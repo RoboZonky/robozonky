@@ -2,6 +2,7 @@ package net.petrovicky.zonkybot.app;
 
 import java.io.File;
 
+import net.petrovicky.zonkybot.Operations;
 import net.petrovicky.zonkybot.strategy.Strategy;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -59,14 +60,21 @@ public class ZonkyBot {
         if (!strategyConfig.canRead()) {
             printHelpAndExit(options, "Investment strategy file must be readable.", true);
         }
+        Strategy strategy = null;
         try {
-            Strategy strategy = StrategyParser.parse(strategyConfig);
+            strategy = StrategyParser.parse(strategyConfig);
         } catch (Exception e) {
             printHelpAndExit(options, "Failed parsing strategy: " + e.getMessage(), true);
         }
         String username = cmd.getOptionValue(OPTION_USERNAME.getOpt());
         String password = cmd.getOptionValue(OPTION_PASSWORD.getOpt());
         LOGGER.info("Will communicate with Zonky as user '{}'.", username);
+        operate(new Operations(username, password, strategy));
+    }
+
+    private static void operate(Operations ops) {
+        ops.login();
+        ops.logout();
     }
 
 }

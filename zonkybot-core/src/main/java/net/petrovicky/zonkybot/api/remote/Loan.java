@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.Collection;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class Loan {
 
