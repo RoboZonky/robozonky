@@ -4,12 +4,16 @@
     <groupId>net.petrovicky.zonkybot</groupId>
     <artifactId>zonkybot-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <modules>
+        <module>zonkybot-core</module>
+    </modules>
     <packaging>pom</packaging>
     <name>Zonkybot: Investing made easy</name>
     <description>Automated investing on Zonky.</description>
     <properties>
         <java.version>1.8</java.version>
         <surefire.version>2.19.1</surefire.version>
+        <version.org.jboss.resteasy>3.0.16.Final</version.org.jboss.resteasy>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencyManagement>
@@ -18,6 +22,21 @@
                 <groupId>com.github.triceo.splitlog</groupId>
                 <artifactId>zonkybot-core</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jaxrs</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jackson-provider</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-client</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
