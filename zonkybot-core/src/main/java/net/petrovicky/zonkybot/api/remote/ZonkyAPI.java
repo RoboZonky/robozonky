@@ -45,4 +45,10 @@ public interface ZonkyAPI {
     @GET
     @Path(ME + "/logout")
     List<Loan> logout();
+
+    @GET
+    @Path(ME + "/investments/statistics")
+    Statistics getStatistics();
+
 }
+

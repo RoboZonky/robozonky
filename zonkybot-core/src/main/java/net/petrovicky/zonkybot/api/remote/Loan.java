@@ -9,6 +9,15 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class Loan {
 
+    private boolean topped, covered, published;
+    private int id, termInMonths, investmentsCount, questionsCount;
+    private double amount, remainingInvestment;
+    private String name, story, nickName;
+    private BigDecimal interestRate;
+    private Instant datePublished, deadline;
+    private Rating rating;
+    private Collection<Photo> photos;
+
     @XmlElement
     public int getId() {
         return id;
@@ -97,45 +106,15 @@ public class Loan {
         return photos;
     }
 
-    private int id;
-    private String name;
-    private String story;
-    private String nickName;
-    private int termInMonths;
-    private BigDecimal interestRate;
-    // FIXME will need converter
-    private Rating rating;
-    private boolean topped;
-    private double amount;
-    private double remainingInvestment;
-    private boolean covered;
-    private boolean published;
-    private Instant datePublished;
-    private Instant deadline;
-    private int investmentsCount;
-    private int questionsCount;
-    private Collection<Photo> photos;
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Loan{");
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
-        sb.append(", story='").append(story).append('\'');
         sb.append(", nickName='").append(nickName).append('\'');
         sb.append(", termInMonths=").append(termInMonths);
-        sb.append(", interestRate=").append(interestRate);
         sb.append(", rating=").append(rating);
-        sb.append(", topped=").append(topped);
-        sb.append(", amount=").append(amount);
         sb.append(", remainingInvestment=").append(remainingInvestment);
-        sb.append(", covered=").append(covered);
-        sb.append(", published=").append(published);
-        sb.append(", datePublished=").append(datePublished);
-        sb.append(", deadline=").append(deadline);
-        sb.append(", investmentsCount=").append(investmentsCount);
-        sb.append(", questionsCount=").append(questionsCount);
-        sb.append(", photos=").append(photos);
         sb.append('}');
         return sb.toString();
     }

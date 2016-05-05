@@ -37,12 +37,16 @@ class StrategyPerRating implements Strategy {
         return this.minimumInvestmentAmount;
     }
 
+    public int getMaximumInvestmentAmount() {
+        return this.maximumInvestmentAmount;
+    }
+
     public boolean isAcceptableTerm(Loan loan) {
         return loan.getTermInMonths() >= minimumAcceptableTerm && loan.getTermInMonths() <= maximumAcceptableTerm;
     }
 
     public boolean isAcceptableAmount(Loan loan) {
-        return loan.getAmount() > minimumInvestmentAmount;
+        return loan.getRemainingInvestment() >= minimumInvestmentAmount;
     }
 
     @Override
@@ -50,14 +54,13 @@ class StrategyPerRating implements Strategy {
         if (loan.getRating() != this.getRating()) {
             throw new IllegalStateException("Loan " + loan + " should never have gotten here.");
         } else if (!this.isAcceptableTerm(loan)) {
-            LOGGER.info("Loan '{}' rejected; not within term limits defined in the strategy.", loan);
+            LOGGER.debug("Loan '{}' rejected; strategy looking for loans with terms in range <{}, {}>.", loan,
+                    minimumAcceptableTerm, maximumAcceptableTerm);
             return false;
-        } else if (this.isAcceptableAmount(loan)) {
-            LOGGER.info("Loan '{}' rejected; under the minimum investment amount defined in the strategy.", loan);
+        } else if (!this.isAcceptableAmount(loan)) {
+            LOGGER.debug("Loan '{}' rejected; strategy looking for minimum investment of {} CZK.", loan,
+                    minimumInvestmentAmount);
             return false;
-        } else {
-            // TODO implement maximum amount criteria
-            // TODO implement share criteria
         }
         return true;
     }

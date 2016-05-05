@@ -11,11 +11,14 @@ public class InvestmentStrategy implements Strategy {
 
     @Override
     public boolean isAcceptable(Loan loan) {
-        return individualStrategies.get(loan.getRating()).isAcceptable(loan);
+        Rating r = loan.getRating();
+        return individualStrategies.get(r).isAcceptable(loan);
     }
 
     private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
     private final Map<Rating, BigDecimal> targetShares = new EnumMap<>(Rating.class);
+    private final Map<Rating, Integer> minimumInvestmentAmounts = new EnumMap<>(Rating.class);
+    private final Map<Rating, Integer> maximumInvestmentAmounts = new EnumMap<>(Rating.class);
     private int minimumInvestmentAmount = Integer.MAX_VALUE;
 
     InvestmentStrategy(Map<Rating, StrategyPerRating> individualStrategies) {
@@ -23,6 +26,8 @@ public class InvestmentStrategy implements Strategy {
         for (StrategyPerRating s : individualStrategies.values()) {
             minimumInvestmentAmount = Math.min(s.getMinimumInvestmentAmount(), minimumInvestmentAmount);
             targetShares.put(s.getRating(), s.getTargetShare());
+            minimumInvestmentAmounts.put(s.getRating(), s.getMinimumInvestmentAmount());
+            maximumInvestmentAmounts.put(s.getRating(), s.getMaximumInvestmentAmount());
         }
     }
 
@@ -32,6 +37,14 @@ public class InvestmentStrategy implements Strategy {
 
     public int getMinimumInvestmentAmount() {
         return minimumInvestmentAmount;
+    }
+
+    public int getMinimumInvestmentAmount(final Rating r) {
+        return minimumInvestmentAmounts.get(r);
+    }
+
+    public int getMaximumInvestmentAmount(final Rating r) {
+        return maximumInvestmentAmounts.get(r);
     }
 
 }

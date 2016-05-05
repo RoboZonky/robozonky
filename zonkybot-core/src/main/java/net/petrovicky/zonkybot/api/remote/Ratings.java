@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class Ratings {
+public class Ratings {
 
     public static Ratings of(Rating... ratings) {
         return Ratings.of(Arrays.asList(ratings));

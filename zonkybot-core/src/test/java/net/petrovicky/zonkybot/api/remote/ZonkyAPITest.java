@@ -1,5 +1,8 @@
 package net.petrovicky.zonkybot.api.remote;
 
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.AfterClass;
@@ -13,8 +16,10 @@ public class ZonkyAPITest {
 
     @Test
     public void testBasicParsing() {
-        Ratings ratings = Ratings.of(Rating.D);
-        API.getLoans(ratings, 0);
+        final Ratings ratings = Ratings.all();
+        final List<Loan> loans = API.getLoans(ratings, 200);
+        Assertions.assertThat(loans).isNotEmpty();
+        Assertions.assertThat(loans.get(0).getRemainingInvestment()).isGreaterThan(0);
     }
 
     @BeforeClass
