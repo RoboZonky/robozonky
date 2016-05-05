@@ -1,0 +1,66 @@
+package net.petrovicky.zonkybot.app;
+
+import java.io.File;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ZonkyBot {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyBot.class);
+
+    private static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy").argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.").build();
+    private static final Option OPTION_USERNAME = Option.builder("u").hasArg().longOpt("username").argName("Zonky username").desc("Used to connect to the Zonky server.").build();
+    private static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password").argName("Zonky password").desc("Used to connect to the Zonky server.").build();
+    private static final Option OPTION_HELP = Option.builder("h").longOpt("help").argName("Show help").desc("Show this help message and quit.").build();
+
+    private static void printHelpAndExit(Options options, String message, boolean exitWithError) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("ZonkyBot", null, options, exitWithError ? "Error: " + message : message, true);
+        System.exit(exitWithError ? 1 : 0);
+    }
+
+    public static void main(String[] args) throws ParseException {
+        OptionGroup og = new OptionGroup();
+        og.setRequired(true);
+        og.addOption(OPTION_HELP);
+        og.addOption(OPTION_STRATEGY);
+        Options options = new Options();
+        options.addOptionGroup(og);
+        options.addOption(OPTION_PASSWORD);
+        options.addOption(OPTION_USERNAME);
+
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = null;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (Exception ex) { // for some reason, the CLI could not be parsed
+            printHelpAndExit(options, ex.getMessage(), true);
+        }
+        if (cmd.hasOption(OPTION_HELP.getOpt())) { // user requested help
+            printHelpAndExit(options, "", false);
+        }
+        // standard workflow
+        if (!cmd.hasOption(OPTION_USERNAME.getOpt())) {
+            printHelpAndExit(options, "Username must be provided.", true);
+        } else if (!cmd.hasOption(OPTION_PASSWORD.getOpt())) {
+            printHelpAndExit(options, "Password must be provided.", true);
+        }
+        File strategyConfig = new File(cmd.getOptionValue(OPTION_STRATEGY.getOpt()));
+        if (!strategyConfig.canRead()) {
+            printHelpAndExit(options, "Investment strategy file must be readable.", true);
+        }
+        String username = cmd.getOptionValue(OPTION_USERNAME.getOpt());
+        String password = cmd.getOptionValue(OPTION_PASSWORD.getOpt());
+        LOGGER.info("Will communicate with Zonky as user '{}'.", username);
+    }
+
+}
