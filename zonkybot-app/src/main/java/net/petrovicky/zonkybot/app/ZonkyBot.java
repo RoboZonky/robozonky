@@ -3,7 +3,7 @@ package net.petrovicky.zonkybot.app;
 import java.io.File;
 
 import net.petrovicky.zonkybot.Operations;
-import net.petrovicky.zonkybot.strategy.Strategy;
+import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -60,7 +60,7 @@ public class ZonkyBot {
         if (!strategyConfig.canRead()) {
             printHelpAndExit(options, "Investment strategy file must be readable.", true);
         }
-        Strategy strategy = null;
+        InvestmentStrategy strategy = null;
         try {
             strategy = StrategyParser.parse(strategyConfig);
         } catch (Exception e) {
@@ -74,6 +74,12 @@ public class ZonkyBot {
 
     private static void operate(Operations ops) {
         ops.login();
+        int result = ops.invest();
+        if (result == 0) {
+            LOGGER.info("ZonkyBot did not invest.");
+        } else {
+            LOGGER.info("ZonkyBot invested into {} loans.", result);
+        }
         ops.logout();
     }
 

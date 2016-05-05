@@ -33,6 +33,10 @@ class StrategyPerRating implements Strategy {
         return targetShare;
     }
 
+    public int getMinimumInvestmentAmount() {
+        return this.minimumInvestmentAmount;
+    }
+
     public boolean isAcceptableTerm(Loan loan) {
         return loan.getTermInMonths() >= minimumAcceptableTerm && loan.getTermInMonths() <= maximumAcceptableTerm;
     }

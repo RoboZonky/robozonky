@@ -2,14 +2,15 @@ package net.petrovicky.zonkybot;
 
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Base64;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
 import net.petrovicky.zonkybot.api.remote.Authorization;
-import net.petrovicky.zonkybot.api.remote.Marketplace;
 import net.petrovicky.zonkybot.api.remote.Token;
-import net.petrovicky.zonkybot.strategy.Strategy;
+import net.petrovicky.zonkybot.api.remote.ZonkyAPI;
+import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
@@ -52,14 +53,38 @@ public class Operations {
         }
     }
 
-    private final String username, password;
-    private final Strategy strategy;
-    private Marketplace authenticatedClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
 
-    public Operations(String username, String password, Strategy strategy) {
+    private final String username, password;
+    private final InvestmentStrategy strategy;
+    private ZonkyAPI authenticatedClient;
+
+    public Operations(String username, String password, InvestmentStrategy strategy) {
         this.username = username;
         this.password = password;
         this.strategy = strategy;
+    }
+
+    private BigDecimal getAvailableBalance() {
+        return authenticatedClient.getWallet().getAvailableBalance();
+    }
+
+    private void makeInvestment() {
+
+    }
+
+    public int invest() {
+        BigDecimal availableBalance = this.getAvailableBalance();
+        int minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
+        int investmentsMade = 0;
+        while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
+            makeInvestment();
+            investmentsMade++;
+            availableBalance = this.getAvailableBalance();
+        }
+        LOGGER.info("Account balance ({} CZK) less than investment minimum ({} CZK) defined by strategy.",
+                availableBalance, minimumInvestmentAmount);
+        return investmentsMade;
     }
 
     public void login() {
@@ -77,7 +102,7 @@ public class Operations {
         client.close();
         // provide authenticated clients
         authenticatedClient = clientBuilder.build().register(new AuthenticatedFilter(authorization))
-                .target(ZONKY_URL).proxy(Marketplace.class);
+                .target(ZONKY_URL).proxy(ZonkyAPI.class);
     }
 
     public void logout() {

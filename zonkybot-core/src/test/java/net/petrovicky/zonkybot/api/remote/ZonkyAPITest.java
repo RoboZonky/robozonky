@@ -6,28 +6,28 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class MarketplaceTest {
+public class ZonkyAPITest {
 
     private static ResteasyClient CLIENT;
-    private static Marketplace MARKETPLACE;
+    private static ZonkyAPI API;
 
     @Test
     public void testBasicParsing() {
         Ratings ratings = Ratings.of(Rating.D);
-        MARKETPLACE.getLoans(ratings, 0);
+        API.getLoans(ratings, 0);
     }
 
     @BeforeClass
     public static void startUp() {
         CLIENT = new ResteasyClientBuilder().build();
-        MARKETPLACE = CLIENT.target("https://api.zonky.cz").proxy(Marketplace.class);
+        API = CLIENT.target("https://api.zonky.cz").proxy(ZonkyAPI.class);
     }
 
     @AfterClass
     public static void cleanUp() {
         CLIENT.close();
         CLIENT = null;
-        MARKETPLACE = null;
+        API = null;
     }
 
 }

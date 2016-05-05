@@ -7,10 +7,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 @Path("/")
-public interface Marketplace {
+public interface ZonkyAPI {
+
+    String MARKETPLACE = "/loans/marketplace";
+    String ME = "/users/me";
 
     @GET
-    @Path("/loans/marketplace")
+    @Path(ME + "/wallet")
+    Wallet getWallet();
+
+    @GET
+    @Path(MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
@@ -18,24 +25,24 @@ public interface Marketplace {
             @QueryParam("termInMonths__lte") int mostPossibleTermInMonths);
 
     @GET
-    @Path("/loans/marketplace")
+    @Path(MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
             @QueryParam("termInMonths__gte") @DefaultValue("0") int leastPossibleTermInMonths);
 
     @GET
-    @Path("/loans/marketplace")
+    @Path(MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment);
 
     @GET
-    @Path("/loans/marketplace")
+    @Path(MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings);
 
     @GET
-    @Path("/users/me/logout")
+    @Path(ME + "/logout")
     List<Loan> logout();
 }

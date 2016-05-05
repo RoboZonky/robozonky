@@ -6,7 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.petrovicky.zonkybot.api.remote.Rating;
-import net.petrovicky.zonkybot.strategy.Strategy;
+import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import net.petrovicky.zonkybot.strategy.StrategyBuilder;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -37,7 +37,7 @@ public class StrategyParser {
         return getValue(config, r, property, (a) -> supplier.apply(a, def));
     }
 
-    public static Strategy parse(File strategyFile) throws ConfigurationException {
+    public static InvestmentStrategy parse(File strategyFile) throws ConfigurationException {
         // read config file
         PropertiesBuilderParameters props = new Parameters().properties().setFile(strategyFile);
         FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
