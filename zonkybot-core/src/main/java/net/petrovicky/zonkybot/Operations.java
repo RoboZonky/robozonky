@@ -18,6 +18,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
 import net.petrovicky.zonkybot.api.remote.Authorization;
+import net.petrovicky.zonkybot.api.remote.Investment;
 import net.petrovicky.zonkybot.api.remote.Loan;
 import net.petrovicky.zonkybot.api.remote.Rating;
 import net.petrovicky.zonkybot.api.remote.Ratings;
@@ -64,7 +65,7 @@ public class Operations {
              make sure the share reflects the investments made by ZonkyBot which have not yet been reflected in the API
               */
             Rating r = previousInvestment.getLoan().getRating();
-            BigDecimal investment = previousInvestment.getInvestedAmount();
+            BigDecimal investment = BigDecimal.valueOf(previousInvestment.getInvestedAmount());
             amounts.put(r, amounts.get(r).add(investment));
         });
         final BigDecimal total = sum(amounts.values());
@@ -141,13 +142,21 @@ public class Operations {
                     continue;
                 }
                 int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(r), l.getRemainingInvestment());
+                Optional<Investment> optional = Optional.of(new Investment(l, toInvest));
                 if (dryRun) {
                     LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvest, l);
+                    return optional;
                 } else {
                     LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
-                    // FIXME actually invest
+                    try {
+                        authenticatedClient.invest(optional.get());
+                        LOGGER.warn("Investment operating succeeded.");
+                        return optional;
+                    } catch (Exception ex) {
+                        LOGGER.warn("Investment operating failed.", ex);
+                        return Optional.empty();
+                    }
                 }
-                return Optional.of(new Investment(l, toInvest));
             }
         }
         return Optional.empty();
@@ -158,7 +167,7 @@ public class Operations {
                 authenticatedClient.getWallet().getAvailableBalance();
         if (dryRun) {
             for (Investment i : previousInvestments) {
-                balance = balance.subtract(i.getInvestedAmount());
+                balance = balance.subtract(BigDecimal.valueOf(i.getInvestedAmount()));
             }
         }
         return balance;
@@ -176,7 +185,6 @@ public class Operations {
                 availableBalance = this.getAvailableBalance(investmentsMade);
                 LOGGER.info("New account balance is {} CZK.", availableBalance);
             } else {
-                LOGGER.info("No loans are available for the current investment strategy.");
                 break;
             }
         }
@@ -236,25 +244,6 @@ public class Operations {
         public void filter(ClientRequestContext clientRequestContext) throws IOException {
             LOGGER.debug("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
             clientRequestContext.getHeaders().add("Authorization", "Bearer " + authorization.getAccessToken());
-        }
-    }
-
-    private static class Investment {
-
-        private final Loan loan;
-        private final BigDecimal investedAmount;
-
-        public Investment(Loan loan, int investedAmount) {
-            this.loan = loan;
-            this.investedAmount = BigDecimal.valueOf(investedAmount);
-        }
-
-        public Loan getLoan() {
-            return loan;
-        }
-
-        public BigDecimal getInvestedAmount() {
-            return investedAmount;
         }
     }
 
