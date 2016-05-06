@@ -11,6 +11,10 @@
 
     <artifactId>zonkybot-app</artifactId>
 
+    <properties>
+        <mainClass>net.petrovicky.zonkybot.app.ZonkyBot</mainClass>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.petrovicky.zonkybot</groupId>
@@ -41,13 +45,28 @@
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>net.petrovicky.zonkybot.app.ZonkyBot</mainClass>
+                            <mainClass>${mainClass}</mainClass>
                         </manifest>
                     </archive>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
