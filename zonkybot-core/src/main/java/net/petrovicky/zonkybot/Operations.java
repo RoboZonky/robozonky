@@ -81,6 +81,15 @@ public class Operations {
         return result;
     }
 
+    private static boolean isLoanPresent(Loan loan, List<Investment> previousInvestments) {
+        for (Investment i : previousInvestments) {
+            if (loan.getId() == i.getLoan().getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Optional<Investment> makeInvestment(List<Investment> previousInvestments) {
         Map<Rating, BigDecimal> shareOfRatings = calculateSharesPerRating(authenticatedClient.getStatistics(),
                 previousInvestments);
@@ -105,15 +114,16 @@ public class Operations {
                 continue;
             }
             for (Loan l : loans) {
-                boolean accepted = strategy.isAcceptable(l);
-                if (!accepted) {
+                if (isLoanPresent(l, previousInvestments)) { // should only happen in dry run
+                    LOGGER.info("ZonkyBot already invested in loan '{}', skipping.", l);
+                    continue;
+                } else if (!strategy.isAcceptable(l)) {
                     LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
                     continue;
                 }
                 int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(r), l.getRemainingInvestment());
                 if (dryRun) {
                     LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvest, l);
-                    // FIXME make sure the loan is not available for investing
                 } else {
                     LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
                     // FIXME actually invest
