@@ -112,7 +112,7 @@ public class ZonkyBot {
         if (result.size() == 0) {
             ZonkyBot.LOGGER.info("ZonkyBot did not invest.");
         } else if (dryRun) {
-            ZonkyBot.LOGGER.info("ZonkyBot pretended to invest into {} loans.", result);
+            ZonkyBot.LOGGER.info("ZonkyBot pretended to invest into {} loans.", result.size());
         } else {
             final String filename = "zonkybot." + DateTimeFormatter.ofPattern("YYYY-MM-dd-HH:mm").format(Instant.now()) + ".invested";
             try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
@@ -124,7 +124,7 @@ public class ZonkyBot {
             } catch (final IOException ex) {
                 ZonkyBot.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
             }
-            ZonkyBot.LOGGER.info("ZonkyBot invested into {} loans.", result);
+            ZonkyBot.LOGGER.info("ZonkyBot invested into {} loans.", result.size());
         }
         ZonkyBot.LOGGER.info("===== ZonkyBot out. =====");
     }

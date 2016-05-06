@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
@@ -37,7 +38,6 @@ import net.petrovicky.zonkybot.remote.Investment;
 import net.petrovicky.zonkybot.remote.Loan;
 import net.petrovicky.zonkybot.remote.Rating;
 import net.petrovicky.zonkybot.remote.Ratings;
-import net.petrovicky.zonkybot.remote.RiskPortfolio;
 import net.petrovicky.zonkybot.remote.Statistics;
 import net.petrovicky.zonkybot.remote.Token;
 import net.petrovicky.zonkybot.remote.ZonkyAPI;
@@ -70,15 +70,11 @@ public class Operations {
 
     private static Map<Rating, BigDecimal> calculateSharesPerRating(final Statistics stats,
                                                                     final Iterable<Investment> previousInvestments) {
-        final Map<Rating, BigDecimal> amounts = new EnumMap<>(Rating.class);
-        for (final RiskPortfolio risk : stats.getRiskPortfolio()) {
-            final BigDecimal value = BigDecimal.valueOf(risk.getUnpaid());
-            amounts.put(Rating.valueOf(risk.getRating()), value);
-        }
+        final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
+                Collectors.toMap(risk -> Rating.valueOf(risk.getRating()), risk -> BigDecimal.valueOf(risk.getUnpaid()))
+        );
         previousInvestments.forEach(previousInvestment -> {
-            /*
-             make sure the share reflects the investments made by ZonkyBot which have not yet been reflected in the API
-              */
+            // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
             final Rating r = previousInvestment.getLoan().getRating();
             final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getInvestedAmount());
             amounts.put(r, amounts.get(r).add(investment));
@@ -89,12 +85,8 @@ public class Operations {
         return Collections.unmodifiableMap(result);
     }
 
-    private static BigDecimal sum(final Iterable<BigDecimal> vals) {
-        BigDecimal result = BigDecimal.ZERO;
-        for (final BigDecimal val : vals) {
-            result = result.add(val);
-        }
-        return result;
+    private static BigDecimal sum(final Collection<BigDecimal> vals) {
+        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static boolean isLoanPresent(final Loan loan, final Iterable<Investment> previousInvestments) {
@@ -106,72 +98,97 @@ public class Operations {
         return false;
     }
 
-    private Optional<Investment> makeInvestment(final List<Investment> previousInvestments) {
-        final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(authenticatedClient.getStatistics(),
-                previousInvestments);
-        Operations.LOGGER.info("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
+    private Optional<Investment> makeInvestment(final Loan l, final List<Investment> previousInvestments) {
+        if (Operations.isLoanPresent(l, previousInvestments)) { // should only happen in dry run
+            Operations.LOGGER.info("ZonkyBot already invested in loan '{}', skipping.", l);
+            return Optional.empty();
+        } else if (!strategy.isAcceptable(l)) {
+            Operations.LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
+            return Optional.empty();
+        }
+        final int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(l.getRating()),
+                l.getRemainingInvestment());
+        final Optional<Investment> optional = Optional.of(new Investment(l, toInvest));
+        if (dryRun) {
+            Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvest, l);
+            return optional;
+        } else {
+            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
+            try {
+                authenticatedClient.invest(optional.get());
+                Operations.LOGGER.warn("Investment operating succeeded.");
+                return optional;
+            } catch (final Exception ex) {
+                Operations.LOGGER.warn("Investment operating failed.", ex);
+                return Optional.empty();
+            }
+        }
+    }
+
+    private static List<Loan> sortLoansByTerm(final Collection<Loan> loans) {
+        final List<Loan> sortedLoans = new ArrayList<>(loans.size());
+        while (!loans.isEmpty()) {
+            Loan longestTerm = null;
+            for (final Loan l : loans) {
+                if (longestTerm == null || longestTerm.getTermInMonths() < l.getTermInMonths()) {
+                    longestTerm = l;
+                }
+            }
+            loans.remove(longestTerm);
+            sortedLoans.add(longestTerm);
+        }
+        return sortedLoans;
+    }
+
+    private Optional<Investment> makeInvestment(Rating r, final List<Investment> previousInvestments) {
+        final Collection<Loan> loans = authenticatedClient.getLoans(Ratings.of(r),
+                strategy.getMinimumInvestmentAmount(r));
+        if (loans.size() == 0) {
+            Operations.LOGGER.info("There are no loans of rating '{}' matching the investment strategy.", r);
+            return Optional.empty();
+        }
+        // sort loans by their term
+        final List<Loan> sortedLoans = Operations.sortLoansByTerm(loans);
+        if (strategy.prefersLongerTerms(r)) {
+            Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the longest terms.", r);
+        } else {
+            Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the shortest terms.", r);
+            Collections.reverse(sortedLoans);
+        }
+        // start investing
+        for (final Loan l : sortedLoans) {
+            final Optional<Investment> investment = this.makeInvestment(l, previousInvestments);
+            if (investment.isPresent()) {
+                return investment;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private SortedMap<BigDecimal, Rating> rankRankinsByDemand(final Map<Rating, BigDecimal> shareOfRatings) {
         final SortedMap<BigDecimal, Rating> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
-        for (final Map.Entry<Rating, BigDecimal> entry : shareOfRatings.entrySet()) {
-            final Rating r = entry.getKey();
-            final BigDecimal currentShare = entry.getValue();
+        shareOfRatings.forEach((r, currentShare) -> {
             final BigDecimal maximumAllowedShare = strategy.getTargetShare(r);
             if (currentShare.compareTo(maximumAllowedShare) >= 0) { // we bought too many of this rating; ignore
-                continue;
+                return;
             }
             // sort the ratings by how much we miss them based on the strategy
             mostWantedRatings.put(maximumAllowedShare.subtract(currentShare), r);
-        }
+        });
+        return Collections.unmodifiableSortedMap(mostWantedRatings);
+    }
+
+    private Optional<Investment> makeInvestment(final List<Investment> previousInvestments) {
+        final Map<Rating, BigDecimal> shareOfRatings =
+                Operations.calculateSharesPerRating(authenticatedClient.getStatistics(), previousInvestments);
+        final SortedMap<BigDecimal, Rating> mostWantedRatings = this.rankRankinsByDemand(shareOfRatings);
+        Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on the following ratings: {}.",
                 mostWantedRatings.values());
         for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
-            final Collection<Loan> loans = authenticatedClient.getLoans(Ratings.of(r), strategy.getMinimumInvestmentAmount(r));
-            if (loans.size() == 0) {
-                Operations.LOGGER.info("There are no loans of rating '{}' that match criteria defined by investment strategy.", r);
-                continue;
-            }
-            // sort loans by their term
-            final List<Loan> sortedLoans = new ArrayList<>(loans.size());
-            while (!loans.isEmpty()) {
-                Loan longestTerm = null;
-                for (final Loan l : loans) {
-                    if (longestTerm == null || longestTerm.getTermInMonths() < l.getTermInMonths()) {
-                        longestTerm = l;
-                    }
-                }
-                loans.remove(longestTerm);
-                sortedLoans.add(longestTerm);
-            }
-            if (strategy.prefersLongerTerms(r)) {
-                Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the longest terms.", r);
-            } else {
-                Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the shortest terms.", r);
-                Collections.reverse(sortedLoans);
-            }
-            // start investing
-            for (final Loan l : sortedLoans) {
-                if (Operations.isLoanPresent(l, previousInvestments)) { // should only happen in dry run
-                    Operations.LOGGER.info("ZonkyBot already invested in loan '{}', skipping.", l);
-                    continue;
-                } else if (!strategy.isAcceptable(l)) {
-                    Operations.LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
-                    continue;
-                }
-                final int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(r), l.getRemainingInvestment());
-                final Optional<Investment> optional = Optional.of(new Investment(l, toInvest));
-                if (dryRun) {
-                    Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvest, l);
-                    return optional;
-                } else {
-                    Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
-                    try {
-                        authenticatedClient.invest(optional.get());
-                        Operations.LOGGER.warn("Investment operating succeeded.");
-                        return optional;
-                    } catch (final Exception ex) {
-                        Operations.LOGGER.warn("Investment operating failed.", ex);
-                        return Optional.empty();
-                    }
-                }
+            final Optional<Investment> investment = makeInvestment(r, previousInvestments);
+            if (investment.isPresent()) {
+                return investment;
             }
         }
         return Optional.empty();

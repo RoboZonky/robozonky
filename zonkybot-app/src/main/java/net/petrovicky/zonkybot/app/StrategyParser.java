@@ -31,7 +31,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StrategyParser {
+class StrategyParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyParser.class);
 
@@ -51,16 +51,19 @@ public class StrategyParser {
         return StrategyParser.getValue(config, r, property, (a) -> supplier.apply(a, def));
     }
 
-    public static InvestmentStrategy parse(final File strategyFile) throws ConfigurationException {
+    private static ImmutableConfiguration getConfig(final File strategyFile) throws ConfigurationException {
         // read config file
         final PropertiesBuilderParameters props = new Parameters().properties().setFile(strategyFile);
         final FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
         builder.configure(props);
-        final ImmutableConfiguration config = builder.getConfiguration();
-        // prepare strategy
+        return builder.getConfiguration();
+    }
+
+    public static InvestmentStrategy parse(final File strategyFile) throws ConfigurationException {
+        final ImmutableConfiguration config = StrategyParser.getConfig(strategyFile);
         final StrategyBuilder strategies = new StrategyBuilder();
         BigDecimal sumShares = BigDecimal.ZERO;
-        for (final Rating rating : Rating.values()) {
+        for (final Rating rating : Rating.values()) { // prepare strategy for a given rating
             final boolean preferLongerTerms = StrategyParser.getValue(config, rating, "preferLongerTerms", config::getBoolean);
             final BigDecimal targetShare = StrategyParser.getValue(config, rating, "targetShare", config::getBigDecimal);
             if (targetShare.compareTo(BigDecimal.ZERO) < 0 || targetShare.compareTo(BigDecimal.ONE) > 0) {
