@@ -187,7 +187,7 @@ public class Operations {
         return balance;
     }
 
-    public int invest() {
+    public List<Investment> invest() {
         int minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
         List<Investment> investmentsMade = new ArrayList<>();
         BigDecimal availableBalance = this.getAvailableBalance(investmentsMade);
@@ -206,7 +206,7 @@ public class Operations {
             LOGGER.info("Account balance ({} CZK) less than investment minimum ({} CZK) defined by strategy.",
                     availableBalance, minimumInvestmentAmount);
         }
-        return investmentsMade.size();
+        return investmentsMade;
     }
 
     public void login() {
