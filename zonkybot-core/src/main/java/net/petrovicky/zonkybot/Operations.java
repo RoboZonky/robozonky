@@ -41,11 +41,15 @@ public class Operations {
     private final String username, password;
     private final InvestmentStrategy strategy;
     private ZonkyAPI authenticatedClient;
+    private final boolean dryRun;
+    private final int dryRunBalance;
 
-    public Operations(String username, String password, InvestmentStrategy strategy) {
+    public Operations(String username, String password, InvestmentStrategy strategy, boolean dryRun, int dryRunBalance) {
         this.username = username;
         this.password = password;
         this.strategy = strategy;
+        this.dryRun = dryRun;
+        this.dryRunBalance = dryRunBalance;
     }
 
     private static Map<Rating, BigDecimal> calculateSharesPerRating(Statistics stats,
@@ -75,10 +79,6 @@ public class Operations {
             result = result.add(val);
         }
         return result;
-    }
-
-    private BigDecimal getAvailableBalance() {
-        return authenticatedClient.getWallet().getAvailableBalance();
     }
 
     private Optional<Investment> makeInvestment(List<Investment> previousInvestments) {
@@ -111,30 +111,47 @@ public class Operations {
                     continue;
                 }
                 int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(r), l.getRemainingInvestment());
-                LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
-                // FIXME actually invest
+                if (dryRun) {
+                    LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvest, l);
+                    // FIXME make sure the loan is not available for investing
+                } else {
+                    LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
+                    // FIXME actually invest
+                }
                 return Optional.of(new Investment(l, toInvest));
             }
         }
         return Optional.empty();
     }
 
+    private BigDecimal getAvailableBalance(List<Investment> previousInvestments) {
+        BigDecimal balance = (dryRun && dryRunBalance >= 0) ? BigDecimal.valueOf(dryRunBalance) :
+                authenticatedClient.getWallet().getAvailableBalance();
+        if (dryRun) {
+            for (Investment i : previousInvestments) {
+                balance = balance.subtract(i.getInvestedAmount());
+            }
+        }
+        return balance;
+    }
+
     public int invest() {
-        BigDecimal availableBalance = BigDecimal.valueOf(10000); // FIXME
         int minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
         List<Investment> investmentsMade = new ArrayList<>();
+        BigDecimal availableBalance = this.getAvailableBalance(investmentsMade);
+        LOGGER.info("ZonkyBot starting account balance is {} CZK.", availableBalance);
         while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
             Optional<Investment> investment = makeInvestment(investmentsMade);
             if (investment.isPresent()) {
                 investmentsMade.add(investment.get());
-                availableBalance = availableBalance.subtract(investment.get().getInvestedAmount());
+                availableBalance = this.getAvailableBalance(investmentsMade);
                 LOGGER.info("New account balance is {} CZK.", availableBalance);
             } else {
                 LOGGER.info("No loans are available for the current investment strategy.");
                 break;
             }
         }
-        if (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
+        if (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) < 0) {
             LOGGER.info("Account balance ({} CZK) less than investment minimum ({} CZK) defined by strategy.",
                     availableBalance, minimumInvestmentAmount);
         }
