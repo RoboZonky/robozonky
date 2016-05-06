@@ -75,6 +75,9 @@ public class ZonkyBot {
         } catch (Exception e) {
             printHelpAndExit(options, "Failed parsing strategy: " + e.getMessage(), true);
         }
+
+        // let's go!
+        LOGGER.info("===== ZonkyBot at your service! =====");
         String username = cmd.getOptionValue(OPTION_USERNAME.getOpt());
         String password = cmd.getOptionValue(OPTION_PASSWORD.getOpt());
         LOGGER.info("Will communicate with Zonky as user '{}'.", username);
@@ -91,6 +94,7 @@ public class ZonkyBot {
         } else {
             LOGGER.info("ZonkyBot invested into {} loans.", result);
         }
+        LOGGER.info("===== ZonkyBot out. =====");
     }
 
     private static int operate(Operations ops) {
