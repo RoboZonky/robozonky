@@ -11,18 +11,25 @@ class StrategyPerRating implements Strategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyPerRating.class);
 
+    private final boolean preferLongerTerms;
     private final Rating rating;
     private final BigDecimal targetShare;
     private final int minimumAcceptableTerm, maximumAcceptableTerm, minimumInvestmentAmount, maximumInvestmentAmount;
 
     public StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm,
-                             final int maxTerm, final int minAmount, final int maxAmount) {
+                             final int maxTerm, final int minAmount, final int maxAmount,
+                             final boolean preferLongerTerms) {
         this.rating = rating;
         this.minimumAcceptableTerm = minTerm < 0 ? 0 : minTerm;
         this.maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
         this.targetShare = targetShare;
         this.minimumInvestmentAmount = minAmount;
         this.maximumInvestmentAmount = maxAmount;
+        this.preferLongerTerms = preferLongerTerms;
+    }
+
+    public boolean isPreferLongerTerms() {
+        return preferLongerTerms;
     }
 
     public Rating getRating() {

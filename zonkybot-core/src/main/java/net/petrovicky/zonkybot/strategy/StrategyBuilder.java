@@ -15,17 +15,19 @@ public class StrategyBuilder {
     private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
 
     public StrategyBuilder addIndividualStrategy(Rating r, final BigDecimal targetShare, final int minTerm,
-                                                 final int maxTerm, final int minAmount, final int maxAmount) {
+                                                 final int maxTerm, final int minAmount, final int maxAmount,
+                                                 final boolean preferLongerTerms) {
         if (individualStrategies.containsKey(r)) {
             throw new IllegalArgumentException("Already added strategy for rating " + r);
         }
-        individualStrategies.put(r, new StrategyPerRating(r, targetShare, minTerm, maxTerm, minAmount, maxAmount));
+        individualStrategies.put(r, new StrategyPerRating(r, targetShare, minTerm, maxTerm, minAmount, maxAmount, preferLongerTerms));
         LOGGER.info("Adding strategy for rating '{}'.", r.getDescription());
         LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getDescription(), targetShare);
         LOGGER.debug("Range of acceptable investment terms for rating '{}' is <{}, {}> months.", r.getDescription(),
                 minTerm == -1 ? 0 : minTerm, maxTerm == -1 ? "+inf" : maxTerm);
         LOGGER.debug("Range of acceptable investment amounts for rating '{}' is <{}, {}> CZK.", r.getDescription(),
                 minAmount, maxAmount);
+        LOGGER.debug("Rating '{}' will prefer longer terms: ", r.getDescription(), preferLongerTerms);
         return this;
     }
 

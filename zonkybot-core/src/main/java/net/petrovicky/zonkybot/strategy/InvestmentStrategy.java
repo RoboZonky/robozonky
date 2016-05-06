@@ -19,6 +19,7 @@ public class InvestmentStrategy implements Strategy {
     private final Map<Rating, BigDecimal> targetShares = new EnumMap<>(Rating.class);
     private final Map<Rating, Integer> minimumInvestmentAmounts = new EnumMap<>(Rating.class);
     private final Map<Rating, Integer> maximumInvestmentAmounts = new EnumMap<>(Rating.class);
+    private final Map<Rating, Boolean> prefersLongerTerms = new EnumMap<>(Rating.class);
     private int minimumInvestmentAmount = Integer.MAX_VALUE;
 
     InvestmentStrategy(Map<Rating, StrategyPerRating> individualStrategies) {
@@ -28,6 +29,7 @@ public class InvestmentStrategy implements Strategy {
             targetShares.put(s.getRating(), s.getTargetShare());
             minimumInvestmentAmounts.put(s.getRating(), s.getMinimumInvestmentAmount());
             maximumInvestmentAmounts.put(s.getRating(), s.getMaximumInvestmentAmount());
+            prefersLongerTerms.put(s.getRating(), s.isPreferLongerTerms());
         }
     }
 
@@ -37,6 +39,10 @@ public class InvestmentStrategy implements Strategy {
 
     public int getMinimumInvestmentAmount() {
         return minimumInvestmentAmount;
+    }
+
+    public boolean prefersLongerTerms(final Rating r) {
+        return prefersLongerTerms.get(r);
     }
 
     public int getMinimumInvestmentAmount(final Rating r) {

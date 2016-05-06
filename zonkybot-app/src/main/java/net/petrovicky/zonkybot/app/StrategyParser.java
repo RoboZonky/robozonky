@@ -47,6 +47,7 @@ public class StrategyParser {
         StrategyBuilder strategies = new StrategyBuilder();
         BigDecimal sumShares = BigDecimal.ZERO;
         for (Rating rating : Rating.values()) {
+            boolean preferLongerTerms = getValue(config, rating, "preferLongerTerms", config::getBoolean);
             BigDecimal targetShare = getValue(config, rating, "targetShare", config::getBigDecimal);
             if (targetShare.compareTo(BigDecimal.ZERO) < 0 || targetShare.compareTo(BigDecimal.ONE) > 0) {
                 throw new IllegalStateException("Target share for rating " + rating + " outside of range <0, 1>: " + targetShare);
@@ -71,7 +72,8 @@ public class StrategyParser {
                 throw new IllegalStateException("Maximum investment amount for rating " + rating + "  is smaller than minimum.");
             }
             // TODO should we limit maxAmount for safety?
-            strategies.addIndividualStrategy(rating, targetShare, minTerm, maxTerm, minAmount, maxAmount);
+            strategies.addIndividualStrategy(rating, targetShare, minTerm, maxTerm, minAmount, maxAmount,
+                    preferLongerTerms);
         }
         if (sumShares.compareTo(BigDecimal.ONE) > 0) {
             throw new IllegalStateException("Sum of target shares is larger than 1: " + sumShares);

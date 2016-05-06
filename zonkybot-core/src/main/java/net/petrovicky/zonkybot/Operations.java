@@ -113,7 +113,26 @@ public class Operations {
                 LOGGER.info("There are no loans of rating '{}' that match criteria defined by investment strategy.", r);
                 continue;
             }
-            for (Loan l : loans) {
+            // sort loans by their term
+            List<Loan> sortedLoans = new ArrayList<>();
+            while (!loans.isEmpty()) {
+                Loan longestTerm = null;
+                for (Loan l : loans) {
+                    if (longestTerm == null || longestTerm.getTermInMonths() < l.getTermInMonths()) {
+                        longestTerm = l;
+                    }
+                }
+                loans.remove(longestTerm);
+                sortedLoans.add(longestTerm);
+            }
+            if (strategy.prefersLongerTerms(r)) {
+                LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the longest terms.", r);
+            } else {
+                LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the shortest terms.", r);
+                Collections.reverse(sortedLoans);
+            }
+            // start investing
+            for (Loan l : sortedLoans) {
                 if (isLoanPresent(l, previousInvestments)) { // should only happen in dry run
                     LOGGER.info("ZonkyBot already invested in loan '{}', skipping.", l);
                     continue;
