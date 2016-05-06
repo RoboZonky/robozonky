@@ -3,12 +3,15 @@ package net.petrovicky.zonkybot;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import javax.ws.rs.client.ClientRequestContext;
@@ -34,6 +37,131 @@ import org.slf4j.LoggerFactory;
 public class Operations {
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
+    private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
+    private final String username, password;
+    private final InvestmentStrategy strategy;
+    private ZonkyAPI authenticatedClient;
+
+    public Operations(String username, String password, InvestmentStrategy strategy) {
+        this.username = username;
+        this.password = password;
+        this.strategy = strategy;
+    }
+
+    private static Map<Rating, BigDecimal> calculateSharesPerRating(Statistics stats,
+                                                                    List<Investment> previousInvestments) {
+        final Map<Rating, BigDecimal> amounts = new EnumMap<>(Rating.class);
+        for (RiskPortfolio risk : stats.getRiskPortfolio()) {
+            final BigDecimal value = BigDecimal.valueOf(risk.getUnpaid());
+            amounts.put(Rating.valueOf(risk.getRating()), value);
+        }
+        previousInvestments.forEach(previousInvestment -> {
+            /*
+             make sure the share reflects the investments made by ZonkyBot which have not yet been reflected in the API
+              */
+            Rating r = previousInvestment.getLoan().getRating();
+            BigDecimal investment = previousInvestment.getInvestedAmount();
+            amounts.put(r, amounts.get(r).add(investment));
+        });
+        final BigDecimal total = sum(amounts.values());
+        final Map<Rating, BigDecimal> result = new EnumMap<>(Rating.class);
+        amounts.forEach((rating, amount) -> result.put(rating, amount.divide(total, 4, BigDecimal.ROUND_HALF_EVEN)));
+        return Collections.unmodifiableMap(result);
+    }
+
+    private static BigDecimal sum(Collection<BigDecimal> vals) {
+        BigDecimal result = BigDecimal.ZERO;
+        for (BigDecimal val : vals) {
+            result = result.add(val);
+        }
+        return result;
+    }
+
+    private BigDecimal getAvailableBalance() {
+        return authenticatedClient.getWallet().getAvailableBalance();
+    }
+
+    private Optional<Investment> makeInvestment(List<Investment> previousInvestments) {
+        Map<Rating, BigDecimal> shareOfRatings = calculateSharesPerRating(authenticatedClient.getStatistics(),
+                previousInvestments);
+        LOGGER.info("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
+        SortedMap<BigDecimal, Rating> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
+        for (Map.Entry<Rating, BigDecimal> entry : shareOfRatings.entrySet()) {
+            Rating r = entry.getKey();
+            BigDecimal currentShare = entry.getValue();
+            BigDecimal maximumAllowedShare = strategy.getTargetShare(r);
+            if (currentShare.compareTo(maximumAllowedShare) >= 0) { // we bought too many of this rating; ignore
+                continue;
+            }
+            // sort the ratings by how much we miss them based on the strategy
+            mostWantedRatings.put(maximumAllowedShare.subtract(currentShare), r);
+        }
+        LOGGER.info("According to the investment strategy, the portfolio is low on the following ratings: {}.",
+                mostWantedRatings.values());
+        for (Rating r : mostWantedRatings.values()) { // try to invest in a given rating
+            Collection<Loan> loans = authenticatedClient.getLoans(Ratings.of(r), strategy.getMinimumInvestmentAmount(r));
+            if (loans.size() == 0) {
+                LOGGER.info("There are no loans of rating '{}' that match criteria defined by investment strategy.", r);
+                continue;
+            }
+            for (Loan l : loans) {
+                boolean accepted = strategy.isAcceptable(l);
+                if (!accepted) {
+                    LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
+                    continue;
+                }
+                int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(r), l.getRemainingInvestment());
+                LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
+                // FIXME actually invest
+                return Optional.of(new Investment(l, toInvest));
+            }
+        }
+        return Optional.empty();
+    }
+
+    public int invest() {
+        BigDecimal availableBalance = BigDecimal.valueOf(10000); // FIXME
+        int minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
+        List<Investment> investmentsMade = new ArrayList<>();
+        while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
+            Optional<Investment> investment = makeInvestment(investmentsMade);
+            if (investment.isPresent()) {
+                investmentsMade.add(investment.get());
+                availableBalance = availableBalance.subtract(investment.get().getInvestedAmount());
+                LOGGER.info("New account balance is {} CZK.", availableBalance);
+            } else {
+                LOGGER.info("No loans are available for the current investment strategy.");
+                break;
+            }
+        }
+        if (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
+            LOGGER.info("Account balance ({} CZK) less than investment minimum ({} CZK) defined by strategy.",
+                    availableBalance, minimumInvestmentAmount);
+        }
+        return investmentsMade.size();
+    }
+
+    public void login() {
+        // register Jackson
+        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
+        RegisterBuiltin.register(instance);
+        instance.registerProvider(ResteasyJackson2Provider.class);
+        // authenticate
+        ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
+        clientBuilder.providerFactory(instance);
+        ResteasyClient client = clientBuilder.build();
+        client.register(new AuthorizationFilter());
+        Authorization auth = client.target(ZONKY_URL).proxy(Authorization.class);
+        Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
+        client.close();
+        // provide authenticated clients
+        authenticatedClient = clientBuilder.build().register(new AuthenticatedFilter(authorization))
+                .target(ZONKY_URL).proxy(ZonkyAPI.class);
+    }
+
+    public void logout() {
+        authenticatedClient.logout();
+    }
 
     private static class AuthorizationFilter implements ClientRequestFilter {
 
@@ -65,114 +193,23 @@ public class Operations {
         }
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
+    private static class Investment {
 
-    private final String username, password;
-    private final InvestmentStrategy strategy;
-    private ZonkyAPI authenticatedClient;
+        private final Loan loan;
+        private final BigDecimal investedAmount;
 
-    public Operations(String username, String password, InvestmentStrategy strategy) {
-        this.username = username;
-        this.password = password;
-        this.strategy = strategy;
-    }
-
-    private BigDecimal getAvailableBalance() {
-        return authenticatedClient.getWallet().getAvailableBalance();
-    }
-
-    private static Map<Rating, BigDecimal> calculateSharesPerRating(Statistics stats) {
-        final Map<Rating, BigDecimal> amounts = new EnumMap<>(Rating.class);
-        for (RiskPortfolio risk : stats.getRiskPortfolio()) {
-            final BigDecimal value = BigDecimal.valueOf(risk.getUnpaid());
-            amounts.put(Rating.valueOf(risk.getRating()), value);
+        public Investment(Loan loan, int investedAmount) {
+            this.loan = loan;
+            this.investedAmount = BigDecimal.valueOf(investedAmount);
         }
-        final BigDecimal total = sum(amounts.values());
-        final Map<Rating, BigDecimal> result = new EnumMap<>(Rating.class);
-        amounts.forEach((rating, amount) -> {
-            result.put(rating, amount.divide(total, 4, BigDecimal.ROUND_HALF_EVEN));
-        });
-        return Collections.unmodifiableMap(result);
-    }
 
-    private static BigDecimal sum(Collection<BigDecimal> vals) {
-        BigDecimal result = BigDecimal.ZERO;
-        for (BigDecimal val : vals) {
-            result = result.add(val);
+        public Loan getLoan() {
+            return loan;
         }
-        return result;
-    }
 
-    private Loan makeInvestment() {
-        Map<Rating, BigDecimal> shareOfRatings = calculateSharesPerRating(authenticatedClient.getStatistics());
-        LOGGER.info("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
-        SortedMap<BigDecimal, Rating> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
-        for (Map.Entry<Rating, BigDecimal> entry : shareOfRatings.entrySet()) {
-            Rating r = entry.getKey();
-            BigDecimal currentShare = entry.getValue();
-            BigDecimal maximumAllowedShare = strategy.getTargetShare(r);
-            if (currentShare.compareTo(maximumAllowedShare) >= 0) { // we bought too many of this rating; ignore
-                continue;
-            }
-            // sort the ratings by how much we miss them based on the strategy
-            mostWantedRatings.put(maximumAllowedShare.subtract(currentShare), r);
+        public BigDecimal getInvestedAmount() {
+            return investedAmount;
         }
-        LOGGER.info("According to the investment strategy, the portfolio is low on the following ratings: {}.", mostWantedRatings.values());
-        for (Rating r : mostWantedRatings.values()) { // try to invest in a given rating
-            Collection<Loan> loans = authenticatedClient.getLoans(Ratings.of(r), strategy.getMinimumInvestmentAmount(r));
-            if (loans.size() == 0) {
-                LOGGER.info("There are no loans of rating '{}' that match criteria defined by strategy.", r);
-                continue;
-            }
-            for (Loan l : loans) {
-                boolean accepted = strategy.isAcceptable(l);
-                if (!accepted) {
-                    LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
-                    continue;
-                }
-                int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(r), l.getRemainingInvestment());
-                LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
-                // FIXME actually invest
-                return l;
-            }
-        }
-        return null;
-    }
-
-    public int invest() {
-        BigDecimal availableBalance = this.getAvailableBalance();
-        int minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
-        int investmentsMade = 0;
-        // while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
-            makeInvestment();
-            investmentsMade++;
-            availableBalance = this.getAvailableBalance();
-        //}
-        LOGGER.info("Account balance ({} CZK) less than investment minimum ({} CZK) defined by strategy.",
-                availableBalance, minimumInvestmentAmount);
-        return investmentsMade;
-    }
-
-    public void login() {
-        // register Jackson
-        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
-        RegisterBuiltin.register(instance);
-        instance.registerProvider(ResteasyJackson2Provider.class);
-        // authenticate
-        ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
-        clientBuilder.providerFactory(instance);
-        ResteasyClient client = clientBuilder.build();
-        client.register(new AuthorizationFilter());
-        Authorization auth = client.target(ZONKY_URL).proxy(Authorization.class);
-        Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
-        client.close();
-        // provide authenticated clients
-        authenticatedClient = clientBuilder.build().register(new AuthenticatedFilter(authorization))
-                .target(ZONKY_URL).proxy(ZonkyAPI.class);
-    }
-
-    public void logout() {
-        authenticatedClient.logout();
     }
 
 }
