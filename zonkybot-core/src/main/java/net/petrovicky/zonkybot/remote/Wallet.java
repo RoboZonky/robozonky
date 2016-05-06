@@ -1,4 +1,4 @@
-package net.petrovicky.zonkybot.api.remote;
+package net.petrovicky.zonkybot.remote;
 
 import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
@@ -48,7 +48,7 @@ public class Wallet {
     }
 
     @XmlTransient
-    public Object getAccount() { // FIXME implement?
+    public Object getAccount() {
         return account;
     }
 }

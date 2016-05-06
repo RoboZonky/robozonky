@@ -1,4 +1,4 @@
-package net.petrovicky.zonkybot.api.remote;
+package net.petrovicky.zonkybot.remote;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class Ratings {
 
     public static Ratings of(Rating... ratings) {
-        return Ratings.of(Arrays.asList(ratings));
+        return of(Arrays.asList(ratings));
     }
 
     public static Ratings of(List<Rating> ratings) {
@@ -19,7 +19,7 @@ public class Ratings {
     }
 
     public static Ratings all() {
-        return Ratings.of(Rating.values());
+        return of(Rating.values());
     }
 
     private final Set<Rating> ratings = new LinkedHashSet<>();

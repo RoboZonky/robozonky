@@ -1,4 +1,4 @@
-package net.petrovicky.zonkybot.api.remote;
+package net.petrovicky.zonkybot.remote;
 
 import java.util.List;
 import javax.ws.rs.Consumes;

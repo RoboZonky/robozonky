@@ -4,12 +4,11 @@ import java.math.BigDecimal;
 import java.util.EnumMap;
 import java.util.Map;
 
-import net.petrovicky.zonkybot.api.remote.Loan;
-import net.petrovicky.zonkybot.api.remote.Rating;
+import net.petrovicky.zonkybot.remote.Loan;
+import net.petrovicky.zonkybot.remote.Rating;
 
-public class InvestmentStrategy implements Strategy {
+public class InvestmentStrategy {
 
-    @Override
     public boolean isAcceptable(Loan loan) {
         Rating r = loan.getRating();
         return individualStrategies.get(r).isAcceptable(loan);

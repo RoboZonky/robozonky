@@ -1,4 +1,4 @@
-package net.petrovicky.zonkybot.api.remote;
+package net.petrovicky.zonkybot.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 

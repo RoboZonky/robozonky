@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.EnumMap;
 import java.util.Map;
 
-import net.petrovicky.zonkybot.api.remote.Rating;
+import net.petrovicky.zonkybot.remote.Rating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ public class StrategyBuilder {
             throw new IllegalArgumentException("Already added strategy for rating " + r);
         }
         individualStrategies.put(r, new StrategyPerRating(r, targetShare, minTerm, maxTerm, minAmount, maxAmount, preferLongerTerms));
-        LOGGER.info("Adding strategy for rating '{}'.", r.getDescription());
+        LOGGER.debug("Adding strategy for rating '{}'.", r.getDescription());
         LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getDescription(), targetShare);
         LOGGER.debug("Range of acceptable investment terms for rating '{}' is <{}, {}> months.", r.getDescription(),
                 minTerm == -1 ? 0 : minTerm, maxTerm == -1 ? "+inf" : maxTerm);

@@ -17,15 +17,15 @@ import java.util.TreeMap;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
-import net.petrovicky.zonkybot.api.remote.Authorization;
-import net.petrovicky.zonkybot.api.remote.Investment;
-import net.petrovicky.zonkybot.api.remote.Loan;
-import net.petrovicky.zonkybot.api.remote.Rating;
-import net.petrovicky.zonkybot.api.remote.Ratings;
-import net.petrovicky.zonkybot.api.remote.RiskPortfolio;
-import net.petrovicky.zonkybot.api.remote.Statistics;
-import net.petrovicky.zonkybot.api.remote.Token;
-import net.petrovicky.zonkybot.api.remote.ZonkyAPI;
+import net.petrovicky.zonkybot.remote.Authorization;
+import net.petrovicky.zonkybot.remote.Investment;
+import net.petrovicky.zonkybot.remote.Loan;
+import net.petrovicky.zonkybot.remote.Rating;
+import net.petrovicky.zonkybot.remote.Ratings;
+import net.petrovicky.zonkybot.remote.RiskPortfolio;
+import net.petrovicky.zonkybot.remote.Statistics;
+import net.petrovicky.zonkybot.remote.Token;
+import net.petrovicky.zonkybot.remote.ZonkyAPI;
 import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -54,7 +54,7 @@ public class Operations {
     }
 
     private static Map<Rating, BigDecimal> calculateSharesPerRating(Statistics stats,
-                                                                    List<Investment> previousInvestments) {
+                                                                    Iterable<Investment> previousInvestments) {
         final Map<Rating, BigDecimal> amounts = new EnumMap<>(Rating.class);
         for (RiskPortfolio risk : stats.getRiskPortfolio()) {
             final BigDecimal value = BigDecimal.valueOf(risk.getUnpaid());
@@ -74,7 +74,7 @@ public class Operations {
         return Collections.unmodifiableMap(result);
     }
 
-    private static BigDecimal sum(Collection<BigDecimal> vals) {
+    private static BigDecimal sum(Iterable<BigDecimal> vals) {
         BigDecimal result = BigDecimal.ZERO;
         for (BigDecimal val : vals) {
             result = result.add(val);
@@ -82,7 +82,7 @@ public class Operations {
         return result;
     }
 
-    private static boolean isLoanPresent(Loan loan, List<Investment> previousInvestments) {
+    private static boolean isLoanPresent(Loan loan, Iterable<Investment> previousInvestments) {
         for (Investment i : previousInvestments) {
             if (loan.getId() == i.getLoan().getId()) {
                 return true;
@@ -162,7 +162,7 @@ public class Operations {
         return Optional.empty();
     }
 
-    private BigDecimal getAvailableBalance(List<Investment> previousInvestments) {
+    private BigDecimal getAvailableBalance(Iterable<Investment> previousInvestments) {
         BigDecimal balance = (dryRun && dryRunBalance >= 0) ? BigDecimal.valueOf(dryRunBalance) :
                 authenticatedClient.getWallet().getAvailableBalance();
         if (dryRun) {

@@ -1,4 +1,4 @@
-package net.petrovicky.zonkybot.api.remote;
+package net.petrovicky.zonkybot.remote;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -43,7 +43,7 @@ public class Statistics {
     }
 
     @XmlElementWrapper
-    public List<RiskPortfolio> getRiskPortfolio() {
+    public Iterable<RiskPortfolio> getRiskPortfolio() {
         return riskPortfolio;
     }
 

@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import net.petrovicky.zonkybot.api.remote.Rating;
+import net.petrovicky.zonkybot.remote.Rating;
 import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import net.petrovicky.zonkybot.strategy.StrategyBuilder;
 import org.apache.commons.configuration2.ImmutableConfiguration;

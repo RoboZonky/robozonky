@@ -1,4 +1,4 @@
-package net.petrovicky.zonkybot.api.remote;
+package net.petrovicky.zonkybot.remote;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;

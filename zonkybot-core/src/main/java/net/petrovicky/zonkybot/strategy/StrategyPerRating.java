@@ -2,12 +2,12 @@ package net.petrovicky.zonkybot.strategy;
 
 import java.math.BigDecimal;
 
-import net.petrovicky.zonkybot.api.remote.Loan;
-import net.petrovicky.zonkybot.api.remote.Rating;
+import net.petrovicky.zonkybot.remote.Loan;
+import net.petrovicky.zonkybot.remote.Rating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class StrategyPerRating implements Strategy {
+class StrategyPerRating {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyPerRating.class);
 
@@ -41,11 +41,11 @@ class StrategyPerRating implements Strategy {
     }
 
     public int getMinimumInvestmentAmount() {
-        return this.minimumInvestmentAmount;
+        return minimumInvestmentAmount;
     }
 
     public int getMaximumInvestmentAmount() {
-        return this.maximumInvestmentAmount;
+        return maximumInvestmentAmount;
     }
 
     public boolean isAcceptableTerm(Loan loan) {
@@ -56,15 +56,14 @@ class StrategyPerRating implements Strategy {
         return loan.getRemainingInvestment() >= minimumInvestmentAmount;
     }
 
-    @Override
     public boolean isAcceptable(Loan loan) {
-        if (loan.getRating() != this.getRating()) {
+        if (loan.getRating() != getRating()) {
             throw new IllegalStateException("Loan " + loan + " should never have gotten here.");
-        } else if (!this.isAcceptableTerm(loan)) {
+        } else if (!isAcceptableTerm(loan)) {
             LOGGER.debug("Loan '{}' rejected; strategy looking for loans with terms in range <{}, {}>.", loan,
                     minimumAcceptableTerm, maximumAcceptableTerm);
             return false;
-        } else if (!this.isAcceptableAmount(loan)) {
+        } else if (!isAcceptableAmount(loan)) {
             LOGGER.debug("Loan '{}' rejected; strategy looking for minimum investment of {} CZK.", loan,
                     minimumInvestmentAmount);
             return false;
