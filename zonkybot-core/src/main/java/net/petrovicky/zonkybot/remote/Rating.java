@@ -33,7 +33,7 @@ public enum Rating {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
 }

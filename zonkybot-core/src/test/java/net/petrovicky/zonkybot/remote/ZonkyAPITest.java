@@ -17,22 +17,20 @@ public class ZonkyAPITest {
     @Test
     public void testBasicParsing() {
         final Ratings ratings = Ratings.all();
-        final List<Loan> loans = API.getLoans(ratings, 200);
+        final List<Loan> loans = ZonkyAPITest.API.getLoans(ratings, 200);
         Assertions.assertThat(loans).isNotEmpty();
         Assertions.assertThat(loans.get(0).getRemainingInvestment()).isGreaterThan(0);
     }
 
     @BeforeClass
     public static void startUp() {
-        CLIENT = new ResteasyClientBuilder().build();
-        API = CLIENT.target("https://api.zonky.cz").proxy(ZonkyAPI.class);
+        ZonkyAPITest.CLIENT = new ResteasyClientBuilder().build();
+        ZonkyAPITest.API = ZonkyAPITest.CLIENT.target("https://api.zonky.cz").proxy(ZonkyAPI.class);
     }
 
     @AfterClass
     public static void cleanUp() {
-        CLIENT.close();
-        CLIENT = null;
-        API = null;
+        ZonkyAPITest.CLIENT.close();
     }
 
 }

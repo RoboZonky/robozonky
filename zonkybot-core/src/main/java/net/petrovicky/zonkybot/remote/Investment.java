@@ -22,7 +22,7 @@ public class Investment {
     private final Loan loan;
     private final int investedAmount;
 
-    public Investment(Loan loan, int investedAmount) {
+    public Investment(final Loan loan, final int investedAmount) {
         this.loan = loan;
         this.investedAmount = investedAmount;
     }
@@ -34,7 +34,7 @@ public class Investment {
 
     @XmlElement
     public int getLoanId() {
-        return this.loan.getId();
+        return loan.getId();
     }
 
     @XmlElement(name = "amount")

@@ -34,11 +34,11 @@ public interface ZonkyAPI {
     String ME = "/users/me";
 
     @GET
-    @Path(ME + "/wallet")
+    @Path(ZonkyAPI.ME + "/wallet")
     Wallet getWallet();
 
     @GET
-    @Path(MARKETPLACE)
+    @Path(ZonkyAPI.MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
@@ -46,33 +46,33 @@ public interface ZonkyAPI {
             @QueryParam("termInMonths__lte") int mostPossibleTermInMonths);
 
     @GET
-    @Path(MARKETPLACE)
+    @Path(ZonkyAPI.MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
             @QueryParam("termInMonths__gte") @DefaultValue("0") int leastPossibleTermInMonths);
 
     @GET
-    @Path(MARKETPLACE)
+    @Path(ZonkyAPI.MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment);
 
     @GET
-    @Path(MARKETPLACE)
+    @Path(ZonkyAPI.MARKETPLACE)
     List<Loan> getLoans(
             @QueryParam("rating.type__in") Ratings ratings);
 
     @GET
-    @Path(ME + "/logout")
+    @Path(ZonkyAPI.ME + "/logout")
     List<Loan> logout();
 
     @GET
-    @Path(ME + "/investments/statistics")
+    @Path(ZonkyAPI.ME + "/investments/statistics")
     Statistics getStatistics();
 
     @POST
-    @Path(ME + "/investment")
+    @Path(ZonkyAPI.ME + "/investment")
     void invest(Investment investment);
 
 }

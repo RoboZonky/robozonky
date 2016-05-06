@@ -23,9 +23,9 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 class RatingDeserializer extends JsonDeserializer<Rating> {
 
     @Override
-    public Rating deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public Rating deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException {
         jsonParser.nextValue();
-        Rating r = Rating.valueOf(jsonParser.getText());
+        final Rating r = Rating.valueOf(jsonParser.getText());
         jsonParser.nextValue();
         return r;
     }

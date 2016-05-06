@@ -28,10 +28,10 @@ class InstantDeserializer extends JsonDeserializer<Instant> {
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     @Override
-    public Instant deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public Instant deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException {
         try {
-            return DATE_FORMAT.parse(jsonParser.getText().replace("+02:00", "+0200")).toInstant();
-        } catch (ParseException e) {
+            return InstantDeserializer.DATE_FORMAT.parse(jsonParser.getText().replace("+02:00", "+0200")).toInstant();
+        } catch (final ParseException e) {
             throw new IOException(e);
         }
     }

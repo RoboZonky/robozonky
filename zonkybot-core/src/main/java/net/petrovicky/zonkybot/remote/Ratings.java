@@ -17,33 +17,33 @@ package net.petrovicky.zonkybot.remote;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Ratings {
 
-    public static Ratings of(Rating... ratings) {
-        return of(Arrays.asList(ratings));
+    public static Ratings of(final Rating... ratings) {
+        return Ratings.of(Arrays.asList(ratings));
     }
 
-    public static Ratings of(List<Rating> ratings) {
+    public static Ratings of(final List<Rating> ratings) {
         return new Ratings(ratings);
     }
 
     public static Ratings all() {
-        return of(Rating.values());
+        return Ratings.of(Rating.values());
     }
 
-    private final Set<Rating> ratings = new LinkedHashSet<>();
+    private final Set<Rating> ratings;
 
-    private Ratings(Collection<Rating> ratings) {
-        this.ratings.addAll(ratings);
+    private Ratings(final Collection<Rating> ratings) {
+        this.ratings = EnumSet.copyOf(ratings);
     }
 
     public Set<Rating> getRatings() {
-        return Collections.unmodifiableSet(this.ratings);
+        return Collections.unmodifiableSet(ratings);
     }
 
     @Override

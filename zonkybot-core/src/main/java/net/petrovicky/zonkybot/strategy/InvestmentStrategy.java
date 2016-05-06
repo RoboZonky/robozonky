@@ -23,8 +23,8 @@ import net.petrovicky.zonkybot.remote.Rating;
 
 public class InvestmentStrategy {
 
-    public boolean isAcceptable(Loan loan) {
-        Rating r = loan.getRating();
+    public boolean isAcceptable(final Loan loan) {
+        final Rating r = loan.getRating();
         return individualStrategies.get(r).isAcceptable(loan);
     }
 
@@ -35,9 +35,9 @@ public class InvestmentStrategy {
     private final Map<Rating, Boolean> prefersLongerTerms = new EnumMap<>(Rating.class);
     private int minimumInvestmentAmount = Integer.MAX_VALUE;
 
-    InvestmentStrategy(Map<Rating, StrategyPerRating> individualStrategies) {
+    InvestmentStrategy(final Map<Rating, StrategyPerRating> individualStrategies) {
         this.individualStrategies.putAll(individualStrategies);
-        for (StrategyPerRating s : individualStrategies.values()) {
+        for (final StrategyPerRating s : individualStrategies.values()) {
             minimumInvestmentAmount = Math.min(s.getMinimumInvestmentAmount(), minimumInvestmentAmount);
             targetShares.put(s.getRating(), s.getTargetShare());
             minimumInvestmentAmounts.put(s.getRating(), s.getMinimumInvestmentAmount());

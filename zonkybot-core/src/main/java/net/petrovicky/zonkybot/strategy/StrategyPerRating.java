@@ -34,11 +34,11 @@ class StrategyPerRating {
                              final int maxTerm, final int minAmount, final int maxAmount,
                              final boolean preferLongerTerms) {
         this.rating = rating;
-        this.minimumAcceptableTerm = minTerm < 0 ? 0 : minTerm;
-        this.maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
+        minimumAcceptableTerm = minTerm < 0 ? 0 : minTerm;
+        maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
         this.targetShare = targetShare;
-        this.minimumInvestmentAmount = minAmount;
-        this.maximumInvestmentAmount = maxAmount;
+        minimumInvestmentAmount = minAmount;
+        maximumInvestmentAmount = maxAmount;
         this.preferLongerTerms = preferLongerTerms;
     }
 
@@ -62,23 +62,23 @@ class StrategyPerRating {
         return maximumInvestmentAmount;
     }
 
-    public boolean isAcceptableTerm(Loan loan) {
+    public boolean isAcceptableTerm(final Loan loan) {
         return loan.getTermInMonths() >= minimumAcceptableTerm && loan.getTermInMonths() <= maximumAcceptableTerm;
     }
 
-    public boolean isAcceptableAmount(Loan loan) {
+    public boolean isAcceptableAmount(final Loan loan) {
         return loan.getRemainingInvestment() >= minimumInvestmentAmount;
     }
 
-    public boolean isAcceptable(Loan loan) {
-        if (loan.getRating() != getRating()) {
+    public boolean isAcceptable(final Loan loan) {
+        if (loan.getRating() != rating) {
             throw new IllegalStateException("Loan " + loan + " should never have gotten here.");
         } else if (!isAcceptableTerm(loan)) {
-            LOGGER.debug("Loan '{}' rejected; strategy looking for loans with terms in range <{}, {}>.", loan,
+            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; strategy looking for loans with terms in range <{}, {}>.", loan,
                     minimumAcceptableTerm, maximumAcceptableTerm);
             return false;
         } else if (!isAcceptableAmount(loan)) {
-            LOGGER.debug("Loan '{}' rejected; strategy looking for minimum investment of {} CZK.", loan,
+            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; strategy looking for minimum investment of {} CZK.", loan,
                     minimumInvestmentAmount);
             return false;
         }

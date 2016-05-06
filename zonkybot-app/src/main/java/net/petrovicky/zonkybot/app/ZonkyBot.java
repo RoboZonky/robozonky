@@ -52,67 +52,67 @@ public class ZonkyBot {
     private static final Option OPTION_HELP = Option.builder("h").longOpt("help").argName("Show help")
             .desc("Show this help message and quit.").build();
 
-    private static void printHelpAndExit(Options options, String message, boolean exitWithError) {
+    private static void printHelpAndExit(final Options options, final String message, final boolean exitWithError) {
         final HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("ZonkyBot", null, options, exitWithError ? "Error: " + message : message, true);
         System.exit(exitWithError ? 1 : 0);
     }
 
-    public static void main(String[] args) {
+    public static void main(final String... args) {
         final OptionGroup og = new OptionGroup();
         og.setRequired(true);
-        og.addOption(OPTION_HELP);
-        og.addOption(OPTION_STRATEGY);
+        og.addOption(ZonkyBot.OPTION_HELP);
+        og.addOption(ZonkyBot.OPTION_STRATEGY);
         final Options options = new Options();
         options.addOptionGroup(og);
-        options.addOption(OPTION_DRY_RUN);
-        options.addOption(OPTION_PASSWORD);
-        options.addOption(OPTION_USERNAME);
+        options.addOption(ZonkyBot.OPTION_DRY_RUN);
+        options.addOption(ZonkyBot.OPTION_PASSWORD);
+        options.addOption(ZonkyBot.OPTION_USERNAME);
 
         final CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
         try {
             cmd = parser.parse(options, args);
-        } catch (Exception ex) { // for some reason, the CLI could not be parsed
-            printHelpAndExit(options, ex.getMessage(), true);
+        } catch (final Exception ex) { // for some reason, the CLI could not be parsed
+            ZonkyBot.printHelpAndExit(options, ex.getMessage(), true);
         }
-        if (cmd.hasOption(OPTION_HELP.getOpt())) { // user requested help
-            printHelpAndExit(options, "", false);
+        if (cmd.hasOption(ZonkyBot.OPTION_HELP.getOpt())) { // user requested help
+            ZonkyBot.printHelpAndExit(options, "", false);
         }
         // standard workflow
-        if (!cmd.hasOption(OPTION_USERNAME.getOpt())) {
-            printHelpAndExit(options, "Username must be provided.", true);
-        } else if (!cmd.hasOption(OPTION_PASSWORD.getOpt())) {
-            printHelpAndExit(options, "Password must be provided.", true);
+        if (!cmd.hasOption(ZonkyBot.OPTION_USERNAME.getOpt())) {
+            ZonkyBot.printHelpAndExit(options, "Username must be provided.", true);
+        } else if (!cmd.hasOption(ZonkyBot.OPTION_PASSWORD.getOpt())) {
+            ZonkyBot.printHelpAndExit(options, "Password must be provided.", true);
         }
-        final File strategyConfig = new File(cmd.getOptionValue(OPTION_STRATEGY.getOpt()));
+        final File strategyConfig = new File(cmd.getOptionValue(ZonkyBot.OPTION_STRATEGY.getOpt()));
         if (!strategyConfig.canRead()) {
-            printHelpAndExit(options, "Investment strategy file must be readable.", true);
+            ZonkyBot.printHelpAndExit(options, "Investment strategy file must be readable.", true);
         }
         InvestmentStrategy strategy = null;
         try {
             strategy = StrategyParser.parse(strategyConfig);
-        } catch (Exception e) {
-            printHelpAndExit(options, "Failed parsing strategy: " + e.getMessage(), true);
+        } catch (final Exception e) {
+            ZonkyBot.printHelpAndExit(options, "Failed parsing strategy: " + e.getMessage(), true);
         }
-        letsGo(cmd, strategy); // and start actually working with Zonky
+        ZonkyBot.letsGo(cmd, strategy); // and start actually working with Zonky
     }
 
     private static void letsGo(final CommandLine cmd, final InvestmentStrategy strategy) {
-        LOGGER.info("===== ZonkyBot at your service! =====");
-        final String username = cmd.getOptionValue(OPTION_USERNAME.getOpt());
-        final String password = cmd.getOptionValue(OPTION_PASSWORD.getOpt());
-        LOGGER.info("Will communicate with Zonky as user '{}'.", username);
-        final boolean dryRun = cmd.hasOption(OPTION_DRY_RUN.getOpt());
-        int startingBalance = Integer.valueOf(cmd.getOptionValue(OPTION_DRY_RUN.getOpt(), "-1")); // FIXME throws
+        ZonkyBot.LOGGER.info("===== ZonkyBot at your service! =====");
+        final String username = cmd.getOptionValue(ZonkyBot.OPTION_USERNAME.getOpt());
+        final String password = cmd.getOptionValue(ZonkyBot.OPTION_PASSWORD.getOpt());
+        ZonkyBot.LOGGER.info("Will communicate with Zonky as user '{}'.", username);
+        final boolean dryRun = cmd.hasOption(ZonkyBot.OPTION_DRY_RUN.getOpt());
+        final int startingBalance = Integer.valueOf(cmd.getOptionValue(ZonkyBot.OPTION_DRY_RUN.getOpt(), "-1")); // FIXME throws
         if (dryRun) {
-            LOGGER.info("ZonkyBot is doing a dry run. It will simulate investing, but not invest any real money.");
+            ZonkyBot.LOGGER.info("ZonkyBot is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        final List<Investment> result = operate(new Operations(username, password, strategy, dryRun, startingBalance));
+        final List<Investment> result = ZonkyBot.operate(new Operations(username, password, strategy, dryRun, startingBalance));
         if (result.size() == 0) {
-            LOGGER.info("ZonkyBot did not invest.");
+            ZonkyBot.LOGGER.info("ZonkyBot did not invest.");
         } else if (dryRun) {
-            LOGGER.info("ZonkyBot pretended to invest into {} loans.", result);
+            ZonkyBot.LOGGER.info("ZonkyBot pretended to invest into {} loans.", result);
         } else {
             final String filename = "zonkybot." + DateTimeFormatter.ofPattern("YYYY-MM-dd-HH:mm").format(Instant.now()) + ".invested";
             try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
@@ -121,12 +121,12 @@ public class ZonkyBot {
                             + i.getInvestedAmount() + " CZK");
                     bw.newLine();
                 }
-            } catch (IOException ex) {
-                LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
+            } catch (final IOException ex) {
+                ZonkyBot.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
             }
-            LOGGER.info("ZonkyBot invested into {} loans.", result);
+            ZonkyBot.LOGGER.info("ZonkyBot invested into {} loans.", result);
         }
-        LOGGER.info("===== ZonkyBot out. =====");
+        ZonkyBot.LOGGER.info("===== ZonkyBot out. =====");
     }
 
     private static List<Investment> operate(final Operations ops) {
