@@ -32,7 +32,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +58,7 @@ public class ZonkyBot {
         System.exit(exitWithError ? 1 : 0);
     }
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) {
         final OptionGroup og = new OptionGroup();
         og.setRequired(true);
         og.addOption(OPTION_HELP);
@@ -96,8 +95,10 @@ public class ZonkyBot {
         } catch (Exception e) {
             printHelpAndExit(options, "Failed parsing strategy: " + e.getMessage(), true);
         }
+        letsGo(cmd, strategy); // and start actually working with Zonky
+    }
 
-        // let's go!
+    private static void letsGo(final CommandLine cmd, final InvestmentStrategy strategy) {
         LOGGER.info("===== ZonkyBot at your service! =====");
         final String username = cmd.getOptionValue(OPTION_USERNAME.getOpt());
         final String password = cmd.getOptionValue(OPTION_PASSWORD.getOpt());
