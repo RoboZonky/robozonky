@@ -125,9 +125,11 @@ public class Operations {
      * Put money into an already selected loan.
      * @param l Loan to invest into.
      * @param investmentsInSession Previous loans invested in this session.
+     * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private Optional<Investment> makeInvestment(final Loan l, final List<Investment> investmentsInSession) {
+    private Optional<Investment> makeInvestment(final Loan l, final List<Investment> investmentsInSession,
+                                                final BigDecimal balance) {
         if (Operations.isLoanPresent(l, investmentsInSession)) {
             Operations.LOGGER.info("ZonkyBot already invested in loan '{}', skipping. May only happen in dry runs.", l);
             return Optional.empty();
@@ -139,23 +141,25 @@ public class Operations {
         final int recommendedInvestment = strategy.recommendInvestmentAmount(l);
         final int roundToNearestHundred = (int) Math.round(((double) recommendedInvestment / 100.0) * 100.0);
         final int toInvest = Math.min(roundToNearestHundred, (int) l.getRemainingInvestment());
-        Operations.LOGGER.debug("Strategy recommended to invest {} CZK.", recommendedInvestment);
-        if (toInvest < Operations.MINIMAL_INVESTMEND_ALLOWED) {
+        final int toInvestAdjusted = Math.min(toInvest, balance.intValue());
+        Operations.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.",
+                recommendedInvestment, balance.intValue());
+        if (toInvestAdjusted < Operations.MINIMAL_INVESTMEND_ALLOWED) {
             Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
-                    l, toInvest);
+                    l, toInvestAdjusted);
             return Optional.empty();
         }
-        final Optional<Investment> optional = Optional.of(new Investment(l, toInvest));
-        // and invest
+        // and now actually invest
+        final Investment investment = new Investment(l, toInvestAdjusted);
         if (dryRun) {
-            Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvest, l);
-            return optional;
+            Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvestAdjusted, l);
+            return Optional.of(investment);
         } else {
-            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvest, l);
+            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvestAdjusted, l);
             try {
-                authenticatedClient.invest(optional.get());
+                authenticatedClient.invest(investment);
                 Operations.LOGGER.warn("Investment operating succeeded.");
-                return optional;
+                return Optional.of(investment);
             } catch (final Exception ex) {
                 Operations.LOGGER.warn("Investment operating failed.", ex);
                 return Optional.empty();
@@ -183,10 +187,11 @@ public class Operations {
      * @param r Rating in question.
      * @param loansFuture Loans carrying that rating.
      * @param investmentsInSession Previous investments made in this session.
+     * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
     private Optional<Investment> makeInvestment(final Rating r, final Future<Collection<Loan>> loansFuture,
-                                                final List<Investment> investmentsInSession) {
+                                                final List<Investment> investmentsInSession, final BigDecimal balance) {
         final Collection<Loan> loans;
         try {
             loans = loansFuture.get();
@@ -208,7 +213,7 @@ public class Operations {
         }
         // start investing
         for (final Loan l : sortedLoans) {
-            final Optional<Investment> investment = this.makeInvestment(l, investmentsInSession);
+            final Optional<Investment> investment = this.makeInvestment(l, investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -251,9 +256,10 @@ public class Operations {
     /**
      * Choose from available loans the most important loan to invest money into.
      * @param investmentsInSession Previous investments made in this session.
+     * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private Optional<Investment> makeInvestment(final List<Investment> investmentsInSession) {
+    private Optional<Investment> makeInvestment(final List<Investment> investmentsInSession, final BigDecimal balance) {
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(
                 authenticatedClient.getStatistics(),
                 authenticatedClient.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
@@ -270,7 +276,8 @@ public class Operations {
             availableLoans.put(r, this.backgroundThreadExecutor.submit(future));
         });
         for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
-            final Optional<Investment> investment = makeInvestment(r, availableLoans.get(r), investmentsInSession);
+            final Optional<Investment> investment =
+                    makeInvestment(r, availableLoans.get(r), investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -295,7 +302,7 @@ public class Operations {
         BigDecimal availableBalance = getAvailableBalance(investmentsMade);
         Operations.LOGGER.info("ZonkyBot starting account balance is {} CZK.", availableBalance);
         while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
-            final Optional<Investment> investment = makeInvestment(investmentsMade);
+            final Optional<Investment> investment = makeInvestment(investmentsMade, availableBalance);
             if (investment.isPresent()) {
                 investmentsMade.add(investment.get());
                 availableBalance = getAvailableBalance(investmentsMade);
