@@ -18,9 +18,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Properties;
 
 import net.petrovicky.zonkybot.Operations;
 import net.petrovicky.zonkybot.remote.Investment;
@@ -35,9 +38,11 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ZonkyBot {
+class ZonkyBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyBot.class);
+    protected static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
+    protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
 
     private static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -52,6 +57,18 @@ public class ZonkyBot {
     private static final Option OPTION_HELP = Option.builder("h").longOpt("help").argName("Show help")
             .desc("Show this help message and quit.").build();
 
+    protected static String getZonkyBotVersion() {
+        try {
+            final URLClassLoader cl = (URLClassLoader) ZonkyBot.class.getClassLoader();
+            final URL url = cl.findResource("META-INF/maven/net.petrovicky.zonkybot/zonkybot-app/pom.properties");
+            final Properties props = new Properties();
+            props.load(url.openStream());
+            return props.getProperty("version", ZonkyBot.ZONKY_VERSION_UNKNOWN);
+        } catch (Exception E) {
+            return ZonkyBot.ZONKY_VERSION_UNDETECTED;
+        }
+    }
+
     private static void printHelpAndExit(final Options options, final String message, final boolean exitWithError) {
         final HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("ZonkyBot", null, options, exitWithError ? "Error: " + message : message, true);
@@ -59,6 +76,7 @@ public class ZonkyBot {
     }
 
     public static void main(final String... args) {
+        LOGGER.info("ZonkyBot v{} loading.", ZonkyBot.getZonkyBotVersion());
         final OptionGroup og = new OptionGroup();
         og.setRequired(true);
         og.addOption(ZonkyBot.OPTION_HELP);
