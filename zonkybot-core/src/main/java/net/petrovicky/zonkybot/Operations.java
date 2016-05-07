@@ -27,6 +27,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import net.petrovicky.zonkybot.remote.Authorization;
@@ -55,6 +59,7 @@ public class Operations {
     private ZonkyAPI authenticatedClient;
     private final boolean dryRun;
     private final int dryRunBalance;
+    private ExecutorService backgroundThreadExecutor;
 
     public Operations(final String username, final String password, final InvestmentStrategy strategy, final boolean dryRun, final int dryRunBalance) {
         this.username = username;
@@ -136,9 +141,15 @@ public class Operations {
         return sortedLoans;
     }
 
-    private Optional<Investment> makeInvestment(Rating r, final List<Investment> previousInvestments) {
-        final Collection<Loan> loans = authenticatedClient.getLoans(Ratings.of(r),
-                strategy.getMinimumInvestmentAmount(r));
+    private Optional<Investment> makeInvestment(Rating r, final Future<Collection<Loan>> loansFuture,
+                                                final List<Investment> previousInvestments) {
+        final Collection<Loan> loans;
+        try {
+            loans = loansFuture.get();
+        } catch (Exception e) {
+            Operations.LOGGER.warn("Could not list loans with rating '{}'. Can not invest in that rating.", r);
+            return Optional.empty();
+        }
         if (loans.size() == 0) {
             Operations.LOGGER.info("There are no loans of rating '{}' matching the investment strategy.", r);
             return Optional.empty();
@@ -181,8 +192,15 @@ public class Operations {
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on the following ratings: {}.",
                 mostWantedRatings.values());
+        final Map<Rating, Future<Collection<Loan>>> availableLoans = new EnumMap<>(Rating.class);
+        // submit HTTP requests ahead of time
+        mostWantedRatings.forEach((s, r) -> {
+            final Callable<Collection<Loan>> future =
+                    () -> authenticatedClient.getLoans(Ratings.of(r), strategy.getMinimumInvestmentAmount(r));
+            availableLoans.put(r, this.backgroundThreadExecutor.submit(future));
+        });
         for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
-            final Optional<Investment> investment = makeInvestment(r, previousInvestments);
+            final Optional<Investment> investment = makeInvestment(r, availableLoans.get(r), previousInvestments);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -239,10 +257,12 @@ public class Operations {
         // provide authenticated clients
         authenticatedClient = clientBuilder.build().register(new AuthenticatedFilter(authorization))
                 .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
+        this.backgroundThreadExecutor = Executors.newSingleThreadExecutor();
     }
 
     public void logout() {
         authenticatedClient.logout();
+        this.backgroundThreadExecutor.shutdownNow();
     }
 
 }
