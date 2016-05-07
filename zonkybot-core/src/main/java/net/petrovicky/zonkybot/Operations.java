@@ -15,11 +15,9 @@
 package net.petrovicky.zonkybot;
 
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,8 +28,6 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
 
 import net.petrovicky.zonkybot.remote.Authorization;
 import net.petrovicky.zonkybot.remote.Investment;
@@ -236,47 +232,17 @@ public class Operations {
         final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
         clientBuilder.providerFactory(instance);
         final ResteasyClient client = clientBuilder.build();
-        client.register(new Operations.AuthorizationFilter());
+        client.register(new AuthorizationFilter());
         final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
         final Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
         client.close();
         // provide authenticated clients
-        authenticatedClient = clientBuilder.build().register(new Operations.AuthenticatedFilter(authorization))
+        authenticatedClient = clientBuilder.build().register(new AuthenticatedFilter(authorization))
                 .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
     }
 
     public void logout() {
         authenticatedClient.logout();
-    }
-
-    private static class AuthorizationFilter implements ClientRequestFilter {
-
-        private static final Logger LOGGER = LoggerFactory.getLogger(Operations.AuthorizationFilter.class);
-
-        @Override
-        public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-            Operations.AuthorizationFilter.LOGGER.debug("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
-            final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes());
-            clientRequestContext.getHeaders().add("Authorization", "Basic " + authCode);
-        }
-    }
-
-    private static class AuthenticatedFilter implements ClientRequestFilter {
-
-        private static final Logger LOGGER = LoggerFactory.getLogger(Operations.AuthenticatedFilter.class);
-
-        private final Token authorization;
-
-        public AuthenticatedFilter(final Token token) {
-            authorization = token;
-            Operations.AuthenticatedFilter.LOGGER.debug("Using Zonky access token '{}'.", authorization.getAccessToken());
-        }
-
-        @Override
-        public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-            Operations.AuthenticatedFilter.LOGGER.debug("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
-            clientRequestContext.getHeaders().add("Authorization", "Bearer " + authorization.getAccessToken());
-        }
     }
 
 }
