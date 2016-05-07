@@ -10,7 +10,7 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>zonkybot.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>zonkybot.%d{yyyy-MM-dd-HH:mm}.log</fileNamePattern>
+            <fileNamePattern>zonkybot.%d{yyyyMMddHHmm}.log</fileNamePattern>
             <maxHistory>43200</maxHistory> <!-- 1 month worth of logs -->
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>

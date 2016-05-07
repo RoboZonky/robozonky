@@ -72,12 +72,12 @@ class ZonkyBot {
 
     private static void printHelpAndExit(final Options options, final String message, final boolean exitWithError) {
         final HelpFormatter formatter = new HelpFormatter();
+        // FIXME needs to use run.bat / run.sh
         formatter.printHelp("ZonkyBot", null, options, exitWithError ? "Error: " + message : message, true);
         System.exit(exitWithError ? 1 : 0);
     }
 
     public static void main(final String... args) {
-        LOGGER.info("ZonkyBot v{} loading.", ZonkyBot.getZonkyBotVersion());
         final OptionGroup og = new OptionGroup();
         og.setRequired(true);
         og.addOption(ZonkyBot.OPTION_HELP);
@@ -98,6 +98,7 @@ class ZonkyBot {
         if (cmd.hasOption(ZonkyBot.OPTION_HELP.getOpt())) { // user requested help
             ZonkyBot.printHelpAndExit(options, "", false);
         }
+        LOGGER.info("ZonkyBot v{} loading.", ZonkyBot.getZonkyBotVersion());
         // standard workflow
         if (!cmd.hasOption(ZonkyBot.OPTION_USERNAME.getOpt())) {
             ZonkyBot.printHelpAndExit(options, "Username must be provided.", true);
@@ -121,7 +122,7 @@ class ZonkyBot {
         final String suffix = dryRun ? "dry" : "invested";
         final LocalDateTime now = LocalDateTime.now();
         final String filename =
-                "zonkybot." + DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm").format(now) + '.' + suffix;
+                "zonkybot." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
         try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
             for (final Investment i : result) {
                 bw.write(i.getLoanId() + "('" + i.getLoan().getName() + "', " + i.getLoan().getRating() + "): "
