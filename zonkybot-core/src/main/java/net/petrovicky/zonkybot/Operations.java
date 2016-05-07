@@ -16,6 +16,8 @@ package net.petrovicky.zonkybot;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,6 +26,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -52,10 +55,13 @@ import org.slf4j.LoggerFactory;
 
 public class Operations {
 
-    private static final int CONNECTION_POOL_SIZE = 2;
     public static final int MINIMAL_INVESTMENT_ALLOWED = 200;
+    protected static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
+    protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
 
+    private static final int CONNECTION_POOL_SIZE = 2;
     private static final String ZONKY_URL = "https://api.zonky.cz";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
 
     /**
@@ -273,6 +279,18 @@ public class Operations {
             }
         }
         return Optional.empty();
+    }
+
+    public static String getZonkyBotVersion() {
+        try {
+            final URLClassLoader cl = (URLClassLoader) Operations.class.getClassLoader();
+            final URL url = cl.findResource("META-INF/maven/net.petrovicky.zonkybot/zonkybot-core/pom.properties");
+            final Properties props = new Properties();
+            props.load(url.openStream());
+            return props.getProperty("version", Operations.ZONKY_VERSION_UNKNOWN);
+        } catch (Exception ex) {
+            return Operations.ZONKY_VERSION_UNDETECTED;
+        }
     }
 
     protected static BigDecimal getAvailableBalance(final OperationsContext oc,

@@ -15,18 +15,18 @@
  * /
  */
 
-package net.petrovicky.zonkybot.app;
+package net.petrovicky.zonkybot;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class ZonkyBotIT {
+public class OperationsIT {
 
     @Test
     public void testGetZonkyBotVersion() {
-        final String version = ZonkyBot.getZonkyBotVersion();
-        Assertions.assertThat(version).isNotEqualTo(ZonkyBot.ZONKY_VERSION_UNDETECTED);
-        Assertions.assertThat(version).isNotEqualTo(ZonkyBot.ZONKY_VERSION_UNKNOWN);
+        final String version = Operations.getZonkyBotVersion();
+        Assertions.assertThat(version).isNotEqualTo(Operations.ZONKY_VERSION_UNDETECTED);
+        Assertions.assertThat(version).isNotEqualTo(Operations.ZONKY_VERSION_UNKNOWN);
     }
 
 }

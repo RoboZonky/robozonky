@@ -30,6 +30,8 @@ abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
+        clientRequestContext.getHeaders().putSingle(
+                "User-Agent", "ZonkyBot " + Operations.getZonkyBotVersion() + " (https://github.com/triceo/zonkybot)");
         this.getLogger().debug("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 

@@ -18,12 +18,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Properties;
 
 import net.petrovicky.zonkybot.Operations;
 import net.petrovicky.zonkybot.OperationsContext;
@@ -42,8 +39,6 @@ import org.slf4j.LoggerFactory;
 class ZonkyBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyBot.class);
-    protected static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
-    protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
 
     private static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -57,18 +52,6 @@ class ZonkyBot {
             .build();
     private static final Option OPTION_HELP = Option.builder("h").longOpt("help").argName("Show help")
             .desc("Show this help message and quit.").build();
-
-    protected static String getZonkyBotVersion() {
-        try {
-            final URLClassLoader cl = (URLClassLoader) ZonkyBot.class.getClassLoader();
-            final URL url = cl.findResource("META-INF/maven/net.petrovicky.zonkybot/zonkybot-app/pom.properties");
-            final Properties props = new Properties();
-            props.load(url.openStream());
-            return props.getProperty("version", ZonkyBot.ZONKY_VERSION_UNKNOWN);
-        } catch (Exception ex) {
-            return ZonkyBot.ZONKY_VERSION_UNDETECTED;
-        }
-    }
 
     private static void printHelpAndExit(final Options options, final String message, final boolean exitWithError) {
         final HelpFormatter formatter = new HelpFormatter();
@@ -98,7 +81,7 @@ class ZonkyBot {
         if (cmd.hasOption(ZonkyBot.OPTION_HELP.getOpt())) { // user requested help
             ZonkyBot.printHelpAndExit(options, "", false);
         }
-        LOGGER.info("ZonkyBot v{} loading.", ZonkyBot.getZonkyBotVersion());
+        LOGGER.info("ZonkyBot v{} loading.", Operations.getZonkyBotVersion());
         // standard workflow
         if (!cmd.hasOption(ZonkyBot.OPTION_USERNAME.getOpt())) {
             ZonkyBot.printHelpAndExit(options, "Username must be provided.", true);
