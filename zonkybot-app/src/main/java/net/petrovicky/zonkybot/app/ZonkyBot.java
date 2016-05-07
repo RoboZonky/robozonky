@@ -98,6 +98,21 @@ public class ZonkyBot {
         ZonkyBot.letsGo(cmd, strategy); // and start actually working with Zonky
     }
 
+    private static void storeInvestmentsMade(final List<Investment> result, final boolean dryRun) {
+        final String suffix = dryRun ? "dry" : "invested";
+        final String filename =
+                "zonkybot." + DateTimeFormatter.ofPattern("YYYY-MM-dd-HH:mm").format(Instant.now()) + '.' + suffix;
+        try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
+            for (final Investment i : result) {
+                bw.write(i.getLoanId() + "('" + i.getLoan().getName() + "', " + i.getLoan().getRating() + "): "
+                        + i.getInvestedAmount() + " CZK");
+                bw.newLine();
+            }
+        } catch (final IOException ex) {
+            ZonkyBot.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
+        }
+    }
+
     private static void letsGo(final CommandLine cmd, final InvestmentStrategy strategy) {
         ZonkyBot.LOGGER.info("===== ZonkyBot at your service! =====");
         final String username = cmd.getOptionValue(ZonkyBot.OPTION_USERNAME.getOpt());
@@ -111,20 +126,13 @@ public class ZonkyBot {
         final List<Investment> result = ZonkyBot.operate(new Operations(username, password, strategy, dryRun, startingBalance));
         if (result.size() == 0) {
             ZonkyBot.LOGGER.info("ZonkyBot did not invest.");
-        } else if (dryRun) {
-            ZonkyBot.LOGGER.info("ZonkyBot pretended to invest into {} loans.", result.size());
         } else {
-            final String filename = "zonkybot." + DateTimeFormatter.ofPattern("YYYY-MM-dd-HH:mm").format(Instant.now()) + ".invested";
-            try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
-                for (final Investment i : result) {
-                    bw.write(i.getLoanId() + "('" + i.getLoan().getName() + "', " + i.getLoan().getRating() + "): "
-                            + i.getInvestedAmount() + " CZK");
-                    bw.newLine();
-                }
-            } catch (final IOException ex) {
-                ZonkyBot.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
+            ZonkyBot.storeInvestmentsMade(result, dryRun);
+            if (dryRun) {
+                ZonkyBot.LOGGER.info("ZonkyBot pretended to invest into {} loans.", result.size());
+            } else {
+                ZonkyBot.LOGGER.info("ZonkyBot invested into {} loans.", result.size());
             }
-            ZonkyBot.LOGGER.info("ZonkyBot invested into {} loans.", result.size());
         }
         ZonkyBot.LOGGER.info("===== ZonkyBot out. =====");
     }
