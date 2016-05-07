@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 public class Operations {
 
     private static final int CONNECTION_POOL_SIZE = 2;
+    public static final int MINIMAL_INVESTMEND_ALLOWED = 200;
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
@@ -134,9 +135,18 @@ public class Operations {
             Operations.LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
             return Optional.empty();
         }
-        final int toInvest = (int) Math.min(strategy.getMaximumInvestmentAmount(l.getRating()),
-                l.getRemainingInvestment());
+        // figure out how much to invest
+        final int recommendedInvestment = strategy.recommendInvestmentAmount(l);
+        final int roundToNearestHundred = (int) Math.round(((double) recommendedInvestment / 100.0) * 100.0);
+        final int toInvest = Math.min(roundToNearestHundred, (int) l.getRemainingInvestment());
+        Operations.LOGGER.debug("Strategy recommended to invest {} CZK.", recommendedInvestment);
+        if (toInvest < Operations.MINIMAL_INVESTMEND_ALLOWED) {
+            Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
+                    l, toInvest);
+            return Optional.empty();
+        }
         final Optional<Investment> optional = Optional.of(new Investment(l, toInvest));
+        // and invest
         if (dryRun) {
             Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvest, l);
             return optional;
@@ -257,7 +267,7 @@ public class Operations {
         mostWantedRatings.forEach((s, r) -> {
             // FIXME make sure that loans where I invested but which are not yet funded do not show up in here
             final Callable<Collection<Loan>> future =
-                    () -> authenticatedClient.getLoans(Ratings.of(r), strategy.getMinimumInvestmentAmount(r));
+                    () -> authenticatedClient.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMEND_ALLOWED);
             availableLoans.put(r, this.backgroundThreadExecutor.submit(future));
         });
         for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
@@ -281,7 +291,7 @@ public class Operations {
     }
 
     public Collection<Investment> invest() {
-        final int minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
+        final int minimumInvestmentAmount = Operations.MINIMAL_INVESTMEND_ALLOWED;
         final List<Investment> investmentsMade = new ArrayList<>();
         BigDecimal availableBalance = getAvailableBalance(investmentsMade);
         Operations.LOGGER.info("ZonkyBot starting account balance is {} CZK.", availableBalance);
@@ -294,10 +304,6 @@ public class Operations {
             } else {
                 break;
             }
-        }
-        if (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) < 0) {
-            Operations.LOGGER.info("Account balance ({} CZK) less than investment minimum ({} CZK) defined by strategy.",
-                    availableBalance, minimumInvestmentAmount);
         }
         return investmentsMade;
     }

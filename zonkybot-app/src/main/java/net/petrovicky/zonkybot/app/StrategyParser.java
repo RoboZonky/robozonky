@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import net.petrovicky.zonkybot.Operations;
 import net.petrovicky.zonkybot.remote.Rating;
 import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import net.petrovicky.zonkybot.strategy.StrategyBuilder;
@@ -65,10 +66,13 @@ class StrategyParser {
         final StrategyBuilder strategies = new StrategyBuilder();
         BigDecimal sumShares = BigDecimal.ZERO;
         for (final Rating rating : Rating.values()) { // prepare strategy for a given rating
-            final boolean preferLongerTerms = StrategyParser.getValue(config, rating, "preferLongerTerms", config::getBoolean);
-            final BigDecimal targetShare = StrategyParser.getValue(config, rating, "targetShare", config::getBigDecimal);
+            final boolean preferLongerTerms =
+                    StrategyParser.getValue(config, rating, "preferLongerTerms", config::getBoolean);
+            final BigDecimal targetShare =
+                    StrategyParser.getValue(config, rating, "targetShare", config::getBigDecimal);
             if (targetShare.compareTo(BigDecimal.ZERO) < 0 || targetShare.compareTo(BigDecimal.ONE) > 0) {
-                throw new IllegalStateException("Target share for rating " + rating + " outside of range <0, 1>: " + targetShare);
+                throw new IllegalStateException("Target share for rating " + rating + " outside of range <0, 1>: "
+                        + targetShare);
             }
             sumShares = sumShares.add(targetShare);
             final int minTerm = StrategyParser.getValue(config, rating, "minimumTerm", config::getInteger, 0);
@@ -79,18 +83,22 @@ class StrategyParser {
             if (maxTerm < -1) {
                 throw new IllegalStateException("Maximum acceptable term for rating " + rating + " is negative.");
             } else if (minTerm > maxTerm && maxTerm != -1) {
-                throw new IllegalStateException("Maximum acceptable term for rating " + rating + " is smaller than the minimum.");
+                throw new IllegalStateException("Maximum acceptable term for rating " + rating
+                        + " is smaller than the minimum.");
             }
-            final int minAmount = StrategyParser.getValue(config, rating, "minimumAmount", config::getInteger, 0);
-            if (minAmount < 200) {
-                throw new IllegalStateException("Minimum investment amount for rating " + rating + "  must not be less than 200.");
+            final int maxLoanAmount =
+                    StrategyParser.getValue(config, rating, "maximumLoanAmount", config::getInteger, 0);
+            if (maxLoanAmount < Operations.MINIMAL_INVESTMEND_ALLOWED) {
+                throw new IllegalStateException("Maximum investment amount for rating " + rating
+                        + "  is smaller than minimum.");
             }
-            final int maxAmount = StrategyParser.getValue(config, rating, "maximumAmount", config::getInteger, 0);
-            if (maxAmount < minAmount) {
-                throw new IllegalStateException("Maximum investment amount for rating " + rating + "  is smaller than minimum.");
+            final BigDecimal maxLoanShare =
+                    StrategyParser.getValue(config, rating, "maximumLoanShare", config::getBigDecimal);
+            if (maxLoanShare.compareTo(BigDecimal.ZERO) < 0 || maxLoanShare.compareTo(BigDecimal.ONE) > 0) {
+                throw new IllegalStateException("Maximum investment share for rating " + rating
+                        + " outside of range <0, 1>: " + targetShare);
             }
-            // TODO should we limit maxAmount for safety?
-            strategies.addIndividualStrategy(rating, targetShare, minTerm, maxTerm, minAmount, maxAmount,
+            strategies.addIndividualStrategy(rating, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare,
                     preferLongerTerms);
         }
         if (sumShares.compareTo(BigDecimal.ONE) > 0) {

@@ -27,18 +27,18 @@ class StrategyPerRating {
 
     private final boolean preferLongerTerms;
     private final Rating rating;
-    private final BigDecimal targetShare;
-    private final int minimumAcceptableTerm, maximumAcceptableTerm, minimumInvestmentAmount, maximumInvestmentAmount;
+    private final BigDecimal targetShare, maximumInvestmentShare;
+    private final int minimumAcceptableTerm, maximumAcceptableTerm, maximumInvestmentAmount;
 
     public StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm,
-                             final int maxTerm, final int minAmount, final int maxAmount,
+                             final int maxTerm, final int maxLoanAmount, final BigDecimal maxLoanShare,
                              final boolean preferLongerTerms) {
         this.rating = rating;
-        minimumAcceptableTerm = minTerm < 0 ? 0 : minTerm;
-        maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
+        this.minimumAcceptableTerm = minTerm < 0 ? 0 : minTerm;
+        this.maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
         this.targetShare = targetShare;
-        minimumInvestmentAmount = minAmount;
-        maximumInvestmentAmount = maxAmount;
+        this.maximumInvestmentAmount = maxLoanAmount;
+        this.maximumInvestmentShare = maxLoanShare;
         this.preferLongerTerms = preferLongerTerms;
     }
 
@@ -54,20 +54,8 @@ class StrategyPerRating {
         return targetShare;
     }
 
-    public int getMinimumInvestmentAmount() {
-        return minimumInvestmentAmount;
-    }
-
-    public int getMaximumInvestmentAmount() {
-        return maximumInvestmentAmount;
-    }
-
     public boolean isAcceptableTerm(final Loan loan) {
         return loan.getTermInMonths() >= minimumAcceptableTerm && loan.getTermInMonths() <= maximumAcceptableTerm;
-    }
-
-    public boolean isAcceptableAmount(final Loan loan) {
-        return loan.getRemainingInvestment() >= minimumInvestmentAmount;
     }
 
     public boolean isAcceptable(final Loan loan) {
@@ -77,11 +65,17 @@ class StrategyPerRating {
             StrategyPerRating.LOGGER.debug("Loan '{}' rejected; strategy looking for loans with terms in range <{}, {}>.", loan,
                     minimumAcceptableTerm, maximumAcceptableTerm);
             return false;
-        } else if (!isAcceptableAmount(loan)) {
-            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; strategy looking for minimum investment of {} CZK.", loan,
-                    minimumInvestmentAmount);
-            return false;
         }
         return true;
+    }
+
+    public int recommendInvestmentAmount(final Loan loan) {
+        if (loan.getRating() != rating) {
+            throw new IllegalStateException("Loan " + loan + " should never have gotten here.");
+        }
+        final int maximumInvestmentByShare =
+                BigDecimal.valueOf(loan.getAmount()).multiply(this.maximumInvestmentShare).intValue();
+        return Math.min(maximumInvestmentByShare, maximumInvestmentAmount);
+
     }
 }

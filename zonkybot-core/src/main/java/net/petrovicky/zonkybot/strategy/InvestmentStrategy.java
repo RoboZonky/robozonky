@@ -24,24 +24,21 @@ import net.petrovicky.zonkybot.remote.Rating;
 public class InvestmentStrategy {
 
     public boolean isAcceptable(final Loan loan) {
-        final Rating r = loan.getRating();
-        return individualStrategies.get(r).isAcceptable(loan);
+        return individualStrategies.get(loan.getRating()).isAcceptable(loan);
+    }
+
+    public int recommendInvestmentAmount(final Loan loan) {
+        return individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan);
     }
 
     private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
     private final Map<Rating, BigDecimal> targetShares = new EnumMap<>(Rating.class);
-    private final Map<Rating, Integer> minimumInvestmentAmounts = new EnumMap<>(Rating.class);
-    private final Map<Rating, Integer> maximumInvestmentAmounts = new EnumMap<>(Rating.class);
     private final Map<Rating, Boolean> prefersLongerTerms = new EnumMap<>(Rating.class);
-    private int minimumInvestmentAmount = Integer.MAX_VALUE;
 
     InvestmentStrategy(final Map<Rating, StrategyPerRating> individualStrategies) {
         this.individualStrategies.putAll(individualStrategies);
         for (final StrategyPerRating s : individualStrategies.values()) {
-            minimumInvestmentAmount = Math.min(s.getMinimumInvestmentAmount(), minimumInvestmentAmount);
             targetShares.put(s.getRating(), s.getTargetShare());
-            minimumInvestmentAmounts.put(s.getRating(), s.getMinimumInvestmentAmount());
-            maximumInvestmentAmounts.put(s.getRating(), s.getMaximumInvestmentAmount());
             prefersLongerTerms.put(s.getRating(), s.isPreferLongerTerms());
         }
     }
@@ -50,20 +47,8 @@ public class InvestmentStrategy {
         return targetShares.get(r);
     }
 
-    public int getMinimumInvestmentAmount() {
-        return minimumInvestmentAmount;
-    }
-
     public boolean prefersLongerTerms(final Rating r) {
         return prefersLongerTerms.get(r);
-    }
-
-    public int getMinimumInvestmentAmount(final Rating r) {
-        return minimumInvestmentAmounts.get(r);
-    }
-
-    public int getMaximumInvestmentAmount(final Rating r) {
-        return maximumInvestmentAmounts.get(r);
     }
 
 }

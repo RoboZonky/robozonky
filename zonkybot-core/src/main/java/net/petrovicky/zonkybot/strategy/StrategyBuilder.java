@@ -29,18 +29,19 @@ public class StrategyBuilder {
     private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
 
     public StrategyBuilder addIndividualStrategy(final Rating r, final BigDecimal targetShare, final int minTerm,
-                                                 final int maxTerm, final int minAmount, final int maxAmount,
-                                                 final boolean preferLongerTerms) {
+                                                 final int maxTerm, final int maxLoanAmount,
+                                                 final BigDecimal maxLoanShare, final boolean preferLongerTerms) {
         if (individualStrategies.containsKey(r)) {
             throw new IllegalArgumentException("Already added strategy for rating " + r);
         }
-        individualStrategies.put(r, new StrategyPerRating(r, targetShare, minTerm, maxTerm, minAmount, maxAmount, preferLongerTerms));
+        individualStrategies.put(r,
+                new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare, preferLongerTerms));
         StrategyBuilder.LOGGER.debug("Adding strategy for rating '{}'.", r.getDescription());
         StrategyBuilder.LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getDescription(), targetShare);
         StrategyBuilder.LOGGER.debug("Range of acceptable investment terms for rating '{}' is <{}, {}> months.", r.getDescription(),
                 minTerm == -1 ? 0 : minTerm, maxTerm == -1 ? "+inf" : maxTerm);
-        StrategyBuilder.LOGGER.debug("Range of acceptable investment amounts for rating '{}' is <{}, {}> CZK.", r.getDescription(),
-                minAmount, maxAmount);
+        StrategyBuilder.LOGGER.debug("Maximum investment amount for rating '{}' is {} CZK.", r.getDescription(), maxLoanAmount);
+        StrategyBuilder.LOGGER.debug("Maximum investment share for rating '{}' is {}.", r.getDescription(), maxLoanShare);
         StrategyBuilder.LOGGER.debug("Rating '{}' will prefer longer terms: ", r.getDescription());
         return this;
     }
