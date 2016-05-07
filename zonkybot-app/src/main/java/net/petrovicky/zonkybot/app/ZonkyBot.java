@@ -155,6 +155,7 @@ class ZonkyBot {
             }
         }
         ZonkyBot.LOGGER.info("===== ZonkyBot out. =====");
+        System.exit(0); // make sure the app actually quits
     }
 
     private static Collection<Investment> operate(final String username, final String password,

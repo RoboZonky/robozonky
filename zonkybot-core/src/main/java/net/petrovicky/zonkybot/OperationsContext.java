@@ -21,8 +21,18 @@ import java.util.concurrent.Executors;
 
 import net.petrovicky.zonkybot.remote.ZonkyAPI;
 import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Carries information to enable {@link Operations} to function, such as an authenticated Zonky API.
+ * <p>
+ * When the class instance is no longer needed, it must be {@link #dispose()}d - otherwise the #ExecutorService may
+ * prevent the application from ending.
+ */
 public final class OperationsContext {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationsContext.class);
 
     private final ZonkyAPI api;
     private final InvestmentStrategy strategy;
@@ -37,12 +47,23 @@ public final class OperationsContext {
         this.dryRun = dryRun;
         this.dryRunInitialBalance = dryRunInitialBalance;
         this.backgroundExecutor = Executors.newFixedThreadPool(maxNumberParallelHttpConnections - 1);
+        OperationsContext.LOGGER.debug("OperationsContext initialized.");
     }
 
+    /**
+     * Retrieve executor service to be used for background network communication. Filling this service with non-related
+     * tasks will prevent ZonkyBot from querying Zonky API.
+     * @return
+     */
     protected ExecutorService getBackgroundExecutor() {
         return this.backgroundExecutor;
     }
 
+    /**
+     * Retrieve fully authenticated Zonky API, ready to be worked with.
+     * @return Zonky API.
+     * @throws IllegalStateException When called after {@link #dispose()}.
+     */
     protected ZonkyAPI getAPI() {
         if (backgroundExecutor.isShutdown()) {
             throw new IllegalStateException("OperationsContext already disposed of.");
@@ -64,5 +85,6 @@ public final class OperationsContext {
 
     protected void dispose() {
         backgroundExecutor.shutdownNow();
+        OperationsContext.LOGGER.debug("OperationsContext disposed of.");
     }
 }
