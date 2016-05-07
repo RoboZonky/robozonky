@@ -1,16 +1,3 @@
-package net.petrovicky.zonkybot.remote;
-
-import java.util.Collection;
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
 /*
  * Copyright 2016 Lukáš Petrovický
  *
@@ -25,6 +12,18 @@ import javax.ws.rs.core.MediaType;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.petrovicky.zonkybot.remote;
+
+import java.util.Collection;
+import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")

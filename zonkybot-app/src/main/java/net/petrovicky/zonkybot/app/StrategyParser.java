@@ -88,7 +88,7 @@ class StrategyParser {
             }
             final int maxLoanAmount =
                     StrategyParser.getValue(config, rating, "maximumLoanAmount", config::getInteger, 0);
-            if (maxLoanAmount < Operations.MINIMAL_INVESTMEND_ALLOWED) {
+            if (maxLoanAmount < Operations.MINIMAL_INVESTMENT_ALLOWED) {
                 throw new IllegalStateException("Maximum investment amount for rating " + rating
                         + "  is smaller than minimum.");
             }

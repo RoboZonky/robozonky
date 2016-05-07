@@ -14,7 +14,6 @@
  */
 package net.petrovicky.zonkybot;
 
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class Operations {
 
     private static final int CONNECTION_POOL_SIZE = 2;
-    public static final int MINIMAL_INVESTMEND_ALLOWED = 200;
+    public static final int MINIMAL_INVESTMENT_ALLOWED = 200;
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
@@ -144,7 +143,7 @@ public class Operations {
         final int toInvestAdjusted = Math.min(toInvest, balance.intValue());
         Operations.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.",
                 recommendedInvestment, balance.intValue());
-        if (toInvestAdjusted < Operations.MINIMAL_INVESTMEND_ALLOWED) {
+        if (toInvestAdjusted < Operations.MINIMAL_INVESTMENT_ALLOWED) {
             Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
                     l, toInvestAdjusted);
             return Optional.empty();
@@ -195,7 +194,7 @@ public class Operations {
         final Collection<Loan> loans;
         try {
             loans = loansFuture.get();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Operations.LOGGER.warn("Could not list loans with rating '{}'. Can not invest in that rating.", r);
             return Optional.empty();
         }
@@ -272,7 +271,7 @@ public class Operations {
         mostWantedRatings.forEach((s, r) -> { // submit HTTP requests ahead of time
             // FIXME make sure that loans where I invested but which are not yet funded do not show up in here
             final Callable<Collection<Loan>> future =
-                    () -> authenticatedClient.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMEND_ALLOWED);
+                    () -> authenticatedClient.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMENT_ALLOWED);
             availableLoans.put(r, this.backgroundThreadExecutor.submit(future));
         });
         for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
@@ -297,7 +296,7 @@ public class Operations {
     }
 
     public Collection<Investment> invest() {
-        final int minimumInvestmentAmount = Operations.MINIMAL_INVESTMEND_ALLOWED;
+        final int minimumInvestmentAmount = Operations.MINIMAL_INVESTMENT_ALLOWED;
         final List<Investment> investmentsMade = new ArrayList<>();
         BigDecimal availableBalance = getAvailableBalance(investmentsMade);
         Operations.LOGGER.info("ZonkyBot starting account balance is {} CZK.", availableBalance);

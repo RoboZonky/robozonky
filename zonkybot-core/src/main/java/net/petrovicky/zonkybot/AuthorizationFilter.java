@@ -14,7 +14,6 @@
  *  * limitations under the License.
  * /
  */
-
 package net.petrovicky.zonkybot;
 
 import java.io.IOException;
