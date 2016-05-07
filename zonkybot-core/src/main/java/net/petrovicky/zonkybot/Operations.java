@@ -260,11 +260,10 @@ public class Operations {
                 investmentsInSession);
         final SortedMap<BigDecimal, Rating> mostWantedRatings = this.rankRankinsByDemand(shareOfRatings);
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
-        Operations.LOGGER.info("According to the investment strategy, the portfolio is low on the following ratings: {}.",
+        Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
                 mostWantedRatings.values());
         final Map<Rating, Future<Collection<Loan>>> availableLoans = new EnumMap<>(Rating.class);
-        // submit HTTP requests ahead of time
-        mostWantedRatings.forEach((s, r) -> {
+        mostWantedRatings.forEach((s, r) -> { // submit HTTP requests ahead of time
             // FIXME make sure that loans where I invested but which are not yet funded do not show up in here
             final Callable<Collection<Loan>> future =
                     () -> authenticatedClient.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMEND_ALLOWED);
@@ -305,7 +304,7 @@ public class Operations {
                 break;
             }
         }
-        return investmentsMade;
+        return Collections.unmodifiableList(investmentsMade);
     }
 
     public void login() {
