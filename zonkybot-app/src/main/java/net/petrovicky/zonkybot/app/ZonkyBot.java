@@ -22,7 +22,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.Collection;
 import java.util.Properties;
 
 import net.petrovicky.zonkybot.Operations;
@@ -116,7 +116,7 @@ class ZonkyBot {
         ZonkyBot.letsGo(cmd, strategy); // and start actually working with Zonky
     }
 
-    private static void storeInvestmentsMade(final List<Investment> result, final boolean dryRun) {
+    private static void storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
         final String suffix = dryRun ? "dry" : "invested";
         final LocalDateTime now = LocalDateTime.now();
         final String filename =
@@ -124,7 +124,7 @@ class ZonkyBot {
         try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
             for (final Investment i : result) {
                 bw.write(i.getLoanId() + "('" + i.getLoan().getName() + "', " + i.getLoan().getRating() + "): "
-                        + i.getInvestedAmount() + " CZK");
+                        + i.getAmount() + " CZK");
                 bw.newLine();
             }
         } catch (final IOException ex) {
@@ -142,7 +142,8 @@ class ZonkyBot {
         if (dryRun) {
             ZonkyBot.LOGGER.info("ZonkyBot is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        final List<Investment> result = ZonkyBot.operate(new Operations(username, password, strategy, dryRun, startingBalance));
+        final Collection<Investment> result = ZonkyBot.operate(
+                new Operations(username, password, strategy, dryRun, startingBalance));
         if (result.size() == 0) {
             ZonkyBot.LOGGER.info("ZonkyBot did not invest.");
         } else {
@@ -156,9 +157,9 @@ class ZonkyBot {
         ZonkyBot.LOGGER.info("===== ZonkyBot out. =====");
     }
 
-    private static List<Investment> operate(final Operations ops) {
+    private static Collection<Investment> operate(final Operations ops) {
         ops.login();
-        final List<Investment> result = ops.invest();
+        final Collection<Investment> result = ops.invest();
         ops.logout();
         return result;
     }

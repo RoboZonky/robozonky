@@ -1,5 +1,6 @@
 package net.petrovicky.zonkybot.remote;
 
+import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -32,6 +33,7 @@ public interface ZonkyAPI {
 
     String MARKETPLACE = "/loans/marketplace";
     String ME = "/users/me";
+    String INVESTMENTS = ME + "/investments";
 
     @GET
     @Path(ZonkyAPI.ME + "/wallet")
@@ -60,16 +62,25 @@ public interface ZonkyAPI {
 
     @GET
     @Path(ZonkyAPI.MARKETPLACE)
-    List<Loan> getLoans(
-            @QueryParam("rating.type__in") Ratings ratings);
+    List<Loan> getLoans(@QueryParam("rating.type__in") Ratings ratings);
 
     @GET
     @Path(ZonkyAPI.ME + "/logout")
     List<Loan> logout();
 
     @GET
-    @Path(ZonkyAPI.ME + "/investments/statistics")
+    @Path(ZonkyAPI.INVESTMENTS + "/statistics")
     Statistics getStatistics();
+
+    @GET
+    @Path(ZonkyAPI.INVESTMENTS)
+    Collection<Investment> getInvestments(
+            @QueryParam("loan.status__in") InvestmentStatuses statuses,
+            @QueryParam("loan.dpd__gt") @DefaultValue("0") int daysPastDueGreaterThan);
+
+    @GET
+    @Path(ZonkyAPI.INVESTMENTS)
+    Collection<FullInvestment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
 
     @POST
     @Path(ZonkyAPI.ME + "/investment")

@@ -18,7 +18,6 @@
 package net.petrovicky.zonkybot;
 
 import java.io.IOException;
-import java.util.Base64;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
@@ -33,11 +32,11 @@ abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
         this.getLogger().debug("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
-        final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes());
     }
 
     @Override
-    public void filter(ClientRequestContext clientRequestContext, ClientResponseContext clientResponseContext) throws IOException {
+    public void filter(final ClientRequestContext clientRequestContext,
+                       final ClientResponseContext clientResponseContext) throws IOException {
         this.getLogger().debug("Operation '{}' to '{}' finished with HTTP {}.",
                 clientRequestContext.getMethod(), clientRequestContext.getUri(), clientResponseContext.getStatus());
     }

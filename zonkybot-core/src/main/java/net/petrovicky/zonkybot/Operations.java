@@ -34,7 +34,10 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import net.petrovicky.zonkybot.remote.Authorization;
+import net.petrovicky.zonkybot.remote.FullInvestment;
 import net.petrovicky.zonkybot.remote.Investment;
+import net.petrovicky.zonkybot.remote.InvestmentStatus;
+import net.petrovicky.zonkybot.remote.InvestmentStatuses;
 import net.petrovicky.zonkybot.remote.Loan;
 import net.petrovicky.zonkybot.remote.Rating;
 import net.petrovicky.zonkybot.remote.Ratings;
@@ -51,6 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Operations {
+
+    private static final int CONNECTION_POOL_SIZE = 2;
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
@@ -69,15 +74,24 @@ public class Operations {
         this.dryRunBalance = dryRunBalance;
     }
 
+    /**
+     * Get the share of 'payments due for each rating' on the overall portfolio.
+     * @param stats
+     * @param investmentsInZonky Loans which have already been funded but are not yet part of your portfolio.
+     * @param investmentsInSession Loans invested made in this session of ZonkyBot.
+     * @return Map where each rating is the key and value is the share of that rating among overall due payments.
+     */
     private static Map<Rating, BigDecimal> calculateSharesPerRating(final Statistics stats,
-                                                                    final Iterable<Investment> previousInvestments) {
+                                                                    final Collection<FullInvestment> investmentsInZonky,
+                                                                    final Collection<Investment> investmentsInSession) {
         final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
                 Collectors.toMap(risk -> Rating.valueOf(risk.getRating()), risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );
-        previousInvestments.forEach(previousInvestment -> {
+        final Collection<Investment> investments = Operations.mergeInvestments(investmentsInZonky, investmentsInSession);
+        investments.forEach(previousInvestment -> {
             // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
             final Rating r = previousInvestment.getLoan().getRating();
-            final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getInvestedAmount());
+            final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getAmount());
             amounts.put(r, amounts.get(r).add(investment));
         });
         final BigDecimal total = Operations.sum(amounts.values());
@@ -90,8 +104,15 @@ public class Operations {
         return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private static boolean isLoanPresent(final Loan loan, final Iterable<Investment> previousInvestments) {
-        for (final Investment i : previousInvestments) {
+    /**
+     * Determine whether or not a given loan is present among existing investments.
+     *
+     * @param loan Loan in question.
+     * @param investments Known investments.
+     * @return True if present.
+     */
+    private static boolean isLoanPresent(final Loan loan, final Iterable<Investment> investments) {
+        for (final Investment i : investments) {
             if (loan.getId() == i.getLoan().getId()) {
                 return true;
             }
@@ -99,9 +120,15 @@ public class Operations {
         return false;
     }
 
-    private Optional<Investment> makeInvestment(final Loan l, final List<Investment> previousInvestments) {
-        if (Operations.isLoanPresent(l, previousInvestments)) { // should only happen in dry run
-            Operations.LOGGER.info("ZonkyBot already invested in loan '{}', skipping.", l);
+    /**
+     * Put money into an already selected loan.
+     * @param l Loan to invest into.
+     * @param investmentsInSession Previous loans invested in this session.
+     * @return Present only if Zonky API confirmed money was invested or if dry run.
+     */
+    private Optional<Investment> makeInvestment(final Loan l, final List<Investment> investmentsInSession) {
+        if (Operations.isLoanPresent(l, investmentsInSession)) {
+            Operations.LOGGER.info("ZonkyBot already invested in loan '{}', skipping. May only happen in dry runs.", l);
             return Optional.empty();
         } else if (!strategy.isAcceptable(l)) {
             Operations.LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
@@ -141,8 +168,15 @@ public class Operations {
         return sortedLoans;
     }
 
-    private Optional<Investment> makeInvestment(Rating r, final Future<Collection<Loan>> loansFuture,
-                                                final List<Investment> previousInvestments) {
+    /**
+     * Choose from available loans of a given rating one loan to invest money into.
+     * @param r Rating in question.
+     * @param loansFuture Loans carrying that rating.
+     * @param investmentsInSession Previous investments made in this session.
+     * @return Present only if Zonky API confirmed money was invested or if dry run.
+     */
+    private Optional<Investment> makeInvestment(final Rating r, final Future<Collection<Loan>> loansFuture,
+                                                final List<Investment> investmentsInSession) {
         final Collection<Loan> loans;
         try {
             loans = loansFuture.get();
@@ -164,12 +198,31 @@ public class Operations {
         }
         // start investing
         for (final Loan l : sortedLoans) {
-            final Optional<Investment> investment = this.makeInvestment(l, previousInvestments);
+            final Optional<Investment> investment = this.makeInvestment(l, investmentsInSession);
             if (investment.isPresent()) {
                 return investment;
             }
         }
         return Optional.empty();
+    }
+
+    private static Collection<Investment> mergeInvestments(final Collection<FullInvestment> online,
+                                                           final Collection<Investment> session) {
+        // merge investments made in this session with not-yet-active investments reported by Zonky
+        final Collection<Investment> investments = new ArrayList<>(online);
+        if (investments.size() == 0) {
+            investments.addAll(session);
+        } else {
+            session.stream().forEach(investmentFromThisSession -> {
+                for (final Investment investmentReportedByZonky : investments) {
+                    if (investmentFromThisSession.getLoanId() == investmentReportedByZonky.getLoanId()) {
+                        continue; // we already got this from the API
+                    }
+                    investments.add(investmentFromThisSession);
+                }
+            });
+        }
+        return investments;
     }
 
     private SortedMap<BigDecimal, Rating> rankRankinsByDemand(final Map<Rating, BigDecimal> shareOfRatings) {
@@ -185,9 +238,16 @@ public class Operations {
         return Collections.unmodifiableSortedMap(mostWantedRatings);
     }
 
-    private Optional<Investment> makeInvestment(final List<Investment> previousInvestments) {
-        final Map<Rating, BigDecimal> shareOfRatings =
-                Operations.calculateSharesPerRating(authenticatedClient.getStatistics(), previousInvestments);
+    /**
+     * Choose from available loans the most important loan to invest money into.
+     * @param investmentsInSession Previous investments made in this session.
+     * @return Present only if Zonky API confirmed money was invested or if dry run.
+     */
+    private Optional<Investment> makeInvestment(final List<Investment> investmentsInSession) {
+        final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(
+                authenticatedClient.getStatistics(),
+                authenticatedClient.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
+                investmentsInSession);
         final SortedMap<BigDecimal, Rating> mostWantedRatings = this.rankRankinsByDemand(shareOfRatings);
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on the following ratings: {}.",
@@ -195,12 +255,13 @@ public class Operations {
         final Map<Rating, Future<Collection<Loan>>> availableLoans = new EnumMap<>(Rating.class);
         // submit HTTP requests ahead of time
         mostWantedRatings.forEach((s, r) -> {
+            // FIXME make sure that loans where I invested but which are not yet funded do not show up in here
             final Callable<Collection<Loan>> future =
                     () -> authenticatedClient.getLoans(Ratings.of(r), strategy.getMinimumInvestmentAmount(r));
             availableLoans.put(r, this.backgroundThreadExecutor.submit(future));
         });
         for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
-            final Optional<Investment> investment = makeInvestment(r, availableLoans.get(r), previousInvestments);
+            final Optional<Investment> investment = makeInvestment(r, availableLoans.get(r), investmentsInSession);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -208,18 +269,18 @@ public class Operations {
         return Optional.empty();
     }
 
-    private BigDecimal getAvailableBalance(final Iterable<Investment> previousInvestments) {
+    private BigDecimal getAvailableBalance(final Iterable<Investment> investmentsInSession) {
         BigDecimal balance = (dryRun && dryRunBalance >= 0) ? BigDecimal.valueOf(dryRunBalance) :
                 authenticatedClient.getWallet().getAvailableBalance();
         if (dryRun) {
-            for (final Investment i : previousInvestments) {
-                balance = balance.subtract(BigDecimal.valueOf(i.getInvestedAmount()));
+            for (final Investment i : investmentsInSession) {
+                balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
             }
         }
         return balance;
     }
 
-    public List<Investment> invest() {
+    public Collection<Investment> invest() {
         final int minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
         final List<Investment> investmentsMade = new ArrayList<>();
         BigDecimal availableBalance = getAvailableBalance(investmentsMade);
@@ -255,9 +316,11 @@ public class Operations {
         final Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
         client.close();
         // provide authenticated clients
+        clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
         authenticatedClient = clientBuilder.build().register(new AuthenticatedFilter(authorization))
                 .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
-        this.backgroundThreadExecutor = Executors.newSingleThreadExecutor();
+        // never exhaust the connection pool
+        this.backgroundThreadExecutor = Executors.newFixedThreadPool(Math.max(1, Operations.CONNECTION_POOL_SIZE - 1));
     }
 
     public void logout() {

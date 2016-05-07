@@ -19,12 +19,13 @@ import javax.xml.bind.annotation.XmlTransient;
 
 public class Investment {
 
-    private final Loan loan;
-    private final int investedAmount;
+    private Loan loan;
+    private int loanId, amount;
 
-    public Investment(final Loan loan, final int investedAmount) {
+    public Investment(final Loan loan, final int amount) {
         this.loan = loan;
-        this.investedAmount = investedAmount;
+        this.loanId = loan.getId();
+        this.amount = amount;
     }
 
     @XmlTransient
@@ -32,13 +33,26 @@ public class Investment {
         return loan;
     }
 
-    @XmlElement
-    public int getLoanId() {
-        return loan.getId();
+    public void setLoan() {
+        throw new UnsupportedOperationException("Cannot set loan other than from the constructor.");
     }
 
-    @XmlElement(name = "amount")
-    public int getInvestedAmount() {
-        return investedAmount;
+    @XmlElement
+    public int getLoanId() {
+        return loanId;
+    }
+
+    @XmlElement
+    public int getAmount() {
+        return amount;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Investment{");
+        sb.append("loanId=").append(loanId);
+        sb.append(", amount=").append(amount);
+        sb.append('}');
+        return sb.toString();
     }
 }
