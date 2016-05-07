@@ -20,7 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
@@ -64,7 +64,7 @@ class ZonkyBot {
             final Properties props = new Properties();
             props.load(url.openStream());
             return props.getProperty("version", ZonkyBot.ZONKY_VERSION_UNKNOWN);
-        } catch (Exception E) {
+        } catch (Exception ex) {
             return ZonkyBot.ZONKY_VERSION_UNDETECTED;
         }
     }
@@ -118,8 +118,9 @@ class ZonkyBot {
 
     private static void storeInvestmentsMade(final List<Investment> result, final boolean dryRun) {
         final String suffix = dryRun ? "dry" : "invested";
+        final LocalDateTime now = LocalDateTime.now();
         final String filename =
-                "zonkybot." + DateTimeFormatter.ofPattern("YYYY-MM-dd-HH:mm").format(Instant.now()) + '.' + suffix;
+                "zonkybot." + DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm").format(now) + '.' + suffix;
         try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
             for (final Investment i : result) {
                 bw.write(i.getLoanId() + "('" + i.getLoan().getName() + "', " + i.getLoan().getRating() + "): "
