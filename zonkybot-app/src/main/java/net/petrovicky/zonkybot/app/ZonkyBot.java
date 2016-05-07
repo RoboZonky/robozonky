@@ -128,7 +128,7 @@ class ZonkyBot {
                         + i.getAmount() + " CZK");
                 bw.newLine();
             }
-            LOGGER.info("Investments made by ZonkyBot in this session were stored in file '{}'.", filename);
+            ZonkyBot.LOGGER.info("Investments made by ZonkyBot during the session were stored in file '{}'.", filename);
         } catch (final IOException ex) {
             ZonkyBot.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
         }
