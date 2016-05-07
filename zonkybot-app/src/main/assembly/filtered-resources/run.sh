@@ -1,2 +1,3 @@
 #!/bin/bash
-java -Xmx64m -jar zonkybot-app-${project.version}.jar "$@"
+BASEDIR=$(dirname "$0")
+java -Xmx64m -jar $BASEDIR/zonkybot-app-${project.version}.jar "$@"
