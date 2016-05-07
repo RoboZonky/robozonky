@@ -27,8 +27,6 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
@@ -59,20 +57,6 @@ public class Operations {
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
-    private final String username, password;
-    private final InvestmentStrategy strategy;
-    private ZonkyAPI authenticatedClient;
-    private final boolean dryRun;
-    private final int dryRunBalance;
-    private ExecutorService backgroundThreadExecutor;
-
-    public Operations(final String username, final String password, final InvestmentStrategy strategy, final boolean dryRun, final int dryRunBalance) {
-        this.username = username;
-        this.password = password;
-        this.strategy = strategy;
-        this.dryRun = dryRun;
-        this.dryRunBalance = dryRunBalance;
-    }
 
     /**
      * Get the share of 'payments due for each rating' on the overall portfolio.
@@ -122,22 +106,23 @@ public class Operations {
 
     /**
      * Put money into an already selected loan.
+     * @param oc Context for the current session.
      * @param l Loan to invest into.
      * @param investmentsInSession Previous loans invested in this session.
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private Optional<Investment> makeInvestment(final Loan l, final List<Investment> investmentsInSession,
-                                                final BigDecimal balance) {
+    private static Optional<Investment> makeInvestment(final OperationsContext oc, final Loan l,
+                                                       final List<Investment> investmentsInSession, final BigDecimal balance) {
         if (Operations.isLoanPresent(l, investmentsInSession)) {
             Operations.LOGGER.info("ZonkyBot already invested in loan '{}', skipping. May only happen in dry runs.", l);
             return Optional.empty();
-        } else if (!strategy.isAcceptable(l)) {
+        } else if (!oc.getStrategy().isAcceptable(l)) {
             Operations.LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
             return Optional.empty();
         }
         // figure out how much to invest
-        final int recommendedInvestment = strategy.recommendInvestmentAmount(l);
+        final int recommendedInvestment = oc.getStrategy().recommendInvestmentAmount(l);
         final int roundToNearestHundred = (int) Math.round(((double) recommendedInvestment / 100.0) * 100.0);
         final int toInvest = Math.min(roundToNearestHundred, (int) l.getRemainingInvestment());
         final int toInvestAdjusted = Math.min(toInvest, balance.intValue());
@@ -150,13 +135,13 @@ public class Operations {
         }
         // and now actually invest
         final Investment investment = new Investment(l, toInvestAdjusted);
-        if (dryRun) {
+        if (oc.isDryRun()) {
             Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvestAdjusted, l);
             return Optional.of(investment);
         } else {
             Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvestAdjusted, l);
             try {
-                authenticatedClient.invest(investment);
+                oc.getAPI().invest(investment);
                 Operations.LOGGER.warn("Investment operating succeeded.");
                 return Optional.of(investment);
             } catch (final Exception ex) {
@@ -183,14 +168,17 @@ public class Operations {
 
     /**
      * Choose from available loans of a given rating one loan to invest money into.
+     * @param oc Context for the current session.
      * @param r Rating in question.
      * @param loansFuture Loans carrying that rating.
      * @param investmentsInSession Previous investments made in this session.
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private Optional<Investment> makeInvestment(final Rating r, final Future<Collection<Loan>> loansFuture,
-                                                final List<Investment> investmentsInSession, final BigDecimal balance) {
+    private static Optional<Investment> makeInvestment(final OperationsContext oc, final Rating r,
+                                                       final Future<Collection<Loan>> loansFuture,
+                                                       final List<Investment> investmentsInSession,
+                                                       final BigDecimal balance) {
         final Collection<Loan> loans;
         try {
             loans = loansFuture.get();
@@ -204,7 +192,7 @@ public class Operations {
         }
         // sort loans by their term
         final List<Loan> sortedLoans = Operations.sortLoansByTerm(loans);
-        if (strategy.prefersLongerTerms(r)) {
+        if (oc.getStrategy().prefersLongerTerms(r)) {
             Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the longest terms.", r);
         } else {
             Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the shortest terms.", r);
@@ -212,7 +200,7 @@ public class Operations {
         }
         // start investing
         for (final Loan l : sortedLoans) {
-            final Optional<Investment> investment = this.makeInvestment(l, investmentsInSession, balance);
+            final Optional<Investment> investment = Operations.makeInvestment(oc, l, investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -239,10 +227,11 @@ public class Operations {
         return investments;
     }
 
-    private SortedMap<BigDecimal, Rating> rankRankinsByDemand(final Map<Rating, BigDecimal> shareOfRatings) {
+    private static SortedMap<BigDecimal, Rating> rankRankinsByDemand(final OperationsContext oc,
+                                                                     final Map<Rating, BigDecimal> shareOfRatings) {
         final SortedMap<BigDecimal, Rating> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
         shareOfRatings.forEach((r, currentShare) -> {
-            final BigDecimal maximumAllowedShare = strategy.getTargetShare(r);
+            final BigDecimal maximumAllowedShare = oc.getStrategy().getTargetShare(r);
             if (currentShare.compareTo(maximumAllowedShare) >= 0) { // we bought too many of this rating; ignore
                 return;
             }
@@ -254,29 +243,31 @@ public class Operations {
 
     /**
      * Choose from available loans the most important loan to invest money into.
+     * @param oc Context for the current session.
      * @param investmentsInSession Previous investments made in this session.
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private Optional<Investment> makeInvestment(final List<Investment> investmentsInSession, final BigDecimal balance) {
+    private static Optional<Investment> makeInvestment(final OperationsContext oc,
+                                                       final List<Investment> investmentsInSession,
+                                                       final BigDecimal balance) {
+        final ZonkyAPI api = oc.getAPI();
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(
-                authenticatedClient.getStatistics(),
-                authenticatedClient.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
+                api.getStatistics(), api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
                 investmentsInSession);
-        final SortedMap<BigDecimal, Rating> mostWantedRatings = this.rankRankinsByDemand(shareOfRatings);
+        final SortedMap<BigDecimal, Rating> mostWantedRatings = Operations.rankRankinsByDemand(oc, shareOfRatings);
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
                 mostWantedRatings.values());
         final Map<Rating, Future<Collection<Loan>>> availableLoans = new EnumMap<>(Rating.class);
         mostWantedRatings.forEach((s, r) -> { // submit HTTP requests ahead of time
             // FIXME make sure that loans where I invested but which are not yet funded do not show up in here
-            final Callable<Collection<Loan>> future =
-                    () -> authenticatedClient.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMENT_ALLOWED);
-            availableLoans.put(r, this.backgroundThreadExecutor.submit(future));
+            final Callable<Collection<Loan>> future = () -> api.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMENT_ALLOWED);
+            availableLoans.put(r, oc.getBackgroundExecutor().submit(future));
         });
         for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
             final Optional<Investment> investment =
-                    makeInvestment(r, availableLoans.get(r), investmentsInSession, balance);
+                    Operations.makeInvestment(oc, r, availableLoans.get(r), investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -284,10 +275,13 @@ public class Operations {
         return Optional.empty();
     }
 
-    private BigDecimal getAvailableBalance(final Iterable<Investment> investmentsInSession) {
-        BigDecimal balance = (dryRun && dryRunBalance >= 0) ? BigDecimal.valueOf(dryRunBalance) :
-                authenticatedClient.getWallet().getAvailableBalance();
-        if (dryRun) {
+    protected static BigDecimal getAvailableBalance(final OperationsContext oc,
+                                                    final Collection<Investment> investmentsInSession) {
+        final boolean isDryRun = oc.isDryRun();
+        final int dryRunInitialBalance = oc.getDryRunInitialBalance();
+        BigDecimal balance = (isDryRun && dryRunInitialBalance >= 0) ?
+                BigDecimal.valueOf(dryRunInitialBalance) : oc.getAPI().getWallet().getAvailableBalance();
+        if (isDryRun) {
             for (final Investment i : investmentsInSession) {
                 balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
             }
@@ -295,16 +289,16 @@ public class Operations {
         return balance;
     }
 
-    public Collection<Investment> invest() {
+    public static Collection<Investment> invest(final OperationsContext oc) {
         final int minimumInvestmentAmount = Operations.MINIMAL_INVESTMENT_ALLOWED;
         final List<Investment> investmentsMade = new ArrayList<>();
-        BigDecimal availableBalance = getAvailableBalance(investmentsMade);
+        BigDecimal availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
         Operations.LOGGER.info("ZonkyBot starting account balance is {} CZK.", availableBalance);
         while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
-            final Optional<Investment> investment = makeInvestment(investmentsMade, availableBalance);
+            final Optional<Investment> investment = Operations.makeInvestment(oc, investmentsMade, availableBalance);
             if (investment.isPresent()) {
                 investmentsMade.add(investment.get());
-                availableBalance = getAvailableBalance(investmentsMade);
+                availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
                 Operations.LOGGER.info("New account balance is {} CZK.", availableBalance);
             } else {
                 break;
@@ -313,7 +307,9 @@ public class Operations {
         return Collections.unmodifiableList(investmentsMade);
     }
 
-    public void login() {
+    public static OperationsContext login(final String username, final String password,
+                                          final InvestmentStrategy strategy, final boolean dryRun,
+                                          final int dryRunInitialBalance) {
         // register Jackson
         final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(instance);
@@ -326,17 +322,18 @@ public class Operations {
         final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
         final Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
         client.close();
+        Operations.LOGGER.info("Logged in with Zonky as user '{}'.", username);
         // provide authenticated clients
         clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
-        authenticatedClient = clientBuilder.build().register(new AuthenticatedFilter(authorization))
+        final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
                 .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
-        // never exhaust the connection pool
-        this.backgroundThreadExecutor = Executors.newFixedThreadPool(Math.max(1, Operations.CONNECTION_POOL_SIZE - 1));
+        return new OperationsContext(api, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
     }
 
-    public void logout() {
-        authenticatedClient.logout();
-        this.backgroundThreadExecutor.shutdownNow();
+    public static void logout(final OperationsContext oc) {
+        oc.getAPI().logout();
+        oc.dispose();
+        Operations.LOGGER.info("Logged out of Zonky.");
     }
 
 }

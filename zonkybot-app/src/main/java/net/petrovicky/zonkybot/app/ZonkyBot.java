@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import net.petrovicky.zonkybot.Operations;
+import net.petrovicky.zonkybot.OperationsContext;
 import net.petrovicky.zonkybot.remote.Investment;
 import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import org.apache.commons.cli.CommandLine;
@@ -136,14 +137,12 @@ class ZonkyBot {
         ZonkyBot.LOGGER.info("===== ZonkyBot at your service! =====");
         final String username = cmd.getOptionValue(ZonkyBot.OPTION_USERNAME.getOpt());
         final String password = cmd.getOptionValue(ZonkyBot.OPTION_PASSWORD.getOpt());
-        ZonkyBot.LOGGER.info("Will communicate with Zonky as user '{}'.", username);
         final boolean dryRun = cmd.hasOption(ZonkyBot.OPTION_DRY_RUN.getOpt());
         final int startingBalance = Integer.valueOf(cmd.getOptionValue(ZonkyBot.OPTION_DRY_RUN.getOpt(), "-1")); // FIXME throws
         if (dryRun) {
             ZonkyBot.LOGGER.info("ZonkyBot is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        final Collection<Investment> result = ZonkyBot.operate(
-                new Operations(username, password, strategy, dryRun, startingBalance));
+        final Collection<Investment> result = ZonkyBot.operate(username, password, strategy, dryRun, startingBalance);
         if (result.size() == 0) {
             ZonkyBot.LOGGER.info("ZonkyBot did not invest.");
         } else {
@@ -157,10 +156,12 @@ class ZonkyBot {
         ZonkyBot.LOGGER.info("===== ZonkyBot out. =====");
     }
 
-    private static Collection<Investment> operate(final Operations ops) {
-        ops.login();
-        final Collection<Investment> result = ops.invest();
-        ops.logout();
+    private static Collection<Investment> operate(final String username, final String password,
+                                                  final InvestmentStrategy strategy, final boolean dryRun,
+                                                  final int startingBalance) {
+        final OperationsContext oc = Operations.login(username, password, strategy, dryRun, startingBalance);
+        final Collection<Investment> result = Operations.invest(oc);
+        Operations.logout(oc);
         return result;
     }
 
