@@ -25,6 +25,7 @@ import java.util.Collection;
 import net.petrovicky.zonkybot.Operations;
 import net.petrovicky.zonkybot.OperationsContext;
 import net.petrovicky.zonkybot.remote.Investment;
+import net.petrovicky.zonkybot.remote.Loan;
 import net.petrovicky.zonkybot.strategy.InvestmentStrategy;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -108,7 +109,8 @@ class ZonkyBot {
                 "zonkybot." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
         try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
             for (final Investment i : result) {
-                bw.write(i.getLoanId() + "('" + i.getLoan().getName() + "', " + i.getLoan().getRating() + "): "
+                final Loan l = i.getLoan();
+                bw.write('#' + i.getLoanId() + " ('" + l.getName() + "', " + l.getRating().getDescription() + "): "
                         + i.getAmount() + " CZK");
                 bw.newLine();
             }
