@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>zonkybot-parent</artifactId>
-        <groupId>net.petrovicky.zonkybot</groupId>
+        <groupId>com.github.triceo.zonkybot</groupId>
         <version>1.0.0.Beta1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -10,12 +10,12 @@
     <artifactId>zonkybot-app</artifactId>
 
     <properties>
-        <mainClass>net.petrovicky.zonkybot.app.ZonkyBot</mainClass>
+        <mainClass>com.github.triceo.zonkybot.app.ZonkyBot</mainClass>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>net.petrovicky.zonkybot</groupId>
+            <groupId>com.github.triceo.zonkybot</groupId>
             <artifactId>zonkybot-core</artifactId>
         </dependency>
         <dependency>
