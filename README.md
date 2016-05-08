@@ -6,9 +6,9 @@
 
 Investiční strategie je soubor, ve kterém ZonkyBotu řeknete, jaké složení investičního portfolia má mít za cíl. Na
 ukázku má ZonkyBot zabudované tři investiční strategie:
-[vyváženou](blob/master/zonkybot-app/src/main/assembly/resources/zonkybot-balanced.cfg),
-[konzervativní](blob/master/zonkybot-app/src/main/assembly/resources/zonkybot-conservative.cfg) a
-[dynamickou](blob/master/zonkybot-app/src/main/assembly/resources/zonkybot-dynamic.cfg). My si teď popíšeme
+[vyváženou](zonkybot-app/src/main/assembly/resources/zonkybot-balanced.cfg),
+[konzervativní](zonkybot-app/src/main/assembly/resources/zonkybot-conservative.cfg) a
+[dynamickou](zonkybot-app/src/main/assembly/resources/zonkybot-dynamic.cfg). My si teď popíšeme
 podrobněji tu dynamickou, jejíž pochopení by vám mělo umožnit napsat vlastní strategii přesně podle vašeho gusta.
 
 ### Cílový podíl ratingu na penězích ve hře
