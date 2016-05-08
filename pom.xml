@@ -9,8 +9,10 @@
         <module>zonkybot-app</module>
     </modules>
     <packaging>pom</packaging>
-    <name>Zonkybot: Investing made easy</name>
-    <description>Automated investing on Zonky.</description>
+    <name>Zonkybot: Easy automated investing with Zonky</name>
+    <description>Automated investing on Zonky. Define investment strategy, run repeatedly, profit.</description>
+    <url>https://triceo.github.io/zonkybot/</url>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
