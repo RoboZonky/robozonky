@@ -53,6 +53,8 @@ Tato kritéria se ve strategii definují následujícím způsobem:
 * `maximumLoanShare.AAAA = 0.1` říká, že maximální podíl na investici s ratingem A* smí být 10 %.
 * `maximumLoanAmount.default = 400` říká, že maximální částka pro jakoukoliv investici je 400 Kč.
 
+ZonkyBot nikdy nepřekročí při investování zadanou absolutní maximální částku. Pokud by se snad stalo, že maximální výše investice vyjde nižší než 200 Kč - tj. menší než nejmenší možná investice na Zonky - nebude ZonkyBot do takového úvěru investovat.
+
 ### Preferovaná délka doby splácení
 
 Řekněme, že ZonkyBot našel na tržišti dvě půjčky nějakého konkrétního ratingu a nyní rozhoduje, do které z nich
