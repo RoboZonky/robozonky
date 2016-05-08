@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.petrovicky.zonkybot</groupId>
     <artifactId>zonkybot-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.Alpha1</version>
     <modules>
         <module>zonkybot-core</module>
         <module>zonkybot-app</module>
@@ -187,7 +187,7 @@
         <url>git@github.com:triceo/zonkybot.git</url>
         <connection>scm:git:git@github.com:triceo/zonkybot.git</connection>
         <developerConnection>scm:git:git@github.com:triceo/zonkybot.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>zonkybot-parent-1.0.0.Alpha1</tag>
     </scm>
     <issueManagement>
         <system>github</system>
