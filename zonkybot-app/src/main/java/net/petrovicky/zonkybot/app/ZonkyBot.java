@@ -55,8 +55,8 @@ class ZonkyBot {
 
     private static void printHelpAndExit(final Options options, final String message, final boolean exitWithError) {
         final HelpFormatter formatter = new HelpFormatter();
-        // FIXME needs to use run.bat / run.sh
-        formatter.printHelp("ZonkyBot", null, options, exitWithError ? "Error: " + message : message, true);
+        final String scriptName = System.getProperty("os.name").contains("Windows") ? "zonkybot.bat" : "zonkybot.sh";
+        formatter.printHelp(scriptName, null, options, exitWithError ? "Error: " + message : message, true);
         System.exit(exitWithError ? 1 : 0);
     }
 
