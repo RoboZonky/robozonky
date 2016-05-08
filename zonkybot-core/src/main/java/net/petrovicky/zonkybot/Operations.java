@@ -127,25 +127,25 @@ public class Operations {
             Operations.LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
             return Optional.empty();
         }
-        // figure out how much to invest
+        // figure out how much to invest; never exceed maximum investment amount
         final int recommendedInvestment = oc.getStrategy().recommendInvestmentAmount(l);
-        final int roundToNearestHundred = (int) Math.round(((double) recommendedInvestment / 100.0) * 100.0);
-        final int toInvest = Math.min(roundToNearestHundred, (int) l.getRemainingInvestment());
-        final int toInvestAdjusted = Math.min(toInvest, balance.intValue());
+        final int roundToNearestHundred = (int) Math.floor(((double) recommendedInvestment / 100.0) * 100.0);
+        final int toInvestAdjusted = Math.min(roundToNearestHundred, balance.intValue());
+        final int resultingInvestment = Math.min(toInvestAdjusted, (int) l.getRemainingInvestment());
         Operations.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.",
                 recommendedInvestment, balance.intValue());
-        if (toInvestAdjusted < Operations.MINIMAL_INVESTMENT_ALLOWED) {
+        if (resultingInvestment < Operations.MINIMAL_INVESTMENT_ALLOWED) {
             Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
-                    l, toInvestAdjusted);
+                    l, resultingInvestment);
             return Optional.empty();
         }
         // and now actually invest
-        final Investment investment = new Investment(l, toInvestAdjusted);
+        final Investment investment = new Investment(l, resultingInvestment);
         if (oc.isDryRun()) {
-            Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", toInvestAdjusted, l);
+            Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", resultingInvestment, l);
             return Optional.of(investment);
         } else {
-            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", toInvestAdjusted, l);
+            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", resultingInvestment, l);
             try {
                 oc.getAPI().invest(investment);
                 Operations.LOGGER.warn("Investment operating succeeded.");
