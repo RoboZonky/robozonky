@@ -15,11 +15,11 @@ podrobněji tu dynamickou, jejíž pochopení by vám mělo umožnit napsat vlas
 
 Klíčovou vlastností investiční strategie je podíl, který si přejete, aby investice daného ratingu ve vašem portfoliu
 měly. ZonkyBot jej počítá tak, že vezme všechny vaše peníze, které v dané chvíli máte ve hře, rozdělí je podle ratingů a
-vyděli toto číslo součtem investic ve hře. V souboru investiční strategie se to vyjadřuje následujícím způsobem:
+vydělí toto číslo součtem investic ve hře. V souboru investiční strategie se to vyjadřuje následujícím způsobem:
 
 Řádek `targetShare.AA = 0.15` říká, že investice s ratingem A+ by měly zastávat 15 % portfolia. Stejným způsobem můžete
 nastavit výsledný podíl pro všechny ostatní ratingy (AAAAA, AAAA, AAA, AA, A, B, C, D). Řádek
-`targetShare.default = 0.20` potom říká, že každý takto nastavený rating má v portfoliu zastávat 20 %. Tento řádek není
+`targetShare.default = 0.20` potom říká, že každý takto nenastavený rating má v portfoliu zastávat 20 %. Tento řádek není
 povinný, uvedete-li zvláštní řádek pro každý rating.
 
 ### Největší a nejmenší akceptovatelná délka splácení
@@ -27,21 +27,21 @@ povinný, uvedete-li zvláštní řádek pro každý rating.
 Pro každý rating máte v investiční strategii možnost nastavit, jaká je nejmenší a největší možná doba splácení v
 měsících, kterou jste schopní akceptovat.
 
-`minimumTerm.default = 0` například říká, že pro všechny ratingy jinde neuvedené je minimální doba splácení 0 měsíců.
+`minimumTerm.default = 0` například říká, že pro všechny ratingy jinak neuvedené je minimální doba splácení 0 měsíců.
 Jinými slovy - budou akceptovány i půjčky s nejkratší možnou dobou splatnosti.
 
-`maximumTerm.AAA = 36` naopak říká, že v ratingu A++ mají být investovány pouze půjčky s dobou splatnosti do 36 měsíců.
+`maximumTerm.AAA = 36` naopak říká, že v ratingu A++ mají být investovány pouze půjčky s dobou splácení do 36 měsíců.
 Pro ratingy jinak neuvedené potom slouží řádek `maximumTerm.default = -1`, který říká, že mají být investovány půjčky s
-libovolně dlouhou splatností.
+libovolně dlouhou dobou splácení.
 
 ### Výše investice do jednotlivé půjčky
 
-ZonkyBot umožňuje ve strategii nakonfigurovat maximální velikost půjčky, a to dvěma způsoby. Jednak uvedením absolutní
+ZonkyBot umožňuje ve strategii nakonfigurovat maximální velikost investice, a to dvěma způsoby. Jednak uvedením absolutní
 maximální částky, kterou může do jedné půjčky investovat. Druhak uvedením maximálního podílu, který vaše investice může
 činit na celkové výši úveru.
 
 Obě tato kritéria se převedou do částky, kterou ZonkyBot investuje do úvěrů, takto:
-* Vezměte v úvahu úvěr o výši 100.000 Kč s ratingem B. V peněžence máte 330 Kč.
+* Vezměte v úvahu úvěr o výši 100.000 Kč s ratingem A*. V peněžence máte 330 Kč.
 * Strategie definuje maximální podíl na úvěru 1 %. Maximální investice tedy činí 1000 Kč.
 * Strategie ale zároveň definuje absolutní maximální velikost investice, a to 400 Kč.
 * Strategie vezme obě tyto maximální částky, a použije tu menší z nich.
