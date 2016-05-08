@@ -37,7 +37,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ZonkyBot {
+public class ZonkyBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyBot.class);
 
