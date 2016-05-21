@@ -33,6 +33,31 @@ public class Loan {
     private Instant datePublished, deadline;
     private Rating rating;
     private Collection<Photo> photos;
+    private BigDecimal investmentRate;
+    // FIXME implement
+    private String mainIncomeType;
+    // FIXME implement
+    private int region, purpose;
+
+    @XmlElement
+    public String getMainIncomeType() {
+        return mainIncomeType;
+    }
+
+    @XmlElement
+    public BigDecimal getInvestmentRate() {
+        return investmentRate;
+    }
+
+    @XmlElement
+    public int getRegion() {
+        return region;
+    }
+
+    @XmlElement
+    public int getPurpose() {
+        return purpose;
+    }
 
     @XmlElement
     public int getId() {
@@ -65,7 +90,6 @@ public class Loan {
     }
 
     @XmlElement
-    @JsonDeserialize(using = RatingDeserializer.class)
     public Rating getRating() {
         return rating;
     }

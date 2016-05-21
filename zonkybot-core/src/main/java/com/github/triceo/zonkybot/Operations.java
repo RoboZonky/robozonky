@@ -191,7 +191,7 @@ public class Operations {
         try {
             loans = loansFuture.get();
         } catch (final Exception e) {
-            Operations.LOGGER.warn("Could not list loans with rating '{}'. Can not invest in that rating.", r);
+            Operations.LOGGER.warn("Could not list loans with rating '{}'. Can not invest in that rating.", r, e);
             return Optional.empty();
         }
         if (loans.size() == 0) {

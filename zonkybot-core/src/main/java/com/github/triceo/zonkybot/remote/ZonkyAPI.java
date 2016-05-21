@@ -43,7 +43,7 @@ public interface ZonkyAPI {
     @GET
     @Path(ZonkyAPI.MARKETPLACE)
     List<Loan> getLoans(
-            @QueryParam("rating.type__in") Ratings ratings,
+            @QueryParam("rating__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
             @QueryParam("termInMonths__gte") @DefaultValue("0") int leastPossibleTermInMonths,
             @QueryParam("termInMonths__lte") int mostPossibleTermInMonths);
@@ -51,19 +51,19 @@ public interface ZonkyAPI {
     @GET
     @Path(ZonkyAPI.MARKETPLACE)
     List<Loan> getLoans(
-            @QueryParam("rating.type__in") Ratings ratings,
+            @QueryParam("rating__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
             @QueryParam("termInMonths__gte") @DefaultValue("0") int leastPossibleTermInMonths);
 
     @GET
     @Path(ZonkyAPI.MARKETPLACE)
     List<Loan> getLoans(
-            @QueryParam("rating.type__in") Ratings ratings,
+            @QueryParam("rating__in") Ratings ratings,
             @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment);
 
     @GET
     @Path(ZonkyAPI.MARKETPLACE)
-    List<Loan> getLoans(@QueryParam("rating.type__in") Ratings ratings);
+    List<Loan> getLoans(@QueryParam("rating__in") Ratings ratings);
 
     @GET
     @Path(ZonkyAPI.ME + "/logout")

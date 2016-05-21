@@ -50,6 +50,6 @@ public class Ratings {
 
     @Override
     public String toString() {
-        return ratings.stream().collect(Collectors.mapping(Rating::name, Collectors.joining(", ", "[", "]")));
+        return ratings.stream().collect(Collectors.mapping(Rating::name, Collectors.joining("\", \"", "[\"", "\"]")));
     }
 }
