@@ -44,7 +44,7 @@ public class StrategyBuilder {
                 minTerm == -1 ? 0 : minTerm, maxTerm == -1 ? "+inf" : maxTerm);
         StrategyBuilder.LOGGER.debug("Maximum investment amount for rating '{}' is {} CZK.", r.getDescription(), maxLoanAmount);
         StrategyBuilder.LOGGER.debug("Maximum investment share for rating '{}' is {}.", r.getDescription(), maxLoanShare);
-        StrategyBuilder.LOGGER.debug("Rating '{}' will prefer longer terms: ", r.getDescription());
+        StrategyBuilder.LOGGER.debug("Rating '{}' will prefer longer terms.", r.getDescription());
         return this;
     }
 
