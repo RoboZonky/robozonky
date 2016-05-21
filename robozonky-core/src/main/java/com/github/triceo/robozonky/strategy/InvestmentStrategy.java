@@ -53,12 +53,11 @@ public class InvestmentStrategy {
                 BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT);
         BigDecimal tmp = BigDecimal.valueOf(individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan));
         // round to nearest lower increment
+        tmp = tmp.min(balance);
         tmp = tmp.divide(maxAllowedInvestmentIncrement, 0, RoundingMode.DOWN); // make sure we never exceed max allowed
         tmp = tmp.multiply(maxAllowedInvestmentIncrement);
-        // make sure we never over-draw the balance
-        final int toInvestAdjusted = tmp.min(balance).intValue();
         // make sure we never submit more than there is remaining in the loan
-        return Math.min(toInvestAdjusted, (int) loan.getRemainingInvestment());
+        return Math.min(tmp.intValue(), (int)loan.getRemainingInvestment());
     }
 
 }
