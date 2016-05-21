@@ -1,6 +1,6 @@
 # RoboZonky
 
-RoboZonky je [ke stažení](http://search.maven.org/remotecontent?filepath=com/github/triceo/robozonky/robozonky-app/1.0.0.Final/robozonky-app-1.0.0.Final-dist.zip).
+RoboZonky je [ke stažení](http://search.maven.org/remotecontent?filepath=com/github/triceo/robozonky/robozonky-app/1.0.2.Final/robozonky-app-1.0.2.Final-dist.zip).
 
 ## Jak to funguje
 
