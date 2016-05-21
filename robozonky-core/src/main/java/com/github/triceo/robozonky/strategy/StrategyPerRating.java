@@ -44,35 +44,40 @@ class StrategyPerRating {
     }
 
     public boolean isPreferLongerTerms() {
-        return preferLongerTerms;
+        return this.preferLongerTerms;
     }
 
     public BigDecimal getTargetShare() {
-        return targetShare;
+        return this.targetShare;
     }
 
-    public boolean isAcceptableTerm(final Loan loan) {
-        return loan.getTermInMonths() >= minimumAcceptableTerm && loan.getTermInMonths() <= maximumAcceptableTerm;
+    public Rating getRating() {
+        return this.rating;
+    }
+
+    private boolean isAcceptableTerm(final Loan loan) {
+        return loan.getTermInMonths() >= this.minimumAcceptableTerm
+                && loan.getTermInMonths() <= this.maximumAcceptableTerm;
     }
 
     public boolean isAcceptable(final Loan loan) {
-        if (loan.getRating() != rating) {
-            throw new IllegalStateException("Loan " + loan + " should never have gotten here.");
+        if (loan.getRating() != this.rating) {
+            throw new IllegalArgumentException("Loan " + loan + " should never have gotten here.");
         } else if (!isAcceptableTerm(loan)) {
-            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; strategy looking for loans with terms in range <{}, {}>.", loan,
-                    minimumAcceptableTerm, maximumAcceptableTerm);
+            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; looking for loans with terms in range <{}, {}>.", loan,
+                    this.minimumAcceptableTerm, this.maximumAcceptableTerm);
             return false;
         }
         return true;
     }
 
     public int recommendInvestmentAmount(final Loan loan) {
-        if (loan.getRating() != rating) {
-            throw new IllegalStateException("Loan " + loan + " should never have gotten here.");
+        if (loan.getRating() != this.rating) {
+            throw new IllegalArgumentException("Loan " + loan + " should never have gotten here.");
         }
         final int maximumInvestmentByShare =
                 BigDecimal.valueOf(loan.getAmount()).multiply(this.maximumInvestmentShare).intValue();
-        return Math.min(maximumInvestmentByShare, maximumInvestmentAmount);
+        return Math.min(maximumInvestmentByShare, this.maximumInvestmentAmount);
 
     }
 }
