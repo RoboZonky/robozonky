@@ -32,6 +32,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.remote.Authorization;
@@ -212,23 +213,20 @@ public class Operations {
         return Optional.empty();
     }
 
-    private static Collection<Investment> mergeInvestments(final Collection<Investment> online,
+    protected static Collection<Investment> mergeInvestments(final Collection<Investment> online,
                                                            final Collection<Investment> session) {
         // merge investments made in this session with not-yet-active investments reported by Zonky
-        final Collection<Investment> investments = new ArrayList<>(online);
-        if (investments.size() == 0) {
-            investments.addAll(session);
+        if (online.size() == 0) {
+            return Collections.unmodifiableCollection(session);
+        } else if (session.size() == 0) {
+            return Collections.unmodifiableCollection(online);
         } else {
-            session.stream().forEach(investmentFromThisSession -> {
-                for (final Investment investmentReportedByZonky : investments) {
-                    if (investmentFromThisSession.getLoanId() == investmentReportedByZonky.getLoanId()) {
-                        continue; // we already got this from the API
-                    }
-                    investments.add(investmentFromThisSession);
-                }
-            });
+            final Map<Integer, Investment> investments
+                    = online.stream().collect(Collectors.toMap(Investment::getLoanId, Function.identity()));
+            session.stream().filter(investment -> !investments.containsKey(investment.getLoanId()))
+                    .forEach(investment -> investments.put(investment.getLoanId(), investment));
+            return Collections.unmodifiableCollection(investments.values());
         }
-        return investments;
     }
 
     private static SortedMap<BigDecimal, Rating> rankRankinsByDemand(final OperationsContext oc,
