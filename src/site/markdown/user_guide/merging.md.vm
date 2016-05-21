@@ -1,0 +1,46 @@
+#parse("header.vm")
+
+$h1 *Splitlog* Features: Follower merging
+
+This document will explain how you can use *Splitlog* to combine various log files into one.
+
+$h2 What is follower merging?
+
+When you have two and more ```Follower```s, you can merge them into one and treat them like a single unit. This is especially handy when these followers come from different ```LogWatch``` instances and therefore are receiving ```Message```s from different log files. However, nothing prevents you from merging followers on the same ```LogWatch```.
+
+Merging followers are the aggregation of their respective followers, with the following characteristics:
+
+- Every message that the follower is notified of, the merge will be notified of as well. When multiple followers within a merge are watching the same file, the resulting merge will be notified of these ```Message```s once for each follower.
+- ```MergingFollower```'s ```getMessages()``` and ```write()``` will only work with the ```Message```s that are, at the moment, accessible through at least one of its merged followers. ```MergingFollower``` doesn't store any message data on its own, but it will track metrics independently.
+- Metrics or consumers registered with the respective followers are never transferred to the merge.
+- ```MergingFollower``` is immutable with respect to its followers. Whenever you want to add/remove another follower to/from the merge, a different ```MergingFollower``` instance will be created.
+
+Merging followers are a summation of their respective merged followers. Nothing more should be expected of them.
+
+$h2 How do I merge followers?
+
+It's as easy as this:
+
+```java
+  Follower follower1 = ...; 
+  Follower follower2 = ...;
+  MergingFollower merge = follower2.mergeWith(follower1); // the order has no effect
+```
+
+And you can also merge ```MergingFollower```s:
+
+```java
+  Follower follower1 = ...; 
+  MergingFollower follower2 = ...;
+  MergingFollower merge = follower1.mergeWith(follower2);
+  MergingFollower follower3 = ...;
+  MergingFollower merge2 = merge.mergeWith(follower3);
+```
+
+$h3 References
+
+1. [Follower Javadoc](../apidocs/com/github/triceo/splitlog/api/Follower.html).
+2. [MergingFollower Javadoc](../apidocs/com/github/triceo/splitlog/api/MergingFollower.html).
+
+#set($page = "metrics")
+#parse("footer.vm")

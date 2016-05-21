@@ -1,0 +1,8 @@
+#if ($page)
+
+-------------------------------------------
+$h3 Something wrong?
+Think you spotted a mistake in this document? A typo? Factual inaccuracy? [Make an edit](https://github.com/triceo/splitlog/edit/master/src/site/markdown/user_guide/${page}.md.vm). Think of the legions of grateful users!
+
+#end
+

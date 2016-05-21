@@ -1,0 +1,93 @@
+#parse("header.vm")
+
+$h1 *Splitlog* Features: Expectations
+
+This document will explain how you can use *Splitlog* to block execution of your application until a given ```Message``` shows up in the watched log. This is especially useful inside tests for web applications, where the progress of some operation is only signalled via the server log.
+
+$h2 What are expectations?
+
+Expectations are a mechanism through which *Splitlog* allows you to block any thread until a particular condition is met. There are several kinds of expectations, but they all share some common properties:
+
+- Each expectation is acquired by providing a condition that needs to be true for the expectation to unblock.
+- The condition is evaluated every time a new ```Message``` is received by the message consumer. Expectations will not be triggered if the given consumer, say a ```Follower```, isn't following at the time when the ```Message``` arrives.
+- Expectations return a ```java.util.concurrent.Future<Message>``` instance. When you call the ```get()``` method, the current thread will be blocked until the original condition becomes true. After then, it will always be true - it is therefore recommended to not store the ```Future``` instances and allow them to be properly garbage-collected.
+
+$h2 Expectations on Followers
+
+The most obvious use case for expectations is to use them on ```Follower``` instances, in order to block for a particular kind of ```Message```. Let's say we want to wait until an ```ERROR``` shows up in the server log. First, let's create the condition:
+
+```java
+  MidDeliveryMessageCondition<LogWatch> condition = new MidDeliveryMessageCondition<LogWatch>() {
+    @Override
+    public boolean accept(Message message, MessageDeliveryStatus status, LogWatch source) {
+      return (message.getSeverity() == MessageSeverity.ERROR);
+    }
+  }
+```
+
+There are a few noteworthy things in this example:
+
+- The ```MessageDeliveryStatus``` - for an explanation of those, please refer to [Message Lifecycle](message_lifecycle.html) documentation. Generally, this condition can become true irregardless of where the ```Message``` is in its lifecycle.
+- The ```source``` property will contain the code that has notified this condition of the new ```Message```. In case the expectation is being triggered by a ```Follower```, the messages will be coming directly from ```LogWatch``` as is the case here. For ```MergingFollower``` the messages will be provided by ```Follower```. This can be very useful in case you need to find out the source file for those messages etc.
+
+The next step is to actually trigger the expectation:
+
+```java
+  Follower f = ...; // acquire follower instance here
+  Future<Message> expectation = f.expect(condition); // this is your expectation
+```
+
+And now, here's how you block:
+
+```java
+  try {
+    Message result = expectation.get(); // this will block until condition is made true by incoming Messages
+    // "result" holds your message now
+    System.out.printn("An error has been caught: " + result);
+  } catch (InterruptedException e) {
+    System.out.println("The thread has been interrupted.");
+  } catch (ExecutionException e) {
+    System.out.println("An exception has been thrown in the user code.");
+  }
+```
+
+Please note that this particular example requires a properly configured ```TailSplitter``` that will understand the severity of log messages. Please refer to the section on [Splitting](splitting.html) for more information.
+
+$h2 Expectations on Metrics
+
+For some general information on ```Metric```s, please see the [chapter about them](metrics.html). Here, we'll focus merely on how to set expectations on top of them. You'll see nothing much will change from the previous example. First, the condition changes a bit:
+
+```java
+  MessageMetricCondition<Integer, LogWatch> condition = new MessageMetricCondition<Integer, LogWatch>() {
+
+    @Override
+    public boolean accept(final MessageMetric<Integer, LogWatch> evaluate) {
+        return evaluate.getValue() == 65;
+    }
+
+  }
+```
+
+Couple things to note:
+
+- This condition will trigger when the value of the metric reaches 65, and only then. A more reliable way of writing this condition would, however, be using "greather than" instead of "is equal to"; just in case some message pushes the metric over the threshold.
+- Metrics are generified to be able to return custom numeric types. The first generic type refers to the numeric type of the metric. The second type is the source and we already covered that in the previous example.
+- The syntax here is a bit too chatty, with all the generics. However, if you use Java 7, you can get rid of most of that using the diamond operator.
+
+The rest of the code remains mostly identical to the previous example:
+
+```java
+  Follower f = ...; // acquire follower instance here
+  MessageMetric<Integer, LogWatch> m = f.startMeasuring(...); // acquire metric here
+  Future<Message> expectation = m.expect(condition); // this is your expectation
+  try {
+    Message result = expectation.get(); // this will block until condition is made true by incoming Messages
+    // "result" holds your message now
+    System.out.printn("An error has been caught: " + result);
+  } catch (Exception e) {
+    // handle exceptions
+  }
+```
+
+#set($page = "expectations")
+#parse("footer.vm")

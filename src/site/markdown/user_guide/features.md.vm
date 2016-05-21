@@ -1,0 +1,19 @@
+#parse("header.vm")
+
+$h1 More advanced *Splitlog* features
+
+In this section, we will explain some of what makes *Splitlog* so powerful. 
+
+[Metrics](metrics.html)
+: Shows how you can gather statistical data from the log files.
+
+[Merging followers](merging.html)
+: Demonstrates how you can leverage all of the above across multiple log files.
+
+[Expectations](expectations.html)
+: Describes the mechanism through which you can block execution of your program until a given ```Message``` is read from the log.
+
+After you have mastered these, maybe you'll be interested in knowing [how it works](advanced.html). Or do you still have [unanswered questions](faq.html)?
+
+#set($page = "advanced")
+#parse("footer.vm")

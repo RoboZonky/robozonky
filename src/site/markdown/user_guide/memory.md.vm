@@ -1,0 +1,34 @@
+#parse("header.vm")
+
+$h1 Advanced *Splitlog* Concepts: Memory Management
+
+This chapter will explain how *Splitlog* stores ```Message``` instances and will provide tips towards minimizing its memory consumption. 
+
+$h2 Message store
+
+Any message in the ```ACCEPTED``` state (see [Message Lifecycle](message_lifecycle.html) will be stored inside *Splitlog*'s in-memory data store. Only messages stored here will be available for followers to retrieve.
+
+Obviously, as the log files watched by *Splitlog* grow in size, so will the amount of memory that is required to store all those ```Message``` instances. To this end, *Splitlog* implements some smart techniques to help keep the memory consumption down. But it may need your cooperation.
+
+$h2 Weak referencing
+
+The *Java Virtual Machine* supports two kinds of object references, weak and strong. Garbage collectors won't remove objects from memory for as long as there are strong references to them. And *Splitlog*'s internals will only store ```Follower```s as weak references - as long as there are no Followers pointing to a ```Message``` instance, it will be garbage-collected. So, what else can be pointing to those instances? No message will ever be garbage-collected for as long as there are ```CommonFollower``` instances that have been notified of it. If memory consumption is your concern, it is highly recommended you throw follower references away immediately after you've stopped the follower.
+
+If a follower is garbage-collected, it will take with it all messages no longer accessible through any other follower. It will be impossible, from that point, to retrieve those messages in any way.
+
+$h2 Keeping the memory consumption down
+
+There are some tips and tricks that you can leverage to manage *Splitlog*'s memory consumption.
+
+- Gate your messages. You can prevent whole messages from being processed by *Splitlog* at all, and that includes storage.
+- Reject unwanted messages. If you let a message through the gate, consumers will be informed of it. But even then, you can reject the message from being stored. But remember - message not stored is message not accessible for retrieval later.
+- Limit message store capacity. Message store is a queue, and an unbounded one by default. You can limit its capacity and when the limit is reached, the first message in the queue will be removed. And as you are well aware by now, this will cause the message to not be available any more.
+
+All of these can be accomplished through ```LogWatchBuilder```. But the most important thing you can do is this: **write clean code!** Properly limit the scope of your variables, don't store what doesn't need to be stored. The *JVM* will handle the rest for you.
+
+$h3 References
+
+1. [LogWatchBuilder Javadoc](../apidocs/com/github/triceo/splitlog/api/LogWatchBuilder.html).
+
+#set($page = "memory")
+#parse("footer.vm")

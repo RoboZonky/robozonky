@@ -1,0 +1,97 @@
+#parse("header.vm")
+
+$h1 Introduction into *Splitlog*
+
+*Splitlog* is a tool that helps you monitor log files from within Java 
+applications. It allows you to listen for changes to the log files, to
+wait for particular content or to gather various statistics thereof.
+
+This document will explain the basic concepts behind *Splitlog* and show you 
+the most common examples for using *Splitlog* within your own application.
+Without further ado, let's dive in. 
+
+$h2 Basic concepts
+
+In order to understand *Splitlog*, you should first learn about the basic
+building blocks of the tool. Worry not, it's only a short list.
+
+* First and foremost, we have the ```LogWatch```. This is the piece of code that periodically checks a log file for changes. For every log file that you want to use within *Splitlog*, you need one ```LogWatch``` and you will get it through ```LogWatchBuilder```. When you have ```LogWatch``` tracking changes in a log file, we call that **watching the log** and the file is called **watched file**. 
+* Watched files will be read **line by line** and these lines **will be put together into a ```Message```**. A ```Message``` would typically look like this:
+    
+    > 15:11:42,044 WARN  \[org.mylogger\] \(thread-1\) This is a warning.
+    
+    Alternately, ```Message``` can also span multiple lines, like this one containing an exception stack trace:
+    
+    > 15:11:49,051 ERROR \[org.mylogger\] \(thread-1\) Some exception
+    >
+    >    at org.switchyard.internal.ServiceReferenceImpl.createExchange\(ServiceReferenceImpl.java:118\) \[switchyard-runtime-1.1.1.jar:1.1.1\]
+    
+    You will not be notified of each line -- but you will be notified every time another line is added to a ```Message```, be it a new ```Message``` or a continuation of the previous one. The beginning and the end of each ```Message``` is determined by the ```Splitter```, but more on that later. 
+* **Message consumer** is a piece of code that is notified whenever a new line appears in the log, resulting in a ```Message```. There are various kinds of consumers, most important of which is the ```Follower```, as explained below.
+* Your consumers will only be notified of ```Message```s if you are **following** the watched file. Following can be started from the ```LogWatch```, at which point you will be given a ```Follower``` instance. ```Follower``` is your window into the watched log file -- it will contain only the ```Message```s that have arrived since you started following the ```LogWatch```, until you either stop following or you stop watching.
+
+And that's it, folks! You can now start using *Splitlog*. Let's see how. 
+
+$h2 Simple example
+
+Before we start, let's make sure you have *Splitlog* on your Java classpath. Either include the [uber jar](http://search.maven.org/remotecontent?filepath=com/github/triceo/splitlog/splitlog-core/${project.version}/splitlog-core-${project.version}-jar-with-dependencies.jar "Splitlog Uber Jar") or, preferably, use Maven:
+
+    <dependency>
+      <groupId>com.github.triceo.splitlog</groupId>
+      <artifactId>splitlog-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+Now that this is behind us, let us look at the simplest possible *Splitlog* use case:
+
+```java
+  File myLogFile = new File("server.log");
+  LogWatchBuilder builder = LogWatchBuilder.getDefault().watchingFile(myLogFile);
+  LogWatch watch = builder.build();
+  Follower follower = watch.startFollowing();
+  // [snip] insert whatever code here [/snip]
+  System.out.println(follower.getMessages());
+```
+
+You know what? Let's take it line by line. Here, you tell *Splitlog* to prepare a ```LogWatch``` that would watch the file stored in the ```myLogFile``` variable: 
+
+```java
+  LogWatchBuilder builder = LogWatchBuilder.getDefault().watchingFile(myLogFile);
+```
+
+Here, you actually retrieve this ```LogWatch```:
+
+```java
+  LogWatch watch = builder.build();
+```
+
+And, to top it all off, you start following the file to start receiving notifications on new ```Message```s. Based on the configuration of the ```LogWatch```, it is possible that the ```LogWatch``` will only actually start watching the log now:
+
+```java
+  Follower follower = watch.startFollowing();
+```
+
+Now would be a good time to let *Splitlog* wait for some ```Message```s to be read from the log. Here goes some code that your application actually needs to do while the logs are being filled with stuff. And, when it's over, you can print every ```Message``` received in the meantime:
+
+```java
+  System.out.println(follower.getMessages());
+```
+
+What remains is to clean up.
+
+```java
+  follower.stop();
+  watch.terminate(); // this one will suffice
+```
+
+And that's it. You're done. But *Splitlog* offers [much more](features.html "Splitlog User Guide: Features")?
+
+$h3 References
+
+1. [LogWatch Javadoc](../apidocs/com/github/triceo/splitlog/api/LogWatch.html).
+2. [LogWatchBuilder Javadoc](../apidocs/com/github/triceo/splitlog/api/LogWatchBuilder.html).
+3. [Message Javadoc](../apidocs/com/github/triceo/splitlog/api/Message.html).
+4. [Follower Javadoc](../apidocs/com/github/triceo/splitlog/api/Follower.html).
+
+#set($page = "introduction")
+#parse("footer.vm") 

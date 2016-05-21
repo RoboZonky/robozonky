@@ -1,0 +1,16 @@
+<document xmlns="http://maven.apache.org/changes/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd
+http://maven.apache.org/changes/1.0.0 ">
+  <properties>
+    <title>RoboZonky Changelog</title>
+    <author email="lukas@petrovicky.net">Lukáš Petrovický</author>
+  </properties>
+  <body> <!-- Features first, then bugfixes, then updates. -->
+    <release version="1.1.0.Beta1" date="?" description="Testing and others.">
+      <action issue="4" dev="triceo" type="update">
+        RoboZonky now has test coverage, which will prevent stupid bugs from showing up in the future.
+      </action>
+    </release>
+  </body>
+</document>

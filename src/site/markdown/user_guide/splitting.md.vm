@@ -1,0 +1,54 @@
+#parse("header.vm")
+
+$h1 Advanced *Splitlog* Concepts: Log Splitting
+
+This chapter will explain how *Splitlog* joins log file lines into ```Message``` instances and how it moves them through the [message lifecycle](message_lifecycle.vm). This is essential to understanding certain limitations of *Splitlog* that may not be immediately obvious.
+
+$h2 What is splitting
+
+*Splitlog* reads changes from the watched log files line by line, as they appear. However, in order to provide some useful information here, it may group multiple lines into a single ```Message``` and infer some additional metadata from them. This process is called "splitting the log" and is what originally gave *Splitlog* its name.
+
+In order to be able to separate the random set of lines into ```Message```s, *Splitlog* needs to understand the boundaries of each message, and therefore have a good understanding of the file format. This is where the biggest limitations of *Splitlog* come from:
+
+- It is not possible to parse most of logging files unambiguously. Let's say we have a [Logback](http://logback.qos.ch) logging pattern "%m%n", where "%m" is a non-specific multi-line string and "%n" is a newline, used as a message separator. Where do messages end in this case? Which line ending is the end of the message, and which is just a continuation of "%m"?
+- It is not possible to finalize a ```Message``` until we have seen the first line of the next one, or at least we are sure that the current line is the last.
+
+This has multiple consequences:
+
+1. There can be no generic splitter for Logback, JBoss Logging or what have you. The current JBossServerLogTailSplitter, for example, only supports the default JBoss log file layout.
+2. Users have to write their own ```TailSplitter``` implementations for their particular logger patterns.
+
+$h2 Message metadata
+
+In cases where the splitter understands the log file, it can infer various metadata from them. There are various kinds of metadata that *Splitlog* is able to infer, such as:
+
+- Message severity, such as ```ERROR```, ```WARNING```, ```INFO``` etc.
+- The date when the line was recorded.
+- Full stack trace of the exception, in case the ```Message``` carries one.
+
+In case splitter can not infer any of these, it will try to provide some sensible defaults. If it couldn't do even that, it will return ```null```.
+
+$h2 Available TailSplitter implementations
+
+The most basic ```TailSplitter``` available is the ```SimpleTailSplitter``` and it is what you get when you obtain ```LogWatch``` through ```LogWatchBuilder``` without specifying any splitter implementation. This splitter:
+
+- Treats every line as a new ```Message```. Therefore even exception stack traces will not be merged into one ```Message```.
+- Infers no metadata.
+
+The ```JBossServerLogTailSplitter``` is a bit more advanced and supports the default log file format of the [JBoss Application Server](http://jbossas.jboss.org/). It will infer every possible metadata and properly parse exception stack traces. The following code snippet illustrates how to obtain it.
+
+```java
+  LogWatch watch = LogWatchBuilder.getDefault()
+      .watchingFile(...)
+      .buildWith(new JBossServerLogTailSplitter());
+```
+
+The ```TailSplitter``` interface is fairly simple and users are encouraged to implement it to make *Splitlog* understand their particular log file formats. Pseudo-generic implementations for Logback and other logging systems would be welcome as pull requests.
+
+$h3 References
+
+1. [TailSplitter Javadoc](../apidocs/com/github/triceo/splitlog/api/TailSplitter.html).
+2. [LogWatchBuilder Javadoc](../apidocs/com/github/triceo/splitlog/api/LogWatchBuilder.html).
+
+#set($page = "splitting")
+#parse("footer.vm")
