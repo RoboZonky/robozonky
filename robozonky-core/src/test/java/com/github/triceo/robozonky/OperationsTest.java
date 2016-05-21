@@ -17,6 +17,7 @@ package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -24,12 +25,16 @@ import java.util.Map;
 
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.remote.Wallet;
+import com.github.triceo.robozonky.remote.ZonkyAPI;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class OperationsTest {
+
+
 
     private static Investment getMockInvestmentWithId(final int id) {
         final Investment i = Mockito.mock(Investment.class);
@@ -65,7 +70,7 @@ public class OperationsTest {
 
     private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
                                                            final BigDecimal ratingC) {
-        final EnumMap<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
+        final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
         map.put(Rating.A, ratingA);
         map.put(Rating.B, ratingB);
         map.put(Rating.C, ratingC);
@@ -87,7 +92,7 @@ public class OperationsTest {
     }
 
     @Test
-    public void testProperRankingOfRatings() {
+    public void properRankingOfRatings() {
         final BigDecimal targetShareA = BigDecimal.valueOf(0.001);
         final BigDecimal targetShareB = targetShareA.multiply(BigDecimal.TEN);
         final BigDecimal targetShareC = targetShareB.multiply(BigDecimal.TEN);
@@ -111,6 +116,41 @@ public class OperationsTest {
         // B > C > A
         tmp = OperationsTest.prepareShareMap(BigDecimal.valueOf(0.00095), BigDecimal.ZERO, BigDecimal.valueOf(0.099));
         OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.B, Rating.C, Rating.A);
+    }
+
+    private static Collection<Investment> getMockInvestmentWithBalance(final int loanAmount) {
+        final Investment i = Mockito.mock(Investment.class);
+        Mockito.when(i.getAmount()).thenReturn(loanAmount);
+        return Collections.singletonList(i);
+    }
+
+    @Test
+    public void properBalanceRetrievalInDryRun() {
+        // prepare context
+        final BigDecimal dryRunBalance = BigDecimal.valueOf(12345);
+        final OperationsContext ctx = Mockito.mock(OperationsContext.class);
+        Mockito.when(ctx.isDryRun()).thenReturn(true);
+        Mockito.when(ctx.getDryRunInitialBalance()).thenReturn(dryRunBalance.intValue());
+        // test operation
+        Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(dryRunBalance);
+        final int amount = 1;
+        final BigDecimal newBalance = dryRunBalance.subtract(BigDecimal.valueOf(amount));
+        Assertions.assertThat(Operations.getAvailableBalance(ctx, OperationsTest.getMockInvestmentWithBalance(amount)))
+                .isEqualTo(newBalance);
+    }
+
+    @Test
+    public void properBalanceRetrievalInNormalMode() {
+        // prepare context
+        final BigDecimal remoteBalance = BigDecimal.valueOf(12345);
+        final Wallet wallet = Mockito.mock(Wallet.class);
+        Mockito.when(wallet.getAvailableBalance()).thenReturn(remoteBalance);
+        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
+        Mockito.when(api.getWallet()).thenReturn(wallet);
+        final OperationsContext ctx = Mockito.mock(OperationsContext.class);
+        Mockito.when(ctx.getAPI()).thenReturn(api);
+        // test operation
+        Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
     }
 
 }

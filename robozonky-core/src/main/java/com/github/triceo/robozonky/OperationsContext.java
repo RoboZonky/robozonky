@@ -79,6 +79,7 @@ public class OperationsContext {
         return this.dryRun;
     }
 
+    // FIXME balance typically BigDecimal
     public int getDryRunInitialBalance() {
         return this.dryRunInitialBalance;
     }
