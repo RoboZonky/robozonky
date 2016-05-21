@@ -35,7 +35,6 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.remote.Authorization;
-import com.github.triceo.robozonky.remote.FullInvestment;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.InvestmentStatus;
 import com.github.triceo.robozonky.remote.InvestmentStatuses;
@@ -73,7 +72,7 @@ public class Operations {
      * @return Map where each rating is the key and value is the share of that rating among overall due payments.
      */
     private static Map<Rating, BigDecimal> calculateSharesPerRating(final Statistics stats,
-                                                                    final Collection<FullInvestment> investmentsInZonky,
+                                                                    final Collection<Investment> investmentsInZonky,
                                                                     final Collection<Investment> investmentsInSession) {
         final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
                 Collectors.toMap(risk -> Rating.valueOf(risk.getRating()), risk -> BigDecimal.valueOf(risk.getUnpaid()))
@@ -213,7 +212,7 @@ public class Operations {
         return Optional.empty();
     }
 
-    private static Collection<Investment> mergeInvestments(final Collection<FullInvestment> online,
+    private static Collection<Investment> mergeInvestments(final Collection<Investment> online,
                                                            final Collection<Investment> session) {
         // merge investments made in this session with not-yet-active investments reported by Zonky
         final Collection<Investment> investments = new ArrayList<>(online);
