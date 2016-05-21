@@ -28,14 +28,14 @@ public enum Rating {
     D("D");
 
 
-    private final String description;
+    private final String code;
 
-    Rating(final String description) {
-        this.description = description;
+    Rating(final String code) {
+        this.code = code;
     }
 
-    public String getDescription() {
-        return description;
+    public String getCode() {
+        return code;
     }
 
 }

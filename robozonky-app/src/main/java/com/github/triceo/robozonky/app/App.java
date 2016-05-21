@@ -129,7 +129,7 @@ public class App {
                 "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
         try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
             for (final Investment i : result) {
-                bw.write('#' + i.getLoanId() + " ('" + i.getRating().getDescription() + "): " + i.getAmount() + " CZK");
+                bw.write('#' + i.getLoanId() + " ('" + i.getRating().getCode() + "): " + i.getAmount() + " CZK");
                 bw.newLine();
             }
             App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.", filename);
