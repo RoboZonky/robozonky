@@ -1,18 +1,17 @@
 /*
+ * Copyright 2016 Lukáš Petrovický
  *
- *  * Copyright 2016 Lukáš Petrovický
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- * /
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.github.triceo.robozonky;
 
@@ -121,7 +120,8 @@ public class Operations {
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
     private static Optional<Investment> makeInvestment(final OperationsContext oc, final Loan l,
-                                                       final List<Investment> investmentsInSession, final BigDecimal balance) {
+                                                       final List<Investment> investmentsInSession,
+                                                       final BigDecimal balance) {
         if (Operations.isLoanPresent(l, investmentsInSession)) {
             Operations.LOGGER.info("RoboZonky already invested in loan '{}', skipping. May only happen in dry runs.", l);
             return Optional.empty();
@@ -129,13 +129,10 @@ public class Operations {
             Operations.LOGGER.info("According to the investment strategy, loan '{}' is not acceptable.", l);
             return Optional.empty();
         }
-        // figure out how much to invest; never exceed maximum investment amount
-        final int recommendedInvestment = oc.getStrategy().recommendInvestmentAmount(l);
-        final int roundToNearestHundred = (int) Math.floor(((double) recommendedInvestment / 100.0) * 100.0);
-        final int toInvestAdjusted = Math.min(roundToNearestHundred, balance.intValue());
-        final int resultingInvestment = Math.min(toInvestAdjusted, (int) l.getRemainingInvestment());
-        Operations.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.",
-                recommendedInvestment, balance.intValue());
+        // figure out how much to invest
+        final int resultingInvestment = oc.getStrategy().recommendInvestmentAmount(l, balance);
+        Operations.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.", resultingInvestment,
+                balance.intValue());
         if (resultingInvestment < Operations.MINIMAL_INVESTMENT_ALLOWED) {
             Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
                     l, resultingInvestment);
