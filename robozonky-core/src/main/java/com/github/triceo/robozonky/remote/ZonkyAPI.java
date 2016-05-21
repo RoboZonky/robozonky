@@ -81,7 +81,7 @@ public interface ZonkyAPI {
 
     @GET
     @Path(ZonkyAPI.INVESTMENTS)
-    Collection<FullInvestment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
+    Collection<Investment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
 
     @POST
     @Path(ZonkyAPI.ME + "/investment")

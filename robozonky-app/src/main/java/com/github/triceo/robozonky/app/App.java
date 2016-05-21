@@ -26,7 +26,6 @@ import java.util.Collection;
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -130,9 +129,7 @@ public class App {
                 "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
         try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
             for (final Investment i : result) {
-                final Loan l = i.getLoan();
-                bw.write('#' + i.getLoanId() + " ('" + l.getName() + "', " + l.getRating().getDescription() + "): "
-                        + i.getAmount() + " CZK");
+                bw.write('#' + i.getLoanId() + " ('" + i.getRating().getDescription() + "): " + i.getAmount() + " CZK");
                 bw.newLine();
             }
             App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.", filename);
