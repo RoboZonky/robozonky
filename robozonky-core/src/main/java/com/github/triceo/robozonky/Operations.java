@@ -17,8 +17,6 @@ package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,10 +24,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.remote.Authorization;
@@ -82,30 +78,10 @@ public class Operations {
             final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getAmount());
             amounts.put(r, amounts.get(r).add(investment));
         });
-        final BigDecimal total = Operations.sum(amounts.values());
+        final BigDecimal total = Util.sum(amounts.values());
         final Map<Rating, BigDecimal> result = new EnumMap<>(Rating.class);
         amounts.forEach((rating, amount) -> result.put(rating, amount.divide(total, 4, RoundingMode.HALF_EVEN)));
         return Collections.unmodifiableMap(result);
-    }
-
-    private static BigDecimal sum(final Collection<BigDecimal> vals) {
-        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    /**
-     * Determine whether or not a given loan is present among existing investments.
-     *
-     * @param loan Loan in question.
-     * @param investments Known investments.
-     * @return True if present.
-     */
-    private static boolean isLoanPresent(final Loan loan, final Iterable<Investment> investments) {
-        for (final Investment i : investments) {
-            if (loan.getId() == i.getLoanId()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -119,7 +95,7 @@ public class Operations {
     private static Optional<Investment> makeInvestment(final OperationsContext oc, final Loan l,
                                                        final List<Investment> investmentsInSession,
                                                        final BigDecimal balance) {
-        if (Operations.isLoanPresent(l, investmentsInSession)) {
+        if (Util.isLoanPresent(l, investmentsInSession)) {
             Operations.LOGGER.info("RoboZonky already invested in loan '{}', skipping. May only happen in dry runs.", l);
             return Optional.empty();
         } else if (!oc.getStrategy().isAcceptable(l)) {
@@ -153,21 +129,6 @@ public class Operations {
         }
     }
 
-    private static List<Loan> sortLoansByTerm(final Collection<Loan> loans) {
-        final List<Loan> sortedLoans = new ArrayList<>(loans.size());
-        while (!loans.isEmpty()) {
-            Loan longestTerm = null;
-            for (final Loan l : loans) {
-                if (longestTerm == null || longestTerm.getTermInMonths() < l.getTermInMonths()) {
-                    longestTerm = l;
-                }
-            }
-            loans.remove(longestTerm);
-            sortedLoans.add(longestTerm);
-        }
-        return sortedLoans;
-    }
-
     /**
      * Choose from available loans of a given rating one loan to invest money into.
      * @param oc Context for the current session.
@@ -192,38 +153,17 @@ public class Operations {
             Operations.LOGGER.info("There are no loans of rating '{}' matching the investment strategy.", r);
             return Optional.empty();
         }
-        // sort loans by their term
-        final List<Loan> sortedLoans = Operations.sortLoansByTerm(loans);
-        if (oc.getStrategy().prefersLongerTerms(r)) {
-            Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the longest terms.", r);
-        } else {
-            Operations.LOGGER.info("According to the investment strategy, loans with rating '{}' will be evaluated starting from the shortest terms.", r);
-            Collections.reverse(sortedLoans);
-        }
-        // start investing
-        for (final Loan l : sortedLoans) {
+        // sort loans by their term and start investing
+        final boolean prefersLongTerm = oc.getStrategy().prefersLongerTerms(r);
+        Operations.LOGGER.info("Investment strategy for rating '{}' prefers {} term loans.", r,
+                prefersLongTerm ? "longer" : "shorter");
+        for (final Loan l : Util.sortLoansByTerm(loans, prefersLongTerm)) {
             final Optional<Investment> investment = Operations.makeInvestment(oc, l, investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
         }
         return Optional.empty();
-    }
-
-    static Collection<Investment> mergeInvestments(final Collection<Investment> online,
-                                                           final Collection<Investment> session) {
-        // merge investments made in this session with not-yet-active investments reported by Zonky
-        if (online.size() == 0) {
-            return Collections.unmodifiableCollection(session);
-        } else if (session.size() == 0) {
-            return Collections.unmodifiableCollection(online);
-        } else {
-            final Map<Integer, Investment> investments
-                    = online.stream().collect(Collectors.toMap(Investment::getLoanId, Function.identity()));
-            session.stream().filter(investment -> !investments.containsKey(investment.getLoanId()))
-                    .forEach(investment -> investments.put(investment.getLoanId(), investment));
-            return Collections.unmodifiableCollection(investments.values());
-        }
     }
 
     /**
@@ -268,7 +208,7 @@ public class Operations {
                                                        final List<Investment> investmentsInSession,
                                                        final BigDecimal balance) {
         final ZonkyAPI api = oc.getAPI();
-        final Collection<Investment> investments = Operations.mergeInvestments(
+        final Collection<Investment> investments = Util.mergeInvestments(
                 api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)), investmentsInSession);
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(api.getStatistics(),
                 investments);
@@ -290,18 +230,6 @@ public class Operations {
             }
         }
         return Optional.empty();
-    }
-
-    public static String getRoboZonkyVersion() {
-        try {
-            final URLClassLoader cl = (URLClassLoader) Operations.class.getClassLoader();
-            final URL url = cl.findResource("META-INF/maven/com.github.triceo.robozonky/robozonky-core/pom.properties");
-            final Properties props = new Properties();
-            props.load(url.openStream());
-            return props.getProperty("version", Operations.ZONKY_VERSION_UNKNOWN);
-        } catch (Exception ex) {
-            return Operations.ZONKY_VERSION_UNDETECTED;
-        }
     }
 
     static BigDecimal getAvailableBalance(final OperationsContext oc,

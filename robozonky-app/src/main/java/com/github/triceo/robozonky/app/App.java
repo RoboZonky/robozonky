@@ -25,6 +25,7 @@ import java.util.Collection;
 
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
+import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.apache.commons.cli.CommandLine;
@@ -94,7 +95,7 @@ public class App {
         if (cmd.hasOption(App.OPTION_HELP.getOpt())) { // user requested help
             App.printHelpAndExit("", false);
         }
-        App.LOGGER.info("RoboZonky v{} loading.", Operations.getRoboZonkyVersion());
+        App.LOGGER.info("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
         // standard workflow
         if (!cmd.hasOption(App.OPTION_USERNAME.getOpt())) {
             App.printHelpAndExit("Username must be provided.", true);

@@ -36,40 +36,6 @@ import org.mockito.Mockito;
 
 public class OperationsTest {
 
-
-
-    private static Investment getMockInvestmentWithId(final int id) {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getLoanId()).thenReturn(id);
-        return i;
-    }
-
-    @Test
-    public void mergingTwoInvestmentCollectinsWorksProperly() {
-        final Investment I1 = OperationsTest.getMockInvestmentWithId(1);
-        final Investment I2 = OperationsTest.getMockInvestmentWithId(2);
-        final Investment I3 = OperationsTest.getMockInvestmentWithId(3);
-
-        // two identical investments will result in one
-        final List<Investment> a = Arrays.asList(I1, I2);
-        final List<Investment> b = Arrays.asList(I2, I3);
-        Assertions.assertThat(Operations.mergeInvestments(a, b)).containsExactly(I1, I2, I3);
-
-        // standard merging also works
-        final List<Investment> c = Collections.singletonList(I3);
-        Assertions.assertThat(Operations.mergeInvestments(a, c)).containsExactly(I1, I2, I3);
-
-        // reverse-order merging works
-        final List<Investment> d = Arrays.asList(I2, I1);
-        Assertions.assertThat(Operations.mergeInvestments(a, d)).containsExactly(I1, I2);
-
-        // two non-identical loans with same ID are merged in the order in which they came
-        final Investment I3_2 = OperationsTest.getMockInvestmentWithId(3);
-        final List<Investment> e = Collections.singletonList(I3_2);
-        Assertions.assertThat(Operations.mergeInvestments(c, e)).containsExactly(I3);
-        Assertions.assertThat(Operations.mergeInvestments(e, c)).containsExactly(I3_2);
-    }
-
     private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
                                                            final BigDecimal ratingC) {
         final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
