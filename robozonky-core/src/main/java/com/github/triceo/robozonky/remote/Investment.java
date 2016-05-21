@@ -17,26 +17,25 @@
 package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 public class Investment {
 
-    private Loan loan;
     private int loanId, amount;
+    private Rating rating;
+
+    Investment() {
+        // just for JAXB
+    }
 
     public Investment(final Loan loan, final int amount) {
-        this.loan = loan;
         this.loanId = loan.getId();
+        this.rating = loan.getRating();
         this.amount = amount;
     }
 
-    @XmlTransient
-    public Loan getLoan() {
-        return loan;
-    }
-
-    public void setLoan() {
-        throw new UnsupportedOperationException("Cannot set loan other than from the constructor.");
+    @XmlElement
+    public Rating getRating() {
+        return rating;
     }
 
     @XmlElement
@@ -53,6 +52,7 @@ public class Investment {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Investment{");
         sb.append("loanId=").append(loanId);
+        sb.append(", rating=").append(rating);
         sb.append(", amount=").append(amount);
         sb.append('}');
         return sb.toString();

@@ -82,7 +82,7 @@ public class Operations {
         final Collection<Investment> investments = Operations.mergeInvestments(investmentsInZonky, investmentsInSession);
         investments.forEach(previousInvestment -> {
             // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
-            final Rating r = previousInvestment.getLoan().getRating();
+            final Rating r = previousInvestment.getRating();
             final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getAmount());
             amounts.put(r, amounts.get(r).add(investment));
         });
@@ -105,7 +105,7 @@ public class Operations {
      */
     private static boolean isLoanPresent(final Loan loan, final Iterable<Investment> investments) {
         for (final Investment i : investments) {
-            if (loan.getId() == i.getLoan().getId()) {
+            if (loan.getId() == i.getLoanId()) {
                 return true;
             }
         }

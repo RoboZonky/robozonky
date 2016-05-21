@@ -20,22 +20,26 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 public class FullInvestment extends Investment {
 
     private int id, dpd, loanTermInMonth, currentTerm;
-    private String loanName, nickName, firstName, surname, paymentStatus;
-    private Rating rating;
+    private String loanName, nickname, firstName, surname, paymentStatus;
     private Instant investmentDate, nextPaymentDate;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal, expectedInterest;
+
+    public FullInvestment() {
+        // just for JAXB
+    }
 
     public FullInvestment(final Loan loan, final int amount) {
         super(loan, amount);
         this.loanTermInMonth = loan.getTermInMonths();
         this.currentTerm = this.loanTermInMonth;
         this.loanName = loan.getName();
-        this.nickName = loan.getNickName();
+        this.nickname = loan.getNickName();
         this.paymentStatus = "OK";
-        this.rating = loan.getRating();
         this.investmentDate = Instant.now();
         this.interestRate = loan.getInterestRate();
         this.paid = BigDecimal.ZERO;
@@ -69,8 +73,8 @@ public class FullInvestment extends Investment {
     }
 
     @XmlElement
-    public String getNickName() {
-        return nickName;
+    public String getNickname() {
+        return nickname;
     }
 
     @XmlElement
@@ -89,16 +93,13 @@ public class FullInvestment extends Investment {
     }
 
     @XmlElement
-    public Rating getRating() {
-        return rating;
-    }
-
-    @XmlElement
+    @JsonDeserialize(using = InstantDeserializer.class)
     public Instant getInvestmentDate() {
         return investmentDate;
     }
 
     @XmlElement
+    @JsonDeserialize(using = InstantDeserializer.class)
     public Instant getNextPaymentDate() {
         return nextPaymentDate;
     }
@@ -155,7 +156,7 @@ public class FullInvestment extends Investment {
         sb.append(", loanId=").append(this.getLoanId());
         sb.append(", loanName='").append(loanName).append('\'');
         sb.append(", amount=").append(this.getAmount());
-        sb.append(", rating=").append(rating);
+        sb.append(", rating=").append(this.getRating());
         sb.append(", interestRate=").append(interestRate);
         sb.append(", loanTermInMonth=").append(loanTermInMonth);
         sb.append(", currentTerm=").append(currentTerm);
