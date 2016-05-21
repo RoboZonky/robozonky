@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.triceo.robozonky</groupId>
     <artifactId>robozonky-parent</artifactId>
-    <version>1.0.0.CR1-SNAPSHOT</version>
+    <version>1.0.0.CR1</version>
     <modules>
         <module>robozonky-core</module>
         <module>robozonky-app</module>
@@ -200,7 +200,7 @@
         <url>git@github.com:triceo/robozonky.git</url>
         <connection>scm:git:git@github.com:triceo/robozonky.git</connection>
         <developerConnection>scm:git:git@github.com:triceo/robozonky.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>robozonky-parent-1.0.0.CR1</tag>
     </scm>
     <issueManagement>
         <system>github</system>
