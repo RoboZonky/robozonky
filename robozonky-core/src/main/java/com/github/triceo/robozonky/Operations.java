@@ -39,6 +39,7 @@ import com.github.triceo.robozonky.remote.InvestmentStatuses;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.Ratings;
+import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Token;
 import com.github.triceo.robozonky.remote.ZonkyAPI;
@@ -67,17 +68,14 @@ public class Operations {
     /**
      * Get the share of 'payments due for each rating' on the overall portfolio.
      * @param stats
-     * @param investmentsInZonky Loans which have already been funded but are not yet part of your portfolio.
-     * @param investmentsInSession Loans invested made in this session of RoboZonky.
+     * @param investments Loans which have already been invested in by the current user.
      * @return Map where each rating is the key and value is the share of that rating among overall due payments.
      */
-    private static Map<Rating, BigDecimal> calculateSharesPerRating(final Statistics stats,
-                                                                    final Collection<Investment> investmentsInZonky,
-                                                                    final Collection<Investment> investmentsInSession) {
+    static Map<Rating, BigDecimal> calculateSharesPerRating(final Statistics stats,
+                                                            final Collection<Investment> investments) {
         final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
-                Collectors.toMap(risk -> Rating.valueOf(risk.getRating()), risk -> BigDecimal.valueOf(risk.getUnpaid()))
+                Collectors.toMap(RiskPortfolio::getRating, risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );
-        final Collection<Investment> investments = Operations.mergeInvestments(investmentsInZonky, investmentsInSession);
         investments.forEach(previousInvestment -> {
             // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
             final Rating r = previousInvestment.getRating();
@@ -212,7 +210,7 @@ public class Operations {
         return Optional.empty();
     }
 
-    protected static Collection<Investment> mergeInvestments(final Collection<Investment> online,
+    static Collection<Investment> mergeInvestments(final Collection<Investment> online,
                                                            final Collection<Investment> session) {
         // merge investments made in this session with not-yet-active investments reported by Zonky
         if (online.size() == 0) {
@@ -234,7 +232,7 @@ public class Operations {
      * @param currentShare Current share of investments in a given rating.
      * @return Ratings in the order of decreasing demand. Over-invested ratings not present.
      */
-    protected static List<Rating> rankRatingsByDemand(final OperationsContext oc,
+    static List<Rating> rankRatingsByDemand(final OperationsContext oc,
                                                                        final Map<Rating, BigDecimal> currentShare) {
         final MultiValuedMap<BigDecimal, Rating> mostWantedRatings = new HashSetValuedHashMap<>();
         // put the ratings into buckets based on how much we're missing them
@@ -270,16 +268,16 @@ public class Operations {
                                                        final List<Investment> investmentsInSession,
                                                        final BigDecimal balance) {
         final ZonkyAPI api = oc.getAPI();
-        final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(
-                api.getStatistics(), api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
-                investmentsInSession);
+        final Collection<Investment> investments = Operations.mergeInvestments(
+                api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)), investmentsInSession);
+        final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(api.getStatistics(),
+                investments);
         final List<Rating> mostWantedRatings = Operations.rankRatingsByDemand(oc, shareOfRatings);
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
                 mostWantedRatings);
         final Map<Rating, Future<Collection<Loan>>> availableLoans = new EnumMap<>(Rating.class);
         mostWantedRatings.forEach(r -> { // submit HTTP requests ahead of time
-            // FIXME make sure that loans where I invested but which are not yet funded do not show up in here
             final Callable<Collection<Loan>> future
                     = () -> api.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMENT_ALLOWED);
             availableLoans.put(r, oc.getBackgroundExecutor().submit(future));
@@ -306,7 +304,7 @@ public class Operations {
         }
     }
 
-    protected static BigDecimal getAvailableBalance(final OperationsContext oc,
+    static BigDecimal getAvailableBalance(final OperationsContext oc,
                                                     final Collection<Investment> investmentsInSession) {
         final boolean isDryRun = oc.isDryRun();
         final int dryRunInitialBalance = oc.getDryRunInitialBalance();

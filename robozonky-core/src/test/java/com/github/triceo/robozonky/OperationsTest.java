@@ -16,8 +16,8 @@
 package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -25,6 +25,8 @@ import java.util.Map;
 
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.remote.RiskPortfolio;
+import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyAPI;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
@@ -118,7 +120,7 @@ public class OperationsTest {
         OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.B, Rating.C, Rating.A);
     }
 
-    private static Collection<Investment> getMockInvestmentWithBalance(final int loanAmount) {
+    private static List<Investment> getMockInvestmentWithBalance(final int loanAmount) {
         final Investment i = Mockito.mock(Investment.class);
         Mockito.when(i.getAmount()).thenReturn(loanAmount);
         return Collections.singletonList(i);
@@ -151,6 +153,41 @@ public class OperationsTest {
         Mockito.when(ctx.getAPI()).thenReturn(api);
         // test operation
         Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
+    }
+
+    private static void assertProperRatingShare(final Map<Rating, BigDecimal> result, final Rating r, final int amount,
+                                                final int total) {
+        final BigDecimal expectedShare
+                = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_EVEN);
+        Assertions.assertThat(result.get(r)).isEqualTo(expectedShare);
+    }
+
+    @Test
+    public void properRatingShareCalculation() {
+        // mock necessary structures
+        final int amountAA = 300, amountB = 200, amountD = 100;
+        final int totalPie = amountAA + amountB + amountD;
+        final RiskPortfolio riskAA = new RiskPortfolio(Rating.AA, -1, amountAA, -1, -1);
+        final RiskPortfolio riskB = new RiskPortfolio(Rating.B, -1, amountB, -1, -1);
+        final RiskPortfolio riskD = new RiskPortfolio(Rating.D, -1, amountD, -1, -1);
+        final Statistics stats = Mockito.mock(Statistics.class);
+        Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(riskAA, riskB, riskD));
+
+        // check standard operation
+        Map<Rating, BigDecimal> result = Operations.calculateSharesPerRating(stats, Collections.emptyList());
+        OperationsTest.assertProperRatingShare(result, Rating.AA, amountAA, totalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.B, amountB, totalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.D, amountD, totalPie);
+
+        // check operation with offline investments
+        final int increment = 200, newTotalPie = totalPie + increment;
+        final List<Investment> investments = OperationsTest.getMockInvestmentWithBalance(increment);
+        final Investment i = investments.get(0);
+        Mockito.when(i.getRating()).thenReturn(Rating.D);
+        result = Operations.calculateSharesPerRating(stats, investments);
+        OperationsTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.D, amountD + increment, newTotalPie);
     }
 
 }
