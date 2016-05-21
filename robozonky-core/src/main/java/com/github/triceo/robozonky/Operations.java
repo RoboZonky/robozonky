@@ -22,14 +22,11 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -46,6 +43,8 @@ import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Token;
 import com.github.triceo.robozonky.remote.ZonkyAPI;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
@@ -229,18 +228,35 @@ public class Operations {
         }
     }
 
-    private static SortedMap<BigDecimal, Rating> rankRankinsByDemand(final OperationsContext oc,
-                                                                     final Map<Rating, BigDecimal> shareOfRatings) {
-        final SortedMap<BigDecimal, Rating> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
-        shareOfRatings.forEach((r, currentShare) -> {
+    /**
+     *
+     * @param oc Context for the current session.
+     * @param currentShare Current share of investments in a given rating.
+     * @return Ratings in the order of decreasing demand. Over-invested ratings not present.
+     */
+    protected static List<Rating> rankRatingsByDemand(final OperationsContext oc,
+                                                                       final Map<Rating, BigDecimal> currentShare) {
+        final MultiValuedMap<BigDecimal, Rating> mostWantedRatings = new HashSetValuedHashMap<>();
+        // put the ratings into buckets based on how much we're missing them
+        currentShare.forEach((r, currentRatingShare) -> {
             final BigDecimal maximumAllowedShare = oc.getStrategy().getTargetShare(r);
-            if (currentShare.compareTo(maximumAllowedShare) >= 0) { // we bought too many of this rating; ignore
+            if (currentRatingShare.compareTo(maximumAllowedShare) >= 0) { // we bought too many of this rating; ignore
                 return;
             }
-            // sort the ratings by how much we miss them based on the strategy
-            mostWantedRatings.put(maximumAllowedShare.subtract(currentShare), r);
+            mostWantedRatings.put(maximumAllowedShare.subtract(currentRatingShare), r);
         });
-        return Collections.unmodifiableSortedMap(mostWantedRatings);
+        // and now output ratings in an order, bigger first
+        final List<Rating> result = new ArrayList<>(currentShare.size());
+        while (!mostWantedRatings.isEmpty()) {
+            BigDecimal biggestRanking = BigDecimal.ZERO;
+            for (final BigDecimal tested: mostWantedRatings.keySet()) {
+                if (tested.compareTo(biggestRanking) > 0) {
+                    biggestRanking = tested;
+                }
+            }
+            result.addAll(mostWantedRatings.remove(biggestRanking));
+        }
+        return Collections.unmodifiableList(result);
     }
 
     /**
@@ -257,17 +273,18 @@ public class Operations {
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(
                 api.getStatistics(), api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
                 investmentsInSession);
-        final SortedMap<BigDecimal, Rating> mostWantedRatings = Operations.rankRankinsByDemand(oc, shareOfRatings);
+        final List<Rating> mostWantedRatings = Operations.rankRatingsByDemand(oc, shareOfRatings);
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
-                mostWantedRatings.values());
+                mostWantedRatings);
         final Map<Rating, Future<Collection<Loan>>> availableLoans = new EnumMap<>(Rating.class);
-        mostWantedRatings.forEach((s, r) -> { // submit HTTP requests ahead of time
+        mostWantedRatings.forEach(r -> { // submit HTTP requests ahead of time
             // FIXME make sure that loans where I invested but which are not yet funded do not show up in here
-            final Callable<Collection<Loan>> future = () -> api.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMENT_ALLOWED);
+            final Callable<Collection<Loan>> future
+                    = () -> api.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMENT_ALLOWED);
             availableLoans.put(r, oc.getBackgroundExecutor().submit(future));
         });
-        for (final Rating r : mostWantedRatings.values()) { // try to invest in a given rating
+        for (final Rating r : mostWantedRatings) { // try to invest in a given rating
             final Optional<Investment> investment =
                     Operations.makeInvestment(oc, r, availableLoans.get(r), investmentsInSession, balance);
             if (investment.isPresent()) {

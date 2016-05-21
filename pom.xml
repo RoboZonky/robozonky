@@ -62,6 +62,11 @@
                 <artifactId>commons-beanutils</artifactId>
                 <version>1.9.2</version>
             </dependency>
+            <dependency> <!-- for Bag collection -->
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>4.1</version>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

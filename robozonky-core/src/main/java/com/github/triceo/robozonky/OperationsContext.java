@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * When the class instance is no longer needed, it must be {@link #dispose()}d - otherwise the #ExecutorService may
  * prevent the application from ending.
  */
-public final class OperationsContext {
+public class OperationsContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationsContext.class);
 
