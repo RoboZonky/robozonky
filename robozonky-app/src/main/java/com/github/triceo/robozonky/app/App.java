@@ -1,18 +1,17 @@
 /*
  *
- *  * Copyright 2016 Lukáš Petrovický
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- * /
+ *  Copyright 2016 Lukáš Petrovický
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package com.github.triceo.robozonky.app;
 
@@ -56,52 +55,72 @@ public class App {
     private static final Option OPTION_HELP = Option.builder("h").longOpt("help").argName("Show help")
             .desc("Show this help message and quit.").build();
 
-    private static void printHelpAndExit(final Options options, final String message, final boolean exitWithError) {
-        final HelpFormatter formatter = new HelpFormatter();
-        final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
-        formatter.printHelp(scriptName, null, options, exitWithError ? "Error: " + message : message, true);
-        System.exit(exitWithError ? 1 : 0);
-    }
-
-    public static void main(final String... args) {
+    private static final Options OPTIONS;
+    static {
         final OptionGroup og = new OptionGroup();
         og.setRequired(true);
         og.addOption(App.OPTION_HELP);
         og.addOption(App.OPTION_STRATEGY);
-        final Options options = new Options();
-        options.addOptionGroup(og);
-        options.addOption(App.OPTION_DRY_RUN);
-        options.addOption(App.OPTION_PASSWORD);
-        options.addOption(App.OPTION_USERNAME);
+        OPTIONS = new Options();
+        App.OPTIONS.addOptionGroup(og);
+        App.OPTIONS.addOption(App.OPTION_DRY_RUN);
+        App.OPTIONS.addOption(App.OPTION_PASSWORD);
+        App.OPTIONS.addOption(App.OPTION_USERNAME);
+    }
 
+    private static void exit(final ReturnCode returnCode) {
+        App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
+        System.exit(returnCode.getCode());
+    }
+
+    private static void printHelpAndExit(final String message, final boolean exitWithError) {
+        final HelpFormatter formatter = new HelpFormatter();
+        final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
+        formatter.printHelp(scriptName, null, App.OPTIONS, exitWithError ? "Error: " + message : message, true);
+        App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
+    }
+
+    private static CommandLine parseCommandLine(final String... args) {
         final CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = null;
         try {
-            cmd = parser.parse(options, args);
+            return parser.parse(App.OPTIONS, args);
         } catch (final Exception ex) { // for some reason, the CLI could not be parsed
-            App.printHelpAndExit(options, ex.getMessage(), true);
+            App.printHelpAndExit(ex.getMessage(), true);
         }
+        throw new IllegalStateException("This should not have happened.");
+    }
+
+    private static AppContext processCommandLine(final String... args) {
+        final CommandLine cmd = App.parseCommandLine(args);
         if (cmd.hasOption(App.OPTION_HELP.getOpt())) { // user requested help
-            App.printHelpAndExit(options, "", false);
+            App.printHelpAndExit("", false);
         }
-        LOGGER.info("RoboZonky v{} loading.", Operations.getRoboZonkyVersion());
+        App.LOGGER.info("RoboZonky v{} loading.", Operations.getRoboZonkyVersion());
         // standard workflow
         if (!cmd.hasOption(App.OPTION_USERNAME.getOpt())) {
-            App.printHelpAndExit(options, "Username must be provided.", true);
+            App.printHelpAndExit("Username must be provided.", true);
         } else if (!cmd.hasOption(App.OPTION_PASSWORD.getOpt())) {
-            App.printHelpAndExit(options, "Password must be provided.", true);
+            App.printHelpAndExit("Password must be provided.", true);
         }
         final File strategyConfig = new File(cmd.getOptionValue(App.OPTION_STRATEGY.getOpt()));
         if (!strategyConfig.canRead()) {
-            App.printHelpAndExit(options, "Investment strategy file must be readable.", true);
+            App.printHelpAndExit("Investment strategy file must be readable.", true);
         }
-        InvestmentStrategy strategy = null;
         try {
-            strategy = StrategyParser.parse(strategyConfig);
+            return new AppContext(cmd, StrategyParser.parse(strategyConfig));
         } catch (final Exception e) {
-            App.printHelpAndExit(options, "Failed parsing strategy: " + e.getMessage(), true);
+            App.printHelpAndExit("Failed parsing strategy: " + e.getMessage(), true);
         }
-        App.letsGo(cmd, strategy); // and start actually working with Zonky
+        throw new IllegalStateException("This should not have happened.");
+    }
+
+    public static void main(final String... args) {
+        try {
+            App.letsGo(App.processCommandLine(args)); // and start actually working with Zonky
+        } catch (final Exception ex) {
+            App.LOGGER.error("Unexpected error." , ex);
+            App.exit(ReturnCode.ERROR_UNEXPECTED);
+        }
     }
 
     private static void storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
@@ -122,8 +141,9 @@ public class App {
         }
     }
 
-    private static void letsGo(final CommandLine cmd, final InvestmentStrategy strategy) {
+    private static void letsGo(final AppContext ctx) {
         App.LOGGER.info("===== RoboZonky at your service! =====");
+        final CommandLine cmd = ctx.getCommandLine();
         final String username = cmd.getOptionValue(App.OPTION_USERNAME.getOpt());
         final String password = cmd.getOptionValue(App.OPTION_PASSWORD.getOpt());
         final boolean dryRun = cmd.hasOption(App.OPTION_DRY_RUN.getOpt());
@@ -131,7 +151,8 @@ public class App {
         if (dryRun) {
             App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        final Collection<Investment> result = App.operate(username, password, strategy, dryRun, startingBalance);
+        final Collection<Investment> result = App.operate(username, password, ctx.getInvestmentStrategy(), dryRun,
+                startingBalance);
         if (result.size() == 0) {
             App.LOGGER.info("RoboZonky did not invest.");
         } else {
@@ -143,7 +164,7 @@ public class App {
             }
         }
         App.LOGGER.info("===== RoboZonky out. =====");
-        System.exit(0); // make sure the app actually quits
+        App.exit(ReturnCode.OK);
     }
 
     private static Collection<Investment> operate(final String username, final String password,
