@@ -1,20 +1,20 @@
-# ZonkyBot
+# RoboZonky
 
 ## Jak to funguje
 
 ## Investiční strategie
 
-Investiční strategie je soubor, ve kterém ZonkyBotu řeknete, jaké složení investičního portfolia má mít za cíl. Na
-ukázku má ZonkyBot zabudované tři investiční strategie:
-[vyváženou](zonkybot-app/src/main/assembly/resources/zonkybot-balanced.cfg),
-[konzervativní](zonkybot-app/src/main/assembly/resources/zonkybot-conservative.cfg) a
-[dynamickou](zonkybot-app/src/main/assembly/resources/zonkybot-dynamic.cfg). My si teď popíšeme
+Investiční strategie je soubor, ve kterém RoboZonky řeknete, jaké složení investičního portfolia má mít za cíl. Na
+ukázku má RoboZonky zabudované tři investiční strategie:
+[vyváženou](robozonky-app/src/main/assembly/resources/robozonky-balanced.cfg),
+[konzervativní](robozonky-app/src/main/assembly/resources/robozonky-conservative.cfg) a
+[dynamickou](robozonky-app/src/main/assembly/resources/robozonky-dynamic.cfg). My si teď popíšeme
 podrobněji tu dynamickou, jejíž pochopení by vám mělo umožnit napsat vlastní strategii přesně podle vašeho gusta.
 
 ### Cílový podíl ratingu na penězích ve hře
 
 Klíčovou vlastností investiční strategie je podíl, který si přejete, aby investice daného ratingu ve vašem portfoliu
-měly. ZonkyBot jej počítá tak, že vezme všechny vaše peníze, které v dané chvíli máte ve hře, rozdělí je podle ratingů a
+měly. RoboZonky jej počítá tak, že vezme všechny vaše peníze, které v dané chvíli máte ve hře, rozdělí je podle ratingů a
 vydělí toto číslo součtem investic ve hře. V souboru investiční strategie se to vyjadřuje následujícím způsobem:
 
 Řádek `targetShare.AA = 0.15` říká, že investice s ratingem A+ by měly zastávat 15 % portfolia. Stejným způsobem můžete
@@ -36,11 +36,11 @@ libovolně dlouhou dobou splácení.
 
 ### Výše investice do jednotlivé půjčky
 
-ZonkyBot umožňuje ve strategii nakonfigurovat maximální velikost investice, a to dvěma způsoby. Jednak uvedením absolutní
+RoboZonky umožňuje ve strategii nakonfigurovat maximální velikost investice, a to dvěma způsoby. Jednak uvedením absolutní
 maximální částky, kterou může do jedné půjčky investovat. Druhak uvedením maximálního podílu, který vaše investice může
 činit na celkové výši úveru.
 
-Obě tato kritéria se převedou do částky, kterou ZonkyBot investuje do úvěrů, takto:
+Obě tato kritéria se převedou do částky, kterou RoboZonky investuje do úvěrů, takto:
 * Vezměte v úvahu úvěr o výši 100.000 Kč s ratingem A*. V peněžence máte 330 Kč.
 * Strategie definuje maximální podíl na úvěru 1 %. Maximální investice tedy činí 1000 Kč.
 * Strategie ale zároveň definuje absolutní maximální velikost investice, a to 400 Kč.
@@ -53,14 +53,14 @@ Tato kritéria se ve strategii definují následujícím způsobem:
 * `maximumLoanShare.AAAA = 0.1` říká, že maximální podíl na investici s ratingem A* smí být 10 %.
 * `maximumLoanAmount.default = 400` říká, že maximální částka pro jakoukoliv investici je 400 Kč.
 
-ZonkyBot nikdy nepřekročí při investování zadanou absolutní maximální částku. Pokud by se snad stalo, že maximální výše investice vyjde nižší než 200 Kč - tj. menší než nejmenší možná investice na Zonky - nebude ZonkyBot do takového úvěru investovat.
+RoboZonky nikdy nepřekročí při investování zadanou absolutní maximální částku. Pokud by se snad stalo, že maximální výše investice vyjde nižší než 200 Kč - tj. menší než nejmenší možná investice na Zonky - nebude RoboZonky do takového úvěru investovat.
 
 ### Preferovaná délka doby splácení
 
-Řekněme, že ZonkyBot našel na tržišti dvě půjčky nějakého konkrétního ratingu a nyní rozhoduje, do které z nich
-investovat první. Řádek `preferLongerTerms.default = true` způsobí, že ZonkyBot jako první investuje do té půjčky, která
+Řekněme, že RoboZonky našel na tržišti dvě půjčky nějakého konkrétního ratingu a nyní rozhoduje, do které z nich
+investovat první. Řádek `preferLongerTerms.default = true` způsobí, že RoboZonky jako první investuje do té půjčky, která
 má delší dobu splácení. Řádek `preferLongerTerms.default = false` bude mít za důsledek pravý opak.
 
-A to je vše, vážení investoři! S takhle definovanou strategií už můžete pustit ZonkyBota na tržiště a vesele jej nechat
+A to je vše, vážení investoři! S takhle definovanou strategií už můžete pustit RoboZonky na tržiště a vesele jej nechat
 rozhodovat za vás. Hodně štěstí!
 

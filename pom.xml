@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.github.triceo.zonkybot</groupId>
-    <artifactId>zonkybot-parent</artifactId>
+    <groupId>com.github.triceo.robozonky</groupId>
+    <artifactId>robozonky-parent</artifactId>
     <version>1.0.0.CR1-SNAPSHOT</version>
     <modules>
-        <module>zonkybot-core</module>
-        <module>zonkybot-app</module>
+        <module>robozonky-core</module>
+        <module>robozonky-app</module>
     </modules>
     <packaging>pom</packaging>
-    <name>Zonkybot: Easy automated investing with Zonky</name>
+    <name>RoboZonky: Easy automated investing with Zonky</name>
     <description>Automated investing on Zonky. Define investment strategy, run repeatedly, profit.</description>
-    <url>https://triceo.github.io/zonkybot/</url>
+    <url>https://triceo.github.io/robozonky/</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,13 +23,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.github.triceo.zonkybot</groupId>
-                <artifactId>zonkybot-core</artifactId>
+                <groupId>com.github.triceo.robozonky</groupId>
+                <artifactId>robozonky-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.triceo.zonkybot</groupId>
-                <artifactId>zonkybot-app</artifactId>
+                <groupId>com.github.triceo.robozonky</groupId>
+                <artifactId>robozonky-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -197,14 +197,14 @@
         </pluginManagement>
     </build>
     <scm>
-        <url>git@github.com:triceo/zonkybot.git</url>
-        <connection>scm:git:git@github.com:triceo/zonkybot.git</connection>
-        <developerConnection>scm:git:git@github.com:triceo/zonkybot.git</developerConnection>
+        <url>git@github.com:triceo/robozonky.git</url>
+        <connection>scm:git:git@github.com:triceo/robozonky.git</connection>
+        <developerConnection>scm:git:git@github.com:triceo/robozonky.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/triceo/zonkybot/issues</url>
+        <url>https://github.com/triceo/robozonky/issues</url>
     </issueManagement>
     <developers>
         <developer>
@@ -224,7 +224,7 @@
     </licenses>
     <ciManagement>
         <system>travis</system>
-        <url>https://travis-ci.org/triceo/zonkybot</url>
+        <url>https://travis-ci.org/triceo/robozonky</url>
     </ciManagement>
     <distributionManagement>
         <snapshotRepository>
