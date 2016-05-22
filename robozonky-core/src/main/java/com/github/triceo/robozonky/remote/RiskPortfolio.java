@@ -23,6 +23,10 @@ public class RiskPortfolio {
     private int unpaid, paid, due, totalAmount;
     private Rating rating;
 
+    RiskPortfolio() {
+        // for JAXB
+    }
+
     public RiskPortfolio(final Rating rating, final int paid, final int unpaid, final int due, final int totalAmount) {
         this.rating = rating;
         this.paid = paid;
