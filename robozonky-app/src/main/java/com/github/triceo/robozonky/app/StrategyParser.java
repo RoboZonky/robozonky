@@ -34,7 +34,6 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO implement over-investing in a rating
 class StrategyParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyParser.class);

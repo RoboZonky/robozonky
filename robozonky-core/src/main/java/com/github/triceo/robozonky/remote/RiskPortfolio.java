@@ -21,7 +21,15 @@ import javax.xml.bind.annotation.XmlElement;
 public class RiskPortfolio {
 
     private int unpaid, paid, due, totalAmount;
-    private String rating;
+    private Rating rating;
+
+    public RiskPortfolio(final Rating rating, final int paid, final int unpaid, final int due, final int totalAmount) {
+        this.rating = rating;
+        this.paid = paid;
+        this.unpaid = unpaid;
+        this.due = due;
+        this.totalAmount = totalAmount;
+    }
 
     @XmlElement
     public int getUnpaid() {
@@ -44,7 +52,7 @@ public class RiskPortfolio {
     }
 
     @XmlElement
-    public String getRating() {
+    public Rating getRating() {
         return rating;
     }
 

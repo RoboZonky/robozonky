@@ -38,13 +38,13 @@ public class StrategyBuilder {
         }
         individualStrategies.put(r,
                 new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare, preferLongerTerms));
-        StrategyBuilder.LOGGER.debug("Adding strategy for rating '{}'.", r.getDescription());
-        StrategyBuilder.LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getDescription(), targetShare);
-        StrategyBuilder.LOGGER.debug("Range of acceptable investment terms for rating '{}' is <{}, {}> months.", r.getDescription(),
+        StrategyBuilder.LOGGER.debug("Adding strategy for rating '{}'.", r.getCode());
+        StrategyBuilder.LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getCode(), targetShare);
+        StrategyBuilder.LOGGER.debug("Range of acceptable investment terms for rating '{}' is <{}, {}> months.", r.getCode(),
                 minTerm == -1 ? 0 : minTerm, maxTerm == -1 ? "+inf" : maxTerm);
-        StrategyBuilder.LOGGER.debug("Maximum investment amount for rating '{}' is {} CZK.", r.getDescription(), maxLoanAmount);
-        StrategyBuilder.LOGGER.debug("Maximum investment share for rating '{}' is {}.", r.getDescription(), maxLoanShare);
-        StrategyBuilder.LOGGER.debug("Rating '{}' will prefer longer terms.", r.getDescription());
+        StrategyBuilder.LOGGER.debug("Maximum investment amount for rating '{}' is {} CZK.", r.getCode(), maxLoanAmount);
+        StrategyBuilder.LOGGER.debug("Maximum investment share for rating '{}' is {}.", r.getCode(), maxLoanShare);
+        StrategyBuilder.LOGGER.debug("Rating '{}' will prefer longer terms.", r.getCode());
         return this;
     }
 

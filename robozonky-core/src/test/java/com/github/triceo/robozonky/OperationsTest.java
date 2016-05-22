@@ -15,46 +15,144 @@
  */
 package com.github.triceo.robozonky;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.remote.RiskPortfolio;
+import com.github.triceo.robozonky.remote.Statistics;
+import com.github.triceo.robozonky.remote.Wallet;
+import com.github.triceo.robozonky.remote.ZonkyAPI;
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class OperationsTest {
 
-    private static Investment getMockInvestmentWithId(final int id) {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getLoanId()).thenReturn(id);
-        return i;
+    private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
+                                                           final BigDecimal ratingC) {
+        final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
+        map.put(Rating.A, ratingA);
+        map.put(Rating.B, ratingB);
+        map.put(Rating.C, ratingC);
+        return Collections.unmodifiableMap(map);
+    }
+
+    private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
+        Assertions.assertThat(result).hasSize(ratingsOrderedDown.length);
+        if (ratingsOrderedDown.length < 2) {
+            return;
+        } else if (ratingsOrderedDown.length > 3) {
+            throw new IllegalStateException("This should never happen in the test.");
+        }
+        final Rating first = result.get(0);
+        final Rating last = result.get(result.size() - 1);
+        Assertions.assertThat(first).isGreaterThan(last);
+        Assertions.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
+        Assertions.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
     }
 
     @Test
-    public void mergingTwoInvestmentCollectinsWorksProperly() {
-        final Investment I1 = OperationsTest.getMockInvestmentWithId(1);
-        final Investment I2 = OperationsTest.getMockInvestmentWithId(2);
-        final Investment I3 = OperationsTest.getMockInvestmentWithId(3);
+    public void properRankingOfRatings() {
+        final BigDecimal targetShareA = BigDecimal.valueOf(0.001);
+        final BigDecimal targetShareB = targetShareA.multiply(BigDecimal.TEN);
+        final BigDecimal targetShareC = targetShareB.multiply(BigDecimal.TEN);
 
-        // two identical investments will result in one
-        final List<Investment> a = Arrays.asList(I1, I2);
-        final List<Investment> b = Arrays.asList(I2, I3);
-        Assertions.assertThat(Operations.mergeInvestments(a, b)).containsExactly(I1, I2, I3);
+        // prepare the mocks of strategy and context
+        final InvestmentStrategy strategy = Mockito.mock(InvestmentStrategy.class);
+        Mockito.when(strategy.getTargetShare(Rating.A)).thenReturn(targetShareA);
+        Mockito.when(strategy.getTargetShare(Rating.B)).thenReturn(targetShareB);
+        Mockito.when(strategy.getTargetShare(Rating.C)).thenReturn(targetShareC);
+        final OperationsContext ctx = Mockito.mock(OperationsContext.class);
+        Mockito.when(ctx.getStrategy()).thenReturn(strategy);
 
-        // standard merging also works
-        final List<Investment> c = Arrays.asList(I3);
-        Assertions.assertThat(Operations.mergeInvestments(a, c)).containsExactly(I1, I2, I3);
+        // all ratings have zero share; C > B > A
+        Map<Rating, BigDecimal> tmp = OperationsTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.C, Rating.B, Rating.A);
 
-        // reverse-order merging works
-        final List<Investment> d = Arrays.asList(I2, I1);
-        Assertions.assertThat(Operations.mergeInvestments(a, d)).containsExactly(I1, I2);
+        // A only; B, C overinvested
+        tmp = OperationsTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.TEN);
+        OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.A);
 
-        // two non-identical loans with same ID are merged in the order in which they came
-        final Investment I3_2 = OperationsTest.getMockInvestmentWithId(3);
-        final List<Investment> e = Arrays.asList(I3_2);
-        Assertions.assertThat(Operations.mergeInvestments(c, e)).containsExactly(I3);
-        Assertions.assertThat(Operations.mergeInvestments(e, c)).containsExactly(I3_2);
+        // B > C > A
+        tmp = OperationsTest.prepareShareMap(BigDecimal.valueOf(0.00095), BigDecimal.ZERO, BigDecimal.valueOf(0.099));
+        OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.B, Rating.C, Rating.A);
+    }
+
+    private static List<Investment> getMockInvestmentWithBalance(final int loanAmount) {
+        final Investment i = Mockito.mock(Investment.class);
+        Mockito.when(i.getAmount()).thenReturn(loanAmount);
+        return Collections.singletonList(i);
+    }
+
+    @Test
+    public void properBalanceRetrievalInDryRun() {
+        // prepare context
+        final BigDecimal dryRunBalance = BigDecimal.valueOf(12345);
+        final OperationsContext ctx = Mockito.mock(OperationsContext.class);
+        Mockito.when(ctx.isDryRun()).thenReturn(true);
+        Mockito.when(ctx.getDryRunInitialBalance()).thenReturn(dryRunBalance.intValue());
+        // test operation
+        Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(dryRunBalance);
+        final int amount = 1;
+        final BigDecimal newBalance = dryRunBalance.subtract(BigDecimal.valueOf(amount));
+        Assertions.assertThat(Operations.getAvailableBalance(ctx, OperationsTest.getMockInvestmentWithBalance(amount)))
+                .isEqualTo(newBalance);
+    }
+
+    @Test
+    public void properBalanceRetrievalInNormalMode() {
+        // prepare context
+        final BigDecimal remoteBalance = BigDecimal.valueOf(12345);
+        final Wallet wallet = new Wallet(-1, -1, BigDecimal.valueOf(100000), remoteBalance);
+        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
+        Mockito.when(api.getWallet()).thenReturn(wallet);
+        final OperationsContext ctx = Mockito.mock(OperationsContext.class);
+        Mockito.when(ctx.getAPI()).thenReturn(api);
+        // test operation
+        Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
+    }
+
+    private static void assertProperRatingShare(final Map<Rating, BigDecimal> result, final Rating r, final int amount,
+                                                final int total) {
+        final BigDecimal expectedShare
+                = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_EVEN);
+        Assertions.assertThat(result.get(r)).isEqualTo(expectedShare);
+    }
+
+    @Test
+    public void properRatingShareCalculation() {
+        // mock necessary structures
+        final int amountAA = 300, amountB = 200, amountD = 100;
+        final int totalPie = amountAA + amountB + amountD;
+        final RiskPortfolio riskAA = new RiskPortfolio(Rating.AA, -1, amountAA, -1, -1);
+        final RiskPortfolio riskB = new RiskPortfolio(Rating.B, -1, amountB, -1, -1);
+        final RiskPortfolio riskD = new RiskPortfolio(Rating.D, -1, amountD, -1, -1);
+        final Statistics stats = Mockito.mock(Statistics.class);
+        Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(riskAA, riskB, riskD));
+
+        // check standard operation
+        Map<Rating, BigDecimal> result = Operations.calculateSharesPerRating(stats, Collections.emptyList());
+        OperationsTest.assertProperRatingShare(result, Rating.AA, amountAA, totalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.B, amountB, totalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.D, amountD, totalPie);
+
+        // check operation with offline investments
+        final int increment = 200, newTotalPie = totalPie + increment;
+        final List<Investment> investments = OperationsTest.getMockInvestmentWithBalance(increment);
+        final Investment i = investments.get(0);
+        Mockito.when(i.getRating()).thenReturn(Rating.D);
+        result = Operations.calculateSharesPerRating(stats, investments);
+        OperationsTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.D, amountD + increment, newTotalPie);
     }
 
 }

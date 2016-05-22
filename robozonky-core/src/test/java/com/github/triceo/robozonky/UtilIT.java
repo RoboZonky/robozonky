@@ -20,11 +20,11 @@ package com.github.triceo.robozonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class OperationsIT {
+public class UtilIT {
 
     @Test
     public void testRoboZonkyBotVersion() {
-        final String version = Operations.getRoboZonkyVersion();
+        final String version = Util.getRoboZonkyVersion();
         Assertions.assertThat(version).isNotEqualTo(Operations.ZONKY_VERSION_UNDETECTED);
         Assertions.assertThat(version).isNotEqualTo(Operations.ZONKY_VERSION_UNKNOWN);
     }
