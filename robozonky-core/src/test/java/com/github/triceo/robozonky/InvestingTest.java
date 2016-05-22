@@ -236,7 +236,7 @@ public class InvestingTest {
                 BigDecimal.valueOf(1000));
         Assertions.assertThat(result).isNotEmpty();
         Assertions.assertThat(result.get().getLoanId()).isEqualTo(shortLoanA.getId());
-        // test that rating B will invest longer loan
+        // test that rating B, which is newly underinvested, will invest longer loan
         final RiskPortfolio newRiskA = new RiskPortfolio(Rating.A, -1, 1000, -1, -1);
         final RiskPortfolio newRiskB = new RiskPortfolio(Rating.B, -1, 0, -1, -1);
         Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(newRiskA, newRiskB));
