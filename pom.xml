@@ -141,28 +141,7 @@
                                         <limit>
                                             <counter>COMPLEXITY</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.60</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                            </rules>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integration-test-check</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>integration-test</phase>
-                        <configuration>
-                            <rules>
-                                <rule>
-                                    <element>BUNDLE</element>
-                                    <limits>
-                                        <limit>
-                                            <counter>COMPLEXITY</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
+                                            <minimum>0.41</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -287,7 +266,7 @@
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${surefire.version}</version>
                     <configuration>
-                        <argLine>${argLine} -Xmx128m</argLine> <!-- ${argLine} is there for JaCoCo -->
+                        <argLine>-Xmx128m</argLine>
                         <forkCount>1C</forkCount>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <reuseForks>false</reuseForks>

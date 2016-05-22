@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    static final String EXIT_ON_HELP = "robozonky.do.not.exit";
 
     private static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -77,7 +79,9 @@ public class App {
         final HelpFormatter formatter = new HelpFormatter();
         final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
         formatter.printHelp(scriptName, null, App.OPTIONS, exitWithError ? "Error: " + message : message, true);
-        App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
+        if (!System.getProperty(App.EXIT_ON_HELP, "false").equals("true")) {
+            App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
+        }
     }
 
     private static CommandLine parseCommandLine(final String... args) {
@@ -90,10 +94,11 @@ public class App {
         throw new IllegalStateException("This should not have happened.");
     }
 
-    private static AppContext processCommandLine(final String... args) {
+    static AppContext processCommandLine(final String... args) {
         final CommandLine cmd = App.parseCommandLine(args);
         if (cmd.hasOption(App.OPTION_HELP.getOpt())) { // user requested help
             App.printHelpAndExit("", false);
+            return null; // just in case exit control property is tests
         }
         App.LOGGER.info("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
         // standard workflow
@@ -117,6 +122,7 @@ public class App {
     public static void main(final String... args) {
         try {
             App.letsGo(App.processCommandLine(args)); // and start actually working with Zonky
+            App.exit(ReturnCode.OK);
         } catch (final Exception ex) {
             App.LOGGER.error("Unexpected error." , ex);
             App.exit(ReturnCode.ERROR_UNEXPECTED);
@@ -139,7 +145,7 @@ public class App {
         }
     }
 
-    private static void letsGo(final AppContext ctx) {
+    static void letsGo(final AppContext ctx) {
         App.LOGGER.info("===== RoboZonky at your service! =====");
         final CommandLine cmd = ctx.getCommandLine();
         final String username = cmd.getOptionValue(App.OPTION_USERNAME.getOpt());
@@ -162,12 +168,15 @@ public class App {
             }
         }
         App.LOGGER.info("===== RoboZonky out. =====");
-        App.exit(ReturnCode.OK);
     }
 
     private static Collection<Investment> operate(final String username, final String password,
                                                   final InvestmentStrategy strategy, final boolean dryRun,
                                                   final int startingBalance) {
+        if (dryRun && startingBalance < Operations.MINIMAL_INVESTMENT_ALLOWED) {
+            App.LOGGER.info("Starting balance in dry run is lower than minimum, no need to execute at all.");
+            return Collections.emptyList();
+        }
         final OperationsContext oc = Operations.login(username, password, strategy, dryRun, startingBalance);
         final Collection<Investment> result = Operations.invest(oc);
         Operations.logout(oc);
