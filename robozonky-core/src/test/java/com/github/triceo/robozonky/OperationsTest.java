@@ -111,8 +111,7 @@ public class OperationsTest {
     public void properBalanceRetrievalInNormalMode() {
         // prepare context
         final BigDecimal remoteBalance = BigDecimal.valueOf(12345);
-        final Wallet wallet = Mockito.mock(Wallet.class);
-        Mockito.when(wallet.getAvailableBalance()).thenReturn(remoteBalance);
+        final Wallet wallet = new Wallet(-1, -1, BigDecimal.valueOf(100000), remoteBalance);
         final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
         Mockito.when(api.getWallet()).thenReturn(wallet);
         final OperationsContext ctx = Mockito.mock(OperationsContext.class);

@@ -28,6 +28,14 @@ public class Wallet {
     @XmlTransient
     private Object account;
 
+    public Wallet(final int id, final int variableSymbol, final BigDecimal balance, final BigDecimal availableBalance) {
+        this.id = id;
+        this.availableBalance = availableBalance;
+        this.balance = balance;
+        this.variableSymbol = variableSymbol;
+        this.blockedBalance = balance.subtract(availableBalance);
+    }
+
     public int getId() {
         return id;
     }

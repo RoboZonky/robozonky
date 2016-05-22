@@ -79,6 +79,9 @@ public class Operations {
             amounts.put(r, amounts.get(r).add(investment));
         });
         final BigDecimal total = Util.sum(amounts.values());
+        if (total.compareTo(BigDecimal.ZERO) == 0) { // no ratings have any investments
+            return Collections.unmodifiableMap(amounts);
+        }
         final Map<Rating, BigDecimal> result = new EnumMap<>(Rating.class);
         amounts.forEach((rating, amount) -> result.put(rating, amount.divide(total, 4, RoundingMode.HALF_EVEN)));
         return Collections.unmodifiableMap(result);
