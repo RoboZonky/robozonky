@@ -20,6 +20,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -79,6 +80,8 @@ public class Operations {
                 Collectors.toMap(risk -> Rating.valueOf(risk.getRating()), risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );
         final Collection<Investment> investments = Operations.mergeInvestments(investmentsInZonky, investmentsInSession);
+        // make sure ratings are present even when there's 0 invested in them
+        Arrays.stream(Rating.values()).filter(r -> !amounts.containsKey(r)).forEach(r -> amounts.put(r, BigDecimal.ZERO));
         investments.forEach(previousInvestment -> {
             // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
             final Rating r = previousInvestment.getRating();
