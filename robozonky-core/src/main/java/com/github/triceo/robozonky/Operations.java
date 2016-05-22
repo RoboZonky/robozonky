@@ -142,10 +142,10 @@ public class Operations {
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private static Optional<Investment> actuallyInvest(final OperationsContext oc, final Rating r,
-                                                       final Future<Collection<Loan>> loansFuture,
-                                                       final List<Investment> investmentsInSession,
-                                                       final BigDecimal balance) {
+    static Optional<Investment> identifyLoanToInvest(final OperationsContext oc, final Rating r,
+                                                     final Future<Collection<Loan>> loansFuture,
+                                                     final List<Investment> investmentsInSession,
+                                                     final BigDecimal balance) {
         final Collection<Loan> loans;
         try {
             loans = loansFuture.get();
@@ -228,7 +228,7 @@ public class Operations {
         });
         for (final Rating r : mostWantedRatings) { // try to invest in a given rating
             final Optional<Investment> investment =
-                    Operations.actuallyInvest(oc, r, availableLoans.get(r), investmentsInSession, balance);
+                    Operations.identifyLoanToInvest(oc, r, availableLoans.get(r), investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
