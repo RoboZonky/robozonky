@@ -26,6 +26,9 @@ import java.util.concurrent.Future;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.remote.Ratings;
+import com.github.triceo.robozonky.remote.RiskPortfolio;
+import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.ZonkyAPI;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
@@ -186,21 +189,63 @@ public class InvestingTest {
                 .thenReturn(500);
         // mock API to perform loans just fine
         final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
-        final OperationsContext mockContext = Mockito.mock(OperationsContext.class);
-        Mockito.when(mockContext.getStrategy()).thenReturn(strategy);
-        Mockito.when(mockContext.isDryRun()).thenReturn(false);
-        Mockito.when(mockContext.getAPI()).thenReturn(api);
+        final OperationsContext context = new OperationsContext(api, strategy, false, -1, 2);
         // test preference for shorter terms
         Mockito.when(strategy.prefersLongerTerms(Mockito.any(Rating.class))).thenReturn(false);
-        InvestingTest.testLoanLength(mockContext, future, shortLoan);
+        InvestingTest.testLoanLength(context, future, shortLoan);
         // test preference for longer terms
         Mockito.when(strategy.prefersLongerTerms(Mockito.any(Rating.class))).thenReturn(true);
-        InvestingTest.testLoanLength(mockContext, future, longLoan);
+        InvestingTest.testLoanLength(context, future, longLoan);
         // mock API to perform no loans
         Mockito.doThrow(InterruptedException.class).when(api).invest(Mockito.any(Investment.class));
-        final Optional<Investment> result = Operations.identifyLoanToInvest(mockContext, null, future,
+        final Optional<Investment> result = Operations.identifyLoanToInvest(context, null, future,
                 Collections.emptyList(), BigDecimal.valueOf(1000));
         Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void rankLoansAndidentifyLoansAndInvest() throws Exception {
+        final Loan shortLoanA = InvestingTest.mockLoan(1, 100000.0, 10);
+        final Loan longLoanA = InvestingTest.mockLoan(2, 200000.0, 20);
+        final Loan shortLoanB = InvestingTest.mockLoan(3, 50000.0, 5);
+        final Loan longLoanB = InvestingTest.mockLoan(4, 300000.0, 25);
+        // mock strategy to return a default recommended investment amount on an acceptable loan
+        final InvestmentStrategy strategy = Mockito.mock(InvestmentStrategy.class);
+        Mockito.when(strategy.isAcceptable(Mockito.any(Loan.class))).thenReturn(true);
+        Mockito.when(strategy.recommendInvestmentAmount(Mockito.any(Loan.class), Mockito.any(BigDecimal.class)))
+                .thenReturn(500);
+        // mock API to perform loans just fine
+        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
+        // mock API to return loans we need
+        Mockito.when(strategy.prefersLongerTerms(Rating.A)).thenReturn(false);
+        Mockito.when(api.getLoans(Ratings.of(Rating.A), 200))
+                .thenReturn(Arrays.asList(shortLoanA, longLoanA));
+        Mockito.when(strategy.prefersLongerTerms(Rating.B)).thenReturn(true);
+        Mockito.when(api.getLoans(Ratings.of(Rating.B), 200))
+                .thenReturn(Arrays.asList(shortLoanB, longLoanB));
+        Mockito.when(strategy.getTargetShare(Rating.A)).thenReturn(BigDecimal.valueOf(0.01));
+        Mockito.when(strategy.getTargetShare(Rating.B)).thenReturn(BigDecimal.valueOf(0.01));
+        final OperationsContext ctx = new OperationsContext(api, strategy, false, -1, 2);
+        // test that rating A, which is underinvested, will invest shorter loan
+        final Statistics stats = Mockito.mock(Statistics.class);
+        final RiskPortfolio riskA = new RiskPortfolio(Rating.A, -1, 0, -1, -1);
+        final RiskPortfolio riskB = new RiskPortfolio(Rating.B, -1, 1000, -1, -1);
+        Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(riskA, riskB));
+        Mockito.when(api.getStatistics()).thenReturn(stats);
+        final Optional<Investment> result = Operations.identifyLoanToInvest(ctx, Collections.emptyList(),
+                BigDecimal.valueOf(1000));
+        Assertions.assertThat(result).isNotEmpty();
+        Assertions.assertThat(result.get().getLoanId()).isEqualTo(shortLoanA.getId());
+        // test that rating B will invest longer loan
+        final RiskPortfolio newRiskA = new RiskPortfolio(Rating.A, -1, 1000, -1, -1);
+        final RiskPortfolio newRiskB = new RiskPortfolio(Rating.B, -1, 0, -1, -1);
+        Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(newRiskA, newRiskB));
+        final Optional<Investment> newResult = Operations.identifyLoanToInvest(ctx, Collections.emptyList(),
+                BigDecimal.valueOf(1000));
+        Assertions.assertThat(newResult).isNotEmpty();
+        Assertions.assertThat(newResult.get().getLoanId()).isEqualTo(longLoanB.getId());
+        // finish
+        ctx.dispose();
     }
 
 }

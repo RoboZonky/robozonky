@@ -208,9 +208,9 @@ public class Operations {
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private static Optional<Investment> actuallyInvest(final OperationsContext oc,
-                                                       final List<Investment> investmentsInSession,
-                                                       final BigDecimal balance) {
+    static Optional<Investment> identifyLoanToInvest(final OperationsContext oc,
+                                                     final List<Investment> investmentsInSession,
+                                                     final BigDecimal balance) {
         final ZonkyAPI api = oc.getAPI();
         final Collection<Investment> investments = Util.mergeInvestments(
                 api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)), investmentsInSession);
@@ -256,7 +256,7 @@ public class Operations {
         BigDecimal availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
         Operations.LOGGER.info("RoboZonky starting account balance is {} CZK.", availableBalance);
         while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
-            final Optional<Investment> investment = Operations.actuallyInvest(oc, investmentsMade, availableBalance);
+            final Optional<Investment> investment = Operations.identifyLoanToInvest(oc, investmentsMade, availableBalance);
             if (investment.isPresent()) {
                 investmentsMade.add(investment.get());
                 availableBalance = Operations.getAvailableBalance(oc, investmentsMade);

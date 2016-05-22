@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,5 +52,18 @@ public class Ratings {
     @Override
     public String toString() {
         return ratings.stream().collect(Collectors.mapping(Rating::name, Collectors.joining("\", \"", "[\"", "\"]")));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ratings ratings1 = (Ratings) o;
+        return Objects.equals(ratings, ratings1.ratings);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ratings);
     }
 }
