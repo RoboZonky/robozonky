@@ -143,7 +143,11 @@ public class OperationsTest {
         OperationsTest.assertProperRatingShare(result, Rating.AA, amountAA, totalPie);
         OperationsTest.assertProperRatingShare(result, Rating.B, amountB, totalPie);
         OperationsTest.assertProperRatingShare(result, Rating.D, amountD, totalPie);
-
+        OperationsTest.assertProperRatingShare(result, Rating.AAAAA, 0, totalPie); // test other ratings included
+        OperationsTest.assertProperRatingShare(result, Rating.AAAA, 0, totalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.AAA, 0, totalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.A, 0, totalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.C, 0, totalPie);
         // check operation with offline investments
         final int increment = 200, newTotalPie = totalPie + increment;
         final List<Investment> investments = OperationsTest.getMockInvestmentWithBalance(increment);
@@ -153,6 +157,11 @@ public class OperationsTest {
         OperationsTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
         OperationsTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
         OperationsTest.assertProperRatingShare(result, Rating.D, amountD + increment, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.AAAAA, 0, newTotalPie); // test other ratings included
+        OperationsTest.assertProperRatingShare(result, Rating.AAAA, 0, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.AAA, 0, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.A, 0, newTotalPie);
+        OperationsTest.assertProperRatingShare(result, Rating.C, 0, newTotalPie);
     }
 
 }

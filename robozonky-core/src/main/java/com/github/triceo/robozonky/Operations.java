@@ -18,6 +18,7 @@ package com.github.triceo.robozonky;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -72,8 +73,10 @@ public class Operations {
         final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
                 Collectors.toMap(RiskPortfolio::getRating, risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );
+        // make sure ratings are present even when there's 0 invested in them
+        Arrays.stream(Rating.values()).filter(r -> !amounts.containsKey(r)).forEach(r -> amounts.put(r, BigDecimal.ZERO));
+        // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {
-            // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
             final Rating r = previousInvestment.getRating();
             final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getAmount());
             amounts.put(r, amounts.get(r).add(investment));
@@ -179,8 +182,7 @@ public class Operations {
      * @param currentShare Current share of investments in a given rating.
      * @return Ratings in the order of decreasing demand. Over-invested ratings not present.
      */
-    static List<Rating> rankRatingsByDemand(final OperationsContext oc,
-                                                                       final Map<Rating, BigDecimal> currentShare) {
+    static List<Rating> rankRatingsByDemand(final OperationsContext oc, final Map<Rating, BigDecimal> currentShare) {
         final MultiValuedMap<BigDecimal, Rating> mostWantedRatings = new HashSetValuedHashMap<>();
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {

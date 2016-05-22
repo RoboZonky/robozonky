@@ -232,8 +232,7 @@ public class InvestingTest {
         Mockito.when(strategy.prefersLongerTerms(Rating.B)).thenReturn(true);
         Mockito.when(api.getLoans(Ratings.of(Rating.B), 200))
                 .thenReturn(Arrays.asList(shortLoanB, longLoanB));
-        Mockito.when(strategy.getTargetShare(Rating.A)).thenReturn(BigDecimal.valueOf(0.01));
-        Mockito.when(strategy.getTargetShare(Rating.B)).thenReturn(BigDecimal.valueOf(0.01));
+        Mockito.when(strategy.getTargetShare(Mockito.any(Rating.class))).thenReturn(BigDecimal.valueOf(0.01));
         final OperationsContext ctx = new OperationsContext(api, strategy, false, -1, 2);
         // test that rating A, which is underinvested, will invest shorter loan
         final Statistics stats = Mockito.mock(Statistics.class);
@@ -280,6 +279,12 @@ public class InvestingTest {
         // both ratings are not represented at all; A is asking for 60 % representation, B for 30 %
         Mockito.when(strategy.getTargetShare(Rating.A)).thenReturn(BigDecimal.valueOf(0.6));
         Mockito.when(strategy.getTargetShare(Rating.B)).thenReturn(BigDecimal.valueOf(0.3));
+        for (final Rating r: Rating.values()) { // mock values for all other ratings, to prevent NPEs in test
+            if (r == Rating.A || r == Rating.B) {
+                continue;
+            }
+            Mockito.when(strategy.getTargetShare(r)).thenReturn(BigDecimal.valueOf(0.01));
+        }
         final Statistics stats = Mockito.mock(Statistics.class);
         final RiskPortfolio riskA = new RiskPortfolio(Rating.A, -1, 0, -1, -1);
         final RiskPortfolio riskB = new RiskPortfolio(Rating.B, -1, 0, -1, -1);
