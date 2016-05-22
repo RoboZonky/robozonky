@@ -92,9 +92,8 @@ public class Operations {
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private static Optional<Investment> makeInvestment(final OperationsContext oc, final Loan l,
-                                                       final List<Investment> investmentsInSession,
-                                                       final BigDecimal balance) {
+    static Optional<Investment> actuallyInvest(final OperationsContext oc, final Loan l,
+                                               final List<Investment> investmentsInSession, final BigDecimal balance) {
         if (Util.isLoanPresent(l, investmentsInSession)) {
             Operations.LOGGER.info("RoboZonky already invested in loan '{}', skipping. May only happen in dry runs.", l);
             return Optional.empty();
@@ -110,6 +109,10 @@ public class Operations {
             Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
                     l, resultingInvestment);
             return Optional.empty();
+        } else if (resultingInvestment > balance.intValue()) {
+            Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) more than {} CZK balance.",
+                    l, resultingInvestment, balance);
+            return Optional.empty();
         }
         // and now actually invest
         final Investment investment = new Investment(l, resultingInvestment);
@@ -117,13 +120,14 @@ public class Operations {
             Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", resultingInvestment, l);
             return Optional.of(investment);
         } else {
-            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}'.", resultingInvestment, l);
+            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}' on balance of {} CZK.",
+                    resultingInvestment, l, balance);
             try {
                 oc.getAPI().invest(investment);
-                Operations.LOGGER.warn("Investment operating succeeded.");
+                Operations.LOGGER.warn("Investment operation succeeded.");
                 return Optional.of(investment);
             } catch (final Exception ex) {
-                Operations.LOGGER.warn("Investment operating failed.", ex);
+                Operations.LOGGER.warn("Investment operation failed.", ex);
                 return Optional.empty();
             }
         }
@@ -138,7 +142,7 @@ public class Operations {
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private static Optional<Investment> makeInvestment(final OperationsContext oc, final Rating r,
+    private static Optional<Investment> actuallyInvest(final OperationsContext oc, final Rating r,
                                                        final Future<Collection<Loan>> loansFuture,
                                                        final List<Investment> investmentsInSession,
                                                        final BigDecimal balance) {
@@ -158,7 +162,7 @@ public class Operations {
         Operations.LOGGER.info("Investment strategy for rating '{}' prefers {} term loans.", r,
                 prefersLongTerm ? "longer" : "shorter");
         for (final Loan l : Util.sortLoansByTerm(loans, prefersLongTerm)) {
-            final Optional<Investment> investment = Operations.makeInvestment(oc, l, investmentsInSession, balance);
+            final Optional<Investment> investment = Operations.actuallyInvest(oc, l, investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -204,7 +208,7 @@ public class Operations {
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private static Optional<Investment> makeInvestment(final OperationsContext oc,
+    private static Optional<Investment> actuallyInvest(final OperationsContext oc,
                                                        final List<Investment> investmentsInSession,
                                                        final BigDecimal balance) {
         final ZonkyAPI api = oc.getAPI();
@@ -224,7 +228,7 @@ public class Operations {
         });
         for (final Rating r : mostWantedRatings) { // try to invest in a given rating
             final Optional<Investment> investment =
-                    Operations.makeInvestment(oc, r, availableLoans.get(r), investmentsInSession, balance);
+                    Operations.actuallyInvest(oc, r, availableLoans.get(r), investmentsInSession, balance);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -252,7 +256,7 @@ public class Operations {
         BigDecimal availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
         Operations.LOGGER.info("RoboZonky starting account balance is {} CZK.", availableBalance);
         while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
-            final Optional<Investment> investment = Operations.makeInvestment(oc, investmentsMade, availableBalance);
+            final Optional<Investment> investment = Operations.actuallyInvest(oc, investmentsMade, availableBalance);
             if (investment.isPresent()) {
                 investmentsMade.add(investment.get());
                 availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
@@ -264,6 +268,7 @@ public class Operations {
         return Collections.unmodifiableList(investmentsMade);
     }
 
+    // FIXME what if login fails?
     public static OperationsContext login(final String username, final String password,
                                           final InvestmentStrategy strategy, final boolean dryRun,
                                           final int dryRunInitialBalance) {
