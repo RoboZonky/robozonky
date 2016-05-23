@@ -28,6 +28,10 @@ public class Wallet {
     @XmlTransient
     private Object account;
 
+    private Wallet() {
+        // for JAXB
+    }
+
     public Wallet(final int id, final int variableSymbol, final BigDecimal balance, final BigDecimal availableBalance) {
         this.id = id;
         this.availableBalance = availableBalance;
