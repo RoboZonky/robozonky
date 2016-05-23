@@ -8,6 +8,9 @@ http://maven.apache.org/changes/1.0.0 ">
   </properties>
   <body> <!-- Features first, then bugfixes, then updates. -->
     <release version="1.1.0.Beta1" date="?" description="Small useful features and lots of testing.">
+      <action issue="6" dev="triceo" type="add">
+        RoboZonky now allows you to over-invest into a particular rating, if there are enough such loans available.
+      </action>
       <action issue="5" dev="triceo" type="add">
         RoboZonky now allows you to invest into a particular loan, ignoring rest of the strategy.
       </action>
