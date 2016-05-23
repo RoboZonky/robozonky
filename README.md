@@ -84,4 +84,4 @@ nastane jedna z několika věcí:
 * Každý bude mít robota, a všichni tak budou mít stejné šance.
 * Zonky roboty zakáže, a všichni tak budou mít stejné šance.
 
-Každá z těchto možností je vítaná, a RoboZonky je můj příspěvek k jejich naplnění.
+Každá z těchto možností je vítaná, a _RoboZonky_ je můj příspěvek k jejich naplnění.
