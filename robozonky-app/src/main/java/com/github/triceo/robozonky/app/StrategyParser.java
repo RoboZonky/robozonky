@@ -103,9 +103,11 @@ class StrategyParser {
                     preferLongerTerms);
         }
         if (sumShares.compareTo(BigDecimal.ONE) > 0) {
-            throw new IllegalStateException("Sum of target shares is larger than 1: " + sumShares);
+            StrategyParser.LOGGER.warn("Sum of target shares ({}) is larger than 1. Some ratings are likely to be " +
+                    "over-represented.", sumShares);
         } else if (sumShares.compareTo(BigDecimal.ONE) < 0) {
-            StrategyParser.LOGGER.warn("Sum of target shares ({}) does not equal 1.", sumShares);
+            StrategyParser.LOGGER.warn("Sum of target shares ({}) is smaller than 1. You are likely to leave money " +
+                    "unspent in your wallet.", sumShares);
         }
         return strategies.build();
     }
