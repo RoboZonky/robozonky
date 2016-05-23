@@ -23,19 +23,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,82 +38,89 @@ public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     static final String EXIT_ON_HELP = "robozonky.do.not.exit";
 
-    private static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
-            .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
-            .build();
-    private static final Option OPTION_USERNAME = Option.builder("u").hasArg().longOpt("username")
-            .argName("Zonky username").desc("Used to connect to the Zonky server.").build();
-    private static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password")
-            .argName("Zonky password").desc("Used to connect to the Zonky server.").build();
-    private static final Option OPTION_DRY_RUN = Option.builder("d").hasArg().optionalArg(true).
-            argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
-            .build();
-    private static final Option OPTION_HELP = Option.builder("h").longOpt("help").argName("Show help")
-            .desc("Show this help message and quit.").build();
-
-    private static final Options OPTIONS;
-    static {
-        final OptionGroup og = new OptionGroup();
-        og.setRequired(true);
-        og.addOption(App.OPTION_HELP);
-        og.addOption(App.OPTION_STRATEGY);
-        OPTIONS = new Options();
-        App.OPTIONS.addOptionGroup(og);
-        App.OPTIONS.addOption(App.OPTION_DRY_RUN);
-        App.OPTIONS.addOption(App.OPTION_PASSWORD);
-        App.OPTIONS.addOption(App.OPTION_USERNAME);
-    }
 
     private static void exit(final ReturnCode returnCode) {
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         System.exit(returnCode.getCode());
     }
 
-    private static void printHelpAndExit(final String message, final boolean exitWithError) {
-        final HelpFormatter formatter = new HelpFormatter();
-        final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
-        formatter.printHelp(scriptName, null, App.OPTIONS, exitWithError ? "Error: " + message : message, true);
+    private static void printHelpAndExit(final CommandLineInterface cli, final String message, final boolean exitWithError) {
+        cli.printHelpAndExit(message, exitWithError);
         if (!System.getProperty(App.EXIT_ON_HELP, "false").equals("true")) {
             App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
         }
     }
 
-    private static CommandLine parseCommandLine(final String... args) {
-        final CommandLineParser parser = new DefaultParser();
-        try {
-            return parser.parse(App.OPTIONS, args);
-        } catch (final Exception ex) { // for some reason, the CLI could not be parsed
-            App.printHelpAndExit(ex.getMessage(), true);
+    private static AppContext prepareStrategyDrivenMode(final CommandLineInterface cli) {
+        final Optional<String> username = cli.getUsername();
+        final Optional<String> password = cli.getPassword();
+        final Optional<Integer> loanAmount = cli.getLoanAmount();
+        if (!username.isPresent()) {
+            App.printHelpAndExit(cli, "Username must be provided.", true);
+        } else if (!password.isPresent()) {
+            App.printHelpAndExit(cli, "Password must be provided.", true);
+        } else if (loanAmount.isPresent()) {
+            App.printHelpAndExit(cli, "Loan amount makes no sense in this context.", true);
         }
-        throw new IllegalStateException("This should not have happened.");
+        final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
+        if (!strategyFilePath.isPresent()) {
+            App.printHelpAndExit(cli, "Strategy file must be provided.", true);
+        }
+        final File strategyConfig = new File(strategyFilePath.get());
+        if (!strategyConfig.canRead()) {
+            App.printHelpAndExit(cli, "Investment strategy file must be readable.", true);
+        }
+        try {
+            if (cli.isDryRun()) {
+                return new AppContext(username.get(), password.get(), StrategyParser.parse(strategyConfig),
+                        cli.getDryRunBalance());
+            } else {
+                return new AppContext(username.get(), password.get(), StrategyParser.parse(strategyConfig));
+            }
+        } catch (final Exception e) {
+            App.printHelpAndExit(cli, "Failed parsing strategy: " + e.getMessage(), true);
+            return null;
+        }
+    }
+
+    private static AppContext prepareUserDrivenMode(final CommandLineInterface cli) {
+        final Optional<String> username = cli.getUsername();
+        final Optional<String> password = cli.getPassword();
+        final Optional<Integer> loanId = cli.getLoanId();
+        final Optional<Integer> loanAmount = cli.getLoanAmount();
+        if (!username.isPresent()) {
+            App.printHelpAndExit(cli, "Username must be provided.", true);
+        } else if (!password.isPresent()) {
+            App.printHelpAndExit(cli, "Password must be provided.", true);
+        } else if (!loanId.isPresent()) {
+            App.printHelpAndExit(cli, "Loan ID must be provided.", true);
+        } else if (!loanAmount.isPresent()) {
+            App.printHelpAndExit(cli, "Loan amount must be provided.", true);
+        }
+        if (cli.isDryRun()) {
+            return new AppContext(username.get(), password.get(), loanId.get(), loanAmount.get(),
+                    cli.getDryRunBalance());
+        } else {
+            return new AppContext(username.get(), password.get(), loanId.get(), loanAmount.get());
+        }
     }
 
     static AppContext processCommandLine(final String... args) {
-        final CommandLine cmd = App.parseCommandLine(args);
-        if (cmd.hasOption(App.OPTION_HELP.getOpt())) { // user requested help
-            App.printHelpAndExit("", false);
-            return null; // just in case exit control property is tests
-        }
-        App.LOGGER.info("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
-        // standard workflow
-        if (!cmd.hasOption(App.OPTION_USERNAME.getOpt())) {
-            App.printHelpAndExit("Username must be provided.", true);
-        } else if (!cmd.hasOption(App.OPTION_PASSWORD.getOpt())) {
-            App.printHelpAndExit("Password must be provided.", true);
-        }
-        final File strategyConfig = new File(cmd.getOptionValue(App.OPTION_STRATEGY.getOpt()));
-        if (!strategyConfig.canRead()) {
-            App.printHelpAndExit("Investment strategy file must be readable.", true);
-        }
-        try {
-            return new AppContext(cmd, StrategyParser.parse(strategyConfig));
-        } catch (final Exception e) {
-            App.printHelpAndExit("Failed parsing strategy: " + e.getMessage(), true);
+        final CommandLineInterface cmd = CommandLineInterface.parse(args);
+        switch (cmd.getCliOperatingMode()) {
+            case HELP:
+                App.printHelpAndExit(cmd, "", false);
+                return null; // just in case exit control property is tests
+            case STRATEGY_DRIVEN:
+                return App.prepareStrategyDrivenMode(cmd);
+            case USER_DRIVER:
+                return App.prepareUserDrivenMode(cmd);
         }
         throw new IllegalStateException("This should not have happened.");
     }
 
     public static void main(final String... args) {
+        App.LOGGER.debug("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
         try {
             App.letsGo(App.processCommandLine(args)); // and start actually working with Zonky
             App.exit(ReturnCode.OK);
@@ -136,7 +137,7 @@ public class App {
                 "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
         try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
             for (final Investment i : result) {
-                bw.write('#' + i.getLoanId() + " ('" + i.getRating().getCode() + "): " + i.getAmount() + " CZK");
+                bw.write('#' + i.getLoanId() + ": " + i.getAmount() + " CZK");
                 bw.newLine();
             }
             App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.", filename);
@@ -147,16 +148,19 @@ public class App {
 
     static void letsGo(final AppContext ctx) {
         App.LOGGER.info("===== RoboZonky at your service! =====");
-        final CommandLine cmd = ctx.getCommandLine();
-        final String username = cmd.getOptionValue(App.OPTION_USERNAME.getOpt());
-        final String password = cmd.getOptionValue(App.OPTION_PASSWORD.getOpt());
-        final boolean dryRun = cmd.hasOption(App.OPTION_DRY_RUN.getOpt());
-        final int startingBalance = Integer.valueOf(cmd.getOptionValue(App.OPTION_DRY_RUN.getOpt(), "-1")); // FIXME throws
+        final boolean dryRun = ctx.isDryRun();
         if (dryRun) {
             App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        final Collection<Investment> result = App.operate(username, password, ctx.getInvestmentStrategy(), dryRun,
-                startingBalance);
+        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
+        final Collection<Investment> result = useStrategy ? App.operate(ctx, Operations::invest) : App.operate(ctx, oc -> {
+            final Optional<Investment> optional = Operations.invest(oc, ctx.getLoanId(), ctx.getLoanAmount());
+            if (optional.isPresent()) {
+                return Collections.singletonList(optional.get());
+            } else {
+                return Collections.emptyList();
+            }
+        });
         if (result.size() == 0) {
             App.LOGGER.info("RoboZonky did not invest.");
         } else {
@@ -170,15 +174,17 @@ public class App {
         App.LOGGER.info("===== RoboZonky out. =====");
     }
 
-    private static Collection<Investment> operate(final String username, final String password,
-                                                  final InvestmentStrategy strategy, final boolean dryRun,
-                                                  final int startingBalance) {
-        if (dryRun && startingBalance < Operations.MINIMAL_INVESTMENT_ALLOWED) {
+    private static Collection<Investment> operate(final AppContext ctx, final Function<OperationsContext, Collection<Investment>> operations) {
+        if (ctx.isDryRun() && ctx.getDryRunBalance() < Operations.MINIMAL_INVESTMENT_ALLOWED) {
             App.LOGGER.info("Starting balance in dry run is lower than minimum, no need to execute at all.");
             return Collections.emptyList();
         }
-        final OperationsContext oc = Operations.login(username, password, strategy, dryRun, startingBalance);
-        final Collection<Investment> result = Operations.invest(oc);
+        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
+        final OperationsContext oc = useStrategy ?
+                Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance(),
+                        ctx.getInvestmentStrategy()) :
+                Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance());
+        final Collection<Investment> result = operations.apply(oc);
         Operations.logout(oc);
         return result;
     }

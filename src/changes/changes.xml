@@ -7,7 +7,10 @@ http://maven.apache.org/changes/1.0.0 ">
     <author email="lukas@petrovicky.net">Lukáš Petrovický</author>
   </properties>
   <body> <!-- Features first, then bugfixes, then updates. -->
-    <release version="1.1.0.Beta1" date="?" description="Testing and others.">
+    <release version="1.1.0.Beta1" date="?" description="Small useful features and lots of testing.">
+      <action issue="5" dev="triceo" type="add">
+        RoboZonky now allows you to invest into a particular loan, ignoring rest of the strategy.
+      </action>
       <action issue="4" dev="triceo" type="update">
         RoboZonky now has test coverage, which will prevent stupid bugs from showing up in the future.
       </action>

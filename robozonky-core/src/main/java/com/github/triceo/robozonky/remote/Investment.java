@@ -34,14 +34,18 @@ public class Investment {
         // for JAXB
     }
 
+    public Investment(final int loanId, final int amount) {
+        this.loanId = loanId;
+        this.amount = amount;
+    }
+
     public Investment(final Loan loan, final int amount) {
-        this.loanId = loan.getId();
+        this(loan.getId(), amount);
         this.loanName = loan.getName();
         this.nickname = loan.getNickName();
         this.rating = loan.getRating();
         this.loanTermInMonth = loan.getTermInMonths();
         this.interestRate = loan.getInterestRate();
-        this.amount = amount;
         this.currentTerm = this.loanTermInMonth;
         this.paymentStatus = "OK";
         this.investmentDate = Instant.now();

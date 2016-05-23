@@ -120,23 +120,7 @@ public class Operations {
                     l, resultingInvestment, balance);
             return Optional.empty();
         }
-        // and now actually invest
-        final Investment investment = new Investment(l, resultingInvestment);
-        if (oc.isDryRun()) {
-            Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan '{}'.", resultingInvestment, l);
-            return Optional.of(investment);
-        } else {
-            Operations.LOGGER.info("Attempting to invest {} CZK into loan '{}' on balance of {} CZK.",
-                    resultingInvestment, l, balance);
-            try {
-                oc.getAPI().invest(investment);
-                Operations.LOGGER.warn("Investment operation succeeded.");
-                return Optional.of(investment);
-            } catch (final Exception ex) {
-                Operations.LOGGER.warn("Investment operation failed.", ex);
-                return Optional.empty();
-            }
-        }
+        return Operations.invest(oc, l, resultingInvestment);
     }
 
     /**
@@ -265,7 +249,11 @@ public class Operations {
             if (investment.isPresent()) {
                 investmentsMade.add(investment.get());
                 availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
-                Operations.LOGGER.info("New account balance is {} CZK.", availableBalance);
+                if (oc.isDryRun()) {
+                    Operations.LOGGER.info("Simulated new account balance is {} CZK.", availableBalance);
+                } else {
+                    Operations.LOGGER.info("New account balance is {} CZK.", availableBalance);
+                }
             } else {
                 break;
             }
@@ -273,10 +261,37 @@ public class Operations {
         return Collections.unmodifiableList(investmentsMade);
     }
 
+    private static Optional<Investment> invest(final OperationsContext oc, final Investment i) {
+        if (oc.isDryRun()) {
+            Operations.LOGGER.info("This is a dry run. Not investing {} CZK into loan {}.", i.getAmount(),
+                    i.getLoanId());
+            return Optional.of(i);
+        } else {
+            Operations.LOGGER.info("Attempting to invest {} CZK into loan {}.", i.getAmount(), i.getLoanId());
+            try {
+                oc.getAPI().invest(i);
+                Operations.LOGGER.warn("Investment operation succeeded.");
+                return Optional.of(i);
+            } catch (final Exception ex) {
+                Operations.LOGGER.warn("Investment operation failed.", ex);
+                return Optional.empty();
+            }
+        }
+    }
+
+    private static Optional<Investment> invest(final OperationsContext oc, final Loan loan, final int loanAmount) {
+        final Investment investment = new Investment(loan, loanAmount);
+        return Operations.invest(oc, investment);
+    }
+
+    public static Optional<Investment> invest(final OperationsContext oc, final int loanId, final int loanAmount) {
+        final Investment investment = new Investment(loanId, loanAmount);
+        return Operations.invest(oc, investment);
+    }
+
     // FIXME what if login fails?
-    public static OperationsContext login(final String username, final String password,
-                                          final InvestmentStrategy strategy, final boolean dryRun,
-                                          final int dryRunInitialBalance) {
+    public static OperationsContext login(final String username, final String password, final boolean dryRun,
+                                          final int dryRunInitialBalance, final InvestmentStrategy strategy) {
         // register Jackson
         final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(instance);
@@ -295,6 +310,11 @@ public class Operations {
         final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
                 .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
         return new OperationsContext(api, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
+    }
+
+    public static OperationsContext login(final String username, final String password, final boolean dryRun,
+                                          final int dryRunInitialBalance) {
+        return Operations.login(username, password, dryRun, dryRunInitialBalance, null);
     }
 
     public static void logout(final OperationsContext oc) {

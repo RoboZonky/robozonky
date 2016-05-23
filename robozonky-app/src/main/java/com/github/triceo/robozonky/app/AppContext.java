@@ -15,21 +15,73 @@
  */
 package com.github.triceo.robozonky.app;
 
+import java.util.Optional;
+
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import org.apache.commons.cli.CommandLine;
 
 class AppContext {
 
-    private final CommandLine commandLine;
-    private final InvestmentStrategy investmentStrategy;
+    private InvestmentStrategy investmentStrategy = null;
+    private final String username, password;
+    private final OperatingMode operatingMode;
+    private boolean isDryRun = false;
+    private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
 
-    public AppContext(final CommandLine commandLine, final InvestmentStrategy investmentStrategy) {
-        this.commandLine = commandLine;
-        this.investmentStrategy = investmentStrategy;
+    public AppContext(final String username, final String password, final InvestmentStrategy investmentStrategy,
+                      final Optional<Integer> dryRunBalance) {
+        this(username, password, investmentStrategy);
+        this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
+        this.isDryRun = true;
     }
 
-    public CommandLine getCommandLine() {
-        return commandLine;
+    public AppContext(final String username, final String password, final InvestmentStrategy investmentStrategy) {
+        this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
+        this.investmentStrategy = investmentStrategy;
+        this.username = username;
+        this.password = password;
+    }
+
+    public OperatingMode getOperatingMode() {
+        return operatingMode;
+    }
+
+    public AppContext(final String username, final String password, final int loanId, final int loanAmount,
+                      final Optional<Integer> dryRunBalance) {
+        this(username, password, loanId, loanAmount);
+        this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
+        this.isDryRun = true;
+    }
+
+    public AppContext(final String username, final String password, final int loanId, final int loanAmount) {
+        this.operatingMode = OperatingMode.USER_DRIVER;
+        this.username = username;
+        this.password = password;
+        this.loanId = loanId;
+        this.loanAmount = loanAmount;
+    }
+
+    public int getLoanId() {
+        return loanId;
+    }
+
+    public int getLoanAmount() {
+        return loanAmount;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public boolean isDryRun() {
+        return isDryRun;
+    }
+
+    public int getDryRunBalance() {
+        return dryRunBalance;
     }
 
     public InvestmentStrategy getInvestmentStrategy() {
