@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Base64;
 import javax.ws.rs.client.ClientRequestContext;
 
@@ -34,7 +35,7 @@ class AuthorizationFilter extends CommonFilter {
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes());
+        final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes(Charset.forName("UTF-8")));
         clientRequestContext.getHeaders().add("Authorization", "Basic " + authCode);
         super.filter(clientRequestContext);
     }

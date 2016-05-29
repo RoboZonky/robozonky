@@ -17,8 +17,9 @@ package com.github.triceo.robozonky.app;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -135,7 +136,8 @@ public class App {
         final LocalDateTime now = LocalDateTime.now();
         final String filename =
                 "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
-        try (final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)))) {
+        final File target = new File(filename);
+        try (final BufferedWriter bw = Files.newBufferedWriter(target.toPath(), Charset.forName("UTF-8"))) {
             for (final Investment i : result) {
                 bw.write('#' + i.getLoanId() + ": " + i.getAmount() + " CZK");
                 bw.newLine();
