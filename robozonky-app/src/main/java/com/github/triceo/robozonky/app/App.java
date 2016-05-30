@@ -156,16 +156,19 @@ public class App {
         if (dryRun) {
             App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
+        // figure out whether to invest based on strategy or whether to make a single investment
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
-        final Collection<Investment> result = useStrategy ? App.operate(ctx, Operations::invest) : App.operate(ctx, oc -> {
+        final Function<OperationsContext, Collection<Investment>> op = useStrategy ? Operations::invest : oc -> {
             final Optional<Investment> optional = Operations.invest(oc, ctx.getLoanId(), ctx.getLoanAmount());
             if (optional.isPresent()) {
                 return Collections.singletonList(optional.get());
             } else {
                 return Collections.emptyList();
             }
-        });
-        if (result.size() == 0) {
+        };
+        // and now perform the selected operation
+        final Collection<Investment> result = App.operate(ctx, op);
+        if (result.isEmpty()) {
             App.LOGGER.info("RoboZonky did not invest.");
         } else {
             App.storeInvestmentsMade(result, dryRun);
