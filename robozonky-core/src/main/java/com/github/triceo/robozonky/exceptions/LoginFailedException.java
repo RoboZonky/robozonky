@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky;
+package com.github.triceo.robozonky.exceptions;
 
 public class LoginFailedException extends Exception {
 

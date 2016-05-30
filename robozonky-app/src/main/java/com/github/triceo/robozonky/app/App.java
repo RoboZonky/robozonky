@@ -27,10 +27,11 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.LoginFailedException;
+import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.Util;
+import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.Investment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,13 +191,17 @@ public class App {
                             ctx.getInvestmentStrategy()) :
                     Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance());
             final Collection<Investment> result = operations.apply(oc);
-            Operations.logout(oc);
+            try {
+                Operations.logout(oc);
+            } catch (final LogoutFailedException ex) {
+                App.LOGGER.warn("Logging out of Zonky failed.", ex);
+            }
             return result;
-        } catch (final LoginFailedException ex) { // shutdown gracefully
+        } catch (final LoginFailedException ex) {
             App.LOGGER.error("Logging into Zonky failed. No investments were made.", ex);
             App.exit(ReturnCode.ERROR_LOGIN);
-            return Collections.emptyList(); // should never get here
         }
+        return Collections.emptyList(); // should never get here
     }
 
 }

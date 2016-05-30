@@ -29,6 +29,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.exceptions.LoginFailedException;
+import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.Authorization;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.InvestmentStatus;
@@ -322,8 +324,12 @@ public class Operations {
         return Operations.login(username, password, dryRun, dryRunInitialBalance, null);
     }
 
-    public static void logout(final OperationsContext oc) {
-        oc.getAPI().logout();
+    public static void logout(final OperationsContext oc) throws LogoutFailedException {
+        try {
+            oc.getAPI().logout();
+        } catch (final RuntimeException ex) {
+            throw new LogoutFailedException("Error while logging out Zonky.", ex);
+        }
         oc.dispose();
         Operations.LOGGER.info("Logged out of Zonky.");
     }
