@@ -291,29 +291,34 @@ public class Operations {
 
     // FIXME what if login fails?
     public static OperationsContext login(final String username, final String password, final boolean dryRun,
-                                          final int dryRunInitialBalance, final InvestmentStrategy strategy) {
-        // register Jackson
-        final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
-        RegisterBuiltin.register(instance);
-        instance.registerProvider(ResteasyJackson2Provider.class);
-        // authenticate
-        final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
-        clientBuilder.providerFactory(instance);
-        final ResteasyClient client = clientBuilder.build();
-        client.register(new AuthorizationFilter());
-        final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
-        final Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
-        client.close();
-        Operations.LOGGER.info("Logged in with Zonky as user '{}'.", username);
-        // provide authenticated clients
-        clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
-        final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
-                .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
-        return new OperationsContext(api, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
+                                          final int dryRunInitialBalance, final InvestmentStrategy strategy)
+            throws LoginFailedException {
+        try {
+            // register Jackson
+            final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
+            RegisterBuiltin.register(instance);
+            instance.registerProvider(ResteasyJackson2Provider.class);
+            // authenticate
+            final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
+            clientBuilder.providerFactory(instance);
+            final ResteasyClient client = clientBuilder.build();
+            client.register(new AuthorizationFilter());
+            final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
+            final Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
+            client.close();
+            Operations.LOGGER.info("Logged in with Zonky as user '{}'.", username);
+            // provide authenticated clients
+            clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
+            final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
+                    .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
+            return new OperationsContext(api, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
+        } catch (final RuntimeException ex) {
+            throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
+        }
     }
 
     public static OperationsContext login(final String username, final String password, final boolean dryRun,
-                                          final int dryRunInitialBalance) {
+                                          final int dryRunInitialBalance) throws LoginFailedException {
         return Operations.login(username, password, dryRun, dryRunInitialBalance, null);
     }
 

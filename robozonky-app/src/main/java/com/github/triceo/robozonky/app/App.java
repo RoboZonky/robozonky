@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.github.triceo.robozonky.LoginFailedException;
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.Util;
@@ -176,19 +177,26 @@ public class App {
         App.LOGGER.info("===== RoboZonky out. =====");
     }
 
-    private static Collection<Investment> operate(final AppContext ctx, final Function<OperationsContext, Collection<Investment>> operations) {
+    private static Collection<Investment> operate(final AppContext ctx,
+                                                  final Function<OperationsContext, Collection<Investment>> operations) {
         if (ctx.isDryRun() && ctx.getDryRunBalance() < Operations.MINIMAL_INVESTMENT_ALLOWED) {
             App.LOGGER.info("Starting balance in dry run is lower than minimum, no need to execute at all.");
             return Collections.emptyList();
         }
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
-        final OperationsContext oc = useStrategy ?
-                Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance(),
-                        ctx.getInvestmentStrategy()) :
-                Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance());
-        final Collection<Investment> result = operations.apply(oc);
-        Operations.logout(oc);
-        return result;
+        try {
+            final OperationsContext oc = useStrategy ?
+                    Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance(),
+                            ctx.getInvestmentStrategy()) :
+                    Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance());
+            final Collection<Investment> result = operations.apply(oc);
+            Operations.logout(oc);
+            return result;
+        } catch (final LoginFailedException ex) { // shutdown gracefully
+            App.LOGGER.error("Logging into Zonky failed. No investments were made.", ex);
+            App.exit(ReturnCode.ERROR_LOGIN);
+            return Collections.emptyList(); // should never get here
+        }
     }
 
 }

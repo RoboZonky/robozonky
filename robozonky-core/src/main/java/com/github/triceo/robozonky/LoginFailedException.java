@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.app;
 
-public enum ReturnCode {
-    OK(0), ERROR_WRONG_PARAMETERS(1), ERROR_LOGIN(2), ERROR_UNEXPECTED(255);
+package com.github.triceo.robozonky;
 
-    private final int code;
+public class LoginFailedException extends Exception {
 
-    ReturnCode(int code) {
-        this.code = code;
+    public LoginFailedException() {
+        super();
     }
 
-    public int getCode() {
-        return code;
+    public LoginFailedException(final String message) {
+        super(message);
     }
+
+    public LoginFailedException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
+    public LoginFailedException(final Throwable cause) {
+        super(cause);
+    }
+
 }
