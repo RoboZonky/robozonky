@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
-import com.github.triceo.robozonky.remote.Authorization;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.InvestmentStatus;
 import com.github.triceo.robozonky.remote.InvestmentStatuses;
@@ -45,7 +44,6 @@ import com.github.triceo.robozonky.remote.ZonkyAPI;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
@@ -60,7 +58,7 @@ public class Operations {
     protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
 
     private static final int CONNECTION_POOL_SIZE = 2;
-    private static final String ZONKY_URL = "https://api.zonky.cz";
+    static final String ZONKY_URL = "https://api.zonky.cz";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
 
@@ -292,7 +290,7 @@ public class Operations {
     }
 
     // FIXME what if login fails?
-    public static OperationsContext login(final String username, final String password, final boolean dryRun,
+    public static OperationsContext login(final Authentication authentication, final boolean dryRun,
                                           final int dryRunInitialBalance, final InvestmentStrategy strategy)
             throws LoginFailedException {
         try {
@@ -303,12 +301,7 @@ public class Operations {
             // authenticate
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(instance);
-            final ResteasyClient client = clientBuilder.build();
-            client.register(new AuthorizationFilter());
-            final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
-            final Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
-            client.close();
-            Operations.LOGGER.info("Logged in with Zonky as user '{}'.", username);
+            final Token authorization = authentication.authenticate(clientBuilder);
             // provide authenticated clients
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
             final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
@@ -319,9 +312,9 @@ public class Operations {
         }
     }
 
-    public static OperationsContext login(final String username, final String password, final boolean dryRun,
+    public static OperationsContext login(final Authentication authentication, final boolean dryRun,
                                           final int dryRunInitialBalance) throws LoginFailedException {
-        return Operations.login(username, password, dryRun, dryRunInitialBalance, null);
+        return Operations.login(authentication, dryRun, dryRunInitialBalance, null);
     }
 
     public static void logout(final OperationsContext oc) throws LogoutFailedException {
