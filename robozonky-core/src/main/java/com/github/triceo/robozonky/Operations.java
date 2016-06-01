@@ -29,6 +29,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.authentication.Authenticated;
+import com.github.triceo.robozonky.authentication.AuthenticationMethod;
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.Investment;
@@ -39,7 +41,6 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.Ratings;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
-import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.apache.commons.collections4.MultiValuedMap;
@@ -58,7 +59,7 @@ public class Operations {
     protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
 
     private static final int CONNECTION_POOL_SIZE = 2;
-    static final String ZONKY_URL = "https://api.zonky.cz";
+    private static final String ZONKY_URL = "https://api.zonky.cz";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
 
@@ -289,8 +290,7 @@ public class Operations {
         return Operations.invest(oc, investment);
     }
 
-    // FIXME what if login fails?
-    public static OperationsContext login(final Authentication authentication, final boolean dryRun,
+    public static OperationsContext login(final AuthenticationMethod authenticationMethod, final boolean dryRun,
                                           final int dryRunInitialBalance, final InvestmentStrategy strategy)
             throws LoginFailedException {
         try {
@@ -301,21 +301,17 @@ public class Operations {
             // authenticate
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(instance);
-            final ZonkyApiToken authorization = authentication.authenticate(clientBuilder);
-            // provide authenticated clients
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
-            final ZonkyApi api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
-                    .target(Operations.ZONKY_URL).proxy(ZonkyApi.class);
-            return new OperationsContext(api, authorization, strategy, dryRun, dryRunInitialBalance,
-                    Operations.CONNECTION_POOL_SIZE);
+            final Authenticated auth = authenticationMethod.authenticate(Operations.ZONKY_URL, clientBuilder);
+            return new OperationsContext(auth, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
         }
     }
 
-    public static OperationsContext login(final Authentication authentication, final boolean dryRun,
+    public static OperationsContext login(final AuthenticationMethod authenticationMethod, final boolean dryRun,
                                           final int dryRunInitialBalance) throws LoginFailedException {
-        return Operations.login(authentication, dryRun, dryRunInitialBalance, null);
+        return Operations.login(authenticationMethod, dryRun, dryRunInitialBalance, null);
     }
 
     public static void logout(final OperationsContext oc) throws LogoutFailedException {

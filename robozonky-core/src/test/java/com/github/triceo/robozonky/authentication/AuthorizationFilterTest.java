@@ -13,36 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky;
+
+package com.github.triceo.robozonky.authentication;
 
 import java.io.IOException;
-import java.util.UUID;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
-import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class AuthenticatedFilterTest extends AbstractCommonFilterTest {
-
-    private final ZonkyApiToken token = Mockito.mock(ZonkyApiToken.class);
+public class AuthorizationFilterTest extends AbstractCommonFilterTest {
 
     @Override
     protected CommonFilter getTestedFilter() {
-        return new AuthenticatedFilter(token);
+        return new AuthenticationFilter();
     }
 
     @Test
-    public void hasToken() throws IOException {
-        final String id = UUID.randomUUID().toString();
-        Mockito.when(token.getAccessToken()).thenReturn(id);
+    public void wasAuthorizationAdded() throws IOException {
         final ClientRequestContext crc = Mockito.mock(ClientRequestContext.class);
         Mockito.when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
 
-        getTestedFilter().filter(crc);
-        Assertions.assertThat(crc.getHeaders().getFirst("Authorization")).isEqualTo("Bearer " + token.getAccessToken());
+        this.getTestedFilter().filter(crc);
+        Assertions.assertThat(crc.getHeaders()).containsKey("Authorization");
     }
 
 }

@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.Authentication;
+import com.github.triceo.robozonky.authentication.AuthenticationMethod;
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
@@ -190,7 +190,7 @@ public class App {
         }
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         try {
-            final Authentication auth = Authentication.withCredentials(ctx.getUsername(), ctx.getPassword());
+            final AuthenticationMethod auth = AuthenticationMethod.withCredentials(ctx.getUsername(), ctx.getPassword());
             final OperationsContext oc = useStrategy ?
                     Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :
                     Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());

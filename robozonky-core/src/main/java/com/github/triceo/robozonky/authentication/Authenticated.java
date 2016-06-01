@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky;
+package com.github.triceo.robozonky.authentication;
 
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
-public abstract class Authentication {
+public class Authenticated {
 
-    public static Authentication withCredentials(final String username, final String password) {
-        return new CredentialBasedAuthentication(username, password);
+    private final ZonkyApi api;
+    private final ZonkyApiToken apiToken;
+
+    Authenticated(final ZonkyApi api, final ZonkyApiToken apiToken) {
+        this.api = api;
+        this.apiToken = apiToken;
     }
 
-    public static Authentication withRefreshToken(final String username, final ZonkyApiToken token) {
-        return new RefreshTokenBasedAuthentication(username, token);
+    public ZonkyApi getApi() {
+        return api;
     }
 
-    public abstract ZonkyApiToken authenticate(final ResteasyClientBuilder clientBuilder);
-
+    public ZonkyApiToken getApiToken() {
+        return apiToken;
+    }
 }

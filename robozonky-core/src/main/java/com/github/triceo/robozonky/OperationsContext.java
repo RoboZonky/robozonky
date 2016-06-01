@@ -19,8 +19,9 @@ package com.github.triceo.robozonky;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.github.triceo.robozonky.remote.ZonkyApiToken;
+import com.github.triceo.robozonky.authentication.Authenticated;
 import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +43,10 @@ public class OperationsContext {
     private final int dryRunInitialBalance;
     private final ExecutorService backgroundExecutor;
 
-    public OperationsContext(final ZonkyApi api, final ZonkyApiToken token, final InvestmentStrategy strategy,
+    public OperationsContext(final Authenticated authenticated, final InvestmentStrategy strategy,
                              final boolean dryRun, final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {
-        this.api = api;
-        this.apiToken = token;
+        this.api = authenticated.getApi();
+        this.apiToken = authenticated.getApiToken();
         this.strategy = strategy;
         this.dryRun = dryRun;
         this.dryRunInitialBalance = dryRunInitialBalance;
