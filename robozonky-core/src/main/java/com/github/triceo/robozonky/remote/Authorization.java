@@ -37,4 +37,11 @@ public interface Authorization {
             @FormParam("grant_type") @DefaultValue("password") String grantType,
             @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
 
+    @POST
+    @Path("token")
+    Token refresh(
+            @FormParam("refresh_token") String username,
+            @FormParam("grant_type") @DefaultValue("refresh_token") String grantType,
+            @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
+
 }
