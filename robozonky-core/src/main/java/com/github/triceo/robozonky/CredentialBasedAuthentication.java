@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky;
 
 import com.github.triceo.robozonky.remote.Authorization;
-import com.github.triceo.robozonky.remote.Token;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
@@ -35,11 +35,11 @@ final class CredentialBasedAuthentication extends Authentication {
     }
 
     @Override
-    public Token authenticate(final ResteasyClientBuilder clientBuilder) {
+    public ZonkyApiToken authenticate(final ResteasyClientBuilder clientBuilder) {
         final ResteasyClient client = clientBuilder.build();
         client.register(new AuthorizationFilter());
         final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
-        final Token token = auth.login(username, password, "password", "SCOPE_APP_WEB");
+        final ZonkyApiToken token = auth.login(username, password, "password", "SCOPE_APP_WEB");
         CredentialBasedAuthentication.LOGGER.info("Logged in with Zonky as user '{}' using password.", username);
         client.close();
         return token;

@@ -39,8 +39,8 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.Ratings;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
-import com.github.triceo.robozonky.remote.Token;
-import com.github.triceo.robozonky.remote.ZonkyAPI;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
@@ -200,7 +200,7 @@ public class Operations {
     static Optional<Investment> identifyLoanToInvest(final OperationsContext oc,
                                                      final List<Investment> investmentsInSession,
                                                      final BigDecimal balance) {
-        final ZonkyAPI api = oc.getAPI();
+        final ZonkyApi api = oc.getApi();
         final Collection<Investment> investments = Util.mergeInvestments(
                 api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)), investmentsInSession);
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(api.getStatistics(),
@@ -230,7 +230,7 @@ public class Operations {
         final boolean isDryRun = oc.isDryRun();
         final int dryRunInitialBalance = oc.getDryRunInitialBalance();
         BigDecimal balance = (isDryRun && dryRunInitialBalance >= 0) ?
-                BigDecimal.valueOf(dryRunInitialBalance) : oc.getAPI().getWallet().getAvailableBalance();
+                BigDecimal.valueOf(dryRunInitialBalance) : oc.getApi().getWallet().getAvailableBalance();
         if (isDryRun) {
             for (final Investment i : investmentsInSession) {
                 balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
@@ -269,7 +269,7 @@ public class Operations {
         } else {
             Operations.LOGGER.info("Attempting to invest {} CZK into loan {}.", i.getAmount(), i.getLoanId());
             try {
-                oc.getAPI().invest(i);
+                oc.getApi().invest(i);
                 Operations.LOGGER.warn("Investment operation succeeded.");
                 return Optional.of(i);
             } catch (final Exception ex) {
@@ -301,11 +301,11 @@ public class Operations {
             // authenticate
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(instance);
-            final Token authorization = authentication.authenticate(clientBuilder);
+            final ZonkyApiToken authorization = authentication.authenticate(clientBuilder);
             // provide authenticated clients
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
-            final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
-                    .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
+            final ZonkyApi api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
+                    .target(Operations.ZONKY_URL).proxy(ZonkyApi.class);
             return new OperationsContext(api, authorization, strategy, dryRun, dryRunInitialBalance,
                     Operations.CONNECTION_POOL_SIZE);
         } catch (final RuntimeException ex) {
@@ -320,7 +320,7 @@ public class Operations {
 
     public static void logout(final OperationsContext oc) throws LogoutFailedException {
         try {
-            oc.getAPI().logout();
+            oc.getApi().logout();
         } catch (final RuntimeException ex) {
             throw new LogoutFailedException("Error while logging out Zonky.", ex);
         }

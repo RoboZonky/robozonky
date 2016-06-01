@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky;
 
 import com.github.triceo.robozonky.remote.Authorization;
-import com.github.triceo.robozonky.remote.Token;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
@@ -28,19 +28,19 @@ final class RefreshTokenBasedAuthentication extends Authentication {
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshTokenBasedAuthentication.class);
 
     private final String username;
-    private final Token token;
+    private final ZonkyApiToken token;
 
-    RefreshTokenBasedAuthentication(final String username, final Token token) {
+    RefreshTokenBasedAuthentication(final String username, final ZonkyApiToken token) {
         this.username = username;
         this.token = token;
     }
 
     @Override
-    public Token authenticate(final ResteasyClientBuilder clientBuilder) {
+    public ZonkyApiToken authenticate(final ResteasyClientBuilder clientBuilder) {
         final ResteasyClient client = clientBuilder.build();
         client.register(new AuthorizationFilter());
         final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
-        final Token token = auth.refresh(this.token.getRefreshToken(), "refresh_token", "SCOPE_APP_WEB");
+        final ZonkyApiToken token = auth.refresh(this.token.getRefreshToken(), "refresh_token", "SCOPE_APP_WEB");
         RefreshTokenBasedAuthentication.LOGGER.info("Logged in with Zonky as user '{}' using refresh token.", username);
         client.close();
         return token;

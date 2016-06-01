@@ -19,8 +19,8 @@ package com.github.triceo.robozonky;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.github.triceo.robozonky.remote.Token;
-import com.github.triceo.robozonky.remote.ZonkyAPI;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,17 +35,17 @@ public class OperationsContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationsContext.class);
 
-    private final ZonkyAPI api;
-    private final Token token;
+    private final ZonkyApi api;
+    private final ZonkyApiToken apiToken;
     private final InvestmentStrategy strategy;
     private final boolean dryRun;
     private final int dryRunInitialBalance;
     private final ExecutorService backgroundExecutor;
 
-    public OperationsContext(final ZonkyAPI api, final Token token, final InvestmentStrategy strategy,
+    public OperationsContext(final ZonkyApi api, final ZonkyApiToken token, final InvestmentStrategy strategy,
                              final boolean dryRun, final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {
         this.api = api;
-        this.token = token;
+        this.apiToken = token;
         this.strategy = strategy;
         this.dryRun = dryRun;
         this.dryRunInitialBalance = dryRunInitialBalance;
@@ -67,15 +67,18 @@ public class OperationsContext {
      * @return Zonky API.
      * @throws IllegalStateException When called after {@link #dispose()}.
      */
-    protected ZonkyAPI getAPI() {
+    protected ZonkyApi getApi() {
         if (backgroundExecutor.isShutdown()) {
             throw new IllegalStateException("OperationsContext already disposed of.");
         }
         return this.api;
     }
 
-    public Token getToken() {
-        return token;
+    public ZonkyApiToken getApiToken() {
+        if (backgroundExecutor.isShutdown()) {
+            throw new IllegalStateException("OperationsContext already disposed of.");
+        }
+        return apiToken;
     }
 
     public InvestmentStrategy getStrategy() {

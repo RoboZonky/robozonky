@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky;
 
-import com.github.triceo.robozonky.remote.Token;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 public abstract class Authentication {
@@ -25,10 +25,10 @@ public abstract class Authentication {
         return new CredentialBasedAuthentication(username, password);
     }
 
-    public static Authentication withRefreshToken(final String username, final Token token) {
+    public static Authentication withRefreshToken(final String username, final ZonkyApiToken token) {
         return new RefreshTokenBasedAuthentication(username, token);
     }
 
-    public abstract Token authenticate(final ResteasyClientBuilder clientBuilder);
+    public abstract ZonkyApiToken authenticate(final ResteasyClientBuilder clientBuilder);
 
 }

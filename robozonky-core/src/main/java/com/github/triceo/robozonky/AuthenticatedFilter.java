@@ -19,7 +19,7 @@ package com.github.triceo.robozonky;
 import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
 
-import com.github.triceo.robozonky.remote.Token;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +27,9 @@ class AuthenticatedFilter extends CommonFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticatedFilter.class);
 
-    private final Token authorization;
+    private final ZonkyApiToken authorization;
 
-    public AuthenticatedFilter(final Token token) {
+    public AuthenticatedFilter(final ZonkyApiToken token) {
         authorization = token;
         AuthenticatedFilter.LOGGER.debug("Using Zonky access token '{}'.", authorization.getAccessToken());
     }

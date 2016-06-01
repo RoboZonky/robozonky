@@ -31,7 +31,7 @@ public interface Authorization {
 
     @POST
     @Path("token")
-    Token login(
+    ZonkyApiToken login(
             @FormParam("username") String username,
             @FormParam("password") String password,
             @FormParam("grant_type") @DefaultValue("password") String grantType,
@@ -39,7 +39,7 @@ public interface Authorization {
 
     @POST
     @Path("token")
-    Token refresh(
+    ZonkyApiToken refresh(
             @FormParam("refresh_token") String refreshToken,
             @FormParam("grant_type") @DefaultValue("refresh_token") String grantType,
             @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);

@@ -18,9 +18,9 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Token {
+public class ZonkyApiToken {
 
-    private String accessToken, refreshToken, tokenType;
+    private String accessToken, refreshToken, type;
     private int expiresIn;
     private String scope;
 
@@ -39,7 +39,7 @@ public class Token {
         final StringBuilder sb = new StringBuilder("Token{");
         sb.append("accessToken='").append(accessToken).append('\'');
         sb.append(", refreshToken='").append(refreshToken).append('\'');
-        sb.append(", tokenType='").append(tokenType).append('\'');
+        sb.append(", type='").append(type).append('\'');
         sb.append(", expiresIn=").append(expiresIn);
         sb.append(", scope='").append(scope).append('\'');
         sb.append('}');
@@ -47,8 +47,8 @@ public class Token {
     }
 
     @XmlElement(name = "token_type")
-    public String getTokenType() {
-        return tokenType;
+    public String getType() {
+        return type;
     }
 
     @XmlElement(name = "expires_in")

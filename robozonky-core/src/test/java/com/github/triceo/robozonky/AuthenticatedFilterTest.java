@@ -20,14 +20,14 @@ import java.util.UUID;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
-import com.github.triceo.robozonky.remote.Token;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
-    private final Token token = Mockito.mock(Token.class);
+    private final ZonkyApiToken token = Mockito.mock(ZonkyApiToken.class);
 
     @Override
     protected CommonFilter getTestedFilter() {

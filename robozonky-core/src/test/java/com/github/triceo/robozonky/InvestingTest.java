@@ -31,9 +31,9 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.Ratings;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
-import com.github.triceo.robozonky.remote.Token;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.remote.Wallet;
-import com.github.triceo.robozonky.remote.ZonkyAPI;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -130,11 +130,11 @@ public class InvestingTest {
         Mockito.when(mockStrategy.isAcceptable(mockLoan)).thenReturn(true);
         Mockito.when(mockStrategy.recommendInvestmentAmount(mockLoan, remainingBalance))
                 .thenReturn(remainingBalance.intValue());
-        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         final OperationsContext mockContext = Mockito.mock(OperationsContext.class);
         Mockito.when(mockContext.getStrategy()).thenReturn(mockStrategy);
         Mockito.when(mockContext.isDryRun()).thenReturn(false);
-        Mockito.when(mockContext.getAPI()).thenReturn(api);
+        Mockito.when(mockContext.getApi()).thenReturn(api);
         // test OK
         final Optional<Investment> result
                 = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), remainingBalance);
@@ -198,8 +198,8 @@ public class InvestingTest {
         Mockito.when(strategy.recommendInvestmentAmount(Mockito.any(Loan.class), Mockito.any(BigDecimal.class)))
                 .thenReturn(500);
         // mock API to perform loans just fine
-        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
-        final OperationsContext context = new OperationsContext(api, Mockito.mock(Token.class), strategy, false, -1, 2);
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        final OperationsContext context = new OperationsContext(api, Mockito.mock(ZonkyApiToken.class), strategy, false, -1, 2);
         // test preference for shorter terms
         Mockito.when(strategy.prefersLongerTerms(Mockito.any(Rating.class))).thenReturn(false);
         InvestingTest.testLoanLength(context, future, shortLoan);
@@ -225,7 +225,7 @@ public class InvestingTest {
         Mockito.when(strategy.recommendInvestmentAmount(Mockito.any(Loan.class), Mockito.any(BigDecimal.class)))
                 .thenReturn(500);
         // mock API to perform loans just fine
-        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         // mock API to return loans we need
         Mockito.when(strategy.prefersLongerTerms(Rating.A)).thenReturn(false);
         Mockito.when(api.getLoans(Ratings.of(Rating.A), 200))
@@ -234,7 +234,7 @@ public class InvestingTest {
         Mockito.when(api.getLoans(Ratings.of(Rating.B), 200))
                 .thenReturn(Arrays.asList(shortLoanB, longLoanB));
         Mockito.when(strategy.getTargetShare(Mockito.any(Rating.class))).thenReturn(BigDecimal.valueOf(0.01));
-        final OperationsContext ctx = new OperationsContext(api, Mockito.mock(Token.class), strategy, false, -1, 2);
+        final OperationsContext ctx = new OperationsContext(api, Mockito.mock(ZonkyApiToken.class), strategy, false, -1, 2);
         // test that rating A, which is underinvested, will invest shorter loan
         final Statistics stats = Mockito.mock(Statistics.class);
         final RiskPortfolio riskA = new RiskPortfolio(Rating.A, -1, 0, -1, -1);
@@ -269,7 +269,7 @@ public class InvestingTest {
         Mockito.when(strategy.recommendInvestmentAmount(Mockito.any(Loan.class), Mockito.any(BigDecimal.class)))
                 .thenReturn(400);
         // mock API to perform loans just fine
-        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         // mock API to return loans we need
         Mockito.when(strategy.prefersLongerTerms(Rating.A)).thenReturn(false);
         Mockito.when(api.getLoans(Ratings.of(Rating.A), 200))
@@ -293,7 +293,7 @@ public class InvestingTest {
         Mockito.when(api.getStatistics()).thenReturn(stats);
         final Wallet w = new Wallet(-1, -1, BigDecimal.valueOf(10000), BigDecimal.valueOf(9000));
         Mockito.when(api.getWallet()).thenReturn(w); // FIXME balance will not be updated during investing
-        final OperationsContext ctx = new OperationsContext(api, Mockito.mock(Token.class), strategy, false, -1, 2);
+        final OperationsContext ctx = new OperationsContext(api, Mockito.mock(ZonkyApiToken.class), strategy, false, -1, 2);
         // test that investments were made according to the strategy
         final List<Investment> result = new ArrayList<>(Operations.invest(ctx));
         Assertions.assertThat(result).hasSize(3);
