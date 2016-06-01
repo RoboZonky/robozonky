@@ -306,7 +306,8 @@ public class Operations {
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
             final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
                     .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
-            return new OperationsContext(api, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
+            return new OperationsContext(api, authorization, strategy, dryRun, dryRunInitialBalance,
+                    Operations.CONNECTION_POOL_SIZE);
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
         }

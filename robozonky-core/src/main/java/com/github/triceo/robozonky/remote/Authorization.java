@@ -40,7 +40,7 @@ public interface Authorization {
     @POST
     @Path("token")
     Token refresh(
-            @FormParam("refresh_token") String username,
+            @FormParam("refresh_token") String refreshToken,
             @FormParam("grant_type") @DefaultValue("refresh_token") String grantType,
             @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
 

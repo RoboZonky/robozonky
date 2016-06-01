@@ -25,6 +25,10 @@ public abstract class Authentication {
         return new CredentialBasedAuthentication(username, password);
     }
 
+    public static Authentication withRefreshToken(final String username, final Token token) {
+        return new RefreshTokenBasedAuthentication(username, token);
+    }
+
     public abstract Token authenticate(final ResteasyClientBuilder clientBuilder);
 
 }

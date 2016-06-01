@@ -19,6 +19,7 @@ package com.github.triceo.robozonky;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.github.triceo.robozonky.remote.Token;
 import com.github.triceo.robozonky.remote.ZonkyAPI;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
@@ -35,14 +36,16 @@ public class OperationsContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationsContext.class);
 
     private final ZonkyAPI api;
+    private final Token token;
     private final InvestmentStrategy strategy;
     private final boolean dryRun;
     private final int dryRunInitialBalance;
     private final ExecutorService backgroundExecutor;
 
-    public OperationsContext(final ZonkyAPI api, final InvestmentStrategy strategy, final boolean dryRun,
-                             final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {
+    public OperationsContext(final ZonkyAPI api, final Token token, final InvestmentStrategy strategy,
+                             final boolean dryRun, final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {
         this.api = api;
+        this.token = token;
         this.strategy = strategy;
         this.dryRun = dryRun;
         this.dryRunInitialBalance = dryRunInitialBalance;
@@ -69,6 +72,10 @@ public class OperationsContext {
             throw new IllegalStateException("OperationsContext already disposed of.");
         }
         return this.api;
+    }
+
+    public Token getToken() {
+        return token;
     }
 
     public InvestmentStrategy getStrategy() {

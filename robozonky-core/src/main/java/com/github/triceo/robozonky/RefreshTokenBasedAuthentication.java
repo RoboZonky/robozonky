@@ -23,15 +23,16 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class CredentialBasedAuthentication extends Authentication {
+final class RefreshTokenBasedAuthentication extends Authentication {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialBasedAuthentication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshTokenBasedAuthentication.class);
 
-    private final String username, password;
+    private final String username;
+    private final Token token;
 
-    CredentialBasedAuthentication(final String username, final String password) {
+    RefreshTokenBasedAuthentication(final String username, final Token token) {
         this.username = username;
-        this.password = password;
+        this.token = token;
     }
 
     @Override
@@ -39,8 +40,8 @@ final class CredentialBasedAuthentication extends Authentication {
         final ResteasyClient client = clientBuilder.build();
         client.register(new AuthorizationFilter());
         final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
-        final Token token = auth.login(username, password, "password", "SCOPE_APP_WEB");
-        CredentialBasedAuthentication.LOGGER.info("Logged in with Zonky as user '{}' using password.", username);
+        final Token token = auth.refresh(this.token.getRefreshToken(), "refresh_token", "SCOPE_APP_WEB");
+        RefreshTokenBasedAuthentication.LOGGER.info("Logged in with Zonky as user '{}' using refresh token.", username);
         client.close();
         return token;
     }
