@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.triceo.robozonky</groupId>
     <artifactId>robozonky-parent</artifactId>
-    <version>1.1.0.Beta1-SNAPSHOT</version>
+    <version>1.1.0.Beta1</version>
     <modules>
         <module>robozonky-core</module>
         <module>robozonky-app</module>
@@ -176,6 +176,10 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <minimumPriority>2</minimumPriority>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -333,10 +337,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <configuration>
-                    <aggregate>true</aggregate>
-                    <minimumPriority>3</minimumPriority>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -381,7 +381,7 @@
         <url>git@github.com:triceo/robozonky.git</url>
         <connection>scm:git:git@github.com:triceo/robozonky.git</connection>
         <developerConnection>scm:git:git@github.com:triceo/robozonky.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>robozonky-parent-1.1.0.Beta1</tag>
     </scm>
     <issueManagement>
         <system>github</system>
