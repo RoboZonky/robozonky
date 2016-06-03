@@ -67,7 +67,6 @@ public class App {
             App.printHelpAndExit(cli, "Strategy file must be provided.", true);
         }
         final File strategyConfig = new File(strategyFilePath.get());
-        System.out.println(strategyConfig.getAbsolutePath());
         if (!strategyConfig.canRead()) {
             App.printHelpAndExit(cli, "Investment strategy file must be readable.", true);
         }
