@@ -16,21 +16,37 @@
 
 package com.github.triceo.robozonky.app;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AppTest {
 
+    @BeforeClass
+    public static void disableSystemExit() {
+        App.PERFORM_SYSTEM_EXIT = false;
+    }
+
+    @AfterClass
+    public static void enableSystemExit() {
+        App.PERFORM_SYSTEM_EXIT = true;
+    }
+
     @Test
-    public void simpleDryRun() {
+    public void tokenizedDryRun() {
         App.letsGo(App.processCommandLine("-s", "src/main/assembly/resources/robozonky-dynamic.cfg", "-d", "0",
+                "-u", "someone", "-p", "somepassword", "-r"));
+    }
+
+    @Test
+    public void tokenLessDryRun() {
+        App.letsGo(App.processCommandLine("-s", "src/main/assembly/resources/robozonky-conservative.cfg", "-d", "2000",
                 "-u", "someone", "-p", "somepassword"));
     }
 
     @Test
     public void simpleHelp() {
-        System.setProperty(App.EXIT_ON_HELP, "true");
         App.processCommandLine("-h");
-        System.setProperty(App.EXIT_ON_HELP, "false");
     }
 
 }

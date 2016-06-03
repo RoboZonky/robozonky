@@ -47,19 +47,19 @@ public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final File TOKEN_FILE = new File("robozonky.token");
 
-    static final String EXIT_ON_HELP = "robozonky.do.not.exit";
+    static boolean PERFORM_SYSTEM_EXIT = true; // purely for testing purposes
     static final int REFRESH_TOKEN_BEFORE_EXPIRATION_SECONDS = 60;
 
     private static void exit(final ReturnCode returnCode) {
-        App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
-        System.exit(returnCode.getCode());
+        if (App.PERFORM_SYSTEM_EXIT) {
+            App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
+            System.exit(returnCode.getCode());
+        }
     }
 
     private static void printHelpAndExit(final CommandLineInterface cli, final String message, final boolean exitWithError) {
         cli.printHelpAndExit(message, exitWithError);
-        if (!System.getProperty(App.EXIT_ON_HELP, "false").equals("true")) {
-            App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
-        }
+        App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
     }
 
     private static AppContext prepareStrategyDrivenMode(final CommandLineInterface cli) {
