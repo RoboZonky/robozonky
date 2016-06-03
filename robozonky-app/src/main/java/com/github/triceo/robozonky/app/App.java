@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -95,37 +96,47 @@ public class App {
         final boolean useToken = cli.isTokenEnabled();
         if (!username.isPresent()) {
             App.printHelpAndExit(cli, "Username must be provided.", true);
-        } else if (!useToken) { // using password-based authentication
+        }
+        final String usr = username.get();
+        if (!useToken) { // using password-based authentication
             if (!passwordPresent) {
                 App.printHelpAndExit(cli, "Not using refresh token, password must be provided.", true);
             }
-            return AuthenticationMethod.withCredentials(username.get(), password.get());
-        } else if (!App.TOKEN_FILE.canRead()) { // no token available, also using password-based
-            App.LOGGER.debug("Token file not available for reading, using password-based authentication.");
-            return AuthenticationMethod.withCredentials(username.get(), password.get());
+            return AuthenticationMethod.withCredentials(usr, password.get());
         }
+        final String pwd = password.get();
+        if (!App.TOKEN_FILE.canRead()) { // no token available, also using password-based
+            App.LOGGER.debug("Token file not available for reading, using password-based authentication.");
+            return AuthenticationMethod.withCredentials(usr, pwd);
+        }
+        boolean deleteToken = false;
         try {
-            final ZonkyApiToken t = ZonkyApiToken.unmarshal(App.TOKEN_FILE);
-            final Instant tokenObtained = Instant.ofEpochMilli(App.TOKEN_FILE.lastModified());
-            final Instant tokenExpires = tokenObtained.plus(t.getExpiresIn(), ChronoUnit.SECONDS);
-            final Instant now = Instant.now();
-            final String usr = username.get();
-            if (tokenExpires.isBefore(now)) {
-                App.LOGGER.debug("Token {} expired, using password-based authentication.", t.getAccessToken());
-                App.TOKEN_FILE.delete();
-                return AuthenticationMethod.withCredentials(username.get(), password.get());
-            } else if (tokenExpires.plus(App.REFRESH_TOKEN_BEFORE_EXPIRATION_SECONDS, ChronoUnit.SECONDS).isBefore(now)) {
-                App.LOGGER.debug("Token {} about to expire and will be refreshed.", t.getAccessToken());
-                App.TOKEN_FILE.delete();
-                return AuthenticationMethod.withAccessTokenAndRefresh(username.get(), t);
+            final ZonkyApiToken token = ZonkyApiToken.unmarshal(App.TOKEN_FILE);
+            final LocalDateTime obtained = LocalDateTime.ofInstant(Instant.ofEpochMilli(App.TOKEN_FILE.lastModified()),
+                    ZoneId.systemDefault());
+            final LocalDateTime expires = obtained.plus(token.getExpiresIn(), ChronoUnit.SECONDS);
+            App.LOGGER.debug("Token obtained on {}, expires on {}.", obtained, expires);
+            final LocalDateTime now = LocalDateTime.now();
+            if (expires.isBefore(now)) {
+                App.LOGGER.debug("Token {} expired, using password-based authentication.", token.getAccessToken());
+                deleteToken = true;
+                return AuthenticationMethod.withCredentials(usr, pwd);
+            } else if (expires.minus(App.REFRESH_TOKEN_BEFORE_EXPIRATION_SECONDS, ChronoUnit.SECONDS).isBefore(now)) {
+                App.LOGGER.debug("Token {} about to expire and will be refreshed.", token.getAccessToken());
+                deleteToken = true;
+                return AuthenticationMethod.withAccessTokenAndRefresh(usr, token);
             } else {
-                App.LOGGER.debug("Reusing access token {}.", t.getAccessToken());
-                return AuthenticationMethod.withAccessToken(username.get(), t);
+                App.LOGGER.debug("Reusing access token {}.", token.getAccessToken());
+                return AuthenticationMethod.withAccessToken(usr, token);
             }
-        } catch (JAXBException e) {
-            App.LOGGER.warn("Failed parsing token file, using password-based authentication.");
-            App.TOKEN_FILE.delete();
-            return AuthenticationMethod.withCredentials(username.get(), password.get());
+        } catch (final JAXBException ex) {
+            App.LOGGER.warn("Failed parsing token file, using password-based authentication.", ex);
+            deleteToken = true;
+            return AuthenticationMethod.withCredentials(usr, pwd);
+        } finally {
+            if (deleteToken && !App.TOKEN_FILE.delete()) {
+                App.LOGGER.warn("Failed deleting token file, authentication may stop working.");
+            }
         }
     }
 
