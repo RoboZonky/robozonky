@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>OperationsContext.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">robozonky-core</a> &gt; <a href="index.source.html" class="el_package">com.github.triceo.robozonky</a> &gt; <span class="el_source">OperationsContext.java</span></div><h1>OperationsContext.java</h1><pre class="source lang-java linenums">/*
+ *
+ *  * Copyright 2016 Lukáš Petrovický
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  * you may not use this file except in compliance with the License.
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ * /
+ */
+package com.github.triceo.robozonky;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import com.github.triceo.robozonky.authentication.Authentication;
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Carries information to enable {@link Operations} to function, such as an authenticated Zonky API.
+ * &lt;p&gt;
+ * When the class instance is no longer needed, it must be {@link #dispose()}d - otherwise the #ExecutorService may
+ * prevent the application from ending.
+ */
+public class OperationsContext {
+
+<span class="fc" id="L35">    private static final Logger LOGGER = LoggerFactory.getLogger(OperationsContext.class);</span>
+
+    private final Authentication authenticationInfo;
+    private final InvestmentStrategy strategy;
+    private final boolean dryRun;
+    private final int dryRunInitialBalance;
+    private final ExecutorService backgroundExecutor;
+
+    public OperationsContext(final Authentication authenticated, final InvestmentStrategy strategy,
+<span class="fc" id="L44">                             final boolean dryRun, final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {</span>
+<span class="fc" id="L45">        this.authenticationInfo = authenticated;</span>
+<span class="fc" id="L46">        this.strategy = strategy;</span>
+<span class="fc" id="L47">        this.dryRun = dryRun;</span>
+<span class="fc" id="L48">        this.dryRunInitialBalance = dryRunInitialBalance;</span>
+<span class="fc" id="L49">        this.backgroundExecutor = Executors.newFixedThreadPool(maxNumberParallelHttpConnections - 1);</span>
+<span class="fc" id="L50">        OperationsContext.LOGGER.debug(&quot;OperationsContext initialized.&quot;);</span>
+<span class="fc" id="L51">    }</span>
+
+    /**
+     * Retrieve executor service to be used for background network communication. Filling this service with non-related
+     * tasks will prevent RoboZonky from querying Zonky API.
+     * @return
+     */
+    protected ExecutorService getBackgroundExecutor() {
+<span class="fc" id="L59">        return this.backgroundExecutor;</span>
+    }
+
+    public Authentication getAuthentication() {
+<span class="fc" id="L63">        return authenticationInfo;</span>
+    }
+
+    public InvestmentStrategy getStrategy() {
+<span class="fc" id="L67">        return this.strategy;</span>
+    }
+
+    public boolean isDryRun() {
+<span class="fc" id="L71">        return this.dryRun;</span>
+    }
+
+    // FIXME balance typically BigDecimal
+    public int getDryRunInitialBalance() {
+<span class="fc" id="L76">        return this.dryRunInitialBalance;</span>
+    }
+
+    protected void dispose() {
+<span class="fc" id="L80">        backgroundExecutor.shutdownNow();</span>
+<span class="fc" id="L81">        OperationsContext.LOGGER.debug(&quot;OperationsContext disposed of.&quot;);</span>
+<span class="fc" id="L82">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">robozonky-app</a> &gt; <a href="index.source.html" class="el_package">com.github.triceo.robozonky.app</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">/*
+ *
+ *  Copyright 2016 Lukáš Petrovický
+ *
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package com.github.triceo.robozonky.app;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.function.Function;
+
+import com.github.triceo.robozonky.Operations;
+import com.github.triceo.robozonky.OperationsContext;
+import com.github.triceo.robozonky.Util;
+import com.github.triceo.robozonky.authentication.Authenticator;
+import com.github.triceo.robozonky.exceptions.LoginFailedException;
+import com.github.triceo.robozonky.exceptions.LogoutFailedException;
+import com.github.triceo.robozonky.remote.Investment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+<span class="nc" id="L41">public class App {</span>
+
+<span class="fc" id="L43">    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);</span>
+
+<span class="fc" id="L45">    static boolean PERFORM_SYSTEM_EXIT = true; // purely for testing purposes</span>
+
+    private static void exit(final ReturnCode returnCode) {
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (App.PERFORM_SYSTEM_EXIT) {</span>
+<span class="nc" id="L49">            App.LOGGER.debug(&quot;RoboZonky terminating with '{}' return code.&quot;, returnCode);</span>
+<span class="nc" id="L50">            System.exit(returnCode.getCode());</span>
+        }
+<span class="fc" id="L52">    }</span>
+
+    private static void printHelpAndExit(final CommandLineInterface cli, final String message,
+                                         final boolean exitWithError) {
+<span class="fc" id="L56">        cli.printHelpAndExit(message, exitWithError);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);</span>
+<span class="fc" id="L58">    }</span>
+
+    private static AppContext prepareStrategyDrivenMode(final CommandLineInterface cli) {
+<span class="fc" id="L61">        final Optional&lt;Integer&gt; loanAmount = cli.getLoanAmount();</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (loanAmount.isPresent()) {</span>
+<span class="nc" id="L63">            App.printHelpAndExit(cli, &quot;Loan amount makes no sense in this context.&quot;, true);</span>
+        }
+<span class="fc" id="L65">        final Optional&lt;String&gt; strategyFilePath = cli.getStrategyConfigurationFilePath();</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (!strategyFilePath.isPresent()) {</span>
+<span class="nc" id="L67">            App.printHelpAndExit(cli, &quot;Strategy file must be provided.&quot;, true);</span>
+        }
+<span class="fc" id="L69">        final File strategyConfig = new File(strategyFilePath.get());</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if (!strategyConfig.canRead()) {</span>
+<span class="nc" id="L71">            App.printHelpAndExit(cli, &quot;Investment strategy file must be readable.&quot;, true);</span>
+        }
+<span class="fc" id="L73">        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);</span>
+        try {
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">            if (cli.isDryRun()) {</span>
+<span class="fc" id="L76">                return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig),</span>
+<span class="fc" id="L77">                        cli.getDryRunBalance());</span>
+            } else {
+<span class="nc" id="L79">                return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig));</span>
+            }
+<span class="nc" id="L81">        } catch (final Exception e) {</span>
+<span class="nc" id="L82">            App.printHelpAndExit(cli, &quot;Failed parsing strategy: &quot; + e.getMessage(), true);</span>
+<span class="nc" id="L83">            return null;</span>
+        }
+    }
+
+    private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
+<span class="fc" id="L88">        final Optional&lt;String&gt; username = cli.getUsername();</span>
+<span class="fc" id="L89">        final Optional&lt;String&gt; password = cli.getPassword();</span>
+<span class="fc" id="L90">        final boolean passwordPresent = password.isPresent();</span>
+<span class="fc" id="L91">        final boolean useToken = cli.isTokenEnabled();</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if (!username.isPresent()) {</span>
+<span class="nc" id="L93">            App.printHelpAndExit(cli, &quot;Username must be provided.&quot;, true);</span>
+<span class="nc" id="L94">            return null;</span>
+        }
+<span class="fc" id="L96">        final String usr = username.get();</span>
+<span class="pc bpc" id="L97" title="1 of 4 branches missed.">        if (!useToken &amp;&amp; !passwordPresent) {</span>
+<span class="nc" id="L98">            App.printHelpAndExit(cli, &quot;Not using refresh token, password must be provided.&quot;, true);</span>
+<span class="nc" id="L99">            return null;</span>
+        }
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        final AuthenticationHandler auth =</span>
+<span class="fc" id="L102">                useToken ? AuthenticationHandler.tokenBased(usr) : AuthenticationHandler.passwordBased(usr);</span>
+<span class="fc" id="L103">        auth.withPassword(password.get());</span>
+<span class="fc" id="L104">        final Optional&lt;Integer&gt; secs = cli.getTokenRefreshBeforeExpirationInSeconds();</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (secs.isPresent()) {</span>
+<span class="nc" id="L106">            auth.withTokenRefreshingBeforeExpiration(secs.get(), ChronoUnit.SECONDS);</span>
+        }
+<span class="fc" id="L108">        return auth;</span>
+    }
+
+    private static AppContext prepareUserDrivenMode(final CommandLineInterface cli) {
+<span class="fc" id="L112">        final Optional&lt;Integer&gt; loanId = cli.getLoanId();</span>
+<span class="fc" id="L113">        final Optional&lt;Integer&gt; loanAmount = cli.getLoanAmount();</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (!loanId.isPresent()) {</span>
+<span class="nc" id="L115">            App.printHelpAndExit(cli, &quot;Loan ID must be provided.&quot;, true);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        } else if (!loanAmount.isPresent()) {</span>
+<span class="nc" id="L117">            App.printHelpAndExit(cli, &quot;Loan amount must be provided.&quot;, true);</span>
+        }
+<span class="fc" id="L119">        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (cli.isDryRun()) {</span>
+<span class="fc" id="L121">            return new AppContext(auth, cli.isTokenEnabled(), loanId.get(), loanAmount.get(), cli.getDryRunBalance());</span>
+        } else {
+<span class="nc" id="L123">            return new AppContext(auth, cli.isTokenEnabled(), loanId.get(), loanAmount.get());</span>
+        }
+    }
+
+    static AppContext processCommandLine(final String... args) {
+<span class="fc" id="L128">        final CommandLineInterface cmd = CommandLineInterface.parse(args);</span>
+<span class="pc bpc" id="L129" title="1 of 4 branches missed.">        switch (cmd.getCliOperatingMode()) {</span>
+            case HELP:
+<span class="fc" id="L131">                App.printHelpAndExit(cmd, &quot;&quot;, false);</span>
+<span class="fc" id="L132">                return null; // just in case of tests</span>
+            case STRATEGY_DRIVEN:
+<span class="fc" id="L134">                return App.prepareStrategyDrivenMode(cmd);</span>
+            case USER_DRIVER:
+<span class="fc" id="L136">                return App.prepareUserDrivenMode(cmd);</span>
+        }
+<span class="nc" id="L138">        throw new IllegalStateException(&quot;This should not have happened.&quot;);</span>
+    }
+
+    public static void main(final String... args) {
+<span class="fc" id="L142">        App.LOGGER.debug(&quot;RoboZonky v{} loading.&quot;, Util.getRoboZonkyVersion());</span>
+        try {
+<span class="fc" id="L144">            App.letsGo(App.processCommandLine(args)); // and start actually working with Zonky</span>
+<span class="fc" id="L145">            App.exit(ReturnCode.OK);</span>
+<span class="nc" id="L146">        } catch (final Exception ex) {</span>
+<span class="nc" id="L147">            App.LOGGER.error(&quot;Unexpected error.&quot; , ex);</span>
+<span class="nc" id="L148">            App.exit(ReturnCode.ERROR_UNEXPECTED);</span>
+<span class="fc" id="L149">        }</span>
+<span class="fc" id="L150">    }</span>
+
+    private static void storeInvestmentsMade(final Collection&lt;Investment&gt; result, final boolean dryRun) {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        final String suffix = dryRun ? &quot;dry&quot; : &quot;invested&quot;;</span>
+<span class="nc" id="L154">        final LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc" id="L155">        final String filename =</span>
+<span class="nc" id="L156">                &quot;robozonky.&quot; + DateTimeFormatter.ofPattern(&quot;yyyyMMddHHmm&quot;).format(now) + '.' + suffix;</span>
+<span class="nc" id="L157">        final File target = new File(filename);</span>
+<span class="nc" id="L158">        try (final BufferedWriter bw = Files.newBufferedWriter(target.toPath(), Charset.forName(&quot;UTF-8&quot;))) {</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">            for (final Investment i : result) {</span>
+<span class="nc" id="L160">                bw.write('#' + i.getLoanId() + &quot;: &quot; + i.getAmount() + &quot; CZK&quot;);</span>
+<span class="nc" id="L161">                bw.newLine();</span>
+<span class="nc" id="L162">            }</span>
+<span class="nc" id="L163">            App.LOGGER.info(&quot;Investments made by RoboZonky during the session were stored in file '{}'.&quot;, filename);</span>
+<span class="nc bnc" id="L164" title="All 8 branches missed.">        } catch (final IOException ex) {</span>
+<span class="nc" id="L165">            App.LOGGER.warn(&quot;Failed writing out the list of investments made in this session.&quot;, ex);</span>
+<span class="nc" id="L166">        }</span>
+<span class="nc" id="L167">    }</span>
+
+    static void letsGo(final AppContext ctx) {
+<span class="fc" id="L170">        App.LOGGER.info(&quot;===== RoboZonky at your service! =====&quot;);</span>
+<span class="fc" id="L171">        final boolean dryRun = ctx.isDryRun();</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        if (dryRun) {</span>
+<span class="fc" id="L173">            App.LOGGER.info(&quot;RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.&quot;);</span>
+        }
+        // figure out whether to invest based on strategy or whether to make a single investment
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        final Function&lt;OperationsContext, Collection&lt;Investment&gt;&gt; op = useStrategy ? Operations::invest : oc -&gt; {</span>
+<span class="nc" id="L178">            final Optional&lt;Investment&gt; optional = Operations.invest(oc, ctx.getLoanId(), ctx.getLoanAmount());</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">            if (optional.isPresent()) {</span>
+<span class="nc" id="L180">                return Collections.singletonList(optional.get());</span>
+            } else {
+<span class="nc" id="L182">                return Collections.emptyList();</span>
+            }
+        };
+        // and now perform the selected operation
+<span class="fc" id="L186">        final Collection&lt;Investment&gt; result = App.operate(ctx, op);</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if (result.isEmpty()) {</span>
+<span class="fc" id="L188">            App.LOGGER.info(&quot;RoboZonky did not invest.&quot;);</span>
+        } else {
+<span class="nc" id="L190">            App.storeInvestmentsMade(result, dryRun);</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">            if (dryRun) {</span>
+<span class="nc" id="L192">                App.LOGGER.info(&quot;RoboZonky pretended to invest into {} loans.&quot;, result.size());</span>
+            } else {
+<span class="nc" id="L194">                App.LOGGER.info(&quot;RoboZonky invested into {} loans.&quot;, result.size());</span>
+            }
+        }
+<span class="fc" id="L197">        App.LOGGER.info(&quot;===== RoboZonky out. =====&quot;);</span>
+<span class="fc" id="L198">    }</span>
+
+    private static Collection&lt;Investment&gt; operate(final AppContext ctx,
+                                                  final Function&lt;OperationsContext, Collection&lt;Investment&gt;&gt; operations) {
+<span class="pc bpc" id="L202" title="1 of 4 branches missed.">        if (ctx.isDryRun() &amp;&amp; ctx.getDryRunBalance() &lt; Operations.MINIMAL_INVESTMENT_ALLOWED) {</span>
+<span class="fc" id="L203">            App.LOGGER.info(&quot;Starting balance in dry run is lower than minimum, no need to execute at all.&quot;);</span>
+<span class="fc" id="L204">            return Collections.emptyList();</span>
+        }
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;</span>
+        try {
+<span class="fc" id="L208">            final AuthenticationHandler handler = ctx.getAuthenticationHandler();</span>
+<span class="fc" id="L209">            final Authenticator auth = handler.build();</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">            final OperationsContext oc = useStrategy ?</span>
+<span class="pc" id="L211">                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :</span>
+<span class="nc" id="L212">                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());</span>
+<span class="nc" id="L213">            final boolean logoutAllowed = handler.processToken(oc.getAuthentication().getApiToken());</span>
+<span class="nc" id="L214">            final Collection&lt;Investment&gt; result = operations.apply(oc);</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">            if (logoutAllowed) { // log out</span>
+                try {
+<span class="nc" id="L217">                    Operations.logout(oc);</span>
+<span class="nc" id="L218">                } catch (final LogoutFailedException ex) {</span>
+<span class="nc" id="L219">                    App.LOGGER.warn(&quot;Logging out of Zonky failed.&quot;, ex);</span>
+<span class="nc" id="L220">                }</span>
+            } else {  // if we're using the token, we should never log out
+<span class="nc" id="L222">                App.LOGGER.info(&quot;Refresh token stored, not logging out of Zonky.&quot;);</span>
+            }
+<span class="nc" id="L224">            return result;</span>
+<span class="fc" id="L225">        } catch (final LoginFailedException ex) {</span>
+<span class="fc" id="L226">            App.LOGGER.error(&quot;Logging into Zonky failed. No investments were made.&quot;, ex);</span>
+<span class="fc" id="L227">            App.exit(ReturnCode.ERROR_LOGIN);</span>
+        }
+<span class="fc" id="L229">        return Collections.emptyList(); // should never get here</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

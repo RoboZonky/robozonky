@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AuthenticationHandler.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">robozonky-app</a> &gt; <a href="index.source.html" class="el_package">com.github.triceo.robozonky.app</a> &gt; <span class="el_source">AuthenticationHandler.java</span></div><h1>AuthenticationHandler.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2016 Lukáš Petrovický
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.triceo.robozonky.app;
+
+import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import javax.xml.bind.JAXBException;
+
+import com.github.triceo.robozonky.authentication.Authenticator;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class AuthenticationHandler {
+
+<span class="fc" id="L35">    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandler.class);</span>
+<span class="fc" id="L36">    private static final File TOKEN_FILE = new File(&quot;robozonky.token&quot;);</span>
+
+    public static AuthenticationHandler tokenBased(final String username) {
+<span class="fc" id="L39">        return new AuthenticationHandler(username, true);</span>
+    }
+
+    public static AuthenticationHandler passwordBased(final String username) {
+<span class="fc" id="L43">        return new AuthenticationHandler(username, false);</span>
+    }
+
+    private final boolean tokenBased;
+    private final String username;
+<span class="fc" id="L48">    private long tokenRefreshBeforeExpirationInSeconds = 60;</span>
+<span class="fc" id="L49">    private String password = null;</span>
+
+<span class="fc" id="L51">    private AuthenticationHandler(final String username, final boolean tokenBased) {</span>
+<span class="fc" id="L52">        this.tokenBased = tokenBased;</span>
+<span class="fc" id="L53">        this.username = username;</span>
+<span class="fc" id="L54">    }</span>
+
+    public AuthenticationHandler withPassword(final String password) {
+<span class="fc" id="L57">        this.password = password;</span>
+<span class="fc" id="L58">        return this;</span>
+    }
+
+    public AuthenticationHandler withTokenRefreshingBeforeExpiration(final long time, final TemporalUnit unit) {
+<span class="nc" id="L62">        this.tokenRefreshBeforeExpirationInSeconds = Duration.of(time, unit).getSeconds();</span>
+<span class="nc" id="L63">        return this;</span>
+    }
+
+    public Authenticator build() {
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (!AuthenticationHandler.TOKEN_FILE.canRead()) { // no token available, also using password-based</span>
+<span class="fc" id="L68">            AuthenticationHandler.LOGGER.debug(&quot;Token file not available, using password-based authentication.&quot;);</span>
+<span class="fc" id="L69">            return Authenticator.withCredentials(this.username, this.password);</span>
+        }
+<span class="nc" id="L71">        boolean deleteToken = false;</span>
+        try {
+<span class="nc" id="L73">            final ZonkyApiToken token = ZonkyApiToken.unmarshal(AuthenticationHandler.TOKEN_FILE);</span>
+<span class="nc" id="L74">            final LocalDateTime obtained =</span>
+<span class="nc" id="L75">                    LocalDateTime.ofInstant(Instant.ofEpochMilli(AuthenticationHandler.TOKEN_FILE.lastModified()),</span>
+<span class="nc" id="L76">                    ZoneId.systemDefault());</span>
+<span class="nc" id="L77">            final LocalDateTime expires = obtained.plus(token.getExpiresIn(), ChronoUnit.SECONDS);</span>
+<span class="nc" id="L78">            AuthenticationHandler.LOGGER.debug(&quot;Token obtained on {}, expires on {}.&quot;, obtained, expires);</span>
+<span class="nc" id="L79">            final LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (expires.isBefore(now)) {</span>
+<span class="nc" id="L81">                AuthenticationHandler.LOGGER.debug(&quot;Token {} expired, using password-based authentication.&quot;,</span>
+<span class="nc" id="L82">                        token.getAccessToken());</span>
+<span class="nc" id="L83">                deleteToken = true;</span>
+<span class="nc" id="L84">                return Authenticator.withCredentials(this.username, this.password);</span>
+            }
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {</span>
+<span class="nc" id="L87">                AuthenticationHandler.LOGGER.debug(&quot;Token {} expiring, will be refreshed.&quot;, token.getAccessToken());</span>
+<span class="nc" id="L88">                deleteToken = true;</span>
+<span class="nc" id="L89">                return Authenticator.withAccessTokenAndRefresh(this.username, token);</span>
+            } else {
+<span class="nc" id="L91">                AuthenticationHandler.LOGGER.debug(&quot;Reusing access token {}.&quot;, token.getAccessToken());</span>
+<span class="nc" id="L92">                return Authenticator.withAccessToken(this.username, token);</span>
+            }
+<span class="nc" id="L94">        } catch (final JAXBException ex) {</span>
+<span class="nc" id="L95">            AuthenticationHandler.LOGGER.warn(&quot;Failed parsing token file, using password-based authentication.&quot;, ex);</span>
+<span class="nc" id="L96">            deleteToken = true;</span>
+<span class="nc" id="L97">            return Authenticator.withCredentials(this.username, this.password);</span>
+        } finally {
+<span class="nc bnc" id="L99" title="All 20 branches missed.">            if (deleteToken &amp;&amp; !AuthenticationHandler.TOKEN_FILE.delete()) {</span>
+<span class="nc" id="L100">                AuthenticationHandler.LOGGER.warn(&quot;Failed deleting token file, authentication may stop working.&quot;);</span>
+            }
+        }
+    }
+
+    public boolean processToken(final ZonkyApiToken token) {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (!this.tokenBased) { // not using token; always logout</span>
+<span class="nc" id="L107">            return true;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        } else if (AuthenticationHandler.TOKEN_FILE.canRead()) { // token already exists, do not logout</span>
+<span class="nc" id="L109">            return false;</span>
+        } else try { // try to store token
+<span class="nc" id="L111">            AuthenticationHandler.TOKEN_FILE.delete(); // just to be sure</span>
+<span class="nc" id="L112">            ZonkyApiToken.marshal(token, AuthenticationHandler.TOKEN_FILE);</span>
+<span class="nc" id="L113">            return false;</span>
+<span class="nc" id="L114">        } catch (final JAXBException ex) {</span>
+<span class="nc" id="L115">            AuthenticationHandler.LOGGER.info(&quot;Failed writing access token, will need to use password next time.&quot;, ex);</span>
+<span class="nc" id="L116">            return true;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>
