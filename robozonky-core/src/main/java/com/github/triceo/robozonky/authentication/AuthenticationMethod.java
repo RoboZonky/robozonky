@@ -38,11 +38,19 @@ public final class AuthenticationMethod {
         });
     }
 
-    public static AuthenticationMethod withRefreshToken(final String username, final ZonkyApiToken token) {
+    public static AuthenticationMethod withAccessToken(final String username, final ZonkyApiToken token) {
+        return new AuthenticationMethod((ZonkyApi api) -> {
+            AuthenticationMethod.LOGGER.info("Logged in with Zonky as user '{}' with existing access token.", username);
+            return token;
+        });
+    }
+
+    public static AuthenticationMethod withAccessTokenAndRefresh(final String username, final ZonkyApiToken token) {
         return new AuthenticationMethod((ZonkyApi api) -> {
             final String tokenId = token.getRefreshToken();
             final ZonkyApiToken newToken = api.refresh(tokenId, "refresh_token", AuthenticationMethod.TARGET_SCOPE);
-            AuthenticationMethod.LOGGER.info("Logged in with Zonky as user '{}' using refresh token.", username);
+            AuthenticationMethod.LOGGER.info("Logged in with Zonky as user '{}', refreshing existing access token.",
+                    username);
             return newToken;
         });
     }
@@ -70,7 +78,6 @@ public final class AuthenticationMethod {
         final ZonkyApi api = AuthenticationMethod.newApi(zonkyApiUrl, clientBuilder, new AuthenticationFilter());
         final ZonkyApiToken token = authenticationMethod.apply(api);
         return AuthenticationMethod.newAuthenticatedApi(token, zonkyApiUrl, clientBuilder);
-
     }
 
 }

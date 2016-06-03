@@ -16,27 +16,86 @@
  */
 package com.github.triceo.robozonky.remote;
 
+import java.io.File;
+import java.util.Objects;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "token")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ZonkyApiToken {
 
-    private String accessToken, refreshToken, type;
-    private int expiresIn;
-    private String scope;
+    public static ZonkyApiToken unmarshal(final File tokenFile) throws JAXBException {
+        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
+        final Unmarshaller u = ctx.createUnmarshaller();
+        return (ZonkyApiToken)u.unmarshal(tokenFile);
+    }
 
-    @XmlElement(name = "access_token")
+    public static void marshal(final ZonkyApiToken token, final File tokenFile) throws JAXBException {
+        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
+        final Marshaller m = ctx.createMarshaller();
+        m.marshal(token, tokenFile);
+    }
+
+    @XmlElement(name="access_token")
+    private String accessToken;
+    @XmlElement(name="refresh_token")
+    private String refreshToken;
+    @XmlElement(name = "token_type")
+    private String type;
+    @XmlElement
+    private String scope;
+    @XmlElement(name = "expires_in")
+    private int expiresIn;
+
+    ZonkyApiToken() {
+        // for JAXB
+    }
+
     public String getAccessToken() {
         return accessToken;
     }
 
-    @XmlElement(name = "refresh_token")
     public String getRefreshToken() {
         return refreshToken;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public int getExpiresIn() {
+        return expiresIn;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final ZonkyApiToken that = (ZonkyApiToken) o;
+        return Objects.equals(accessToken, that.accessToken) &&
+                Objects.equals(refreshToken, that.refreshToken) &&
+                Objects.equals(scope, that.scope);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accessToken, refreshToken, scope);
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Token{");
+        final StringBuilder sb = new StringBuilder("ZonkyApiToken{");
         sb.append("accessToken='").append(accessToken).append('\'');
         sb.append(", refreshToken='").append(refreshToken).append('\'');
         sb.append(", type='").append(type).append('\'');
@@ -44,20 +103,5 @@ public class ZonkyApiToken {
         sb.append(", scope='").append(scope).append('\'');
         sb.append('}');
         return sb.toString();
-    }
-
-    @XmlElement(name = "token_type")
-    public String getType() {
-        return type;
-    }
-
-    @XmlElement(name = "expires_in")
-    public int getExpiresIn() {
-        return expiresIn;
-    }
-
-    @XmlElement
-    public String getScope() {
-        return scope;
     }
 }

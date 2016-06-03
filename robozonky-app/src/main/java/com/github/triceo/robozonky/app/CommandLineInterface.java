@@ -47,6 +47,8 @@ class CommandLineInterface {
             .argName("Zonky username").desc("Used to connect to the Zonky server.").build();
     static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password")
             .argName("Zonky password").desc("Used to connect to the Zonky server.").build();
+    static final Option OPTION_USE_TOKEN = Option.builder("r").argName("Refresh connection.").longOpt("refresh")
+            .desc("Once logged in, RoboZonky will never log out unless login expires. Use with caution.").build();
     static final Option OPTION_DRY_RUN = Option.builder("d").hasArg().optionalArg(true).
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
             .build();
@@ -59,7 +61,11 @@ class CommandLineInterface {
         // find all options from all modes of operation
         final Collection<Option> ops = Stream.of(OperatingMode.values()).map(OperatingMode::getOtherOptions)
                 .collect(LinkedHashSet::new, LinkedHashSet::addAll, LinkedHashSet::addAll);
-        // join both in a single config
+        // include authentication options
+        ops.add(CommandLineInterface.OPTION_USERNAME);
+        ops.add(CommandLineInterface.OPTION_PASSWORD);
+        ops.add(CommandLineInterface.OPTION_USE_TOKEN);
+        // join all in a single config
         final Options options = new Options();
         options.addOptionGroup(og);
         ops.forEach(options::addOption);
@@ -131,6 +137,10 @@ class CommandLineInterface {
 
     public boolean isDryRun() {
         return this.cli.hasOption(CommandLineInterface.OPTION_DRY_RUN.getOpt());
+    }
+
+    public boolean isTokenEnabled() {
+        return this.cli.hasOption(CommandLineInterface.OPTION_USE_TOKEN.getOpt());
     }
 
     public Optional<Integer> getDryRunBalance() {

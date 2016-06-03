@@ -42,4 +42,5 @@ abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter
                 clientRequestContext.getMethod(), clientRequestContext.getUri(), clientResponseContext.getStatus());
     }
 
+
 }
