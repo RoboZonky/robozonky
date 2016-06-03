@@ -20,35 +20,29 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
-import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.Util;
-import com.github.triceo.robozonky.authentication.AuthenticationMethod;
+import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final File TOKEN_FILE = new File("robozonky.token");
 
     static boolean PERFORM_SYSTEM_EXIT = true; // purely for testing purposes
-    static final int REFRESH_TOKEN_BEFORE_EXPIRATION_SECONDS = 60;
 
     private static void exit(final ReturnCode returnCode) {
         if (App.PERFORM_SYSTEM_EXIT) {
@@ -57,7 +51,8 @@ public class App {
         }
     }
 
-    private static void printHelpAndExit(final CommandLineInterface cli, final String message, final boolean exitWithError) {
+    private static void printHelpAndExit(final CommandLineInterface cli, final String message,
+                                         final boolean exitWithError) {
         cli.printHelpAndExit(message, exitWithError);
         App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
     }
@@ -72,10 +67,11 @@ public class App {
             App.printHelpAndExit(cli, "Strategy file must be provided.", true);
         }
         final File strategyConfig = new File(strategyFilePath.get());
+        System.out.println(strategyConfig.getAbsolutePath());
         if (!strategyConfig.canRead()) {
             App.printHelpAndExit(cli, "Investment strategy file must be readable.", true);
         }
-        final AuthenticationMethod auth = App.getAuthenticationMethod(cli);
+        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         try {
             if (cli.isDryRun()) {
                 return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig),
@@ -89,55 +85,28 @@ public class App {
         }
     }
 
-    private static AuthenticationMethod getAuthenticationMethod(final CommandLineInterface cli) {
+    private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
         final Optional<String> username = cli.getUsername();
         final Optional<String> password = cli.getPassword();
         final boolean passwordPresent = password.isPresent();
         final boolean useToken = cli.isTokenEnabled();
         if (!username.isPresent()) {
             App.printHelpAndExit(cli, "Username must be provided.", true);
+            return null;
         }
         final String usr = username.get();
-        if (!useToken) { // using password-based authentication
-            if (!passwordPresent) {
-                App.printHelpAndExit(cli, "Not using refresh token, password must be provided.", true);
-            }
-            return AuthenticationMethod.withCredentials(usr, password.get());
+        if (!useToken && !passwordPresent) {
+            App.printHelpAndExit(cli, "Not using refresh token, password must be provided.", true);
+            return null;
         }
-        final String pwd = password.get();
-        if (!App.TOKEN_FILE.canRead()) { // no token available, also using password-based
-            App.LOGGER.debug("Token file not available for reading, using password-based authentication.");
-            return AuthenticationMethod.withCredentials(usr, pwd);
+        final AuthenticationHandler auth =
+                useToken ? AuthenticationHandler.tokenBased(usr) : AuthenticationHandler.passwordBased(usr);
+        auth.withPassword(password.get());
+        final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
+        if (secs.isPresent()) {
+            auth.withTokenRefreshingBeforeExpiration(secs.get(), ChronoUnit.SECONDS);
         }
-        boolean deleteToken = false;
-        try {
-            final ZonkyApiToken token = ZonkyApiToken.unmarshal(App.TOKEN_FILE);
-            final LocalDateTime obtained = LocalDateTime.ofInstant(Instant.ofEpochMilli(App.TOKEN_FILE.lastModified()),
-                    ZoneId.systemDefault());
-            final LocalDateTime expires = obtained.plus(token.getExpiresIn(), ChronoUnit.SECONDS);
-            App.LOGGER.debug("Token obtained on {}, expires on {}.", obtained, expires);
-            final LocalDateTime now = LocalDateTime.now();
-            if (expires.isBefore(now)) {
-                App.LOGGER.debug("Token {} expired, using password-based authentication.", token.getAccessToken());
-                deleteToken = true;
-                return AuthenticationMethod.withCredentials(usr, pwd);
-            } else if (expires.minus(App.REFRESH_TOKEN_BEFORE_EXPIRATION_SECONDS, ChronoUnit.SECONDS).isBefore(now)) {
-                App.LOGGER.debug("Token {} about to expire and will be refreshed.", token.getAccessToken());
-                deleteToken = true;
-                return AuthenticationMethod.withAccessTokenAndRefresh(usr, token);
-            } else {
-                App.LOGGER.debug("Reusing access token {}.", token.getAccessToken());
-                return AuthenticationMethod.withAccessToken(usr, token);
-            }
-        } catch (final JAXBException ex) {
-            App.LOGGER.warn("Failed parsing token file, using password-based authentication.", ex);
-            deleteToken = true;
-            return AuthenticationMethod.withCredentials(usr, pwd);
-        } finally {
-            if (deleteToken && !App.TOKEN_FILE.delete()) {
-                App.LOGGER.warn("Failed deleting token file, authentication may stop working.");
-            }
-        }
+        return auth;
     }
 
     private static AppContext prepareUserDrivenMode(final CommandLineInterface cli) {
@@ -148,7 +117,7 @@ public class App {
         } else if (!loanAmount.isPresent()) {
             App.printHelpAndExit(cli, "Loan amount must be provided.", true);
         }
-        final AuthenticationMethod auth = App.getAuthenticationMethod(cli);
+        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         if (cli.isDryRun()) {
             return new AppContext(auth, cli.isTokenEnabled(), loanId.get(), loanAmount.get(), cli.getDryRunBalance());
         } else {
@@ -161,7 +130,7 @@ public class App {
         switch (cmd.getCliOperatingMode()) {
             case HELP:
                 App.printHelpAndExit(cmd, "", false);
-                return null; // just in case exit control property is tests
+                return null; // just in case of tests
             case STRATEGY_DRIVEN:
                 return App.prepareStrategyDrivenMode(cmd);
             case USER_DRIVER:
@@ -237,29 +206,21 @@ public class App {
         }
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         try {
+            final AuthenticationHandler handler = ctx.getAuthenticationHandler();
+            final Authenticator auth = handler.build();
             final OperationsContext oc = useStrategy ?
-                    Operations.login(ctx.getAuthenticationMethod(), ctx.isDryRun(), ctx.getDryRunBalance(),
-                            ctx.getInvestmentStrategy()) :
-                    Operations.login(ctx.getAuthenticationMethod(), ctx.isDryRun(), ctx.getDryRunBalance());
-            boolean useToken = ctx.isTokenUsed();
-            if (useToken && !App.TOKEN_FILE.exists()) {
-                final ZonkyApiToken t = oc.getApiToken();
-                try {
-                    ZonkyApiToken.marshal(t, App.TOKEN_FILE);
-                } catch (final JAXBException ex) {
-                    App.LOGGER.info("Failed writing access token, will need to use password next time.", ex);
-                    useToken = false;
-                }
-            }
+                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :
+                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());
+            final boolean logoutAllowed = handler.processToken(oc.getAuthentication().getApiToken());
             final Collection<Investment> result = operations.apply(oc);
-            if (useToken) { // if we're using the token, we should never log out
-                App.LOGGER.info("Refresh token stored, not logging out of Zonky.");
-            } else { // log out
+            if (logoutAllowed) { // log out
                 try {
                     Operations.logout(oc);
                 } catch (final LogoutFailedException ex) {
                     App.LOGGER.warn("Logging out of Zonky failed.", ex);
                 }
+            } else {  // if we're using the token, we should never log out
+                App.LOGGER.info("Refresh token stored, not logging out of Zonky.");
             }
             return result;
         } catch (final LoginFailedException ex) {

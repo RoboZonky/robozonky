@@ -17,46 +17,44 @@ package com.github.triceo.robozonky.app;
 
 import java.util.Optional;
 
-import com.github.triceo.robozonky.authentication.AuthenticationMethod;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 
 class AppContext {
 
     private InvestmentStrategy investmentStrategy = null;
-    private final AuthenticationMethod authenticationMethod;
+    private final AuthenticationHandler authenticator;
     private final OperatingMode operatingMode;
     private boolean isDryRun = false;
     private boolean isTokenUsed = false;
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
 
-    public AppContext(final AuthenticationMethod authMethod, final boolean useToken, final int loanId,
+    public AppContext(final AuthenticationHandler authMethod, final boolean useToken, final int loanId,
                       final int loanAmount) {
         this.operatingMode = OperatingMode.USER_DRIVER;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
-        this.authenticationMethod = authMethod;
+        this.authenticator = authMethod;
         this.isTokenUsed = useToken;
     }
 
-    public AppContext(final AuthenticationMethod authMethod, final boolean useToken, final int loanId,
-                      final int loanAmount,
-                      final Optional<Integer> dryRunBalance) {
-        this(authMethod, useToken, loanId, loanAmount);
+    public AppContext(final AuthenticationHandler authenticator, final boolean useToken, final int loanId,
+                      final int loanAmount, final Optional<Integer> dryRunBalance) {
+        this(authenticator, useToken, loanId, loanAmount);
         this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
         this.isDryRun = true;
     }
 
-    public AppContext(final AuthenticationMethod authMethod, final boolean useToken,
+    public AppContext(final AuthenticationHandler authenticator, final boolean useToken,
                       final InvestmentStrategy investmentStrategy) {
         this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
         this.investmentStrategy = investmentStrategy;
-        this.authenticationMethod = authMethod;
+        this.authenticator = authenticator;
         this.isTokenUsed = useToken;
     }
 
-    public AppContext(final AuthenticationMethod authMethod, final boolean useToken,
+    public AppContext(final AuthenticationHandler authenticator, final boolean useToken,
                       final InvestmentStrategy investmentStrategy, final Optional<Integer> dryRunBalance) {
-        this(authMethod, useToken, investmentStrategy);
+        this(authenticator, useToken, investmentStrategy);
         this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
         this.isDryRun = true;
     }
@@ -73,8 +71,8 @@ class AppContext {
         return loanAmount;
     }
 
-    public AuthenticationMethod getAuthenticationMethod() {
-        return authenticationMethod;
+    public AuthenticationHandler getAuthenticationHandler() {
+        return authenticator;
     }
 
     public boolean isDryRun() {

@@ -41,13 +41,13 @@ class CommandLineInterface {
     static final Option OPTION_AMOUNT = Option.builder("a").hasArg().longOpt("amount")
             .argName("Amount to invest").desc("Amount to invest to a single loan when ignoring strategy.")
             .build();
-    static final Option OPTION_HELP = Option.builder("h").longOpt("help").argName("Show help")
-            .desc("Show this help message and quit.").build();
+    static final Option OPTION_HELP = Option.builder("h").longOpt("help").desc("Show this help message and quit.")
+            .build();
     static final Option OPTION_USERNAME = Option.builder("u").hasArg().longOpt("username")
             .argName("Zonky username").desc("Used to connect to the Zonky server.").build();
-    static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password")
-            .argName("Zonky password").desc("Used to connect to the Zonky server.").build();
-    static final Option OPTION_USE_TOKEN = Option.builder("r").argName("Refresh connection.").longOpt("refresh")
+    static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password").argName("Zonky password").desc("Used to connect to the Zonky server.").build();
+    static final Option OPTION_USE_TOKEN = Option.builder("r").hasArg().optionalArg(true)
+            .argName("Seconds before expiration").longOpt("refresh")
             .desc("Once logged in, RoboZonky will never log out unless login expires. Use with caution.").build();
     static final Option OPTION_DRY_RUN = Option.builder("d").hasArg().optionalArg(true).
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
@@ -100,7 +100,12 @@ class CommandLineInterface {
 
     private Optional<String> getOptionValue(final Option option) {
         if (this.cli.hasOption(option.getOpt())) {
-            return Optional.of(this.cli.getOptionValue(option.getOpt()));
+            final String val = this.cli.getOptionValue(option.getOpt());
+            if (val == null || val.isEmpty()) {
+                return Optional.empty();
+            } else {
+                return Optional.of(val);
+            }
         } else {
             return Optional.empty();
         }
@@ -109,7 +114,11 @@ class CommandLineInterface {
     private Optional<Integer> getIntegerOptionValue(final Option option) {
         final Optional<String> result = this.getOptionValue(option);
         if (result.isPresent()) {
-            return Optional.of(Integer.valueOf(result.get())); // FIXME throws
+            try {
+                return Optional.of(Integer.valueOf(result.get()));
+            } catch (final NumberFormatException ex) {
+                return Optional.empty();
+            }
         } else {
             return Optional.empty();
         }
@@ -141,6 +150,10 @@ class CommandLineInterface {
 
     public boolean isTokenEnabled() {
         return this.cli.hasOption(CommandLineInterface.OPTION_USE_TOKEN.getOpt());
+    }
+
+    public Optional<Integer> getTokenRefreshBeforeExpirationInSeconds() {
+        return this.getIntegerOptionValue(CommandLineInterface.OPTION_USE_TOKEN);
     }
 
     public Optional<Integer> getDryRunBalance() {

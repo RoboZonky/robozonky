@@ -20,6 +20,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+// FIXME this "integration test" sucks; break down into multiple actual unit tests
 public class AppTest {
 
     @BeforeClass
@@ -34,14 +35,19 @@ public class AppTest {
 
     @Test
     public void tokenizedDryRun() {
-        App.letsGo(App.processCommandLine("-s", "src/main/assembly/resources/robozonky-dynamic.cfg", "-d", "0",
-                "-u", "someone", "-p", "somepassword", "-r"));
+        App.main("-s", "src/main/assembly/resources/robozonky-dynamic.cfg", "-d", "0", "-u", "someone",
+                "-p", "somepassword", "-r");
     }
 
     @Test
     public void tokenLessDryRun() {
-        App.letsGo(App.processCommandLine("-s", "src/main/assembly/resources/robozonky-conservative.cfg", "-d", "2000",
-                "-u", "someone", "-p", "somepassword"));
+        App.main("-s", "src/main/assembly/resources/robozonky-conservative.cfg", "-d", "2000",
+                "-u", "someone", "-p", "somepassword");
+    }
+
+    @Test
+    public void strategyLessRun() {
+        App.main("-a", "400", "-l", "66666", "-d", "2000", "-u", "someone", "-p", "somepassword");
     }
 
     @Test

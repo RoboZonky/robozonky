@@ -19,12 +19,12 @@ package com.github.triceo.robozonky.authentication;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 
-public class Authenticated {
+public class Authentication {
 
     private final ZonkyApi api;
     private final ZonkyApiToken apiToken;
 
-    Authenticated(final ZonkyApi api, final ZonkyApiToken apiToken) {
+    Authentication(final ZonkyApi api, final ZonkyApiToken apiToken) {
         this.api = api;
         this.apiToken = apiToken;
     }

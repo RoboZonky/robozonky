@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
-import com.github.triceo.robozonky.authentication.Authenticated;
+import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
@@ -135,7 +135,9 @@ public class InvestingTest {
         final OperationsContext mockContext = Mockito.mock(OperationsContext.class);
         Mockito.when(mockContext.getStrategy()).thenReturn(mockStrategy);
         Mockito.when(mockContext.isDryRun()).thenReturn(false);
-        Mockito.when(mockContext.getApi()).thenReturn(api);
+        final Authentication auth = Mockito.mock(Authentication.class);
+        Mockito.when(auth.getApi()).thenReturn(api);
+        Mockito.when(mockContext.getAuthentication()).thenReturn(auth);
         // test OK
         final Optional<Investment> result
                 = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), remainingBalance);
@@ -215,8 +217,8 @@ public class InvestingTest {
         Assertions.assertThat(result).isEmpty();
     }
 
-    private Authenticated mockAuthenticated(final ZonkyApi api) {
-        final Authenticated authenticated = Mockito.mock(Authenticated.class);
+    private Authentication mockAuthenticated(final ZonkyApi api) {
+        final Authentication authenticated = Mockito.mock(Authentication.class);
         Mockito.when(authenticated.getApi()).thenReturn(api);
         final ZonkyApiToken token = Mockito.mock(ZonkyApiToken.class);
         Mockito.when(authenticated.getApiToken()).thenReturn(token);

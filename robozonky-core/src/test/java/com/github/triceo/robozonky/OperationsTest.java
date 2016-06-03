@@ -23,6 +23,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
@@ -114,8 +115,10 @@ public class OperationsTest {
         final Wallet wallet = new Wallet(-1, -1, BigDecimal.valueOf(100000), remoteBalance);
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getWallet()).thenReturn(wallet);
+        final Authentication auth = Mockito.mock(Authentication.class);
+        Mockito.when(auth.getApi()).thenReturn(api);
         final OperationsContext ctx = Mockito.mock(OperationsContext.class);
-        Mockito.when(ctx.getApi()).thenReturn(api);
+        Mockito.when(ctx.getAuthentication()).thenReturn(auth);
         // test operation
         Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
     }
