@@ -19,7 +19,7 @@ package com.github.triceo.robozonky;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.github.triceo.robozonky.remote.ZonkyAPI;
+import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +34,15 @@ public class OperationsContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationsContext.class);
 
-    private final ZonkyAPI api;
+    private final Authentication authenticationInfo;
     private final InvestmentStrategy strategy;
     private final boolean dryRun;
     private final int dryRunInitialBalance;
     private final ExecutorService backgroundExecutor;
 
-    public OperationsContext(final ZonkyAPI api, final InvestmentStrategy strategy, final boolean dryRun,
-                             final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {
-        this.api = api;
+    public OperationsContext(final Authentication authenticated, final InvestmentStrategy strategy,
+                             final boolean dryRun, final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {
+        this.authenticationInfo = authenticated;
         this.strategy = strategy;
         this.dryRun = dryRun;
         this.dryRunInitialBalance = dryRunInitialBalance;
@@ -59,16 +59,8 @@ public class OperationsContext {
         return this.backgroundExecutor;
     }
 
-    /**
-     * Retrieve fully authenticated Zonky API, ready to be worked with.
-     * @return Zonky API.
-     * @throws IllegalStateException When called after {@link #dispose()}.
-     */
-    protected ZonkyAPI getAPI() {
-        if (backgroundExecutor.isShutdown()) {
-            throw new IllegalStateException("OperationsContext already disposed of.");
-        }
-        return this.api;
+    public Authentication getAuthentication() {
+        return authenticationInfo;
     }
 
     public InvestmentStrategy getStrategy() {

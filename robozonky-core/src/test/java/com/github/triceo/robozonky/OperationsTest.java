@@ -23,12 +23,13 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Wallet;
-import com.github.triceo.robozonky.remote.ZonkyAPI;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -112,10 +113,12 @@ public class OperationsTest {
         // prepare context
         final BigDecimal remoteBalance = BigDecimal.valueOf(12345);
         final Wallet wallet = new Wallet(-1, -1, BigDecimal.valueOf(100000), remoteBalance);
-        final ZonkyAPI api = Mockito.mock(ZonkyAPI.class);
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getWallet()).thenReturn(wallet);
+        final Authentication auth = Mockito.mock(Authentication.class);
+        Mockito.when(auth.getApi()).thenReturn(api);
         final OperationsContext ctx = Mockito.mock(OperationsContext.class);
-        Mockito.when(ctx.getAPI()).thenReturn(api);
+        Mockito.when(ctx.getAuthentication()).thenReturn(auth);
         // test operation
         Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
     }

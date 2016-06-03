@@ -26,28 +26,28 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ZonkyAPITest {
+public class ZonkyApiTest {
 
     private static ResteasyClient CLIENT;
-    private static ZonkyAPI API;
+    private static ZonkyApi API;
 
     @Test
     public void testBasicParsing() {
         final Ratings ratings = Ratings.all();
-        final List<Loan> loans = ZonkyAPITest.API.getLoans(ratings, 200);
+        final List<Loan> loans = ZonkyApiTest.API.getLoans(ratings, 200);
         Assertions.assertThat(loans).isNotEmpty();
         Assertions.assertThat(loans.get(0).getRemainingInvestment()).isGreaterThan(0);
     }
 
     @BeforeClass
     public static void startUp() {
-        ZonkyAPITest.CLIENT = new ResteasyClientBuilder().build();
-        ZonkyAPITest.API = ZonkyAPITest.CLIENT.target("https://api.zonky.cz").proxy(ZonkyAPI.class);
+        ZonkyApiTest.CLIENT = new ResteasyClientBuilder().build();
+        ZonkyApiTest.API = ZonkyApiTest.CLIENT.target("https://api.zonky.cz").proxy(ZonkyApi.class);
     }
 
     @AfterClass
     public static void cleanUp() {
-        ZonkyAPITest.CLIENT.close();
+        ZonkyApiTest.CLIENT.close();
     }
 
 }

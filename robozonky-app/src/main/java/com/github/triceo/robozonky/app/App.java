@@ -22,15 +22,17 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.Util;
+import com.github.triceo.robozonky.authentication.Authenticator;
+import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.Investment;
 import org.slf4j.Logger;
@@ -39,30 +41,25 @@ import org.slf4j.LoggerFactory;
 public class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    static final String EXIT_ON_HELP = "robozonky.do.not.exit";
 
+    static boolean PERFORM_SYSTEM_EXIT = true; // purely for testing purposes
 
     private static void exit(final ReturnCode returnCode) {
-        App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
-        System.exit(returnCode.getCode());
-    }
-
-    private static void printHelpAndExit(final CommandLineInterface cli, final String message, final boolean exitWithError) {
-        cli.printHelpAndExit(message, exitWithError);
-        if (!System.getProperty(App.EXIT_ON_HELP, "false").equals("true")) {
-            App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
+        if (App.PERFORM_SYSTEM_EXIT) {
+            App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
+            System.exit(returnCode.getCode());
         }
     }
 
+    private static void printHelpAndExit(final CommandLineInterface cli, final String message,
+                                         final boolean exitWithError) {
+        cli.printHelpAndExit(message, exitWithError);
+        App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
+    }
+
     private static AppContext prepareStrategyDrivenMode(final CommandLineInterface cli) {
-        final Optional<String> username = cli.getUsername();
-        final Optional<String> password = cli.getPassword();
         final Optional<Integer> loanAmount = cli.getLoanAmount();
-        if (!username.isPresent()) {
-            App.printHelpAndExit(cli, "Username must be provided.", true);
-        } else if (!password.isPresent()) {
-            App.printHelpAndExit(cli, "Password must be provided.", true);
-        } else if (loanAmount.isPresent()) {
+        if (loanAmount.isPresent()) {
             App.printHelpAndExit(cli, "Loan amount makes no sense in this context.", true);
         }
         final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
@@ -73,12 +70,13 @@ public class App {
         if (!strategyConfig.canRead()) {
             App.printHelpAndExit(cli, "Investment strategy file must be readable.", true);
         }
+        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         try {
             if (cli.isDryRun()) {
-                return new AppContext(username.get(), password.get(), StrategyParser.parse(strategyConfig),
+                return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig),
                         cli.getDryRunBalance());
             } else {
-                return new AppContext(username.get(), password.get(), StrategyParser.parse(strategyConfig));
+                return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig));
             }
         } catch (final Exception e) {
             App.printHelpAndExit(cli, "Failed parsing strategy: " + e.getMessage(), true);
@@ -86,25 +84,43 @@ public class App {
         }
     }
 
-    private static AppContext prepareUserDrivenMode(final CommandLineInterface cli) {
+    private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
         final Optional<String> username = cli.getUsername();
         final Optional<String> password = cli.getPassword();
-        final Optional<Integer> loanId = cli.getLoanId();
-        final Optional<Integer> loanAmount = cli.getLoanAmount();
+        final boolean passwordPresent = password.isPresent();
+        final boolean useToken = cli.isTokenEnabled();
         if (!username.isPresent()) {
             App.printHelpAndExit(cli, "Username must be provided.", true);
-        } else if (!password.isPresent()) {
-            App.printHelpAndExit(cli, "Password must be provided.", true);
-        } else if (!loanId.isPresent()) {
+            return null;
+        }
+        final String usr = username.get();
+        if (!useToken && !passwordPresent) {
+            App.printHelpAndExit(cli, "Not using refresh token, password must be provided.", true);
+            return null;
+        }
+        final AuthenticationHandler auth =
+                useToken ? AuthenticationHandler.tokenBased(usr) : AuthenticationHandler.passwordBased(usr);
+        auth.withPassword(password.get());
+        final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
+        if (secs.isPresent()) {
+            auth.withTokenRefreshingBeforeExpiration(secs.get(), ChronoUnit.SECONDS);
+        }
+        return auth;
+    }
+
+    private static AppContext prepareUserDrivenMode(final CommandLineInterface cli) {
+        final Optional<Integer> loanId = cli.getLoanId();
+        final Optional<Integer> loanAmount = cli.getLoanAmount();
+        if (!loanId.isPresent()) {
             App.printHelpAndExit(cli, "Loan ID must be provided.", true);
         } else if (!loanAmount.isPresent()) {
             App.printHelpAndExit(cli, "Loan amount must be provided.", true);
         }
+        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         if (cli.isDryRun()) {
-            return new AppContext(username.get(), password.get(), loanId.get(), loanAmount.get(),
-                    cli.getDryRunBalance());
+            return new AppContext(auth, cli.isTokenEnabled(), loanId.get(), loanAmount.get(), cli.getDryRunBalance());
         } else {
-            return new AppContext(username.get(), password.get(), loanId.get(), loanAmount.get());
+            return new AppContext(auth, cli.isTokenEnabled(), loanId.get(), loanAmount.get());
         }
     }
 
@@ -113,7 +129,7 @@ public class App {
         switch (cmd.getCliOperatingMode()) {
             case HELP:
                 App.printHelpAndExit(cmd, "", false);
-                return null; // just in case exit control property is tests
+                return null; // just in case of tests
             case STRATEGY_DRIVEN:
                 return App.prepareStrategyDrivenMode(cmd);
             case USER_DRIVER:
@@ -189,15 +205,21 @@ public class App {
         }
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         try {
+            final AuthenticationHandler handler = ctx.getAuthenticationHandler();
+            final Authenticator auth = handler.build();
             final OperationsContext oc = useStrategy ?
-                    Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance(),
-                            ctx.getInvestmentStrategy()) :
-                    Operations.login(ctx.getUsername(), ctx.getPassword(), ctx.isDryRun(), ctx.getDryRunBalance());
+                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :
+                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());
+            final boolean logoutAllowed = handler.processToken(oc.getAuthentication().getApiToken());
             final Collection<Investment> result = operations.apply(oc);
-            try {
-                Operations.logout(oc);
-            } catch (final LogoutFailedException ex) {
-                App.LOGGER.warn("Logging out of Zonky failed.", ex);
+            if (logoutAllowed) { // log out
+                try {
+                    Operations.logout(oc);
+                } catch (final LogoutFailedException ex) {
+                    App.LOGGER.warn("Logging out of Zonky failed.", ex);
+                }
+            } else {  // if we're using the token, we should never log out
+                App.LOGGER.info("Refresh token stored, not logging out of Zonky.");
             }
             return result;
         } catch (final LoginFailedException ex) {

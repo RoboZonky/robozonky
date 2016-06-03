@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky;
+
+package com.github.triceo.robozonky.authentication;
 
 import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
@@ -27,7 +28,7 @@ public class AuthorizationFilterTest extends AbstractCommonFilterTest {
 
     @Override
     protected CommonFilter getTestedFilter() {
-        return new AuthorizationFilter();
+        return new AuthenticationFilter();
     }
 
     @Test

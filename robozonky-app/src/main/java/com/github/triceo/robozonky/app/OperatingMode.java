@@ -25,10 +25,8 @@ import org.apache.commons.cli.Option;
 enum OperatingMode {
 
     HELP(CommandLineInterface.OPTION_HELP),
-    STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_USERNAME,
-            CommandLineInterface.OPTION_PASSWORD, CommandLineInterface.OPTION_DRY_RUN),
+    STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN),
     USER_DRIVER(CommandLineInterface.OPTION_INVESTMENT, CommandLineInterface.OPTION_AMOUNT,
-            CommandLineInterface.OPTION_USERNAME, CommandLineInterface.OPTION_PASSWORD,
             CommandLineInterface.OPTION_DRY_RUN);
 
     private final Option selectingOption;

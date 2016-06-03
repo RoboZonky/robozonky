@@ -29,9 +29,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.authentication.Authentication;
+import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
-import com.github.triceo.robozonky.remote.Authorization;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.InvestmentStatus;
 import com.github.triceo.robozonky.remote.InvestmentStatuses;
@@ -40,12 +41,10 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.Ratings;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
-import com.github.triceo.robozonky.remote.Token;
-import com.github.triceo.robozonky.remote.ZonkyAPI;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
@@ -76,7 +75,8 @@ public class Operations {
                 Collectors.toMap(RiskPortfolio::getRating, risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );
         // make sure ratings are present even when there's 0 invested in them
-        Arrays.stream(Rating.values()).filter(r -> !amounts.containsKey(r)).forEach(r -> amounts.put(r, BigDecimal.ZERO));
+        Arrays.stream(Rating.values()).filter(r -> !amounts.containsKey(r))
+                .forEach(r -> amounts.put(r, BigDecimal.ZERO));
         // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {
             final Rating r = previousInvestment.getRating();
@@ -202,7 +202,7 @@ public class Operations {
     static Optional<Investment> identifyLoanToInvest(final OperationsContext oc,
                                                      final List<Investment> investmentsInSession,
                                                      final BigDecimal balance) {
-        final ZonkyAPI api = oc.getAPI();
+        final ZonkyApi api = oc.getAuthentication().getApi();
         final Collection<Investment> investments = Util.mergeInvestments(
                 api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)), investmentsInSession);
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(api.getStatistics(),
@@ -232,7 +232,8 @@ public class Operations {
         final boolean isDryRun = oc.isDryRun();
         final int dryRunInitialBalance = oc.getDryRunInitialBalance();
         BigDecimal balance = (isDryRun && dryRunInitialBalance >= 0) ?
-                BigDecimal.valueOf(dryRunInitialBalance) : oc.getAPI().getWallet().getAvailableBalance();
+                BigDecimal.valueOf(dryRunInitialBalance) :
+                oc.getAuthentication().getApi().getWallet().getAvailableBalance();
         if (isDryRun) {
             for (final Investment i : investmentsInSession) {
                 balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
@@ -247,7 +248,8 @@ public class Operations {
         BigDecimal availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
         Operations.LOGGER.info("RoboZonky starting account balance is {} CZK.", availableBalance);
         while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
-            final Optional<Investment> investment = Operations.identifyLoanToInvest(oc, investmentsMade, availableBalance);
+            final Optional<Investment> investment =
+                    Operations.identifyLoanToInvest(oc, investmentsMade, availableBalance);
             if (investment.isPresent()) {
                 investmentsMade.add(investment.get());
                 availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
@@ -271,7 +273,7 @@ public class Operations {
         } else {
             Operations.LOGGER.info("Attempting to invest {} CZK into loan {}.", i.getAmount(), i.getLoanId());
             try {
-                oc.getAPI().invest(i);
+                oc.getAuthentication().getApi().invest(i);
                 Operations.LOGGER.warn("Investment operation succeeded.");
                 return Optional.of(i);
             } catch (final Exception ex) {
@@ -291,8 +293,7 @@ public class Operations {
         return Operations.invest(oc, investment);
     }
 
-    // FIXME what if login fails?
-    public static OperationsContext login(final String username, final String password, final boolean dryRun,
+    public static OperationsContext login(final Authenticator authenticationMethod, final boolean dryRun,
                                           final int dryRunInitialBalance, final InvestmentStrategy strategy)
             throws LoginFailedException {
         try {
@@ -303,30 +304,22 @@ public class Operations {
             // authenticate
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(instance);
-            final ResteasyClient client = clientBuilder.build();
-            client.register(new AuthorizationFilter());
-            final Authorization auth = client.target(Operations.ZONKY_URL).proxy(Authorization.class);
-            final Token authorization = auth.login(username, password, "password", "SCOPE_APP_WEB");
-            client.close();
-            Operations.LOGGER.info("Logged in with Zonky as user '{}'.", username);
-            // provide authenticated clients
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
-            final ZonkyAPI api = clientBuilder.build().register(new AuthenticatedFilter(authorization))
-                    .target(Operations.ZONKY_URL).proxy(ZonkyAPI.class);
-            return new OperationsContext(api, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
+            final Authentication auth = authenticationMethod.authenticate(Operations.ZONKY_URL, clientBuilder);
+            return new OperationsContext(auth, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
         }
     }
 
-    public static OperationsContext login(final String username, final String password, final boolean dryRun,
+    public static OperationsContext login(final Authenticator authenticationMethod, final boolean dryRun,
                                           final int dryRunInitialBalance) throws LoginFailedException {
-        return Operations.login(username, password, dryRun, dryRunInitialBalance, null);
+        return Operations.login(authenticationMethod, dryRun, dryRunInitialBalance, null);
     }
 
     public static void logout(final OperationsContext oc) throws LogoutFailedException {
         try {
-            oc.getAPI().logout();
+            oc.getAuthentication().getApi().logout();
         } catch (final RuntimeException ex) {
             throw new LogoutFailedException("Error while logging out Zonky.", ex);
         }
