@@ -54,12 +54,20 @@ import org.slf4j.LoggerFactory;
 
 public class Operations {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
+
+    private static final ResteasyProviderFactory RESTEASY = ResteasyProviderFactory.getInstance();
+    static {
+        Operations.LOGGER.trace("Initializing RESTEasy.");
+        RegisterBuiltin.register(Operations.RESTEASY);
+        RESTEASY.registerProvider(ResteasyJackson2Provider.class);
+        Operations.LOGGER.trace("RESTEasy initialized.");
+    }
+
     public static final int MINIMAL_INVESTMENT_ALLOWED = 200;
 
     private static final int CONNECTION_POOL_SIZE = 2;
     private static final String ZONKY_URL = "https://api.zonky.cz";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
 
     /**
      * Get the share of 'payments due for each rating' on the overall portfolio.
@@ -294,17 +302,12 @@ public class Operations {
                                           final int dryRunInitialBalance, final InvestmentStrategy strategy)
             throws LoginFailedException {
         try {
-            Operations.LOGGER.trace("Login starting.");
-            // register Jackson
-            final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
-            RegisterBuiltin.register(instance);
-            instance.registerProvider(ResteasyJackson2Provider.class);
-            Operations.LOGGER.trace("RESTEasy initialized.");
+            Operations.LOGGER.trace("Preparing for login.");
             // authenticate
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
-            clientBuilder.providerFactory(instance);
+            clientBuilder.providerFactory(Operations.RESTEASY);
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
-            Operations.LOGGER.trace("Preparing for login.");
+            Operations.LOGGER.trace("Login starting.");
             final Authentication auth =
                     authenticationMethod.authenticate(Operations.ZONKY_URL, Util.getRoboZonkyVersion(), clientBuilder);
             return new OperationsContext(auth, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
