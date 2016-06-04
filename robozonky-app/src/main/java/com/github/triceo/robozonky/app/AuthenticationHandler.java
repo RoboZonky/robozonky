@@ -64,7 +64,10 @@ public class AuthenticationHandler {
     }
 
     public Authenticator build() {
-        if (!AuthenticationHandler.TOKEN_FILE.canRead()) { // no token available, also using password-based
+        if (!this.tokenBased) {
+            AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
+            return Authenticator.withCredentials(this.username, this.password);
+        } else if (!AuthenticationHandler.TOKEN_FILE.canRead()) { // no token available, also using password-based
             AuthenticationHandler.LOGGER.debug("Token file not available, using password-based authentication.");
             return Authenticator.withCredentials(this.username, this.password);
         }
