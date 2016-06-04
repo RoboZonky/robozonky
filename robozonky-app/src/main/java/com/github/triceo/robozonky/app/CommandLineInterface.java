@@ -30,7 +30,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-class CommandLineInterface {
+public class CommandLineInterface {
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -88,7 +88,7 @@ class CommandLineInterface {
         this.cli = cli;
     }
 
-    public OperatingMode getCliOperatingMode() {
+    OperatingMode getCliOperatingMode() {
         for (final OperatingMode mode: OperatingMode.values()) {
             if (cli.hasOption(mode.getSelectingOption().getOpt())) {
                 return mode;
@@ -123,7 +123,7 @@ class CommandLineInterface {
         }
     }
 
-    public Optional<String> getStrategyConfigurationFilePath() {
+    Optional<String> getStrategyConfigurationFilePath() {
         return this.getOptionValue(OperatingMode.STRATEGY_DRIVEN.getSelectingOption());
     }
 
@@ -135,15 +135,15 @@ class CommandLineInterface {
         return this.getOptionValue(CommandLineInterface.OPTION_PASSWORD);
     }
 
-    public Optional<Integer> getLoanId() {
+    Optional<Integer> getLoanId() {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_INVESTMENT);
     }
 
-    public Optional<Integer> getLoanAmount() {
+    Optional<Integer> getLoanAmount() {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_AMOUNT);
     }
 
-    public boolean isDryRun() {
+    boolean isDryRun() {
         return this.cli.hasOption(CommandLineInterface.OPTION_DRY_RUN.getOpt());
     }
 
@@ -155,7 +155,7 @@ class CommandLineInterface {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_USE_TOKEN);
     }
 
-    public Optional<Integer> getDryRunBalance() {
+    Optional<Integer> getDryRunBalance() {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
     }
 

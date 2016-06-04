@@ -31,6 +31,8 @@ import java.util.function.Function;
 import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.Util;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
 import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
@@ -83,21 +85,14 @@ public class App {
 
     private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
         final Optional<String> username = cli.getUsername();
-        final Optional<String> password = cli.getPassword();
-        final boolean passwordPresent = password.isPresent();
         final boolean useToken = cli.isTokenEnabled();
         if (!username.isPresent()) {
             cli.printHelpAndExit("Username must be provided.", true);
-            return null;
         }
         final String usr = username.get();
-        if (!useToken && !passwordPresent) {
-            cli.printHelpAndExit("Not using refresh token, password must be provided.", true);
-            return null;
-        }
-        final AuthenticationHandler auth =
-                useToken ? AuthenticationHandler.tokenBased(usr) : AuthenticationHandler.passwordBased(usr);
-        auth.withPassword(password.get());
+        final SensitiveInformationProvider sensitive = SensitiveInformationProvider.plainTextBased(cli);
+        final AuthenticationHandler auth = useToken ? AuthenticationHandler.tokenBased(usr, sensitive)
+                : AuthenticationHandler.passwordBased(usr, sensitive);
         final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
         if (secs.isPresent()) {
             auth.withTokenRefreshingBeforeExpiration(secs.get(), ChronoUnit.SECONDS);
