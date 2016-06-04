@@ -35,10 +35,25 @@ public class AuthenticationHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandler.class);
     private static final File TOKEN_FILE = new File("robozonky.token");
 
+    /**
+     * Build authentication mechanism that will keep the session alive via the use of session token. The mechanism will
+     * never log out, but the session may expire if not refresh regularly. This is potentially unsafe, as it will
+     * eventually store a plain-text access token on the hard drive, for everyone to see.
+     *
+     * @param username Username to log in.
+     * @return The desired authentication method.
+     */
     public static AuthenticationHandler tokenBased(final String username) {
         return new AuthenticationHandler(username, true);
     }
 
+    /**
+     * Build authentication mechanism that will log out at the end of RoboZonky's operations. This will ignore the
+     * access tokens.
+     *
+     * @param username Username to log in.
+     * @return The desired authentication method.
+     */
     public static AuthenticationHandler passwordBased(final String username) {
         return new AuthenticationHandler(username, false);
     }
@@ -53,16 +68,37 @@ public class AuthenticationHandler {
         this.username = username;
     }
 
+    /**
+     * Optionally provide a password for the authentication method.
+     *
+     * @param password If not provided, based on the selected authentication method, RoboZonky may or may not log in.
+     * @return This.
+     */
     public AuthenticationHandler withPassword(final String password) {
         this.password = password;
         return this;
     }
 
+    /**
+     * Optionally provide the earliest time before the token expiration at which the access token should be refreshed.
+     * The token will only be refreshed if RoboZonky is launched some time between then and the token expiration.
+     *
+     * If this method is not called, the default value is {@link #tokenRefreshBeforeExpirationInSeconds} seconds.
+     *
+     * @param time Access token will be refreshed after expiration minus this.
+     * @param unit Unit of time applied to the previous argument.
+     * @return This.
+     */
     public AuthenticationHandler withTokenRefreshingBeforeExpiration(final long time, final TemporalUnit unit) {
         this.tokenRefreshBeforeExpirationInSeconds = Duration.of(time, unit).getSeconds();
         return this;
     }
 
+    /**
+     * Based on information received until this point, decide on the proper authentication method.
+     *
+     * @return Authentication method matching user preferences.
+     */
     public Authenticator build() {
         if (!this.tokenBased) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
@@ -105,6 +141,12 @@ public class AuthenticationHandler {
         }
     }
 
+    /**
+     * Decide whether or not to log out, based on user preferences.
+     *
+     * @param token Token in question.
+     * @return True if RoboZonky should log out, false otherwise.
+     */
     public boolean processToken(final ZonkyApiToken token) {
         if (!this.tokenBased) { // not using token; always logout
             return true;
