@@ -38,8 +38,8 @@ abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter
     @Override
     public void filter(final ClientRequestContext clientRequestContext,
                        final ClientResponseContext clientResponseContext) throws IOException {
-        this.getLogger().debug("Operation '{}' to '{}' finished with HTTP {}.",
-                clientRequestContext.getMethod(), clientRequestContext.getUri(), clientResponseContext.getStatus());
+        this.getLogger().debug("Operation '{}' to '{}' finished with HTTP {}.", clientRequestContext.getMethod(),
+                clientRequestContext.getUri(), clientResponseContext.getStatus());
     }
 
 

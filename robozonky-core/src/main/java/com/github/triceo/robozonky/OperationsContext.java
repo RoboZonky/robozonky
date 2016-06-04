@@ -42,7 +42,8 @@ public class OperationsContext {
     private final ExecutorService backgroundExecutor;
 
     public OperationsContext(final Authentication authenticated, final InvestmentStrategy strategy,
-                             final boolean dryRun, final int dryRunInitialBalance, final int maxNumberParallelHttpConnections) {
+                             final boolean dryRun, final int dryRunInitialBalance,
+                             final int maxNumberParallelHttpConnections) {
         this.authenticationInfo = authenticated;
         this.strategy = strategy;
         this.dryRun = dryRun;

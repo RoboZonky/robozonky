@@ -45,7 +45,8 @@ class CommandLineInterface {
             .build();
     static final Option OPTION_USERNAME = Option.builder("u").hasArg().longOpt("username")
             .argName("Zonky username").desc("Used to connect to the Zonky server.").build();
-    static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password").argName("Zonky password").desc("Used to connect to the Zonky server.").build();
+    static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password").argName("Zonky password")
+            .desc("Used to connect to the Zonky server.").build();
     static final Option OPTION_USE_TOKEN = Option.builder("r").hasArg().optionalArg(true)
             .argName("Seconds before expiration").longOpt("refresh")
             .desc("Once logged in, RoboZonky will never log out unless login expires. Use with caution.").build();

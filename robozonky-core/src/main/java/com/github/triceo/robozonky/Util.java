@@ -70,7 +70,7 @@ public class Util {
     }
 
     static Collection<Investment> mergeInvestments(final Collection<Investment> left,
-                                                          final Collection<Investment> right) {
+                                                   final Collection<Investment> right) {
         if (left.size() == 0) {
             return Collections.unmodifiableCollection(right);
         } else if (right.size() == 0) {

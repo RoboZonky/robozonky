@@ -38,7 +38,8 @@ class StrategyParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyParser.class);
 
-    private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property, final Function<String, T> supplier) {
+    private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property,
+                                  final Function<String, T> supplier) {
         final String propertyName = property + '.' + r.name();
         final String fallbackPropertyName = property + ".default";
         if (config.containsKey(propertyName)) {
@@ -46,18 +47,21 @@ class StrategyParser {
         } else if (config.containsKey(fallbackPropertyName)) {
             return supplier.apply(fallbackPropertyName);
         } else {
-            throw new IllegalStateException("Investment strategy is incomplete. Missing value for '" + property + "' and rating '" + r + '\'');
+            throw new IllegalStateException("Investment strategy is incomplete. Missing value for '" + property
+                    + "' and rating '" + r + '\'');
         }
     }
 
-    private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property, final BiFunction<String, T, T> supplier, final T def) {
+    private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property,
+                                  final BiFunction<String, T, T> supplier, final T def) {
         return StrategyParser.getValue(config, r, property, (a) -> supplier.apply(a, def));
     }
 
     private static ImmutableConfiguration getConfig(final File strategyFile) throws ConfigurationException {
         // read config file
         final PropertiesBuilderParameters props = new Parameters().properties().setFile(strategyFile);
-        final FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
+        final FileBasedConfigurationBuilder<PropertiesConfiguration> builder
+                = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
         builder.configure(props);
         return builder.getConfiguration();
     }

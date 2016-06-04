@@ -31,9 +31,8 @@ class StrategyPerRating {
     private final BigDecimal targetShare, maximumInvestmentShare;
     private final int minimumAcceptableTerm, maximumAcceptableTerm, maximumInvestmentAmount;
 
-    public StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm,
-                             final int maxTerm, final int maxLoanAmount, final BigDecimal maxLoanShare,
-                             final boolean preferLongerTerms) {
+    public StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm, final int maxTerm,
+                             final int maxLoanAmount, final BigDecimal maxLoanShare, final boolean preferLongerTerms) {
         this.rating = rating;
         this.minimumAcceptableTerm = minTerm < 0 ? 0 : minTerm;
         this.maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;

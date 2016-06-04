@@ -29,7 +29,7 @@ class AuthenticationFilter extends CommonFilter {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return AuthenticationFilter.LOGGER;
     }
 
     @Override
