@@ -25,36 +25,31 @@ class AppContext {
     private final AuthenticationHandler authenticator;
     private final OperatingMode operatingMode;
     private boolean isDryRun = false;
-    private boolean isTokenUsed = false;
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
 
-    public AppContext(final AuthenticationHandler authMethod, final boolean useToken, final int loanId,
-                      final int loanAmount) {
+    public AppContext(final AuthenticationHandler authMethod, final int loanId, final int loanAmount) {
         this.operatingMode = OperatingMode.USER_DRIVER;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
         this.authenticator = authMethod;
-        this.isTokenUsed = useToken;
     }
 
-    public AppContext(final AuthenticationHandler authenticator, final boolean useToken, final int loanId,
-                      final int loanAmount, final Optional<Integer> dryRunBalance) {
-        this(authenticator, useToken, loanId, loanAmount);
+    public AppContext(final AuthenticationHandler authenticator, final int loanId, final int loanAmount,
+                      final Optional<Integer> dryRunBalance) {
+        this(authenticator, loanId, loanAmount);
         this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
         this.isDryRun = true;
     }
 
-    public AppContext(final AuthenticationHandler authenticator, final boolean useToken,
-                      final InvestmentStrategy investmentStrategy) {
+    public AppContext(final AuthenticationHandler authenticator, final InvestmentStrategy investmentStrategy) {
         this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
         this.investmentStrategy = investmentStrategy;
         this.authenticator = authenticator;
-        this.isTokenUsed = useToken;
     }
 
-    public AppContext(final AuthenticationHandler authenticator, final boolean useToken,
-                      final InvestmentStrategy investmentStrategy, final Optional<Integer> dryRunBalance) {
-        this(authenticator, useToken, investmentStrategy);
+    public AppContext(final AuthenticationHandler authenticator, final InvestmentStrategy investmentStrategy,
+                      final Optional<Integer> dryRunBalance) {
+        this(authenticator, investmentStrategy);
         this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
         this.isDryRun = true;
     }
@@ -77,10 +72,6 @@ class AppContext {
 
     public boolean isDryRun() {
         return isDryRun;
-    }
-
-    public boolean isTokenUsed() {
-        return isTokenUsed;
     }
 
     public int getDryRunBalance() {

@@ -69,10 +69,9 @@ public class App {
         final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         try {
             if (cli.isDryRun()) {
-                return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig),
-                        cli.getDryRunBalance());
+                return new AppContext(auth, StrategyParser.parse(strategyConfig), cli.getDryRunBalance());
             } else {
-                return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig));
+                return new AppContext(auth, StrategyParser.parse(strategyConfig));
             }
         } catch (final Exception e) {
             cli.printHelpAndExit("Failed parsing strategy: " + e.getMessage(), true);
@@ -114,9 +113,9 @@ public class App {
         }
         final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         if (cli.isDryRun()) {
-            return new AppContext(auth, cli.isTokenEnabled(), loanId.get(), loanAmount.get(), cli.getDryRunBalance());
+            return new AppContext(auth, loanId.get(), loanAmount.get(), cli.getDryRunBalance());
         } else {
-            return new AppContext(auth, cli.isTokenEnabled(), loanId.get(), loanAmount.get());
+            return new AppContext(auth, loanId.get(), loanAmount.get());
         }
     }
 
