@@ -294,19 +294,24 @@ public class Operations {
                                           final int dryRunInitialBalance, final InvestmentStrategy strategy)
             throws LoginFailedException {
         try {
+            Operations.LOGGER.trace("Login starting.");
             // register Jackson
             final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
             RegisterBuiltin.register(instance);
             instance.registerProvider(ResteasyJackson2Provider.class);
+            Operations.LOGGER.trace("RESTEasy initialized.");
             // authenticate
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(instance);
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
+            Operations.LOGGER.trace("Preparing for login.");
             final Authentication auth =
                     authenticationMethod.authenticate(Operations.ZONKY_URL, Util.getRoboZonkyVersion(), clientBuilder);
             return new OperationsContext(auth, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
+        } finally {
+            Operations.LOGGER.trace("Login complete.");
         }
     }
 
