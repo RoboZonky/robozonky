@@ -50,6 +50,8 @@ public class App {
         if (App.PERFORM_SYSTEM_EXIT) {
             App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
             System.exit(returnCode.getCode());
+        } else {
+            throw new RoboZonkyTestingExitException("Return code: " + returnCode);
         }
     }
 
@@ -119,7 +121,7 @@ public class App {
         }
     }
 
-    static AppContext processCommandLine(final String... args) {
+    private static AppContext processCommandLine(final String... args) {
         final CommandLineInterface cli = CommandLineInterface.parse(args);
         switch (cli.getCliOperatingMode()) {
             case STRATEGY_DRIVEN:
@@ -160,7 +162,7 @@ public class App {
         }
     }
 
-    static void letsGo(final AppContext ctx) {
+    private static void letsGo(final AppContext ctx) {
         App.LOGGER.info("===== RoboZonky at your service! =====");
         final boolean dryRun = ctx.isDryRun();
         if (dryRun) {

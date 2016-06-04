@@ -33,26 +33,26 @@ public class AppTest {
         App.PERFORM_SYSTEM_EXIT = true;
     }
 
-    @Test
+    @Test(expected = RoboZonkyTestingExitException.class)
     public void tokenizedDryRun() {
         App.main("-s", "src/main/assembly/resources/robozonky-dynamic.cfg", "-d", "0", "-u", "someone",
                 "-p", "somepassword", "-r");
     }
 
-    @Test
+    @Test(expected = RoboZonkyTestingExitException.class)
     public void tokenLessDryRun() {
         App.main("-s", "src/main/assembly/resources/robozonky-conservative.cfg", "-d", "2000",
                 "-u", "someone", "-p", "somepassword");
     }
 
-    @Test
+    @Test(expected = RoboZonkyTestingExitException.class)
     public void strategyLessRun() {
         App.main("-a", "400", "-l", "66666", "-d", "2000", "-u", "someone", "-p", "somepassword");
     }
 
-    @Test
+    @Test(expected = RoboZonkyTestingExitException.class)
     public void simpleHelp() {
-        App.processCommandLine("-h");
+        App.main("-h");
     }
 
 }
