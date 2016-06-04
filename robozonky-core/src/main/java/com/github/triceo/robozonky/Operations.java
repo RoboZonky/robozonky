@@ -228,12 +228,11 @@ public class Operations {
     }
 
     static BigDecimal getAvailableBalance(final OperationsContext oc,
-                                                    final Collection<Investment> investmentsInSession) {
+                                          final Collection<Investment> investmentsInSession) {
         final boolean isDryRun = oc.isDryRun();
-        final int dryRunInitialBalance = oc.getDryRunInitialBalance();
-        BigDecimal balance = (isDryRun && dryRunInitialBalance >= 0) ?
-                BigDecimal.valueOf(dryRunInitialBalance) :
-                oc.getAuthentication().getApi().getWallet().getAvailableBalance();
+        final BigDecimal dryRunInitialBalance = oc.getDryRunInitialBalance();
+        BigDecimal balance = (isDryRun && dryRunInitialBalance.compareTo(BigDecimal.ZERO) > 0) ?
+                dryRunInitialBalance : oc.getAuthentication().getApi().getWallet().getAvailableBalance();
         if (isDryRun) {
             for (final Investment i : investmentsInSession) {
                 balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));

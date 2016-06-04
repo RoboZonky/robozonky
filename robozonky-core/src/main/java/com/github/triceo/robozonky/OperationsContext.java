@@ -16,6 +16,7 @@
  */
 package com.github.triceo.robozonky;
 
+import java.math.BigDecimal;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,7 +38,7 @@ public class OperationsContext {
     private final Authentication authenticationInfo;
     private final InvestmentStrategy strategy;
     private final boolean dryRun;
-    private final int dryRunInitialBalance;
+    private final BigDecimal dryRunInitialBalance;
     private final ExecutorService backgroundExecutor;
 
     public OperationsContext(final Authentication authenticated, final InvestmentStrategy strategy,
@@ -45,7 +46,7 @@ public class OperationsContext {
         this.authenticationInfo = authenticated;
         this.strategy = strategy;
         this.dryRun = dryRun;
-        this.dryRunInitialBalance = dryRunInitialBalance;
+        this.dryRunInitialBalance = BigDecimal.valueOf(dryRunInitialBalance);
         this.backgroundExecutor = Executors.newFixedThreadPool(maxNumberParallelHttpConnections - 1);
         OperationsContext.LOGGER.debug("OperationsContext initialized.");
     }
@@ -71,8 +72,7 @@ public class OperationsContext {
         return this.dryRun;
     }
 
-    // FIXME balance typically BigDecimal
-    public int getDryRunInitialBalance() {
+    public BigDecimal getDryRunInitialBalance() {
         return this.dryRunInitialBalance;
     }
 

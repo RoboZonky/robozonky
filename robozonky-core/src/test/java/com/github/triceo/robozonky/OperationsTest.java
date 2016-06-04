@@ -99,7 +99,7 @@ public class OperationsTest {
         final BigDecimal dryRunBalance = BigDecimal.valueOf(12345);
         final OperationsContext ctx = Mockito.mock(OperationsContext.class);
         Mockito.when(ctx.isDryRun()).thenReturn(true);
-        Mockito.when(ctx.getDryRunInitialBalance()).thenReturn(dryRunBalance.intValue());
+        Mockito.when(ctx.getDryRunInitialBalance()).thenReturn(dryRunBalance);
         // test operation
         Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(dryRunBalance);
         final int amount = 1;
