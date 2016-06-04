@@ -20,18 +20,29 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Ratings {
+
+    public static Ratings valueOf(final String ratings) {
+        // trim the surrounding []
+        final String[] parts = ratings.substring(1, ratings.length() - 2).split("\\Q,\\E");
+        // trim the parts and remove surrounding quotes
+        final Collection<String> strings = Stream.of(parts).map(String::trim)
+                .map(string -> string.substring(1, string.length() - 2)).collect(Collectors.toList());
+        // convert string representations to actual instances
+        final Collection<Rating> converted = strings.stream().map(Rating::valueOf).collect(Collectors.toList());
+        return Ratings.of(converted);
+    }
 
     public static Ratings of(final Rating... ratings) {
         return Ratings.of(Arrays.asList(ratings));
     }
 
-    public static Ratings of(final List<Rating> ratings) {
+    public static Ratings of(final Collection<Rating> ratings) {
         return new Ratings(ratings);
     }
 

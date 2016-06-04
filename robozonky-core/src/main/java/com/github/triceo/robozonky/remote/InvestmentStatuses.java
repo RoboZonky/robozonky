@@ -20,17 +20,28 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class InvestmentStatuses {
+
+    public static InvestmentStatuses valueOf(final String statuses) {
+        // trim the surrounding []
+        final String[] parts = statuses.substring(1, statuses.length() - 2).split("\\Q,\\E");
+        // trim the parts
+        final Collection<String> strings = Stream.of(parts).map(String::trim).collect(Collectors.toList());
+        // convert string representations to actual instances
+        final Collection<InvestmentStatus> converted =
+                strings.stream().map(InvestmentStatus::valueOf).collect(Collectors.toList());
+        return InvestmentStatuses.of(converted);
+    }
 
     public static InvestmentStatuses of(final InvestmentStatus... statuses) {
         return of(Arrays.asList(statuses));
     }
 
-    public static InvestmentStatuses of(final List<InvestmentStatus> statuses) {
+    public static InvestmentStatuses of(final Collection<InvestmentStatus> statuses) {
         return new InvestmentStatuses(statuses);
     }
 
