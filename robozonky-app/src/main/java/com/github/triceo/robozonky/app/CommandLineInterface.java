@@ -55,9 +55,9 @@ class CommandLineInterface {
 
     public static CommandLineInterface parse(final String... args) {
         // create the mode of operation
-        final OptionGroup og = new OptionGroup();
-        og.setRequired(true);
-        Stream.of(OperatingMode.values()).forEach(mode -> og.addOption(mode.getSelectingOption()));
+        final OptionGroup operatingModes = new OptionGroup();
+        operatingModes.setRequired(true);
+        Stream.of(OperatingMode.values()).forEach(mode -> operatingModes.addOption(mode.getSelectingOption()));
         // find all options from all modes of operation
         final Collection<Option> ops = Stream.of(OperatingMode.values()).map(OperatingMode::getOtherOptions)
                 .collect(LinkedHashSet::new, LinkedHashSet::addAll, LinkedHashSet::addAll);
@@ -67,14 +67,15 @@ class CommandLineInterface {
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
         // join all in a single config
         final Options options = new Options();
-        options.addOptionGroup(og);
+        options.addOptionGroup(operatingModes);
         ops.forEach(options::addOption);
         final CommandLineParser parser = new DefaultParser();
         // and parse
         try {
             return new CommandLineInterface(options, parser.parse(options, args));
         } catch (final ParseException ex) {
-            return new CommandLineInterface(options, null);
+            CommandLineInterface.printHelpAndExit(options, ex.getMessage(), true);
+            return null;
         }
     }
 
@@ -87,9 +88,6 @@ class CommandLineInterface {
     }
 
     public OperatingMode getCliOperatingMode() {
-        if (this.cli == null) {
-            return OperatingMode.HELP;
-        }
         for (final OperatingMode mode: OperatingMode.values()) {
             if (cli.hasOption(mode.getSelectingOption().getOpt())) {
                 return mode;
@@ -160,11 +158,15 @@ class CommandLineInterface {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
     }
 
-    public void printHelpAndExit(final String message, final boolean isError) {
+    static void printHelpAndExit(final Options options, final String message, final boolean isError) {
         final HelpFormatter formatter = new HelpFormatter();
         final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
-        formatter.printHelp(scriptName, null, this.options, isError ? "Error: " + message : message, true);
+        formatter.printHelp(scriptName, null, options, isError ? "Error: " + message : message, true);
+        App.exit(isError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
     }
 
+    public void printHelpAndExit(final String message, final boolean isError) {
+        CommandLineInterface.printHelpAndExit(this.options, message, isError);
+    }
 
 }

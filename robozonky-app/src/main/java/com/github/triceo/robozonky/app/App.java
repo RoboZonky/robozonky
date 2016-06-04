@@ -38,37 +38,33 @@ import com.github.triceo.robozonky.remote.Investment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.github.triceo.robozonky.app.OperatingMode.STRATEGY_DRIVEN;
+
 public class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
     static boolean PERFORM_SYSTEM_EXIT = true; // purely for testing purposes
 
-    private static void exit(final ReturnCode returnCode) {
+    static void exit(final ReturnCode returnCode) {
         if (App.PERFORM_SYSTEM_EXIT) {
             App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
             System.exit(returnCode.getCode());
         }
     }
 
-    private static void printHelpAndExit(final CommandLineInterface cli, final String message,
-                                         final boolean exitWithError) {
-        cli.printHelpAndExit(message, exitWithError);
-        App.exit(exitWithError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
-    }
-
     private static AppContext prepareStrategyDrivenMode(final CommandLineInterface cli) {
         final Optional<Integer> loanAmount = cli.getLoanAmount();
         if (loanAmount.isPresent()) {
-            App.printHelpAndExit(cli, "Loan amount makes no sense in this context.", true);
+            cli.printHelpAndExit("Loan amount makes no sense in this context.", true);
         }
         final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
         if (!strategyFilePath.isPresent()) {
-            App.printHelpAndExit(cli, "Strategy file must be provided.", true);
+            cli.printHelpAndExit("Strategy file must be provided.", true);
         }
         final File strategyConfig = new File(strategyFilePath.get());
         if (!strategyConfig.canRead()) {
-            App.printHelpAndExit(cli, "Investment strategy file must be readable.", true);
+            cli.printHelpAndExit("Investment strategy file must be readable.", true);
         }
         final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         try {
@@ -79,7 +75,7 @@ public class App {
                 return new AppContext(auth, cli.isTokenEnabled(), StrategyParser.parse(strategyConfig));
             }
         } catch (final Exception e) {
-            App.printHelpAndExit(cli, "Failed parsing strategy: " + e.getMessage(), true);
+            cli.printHelpAndExit("Failed parsing strategy: " + e.getMessage(), true);
             return null;
         }
     }
@@ -90,12 +86,12 @@ public class App {
         final boolean passwordPresent = password.isPresent();
         final boolean useToken = cli.isTokenEnabled();
         if (!username.isPresent()) {
-            App.printHelpAndExit(cli, "Username must be provided.", true);
+            cli.printHelpAndExit("Username must be provided.", true);
             return null;
         }
         final String usr = username.get();
         if (!useToken && !passwordPresent) {
-            App.printHelpAndExit(cli, "Not using refresh token, password must be provided.", true);
+            cli.printHelpAndExit("Not using refresh token, password must be provided.", true);
             return null;
         }
         final AuthenticationHandler auth =
@@ -112,9 +108,9 @@ public class App {
         final Optional<Integer> loanId = cli.getLoanId();
         final Optional<Integer> loanAmount = cli.getLoanAmount();
         if (!loanId.isPresent()) {
-            App.printHelpAndExit(cli, "Loan ID must be provided.", true);
+            cli.printHelpAndExit("Loan ID must be provided.", true);
         } else if (!loanAmount.isPresent()) {
-            App.printHelpAndExit(cli, "Loan amount must be provided.", true);
+            cli.printHelpAndExit("Loan amount must be provided.", true);
         }
         final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
         if (cli.isDryRun()) {
@@ -125,17 +121,16 @@ public class App {
     }
 
     static AppContext processCommandLine(final String... args) {
-        final CommandLineInterface cmd = CommandLineInterface.parse(args);
-        switch (cmd.getCliOperatingMode()) {
-            case HELP:
-                App.printHelpAndExit(cmd, "", false);
-                return null; // just in case of tests
+        final CommandLineInterface cli = CommandLineInterface.parse(args);
+        switch (cli.getCliOperatingMode()) {
             case STRATEGY_DRIVEN:
-                return App.prepareStrategyDrivenMode(cmd);
+                return App.prepareStrategyDrivenMode(cli);
             case USER_DRIVER:
-                return App.prepareUserDrivenMode(cmd);
+                return App.prepareUserDrivenMode(cli);
+            default:
+                cli.printHelpAndExit("", false);
+                return null; // just in case of tests
         }
-        throw new IllegalStateException("This should not have happened.");
     }
 
     public static void main(final String... args) {
@@ -173,7 +168,7 @@ public class App {
             App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
         // figure out whether to invest based on strategy or whether to make a single investment
-        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
+        final boolean useStrategy = ctx.getOperatingMode() == STRATEGY_DRIVEN;
         final Function<OperationsContext, Collection<Investment>> op = useStrategy ? Operations::invest : oc -> {
             final Optional<Investment> optional = Operations.invest(oc, ctx.getLoanId(), ctx.getLoanAmount());
             if (optional.isPresent()) {
@@ -203,7 +198,7 @@ public class App {
             App.LOGGER.info("Starting balance in dry run is lower than minimum, no need to execute at all.");
             return Collections.emptyList();
         }
-        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
+        final boolean useStrategy = ctx.getOperatingMode() == STRATEGY_DRIVEN;
         try {
             final AuthenticationHandler handler = ctx.getAuthenticationHandler();
             final Authenticator auth = handler.build();
