@@ -21,17 +21,22 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 
-import com.github.triceo.robozonky.Util;
 import org.slf4j.Logger;
 
 abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter {
 
     protected abstract Logger getLogger();
 
+    private final String version;
+
+    CommonFilter(final String roboZonkyVersion) {
+        this.version = roboZonkyVersion;
+    }
+
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        clientRequestContext.getHeaders().putSingle("User-Agent", "RoboZonky " + Util.getRoboZonkyVersion() +
-                        " (https://github.com/triceo/robozonky)");
+        clientRequestContext.getHeaders().putSingle("User-Agent", "RoboZonky " + this.version +
+                " (https://github.com/triceo/robozonky)");
         this.getLogger().debug("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 

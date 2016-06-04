@@ -302,7 +302,8 @@ public class Operations {
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(instance);
             clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
-            final Authentication auth = authenticationMethod.authenticate(Operations.ZONKY_URL, clientBuilder);
+            final Authentication auth =
+                    authenticationMethod.authenticate(Operations.ZONKY_URL, Util.getRoboZonkyVersion(), clientBuilder);
             return new OperationsContext(auth, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);

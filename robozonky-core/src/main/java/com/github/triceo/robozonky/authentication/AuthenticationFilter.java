@@ -27,6 +27,10 @@ class AuthenticationFilter extends CommonFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
 
+    public AuthenticationFilter(final String roboZonkyVersion) {
+        super(roboZonkyVersion);
+    }
+
     @Override
     protected Logger getLogger() {
         return AuthenticationFilter.LOGGER;

@@ -56,8 +56,10 @@ public final class Authenticator {
     }
 
     private static Authentication newAuthenticatedApi(final ZonkyApiToken token, final String zonkyApiUrl,
+                                                      final String roboZonkyVersion,
                                                       final ResteasyClientBuilder clientBuilder) {
-        final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticatedFilter(token));
+        final ZonkyApi api =
+                Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticatedFilter(token, roboZonkyVersion));
         return new Authentication(api, token);
     }
 
@@ -74,10 +76,12 @@ public final class Authenticator {
         this.authenticationMethod = authenticationMethod;
     }
 
-    public Authentication authenticate(final String zonkyApiUrl, final ResteasyClientBuilder clientBuilder) {
-        final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticationFilter());
+    public Authentication authenticate(final String zonkyApiUrl, final String roboZonkyVersion,
+                                       final ResteasyClientBuilder clientBuilder) {
+        final ZonkyApi api =
+                Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticationFilter(roboZonkyVersion));
         final ZonkyApiToken token = authenticationMethod.apply(api);
-        return Authenticator.newAuthenticatedApi(token, zonkyApiUrl, clientBuilder);
+        return Authenticator.newAuthenticatedApi(token, zonkyApiUrl, roboZonkyVersion, clientBuilder);
     }
 
 }

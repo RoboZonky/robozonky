@@ -20,13 +20,12 @@ import java.math.RoundingMode;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 
 public class InvestmentStrategy {
 
-    protected static final int MINIMAL_INVESTMENT_INCREMENT = Operations.MINIMAL_INVESTMENT_ALLOWED;
+    protected static final int MINIMAL_INVESTMENT_INCREMENT = 200;
     private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
 
     InvestmentStrategy(final Map<Rating, StrategyPerRating> individualStrategies) {
