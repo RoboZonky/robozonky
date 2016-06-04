@@ -25,8 +25,8 @@ public class UtilIT {
     @Test
     public void testRoboZonkyBotVersion() {
         final String version = Util.getRoboZonkyVersion();
-        Assertions.assertThat(version).isNotEqualTo(Operations.ZONKY_VERSION_UNDETECTED);
-        Assertions.assertThat(version).isNotEqualTo(Operations.ZONKY_VERSION_UNKNOWN);
+        Assertions.assertThat(version).isNotEqualTo(Util.ZONKY_VERSION_UNDETECTED);
+        Assertions.assertThat(version).isNotEqualTo(Util.ZONKY_VERSION_UNKNOWN);
     }
 
 }

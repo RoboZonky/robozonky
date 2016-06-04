@@ -36,6 +36,9 @@ import static java.util.Comparator.comparing;
 
 public class Util {
 
+    protected static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
+    protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
+
     static List<Loan> sortLoansByTerm(final Collection<Loan> loans, final boolean longestFirst) {
         final List<Loan> sortedLoans = new ArrayList<>(new HashSet<>(loans)); // unique loans
         Comparator<Loan> loanComparator = comparing(Loan::getTermInMonths);
@@ -87,9 +90,9 @@ public class Util {
             final URL url = cl.findResource("META-INF/maven/com.github.triceo.robozonky/robozonky-core/pom.properties");
             final Properties props = new Properties();
             props.load(url.openStream());
-            return props.getProperty("version", Operations.ZONKY_VERSION_UNKNOWN);
+            return props.getProperty("version", Util.ZONKY_VERSION_UNKNOWN);
         } catch (Exception ex) {
-            return Operations.ZONKY_VERSION_UNDETECTED;
+            return Util.ZONKY_VERSION_UNDETECTED;
         }
     }
 

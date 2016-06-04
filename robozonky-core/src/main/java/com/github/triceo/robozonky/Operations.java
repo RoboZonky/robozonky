@@ -55,8 +55,6 @@ import org.slf4j.LoggerFactory;
 public class Operations {
 
     public static final int MINIMAL_INVESTMENT_ALLOWED = 200;
-    protected static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
-    protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
 
     private static final int CONNECTION_POOL_SIZE = 2;
     private static final String ZONKY_URL = "https://api.zonky.cz";
