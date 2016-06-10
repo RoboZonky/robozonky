@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.github.triceo.robozonky.app.OperatingMode.STRATEGY_DRIVEN;
+import static com.github.triceo.robozonky.app.OperatingMode.USER_DRIVER;
 
 public class App {
 
@@ -150,14 +151,18 @@ public class App {
 
     private static AppContext processCommandLine(final String... args) {
         final CommandLineInterface cli = CommandLineInterface.parse(args);
-        switch (cli.getCliOperatingMode()) {
+        final Optional<OperatingMode> om = cli.getCliOperatingMode();
+        if (!om.isPresent()) {
+            cli.printHelpAndExit("", false);
+            return null;
+        }
+        switch (om.get()) {
             case STRATEGY_DRIVEN:
                 return App.prepareStrategyDrivenMode(cli);
             case USER_DRIVER:
                 return App.prepareUserDrivenMode(cli);
             default:
-                cli.printHelpAndExit("", false);
-                return null; // just in case of tests
+                return null;
         }
     }
 

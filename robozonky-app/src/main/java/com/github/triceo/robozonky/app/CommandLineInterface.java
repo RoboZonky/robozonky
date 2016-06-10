@@ -42,9 +42,6 @@ public class CommandLineInterface {
     static final Option OPTION_AMOUNT = Option.builder("a").hasArg().longOpt("amount")
             .argName("Amount to invest").desc("Amount to invest to a single loan when ignoring strategy.")
             .build();
-    // FIXME remove
-    static final Option OPTION_HELP = Option.builder("h").longOpt("help").desc("Show this help message and quit.")
-            .build();
     static final Option OPTION_USERNAME = Option.builder("u").hasArg().longOpt("username")
             .argName("Zonky username").desc("Used to connect to the Zonky server.").build();
     static final Option OPTION_KEYSTORE = Option.builder("g").hasArg().longOpt("guarded")
@@ -97,13 +94,13 @@ public class CommandLineInterface {
         this.cli = cli;
     }
 
-    OperatingMode getCliOperatingMode() {
+    Optional<OperatingMode> getCliOperatingMode() {
         for (final OperatingMode mode: OperatingMode.values()) {
             if (cli.hasOption(mode.getSelectingOption().getOpt())) {
-                return mode;
+                return Optional.of(mode);
             }
         }
-        return OperatingMode.HELP;
+        return Optional.empty();
     }
 
     private Optional<String> getOptionValue(final Option option) {
