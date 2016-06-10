@@ -50,6 +50,14 @@ public class KeyStoreHandler {
     private static final String KEYSTORE_TYPE = "JCEKS";
     private static final String KEY_TYPE = "PBE";
 
+    private static SecretKeyFactory getSecretKeyFactory() {
+        try {
+            return SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
+        } catch (final NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("Should not happen.", ex);
+        }
+    }
+
     /**
      * Create brand new key store protected by a given password.
      *
@@ -67,13 +75,7 @@ public class KeyStoreHandler {
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
         final char[] passwordArray = password.toCharArray();
-        try {
-            final SecretKeyFactory factory = SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
-            ks.load(null, passwordArray);
-            return new KeyStoreHandler(ks, passwordArray, keyStoreFile, factory);
-        } catch (final NoSuchAlgorithmException | CertificateException ex) {
-            throw new IllegalStateException("Should not happen.", ex);
-        }
+        return new KeyStoreHandler(ks, passwordArray, keyStoreFile, KeyStoreHandler.getSecretKeyFactory());
     }
 
     /**
@@ -93,10 +95,9 @@ public class KeyStoreHandler {
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
         final char[] passwordArray = password.toCharArray();
-        try (FileInputStream fis = new FileInputStream(keyStoreFile)) {
-            final SecretKeyFactory factory = SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
+        try (final FileInputStream fis = new FileInputStream(keyStoreFile)) {
             ks.load(fis, passwordArray);
-            return new KeyStoreHandler(ks, passwordArray, keyStoreFile, factory);
+            return new KeyStoreHandler(ks, passwordArray, keyStoreFile, KeyStoreHandler.getSecretKeyFactory());
         } catch (final NoSuchAlgorithmException | CertificateException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
