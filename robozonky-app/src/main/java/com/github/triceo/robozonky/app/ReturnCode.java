@@ -15,7 +15,7 @@
  */
 package com.github.triceo.robozonky.app;
 
-public enum ReturnCode {
+enum ReturnCode {
     OK(0), ERROR_WRONG_PARAMETERS(1), ERROR_LOGIN(2), ERROR_UNEXPECTED(255);
 
     private final int code;

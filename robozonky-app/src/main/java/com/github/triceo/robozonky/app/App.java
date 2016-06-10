@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.github.triceo.robozonky.app.OperatingMode.STRATEGY_DRIVEN;
 
-public class App {
+class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
