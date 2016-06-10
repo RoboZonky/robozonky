@@ -115,10 +115,8 @@ public class OperationsTest {
         final Wallet wallet = new Wallet(-1, -1, BigDecimal.valueOf(100000), remoteBalance);
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getWallet()).thenReturn(wallet);
-        final Authentication auth = Mockito.mock(Authentication.class);
-        Mockito.when(auth.getApi()).thenReturn(api);
         final OperationsContext ctx = Mockito.mock(OperationsContext.class);
-        Mockito.when(ctx.getAuthentication()).thenReturn(auth);
+        Mockito.when(ctx.getApi()).thenReturn(api);
         // test operation
         Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
     }

@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.github.triceo.robozonky.authentication.Authentication;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,16 +35,16 @@ public class OperationsContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationsContext.class);
 
-    private final Authentication authenticationInfo;
+    private final ZonkyApi api;
     private final InvestmentStrategy strategy;
     private final boolean dryRun;
     private final BigDecimal dryRunInitialBalance;
     private final ExecutorService backgroundExecutor;
 
-    public OperationsContext(final Authentication authenticated, final InvestmentStrategy strategy,
+    public OperationsContext(final ZonkyApi authenticated, final InvestmentStrategy strategy,
                              final boolean dryRun, final int dryRunInitialBalance,
                              final int maxNumberParallelHttpConnections) {
-        this.authenticationInfo = authenticated;
+        this.api = authenticated;
         this.strategy = strategy;
         this.dryRun = dryRun;
         this.dryRunInitialBalance = BigDecimal.valueOf(dryRunInitialBalance);
@@ -61,8 +61,8 @@ public class OperationsContext {
         return this.backgroundExecutor;
     }
 
-    public Authentication getAuthentication() {
-        return authenticationInfo;
+    protected ZonkyApi getApi() {
+        return this.api;
     }
 
     public InvestmentStrategy getStrategy() {

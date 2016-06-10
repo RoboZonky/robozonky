@@ -26,11 +26,11 @@ class AuthenticatedFilter extends CommonFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticatedFilter.class);
 
-    private final ZonkyApiToken authorization;
+    private final char[] accessToken; // treat the access token as if it were a password
 
     public AuthenticatedFilter(final ZonkyApiToken token, final String roboZonkyVersion) {
         super(roboZonkyVersion);
-        this.authorization = token;
+        this.accessToken = token.getAccessToken() == null ? new char[] {} : token.getAccessToken().toCharArray();
     }
 
     @Override
@@ -40,7 +40,7 @@ class AuthenticatedFilter extends CommonFilter {
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        clientRequestContext.getHeaders().add("Authorization", "Bearer " + this.authorization.getAccessToken());
+        clientRequestContext.getHeaders().add("Authorization", "Bearer " + String.valueOf(accessToken));
         super.filter(clientRequestContext);
     }
 }

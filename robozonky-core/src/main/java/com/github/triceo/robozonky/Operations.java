@@ -42,6 +42,7 @@ import com.github.triceo.robozonky.remote.Ratings;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
@@ -53,6 +54,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Operations {
+
+    /**
+     * Decouples @{@link ZonkyApiToken} from {@link OperationsContext}, since we want the former to be short-lived.
+     */
+    public static class LoginResult {
+
+        private final OperationsContext operationsContext;
+        private final ZonkyApiToken zonkyApiToken;
+
+        private LoginResult(final OperationsContext oc, final ZonkyApiToken token) {
+            this.operationsContext = oc;
+            this.zonkyApiToken = token;
+        }
+
+        public OperationsContext getOperationsContext() {
+            return this.operationsContext;
+        }
+
+        public ZonkyApiToken getZonkyApiToken() {
+            return this.zonkyApiToken;
+        }
+
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
 
@@ -208,7 +232,7 @@ public class Operations {
     static Optional<Investment> identifyLoanToInvest(final OperationsContext oc,
                                                      final List<Investment> investmentsInSession,
                                                      final BigDecimal balance) {
-        final ZonkyApi api = oc.getAuthentication().getApi();
+        final ZonkyApi api = oc.getApi();
         final Collection<Investment> investments = Util.mergeInvestments(
                 api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)), investmentsInSession);
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(api.getStatistics(),
@@ -238,7 +262,7 @@ public class Operations {
         final boolean isDryRun = oc.isDryRun();
         final BigDecimal dryRunInitialBalance = oc.getDryRunInitialBalance();
         BigDecimal balance = (isDryRun && dryRunInitialBalance.compareTo(BigDecimal.ZERO) > 0) ?
-                dryRunInitialBalance : oc.getAuthentication().getApi().getWallet().getAvailableBalance();
+                dryRunInitialBalance : oc.getApi().getWallet().getAvailableBalance();
         if (isDryRun) {
             for (final Investment i : investmentsInSession) {
                 balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
@@ -278,7 +302,7 @@ public class Operations {
         } else {
             Operations.LOGGER.info("Attempting to invest {} CZK into loan {}.", i.getAmount(), i.getLoanId());
             try {
-                oc.getAuthentication().getApi().invest(i);
+                oc.getApi().invest(i);
                 Operations.LOGGER.warn("Investment operation succeeded.");
                 return Optional.of(i);
             } catch (final Exception ex) {
@@ -298,8 +322,8 @@ public class Operations {
         return Operations.invest(oc, investment);
     }
 
-    public static OperationsContext login(final Authenticator authenticationMethod, final boolean dryRun,
-                                          final int dryRunInitialBalance, final InvestmentStrategy strategy)
+    public static LoginResult login(final Authenticator authenticationMethod, final boolean dryRun,
+                                    final int dryRunInitialBalance, final InvestmentStrategy strategy)
             throws LoginFailedException {
         try {
             Operations.LOGGER.trace("Preparing for login.");
@@ -310,7 +334,9 @@ public class Operations {
             Operations.LOGGER.trace("Login starting.");
             final Authentication auth =
                     authenticationMethod.authenticate(Operations.ZONKY_URL, Util.getRoboZonkyVersion(), clientBuilder);
-            return new OperationsContext(auth, strategy, dryRun, dryRunInitialBalance, Operations.CONNECTION_POOL_SIZE);
+            final OperationsContext oc = new OperationsContext(auth.getApi(), strategy, dryRun, dryRunInitialBalance,
+                    Operations.CONNECTION_POOL_SIZE);
+            return new LoginResult(oc, auth.getApiToken());
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
         } finally {
@@ -318,14 +344,14 @@ public class Operations {
         }
     }
 
-    public static OperationsContext login(final Authenticator authenticationMethod, final boolean dryRun,
-                                          final int dryRunInitialBalance) throws LoginFailedException {
+    public static LoginResult login(final Authenticator authenticationMethod, final boolean dryRun,
+                                    final int dryRunInitialBalance) throws LoginFailedException {
         return Operations.login(authenticationMethod, dryRun, dryRunInitialBalance, null);
     }
 
     public static void logout(final OperationsContext oc) throws LogoutFailedException {
         try {
-            oc.getAuthentication().getApi().logout();
+            oc.getApi().logout();
         } catch (final RuntimeException ex) {
             throw new LogoutFailedException("Error while logging out Zonky.", ex);
         }

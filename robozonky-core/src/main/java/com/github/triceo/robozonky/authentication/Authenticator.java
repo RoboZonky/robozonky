@@ -49,7 +49,8 @@ public final class Authenticator {
         return new Authenticator((ZonkyApi api) -> {
             final String tokenId = token.getRefreshToken();
             final ZonkyApiToken newToken = api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
-            Authenticator.LOGGER.info("Logged in with Zonky as user '{}', refreshing existing access token.", username);
+            Authenticator.LOGGER.info("Logged in with Zonky as user '{}', refreshing existing access token.",
+                    username);
             return newToken;
         });
     }

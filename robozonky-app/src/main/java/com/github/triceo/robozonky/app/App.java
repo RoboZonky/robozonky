@@ -237,19 +237,19 @@ public class App {
         try {
             final AuthenticationHandler handler = ctx.getAuthenticationHandler();
             final Authenticator auth = handler.build();
-            final OperationsContext oc = useStrategy ?
+            final Operations.LoginResult loginResult = useStrategy ?
                     Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :
                     Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());
-            final boolean logoutAllowed = handler.processToken(oc.getAuthentication().getApiToken());
-            final Collection<Investment> result = operations.apply(oc);
+            final boolean logoutAllowed = handler.processToken(loginResult.getZonkyApiToken());
+            final Collection<Investment> result = operations.apply(loginResult.getOperationsContext());
             if (logoutAllowed) { // log out
                 try {
-                    Operations.logout(oc);
+                    Operations.logout(loginResult.getOperationsContext());
                 } catch (final LogoutFailedException ex) {
                     App.LOGGER.warn("Logging out of Zonky failed.", ex);
                 }
             } else {  // if we're using the token, we should never log out
-                App.LOGGER.info("Refresh token stored, not logging out of Zonky.");
+                App.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
             }
             return result;
         } catch (final LoginFailedException ex) {
