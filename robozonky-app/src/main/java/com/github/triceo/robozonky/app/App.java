@@ -94,19 +94,27 @@ public class App {
                 final KeyStoreHandler ksh = KeyStoreHandler.open(store, cli.getPassword());
                 return SensitiveInformationProvider.keyStoreBased(ksh);
             } catch (final IOException | KeyStoreException ex) {
-                cli.printHelpAndExit("Failed secure storage: " + ex.getMessage(), true);
+                cli.printHelpAndExit("Failed opening guarded storage: " + ex.getMessage(), true);
                 return null;
             }
         } else { // else everything is read from the cli and put into a keystore
             try {
-                final KeyStoreHandler ksh = KeyStoreHandler.create(App.DEFAULT_KEYSTORE_FILE, cli.getPassword());
-                App.LOGGER.info("Guarded storage has been created with your username and password: {}",
-                        App.DEFAULT_KEYSTORE_FILE);
-                App.LOGGER.info("Feel free to use this instead of providing the information on the command line.");
-                App.LOGGER.info("Please change the storage password to something else than your Zonky password.");
+                final Optional<String> usernameProvided = cli.getUsername();
+                final boolean storageExists = App.DEFAULT_KEYSTORE_FILE.canRead();
+                final KeyStoreHandler ksh = storageExists ?
+                        KeyStoreHandler.open(App.DEFAULT_KEYSTORE_FILE, cli.getPassword()) :
+                        KeyStoreHandler.create(App.DEFAULT_KEYSTORE_FILE, cli.getPassword());
+                if (storageExists && usernameProvided.isPresent()) {
+                    App.LOGGER.warn("Using plain-text credentials when guarded storage available. Consider switching.");
+                } else if (!storageExists) {
+                    App.LOGGER.info("Guarded storage has been created with your username and password: {}",
+                            App.DEFAULT_KEYSTORE_FILE);
+                    App.LOGGER.info("Feel free to use this instead of providing the information on the command line.");
+                    App.LOGGER.info("Please change the storage password to something else than your Zonky password.");
+                }
                 return SensitiveInformationProvider.keyStoreBased(ksh, cli.getUsername().get(), cli.getPassword());
             } catch (final IOException | KeyStoreException ex) {
-                cli.printHelpAndExit("Failed reading secure storage: " + ex.getMessage(), true);
+                cli.printHelpAndExit("Failed reading guarded storage: " + ex.getMessage(), true);
                 return null;
             }
         }
