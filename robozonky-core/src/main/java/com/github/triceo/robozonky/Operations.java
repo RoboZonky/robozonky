@@ -80,9 +80,10 @@ public class Operations {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Operations.class);
 
-    private static final ResteasyProviderFactory RESTEASY = ResteasyProviderFactory.getInstance();
+    private static final ResteasyProviderFactory RESTEASY;
     static {
         Operations.LOGGER.trace("Initializing RESTEasy.");
+        RESTEASY = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(Operations.RESTEASY);
         RESTEASY.registerProvider(ResteasyJackson2Provider.class);
         Operations.LOGGER.trace("RESTEasy initialized.");
