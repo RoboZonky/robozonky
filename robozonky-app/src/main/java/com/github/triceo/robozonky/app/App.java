@@ -42,8 +42,6 @@ import com.github.triceo.robozonky.remote.Investment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.github.triceo.robozonky.app.OperatingMode.STRATEGY_DRIVEN;
-
 class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
@@ -203,7 +201,7 @@ class App {
             App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
         // figure out whether to invest based on strategy or whether to make a single investment
-        final boolean useStrategy = ctx.getOperatingMode() == STRATEGY_DRIVEN;
+        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         final Function<OperationsContext, Collection<Investment>> op = useStrategy ? Operations::invest : oc -> {
             final Optional<Investment> optional = Operations.invest(oc, ctx.getLoanId(), ctx.getLoanAmount());
             if (optional.isPresent()) {
@@ -233,7 +231,7 @@ class App {
             App.LOGGER.info("Starting balance in dry run is lower than minimum, no need to execute at all.");
             return Collections.emptyList();
         }
-        final boolean useStrategy = ctx.getOperatingMode() == STRATEGY_DRIVEN;
+        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         try {
             final AuthenticationHandler handler = ctx.getAuthenticationHandler();
             final Authenticator auth = handler.build();
