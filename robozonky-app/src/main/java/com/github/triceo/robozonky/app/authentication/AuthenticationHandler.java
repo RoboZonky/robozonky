@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.app.authentication;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.Optional;
 import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.authentication.Authenticator;
@@ -33,50 +33,37 @@ import org.slf4j.LoggerFactory;
 public class AuthenticationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandler.class);
-    private static final File TOKEN_FILE = new File("robozonky.token");
 
     /**
      * Build authentication mechanism that will keep the session alive via the use of session token. The mechanism will
      * never log out, but the session may expire if not refresh regularly. This is potentially unsafe, as it will
      * eventually store a plain-text access token on the hard drive, for everyone to see.
      *
-     * @param username Username to log in.
+     * @param data Provider for the sensitive information, such as passwords and tokens.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler tokenBased(final String username) {
-        return new AuthenticationHandler(username, true);
+    public static AuthenticationHandler tokenBased(final SensitiveInformationProvider data) {
+        return new AuthenticationHandler(data, true);
     }
 
     /**
      * Build authentication mechanism that will log out at the end of RoboZonky's operations. This will ignore the
      * access tokens.
      *
-     * @param username Username to log in.
+     * @param data Provider for the sensitive information, such as passwords and tokens.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler passwordBased(final String username) {
-        return new AuthenticationHandler(username, false);
+    public static AuthenticationHandler passwordBased(final SensitiveInformationProvider data) {
+        return new AuthenticationHandler(data, false);
     }
 
     private final boolean tokenBased;
-    private final String username;
+    private final SensitiveInformationProvider data;
     private long tokenRefreshBeforeExpirationInSeconds = 60;
-    private String password = null;
 
-    private AuthenticationHandler(final String username, final boolean tokenBased) {
+    private AuthenticationHandler(final SensitiveInformationProvider data, final boolean tokenBased) {
+        this.data = data;
         this.tokenBased = tokenBased;
-        this.username = username;
-    }
-
-    /**
-     * Optionally provide a password for the authentication method.
-     *
-     * @param password If not provided, based on the selected authentication method, RoboZonky may or may not log in.
-     * @return This.
-     */
-    public AuthenticationHandler withPassword(final String password) {
-        this.password = password;
-        return this;
     }
 
     /**
@@ -94,25 +81,28 @@ public class AuthenticationHandler {
         return this;
     }
 
+    private Authenticator buildWithPassword() {
+        return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
+    }
+
     /**
      * Based on information received until this point, decide on the proper authentication method.
      *
      * @return Authentication method matching user preferences.
      */
     public Authenticator build() {
+        final Optional<InputStream> tokenStream = this.data.getToken();
         if (!this.tokenBased) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
-            return Authenticator.withCredentials(this.username, this.password);
-        } else if (!AuthenticationHandler.TOKEN_FILE.canRead()) { // no token available, also using password-based
+            return this.buildWithPassword();
+        } else if (!tokenStream.isPresent()) { // no token available, also using password-based
             AuthenticationHandler.LOGGER.debug("Token file not available, using password-based authentication.");
-            return Authenticator.withCredentials(this.username, this.password);
+            return this.buildWithPassword();
         }
         boolean deleteToken = false;
         try {
-            final ZonkyApiToken token = ZonkyApiToken.unmarshal(AuthenticationHandler.TOKEN_FILE);
-            final LocalDateTime obtained =
-                    LocalDateTime.ofInstant(Instant.ofEpochMilli(AuthenticationHandler.TOKEN_FILE.lastModified()),
-                    ZoneId.systemDefault());
+            final ZonkyApiToken token = ZonkyApiToken.unmarshal(tokenStream.get());
+            final LocalDateTime obtained = this.data.getTokenSetDate().get();
             final LocalDateTime expires = obtained.plus(token.getExpiresIn(), ChronoUnit.SECONDS);
             AuthenticationHandler.LOGGER.debug("Token obtained on {}, expires on {}.", obtained, expires);
             final LocalDateTime now = LocalDateTime.now();
@@ -120,23 +110,23 @@ public class AuthenticationHandler {
                 AuthenticationHandler.LOGGER.debug("Token {} expired, using password-based authentication.",
                         token.getAccessToken());
                 deleteToken = true;
-                return Authenticator.withCredentials(this.username, this.password);
+                return this.buildWithPassword();
             }
             if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {
                 AuthenticationHandler.LOGGER.debug("Token {} expiring, will be refreshed.", token.getAccessToken());
                 deleteToken = true;
-                return Authenticator.withAccessTokenAndRefresh(this.username, token);
+                return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token);
             } else {
                 AuthenticationHandler.LOGGER.debug("Reusing access token {}.", token.getAccessToken());
-                return Authenticator.withAccessToken(this.username, token);
+                return Authenticator.withAccessToken(this.data.getUsername(), token);
             }
         } catch (final JAXBException ex) {
-            AuthenticationHandler.LOGGER.warn("Failed parsing token file, using password-based authentication.", ex);
+            AuthenticationHandler.LOGGER.warn("Failed parsing token, using password-based authentication.", ex);
             deleteToken = true;
-            return Authenticator.withCredentials(this.username, this.password);
+            return this.buildWithPassword();
         } finally {
-            if (deleteToken && !AuthenticationHandler.TOKEN_FILE.delete()) {
-                AuthenticationHandler.LOGGER.warn("Failed deleting token file, authentication may stop working.");
+            if (deleteToken && !this.data.setToken()) {
+                AuthenticationHandler.LOGGER.warn("Failed deleting token, authentication may stop working.");
             }
         }
     }
@@ -150,12 +140,14 @@ public class AuthenticationHandler {
     public boolean processToken(final ZonkyApiToken token) {
         if (!this.tokenBased) { // not using token; always logout
             return true;
-        } else if (AuthenticationHandler.TOKEN_FILE.canRead()) { // token already exists, do not logout
+        }
+        final Optional<InputStream> tokenStream = this.data.getToken();
+        if (tokenStream.isPresent()) { // token already exists, do not logout
             return false;
         } else try { // try to store token
-            AuthenticationHandler.TOKEN_FILE.delete(); // just to be sure
-            ZonkyApiToken.marshal(token, AuthenticationHandler.TOKEN_FILE);
-            return false;
+            final String marshalled = ZonkyApiToken.marshal(token);
+            final boolean tokenStored = this.data.setToken(new ByteArrayInputStream(marshalled.getBytes()));
+            return !tokenStored;
         } catch (final JAXBException ex) {
             AuthenticationHandler.LOGGER.info("Failed writing access token, will need to use password next time.", ex);
             return true;

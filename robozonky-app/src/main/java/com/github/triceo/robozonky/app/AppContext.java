@@ -17,6 +17,7 @@ package com.github.triceo.robozonky.app;
 
 import java.util.Optional;
 
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 
 class AppContext {

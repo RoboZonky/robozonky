@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -29,8 +30,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class CommandLineInterface {
+public class CommandLineInterface {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -41,12 +46,13 @@ class CommandLineInterface {
     static final Option OPTION_AMOUNT = Option.builder("a").hasArg().longOpt("amount")
             .argName("Amount to invest").desc("Amount to invest to a single loan when ignoring strategy.")
             .build();
-    static final Option OPTION_HELP = Option.builder("h").longOpt("help").desc("Show this help message and quit.")
-            .build();
     static final Option OPTION_USERNAME = Option.builder("u").hasArg().longOpt("username")
             .argName("Zonky username").desc("Used to connect to the Zonky server.").build();
-    static final Option OPTION_PASSWORD = Option.builder("p").hasArg().longOpt("password").argName("Zonky password")
-            .desc("Used to connect to the Zonky server.").build();
+    static final Option OPTION_KEYSTORE = Option.builder("g").hasArg().longOpt("guarded")
+            .argName("Guarded file").desc("Path to secure file that contains username, password etc.").build();
+    static final Option OPTION_PASSWORD = Option.builder("p").required().hasArg().longOpt("password")
+            .argName("Guarded password").desc("Used to connect to the Zonky server, or to read the secure storage.")
+            .build();
     static final Option OPTION_USE_TOKEN = Option.builder("r").hasArg().optionalArg(true)
             .argName("Seconds before expiration").longOpt("refresh")
             .desc("Once logged in, RoboZonky will never log out unless login expires. Use with caution.").build();
@@ -63,12 +69,16 @@ class CommandLineInterface {
         final Collection<Option> ops = Stream.of(OperatingMode.values()).map(OperatingMode::getOtherOptions)
                 .collect(LinkedHashSet::new, LinkedHashSet::addAll, LinkedHashSet::addAll);
         // include authentication options
-        ops.add(CommandLineInterface.OPTION_USERNAME);
+        final OptionGroup authenticationModes = new OptionGroup();
+        authenticationModes.setRequired(true);
+        authenticationModes.addOption(CommandLineInterface.OPTION_USERNAME);
+        authenticationModes.addOption(CommandLineInterface.OPTION_KEYSTORE);
         ops.add(CommandLineInterface.OPTION_PASSWORD);
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
         // join all in a single config
         final Options options = new Options();
         options.addOptionGroup(operatingModes);
+        options.addOptionGroup(authenticationModes);
         ops.forEach(options::addOption);
         final CommandLineParser parser = new DefaultParser();
         // and parse
@@ -88,13 +98,13 @@ class CommandLineInterface {
         this.cli = cli;
     }
 
-    public OperatingMode getCliOperatingMode() {
+    Optional<OperatingMode> getCliOperatingMode() {
         for (final OperatingMode mode: OperatingMode.values()) {
             if (cli.hasOption(mode.getSelectingOption().getOpt())) {
-                return mode;
+                return Optional.of(mode);
             }
         }
-        return OperatingMode.HELP;
+        return Optional.empty();
     }
 
     private Optional<String> getOptionValue(final Option option) {
@@ -123,7 +133,7 @@ class CommandLineInterface {
         }
     }
 
-    public Optional<String> getStrategyConfigurationFilePath() {
+    Optional<String> getStrategyConfigurationFilePath() {
         return this.getOptionValue(OperatingMode.STRATEGY_DRIVEN.getSelectingOption());
     }
 
@@ -131,19 +141,19 @@ class CommandLineInterface {
         return this.getOptionValue(CommandLineInterface.OPTION_USERNAME);
     }
 
-    public Optional<String> getPassword() {
-        return this.getOptionValue(CommandLineInterface.OPTION_PASSWORD);
+    public String getPassword() {
+        return this.getOptionValue(CommandLineInterface.OPTION_PASSWORD).get();
     }
 
-    public Optional<Integer> getLoanId() {
+    Optional<Integer> getLoanId() {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_INVESTMENT);
     }
 
-    public Optional<Integer> getLoanAmount() {
+    Optional<Integer> getLoanAmount() {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_AMOUNT);
     }
 
-    public boolean isDryRun() {
+    boolean isDryRun() {
         return this.cli.hasOption(CommandLineInterface.OPTION_DRY_RUN.getOpt());
     }
 
@@ -155,7 +165,16 @@ class CommandLineInterface {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_USE_TOKEN);
     }
 
-    public Optional<Integer> getDryRunBalance() {
+    public Optional<File> getKeyStoreLocation() {
+        final Optional<String> value = this.getOptionValue(CommandLineInterface.OPTION_KEYSTORE);
+        if (value.isPresent()) {
+            return Optional.of(new File(value.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    Optional<Integer> getDryRunBalance() {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
     }
 
@@ -168,6 +187,11 @@ class CommandLineInterface {
 
     public void printHelpAndExit(final String message, final boolean isError) {
         CommandLineInterface.printHelpAndExit(this.options, message, isError);
+    }
+
+    public void printHelpAndExit(final String message, final Exception ex) {
+        CommandLineInterface.LOGGER.error("Encountered critical error ('{}'), application will exit.", message, ex);
+        CommandLineInterface.printHelpAndExit(this.options, message, true);
     }
 
 }
