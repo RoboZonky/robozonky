@@ -16,8 +16,8 @@
  */
 package com.github.triceo.robozonky.remote;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.Objects;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ZonkyApiToken {
 
-    public static ZonkyApiToken unmarshal(final InputStream token) throws JAXBException {
+    public static ZonkyApiToken unmarshal(final Reader token) throws JAXBException {
         final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
         final Unmarshaller u = ctx.createUnmarshaller();
         return (ZonkyApiToken)u.unmarshal(token);
@@ -47,9 +47,9 @@ public class ZonkyApiToken {
     public static String marshal(final ZonkyApiToken token) throws JAXBException {
         final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
         final Marshaller m = ctx.createMarshaller();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        m.marshal(token, baos);
-        return baos.toString();
+        final StringWriter w = new StringWriter();
+        m.marshal(token, w);
+        return w.toString();
     }
 
     @XmlElement(name="access_token")

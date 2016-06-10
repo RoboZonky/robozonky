@@ -16,8 +16,8 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -91,7 +91,7 @@ public class AuthenticationHandler {
      * @return Authentication method matching user preferences.
      */
     public Authenticator build() {
-        final Optional<InputStream> tokenStream = this.data.getToken();
+        final Optional<Reader> tokenStream = this.data.getToken();
         if (!this.tokenBased) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
             return this.buildWithPassword();
@@ -141,12 +141,12 @@ public class AuthenticationHandler {
         if (!this.tokenBased) { // not using token; always logout
             return true;
         }
-        final Optional<InputStream> tokenStream = this.data.getToken();
+        final Optional<Reader> tokenStream = this.data.getToken();
         if (tokenStream.isPresent()) { // token already exists, do not logout
             return false;
         } else try { // try to store token
             final String marshalled = ZonkyApiToken.marshal(token);
-            final boolean tokenStored = this.data.setToken(new ByteArrayInputStream(marshalled.getBytes()));
+            final boolean tokenStored = this.data.setToken(new StringReader(marshalled));
             return !tokenStored;
         } catch (final JAXBException ex) {
             AuthenticationHandler.LOGGER.info("Failed writing access token, will need to use password next time.", ex);

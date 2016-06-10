@@ -16,9 +16,9 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -59,17 +59,17 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     }
 
     @Override
-    public Optional<InputStream> getToken() {
+    public Optional<Reader> getToken() {
         final Optional<String> stored = this.ksh.get(KeyStoreInformationProvider.ALIAS_TOKEN);
         if (stored.isPresent()) {
-            return Optional.of(new ByteArrayInputStream(stored.get().getBytes()));
+            return Optional.of(new StringReader(stored.get()));
         } else {
             return Optional.empty();
         }
     }
 
     @Override
-    public boolean setToken(final InputStream token) {
+    public boolean setToken(final Reader token) {
         try {
             this.setToken();
             this.ksh.set(KeyStoreInformationProvider.ALIAS_TOKEN, token);

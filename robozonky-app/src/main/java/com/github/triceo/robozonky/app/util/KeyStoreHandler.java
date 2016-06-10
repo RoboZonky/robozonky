@@ -22,8 +22,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -126,8 +126,8 @@ public class KeyStoreHandler {
      * @return True if success.
      * @throws IOException If stream failed to read.
      */
-    public boolean set(final String alias, final InputStream valueStream) throws IOException {
-        return this.set(alias, IOUtils.toString(valueStream, "UTF-8"));
+    public boolean set(final String alias, final Reader valueStream) throws IOException {
+        return this.set(alias, IOUtils.toString(valueStream));
     }
 
     /**

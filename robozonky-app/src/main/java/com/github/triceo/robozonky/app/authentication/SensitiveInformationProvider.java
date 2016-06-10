@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -75,10 +75,10 @@ public abstract class SensitiveInformationProvider {
     /**
      * Retrieve serialization of Zonky's OAuth token.
      *
-     * @return Present if {@link #setToken(InputStream)} previously called, unless {@link #setToken()} was called after
+     * @return Present if {@link #setToken(Reader)} previously called, unless {@link #setToken()} was called after
      * that.
      */
-    abstract public Optional<InputStream> getToken();
+    abstract public Optional<Reader> getToken();
 
     /**
      * Store serialization of Zonky's OAuth token.
@@ -86,7 +86,7 @@ public abstract class SensitiveInformationProvider {
      * @param token The serialization of the token to be stored.
      * @return True if successful.
      */
-    abstract public boolean setToken(final InputStream token);
+    abstract public boolean setToken(final Reader token);
 
     /**
      * Delete the stored token, if any.
@@ -98,7 +98,7 @@ public abstract class SensitiveInformationProvider {
     /**
      * Retrieve the timestamp of the stored token.
      *
-     * @return the last time when {@link #setToken(InputStream)} was called, unless {@link #setToken()} called after
+     * @return the last time when {@link #setToken(Reader)} was called, unless {@link #setToken()} called after
      * that.
      */
     abstract public Optional<LocalDateTime> getTokenSetDate();
