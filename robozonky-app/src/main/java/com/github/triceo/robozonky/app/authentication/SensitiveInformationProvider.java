@@ -22,7 +22,6 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 
-// TODO rename plain text to CLI-based
 public abstract class SensitiveInformationProvider {
 
     public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh) {

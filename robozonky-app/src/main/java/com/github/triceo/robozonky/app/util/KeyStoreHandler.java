@@ -87,7 +87,7 @@ public class KeyStoreHandler {
                             final SecretKeyFactory keyFactory) {
         this.keyStore = keyStore;
         this.password = password;
-        this.protectionParameter = new KeyStore.PasswordProtection(this.password);
+        this.protectionParameter = new KeyStore.PasswordProtection("NO_PASSWORD".toCharArray()); // FIXME is this safe?
         this.keyStoreFile = keyStoreFile;
         this.keyFactory = keyFactory;
     }

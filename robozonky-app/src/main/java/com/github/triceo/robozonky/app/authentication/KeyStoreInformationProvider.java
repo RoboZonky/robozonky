@@ -77,6 +77,7 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
             this.ksh.save();
             return true;
         } catch (final IOException ex) {
+            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
             return false;
         }
     }
@@ -92,6 +93,7 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
             this.ksh.save();
             return true;
         } catch (final IOException ex) {
+            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
             return false;
         }
     }

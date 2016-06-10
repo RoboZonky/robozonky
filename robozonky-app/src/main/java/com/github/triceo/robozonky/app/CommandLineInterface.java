@@ -30,8 +30,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommandLineInterface {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -183,6 +187,11 @@ public class CommandLineInterface {
 
     public void printHelpAndExit(final String message, final boolean isError) {
         CommandLineInterface.printHelpAndExit(this.options, message, isError);
+    }
+
+    public void printHelpAndExit(final String message, final Exception ex) {
+        CommandLineInterface.LOGGER.error("Encountered critical error ('{}'), application will exit.", message, ex);
+        CommandLineInterface.printHelpAndExit(this.options, message, true);
     }
 
 }
