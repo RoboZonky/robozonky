@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.authentication;
+package com.github.triceo.robozonky.app.util;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -38,13 +38,13 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.io.IOUtils;
 
-class KeyStoreHandler {
+public class KeyStoreHandler {
 
     private static final String KEYSTORE_TYPE = "JCEKS";
     private static final String KEY_TYPE = "PBE";
 
     public static KeyStoreHandler create(final File keyStoreFile, final String password)
-            throws IOException, KeyStoreException, NoSuchAlgorithmException {
+            throws IOException, KeyStoreException {
         if (keyStoreFile.exists()) {
             throw new FileAlreadyExistsException(keyStoreFile.getAbsolutePath());
         }
@@ -55,13 +55,13 @@ class KeyStoreHandler {
             final SecretKeyFactory factory = SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
             ks.load(null, passwordArray);
             return new KeyStoreHandler(ks, passwordArray, keyStoreFile, factory);
-        } catch (final CertificateException ex) {
+        } catch (final NoSuchAlgorithmException | CertificateException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
     }
 
     public static KeyStoreHandler open(final File keyStoreFile, final String password)
-            throws IOException, KeyStoreException, NoSuchAlgorithmException {
+            throws IOException, KeyStoreException {
         if (!keyStoreFile.exists()) {
             throw new FileNotFoundException(keyStoreFile.getAbsolutePath());
         }
@@ -72,7 +72,7 @@ class KeyStoreHandler {
             final SecretKeyFactory factory = SecretKeyFactory.getInstance(KeyStoreHandler.KEY_TYPE);
             ks.load(fis, passwordArray);
             return new KeyStoreHandler(ks, passwordArray, keyStoreFile, factory);
-        } catch (final CertificateException ex) {
+        } catch (final NoSuchAlgorithmException | CertificateException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
     }
@@ -111,6 +111,9 @@ class KeyStoreHandler {
         try {
             final KeyStore.SecretKeyEntry skEntry =
                     (KeyStore.SecretKeyEntry)this.keyStore.getEntry(alias, this.protectionParameter);
+            if (skEntry == null) {
+                return Optional.empty();
+            }
             final PBEKeySpec keySpec = (PBEKeySpec)this.keyFactory.getKeySpec(skEntry.getSecretKey(), PBEKeySpec.class);
             return Optional.of(new String(keySpec.getPassword()));
         } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException ex) {

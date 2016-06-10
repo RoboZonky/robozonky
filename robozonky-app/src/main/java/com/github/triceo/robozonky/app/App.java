@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.security.KeyStoreException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +34,7 @@ import com.github.triceo.robozonky.OperationsContext;
 import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
+import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
@@ -45,6 +47,7 @@ import static com.github.triceo.robozonky.app.OperatingMode.STRATEGY_DRIVEN;
 public class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
 
     static boolean PERFORM_SYSTEM_EXIT = true; // purely for testing purposes
 
@@ -77,22 +80,43 @@ public class App {
             } else {
                 return new AppContext(auth, StrategyParser.parse(strategyConfig));
             }
-        } catch (final Exception e) {
-            cli.printHelpAndExit("Failed parsing strategy: " + e.getMessage(), true);
+        } catch (final Exception ex) {
+            cli.printHelpAndExit("Failed parsing strategy: " + ex.getMessage(), true);
             return null;
         }
     }
 
-    private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
-        final Optional<String> username = cli.getUsername();
-        final boolean useToken = cli.isTokenEnabled();
-        if (!username.isPresent()) {
-            cli.printHelpAndExit("Username must be provided.", true);
+    private static SensitiveInformationProvider getSensitiveInformationProvider(final CommandLineInterface cli) {
+        final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
+        if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
+            final File store = keyStoreLocation.get();
+            try {
+                final KeyStoreHandler ksh = KeyStoreHandler.open(store, cli.getPassword());
+                return SensitiveInformationProvider.keyStoreBased(ksh);
+            } catch (final IOException | KeyStoreException ex) {
+                cli.printHelpAndExit("Failed secure storage: " + ex.getMessage(), true);
+                return null;
+            }
+        } else { // else everything is read from the cli and put into a keystore
+            try {
+                final KeyStoreHandler ksh = KeyStoreHandler.create(App.DEFAULT_KEYSTORE_FILE, cli.getPassword());
+                App.LOGGER.info("Guarded storage has been created with your username and password: {}",
+                        App.DEFAULT_KEYSTORE_FILE);
+                App.LOGGER.info("Feel free to use this instead of providing the information on the command line.");
+                App.LOGGER.info("Please change the storage password to something else than your Zonky password.");
+                return SensitiveInformationProvider.keyStoreBased(ksh, cli.getUsername().get(), cli.getPassword());
+            } catch (final IOException | KeyStoreException ex) {
+                cli.printHelpAndExit("Failed reading secure storage: " + ex.getMessage(), true);
+                return null;
+            }
         }
-        final String usr = username.get();
-        final SensitiveInformationProvider sensitive = SensitiveInformationProvider.plainTextBased(cli);
-        final AuthenticationHandler auth = useToken ? AuthenticationHandler.tokenBased(usr, sensitive)
-                : AuthenticationHandler.passwordBased(usr, sensitive);
+    }
+
+    private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
+        final boolean useToken = cli.isTokenEnabled();
+        final SensitiveInformationProvider sensitive = App.getSensitiveInformationProvider(cli);
+        final AuthenticationHandler auth = useToken ? AuthenticationHandler.tokenBased(sensitive)
+                : AuthenticationHandler.passwordBased(sensitive);
         final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
         if (secs.isPresent()) {
             auth.withTokenRefreshingBeforeExpiration(secs.get(), ChronoUnit.SECONDS);

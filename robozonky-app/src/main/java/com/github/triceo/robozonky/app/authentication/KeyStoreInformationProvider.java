@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,7 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreInformationProvider.class);
     private static final String ALIAS_PASSWORD = "pwd";
+    private static final String ALIAS_USERNAME = "usr";
     private static final String ALIAS_TOKEN = "tkn";
     private static final String ALIAS_TOKEN_DATE = "tknd";
 
@@ -39,8 +41,21 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     }
 
     @Override
-    public Optional<String> getPassword() {
-        return this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD);
+    public String getPassword() {
+        return this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD).get();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.ksh.get(KeyStoreInformationProvider.ALIAS_USERNAME).get();
+    }
+
+    public boolean setPassword(final String password) {
+        return this.ksh.set(KeyStoreInformationProvider.ALIAS_PASSWORD, password);
+    }
+
+    public boolean setUsername(final String username) {
+        return this.ksh.set(KeyStoreInformationProvider.ALIAS_USERNAME, username);
     }
 
     @Override
@@ -56,8 +71,10 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     @Override
     public boolean setToken(final InputStream token) {
         try {
+            this.setToken();
             this.ksh.set(KeyStoreInformationProvider.ALIAS_TOKEN, token);
             this.ksh.set(KeyStoreInformationProvider.ALIAS_TOKEN_DATE, LocalDateTime.now().toString());
+            this.ksh.save();
             return true;
         } catch (final IOException ex) {
             return false;
@@ -68,7 +85,15 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     public boolean setToken() {
         boolean result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN);
         result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN_DATE) && result;
-        return result;
+        if (!result) {
+            return false;
+        }
+        try {
+            this.ksh.save();
+            return true;
+        } catch (final IOException ex) {
+            return false;
+        }
     }
 
     @Override

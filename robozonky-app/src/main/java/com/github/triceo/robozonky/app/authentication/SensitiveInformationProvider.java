@@ -20,22 +20,33 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.app.CommandLineInterface;
+import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 
+// TODO rename plain text to CLI-based
 public abstract class SensitiveInformationProvider {
 
-    public static SensitiveInformationProvider plainTextBased(final CommandLineInterface cli) {
-        return new PlainTextInformationProvider(cli);
+    public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh) {
+        return new KeyStoreInformationProvider(ksh);
     }
 
-    abstract Optional<String> getPassword();
+    public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh, final String username,
+                                                             final String password) {
+        final KeyStoreInformationProvider ks = new KeyStoreInformationProvider(ksh);
+        ks.setPassword(password);
+        ks.setUsername(username);
+        return ks;
+    }
 
-    abstract Optional<InputStream> getToken();
+    abstract public String getPassword();
 
-    abstract boolean setToken(final InputStream token);
+    abstract public String getUsername();
 
-    abstract boolean setToken();
+    abstract public Optional<InputStream> getToken();
 
-    abstract Optional<LocalDateTime> getTokenSetDate();
+    abstract public boolean setToken(final InputStream token);
+
+    abstract public boolean setToken();
+
+    abstract public Optional<LocalDateTime> getTokenSetDate();
 
 }

@@ -39,36 +39,31 @@ public class AuthenticationHandler {
      * never log out, but the session may expire if not refresh regularly. This is potentially unsafe, as it will
      * eventually store a plain-text access token on the hard drive, for everyone to see.
      *
-     * @param username Username to log in.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler tokenBased(final String username, final SensitiveInformationProvider data) {
-        return new AuthenticationHandler(username, data, true);
+    public static AuthenticationHandler tokenBased(final SensitiveInformationProvider data) {
+        return new AuthenticationHandler(data, true);
     }
 
     /**
      * Build authentication mechanism that will log out at the end of RoboZonky's operations. This will ignore the
      * access tokens.
      *
-     * @param username Username to log in.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler passwordBased(final String username, final SensitiveInformationProvider data) {
-        return new AuthenticationHandler(username, data, false);
+    public static AuthenticationHandler passwordBased(final SensitiveInformationProvider data) {
+        return new AuthenticationHandler(data, false);
     }
 
     private final boolean tokenBased;
-    private final String username;
     private final SensitiveInformationProvider data;
     private long tokenRefreshBeforeExpirationInSeconds = 60;
 
-    private AuthenticationHandler(final String username, final SensitiveInformationProvider data,
-                                  final boolean tokenBased) {
+    private AuthenticationHandler(final SensitiveInformationProvider data, final boolean tokenBased) {
         this.data = data;
         this.tokenBased = tokenBased;
-        this.username = username;
     }
 
     /**
@@ -87,12 +82,7 @@ public class AuthenticationHandler {
     }
 
     private Authenticator buildWithPassword() {
-        final Optional<String> password = this.data.getPassword();
-        if (!password.isPresent()) { // FIXME MissingPasswordException
-            throw new IllegalStateException("When token authentication fails, password must be present.");
-        } else {
-            return Authenticator.withCredentials(this.username, password.get());
-        }
+        return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
     }
 
     /**
@@ -125,10 +115,10 @@ public class AuthenticationHandler {
             if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {
                 AuthenticationHandler.LOGGER.debug("Token {} expiring, will be refreshed.", token.getAccessToken());
                 deleteToken = true;
-                return Authenticator.withAccessTokenAndRefresh(this.username, token);
+                return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token);
             } else {
                 AuthenticationHandler.LOGGER.debug("Reusing access token {}.", token.getAccessToken());
-                return Authenticator.withAccessToken(this.username, token);
+                return Authenticator.withAccessToken(this.data.getUsername(), token);
             }
         } catch (final JAXBException ex) {
             AuthenticationHandler.LOGGER.warn("Failed parsing token, using password-based authentication.", ex);
