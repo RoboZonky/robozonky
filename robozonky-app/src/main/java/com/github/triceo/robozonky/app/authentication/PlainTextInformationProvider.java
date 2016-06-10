@@ -63,7 +63,7 @@ class PlainTextInformationProvider extends SensitiveInformationProvider {
 
     @Override
     public boolean setToken(final InputStream token) {
-        PlainTextInformationProvider.TOKEN_FILE.delete(); // just in case
+        this.setToken(); // just in case
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(token));
              final BufferedWriter writer = new BufferedWriter(new FileWriter(PlainTextInformationProvider.TOKEN_FILE))) {
             for (final String line: reader.lines().collect(Collectors.toList())) {
