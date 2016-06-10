@@ -37,12 +37,28 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Simple abstraction for dealing with the overly complicated {@link KeyStore} API. Always call {@link #save()} to
+ * persist changes made.
+ */
 public class KeyStoreHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreHandler.class);
     private static final String KEYSTORE_TYPE = "JCEKS";
     private static final String KEY_TYPE = "PBE";
 
+    /**
+     * Create brand new key store protected by a given password.
+     *
+     * @param keyStoreFile The file where the key store should be.
+     * @param password Password to protect the key store.
+     * @return
+     * @throws IOException If file already exists or there is a problem writing the file.
+     * @throws KeyStoreException If something's happened to the key store.
+     */
     public static KeyStoreHandler create(final File keyStoreFile, final String password)
             throws IOException, KeyStoreException {
         if (keyStoreFile.exists()) {
@@ -60,6 +76,15 @@ public class KeyStoreHandler {
         }
     }
 
+    /**
+     * Open an existing key store, protected by a given password.
+     *
+     * @param keyStoreFile The file where the key store is.
+     * @param password Password that protects the key store.
+     * @return
+     * @throws IOException If file does not exist or there is a problem writing the file.
+     * @throws KeyStoreException If something's happened to the key store.
+     */
     public static KeyStoreHandler open(final File keyStoreFile, final String password)
             throws IOException, KeyStoreException {
         if (!keyStoreFile.exists()) {
@@ -92,10 +117,25 @@ public class KeyStoreHandler {
         this.keyFactory = keyFactory;
     }
 
+    /**
+     * Set a key in the key store. Uses {@link SecretKey} as the implementation. Overwrites previous contents, if any.
+     *
+     * @param alias Alias to store the key under.
+     * @param valueStream Will be converted to a {@link String} and stored.
+     * @return True if success.
+     * @throws IOException If stream failed to read.
+     */
     public boolean set(final String alias, final InputStream valueStream) throws IOException {
         return this.set(alias, IOUtils.toString(valueStream, "UTF-8"));
     }
 
+    /**
+     * Set a key in the key store. Uses {@link SecretKey} as the implementation. Overwrites previous contents, if any.
+     *
+     * @param alias Alias to store the key under.
+     * @param value The value to be stored.
+     * @return True if stored in the key store.
+     */
     public boolean set(final String alias, final String value) {
         try {
             final SecretKey secret = this.keyFactory.generateSecret(new PBEKeySpec(value.toCharArray()));
@@ -103,10 +143,17 @@ public class KeyStoreHandler {
             this.keyStore.setEntry(alias, skEntry, this.protectionParameter);
             return true;
         } catch (final KeyStoreException | InvalidKeySpecException ex) {
+            KeyStoreHandler.LOGGER.debug("Failed storing '{}'.", alias, ex);
             return false;
         }
     }
 
+    /**
+     * Retrieve a previously stored key.
+     *
+     * @param alias The alias under which the key will be looked up.
+     * @return Present if the alias is present in the key store.
+     */
     public Optional<String> get(final String alias) {
         try {
             final KeyStore.SecretKeyEntry skEntry =
@@ -119,19 +166,33 @@ public class KeyStoreHandler {
         } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         } catch (final UnrecoverableEntryException ex) {
+            KeyStoreHandler.LOGGER.debug("Unrecoverable entry '{}'.", alias, ex);
             return Optional.empty();
         }
     }
 
+    /**
+     * Remove an entry from the key store.
+     *
+     * @param alias The alias to locate the entry.
+     * @return True if there is now no entry with a given key.
+     */
     public boolean delete(final String alias) {
         try {
             this.keyStore.deleteEntry(alias);
             return true;
         } catch (final KeyStoreException ex) {
+            KeyStoreHandler.LOGGER.debug("Entry '{}' not deleted.", alias, ex);
             return false;
         }
     }
 
+    /**
+     * Persist whatever operations that have been made using this API. Unless this method is called, no other methods
+     * have effect.
+     *
+     * @throws IOException If saving the key store failed.
+     */
     public void save() throws IOException {
         try (final OutputStream os = new BufferedOutputStream(new FileOutputStream(this.keyStoreFile))) {
             try {

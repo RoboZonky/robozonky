@@ -17,17 +17,38 @@
 package com.github.triceo.robozonky.app.authentication;
 
 import java.io.InputStream;
+import java.security.KeyStore;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 
+/**
+ * Children of this class implement various ways of providing sensitive information, such as passwords or access tokens.
+ *
+ * Users shall not be given access to these children - instead, they should get them by calling static methods on this
+ * class, such as {@link #keyStoreBased(KeyStoreHandler)}.
+ */
 public abstract class SensitiveInformationProvider {
 
+    /**
+     * Create a @{@link KeyStore}-based provider based on a given key store.
+     *
+     * @param ksh Initialized KeyStore for the provider to work with.
+     * @return The provider.
+     */
     public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh) {
         return new KeyStoreInformationProvider(ksh);
     }
 
+    /**
+     * Create a @{@link KeyStore}-based provider based on a given key store, filled with initial username and password.
+     *
+     * @param ksh Initialized KeyStore for the provider to work with.
+     * @param username Zonky username to store in the key store.
+     * @param password Zonky password to store in the key store.
+     * @return The provider.
+     */
     public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh, final String username,
                                                              final String password) {
         final KeyStoreInformationProvider ks = new KeyStoreInformationProvider(ksh);
@@ -36,16 +57,50 @@ public abstract class SensitiveInformationProvider {
         return ks;
     }
 
+    /**
+     * Retrieve password used to connect to Zonky API.
+     *
+     * @return
+     */
     abstract public String getPassword();
 
+
+    /**
+     * Retrieve username used to connect to Zonky API.
+     *
+     * @return
+     */
     abstract public String getUsername();
 
+    /**
+     * Retrieve serialization of Zonky's OAuth token.
+     *
+     * @return Present if {@link #setToken(InputStream)} previously called, unless {@link #setToken()} was called after
+     * that.
+     */
     abstract public Optional<InputStream> getToken();
 
+    /**
+     * Store serialization of Zonky's OAuth token.
+     *
+     * @param token The serialization of the token to be stored.
+     * @return True if successful.
+     */
     abstract public boolean setToken(final InputStream token);
 
+    /**
+     * Delete the stored token, if any.
+     *
+     * @return True if no token stored anymore.
+     */
     abstract public boolean setToken();
 
+    /**
+     * Retrieve the timestamp of the stored token.
+     *
+     * @return the last time when {@link #setToken(InputStream)} was called, unless {@link #setToken()} called after
+     * that.
+     */
     abstract public Optional<LocalDateTime> getTokenSetDate();
 
 }
