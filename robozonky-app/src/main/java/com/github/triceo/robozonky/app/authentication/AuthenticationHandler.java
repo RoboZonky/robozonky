@@ -113,11 +113,11 @@ public class AuthenticationHandler {
                 return this.buildWithPassword();
             }
             if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {
-                AuthenticationHandler.LOGGER.debug("Token {} expiring, will be refreshed.", token.getAccessToken());
+                AuthenticationHandler.LOGGER.debug("Access token expiring, will be refreshed.");
                 deleteToken = true;
                 return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token);
             } else {
-                AuthenticationHandler.LOGGER.debug("Reusing access token {}.", token.getAccessToken());
+                AuthenticationHandler.LOGGER.debug("Reusing access token.");
                 return Authenticator.withAccessToken(this.data.getUsername(), token);
             }
         } catch (final JAXBException ex) {

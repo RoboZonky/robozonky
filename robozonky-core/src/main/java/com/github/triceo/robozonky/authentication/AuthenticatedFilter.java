@@ -31,7 +31,6 @@ class AuthenticatedFilter extends CommonFilter {
     public AuthenticatedFilter(final ZonkyApiToken token, final String roboZonkyVersion) {
         super(roboZonkyVersion);
         this.authorization = token;
-        AuthenticatedFilter.LOGGER.debug("Using Zonky access token '{}'.", this.authorization.getAccessToken());
     }
 
     @Override

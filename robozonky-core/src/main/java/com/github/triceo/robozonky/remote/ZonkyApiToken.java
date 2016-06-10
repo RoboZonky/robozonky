@@ -28,6 +28,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * OAuth access token for Zonky API.
+ *
+ * Knowledge of this token will allow anyone to access the service as if they were the authenticated user. This is
+ * therefore highly sensitive information and should never be kept in memory for longer than necessary.
+ */
 @XmlRootElement(name = "token")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ZonkyApiToken {
@@ -99,9 +105,7 @@ public class ZonkyApiToken {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ZonkyApiToken{");
-        sb.append("accessToken='").append(accessToken).append('\'');
-        sb.append(", refreshToken='").append(refreshToken).append('\'');
-        sb.append(", type='").append(type).append('\'');
+        sb.append("type='").append(type).append('\'');
         sb.append(", expiresIn=").append(expiresIn);
         sb.append(", scope='").append(scope).append('\'');
         sb.append('}');
