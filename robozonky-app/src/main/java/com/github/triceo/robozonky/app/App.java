@@ -167,7 +167,7 @@ class App {
     }
 
     public static void main(final String... args) {
-        App.LOGGER.debug("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
+        App.LOGGER.info("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
         try {
             App.letsGo(App.processCommandLine(args)); // and start actually working with Zonky
             App.exit(ReturnCode.OK);
