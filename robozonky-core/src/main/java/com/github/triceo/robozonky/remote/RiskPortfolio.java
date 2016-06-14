@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class RiskPortfolio {
+public class RiskPortfolio  implements BaseEntity {
 
     private int unpaid, paid, due, totalAmount;
     private Rating rating;

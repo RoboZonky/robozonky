@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "token")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ZonkyApiToken {
+public class ZonkyApiToken implements BaseEntity {
 
     public static ZonkyApiToken unmarshal(final Reader token) throws JAXBException {
         final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
