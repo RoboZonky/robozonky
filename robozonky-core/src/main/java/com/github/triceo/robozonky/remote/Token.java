@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Token {
+public class Token implements BaseEntity {
 
     private String accessToken, refreshToken, tokenType;
     private int expiresIn;

@@ -23,10 +23,10 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class Loan {
+public class Loan implements BaseEntity {
 
     private boolean topped, covered, published;
-    private int id, termInMonths, investmentsCount, questionsCount;
+    private int id, termInMonths, investmentsCount, questionsCount, userId;
     private double amount, remainingInvestment;
     private String name, story, nickName;
     private BigDecimal interestRate;
@@ -146,16 +146,27 @@ public class Loan {
         return photos;
     }
 
+    @XmlElement
+    public int getUserId() {
+        return userId;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Loan{");
         sb.append("id=").append(id);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", nickName='").append(nickName).append('\'');
         sb.append(", termInMonths=").append(termInMonths);
-        sb.append(", rating=").append(rating);
+        sb.append(", investmentsCount=").append(investmentsCount);
+        sb.append(", userId=").append(userId);
+        sb.append(", amount=").append(amount);
         sb.append(", remainingInvestment=").append(remainingInvestment);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", interestRate=").append(interestRate);
+        sb.append(", datePublished=").append(datePublished);
+        sb.append(", deadline=").append(deadline);
+        sb.append(", rating=").append(rating);
         sb.append('}');
         return sb.toString();
     }
+
 }

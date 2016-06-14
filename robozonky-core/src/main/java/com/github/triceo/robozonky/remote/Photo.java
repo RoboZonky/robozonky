@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Photo {
+public class Photo  implements BaseEntity {
 
     private String name;
     private String url;

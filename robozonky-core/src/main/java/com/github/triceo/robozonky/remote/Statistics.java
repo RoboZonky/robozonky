@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlTransient;
 
-public class Statistics {
+public class Statistics implements BaseEntity {
 
     private BigDecimal currentProfitability, expectedProfitability;
     private Object currentOverview, overallOverview, overallPortfolio, cashFlow;

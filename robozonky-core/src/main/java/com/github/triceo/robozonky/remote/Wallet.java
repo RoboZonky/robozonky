@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-public class Wallet {
+public class Wallet implements BaseEntity {
 
     private int id;
     private BigDecimal balance, availableBalance, blockedBalance;
