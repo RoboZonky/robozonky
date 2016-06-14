@@ -86,12 +86,9 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     public boolean setToken() {
         boolean result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN);
         result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN_DATE) && result;
-        if (!result) {
-            return false;
-        }
         try {
             this.ksh.save();
-            return true;
+            return result;
         } catch (final IOException ex) {
             KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
             return false;
