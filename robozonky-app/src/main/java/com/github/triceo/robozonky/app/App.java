@@ -100,13 +100,18 @@ class App {
                 final Optional<String> usernameProvided = cli.getUsername();
                 final boolean usernamePresent = usernameProvided.isPresent();
                 final boolean storageExists = App.DEFAULT_KEYSTORE_FILE.canRead();
-                final KeyStoreHandler ksh = storageExists ?
-                        KeyStoreHandler.open(App.DEFAULT_KEYSTORE_FILE, cli.getPassword()) :
-                        KeyStoreHandler.create(App.DEFAULT_KEYSTORE_FILE, cli.getPassword());
+                if (storageExists) {
+                    if (App.DEFAULT_KEYSTORE_FILE.delete()) {
+                        App.LOGGER.debug("Deleted pre-existing guarded storage.");
+                    } else {
+                        throw new IllegalArgumentException("Stale guarded storage is present and can not be deleted.");
+                    }
+                }
+                final KeyStoreHandler ksh = KeyStoreHandler.create(App.DEFAULT_KEYSTORE_FILE, cli.getPassword());
                 if (!usernamePresent) {
-                    cli.printHelpAndExit("When not using guarded storage, username must be available.", true);
+                    cli.printHelpAndExit("When not using guarded storage, username must be provided.", true);
                 } else if (storageExists) {
-                    App.LOGGER.warn("Using plain-text credentials when guarded storage available. Consider switching.");
+                    App.LOGGER.info("Using plain-text credentials when guarded storage available. Consider switching.");
                 } else {
                     App.LOGGER.info("Guarded storage has been created with your username and password: {}",
                             App.DEFAULT_KEYSTORE_FILE);
