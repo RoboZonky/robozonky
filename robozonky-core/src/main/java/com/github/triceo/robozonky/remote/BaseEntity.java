@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.remote;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,12 @@ interface BaseEntity {
     default void handleUnknownGetter(final String key) {
         BaseEntity.getLogger(this.getClass()).warn("Trying to get value of unknown property '{}'."
                 + " Indicates an unexpected API change, RoboZonky may misbehave.", key);
+    }
+
+    @JsonAnySetter
+    default void handleUnknownSetter(final String key, final Object value) {
+        BaseEntity.getLogger(this.getClass()).warn("Trying to set value '{}' to an unknown property '{}'."
+                + " Indicates an unexpected API change, RoboZonky may misbehave.", value, key);
     }
 
 }
