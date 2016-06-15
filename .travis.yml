@@ -1,5 +1,5 @@
 install: true
-script: "mvn clean test integration-test"
+script: "mvn clean install"
 language: java
 jdk:
   - oraclejdk8

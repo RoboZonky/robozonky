@@ -32,6 +32,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -75,6 +76,11 @@ public class KeyStoreHandler {
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
         final char[] passwordArray = password.toCharArray();
+        try {
+            ks.load(null, passwordArray);
+        } catch (final NoSuchAlgorithmException | CertificateException ex) {
+            throw new IllegalStateException("Should not happen.", ex);
+        }
         return new KeyStoreHandler(ks, passwordArray, keyStoreFile, KeyStoreHandler.getSecretKeyFactory());
     }
 
@@ -103,6 +109,7 @@ public class KeyStoreHandler {
         }
     }
 
+    private final AtomicBoolean dirty = new AtomicBoolean(false);
     private final char[] password;
     private final File keyStoreFile;
     private final KeyStore keyStore;
@@ -142,6 +149,7 @@ public class KeyStoreHandler {
             final SecretKey secret = this.keyFactory.generateSecret(new PBEKeySpec(value.toCharArray()));
             final KeyStore.Entry skEntry = new KeyStore.SecretKeyEntry(secret);
             this.keyStore.setEntry(alias, skEntry, this.protectionParameter);
+            this.dirty.set(true);
             return true;
         } catch (final KeyStoreException | InvalidKeySpecException ex) {
             KeyStoreHandler.LOGGER.debug("Failed storing '{}'.", alias, ex);
@@ -181,11 +189,20 @@ public class KeyStoreHandler {
     public boolean delete(final String alias) {
         try {
             this.keyStore.deleteEntry(alias);
+            this.dirty.set(true);
             return true;
         } catch (final KeyStoreException ex) {
             KeyStoreHandler.LOGGER.debug("Entry '{}' not deleted.", alias, ex);
             return false;
         }
+    }
+
+    /**
+     * Whether or not there are unsaved changes.
+     * @return Whether a {@link #set(String, String)} occurred after last {@link #save()}.
+     */
+    public boolean isDirty() {
+        return this.dirty.get();
     }
 
     /**
@@ -198,6 +215,7 @@ public class KeyStoreHandler {
         try (final OutputStream os = new BufferedOutputStream(new FileOutputStream(this.keyStoreFile))) {
             try {
                 this.keyStore.store(os, this.password);
+                this.dirty.set(false);
             } catch (final KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
                 throw new IllegalStateException("Should not happen.", ex);
             }

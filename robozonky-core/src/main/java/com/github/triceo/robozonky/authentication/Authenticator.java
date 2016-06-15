@@ -25,7 +25,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Authenticator {
+public class Authenticator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Authenticator.class);
     private static final String TARGET_SCOPE = "SCOPE_APP_WEB";
@@ -72,7 +72,10 @@ public final class Authenticator {
 
     private final Function<ZonkyApi, ZonkyApiToken> authenticationMethod;
 
-    public Authenticator(final Function<ZonkyApi, ZonkyApiToken> authenticationMethod) {
+    private Authenticator(final Function<ZonkyApi, ZonkyApiToken> authenticationMethod) {
+        if (authenticationMethod == null) {
+            throw new IllegalArgumentException("Authentication method must be provided.");
+        }
         this.authenticationMethod = authenticationMethod;
     }
 

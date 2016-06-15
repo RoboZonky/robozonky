@@ -20,19 +20,35 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Ratings {
 
     public static Ratings valueOf(final String ratings) {
         // trim the surrounding []
-        final String[] parts = ratings.substring(1, ratings.length() - 2).split("\\Q,\\E");
+        final String trimmed = ratings.trim();
+        if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
+            throw new IllegalArgumentException("Expecting string in the format of [\"A\", \"B\"], got " + ratings);
+        }
+        if (trimmed.length() == 2) { // only contains []
+            return Ratings.of();
+        }
+        final String[] parts = trimmed.substring(1, trimmed.length() - 1).split("\\Q,\\E");
+        if (parts.length == 1 && parts[0].trim().length() == 0) { // only contains whitespace
+            return Ratings.of();
+        }
         // trim the parts and remove surrounding quotes
-        final Collection<String> strings = Stream.of(parts).map(String::trim)
-                .map(string -> string.substring(1, string.length() - 2)).collect(Collectors.toList());
+        final Collection<String> strings = new LinkedHashSet<>(parts.length);
+        for (final String part: parts) {
+            final String trimmedPart = part.trim();
+            if (!trimmedPart.startsWith("\"") && !trimmedPart.endsWith("\"") && trimmedPart.length() < 3) {
+                throw new IllegalArgumentException("Expecting part of string to be quoted, got " + part);
+            }
+            strings.add(trimmedPart.substring(1, trimmedPart.length() - 1));
+        }
         // convert string representations to actual instances
         final Collection<Rating> converted = strings.stream().map(Rating::valueOf).collect(Collectors.toList());
         return Ratings.of(converted);
@@ -53,7 +69,7 @@ public class Ratings {
     private final Set<Rating> ratings;
 
     private Ratings(final Collection<Rating> ratings) {
-        this.ratings = EnumSet.copyOf(ratings);
+        this.ratings = ratings.isEmpty() ? Collections.emptySet() : EnumSet.copyOf(ratings);
     }
 
     public Set<Rating> getRatings() {

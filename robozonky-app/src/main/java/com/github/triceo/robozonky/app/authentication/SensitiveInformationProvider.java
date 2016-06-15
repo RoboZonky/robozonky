@@ -51,7 +51,8 @@ public abstract class SensitiveInformationProvider {
      */
     public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh, final String username,
                                                              final String password) {
-        final KeyStoreInformationProvider ks = new KeyStoreInformationProvider(ksh);
+        final KeyStoreInformationProvider ks
+                = (KeyStoreInformationProvider)SensitiveInformationProvider.keyStoreBased(ksh);
         ks.setPassword(password);
         ks.setUsername(username);
         return ks;

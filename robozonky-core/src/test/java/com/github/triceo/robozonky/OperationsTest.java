@@ -24,12 +24,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.triceo.robozonky.authentication.Authentication;
+import com.github.triceo.robozonky.authentication.Authenticator;
+import com.github.triceo.robozonky.exceptions.LoginFailedException;
+import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -163,6 +167,33 @@ public class OperationsTest {
         OperationsTest.assertProperRatingShare(result, Rating.AAA, 0, newTotalPie);
         OperationsTest.assertProperRatingShare(result, Rating.A, 0, newTotalPie);
         OperationsTest.assertProperRatingShare(result, Rating.C, 0, newTotalPie);
+    }
+
+    @Test
+    public void properLogin() {
+        final Authentication tmp = Mockito.mock(Authentication.class);
+        Mockito.when(tmp.getApi()).thenReturn(Mockito.mock(ZonkyApi.class));
+        Mockito.when(tmp.getApiToken()).thenReturn(Mockito.mock(ZonkyApiToken.class));
+        final Authenticator auth = Mockito.mock(Authenticator.class);
+        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tmp);
+        try {
+            final Operations.LoginResult c = Operations.login(auth, true, 1000);
+            Assertions.assertThat(c.getZonkyApiToken()).isSameAs(tmp.getApiToken());
+            Assertions.assertThat(c.getOperationsContext()).isNotNull();
+            Assertions.assertThat(c.getOperationsContext().getApi()).isSameAs(tmp.getApi());
+            Operations.logout(c.getOperationsContext());
+            Mockito.verify(tmp.getApi(), Mockito.times(1)).logout();
+        } catch (final LoginFailedException | LogoutFailedException e) {
+            Assertions.fail("Should not have happened.", e);
+        }
+    }
+
+    @Test(expected = LoginFailedException.class)
+    public void failedLogin() throws LoginFailedException {
+        final Authenticator auth = Mockito.mock(Authenticator.class);
+        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenThrow(new IllegalStateException("Something bad happened."));
+        Operations.login(auth, true, 1000);
     }
 
 }
