@@ -29,13 +29,13 @@ interface BaseEntity {
 
     @JsonAnyGetter
     default void handleUnknownGetter(final String key) {
-        BaseEntity.getLogger(this.getClass()).warn("Trying to get value of unknown property '{}'."
+        BaseEntity.getLogger(this.getClass()).debug("Trying to get value of unknown property '{}'."
                 + " Indicates an unexpected API change, RoboZonky may misbehave.", key);
     }
 
     @JsonAnySetter
     default void handleUnknownSetter(final String key, final Object value) {
-        BaseEntity.getLogger(this.getClass()).warn("Trying to set value '{}' to an unknown property '{}'."
+        BaseEntity.getLogger(this.getClass()).debug("Trying to set value '{}' to an unknown property '{}'."
                 + " Indicates an unexpected API change, RoboZonky may misbehave.", value, key);
     }
 
