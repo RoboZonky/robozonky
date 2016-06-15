@@ -2,8 +2,8 @@
 
 ## Odkazy
 
-*[Ke stažení](http://triceo.github.io/robozonky/).
-*[Dokumentace](https://github.com/triceo/robozonky/wiki).
+* [Ke stažení](http://triceo.github.io/robozonky/).
+* [Dokumentace](https://github.com/triceo/robozonky/wiki).
 
 ## Proč to dělám
 
