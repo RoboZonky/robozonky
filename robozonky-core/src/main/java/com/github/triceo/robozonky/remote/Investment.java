@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class Investment  implements BaseEntity {
 
-    private int id, loanId, amount, dpd, loanTermInMonth, currentTerm;
+    private int id, loanId, amount, additionalAmount, firstAmount, dpd, loanTermInMonth, currentTerm;
     private String loanName, nickname, firstName, surname, paymentStatus;
     private Instant investmentDate, nextPaymentDate;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal, expectedInterest;
@@ -63,6 +63,16 @@ public class Investment  implements BaseEntity {
     @XmlElement
     public int getAmount() {
         return amount;
+    }
+
+    @XmlElement
+    public int getAdditionalAmount() {
+        return additionalAmount;
+    }
+
+    @XmlElement
+    public int getFirstAmount() {
+        return firstAmount;
     }
 
     @XmlElement
