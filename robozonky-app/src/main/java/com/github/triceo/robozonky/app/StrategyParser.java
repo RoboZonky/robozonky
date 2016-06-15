@@ -67,7 +67,7 @@ class StrategyParser {
     }
 
     public static InvestmentStrategy parse(final File strategyFile) throws ConfigurationException {
-        StrategyParser.LOGGER.debug("Will parse strategy file: '{}'", strategyFile.getAbsolutePath());
+        StrategyParser.LOGGER.info("Using strategy: '{}'", strategyFile.getAbsolutePath());
         final ImmutableConfiguration config = StrategyParser.getConfig(strategyFile);
         final StrategyBuilder strategies = new StrategyBuilder();
         BigDecimal sumShares = BigDecimal.ZERO;

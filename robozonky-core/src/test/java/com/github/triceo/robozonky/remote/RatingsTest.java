@@ -33,4 +33,41 @@ public class RatingsTest {
         Assertions.assertThat(Ratings.of(Rating.B, Rating.C, Rating.B).getRatings()).containsExactly(Rating.B, Rating.C);
     }
 
+    @Test
+    public void ofAll() {
+        final Ratings result = Ratings.all();
+        Assertions.assertThat(result.getRatings()).containsOnly(Rating.values());
+    }
+
+    @Test
+    public void correctValueOf() {
+        // test no items
+        Assertions.assertThat(Ratings.valueOf("[]").getRatings()).isEmpty();
+        Assertions.assertThat(Ratings.valueOf(" [ ] ").getRatings()).isEmpty();
+        // test one item
+        Assertions.assertThat(Ratings.valueOf("[ \"A\" ]").getRatings())
+                .containsExactly(Rating.A);
+        Assertions.assertThat(Ratings.valueOf(" [ \"AA\"]").getRatings())
+                .containsExactly(Rating.AA);
+        // test multiple items
+        Assertions.assertThat(Ratings.valueOf(" [\"AAA\", \"B\"]").getRatings())
+                .containsExactly(Rating.AAA, Rating.B);
+        Assertions.assertThat(Ratings.valueOf(" [\"B\" , \"AAA\"] ").getRatings())
+                .containsExactly(Rating.AAA, Rating.B);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidValueOf() {
+        Ratings.valueOf("[");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void unquotedValueOf() {
+        Ratings.valueOf("[A]");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void unknownValueOf() {
+        Ratings.valueOf("[\"SOME_UNKNOWN_VALUE\"]");
+    }
 }

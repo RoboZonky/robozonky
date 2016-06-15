@@ -101,7 +101,7 @@ public interface ZonkyApi {
     Collection<Investment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
 
     @POST
-    @Path(ZonkyApi.ME + "/investment")
+    @Path(ZonkyApi.MARKETPLACE + "/investment")
     void invest(Investment investment);
 
 }

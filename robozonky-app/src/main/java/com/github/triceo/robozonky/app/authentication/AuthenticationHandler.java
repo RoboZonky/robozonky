@@ -94,6 +94,9 @@ public class AuthenticationHandler {
         final Optional<Reader> tokenStream = this.data.getToken();
         if (!this.tokenBased) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
+            if (!this.data.setToken()) {
+                AuthenticationHandler.LOGGER.info("Failed to delete stale access token.");
+            }
             return this.buildWithPassword();
         } else if (!tokenStream.isPresent()) { // no token available, also using password-based
             AuthenticationHandler.LOGGER.debug("Token file not available, using password-based authentication.");

@@ -167,7 +167,7 @@ class App {
     }
 
     public static void main(final String... args) {
-        App.LOGGER.debug("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
+        App.LOGGER.info("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
         try {
             App.letsGo(App.processCommandLine(args)); // and start actually working with Zonky
             App.exit(ReturnCode.OK);
@@ -227,10 +227,6 @@ class App {
 
     private static Collection<Investment> operate(final AppContext ctx,
                                                   final Function<OperationsContext, Collection<Investment>> operations) {
-        if (ctx.isDryRun() && ctx.getDryRunBalance() < Operations.MINIMAL_INVESTMENT_ALLOWED) {
-            App.LOGGER.info("Starting balance in dry run is lower than minimum, no need to execute at all.");
-            return Collections.emptyList();
-        }
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         try {
             final AuthenticationHandler handler = ctx.getAuthenticationHandler();

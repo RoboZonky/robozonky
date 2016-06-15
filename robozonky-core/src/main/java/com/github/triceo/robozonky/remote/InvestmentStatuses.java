@@ -28,7 +28,17 @@ public class InvestmentStatuses {
 
     public static InvestmentStatuses valueOf(final String statuses) {
         // trim the surrounding []
-        final String[] parts = statuses.substring(1, statuses.length() - 2).split("\\Q,\\E");
+        final String trimmed = statuses.trim();
+        if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
+            throw new IllegalArgumentException("Expecting string in the format of [A, B, C], got " + statuses);
+        }
+        if (trimmed.length() == 2) { // only contains []
+            return InvestmentStatuses.of();
+        }
+        final String[] parts = trimmed.substring(1, trimmed.length() - 1).split("\\Q,\\E");
+        if (parts.length == 1 && parts[0].trim().length() == 0) { // only contains whitespace
+            return InvestmentStatuses.of();
+        }
         // trim the parts
         final Collection<String> strings = Stream.of(parts).map(String::trim).collect(Collectors.toList());
         // convert string representations to actual instances
@@ -52,7 +62,7 @@ public class InvestmentStatuses {
     private final Set<InvestmentStatus> statuses;
 
     private InvestmentStatuses(final Collection<InvestmentStatus> statuses) {
-        this.statuses = EnumSet.copyOf(statuses);
+        this.statuses = statuses.isEmpty() ? Collections.emptySet() : EnumSet.copyOf(statuses);
     }
 
     public Set<InvestmentStatus> getInvestmentStatuses() {

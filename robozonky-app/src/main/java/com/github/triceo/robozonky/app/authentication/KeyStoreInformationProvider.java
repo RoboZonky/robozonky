@@ -37,17 +37,30 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     private final KeyStoreHandler ksh;
 
     public KeyStoreInformationProvider(final KeyStoreHandler ksh) {
+        if (ksh == null) {
+            throw new IllegalArgumentException("KeyStoreHandler must be provided.");
+        }
         this.ksh = ksh;
     }
 
     @Override
     public String getPassword() {
-        return this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD).get();
+        final Optional<String> result = this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD);
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            throw new IllegalStateException("Password not present in KeyStore.");
+        }
     }
 
     @Override
     public String getUsername() {
-        return this.ksh.get(KeyStoreInformationProvider.ALIAS_USERNAME).get();
+        final Optional<String> result = this.ksh.get(KeyStoreInformationProvider.ALIAS_USERNAME);
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            throw new IllegalStateException("Username not present in KeyStore.");
+        }
     }
 
     public boolean setPassword(final String password) {
@@ -86,12 +99,9 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     public boolean setToken() {
         boolean result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN);
         result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN_DATE) && result;
-        if (!result) {
-            return false;
-        }
         try {
             this.ksh.save();
-            return true;
+            return result;
         } catch (final IOException ex) {
             KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
             return false;
