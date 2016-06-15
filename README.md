@@ -2,7 +2,8 @@
 
 ## Odkazy
 
-_RoboZonky_ je [ke stažení](http://search.maven.org/remotecontent?filepath=com/github/triceo/robozonky/robozonky-app/1.1.0.Final/robozonky-app-1.1.0.Final-dist.zip).
+*[Ke stažení](http://triceo.github.io/robozonky/).
+*[Dokumentace](https://github.com/triceo/robozonky/wiki).
 
 ## Proč to dělám
 
