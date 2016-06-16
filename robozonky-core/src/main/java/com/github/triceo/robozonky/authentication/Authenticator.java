@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.authentication;
 
 import java.util.function.Function;
 
+import com.github.triceo.robozonky.remote.Api;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.remote.ZotifyApi;
@@ -66,8 +67,8 @@ public class Authenticator {
         return new Authentication(api, token, zotifyApi);
     }
 
-    private static <T> T newApi(final String zonkyApiUrl, final ResteasyClientBuilder clientBuilder,
-                                   final CommonFilter filter, Class<T> api) { // FIXME clients are never closed
+    private static <T extends Api> T newApi(final String zonkyApiUrl, final ResteasyClientBuilder clientBuilder,
+                                            final CommonFilter filter, Class<T> api) { // FIXME clients are never closed
         final ResteasyClient client = clientBuilder.build();
         client.register(filter);
         return client.target(zonkyApiUrl).proxy(api);
