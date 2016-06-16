@@ -168,7 +168,7 @@ public class InvestingTest {
         // mock API to perform loans just fine
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
 
-        final OperationsContext context = new OperationsContext(api, strategy, false, -1, 2);
+        final OperationsContext context = new OperationsContext(api, strategy, false, -1);
         // test preference for shorter terms
         Mockito.when(strategy.prefersLongerTerms(Mockito.any(Rating.class))).thenReturn(false);
         InvestingTest.testLoanLength(context, loans, shortLoan);
@@ -200,7 +200,7 @@ public class InvestingTest {
         Mockito.when(strategy.prefersLongerTerms(Rating.B)).thenReturn(true);
         Mockito.when(api.getLoans()).thenReturn(Arrays.asList(shortLoanA, shortLoanB, longLoanA, longLoanB));
         Mockito.when(strategy.getTargetShare(Mockito.any(Rating.class))).thenReturn(BigDecimal.valueOf(0.01));
-        final OperationsContext ctx = new OperationsContext(api, strategy, false, -1, 2);
+        final OperationsContext ctx = new OperationsContext(api, strategy, false, -1);
         // test that rating A, which is underinvested, will invest shorter loan
         final Statistics stats = Mockito.mock(Statistics.class);
         final RiskPortfolio riskA = new RiskPortfolio(Rating.A, -1, 0, -1, -1);
@@ -219,8 +219,6 @@ public class InvestingTest {
                 BigDecimal.valueOf(1000));
         Assertions.assertThat(newResult).isNotEmpty();
         Assertions.assertThat(newResult.get().getLoanId()).isEqualTo(longLoanB.getId());
-        // finish
-        ctx.dispose();
     }
 
     @Test
@@ -256,15 +254,13 @@ public class InvestingTest {
         Mockito.when(api.getStatistics()).thenReturn(stats);
         final Wallet w = new Wallet(-1, -1, BigDecimal.valueOf(10000), BigDecimal.valueOf(9000));
         Mockito.when(api.getWallet()).thenReturn(w); // FIXME balance will not be updated during investing
-        final OperationsContext ctx = new OperationsContext(api, strategy, false, -1, 2);
+        final OperationsContext ctx = new OperationsContext(api, strategy, false, -1);
         // test that investments were made according to the strategy
         final List<Investment> result = new ArrayList<>(Operations.invest(ctx));
         Assertions.assertThat(result).hasSize(3);
         Assertions.assertThat(result.get(0).getLoanId()).isEqualTo(shortLoanA.getId());
         Assertions.assertThat(result.get(1).getLoanId()).isEqualTo(longLoanB.getId());
         Assertions.assertThat(result.get(2).getLoanId()).isEqualTo(longLoanA.getId());
-        // finish
-        ctx.dispose();
     }
 
 }

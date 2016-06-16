@@ -89,7 +89,6 @@ public class Operations {
 
     public static final int MINIMAL_INVESTMENT_ALLOWED = 200;
 
-    private static final int CONNECTION_POOL_SIZE = 2;
     private static final String ZONKY_URL = "https://api.zonky.cz";
 
     /**
@@ -334,12 +333,10 @@ public class Operations {
             // authenticate
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(Operations.RESTEASY);
-            clientBuilder.connectionPoolSize(Operations.CONNECTION_POOL_SIZE);
             Operations.LOGGER.trace("Login starting.");
             final Authentication auth =
                     authenticationMethod.authenticate(Operations.ZONKY_URL, Util.getRoboZonkyVersion(), clientBuilder);
-            final OperationsContext oc = new OperationsContext(auth.getApi(), strategy, dryRun, dryRunInitialBalance,
-                    Operations.CONNECTION_POOL_SIZE);
+            final OperationsContext oc = new OperationsContext(auth.getApi(), strategy, dryRun, dryRunInitialBalance);
             return new LoginResult(oc, auth.getApiToken());
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
@@ -356,11 +353,10 @@ public class Operations {
     public static void logout(final OperationsContext oc) throws LogoutFailedException {
         try {
             oc.getApi().logout();
+            Operations.LOGGER.info("Logged out of Zonky.");
         } catch (final RuntimeException ex) {
             throw new LogoutFailedException("Error while logging out Zonky.", ex);
         }
-        oc.dispose();
-        Operations.LOGGER.info("Logged out of Zonky.");
     }
 
 }
