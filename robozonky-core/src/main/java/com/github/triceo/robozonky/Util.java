@@ -69,6 +69,14 @@ public class Util {
         return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    static List<Integer> investmentsToLoanIds(final Collection<Investment> investments) {
+        return investments.stream().map(Investment::getLoanId).collect(Collectors.toList());
+    }
+
+    static List<Integer> loansToLoanIds(final Collection<Loan> loans) {
+        return loans.stream().map(Loan::getId).collect(Collectors.toList());
+    }
+
     static Collection<Investment> mergeInvestments(final Collection<Investment> left,
                                                    final Collection<Investment> right) {
         if (left.size() == 0) {
