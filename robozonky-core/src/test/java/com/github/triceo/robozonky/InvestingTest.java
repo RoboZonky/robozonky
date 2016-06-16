@@ -31,6 +31,7 @@ import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.remote.ZotifyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -119,7 +120,7 @@ public class InvestingTest {
         final OperationsContext mockContext = Mockito.mock(OperationsContext.class);
         Mockito.when(mockContext.getStrategy()).thenReturn(mockStrategy);
         Mockito.when(mockContext.isDryRun()).thenReturn(false);
-        Mockito.when(mockContext.getApi()).thenReturn(api);
+        Mockito.when(mockContext.getZonkyApi()).thenReturn(api);
         // test OK
         final Optional<Investment> result
                 = Operations.actuallyInvest(mockContext, mockLoan, remainingBalance);
@@ -168,7 +169,7 @@ public class InvestingTest {
         // mock API to perform loans just fine
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
 
-        final OperationsContext context = new OperationsContext(api, strategy, false, -1);
+        final OperationsContext context = new OperationsContext(api, TestUtil.newZotifyApi(), strategy, false, -1);
         // test preference for shorter terms
         Mockito.when(strategy.prefersLongerTerms(Mockito.any(Rating.class))).thenReturn(false);
         InvestingTest.testLoanLength(context, loans, shortLoan);
@@ -195,12 +196,13 @@ public class InvestingTest {
                 .thenReturn(500);
         // mock API to perform loans just fine
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        final ZotifyApi zotifyApi = Mockito.mock(ZotifyApi.class);
         // mock API to return loans we need
         Mockito.when(strategy.prefersLongerTerms(Rating.A)).thenReturn(false);
         Mockito.when(strategy.prefersLongerTerms(Rating.B)).thenReturn(true);
-        Mockito.when(api.getLoans()).thenReturn(Arrays.asList(shortLoanA, shortLoanB, longLoanA, longLoanB));
+        Mockito.when(zotifyApi.getLoans()).thenReturn(Arrays.asList(shortLoanA, shortLoanB, longLoanA, longLoanB));
         Mockito.when(strategy.getTargetShare(Mockito.any(Rating.class))).thenReturn(BigDecimal.valueOf(0.01));
-        final OperationsContext ctx = new OperationsContext(api, strategy, false, -1);
+        final OperationsContext ctx = new OperationsContext(api, zotifyApi, strategy, false, -1);
         // test that rating A, which is underinvested, will invest shorter loan
         final Statistics stats = Mockito.mock(Statistics.class);
         final RiskPortfolio riskA = new RiskPortfolio(Rating.A, -1, 0, -1, -1);
@@ -234,10 +236,11 @@ public class InvestingTest {
                 .thenReturn(400);
         // mock API to perform loans just fine
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        final ZotifyApi zotifyApi = Mockito.mock(ZotifyApi.class);
         // mock API to return loans we need
         Mockito.when(strategy.prefersLongerTerms(Rating.A)).thenReturn(false);
         Mockito.when(strategy.prefersLongerTerms(Rating.B)).thenReturn(true);
-        Mockito.when(api.getLoans()).thenReturn(Arrays.asList(shortLoanA, longLoanA, shortLoanB, longLoanB));
+        Mockito.when(zotifyApi.getLoans()).thenReturn(Arrays.asList(shortLoanA, longLoanA, shortLoanB, longLoanB));
         // both ratings are not represented at all; A is asking for 60 % representation, B for 30 %
         Mockito.when(strategy.getTargetShare(Rating.A)).thenReturn(BigDecimal.valueOf(0.6));
         Mockito.when(strategy.getTargetShare(Rating.B)).thenReturn(BigDecimal.valueOf(0.3));
@@ -254,7 +257,7 @@ public class InvestingTest {
         Mockito.when(api.getStatistics()).thenReturn(stats);
         final Wallet w = new Wallet(-1, -1, BigDecimal.valueOf(10000), BigDecimal.valueOf(9000));
         Mockito.when(api.getWallet()).thenReturn(w); // FIXME balance will not be updated during investing
-        final OperationsContext ctx = new OperationsContext(api, strategy, false, -1);
+        final OperationsContext ctx = new OperationsContext(api, zotifyApi, strategy, false, -1);
         // test that investments were made according to the strategy
         final List<Investment> result = new ArrayList<>(Operations.invest(ctx));
         Assertions.assertThat(result).hasSize(3);

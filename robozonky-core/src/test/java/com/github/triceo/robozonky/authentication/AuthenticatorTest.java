@@ -54,7 +54,7 @@ public class AuthenticatorTest {
         final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(AuthenticatorTest.DUMMY_URL);
         final ZonkyApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyApi.class);
         Authenticator.withCredentials(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.DUMMY_PWD)
-                .authenticate(AuthenticatorTest.DUMMY_URL, "UNDEFINED", mock);
+                .authenticate(AuthenticatorTest.DUMMY_URL, AuthenticatorTest.DUMMY_URL, "UNDEFINED", mock);
         Mockito.verify(apiMock, Mockito.times(1))
                 .login(Mockito.eq(AuthenticatorTest.DUMMY_USER), Mockito.eq(AuthenticatorTest.DUMMY_PWD),
                         Mockito.any(), Mockito.any());
@@ -66,11 +66,11 @@ public class AuthenticatorTest {
         final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(AuthenticatorTest.DUMMY_URL, mockToken);
         final ZonkyApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyApi.class);
         final Authentication result = Authenticator.withAccessToken(AuthenticatorTest.DUMMY_USER, mockToken)
-                .authenticate(AuthenticatorTest.DUMMY_URL, "UNDEFINED", mock);
+                .authenticate(AuthenticatorTest.DUMMY_URL, AuthenticatorTest.DUMMY_URL, "UNDEFINED", mock);
         Mockito.verify(apiMock, Mockito.never())
                 .login(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(apiMock, Mockito.never()).refresh(Mockito.any(), Mockito.any(), Mockito.any());
-        Assertions.assertThat(result.getApiToken()).isEqualTo(mockToken);
+        Assertions.assertThat(result.getZonkyApiToken()).isEqualTo(mockToken);
     }
 
     @Test
@@ -79,11 +79,11 @@ public class AuthenticatorTest {
         final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(AuthenticatorTest.DUMMY_URL, mockToken);
         final ZonkyApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyApi.class);
         final Authentication result = Authenticator.withAccessTokenAndRefresh(AuthenticatorTest.DUMMY_USER, mockToken)
-                .authenticate(AuthenticatorTest.DUMMY_URL, "UNDEFINED", mock);
+                .authenticate(AuthenticatorTest.DUMMY_URL, AuthenticatorTest.DUMMY_URL, "UNDEFINED", mock);
         Mockito.verify(apiMock, Mockito.never())
                 .login(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(apiMock, Mockito.times(1)).refresh(Mockito.any(), Mockito.any(), Mockito.any());
-        Assertions.assertThat(result.getApiToken()).isNotEqualTo(mockToken);
+        Assertions.assertThat(result.getZonkyApiToken()).isNotEqualTo(mockToken);
     }
 
 }

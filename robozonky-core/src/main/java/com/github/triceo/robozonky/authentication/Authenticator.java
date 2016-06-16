@@ -20,6 +20,7 @@ import java.util.function.Function;
 
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
+import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
@@ -56,18 +57,20 @@ public class Authenticator {
     }
 
     private static Authentication newAuthenticatedApi(final ZonkyApiToken token, final String zonkyApiUrl,
-                                                      final String roboZonkyVersion,
+                                                      final String zotifyApiUrl, final String roboZonkyVersion,
                                                       final ResteasyClientBuilder clientBuilder) {
-        final ZonkyApi api =
-                Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticatedFilter(token, roboZonkyVersion));
-        return new Authentication(api, token);
+        final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder,
+                new AuthenticatedFilter(token, roboZonkyVersion), ZonkyApi.class);
+        final ZotifyApi zotifyApi =
+                Authenticator.newApi(zotifyApiUrl, clientBuilder, new ZotifyFilter(roboZonkyVersion), ZotifyApi.class);
+        return new Authentication(api, token, zotifyApi);
     }
 
-    private static ZonkyApi newApi(final String zonkyApiUrl, final ResteasyClientBuilder clientBuilder,
-                                   final CommonFilter filter) { // FIXME clients are never closed
+    private static <T> T newApi(final String zonkyApiUrl, final ResteasyClientBuilder clientBuilder,
+                                   final CommonFilter filter, Class<T> api) { // FIXME clients are never closed
         final ResteasyClient client = clientBuilder.build();
         client.register(filter);
-        return client.target(zonkyApiUrl).proxy(ZonkyApi.class);
+        return client.target(zonkyApiUrl).proxy(api);
     }
 
     private final Function<ZonkyApi, ZonkyApiToken> authenticationMethod;
@@ -79,12 +82,12 @@ public class Authenticator {
         this.authenticationMethod = authenticationMethod;
     }
 
-    public Authentication authenticate(final String zonkyApiUrl, final String roboZonkyVersion,
-                                       final ResteasyClientBuilder clientBuilder) {
-        final ZonkyApi api =
-                Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticationFilter(roboZonkyVersion));
+    public Authentication authenticate(final String zonkyApiUrl, final String zotifyApiUrl,
+                                       final String roboZonkyVersion, final ResteasyClientBuilder clientBuilder) {
+        final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder,
+                new AuthenticationFilter(roboZonkyVersion), ZonkyApi.class);
         final ZonkyApiToken token = authenticationMethod.apply(api);
-        return Authenticator.newAuthenticatedApi(token, zonkyApiUrl, roboZonkyVersion, clientBuilder);
+        return Authenticator.newAuthenticatedApi(token, zonkyApiUrl, zotifyApiUrl, roboZonkyVersion, clientBuilder);
     }
 
 }

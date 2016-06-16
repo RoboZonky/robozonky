@@ -120,7 +120,7 @@ public class OperationsTest {
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getWallet()).thenReturn(wallet);
         final OperationsContext ctx = Mockito.mock(OperationsContext.class);
-        Mockito.when(ctx.getApi()).thenReturn(api);
+        Mockito.when(ctx.getZonkyApi()).thenReturn(api);
         // test operation
         Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
     }
@@ -172,17 +172,17 @@ public class OperationsTest {
     @Test
     public void properLogin() {
         final Authentication tmp = Mockito.mock(Authentication.class);
-        Mockito.when(tmp.getApi()).thenReturn(Mockito.mock(ZonkyApi.class));
-        Mockito.when(tmp.getApiToken()).thenReturn(Mockito.mock(ZonkyApiToken.class));
+        Mockito.when(tmp.getZonkyApi()).thenReturn(Mockito.mock(ZonkyApi.class));
+        Mockito.when(tmp.getZonkyApiToken()).thenReturn(Mockito.mock(ZonkyApiToken.class));
         final Authenticator auth = Mockito.mock(Authenticator.class);
-        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tmp);
+        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tmp);
         try {
             final Operations.LoginResult c = Operations.login(auth, true, 1000);
-            Assertions.assertThat(c.getZonkyApiToken()).isSameAs(tmp.getApiToken());
+            Assertions.assertThat(c.getZonkyApiToken()).isSameAs(tmp.getZonkyApiToken());
             Assertions.assertThat(c.getOperationsContext()).isNotNull();
-            Assertions.assertThat(c.getOperationsContext().getApi()).isSameAs(tmp.getApi());
+            Assertions.assertThat(c.getOperationsContext().getZonkyApi()).isSameAs(tmp.getZonkyApi());
             Operations.logout(c.getOperationsContext());
-            Mockito.verify(tmp.getApi(), Mockito.times(1)).logout();
+            Mockito.verify(tmp.getZonkyApi(), Mockito.times(1)).logout();
         } catch (final LoginFailedException | LogoutFailedException e) {
             Assertions.fail("Should not have happened.", e);
         }
@@ -191,7 +191,7 @@ public class OperationsTest {
     @Test(expected = LoginFailedException.class)
     public void failedLogin() throws LoginFailedException {
         final Authenticator auth = Mockito.mock(Authenticator.class);
-        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenThrow(new IllegalStateException("Something bad happened."));
         Operations.login(auth, true, 1000);
     }

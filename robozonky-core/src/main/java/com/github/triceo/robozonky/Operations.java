@@ -90,6 +90,7 @@ public class Operations {
     public static final int MINIMAL_INVESTMENT_ALLOWED = 200;
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
+    private static final String ZOTIFY_URL = "http://zotify.cz";
 
     /**
      * Get the share of 'payments due for each rating' on the overall portfolio.
@@ -224,7 +225,7 @@ public class Operations {
     static Optional<Investment> identifyLoanToInvest(final OperationsContext oc,
                                                      final Collection<Investment> investmentsInSession,
                                                      final BigDecimal balance) {
-        final ZonkyApi api = oc.getApi();
+        final ZonkyApi api = oc.getZonkyApi();
         // retrieve a list of loans that the user already put money into
         final Collection<Investment> apiBasedInvestments = Util.mergeInvestments(
                 api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
@@ -241,7 +242,8 @@ public class Operations {
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
                 mostWantedRatings);
-        final Map<Rating, Collection<Loan>> availableLoans = Util.sortAvailableLoansByRating(api.getLoans());
+        final Map<Rating, Collection<Loan>> availableLoans =
+                Util.sortAvailableLoansByRating(oc.getZotifyApi().getLoans());
         for (final Rating r : mostWantedRatings) { // try to invest in a given rating
             final Optional<Investment> investment =
                     Operations.identifyLoanToInvest(oc, r, availableLoans.get(r), investments, balance);
@@ -257,7 +259,7 @@ public class Operations {
         final boolean isDryRun = oc.isDryRun();
         final BigDecimal dryRunInitialBalance = oc.getDryRunInitialBalance();
         BigDecimal balance = (isDryRun && dryRunInitialBalance.compareTo(BigDecimal.ZERO) > 0) ?
-                dryRunInitialBalance : oc.getApi().getWallet().getAvailableBalance();
+                dryRunInitialBalance : oc.getZonkyApi().getWallet().getAvailableBalance();
         if (isDryRun) {
             for (final Investment i : investmentsInSession) {
                 balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
@@ -267,7 +269,7 @@ public class Operations {
     }
 
     private static Collection<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final OperationsContext oc) {
-        final ZonkyApi api = oc.getApi();
+        final ZonkyApi api = oc.getZonkyApi();
         final List<BlockedAmount> amounts = api.getBlockedAmounts();
         final List<Investment> investments = new ArrayList<>(amounts.size());
         for (final BlockedAmount blocked: amounts) {
@@ -306,7 +308,7 @@ public class Operations {
             return Optional.of(i);
         } else {
             try {
-                oc.getApi().invest(i);
+                oc.getZonkyApi().invest(i);
                 Operations.LOGGER.info("Invested {} CZK into loan {}.", i.getAmount(), i.getLoanId());
                 return Optional.of(i);
             } catch (final Exception ex) {
@@ -322,7 +324,7 @@ public class Operations {
     }
 
     public static Optional<Investment> invest(final OperationsContext oc, final int loanId, final int loanAmount) {
-        return Operations.invest(oc, oc.getApi().getLoan(loanId), loanAmount);
+        return Operations.invest(oc, oc.getZonkyApi().getLoan(loanId), loanAmount);
     }
 
     public static LoginResult login(final Authenticator authenticationMethod, final boolean dryRun,
@@ -334,10 +336,11 @@ public class Operations {
             final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
             clientBuilder.providerFactory(Operations.RESTEASY);
             Operations.LOGGER.trace("Login starting.");
-            final Authentication auth =
-                    authenticationMethod.authenticate(Operations.ZONKY_URL, Util.getRoboZonkyVersion(), clientBuilder);
-            final OperationsContext oc = new OperationsContext(auth.getApi(), strategy, dryRun, dryRunInitialBalance);
-            return new LoginResult(oc, auth.getApiToken());
+            final Authentication auth = authenticationMethod.authenticate(Operations.ZONKY_URL, Operations.ZOTIFY_URL,
+                            Util.getRoboZonkyVersion(), clientBuilder);
+            final OperationsContext oc =
+                    new OperationsContext(auth.getZonkyApi(), auth.getZotifyApi(), strategy, dryRun, dryRunInitialBalance);
+            return new LoginResult(oc, auth.getZonkyApiToken());
         } catch (final RuntimeException ex) {
             throw new LoginFailedException("Error while instantiating Zonky API proxy.", ex);
         } finally {
@@ -352,7 +355,7 @@ public class Operations {
 
     public static void logout(final OperationsContext oc) throws LogoutFailedException {
         try {
-            oc.getApi().logout();
+            oc.getZonkyApi().logout();
             Operations.LOGGER.info("Logged out of Zonky.");
         } catch (final RuntimeException ex) {
             throw new LogoutFailedException("Error while logging out Zonky.", ex);
