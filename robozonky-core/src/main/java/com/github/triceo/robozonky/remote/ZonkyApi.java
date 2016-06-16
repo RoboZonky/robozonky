@@ -94,6 +94,11 @@ public interface ZonkyApi {
     List<Loan> getLoans(@QueryParam("rating__in") Ratings ratings);
 
     @GET
+    @Path(ZonkyApi.MARKETPLACE)
+    List<Loan> getLoans();
+
+
+    @GET
     @Path(ZonkyApi.ME + "/logout")
     List<Loan> logout();
 

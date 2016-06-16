@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
+import com.github.triceo.robozonky.remote.Rating;
 
 import static java.util.Comparator.comparing;
 
@@ -71,6 +73,21 @@ public class Util {
 
     static List<Integer> investmentsToLoanIds(final Collection<Investment> investments) {
         return investments.stream().map(Investment::getLoanId).collect(Collectors.toList());
+    }
+
+    static Map<Rating, Collection<Loan>> sortAvailableLoansByRating(final Collection<Loan> loans) {
+        final Map<Rating, Collection<Loan>> result = new EnumMap<>(Rating.class);
+        for (final Loan l: loans) {
+            if (l.getRemainingInvestment() < Operations.MINIMAL_INVESTMENT_ALLOWED) {
+                continue;
+            }
+            final Rating r = l.getRating();
+            if (!result.containsKey(r)) {
+                result.put(r, new ArrayList<>());
+            }
+            result.get(r).add(l);
+        }
+        return Collections.unmodifiableMap(result);
     }
 
     static List<Integer> loansToLoanIds(final Collection<Loan> loans) {

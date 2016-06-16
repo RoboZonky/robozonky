@@ -25,8 +25,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.authentication.Authentication;
@@ -39,7 +37,6 @@ import com.github.triceo.robozonky.remote.InvestmentStatus;
 import com.github.triceo.robozonky.remote.InvestmentStatuses;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
-import com.github.triceo.robozonky.remote.Ratings;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.ZonkyApi;
@@ -152,27 +149,21 @@ public class Operations {
      * Choose from available loans of a given rating one loan to invest money into.
      * @param oc Context for the current session.
      * @param r Rating in question.
-     * @param loansFuture Loans carrying that rating.
+     * @param loans Loans carrying that rating.
      * @param loansInvested Previous loans invested either in this session or on the web.
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
     static Optional<Investment> identifyLoanToInvest(final OperationsContext oc, final Rating r,
-                                                     final Future<Collection<Loan>> loansFuture,
+                                                     final Collection<Loan> loans,
                                                      final Collection<Investment> loansInvested,
                                                      final BigDecimal balance) {
-        final Collection<Loan> loans;
-        try {
-            loans = loansFuture.get();
-        } catch (final Exception e) {
-            Operations.LOGGER.warn("Could not list loans with rating '{}'. Can not invest in that rating.", r, e);
-            return Optional.empty();
-        }
-        if (loans.size() == 0) {
+        if (loans == null || loans.size() == 0) {
             Operations.LOGGER.info("There are no loans of rating '{}' matching the investment strategy.", r);
             return Optional.empty();
         } else {
-            Operations.LOGGER.debug("Zonky retrieved the following loans: {}", Util.loansToLoanIds(loans));
+            Operations.LOGGER.debug("Zonky retrieved the following loans with rating '{}': {}", r,
+                    Util.loansToLoanIds(loans));
         }
         // sort loans by their term and start investing
         final boolean prefersLongTerm = oc.getStrategy().prefersLongerTerms(r);
@@ -251,12 +242,7 @@ public class Operations {
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
                 mostWantedRatings);
-        final Map<Rating, Future<Collection<Loan>>> availableLoans = new EnumMap<>(Rating.class);
-        mostWantedRatings.forEach(r -> { // submit HTTP requests ahead of time
-            final Callable<Collection<Loan>> future
-                    = () -> api.getLoans(Ratings.of(r), Operations.MINIMAL_INVESTMENT_ALLOWED);
-            availableLoans.put(r, oc.getBackgroundExecutor().submit(future));
-        });
+        final Map<Rating, Collection<Loan>> availableLoans = Util.sortAvailableLoansByRating(api.getLoans());
         for (final Rating r : mostWantedRatings) { // try to invest in a given rating
             final Optional<Investment> investment =
                     Operations.identifyLoanToInvest(oc, r, availableLoans.get(r), investments, balance);
