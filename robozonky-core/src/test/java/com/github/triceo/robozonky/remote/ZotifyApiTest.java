@@ -17,37 +17,31 @@
 
 package com.github.triceo.robozonky.remote;
 
-import java.util.List;
-
-import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ZonkyApiTest {
+public class ZotifyApiTest {
 
     private static ResteasyClient CLIENT;
-    private static ZonkyApi API;
+    private static ZotifyApi API;
 
     @Test
     public void testBasicParsing() {
-        final Ratings ratings = Ratings.all();
-        final List<Loan> loans = ZonkyApiTest.API.getLoans(ratings, 200);
-        Assertions.assertThat(loans).isNotEmpty();
-        Assertions.assertThat(loans.get(0).getRemainingInvestment()).isGreaterThan(0);
+        ZotifyApiTest.API.getLoans();
     }
 
     @BeforeClass
     public static void startUp() {
-        ZonkyApiTest.CLIENT = new ResteasyClientBuilder().build();
-        ZonkyApiTest.API = ZonkyApiTest.CLIENT.target("https://api.zonky.cz").proxy(ZonkyApi.class);
+        ZotifyApiTest.CLIENT = new ResteasyClientBuilder().build();
+        ZotifyApiTest.API = ZotifyApiTest.CLIENT.target("http://zotify.cz").proxy(ZotifyApi.class);
     }
 
     @AfterClass
     public static void cleanUp() {
-        ZonkyApiTest.CLIENT.close();
+        ZotifyApiTest.CLIENT.close();
     }
 
 }

@@ -32,7 +32,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
 @Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-public interface ZonkyApi {
+public interface ZonkyApi extends Api {
 
     String LOANS = "/loans";
     String MARKETPLACE = LOANS + "/marketplace";
@@ -92,6 +92,12 @@ public interface ZonkyApi {
     @GET
     @Path(ZonkyApi.MARKETPLACE)
     List<Loan> getLoans(@QueryParam("rating__in") Ratings ratings);
+
+    @GET
+    @Path(ZonkyApi.MARKETPLACE)
+    @Override
+    List<Loan> getLoans();
+
 
     @GET
     @Path(ZonkyApi.ME + "/logout")
