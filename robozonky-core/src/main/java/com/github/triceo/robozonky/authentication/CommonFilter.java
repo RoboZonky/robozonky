@@ -37,7 +37,7 @@ abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
         clientRequestContext.getHeaders().putSingle("User-Agent", "RoboZonky " + this.version +
                 " (https://github.com/triceo/robozonky)");
-        this.getLogger().debug("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
+        this.getLogger().trace("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 
     @Override

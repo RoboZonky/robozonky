@@ -24,6 +24,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -33,8 +34,10 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
 public interface ZonkyApi {
 
-    String MARKETPLACE = "/loans/marketplace";
+    String LOANS = "/loans";
+    String MARKETPLACE = LOANS + "/marketplace";
     String ME = "/users/me";
+    String WALLET = ME + "/wallet";
     String INVESTMENTS = ME + "/investments";
     String OAUTH = "/oauth/token";
 
@@ -54,8 +57,16 @@ public interface ZonkyApi {
             @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
 
     @GET
-    @Path(ZonkyApi.ME + "/wallet")
+    @Path(ZonkyApi.WALLET)
     Wallet getWallet();
+
+    @GET
+    @Path(ZonkyApi.WALLET + "/blocked-amounts")
+    List<BlockedAmount> getBlockedAmounts();
+
+    @GET
+    @Path(ZonkyApi.LOANS + "/{loanId}")
+    Loan getLoan(@PathParam("loanId") int loanId);
 
     @GET
     @Path(ZonkyApi.MARKETPLACE)
@@ -101,7 +112,7 @@ public interface ZonkyApi {
     Collection<Investment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
 
     @POST
-    @Path(ZonkyApi.MARKETPLACE + "/investment")
+    @Path("/marketplace/investment")
     void invest(Investment investment);
 
 }

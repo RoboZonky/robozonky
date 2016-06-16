@@ -34,13 +34,9 @@ public class Investment  implements BaseEntity {
         // for JAXB
     }
 
-    public Investment(final int loanId, final int amount) {
-        this.loanId = loanId;
-        this.amount = amount;
-    }
-
     public Investment(final Loan loan, final int amount) {
-        this(loan.getId(), amount);
+        this.loanId = loan.getId();
+        this.amount = amount;
         this.loanName = loan.getName();
         this.nickname = loan.getNickName();
         this.rating = loan.getRating();

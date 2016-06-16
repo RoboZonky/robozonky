@@ -41,18 +41,6 @@ import org.mockito.Mockito;
 public class InvestingTest {
 
     @Test
-    public void investWithAlreadyInvestedLoan() {
-        // mock
-        final Loan mockLoan = Mockito.mock(Loan.class);
-        Mockito.when(mockLoan.getId()).thenReturn(1);
-        final Investment mockInvestment = new Investment(mockLoan, 200);
-        // test
-        final Optional<Investment> result
-                = Operations.actuallyInvest(null, mockLoan, Collections.singletonList(mockInvestment), BigDecimal.ZERO);
-        Assertions.assertThat(result).isEmpty();
-    }
-
-    @Test
     public void investWithUnacceptableLoan() {
         // mock
         final Loan mockLoan = Mockito.mock(Loan.class);
@@ -63,7 +51,7 @@ public class InvestingTest {
         Mockito.when(mockContext.getStrategy()).thenReturn(mockStrategy);
         // test
         final Optional<Investment> result
-                = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), BigDecimal.ZERO);
+                = Operations.actuallyInvest(mockContext, mockLoan, BigDecimal.ZERO);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -83,13 +71,13 @@ public class InvestingTest {
         Mockito.when(mockContext.getStrategy()).thenReturn(mockStrategy);
         // test investing under minimum loan amount
         final Optional<Investment> result
-                = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), remainingBalance);
+                = Operations.actuallyInvest(mockContext, mockLoan, remainingBalance);
         Assertions.assertThat(result).isEmpty();
         // test investing under balance
         Mockito.when(mockStrategy.recommendInvestmentAmount(mockLoan, remainingBalance))
                 .thenReturn(remainingBalance.add(BigDecimal.ONE).intValue());
         final Optional<Investment> result2
-                = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), remainingBalance);
+                = Operations.actuallyInvest(mockContext, mockLoan, remainingBalance);
         Assertions.assertThat(result2).isEmpty();
     }
 
@@ -111,7 +99,7 @@ public class InvestingTest {
         Mockito.when(mockContext.isDryRun()).thenReturn(true);
         // test
         final Optional<Investment> result
-                = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), remainingBalance);
+                = Operations.actuallyInvest(mockContext, mockLoan, remainingBalance);
         Assertions.assertThat(result).isNotEmpty();
         Assertions.assertThat(result.get().getLoanId()).isEqualTo(loanId);
     }
@@ -136,13 +124,13 @@ public class InvestingTest {
         Mockito.when(mockContext.getApi()).thenReturn(api);
         // test OK
         final Optional<Investment> result
-                = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), remainingBalance);
+                = Operations.actuallyInvest(mockContext, mockLoan, remainingBalance);
         Assertions.assertThat(result).isNotEmpty();
         Assertions.assertThat(result.get().getLoanId()).isEqualTo(loanId);
         // test fail
         Mockito.doThrow(RuntimeException.class).when(api).invest(Mockito.any(Investment.class));
         final Optional<Investment> result2
-                = Operations.actuallyInvest(mockContext, mockLoan, Collections.emptyList(), remainingBalance);
+                = Operations.actuallyInvest(mockContext, mockLoan, remainingBalance);
         Assertions.assertThat(result2).isEmpty();
     }
 
