@@ -287,7 +287,7 @@
                         <withHistory>true</withHistory>
                         <detectInlinedCode>true</detectInlinedCode>
                         <!-- Core can go over 80, app currently lags behind at ~40 -->
-                        <mutationThreshold>35</mutationThreshold>
+                        <mutationThreshold>65</mutationThreshold>
                         <maxDependencyDistance>2</maxDependencyDistance>
                         <targetClasses>
                             <param>com.github.triceo.robozonky.*</param>
