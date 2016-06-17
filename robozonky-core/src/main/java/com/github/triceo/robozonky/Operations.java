@@ -100,6 +100,7 @@ public class Operations {
      */
     static Map<Rating, BigDecimal> calculateSharesPerRating(final Statistics stats,
                                                             final Collection<Investment> investments) {
+        System.out.println(stats);
         final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
                 Collectors.toMap(RiskPortfolio::getRating, risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );

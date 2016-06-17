@@ -26,7 +26,8 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Statistics implements BaseEntity {
 
     private BigDecimal currentProfitability, expectedProfitability;
-    private Object currentOverview, overallOverview, overallPortfolio;
+    private Object currentOverview, overallOverview;
+    private OverallPortfolio overallPortfolio;
     private Collection<Instalment> cashFlow;
     private List<RiskPortfolio> riskPortfolio;
 
@@ -50,8 +51,8 @@ public class Statistics implements BaseEntity {
         return overallOverview;
     }
 
-    @XmlTransient
-    public Object getOverallPortfolio() {
+    @XmlElement
+    public OverallPortfolio getOverallPortfolio() {
         return overallPortfolio;
     }
 
@@ -70,6 +71,10 @@ public class Statistics implements BaseEntity {
         final StringBuilder sb = new StringBuilder("Statistics{");
         sb.append("currentProfitability=").append(currentProfitability);
         sb.append(", expectedProfitability=").append(expectedProfitability);
+        sb.append(", currentOverview=").append(currentOverview);
+        sb.append(", overallOverview=").append(overallOverview);
+        sb.append(", overallPortfolio=").append(overallPortfolio);
+        sb.append(", cashFlow=").append(cashFlow);
         sb.append(", riskPortfolio=").append(riskPortfolio);
         sb.append('}');
         return sb.toString();
