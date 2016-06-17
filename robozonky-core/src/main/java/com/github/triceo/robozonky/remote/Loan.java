@@ -34,10 +34,16 @@ public class Loan implements BaseEntity {
     private Rating rating;
     private Collection<Photo> photos;
     private BigDecimal investmentRate;
+    private MyInvestment myInvestment;
     // FIXME implement
     private String mainIncomeType;
     // FIXME implement
     private int region, purpose;
+
+    @XmlElement
+    public MyInvestment getMyInvestment() {
+        return myInvestment;
+    }
 
     @XmlElement
     public String getMainIncomeType() {
@@ -165,6 +171,7 @@ public class Loan implements BaseEntity {
         sb.append(", datePublished=").append(datePublished);
         sb.append(", deadline=").append(deadline);
         sb.append(", rating=").append(rating);
+        sb.append(", myInvestment=").append(myInvestment);
         sb.append('}');
         return sb.toString();
     }

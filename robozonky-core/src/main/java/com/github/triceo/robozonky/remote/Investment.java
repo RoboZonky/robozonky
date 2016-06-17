@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class Investment  implements BaseEntity {
+public class Investment implements BaseEntity {
 
     private int id, loanId, amount, additionalAmount, firstAmount, dpd, loanTermInMonth, currentTerm;
     private String loanName, nickname, firstName, surname, paymentStatus;
