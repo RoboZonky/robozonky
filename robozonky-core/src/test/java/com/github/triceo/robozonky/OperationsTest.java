@@ -105,11 +105,7 @@ public class OperationsTest {
         Mockito.when(ctx.isDryRun()).thenReturn(true);
         Mockito.when(ctx.getDryRunInitialBalance()).thenReturn(dryRunBalance);
         // test operation
-        Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(dryRunBalance);
-        final int amount = 1;
-        final BigDecimal newBalance = dryRunBalance.subtract(BigDecimal.valueOf(amount));
-        Assertions.assertThat(Operations.getAvailableBalance(ctx, OperationsTest.getMockInvestmentWithBalance(amount)))
-                .isEqualTo(newBalance);
+        Assertions.assertThat(Operations.getAvailableBalance(ctx)).isEqualTo(dryRunBalance);
     }
 
     @Test
@@ -122,7 +118,7 @@ public class OperationsTest {
         final OperationsContext ctx = Mockito.mock(OperationsContext.class);
         Mockito.when(ctx.getZonkyApi()).thenReturn(api);
         // test operation
-        Assertions.assertThat(Operations.getAvailableBalance(ctx, Collections.emptyList())).isEqualTo(remoteBalance);
+        Assertions.assertThat(Operations.getAvailableBalance(ctx)).isEqualTo(remoteBalance);
     }
 
     private static void assertProperRatingShare(final Map<Rating, BigDecimal> result, final Rating r, final int amount,

@@ -218,30 +218,21 @@ public class Operations {
     /**
      * Choose from available loans the most important loan to invest money into.
      * @param oc Context for the current session.
-     * @param investmentsInSession Previous investments made in this session.
+     * @param stats Statistics retrieved from Zonky.
+     * @param investments Previous investments for which to ignore loans.
      * @param balance Latest known Zonky account balance.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    static Optional<Investment> identifyLoanToInvest(final OperationsContext oc,
-                                                     final Collection<Investment> investmentsInSession,
+    static Optional<Investment> identifyLoanToInvest(final OperationsContext oc, final Statistics stats,
+                                                     final Collection<Investment> investments,
                                                      final BigDecimal balance) {
-        final ZonkyApi api = oc.getZonkyApi();
-        // retrieve a list of loans that the user already put money into
-        final Collection<Investment> apiBasedInvestments = Util.mergeInvestments(
-                api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
-                Operations.retrieveInvestmentsRepresentedByBlockedAmounts(oc));
-        Operations.LOGGER.debug("The following loans are coming from the API as possible future investments: {}",
-                Util.investmentsToLoanIds(apiBasedInvestments));
-        final Collection<Investment> investments = Util.mergeInvestments(apiBasedInvestments, investmentsInSession);
-        Operations.LOGGER.debug("The following loans are to be avoided due to having been touched already: {}",
-                Util.investmentsToLoanIds(investments));
         // calculate share of particular ratings on the overall investment pie
-        final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(api.getStatistics(),
-                investments);
+        final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(stats, investments);
         final List<Rating> mostWantedRatings = Operations.rankRatingsByDemand(oc, shareOfRatings);
-        Operations.LOGGER.debug("Current share of unpaid loans with a given rating is currently: {}.", shareOfRatings);
+        Operations.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.", shareOfRatings);
         Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
                 mostWantedRatings);
+        // find and sort available loans
         final Map<Rating, Collection<Loan>> availableLoans =
                 Util.sortAvailableLoansByRating(oc.getZotifyApi().getLoans());
         for (final Rating r : mostWantedRatings) { // try to invest in a given rating
@@ -254,18 +245,11 @@ public class Operations {
         return Optional.empty();
     }
 
-    static BigDecimal getAvailableBalance(final OperationsContext oc,
-                                          final Collection<Investment> investmentsInSession) {
+    static BigDecimal getAvailableBalance(final OperationsContext oc) {
         final boolean isDryRun = oc.isDryRun();
         final BigDecimal dryRunInitialBalance = oc.getDryRunInitialBalance();
-        BigDecimal balance = (isDryRun && dryRunInitialBalance.compareTo(BigDecimal.ZERO) > 0) ?
+        return (isDryRun && dryRunInitialBalance.compareTo(BigDecimal.ZERO) > 0) ?
                 dryRunInitialBalance : oc.getZonkyApi().getWallet().getAvailableBalance();
-        if (isDryRun) {
-            for (final Investment i : investmentsInSession) {
-                balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
-            }
-        }
-        return balance;
     }
 
     private static Collection<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final OperationsContext oc) {
@@ -282,22 +266,37 @@ public class Operations {
     }
 
     public static Collection<Investment> invest(final OperationsContext oc) {
+        // make sure we have enough money to invest
         final int minimumInvestmentAmount = Operations.MINIMAL_INVESTMENT_ALLOWED;
-        final Collection<Investment> investmentsMade = new ArrayList<>();
-        BigDecimal availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
+        BigDecimal availableBalance = Operations.getAvailableBalance(oc);
         Operations.LOGGER.info("RoboZonky starting account balance is {} CZK.", availableBalance);
-        while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0) {
+        if (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) < 0) {
+            return Collections.emptyList(); // no need to do anything else
+        }
+        // retrieve a list of loans that the user already put money into
+        final ZonkyApi api = oc.getZonkyApi();
+        Collection<Investment> investments = Util.mergeInvestments(
+                api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
+                Operations.retrieveInvestmentsRepresentedByBlockedAmounts(oc));
+        Operations.LOGGER.debug("The following loans are coming from the API as already invested into: {}",
+                Util.investmentsToLoanIds(investments));
+        final Statistics stats = api.getStatistics();
+        // and start investing
+        final Collection<Investment> investmentsMade = new ArrayList<>();
+        do {
             final Optional<Investment> investment =
-                    Operations.identifyLoanToInvest(oc, investmentsMade, availableBalance);
-            if (investment.isPresent()) {
-                investmentsMade.add(investment.get());
-                availableBalance = Operations.getAvailableBalance(oc, investmentsMade);
-                Operations.LOGGER.info("New account balance {} {} CZK.", oc.isDryRun() ? "would have been" : "is",
-                        availableBalance);
-            } else {
+                    Operations.identifyLoanToInvest(oc, stats, investments, availableBalance);
+            if (!investment.isPresent()) {
                 break;
             }
-        }
+            final Investment i = investment.get();
+            investmentsMade.add(i);
+            investments = Util.mergeInvestments(investments, Collections.singletonList(i));
+            final BigDecimal amount = BigDecimal.valueOf(i.getAmount());
+            availableBalance = availableBalance.subtract(amount);
+            Operations.LOGGER.info("New account balance {} {} CZK.", oc.isDryRun() ? "would have been" : "is",
+                    availableBalance);
+        } while (availableBalance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0);
         return Collections.unmodifiableCollection(investmentsMade);
     }
 

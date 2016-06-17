@@ -208,8 +208,7 @@ public class InvestingTest {
         final RiskPortfolio riskA = new RiskPortfolio(Rating.A, -1, 0, -1, -1);
         final RiskPortfolio riskB = new RiskPortfolio(Rating.B, -1, 1000, -1, -1);
         Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(riskA, riskB));
-        Mockito.when(api.getStatistics()).thenReturn(stats);
-        final Optional<Investment> result = Operations.identifyLoanToInvest(ctx, Collections.emptyList(),
+        final Optional<Investment> result = Operations.identifyLoanToInvest(ctx, stats, Collections.emptyList(),
                 BigDecimal.valueOf(1000));
         Assertions.assertThat(result).isNotEmpty();
         Assertions.assertThat(result.get().getLoanId()).isEqualTo(shortLoanA.getId());
@@ -217,7 +216,7 @@ public class InvestingTest {
         final RiskPortfolio newRiskA = new RiskPortfolio(Rating.A, -1, 1000, -1, -1);
         final RiskPortfolio newRiskB = new RiskPortfolio(Rating.B, -1, 0, -1, -1);
         Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(newRiskA, newRiskB));
-        final Optional<Investment> newResult = Operations.identifyLoanToInvest(ctx, Collections.emptyList(),
+        final Optional<Investment> newResult = Operations.identifyLoanToInvest(ctx, stats, Collections.emptyList(),
                 BigDecimal.valueOf(1000));
         Assertions.assertThat(newResult).isNotEmpty();
         Assertions.assertThat(newResult.get().getLoanId()).isEqualTo(longLoanB.getId());
