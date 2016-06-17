@@ -32,11 +32,11 @@ import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.exceptions.LoginFailedException;
 import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.BlockedAmount;
-import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.InvestmentStatus;
 import com.github.triceo.robozonky.remote.InvestmentStatuses;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.ZonkyApi;
@@ -100,7 +100,6 @@ public class Operations {
      */
     static Map<Rating, BigDecimal> calculateSharesPerRating(final Statistics stats,
                                                             final Collection<Investment> investments) {
-        System.out.println(stats);
         final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
                 Collectors.toMap(RiskPortfolio::getRating, risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );

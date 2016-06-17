@@ -1,18 +1,17 @@
 /*
+ * Copyright 2016 Lukáš Petrovický
  *
- *  * Copyright 2016 Lukáš Petrovický
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- * /
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.github.triceo.robozonky.remote;
 
@@ -22,9 +21,9 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class Investment implements BaseEntity {
+public class Investment extends BaseInvestment {
 
-    private int id, loanId, amount, additionalAmount, firstAmount, dpd, loanTermInMonth, currentTerm;
+    private int dpd, loanTermInMonth, currentTerm;
     private String loanName, nickname, firstName, surname, paymentStatus;
     private Instant investmentDate, nextPaymentDate;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal, expectedInterest;
@@ -35,8 +34,7 @@ public class Investment implements BaseEntity {
     }
 
     public Investment(final Loan loan, final int amount) {
-        this.loanId = loan.getId();
-        this.amount = amount;
+        super(loan, amount);
         this.loanName = loan.getName();
         this.nickname = loan.getNickName();
         this.rating = loan.getRating();
@@ -44,40 +42,19 @@ public class Investment implements BaseEntity {
         this.interestRate = loan.getInterestRate();
         this.currentTerm = this.loanTermInMonth;
         this.paymentStatus = "OK";
-        this.investmentDate = Instant.now();
         this.paid = BigDecimal.ZERO;
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.valueOf(amount);
+        if (loan.getMyInvestment() != null) {
+            this.investmentDate = loan.getMyInvestment().getTimeCreated();
+        } else {
+            this.investmentDate = Instant.now();
+        }
     }
 
     @XmlElement
     public Rating getRating() {
         return rating;
-    }
-
-    @XmlElement
-    public int getLoanId() {
-        return loanId;
-    }
-
-    @XmlElement
-    public int getAmount() {
-        return amount;
-    }
-
-    @XmlElement
-    public int getAdditionalAmount() {
-        return additionalAmount;
-    }
-
-    @XmlElement
-    public int getFirstAmount() {
-        return firstAmount;
-    }
-
-    @XmlElement
-    public int getId() {
-        return id;
     }
 
     @XmlElement
@@ -179,19 +156,17 @@ public class Investment implements BaseEntity {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("FullInvestment{");
-        sb.append("id=").append(id);
-        sb.append(", loanId=").append(this.getLoanId());
-        sb.append(", loanName='").append(loanName).append('\'');
-        sb.append(", amount=").append(this.getAmount());
-        sb.append(", rating=").append(this.getRating());
-        sb.append(", interestRate=").append(interestRate);
-        sb.append(", loanTermInMonth=").append(loanTermInMonth);
+        final StringBuilder sb = new StringBuilder("Investment{");
+        sb.append("amountDue=").append(amountDue);
         sb.append(", currentTerm=").append(currentTerm);
         sb.append(", dpd=").append(dpd);
+        sb.append(", interestRate=").append(interestRate);
+        sb.append(", loanName='").append(loanName).append('\'');
+        sb.append(", loanTermInMonth=").append(loanTermInMonth);
+        sb.append(", rating=").append(rating);
         sb.append(", paymentStatus='").append(paymentStatus).append('\'');
-        sb.append(", amountDue=").append(amountDue);
-        sb.append('}');
+        sb.append("} extends ");
+        sb.append(super.toString());
         return sb.toString();
     }
 }

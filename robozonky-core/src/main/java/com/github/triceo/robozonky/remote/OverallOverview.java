@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class OverallOverview extends Overview {
+public class OverallOverview extends BaseOverview {
 
     private int feesAmount, netIncome, principalLost;
 

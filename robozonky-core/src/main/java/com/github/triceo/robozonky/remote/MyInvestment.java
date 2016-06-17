@@ -20,39 +20,14 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class MyInvestment implements BaseEntity {
+public class MyInvestment extends BaseInvestment {
 
-    private int id, loanId, amount, additionalAmount, firstAmount, investorId;
+    private int investorId;
     private String status, investorNickname;
     private Instant timeCreated;
 
     MyInvestment() {
         // for JAXB
-    }
-
-    @XmlElement
-    public int getId() {
-        return id;
-    }
-
-    @XmlElement
-    public int getLoanId() {
-        return loanId;
-    }
-
-    @XmlElement
-    public int getAmount() {
-        return amount;
-    }
-
-    @XmlElement
-    public int getAdditionalAmount() {
-        return additionalAmount;
-    }
-
-    @XmlElement
-    public int getFirstAmount() {
-        return firstAmount;
     }
 
     @XmlElement
@@ -79,14 +54,10 @@ public class MyInvestment implements BaseEntity {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("MyInvestment{");
-        sb.append("id=").append(id);
-        sb.append(", loanId=").append(loanId);
-        sb.append(", amount=").append(amount);
-        sb.append(", additionalAmount=").append(additionalAmount);
-        sb.append(", firstAmount=").append(firstAmount);
-        sb.append(", status='").append(status).append('\'');
+        sb.append("status='").append(status).append('\'');
         sb.append(", timeCreated=").append(timeCreated);
-        sb.append('}');
+        sb.append("} extends ");
+        sb.append(super.toString());
         return sb.toString();
     }
 }

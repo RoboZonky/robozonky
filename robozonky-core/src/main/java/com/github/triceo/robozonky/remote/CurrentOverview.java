@@ -17,7 +17,7 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class CurrentOverview extends Overview {
+public class CurrentOverview extends BaseOverview {
 
     private int principalLeft, principalLeftToPay, principalLeftDue, interestPlanned, interestLeft, interestLeftToPay,
             interestLeftDue;
