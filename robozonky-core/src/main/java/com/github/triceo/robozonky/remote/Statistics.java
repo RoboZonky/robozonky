@@ -21,13 +21,12 @@ import java.util.Collection;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlTransient;
 
 public class Statistics implements BaseEntity {
 
     private BigDecimal currentProfitability, expectedProfitability;
     private CurrentOverview currentOverview;
-    private Object overallOverview;
+    private OverallOverview overallOverview;
     private OverallPortfolio overallPortfolio;
     private Collection<Instalment> cashFlow;
     private List<RiskPortfolio> riskPortfolio;
@@ -47,8 +46,8 @@ public class Statistics implements BaseEntity {
         return currentOverview;
     }
 
-    @XmlTransient
-    public Object getOverallOverview() {
+    @XmlElement
+    public OverallOverview getOverallOverview() {
         return overallOverview;
     }
 
