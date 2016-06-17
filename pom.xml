@@ -298,8 +298,6 @@
                         <excludedClasses>
                             <!-- Mostly interfaces; messing up stats -->
                             <param>com.github.triceo.robozonky.remote.*</param>
-                            <!-- All those System.exit()s are messing with the tool -->
-                            <param>com.github.triceo.robozonky.app.App</param>
                             <!-- Mostly getters; messing up stats -->
                             <param>com.github.triceo.robozonky.app.AppContext</param>
                             <param>com.github.triceo.robozonky.app.OperatingMode</param>

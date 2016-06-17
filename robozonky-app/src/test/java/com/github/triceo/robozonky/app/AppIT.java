@@ -16,22 +16,9 @@
 
 package com.github.triceo.robozonky.app;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-// FIXME this "integration test" sucks; break down into multiple actual unit tests
-public class AppTest {
-
-    @BeforeClass
-    public static void disableSystemExit() {
-        App.PERFORM_SYSTEM_EXIT = false;
-    }
-
-    @AfterClass
-    public static void enableSystemExit() {
-        App.PERFORM_SYSTEM_EXIT = true;
-    }
+public class AppIT extends AbstractNonExitingTest {
 
     @Test(expected = RoboZonkyTestingExitException.class)
     public void tokenizedDryRun() {
