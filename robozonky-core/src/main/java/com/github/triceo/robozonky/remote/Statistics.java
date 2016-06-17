@@ -21,12 +21,14 @@ import java.util.Collection;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlTransient;
 
 public class Statistics implements BaseEntity {
 
     private BigDecimal currentProfitability, expectedProfitability;
-    private Object currentOverview, overallOverview, overallPortfolio, cashFlow;
+    private CurrentOverview currentOverview;
+    private OverallOverview overallOverview;
+    private OverallPortfolio overallPortfolio;
+    private Collection<Instalment> cashFlow;
     private List<RiskPortfolio> riskPortfolio;
 
     @XmlElement
@@ -39,23 +41,23 @@ public class Statistics implements BaseEntity {
         return expectedProfitability;
     }
 
-    @XmlTransient
-    public Object getCurrentOverview() {
+    @XmlElement
+    public CurrentOverview getCurrentOverview() {
         return currentOverview;
     }
 
-    @XmlTransient
-    public Object getOverallOverview() {
+    @XmlElement
+    public OverallOverview getOverallOverview() {
         return overallOverview;
     }
 
-    @XmlTransient
-    public Object getOverallPortfolio() {
+    @XmlElement
+    public OverallPortfolio getOverallPortfolio() {
         return overallPortfolio;
     }
 
-    @XmlTransient
-    public Object getCashFlow() {
+    @XmlElementWrapper
+    public Collection<Instalment> getCashFlow() {
         return cashFlow;
     }
 
@@ -69,7 +71,11 @@ public class Statistics implements BaseEntity {
         final StringBuilder sb = new StringBuilder("Statistics{");
         sb.append("currentProfitability=").append(currentProfitability);
         sb.append(", expectedProfitability=").append(expectedProfitability);
+        sb.append(", currentOverview=").append(currentOverview);
+        sb.append(", overallOverview=").append(overallOverview);
+        sb.append(", overallPortfolio=").append(overallPortfolio);
         sb.append(", riskPortfolio=").append(riskPortfolio);
+        sb.append(", cashFlow=").append(cashFlow);
         sb.append('}');
         return sb.toString();
     }

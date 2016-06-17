@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
+import com.github.triceo.robozonky.remote.Investment;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;

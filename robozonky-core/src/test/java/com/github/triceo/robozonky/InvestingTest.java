@@ -24,9 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Wallet;

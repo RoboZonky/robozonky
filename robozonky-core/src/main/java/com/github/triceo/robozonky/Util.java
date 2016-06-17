@@ -30,9 +30,9 @@ import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.remote.Investment;
 
 import static java.util.Comparator.comparing;
 
