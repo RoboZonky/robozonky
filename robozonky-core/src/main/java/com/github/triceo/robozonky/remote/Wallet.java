@@ -18,15 +18,13 @@ package com.github.triceo.robozonky.remote;
 
 import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 public class Wallet implements BaseEntity {
 
     private int id;
     private BigDecimal balance, availableBalance, blockedBalance;
     private int variableSymbol;
-    @XmlTransient
-    private Object account;
+    private BankAccount account;
 
     private Wallet() {
         // for JAXB
@@ -40,19 +38,9 @@ public class Wallet implements BaseEntity {
         this.blockedBalance = balance.subtract(availableBalance);
     }
 
+    @XmlElement
     public int getId() {
         return id;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Wallet{");
-        sb.append("id=").append(id);
-        sb.append(", balance=").append(balance);
-        sb.append(", availableBalance=").append(availableBalance);
-        sb.append(", blockedBalance=").append(blockedBalance);
-        sb.append('}');
-        return sb.toString();
     }
 
     @XmlElement
@@ -75,8 +63,22 @@ public class Wallet implements BaseEntity {
         return variableSymbol;
     }
 
-    @XmlTransient
-    public Object getAccount() {
+    @XmlElement
+    public BankAccount getAccount() {
         return account;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Wallet{");
+        sb.append("id=").append(id);
+        sb.append(", balance=").append(balance);
+        sb.append(", availableBalance=").append(availableBalance);
+        sb.append(", blockedBalance=").append(blockedBalance);
+        sb.append(", account=").append(account);
+        sb.append(", variableSymbol=").append(variableSymbol);
+        sb.append('}');
+        return sb.toString();
+    }
+
 }
