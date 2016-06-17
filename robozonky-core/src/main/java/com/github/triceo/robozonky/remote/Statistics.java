@@ -26,7 +26,8 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Statistics implements BaseEntity {
 
     private BigDecimal currentProfitability, expectedProfitability;
-    private Object currentOverview, overallOverview, overallPortfolio, cashFlow;
+    private Object currentOverview, overallOverview, overallPortfolio;
+    private Collection<Instalment> cashFlow;
     private List<RiskPortfolio> riskPortfolio;
 
     @XmlElement
@@ -54,8 +55,8 @@ public class Statistics implements BaseEntity {
         return overallPortfolio;
     }
 
-    @XmlTransient
-    public Object getCashFlow() {
+    @XmlElementWrapper
+    public Collection<Instalment> getCashFlow() {
         return cashFlow;
     }
 

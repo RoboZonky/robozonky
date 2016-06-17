@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -27,12 +29,17 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 class InstantDeserializer extends JsonDeserializer<Instant> {
 
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private static final Pattern COMPILE = Pattern.compile("([+\\-][0-9][0-9]):([0-9][0-9])");
 
     @Override
     public Instant deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException {
         try {
-            return InstantDeserializer.DATE_FORMAT.parse(jsonParser.getText().replace("+02:00", "+0200")).toInstant();
+            final String dateText = jsonParser.getText();
+            final Matcher m = InstantDeserializer.COMPILE.matcher(dateText); // +02:00 needs to become +0200
+            m.matches();
+            final String newDateText = m.replaceFirst("$1$2");
+            return InstantDeserializer.DATE_FORMAT.parse(newDateText).toInstant();
         } catch (final ParseException e) {
             throw new IOException(e);
         }
