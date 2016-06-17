@@ -17,33 +17,13 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class CurrentOverview implements BaseEntity {
+public class CurrentOverview extends Overview {
 
-    private int totalInvestment, principalPaid, interestPaid, investmentCount, principalLeft, principalLeftToPay,
-            principalLeftDue, interestPlanned, interestLeft, interestLeftToPay, interestLeftDue;
+    private int principalLeft, principalLeftToPay, principalLeftDue, interestPlanned, interestLeft, interestLeftToPay,
+            interestLeftDue;
 
     CurrentOverview() {
         // for JAXB
-    }
-
-    @XmlElement
-    public int getTotalInvestment() {
-        return totalInvestment;
-    }
-
-    @XmlElement
-    public int getPrincipalPaid() {
-        return principalPaid;
-    }
-
-    @XmlElement
-    public int getInterestPaid() {
-        return interestPaid;
-    }
-
-    @XmlElement
-    public int getInvestmentCount() {
-        return investmentCount;
     }
 
     @XmlElement
@@ -84,18 +64,15 @@ public class CurrentOverview implements BaseEntity {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CurrentOverview{");
-        sb.append("totalInvestment=").append(totalInvestment);
-        sb.append(", principalPaid=").append(principalPaid);
-        sb.append(", interestPaid=").append(interestPaid);
-        sb.append(", investmentCount=").append(investmentCount);
-        sb.append(", principalLeft=").append(principalLeft);
+        sb.append("principalLeft=").append(principalLeft);
         sb.append(", principalLeftToPay=").append(principalLeftToPay);
         sb.append(", principalLeftDue=").append(principalLeftDue);
         sb.append(", interestPlanned=").append(interestPlanned);
         sb.append(", interestLeft=").append(interestLeft);
         sb.append(", interestLeftToPay=").append(interestLeftToPay);
         sb.append(", interestLeftDue=").append(interestLeftDue);
-        sb.append('}');
+        sb.append("} extends ");
+        sb.append(super.toString());
         return sb.toString();
     }
 }

@@ -18,37 +18,38 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class OverallOverview extends Overview {
+abstract class Overview implements BaseEntity {
 
-    private int feesAmount, netIncome, principalLost;
+    private int totalInvestment, principalPaid, interestPaid, investmentCount;
 
-    OverallOverview() {
-        // for JAXB
+    @XmlElement
+    public int getTotalInvestment() {
+        return totalInvestment;
     }
 
     @XmlElement
-    public int getFeesAmount() {
-        return feesAmount;
+    public int getPrincipalPaid() {
+        return principalPaid;
     }
 
     @XmlElement
-    public int getNetIncome() {
-        return netIncome;
+    public int getInterestPaid() {
+        return interestPaid;
     }
 
     @XmlElement
-    public int getPrincipalLost() {
-        return principalLost;
+    public int getInvestmentCount() {
+        return investmentCount;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("OverallOverview{");
-        sb.append("feesAmount=").append(feesAmount);
-        sb.append(", netIncome=").append(netIncome);
-        sb.append(", principalLost=").append(principalLost);
-        sb.append("} extends ");
-        sb.append(super.toString());
+        final StringBuilder sb = new StringBuilder("Overview{");
+        sb.append("totalInvestment=").append(totalInvestment);
+        sb.append(", principalPaid=").append(principalPaid);
+        sb.append(", interestPaid=").append(interestPaid);
+        sb.append(", investmentCount=").append(investmentCount);
+        sb.append('}');
         return sb.toString();
     }
 }
