@@ -29,7 +29,7 @@ class AppContext {
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
 
     public AppContext(final AuthenticationHandler authMethod, final int loanId, final int loanAmount) {
-        this.operatingMode = OperatingMode.USER_DRIVER;
+        this.operatingMode = OperatingMode.USER_DRIVEN;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
         this.authenticator = authMethod;

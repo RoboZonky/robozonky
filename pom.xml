@@ -300,7 +300,6 @@
                             <param>com.github.triceo.robozonky.remote.*</param>
                             <!-- Mostly getters; messing up stats -->
                             <param>com.github.triceo.robozonky.app.AppContext</param>
-                            <param>com.github.triceo.robozonky.app.OperatingMode</param>
                         </excludedClasses>
                     </configuration>
                 </plugin>
