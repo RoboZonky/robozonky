@@ -284,9 +284,7 @@
                     <artifactId>pitest-maven</artifactId>
                     <version>1.1.10</version>
                     <configuration>
-                        <withHistory>true</withHistory>
                         <detectInlinedCode>true</detectInlinedCode>
-                        <!-- Core can go over 80, app currently lags behind at ~40 -->
                         <mutationThreshold>65</mutationThreshold>
                         <maxDependencyDistance>2</maxDependencyDistance>
                         <targetClasses>
