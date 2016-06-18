@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-abstract class AbstractNonExitingTest {
+public abstract class AbstractNonExitingTest {
 
     @BeforeClass
     public static void disableSystemExit() {

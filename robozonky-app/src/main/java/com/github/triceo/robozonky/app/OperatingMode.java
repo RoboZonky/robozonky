@@ -30,9 +30,8 @@ enum OperatingMode {
     STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN) {
         @Override
         public AppContext setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
-            final Optional<Integer> loanAmount = cli.getLoanAmount();
-            if (loanAmount.isPresent()) {
-                cli.printHelpAndExit("Loan amount makes no sense in this context.", true);
+            if (cli.getLoanAmount().isPresent() || cli.getLoanId().isPresent()) {
+                cli.printHelpAndExit("Loan data makes no sense in this context.", true);
                 return null;
             }
             final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
@@ -63,14 +62,13 @@ enum OperatingMode {
         public AppContext setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
             final Optional<Integer> loanId = cli.getLoanId();
             final Optional<Integer> loanAmount = cli.getLoanAmount();
-            if (!loanId.isPresent()) {
-                cli.printHelpAndExit("Loan ID must be provided.", true);
+            if (!loanId.isPresent() || loanId.get() < 1) {
+                cli.printHelpAndExit("Loan ID must be provided and greater than 0.", true);
                 return null;
-            } else if (!loanAmount.isPresent()) {
-                cli.printHelpAndExit("Loan amount must be provided.", true);
+            } else if (!loanAmount.isPresent() || loanAmount.get() < 1) {
+                cli.printHelpAndExit("Loan amount must be provided and greater than 0.", true);
                 return null;
-            }
-            if (cli.isDryRun()) {
+            } else if (cli.isDryRun()) {
                 return new AppContext(auth, loanId.get(), loanAmount.get(), cli.getDryRunBalance());
             } else {
                 return new AppContext(auth, loanId.get(), loanAmount.get());
