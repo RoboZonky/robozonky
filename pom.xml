@@ -286,7 +286,7 @@
                     <configuration>
                         <timestampedReports>false</timestampedReports>
                         <detectInlinedCode>true</detectInlinedCode>
-                        <mutationThreshold>65</mutationThreshold>
+                        <mutationThreshold>61</mutationThreshold>
                         <maxDependencyDistance>2</maxDependencyDistance>
                         <targetClasses>
                             <param>com.github.triceo.robozonky.*</param>
