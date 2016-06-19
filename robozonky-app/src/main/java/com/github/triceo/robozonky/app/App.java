@@ -110,7 +110,7 @@ class App {
         return auth;
     }
 
-    private static AppContext processCommandLine(final String... args) {
+    static AppContext processCommandLine(final String... args) {
         final CommandLineInterface cli = CommandLineInterface.parse(args);
         final Optional<OperatingMode> om = cli.getCliOperatingMode();
         if (!om.isPresent()) {
@@ -141,25 +141,29 @@ class App {
         App.exit(ReturnCode.OK);
     }
 
-    private static boolean storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
-        if (result.size() == 0) {
-            return false;
-        }
+    static Optional<File> storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
         final String suffix = dryRun ? "dry" : "invested";
         final LocalDateTime now = LocalDateTime.now();
         final String filename =
                 "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
-        final File target = new File(filename);
+        return App.storeInvestmentsMade(new File(filename), result);
+    }
+
+    static Optional<File> storeInvestmentsMade(final File target, final Collection<Investment> result) {
+        if (result.size() == 0) {
+            return Optional.empty();
+        }
         try (final BufferedWriter bw = Files.newBufferedWriter(target.toPath(), Charset.forName("UTF-8"))) {
             for (final Investment i : result) {
                 bw.write('#' + i.getLoanId() + ": " + i.getAmount() + " CZK");
                 bw.newLine();
             }
-            App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.", filename);
-            return true;
+            App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.",
+                    target.getAbsolutePath());
+            return Optional.of(target);
         } catch (final IOException ex) {
             App.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
-            return false;
+            return Optional.empty();
         }
     }
 
