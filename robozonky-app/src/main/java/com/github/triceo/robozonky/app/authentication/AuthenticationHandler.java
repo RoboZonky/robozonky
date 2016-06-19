@@ -150,7 +150,13 @@ public class AuthenticationHandler {
         } else try { // try to store token
             final String marshalled = ZonkyApiToken.marshal(token);
             final boolean tokenStored = this.data.setToken(new StringReader(marshalled));
-            return !tokenStored;
+            if (tokenStored) {
+                AuthenticationHandler.LOGGER.debug("Token stored successfully.");
+                return false;
+            } else {
+                AuthenticationHandler.LOGGER.debug("Failed storing token.");
+                return true;
+            }
         } catch (final JAXBException ex) {
             AuthenticationHandler.LOGGER.info("Failed writing access token, will need to use password next time.", ex);
             return true;
