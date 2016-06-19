@@ -36,8 +36,6 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import com.github.triceo.robozonky.authentication.Authenticator;
-import com.github.triceo.robozonky.exceptions.LoginFailedException;
-import com.github.triceo.robozonky.exceptions.LogoutFailedException;
 import com.github.triceo.robozonky.remote.Investment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,33 +56,8 @@ class App {
         }
     }
 
-    private static AppContext prepareStrategyDrivenMode(final CommandLineInterface cli) {
-        final Optional<Integer> loanAmount = cli.getLoanAmount();
-        if (loanAmount.isPresent()) {
-            cli.printHelpAndExit("Loan amount makes no sense in this context.", true);
-        }
-        final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
-        if (!strategyFilePath.isPresent()) {
-            cli.printHelpAndExit("Strategy file must be provided.", true);
-        }
-        final File strategyConfig = new File(strategyFilePath.get());
-        if (!strategyConfig.canRead()) {
-            cli.printHelpAndExit("Investment strategy file must be readable.", true);
-        }
-        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
-        try {
-            if (cli.isDryRun()) {
-                return new AppContext(auth, StrategyParser.parse(strategyConfig), cli.getDryRunBalance());
-            } else {
-                return new AppContext(auth, StrategyParser.parse(strategyConfig));
-            }
-        } catch (final Exception ex) {
-            cli.printHelpAndExit("Failed parsing strategy.", ex);
-            return null;
-        }
-    }
-
-    private static SensitiveInformationProvider getSensitiveInformationProvider(final CommandLineInterface cli) {
+    private static SensitiveInformationProvider getSensitiveInformationProvider(final CommandLineInterface cli,
+                                                                                final File defaultKeyStore) {
         final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
         if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
             final File store = keyStoreLocation.get();
@@ -99,24 +72,22 @@ class App {
             try {
                 final Optional<String> usernameProvided = cli.getUsername();
                 final boolean usernamePresent = usernameProvided.isPresent();
-                final boolean storageExists = App.DEFAULT_KEYSTORE_FILE.canRead();
+                final boolean storageExists = defaultKeyStore.canRead();
                 if (storageExists) {
-                    if (App.DEFAULT_KEYSTORE_FILE.delete()) {
+                    if (defaultKeyStore.delete()) {
                         App.LOGGER.debug("Deleted pre-existing guarded storage.");
                     } else {
                         throw new IllegalArgumentException("Stale guarded storage is present and can not be deleted.");
                     }
                 }
-                final KeyStoreHandler ksh = KeyStoreHandler.create(App.DEFAULT_KEYSTORE_FILE, cli.getPassword());
+                final KeyStoreHandler ksh = KeyStoreHandler.create(defaultKeyStore, cli.getPassword());
                 if (!usernamePresent) {
                     cli.printHelpAndExit("When not using guarded storage, username must be provided.", true);
                 } else if (storageExists) {
                     App.LOGGER.info("Using plain-text credentials when guarded storage available. Consider switching.");
                 } else {
                     App.LOGGER.info("Guarded storage has been created with your username and password: {}",
-                            App.DEFAULT_KEYSTORE_FILE);
-                    App.LOGGER.info("Feel free to use this instead of providing the information on the command line.");
-                    App.LOGGER.info("Please change the storage password to something else than your Zonky password.");
+                            defaultKeyStore);
                 }
                 return SensitiveInformationProvider.keyStoreBased(ksh, usernameProvided.get(), cli.getPassword());
             } catch (final IOException | KeyStoreException ex) {
@@ -128,7 +99,8 @@ class App {
 
     private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
         final boolean useToken = cli.isTokenEnabled();
-        final SensitiveInformationProvider sensitive = App.getSensitiveInformationProvider(cli);
+        final SensitiveInformationProvider sensitive =
+                App.getSensitiveInformationProvider(cli, App.DEFAULT_KEYSTORE_FILE);
         final AuthenticationHandler auth = useToken ? AuthenticationHandler.tokenBased(sensitive)
                 : AuthenticationHandler.passwordBased(sensitive);
         final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
@@ -138,75 +110,66 @@ class App {
         return auth;
     }
 
-    private static AppContext prepareUserDrivenMode(final CommandLineInterface cli) {
-        final Optional<Integer> loanId = cli.getLoanId();
-        final Optional<Integer> loanAmount = cli.getLoanAmount();
-        if (!loanId.isPresent()) {
-            cli.printHelpAndExit("Loan ID must be provided.", true);
-        } else if (!loanAmount.isPresent()) {
-            cli.printHelpAndExit("Loan amount must be provided.", true);
-        }
-        final AuthenticationHandler auth = App.getAuthenticationMethod(cli);
-        if (cli.isDryRun()) {
-            return new AppContext(auth, loanId.get(), loanAmount.get(), cli.getDryRunBalance());
-        } else {
-            return new AppContext(auth, loanId.get(), loanAmount.get());
-        }
-    }
-
-    private static AppContext processCommandLine(final String... args) {
+    static AppContext processCommandLine(final String... args) {
         final CommandLineInterface cli = CommandLineInterface.parse(args);
         final Optional<OperatingMode> om = cli.getCliOperatingMode();
         if (!om.isPresent()) {
             cli.printHelpAndExit("", false);
             return null;
         }
-        switch (om.get()) {
-            case STRATEGY_DRIVEN:
-                return App.prepareStrategyDrivenMode(cli);
-            case USER_DRIVER:
-                return App.prepareUserDrivenMode(cli);
-            default:
-                return null;
-        }
+        return om.get().setup(cli, App.getAuthenticationMethod(cli));
     }
 
     public static void main(final String... args) {
         App.LOGGER.info("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
+        final AppContext ctx = App.processCommandLine(args);
+        App.LOGGER.info("===== RoboZonky at your service! =====");
         try {
-            App.letsGo(App.processCommandLine(args)); // and start actually working with Zonky
-            App.exit(ReturnCode.OK);
-        } catch (final Exception ex) {
+            final boolean isDryRun = ctx.isDryRun();
+            if (isDryRun) {
+                App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
+            }
+            final Collection<Investment> result = App.invest(ctx); // perform the investing operations
+            App.storeInvestmentsMade(result, isDryRun);
+            App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
+        } catch (final RuntimeException ex) {
             App.LOGGER.error("Unexpected error." , ex);
             App.exit(ReturnCode.ERROR_UNEXPECTED);
+            return; // non-tests will not get here
         }
+        App.LOGGER.info("===== RoboZonky out. =====");
+        App.exit(ReturnCode.OK);
     }
 
-    private static void storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
+    static Optional<File> storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
         final String suffix = dryRun ? "dry" : "invested";
         final LocalDateTime now = LocalDateTime.now();
         final String filename =
                 "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
-        final File target = new File(filename);
+        return App.storeInvestmentsMade(new File(filename), result);
+    }
+
+    static Optional<File> storeInvestmentsMade(final File target, final Collection<Investment> result) {
+        if (result.size() == 0) {
+            return Optional.empty();
+        }
         try (final BufferedWriter bw = Files.newBufferedWriter(target.toPath(), Charset.forName("UTF-8"))) {
             for (final Investment i : result) {
                 bw.write('#' + i.getLoanId() + ": " + i.getAmount() + " CZK");
                 bw.newLine();
             }
-            App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.", filename);
+            App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.",
+                    target.getAbsolutePath());
+            return Optional.of(target);
         } catch (final IOException ex) {
             App.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
+            return Optional.empty();
         }
     }
 
-    private static void letsGo(final AppContext ctx) {
-        App.LOGGER.info("===== RoboZonky at your service! =====");
-        final boolean dryRun = ctx.isDryRun();
-        if (dryRun) {
-            App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
-        }
-        // figure out whether to invest based on strategy or whether to make a single investment
+    private static Collection<Investment> invest(final AppContext ctx) {
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
+        // figure out what to execute
         final Function<OperationsContext, Collection<Investment>> op = useStrategy ? Operations::invest : oc -> {
             final Optional<Investment> optional = Operations.invest(oc, ctx.getLoanId(), ctx.getLoanAmount());
             if (optional.isPresent()) {
@@ -215,47 +178,27 @@ class App {
                 return Collections.emptyList();
             }
         };
-        // and now perform the selected operation
-        final Collection<Investment> result = App.operate(ctx, op);
-        if (result.isEmpty()) {
-            App.LOGGER.info("RoboZonky did not invest.");
-        } else {
-            App.storeInvestmentsMade(result, dryRun);
-            if (dryRun) {
-                App.LOGGER.info("RoboZonky pretended to invest into {} loans.", result.size());
-            } else {
-                App.LOGGER.info("RoboZonky invested into {} loans.", result.size());
-            }
+        // then log in
+        final AuthenticationHandler handler = ctx.getAuthenticationHandler();
+        final Authenticator auth = handler.build();
+        final Optional<Operations.LoginResult> possibleLogin = useStrategy ?
+                Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :
+                Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());
+        if (!possibleLogin.isPresent()) {
+            App.exit(ReturnCode.ERROR_LOGIN);
+            return Collections.emptyList(); // should never get here
         }
-        App.LOGGER.info("===== RoboZonky out. =====");
-    }
-
-    private static Collection<Investment> operate(final AppContext ctx,
-                                                  final Function<OperationsContext, Collection<Investment>> operations) {
-        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
-        try {
-            final AuthenticationHandler handler = ctx.getAuthenticationHandler();
-            final Authenticator auth = handler.build();
-            final Operations.LoginResult loginResult = useStrategy ?
-                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :
-                    Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());
-            final boolean logoutAllowed = handler.processToken(loginResult.getZonkyApiToken());
-            final Collection<Investment> result = operations.apply(loginResult.getOperationsContext());
-            if (logoutAllowed) { // log out
-                try {
-                    Operations.logout(loginResult.getOperationsContext());
-                } catch (final LogoutFailedException ex) {
-                    App.LOGGER.warn("Logging out of Zonky failed.", ex);
-                }
-            } else {  // if we're using the token, we should never log out
+        final Operations.LoginResult login = possibleLogin.get();
+        final boolean logoutAllowed = handler.processToken(login.getZonkyApiToken());
+        try { // execute the investment
+            return op.apply(login.getOperationsContext());
+        } finally { // make sure logout is processed at all costs
+            if (logoutAllowed) {
+                Operations.logout(login.getOperationsContext());
+            } else { // if we're using the token, we should never log out
                 App.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
             }
-            return result;
-        } catch (final LoginFailedException ex) {
-            App.LOGGER.error("Logging into Zonky failed. No investments were made.", ex);
-            App.exit(ReturnCode.ERROR_LOGIN);
         }
-        return Collections.emptyList(); // should never get here
     }
 
 }

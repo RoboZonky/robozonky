@@ -16,43 +16,56 @@
 
 package com.github.triceo.robozonky.app;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
+
+import com.github.triceo.robozonky.remote.Investment;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-// FIXME this "integration test" sucks; break down into multiple actual unit tests
-public class AppTest {
+import static com.github.triceo.robozonky.app.App.processCommandLine;
 
-    @BeforeClass
-    public static void disableSystemExit() {
-        App.PERFORM_SYSTEM_EXIT = false;
-    }
+public class AppTest extends AbstractNonExitingTest {
 
-    @AfterClass
-    public static void enableSystemExit() {
-        App.PERFORM_SYSTEM_EXIT = true;
-    }
-
-    @Test(expected = RoboZonkyTestingExitException.class)
-    public void tokenizedDryRun() {
-        App.main("-s", "src/main/assembly/resources/robozonky-dynamic.cfg", "-d", "0", "-u", "someone",
-                "-p", "somepassword", "-r");
+    @Test
+    public void simpleCommandLine() {
+        final AppContext ctx = processCommandLine("-s", "src/main/assembly/resources/robozonky-conservative.cfg",
+                "-u", "user", "-p", "pass");
+        Assertions.assertThat(ctx.getOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
+        Assertions.assertThat(ctx.isDryRun()).isFalse();
+        Assertions.assertThat(ctx.getAuthenticationHandler()).isNotNull();
+        Assertions.assertThat(ctx.getInvestmentStrategy()).isNotNull();
     }
 
     @Test(expected = RoboZonkyTestingExitException.class)
-    public void tokenLessDryRun() {
-        App.main("-s", "src/main/assembly/resources/robozonky-conservative.cfg", "-d", "2000",
-                "-u", "someone", "-p", "somepassword");
+    public void unreadableStrategyFile() {
+        processCommandLine("-s", "something", "-u", "user", "-p", "pass");
     }
 
     @Test(expected = RoboZonkyTestingExitException.class)
-    public void strategyLessRun() {
-        App.main("-a", "400", "-l", "66666", "-d", "2000", "-u", "someone", "-p", "somepassword");
+    public void nothingOnCommandLine() {
+        Assertions.assertThat(processCommandLine());
     }
 
-    @Test(expected = RoboZonkyTestingExitException.class)
-    public void simpleHelp() {
-        App.main("-h");
+    @Test
+    public void storeInvestmentData() throws IOException {
+        Assertions.assertThat(App.storeInvestmentsMade(null, Collections.emptySet())).isEmpty();
+        File f = File.createTempFile("robozonky-", ".investments");
+        f.delete();
+        Optional<File> result = App.storeInvestmentsMade(f, Collections.singleton(Mockito.mock(Investment.class)));
+        Assertions.assertThat(result).contains(f);
+    }
+
+    @Test
+    public void storeInvestmentDataWithDryRun() throws IOException {
+        Optional<File> result = App.storeInvestmentsMade(Collections.singleton(Mockito.mock(Investment.class)), true);
+        Assertions.assertThat(result).isPresent();
+        Optional<File> result2 = App.storeInvestmentsMade(Collections.singleton(Mockito.mock(Investment.class)), false);
+        Assertions.assertThat(result2).isPresent();
+        Assertions.assertThat(result2.get().getAbsolutePath()).isNotEqualTo(result.get().getAbsolutePath());
     }
 
 }

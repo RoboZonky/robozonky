@@ -284,10 +284,9 @@
                     <artifactId>pitest-maven</artifactId>
                     <version>1.1.10</version>
                     <configuration>
-                        <withHistory>true</withHistory>
+                        <timestampedReports>false</timestampedReports>
                         <detectInlinedCode>true</detectInlinedCode>
-                        <!-- Core can go over 80, app currently lags behind at ~40 -->
-                        <mutationThreshold>35</mutationThreshold>
+                        <mutationThreshold>61</mutationThreshold>
                         <maxDependencyDistance>2</maxDependencyDistance>
                         <targetClasses>
                             <param>com.github.triceo.robozonky.*</param>
@@ -298,11 +297,8 @@
                         <excludedClasses>
                             <!-- Mostly interfaces; messing up stats -->
                             <param>com.github.triceo.robozonky.remote.*</param>
-                            <!-- All those System.exit()s are messing with the tool -->
-                            <param>com.github.triceo.robozonky.app.App</param>
                             <!-- Mostly getters; messing up stats -->
                             <param>com.github.triceo.robozonky.app.AppContext</param>
-                            <param>com.github.triceo.robozonky.app.OperatingMode</param>
                         </excludedClasses>
                     </configuration>
                 </plugin>

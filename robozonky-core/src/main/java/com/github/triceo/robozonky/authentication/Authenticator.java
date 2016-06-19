@@ -37,14 +37,14 @@ public class Authenticator {
             final ZonkyApiToken token = api.login(username, password, "password", Authenticator.TARGET_SCOPE);
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}' using password.", username);
             return token;
-        });
+        }, false);
     }
 
     public static Authenticator withAccessToken(final String username, final ZonkyApiToken token) {
         return new Authenticator((ZonkyApi api) -> {
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}' with existing access token.", username);
             return token;
-        });
+        }, true);
     }
 
     public static Authenticator withAccessTokenAndRefresh(final String username, final ZonkyApiToken token) {
@@ -54,7 +54,7 @@ public class Authenticator {
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}', refreshing existing access token.",
                     username);
             return newToken;
-        });
+        }, true);
     }
 
     private static Authentication newAuthenticatedApi(final ZonkyApiToken token, final String zonkyApiUrl,
@@ -75,12 +75,18 @@ public class Authenticator {
     }
 
     private final Function<ZonkyApi, ZonkyApiToken> authenticationMethod;
+    private final boolean tokenBased;
 
-    private Authenticator(final Function<ZonkyApi, ZonkyApiToken> authenticationMethod) {
+    private Authenticator(final Function<ZonkyApi, ZonkyApiToken> authenticationMethod, final boolean tokenBased) {
         if (authenticationMethod == null) {
             throw new IllegalArgumentException("Authentication method must be provided.");
         }
         this.authenticationMethod = authenticationMethod;
+        this.tokenBased = tokenBased;
+    }
+
+    public boolean isTokenBased() {
+        return tokenBased;
     }
 
     public Authentication authenticate(final String zonkyApiUrl, final String zotifyApiUrl,

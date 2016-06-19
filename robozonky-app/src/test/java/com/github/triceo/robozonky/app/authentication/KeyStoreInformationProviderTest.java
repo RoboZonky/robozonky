@@ -18,11 +18,11 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.security.KeyStoreException;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +31,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 public class KeyStoreInformationProviderTest {
+
+    private static String USR = "username";
+    private static String PWD = "password";
 
     private static KeyStoreInformationProvider newMockProvider() {
         // make sure any query returns no value
@@ -43,7 +46,7 @@ public class KeyStoreInformationProviderTest {
         try {
             final File f = File.createTempFile("robozonky-", ".keystore");
             f.delete();
-            return KeyStoreHandler.create(f, UUID.randomUUID().toString());
+            return KeyStoreHandler.create(f, KeyStoreInformationProviderTest.PWD);
         } catch (final IOException | KeyStoreException e) {
             Assertions.fail("Something went wrong.", e);
             return null;
@@ -51,7 +54,13 @@ public class KeyStoreInformationProviderTest {
     }
 
     private static KeyStoreInformationProvider newProvider() {
-        return new KeyStoreInformationProvider(KeyStoreInformationProviderTest.getKeyStoreHandler());
+        final KeyStoreHandler ksh = KeyStoreInformationProviderTest.getKeyStoreHandler();
+        return (KeyStoreInformationProvider)SensitiveInformationProvider.keyStoreBased(ksh);
+    }
+
+    private static KeyStoreInformationProvider newProvider(final String username, final String password) {
+        final KeyStoreHandler ksh = KeyStoreInformationProviderTest.getKeyStoreHandler();
+        return (KeyStoreInformationProvider)SensitiveInformationProvider.keyStoreBased(ksh, username, password);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -73,7 +82,13 @@ public class KeyStoreInformationProviderTest {
 
     @Test
     public void setUsernameAndPassword() {
-        final KeyStoreInformationProvider p = KeyStoreInformationProviderTest.newProvider();
+        final KeyStoreInformationProvider p =
+                KeyStoreInformationProviderTest.newProvider(KeyStoreInformationProviderTest.USR,
+                        KeyStoreInformationProviderTest.PWD);
+        // make sure original values were set
+        Assertions.assertThat(p.getUsername()).isEqualTo(KeyStoreInformationProviderTest.USR);
+        Assertions.assertThat(p.getPassword()).isEqualTo(KeyStoreInformationProviderTest.PWD);
+        // make sure updating them works
         final String usr = "something";
         p.setUsername(usr);
         Assertions.assertThat(p.getUsername()).isEqualTo(usr);
@@ -88,6 +103,12 @@ public class KeyStoreInformationProviderTest {
         final String toStore = "something";
         // store token
         final LocalDateTime beforeStoring = LocalDateTime.now();
+        try {
+            // makes sure the following code is always executed on a later timestamp than the previous code
+            Thread.sleep(1);
+        } catch (final InterruptedException ex) {
+            // do nothing
+        }
         Assertions.assertThat(p.setToken(new StringReader(toStore))).isTrue();
         Assertions.assertThat(p.getToken()).isPresent();
         final String stored = IOUtils.toString(p.getToken().get());
@@ -99,6 +120,27 @@ public class KeyStoreInformationProviderTest {
         p.setToken();
         Assertions.assertThat(p.getToken()).isEmpty();
         Assertions.assertThat(p.getTokenSetDate()).isEmpty();
+    }
+
+    @Test
+    public void tokenDeleteFailed() throws IOException {
+        final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
+        Mockito.doThrow(IOException.class).when(ksh).save();
+        final KeyStoreInformationProvider p = new KeyStoreInformationProvider(ksh);
+        Assertions.assertThat(p.setToken()).isFalse();
+        Mockito.verify(ksh, Mockito.times(1)).save();
+        Mockito.verify(ksh, Mockito.times(2)).delete(Mockito.any());
+    }
+
+    @Test
+    public void tokenSaveFailed() throws IOException {
+        final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
+        Mockito.doThrow(IOException.class).when(ksh).save();
+        final KeyStoreInformationProvider p = new KeyStoreInformationProvider(ksh);
+        Assertions.assertThat(p.setToken(new StringReader("something"))).isFalse();
+        Mockito.verify(ksh, Mockito.times(1)).save();
+        Mockito.verify(ksh, Mockito.times(1)).set(Mockito.any(), Mockito.any(String.class));
+        Mockito.verify(ksh, Mockito.times(1)).set(Mockito.any(), Mockito.any(Reader.class));
     }
 
 }

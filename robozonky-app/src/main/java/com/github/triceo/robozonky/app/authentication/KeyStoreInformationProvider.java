@@ -84,7 +84,6 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     @Override
     public boolean setToken(final Reader token) {
         try {
-            this.setToken();
             this.ksh.set(KeyStoreInformationProvider.ALIAS_TOKEN, token);
             this.ksh.set(KeyStoreInformationProvider.ALIAS_TOKEN_DATE, LocalDateTime.now().toString());
             this.ksh.save();

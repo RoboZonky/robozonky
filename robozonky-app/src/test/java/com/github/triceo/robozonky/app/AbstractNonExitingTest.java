@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.exceptions;
+package com.github.triceo.robozonky.app;
 
-public class LoginFailedException extends Exception {
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
-    public LoginFailedException() {
-        super();
+public abstract class AbstractNonExitingTest {
+
+    @BeforeClass
+    public static void disableSystemExit() {
+        App.PERFORM_SYSTEM_EXIT = false;
     }
 
-    public LoginFailedException(final String message) {
-        super(message);
-    }
-
-    public LoginFailedException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    public LoginFailedException(final Throwable cause) {
-        super(cause);
+    @AfterClass
+    public static void enableSystemExit() {
+        App.PERFORM_SYSTEM_EXIT = true;
     }
 
 }

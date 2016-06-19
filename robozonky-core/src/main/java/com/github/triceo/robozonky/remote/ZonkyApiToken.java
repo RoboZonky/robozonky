@@ -67,6 +67,15 @@ public class ZonkyApiToken implements BaseEntity {
         // for JAXB
     }
 
+    public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn, final String type,
+                         final String scope) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.expiresIn = expiresIn;
+        this.type = type;
+        this.scope = scope;
+    }
+
     public String getAccessToken() {
         return accessToken;
     }

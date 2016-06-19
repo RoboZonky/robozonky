@@ -22,13 +22,12 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
-import com.github.triceo.robozonky.exceptions.LoginFailedException;
-import com.github.triceo.robozonky.exceptions.LogoutFailedException;
-import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Wallet;
@@ -172,24 +171,23 @@ public class OperationsTest {
         Mockito.when(tmp.getZonkyApiToken()).thenReturn(Mockito.mock(ZonkyApiToken.class));
         final Authenticator auth = Mockito.mock(Authenticator.class);
         Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tmp);
-        try {
-            final Operations.LoginResult c = Operations.login(auth, true, 1000);
-            Assertions.assertThat(c.getZonkyApiToken()).isSameAs(tmp.getZonkyApiToken());
-            Assertions.assertThat(c.getOperationsContext()).isNotNull();
-            Assertions.assertThat(c.getOperationsContext().getZonkyApi()).isSameAs(tmp.getZonkyApi());
-            Operations.logout(c.getOperationsContext());
-            Mockito.verify(tmp.getZonkyApi(), Mockito.times(1)).logout();
-        } catch (final LoginFailedException | LogoutFailedException e) {
-            Assertions.fail("Should not have happened.", e);
-        }
+        final Optional<Operations.LoginResult> optional = Operations.login(auth, true, 1000);
+        Assertions.assertThat(optional).isPresent();
+        final Operations.LoginResult c = optional.get();
+        Assertions.assertThat(c.getZonkyApiToken()).isSameAs(tmp.getZonkyApiToken());
+        Assertions.assertThat(c.getOperationsContext()).isNotNull();
+        Assertions.assertThat(c.getOperationsContext().getZonkyApi()).isSameAs(tmp.getZonkyApi());
+        Operations.logout(c.getOperationsContext());
+        Mockito.verify(tmp.getZonkyApi(), Mockito.times(1)).logout();
     }
 
-    @Test(expected = LoginFailedException.class)
-    public void failedLogin() throws LoginFailedException {
+    @Test
+    public void failedLogin() {
         final Authenticator auth = Mockito.mock(Authenticator.class);
         Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenThrow(new IllegalStateException("Something bad happened."));
-        Operations.login(auth, true, 1000);
+        Optional<Operations.LoginResult> result = Operations.login(auth, true, 1000);
+        Assertions.assertThat(result).isEmpty();
     }
 
 }
