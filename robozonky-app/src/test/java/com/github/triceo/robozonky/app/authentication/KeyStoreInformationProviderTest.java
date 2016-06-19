@@ -103,6 +103,12 @@ public class KeyStoreInformationProviderTest {
         final String toStore = "something";
         // store token
         final LocalDateTime beforeStoring = LocalDateTime.now();
+        try {
+            // makes sure the following code is always executed on a later timestamp than the previous code
+            Thread.sleep(1);
+        } catch (final InterruptedException ex) {
+            // do nothing
+        }
         Assertions.assertThat(p.setToken(new StringReader(toStore))).isTrue();
         Assertions.assertThat(p.getToken()).isPresent();
         final String stored = IOUtils.toString(p.getToken().get());

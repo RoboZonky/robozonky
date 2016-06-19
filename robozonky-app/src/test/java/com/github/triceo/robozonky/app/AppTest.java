@@ -26,16 +26,28 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static com.github.triceo.robozonky.app.App.processCommandLine;
+
 public class AppTest extends AbstractNonExitingTest {
+
+    @Test
+    public void simpleCommandLine() {
+        final AppContext ctx = processCommandLine("-s", "src/main/assembly/resources/robozonky-conservative.cfg",
+                "-u", "user", "-p", "pass");
+        Assertions.assertThat(ctx.getOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
+        Assertions.assertThat(ctx.isDryRun()).isFalse();
+        Assertions.assertThat(ctx.getAuthenticationHandler()).isNotNull();
+        Assertions.assertThat(ctx.getInvestmentStrategy()).isNotNull();
+    }
 
     @Test(expected = RoboZonkyTestingExitException.class)
     public void unreadableStrategyFile() {
-        App.processCommandLine("-s", "something", "-u", "user", "-p", "pass");
+        processCommandLine("-s", "something", "-u", "user", "-p", "pass");
     }
 
     @Test(expected = RoboZonkyTestingExitException.class)
     public void nothingOnCommandLine() {
-        Assertions.assertThat(App.processCommandLine());
+        Assertions.assertThat(processCommandLine());
     }
 
     @Test
