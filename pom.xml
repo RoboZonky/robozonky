@@ -368,7 +368,6 @@
         <url>git@github.com:triceo/robozonky.git</url>
         <connection>scm:git:git@github.com:triceo/robozonky.git</connection>
         <developerConnection>scm:git:git@github.com:triceo/robozonky.git</developerConnection>
-        <tag>robozonky-1.2.0</tag>
     </scm>
     <issueManagement>
         <system>github</system>
