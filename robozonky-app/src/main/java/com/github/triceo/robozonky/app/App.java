@@ -155,7 +155,7 @@ class App {
         }
         try (final BufferedWriter bw = Files.newBufferedWriter(target.toPath(), Charset.forName("UTF-8"))) {
             for (final Investment i : result) {
-                bw.write('#' + i.getLoanId() + ": " + i.getAmount() + " CZK");
+                bw.write("#" + i.getLoanId() + ": " + i.getAmount() + " CZK");
                 bw.newLine();
             }
             App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.",
