@@ -31,18 +31,22 @@ public class StrategyBuilder {
     private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
 
     public StrategyBuilder addIndividualStrategy(final Rating r, final BigDecimal targetShare, final int minTerm,
-                                                 final int maxTerm, final int maxLoanAmount,
-                                                 final BigDecimal maxLoanShare, final boolean preferLongerTerms) {
+                                                 final int maxTerm, final int minAskAmount, final int maxAskAmount,
+                                                 final int maxLoanAmount, final BigDecimal maxLoanShare,
+                                                 final boolean preferLongerTerms) {
         if (individualStrategies.containsKey(r)) {
             throw new IllegalArgumentException("Already added strategy for rating " + r);
         }
         StrategyBuilder.LOGGER.debug("Adding strategy for rating '{}'.", r.getCode());
         individualStrategies.put(r,
-                new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare, preferLongerTerms));
+                new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare, minAskAmount,
+                        maxAskAmount, preferLongerTerms));
         StrategyBuilder.LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getCode(),
                 targetShare);
+        StrategyBuilder.LOGGER.debug("Range of acceptable loan amounts for rating '{}' is <{}, {}> CZK.",
+                r.getCode(), minAskAmount, maxAskAmount < 0 ? "+inf" : maxAskAmount);
         StrategyBuilder.LOGGER.debug("Range of acceptable investment terms for rating '{}' is <{}, {}) months.",
-                r.getCode(), minTerm == -1 ? 0 : minTerm, maxTerm == -1 ? "+inf" : maxTerm + 1);
+                r.getCode(), minTerm == -1 ? 0 : minTerm, maxTerm < 0 ? "+inf" : maxTerm + 1);
         StrategyBuilder.LOGGER.debug("Maximum investment amount for rating '{}' is {} CZK.", r.getCode(), maxLoanAmount);
         StrategyBuilder.LOGGER.debug("Maximum investment share for rating '{}' is {}.", r.getCode(), maxLoanShare);
         if (preferLongerTerms) {

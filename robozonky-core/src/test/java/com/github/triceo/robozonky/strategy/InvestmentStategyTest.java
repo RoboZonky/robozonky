@@ -31,18 +31,22 @@ public class InvestmentStategyTest {
     private static final Rating RATING_B = Rating.B;
     private static final int TESTED_TERM_LENGTH = 2;
     private static final int MAXIMUM_LOAN_INVESTMENT = 10000;
+    private static final int MINIMUM_ASK = InvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT / 10;
+    private static final int MAXIMUM_ASK = InvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT * 10;
     private static final BigDecimal MAXIMUM_LOAN_SHARE_A = BigDecimal.valueOf(0.01);
     private static final BigDecimal TARGET_SHARE_A = BigDecimal.valueOf(0.2);
     private static final StrategyPerRating STRATEGY_A = new StrategyPerRating(InvestmentStategyTest.RATING_A,
             InvestmentStategyTest.TARGET_SHARE_A, InvestmentStategyTest.TESTED_TERM_LENGTH - 1, -1,
-            InvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, InvestmentStategyTest.MAXIMUM_LOAN_SHARE_A, true);
+            InvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, InvestmentStategyTest.MAXIMUM_LOAN_SHARE_A,
+            InvestmentStategyTest.MINIMUM_ASK, InvestmentStategyTest.MAXIMUM_ASK, true);
 
     private static final BigDecimal MAXIMUM_LOAN_SHARE_B = BigDecimal.valueOf(0.001);
     private static final BigDecimal TARGET_SHARE_B = InvestmentStategyTest.TARGET_SHARE_A.add(BigDecimal.valueOf(0.5));
     private static final StrategyPerRating STRATEGY_B = new StrategyPerRating(InvestmentStategyTest.RATING_B,
             InvestmentStategyTest.TARGET_SHARE_B, InvestmentStategyTest.TESTED_TERM_LENGTH - 1,
             InvestmentStategyTest.TESTED_TERM_LENGTH + 1, InvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT,
-            InvestmentStategyTest.MAXIMUM_LOAN_SHARE_B, false);
+            InvestmentStategyTest.MAXIMUM_LOAN_SHARE_B, InvestmentStategyTest.MINIMUM_ASK,
+            InvestmentStategyTest.MAXIMUM_ASK, false);
 
     private final InvestmentStrategy overallStrategy;
 
@@ -84,6 +88,7 @@ public class InvestmentStategyTest {
     @Test
     public void properlySwitchingAcceptability() {
         final Loan mockLoan = Mockito.mock(Loan.class);
+        Mockito.when(mockLoan.getAmount()).thenReturn((double)InvestmentStategyTest.MAXIMUM_ASK);
         Mockito.when(mockLoan.getTermInMonths()).thenReturn(InvestmentStategyTest.TESTED_TERM_LENGTH + 10);
 
         Mockito.when(mockLoan.getRating()).thenReturn(InvestmentStategyTest.RATING_A);

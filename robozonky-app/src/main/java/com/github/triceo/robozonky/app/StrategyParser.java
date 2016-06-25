@@ -81,6 +81,7 @@ class StrategyParser {
                         + targetShare);
             }
             sumShares = sumShares.add(targetShare);
+            // terms
             final int minTerm = StrategyParser.getValue(config, rating, "minimumTerm", config::getInteger, 0);
             if (minTerm < -1) {
                 throw new IllegalStateException("Minimum acceptable term for rating " + rating + " is negative.");
@@ -92,6 +93,19 @@ class StrategyParser {
                 throw new IllegalStateException("Maximum acceptable term for rating " + rating
                         + " is smaller than the minimum.");
             }
+            // loan asks
+            final int minAskAmount = StrategyParser.getValue(config, rating, "minimumAsk", config::getInteger, 0);
+            if (minAskAmount < -1) {
+                throw new IllegalStateException("Minimum acceptable ask amount for rating " + rating + " is negative.");
+            }
+            final int maxAskAmount = StrategyParser.getValue(config, rating, "maximumAsk", config::getInteger, 0);
+            if (maxAskAmount < -1) {
+                throw new IllegalStateException("Maximum acceptable ask for rating " + rating + " is negative.");
+            } else if (minAskAmount > maxAskAmount && maxAskAmount != -1) {
+                throw new IllegalStateException("Maximum acceptable ask for rating " + rating
+                        + " is smaller than the minimum.");
+            }
+            // investment amounts
             final int maxLoanAmount =
                     StrategyParser.getValue(config, rating, "maximumLoanAmount", config::getInteger, 0);
             if (maxLoanAmount < Operations.MINIMAL_INVESTMENT_ALLOWED) {
@@ -104,8 +118,8 @@ class StrategyParser {
                 throw new IllegalStateException("Maximum investment share for rating " + rating
                         + " outside of range <0, 1>: " + targetShare);
             }
-            strategies.addIndividualStrategy(rating, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare,
-                    preferLongerTerms);
+            strategies.addIndividualStrategy(rating, targetShare, minTerm, maxTerm, minAskAmount, maxAskAmount,
+                    maxLoanAmount, maxLoanShare, preferLongerTerms);
         }
         if (sumShares.compareTo(BigDecimal.ONE) > 0) {
             StrategyParser.LOGGER.warn("Sum of target shares ({}) is larger than 1. Some ratings are likely to be " +

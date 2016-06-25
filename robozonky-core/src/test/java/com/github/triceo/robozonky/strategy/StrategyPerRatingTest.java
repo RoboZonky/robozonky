@@ -28,10 +28,13 @@ public class StrategyPerRatingTest {
     private static final Rating DIFFERENT_RATING = Rating.B;
     private static final int TESTED_TERM_LENGTH = 2;
     private static final int MAXIMUM_LOAN_INVESTMENT = 2000;
+    private static final int MINIMUM_ASK = StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT / 10;
+    private static final int MAXIMUM_ASK = StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT * 10;
     private static final BigDecimal MAXIMUM_LOAN_SHARE = BigDecimal.valueOf(0.01);
     private static final StrategyPerRating STRATEGY = new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15),
             StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-            StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, true);
+            StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
+            StrategyPerRatingTest.MAXIMUM_ASK, true);
 
     @Test(expected = IllegalArgumentException.class)
     public void loanIsNotAcceptableWithoutMatchingRating() {
@@ -52,6 +55,7 @@ public class StrategyPerRatingTest {
     @Test
     public void loanIsNotAcceptableDueToTermMismatch() {
         final Loan mockLoan = Mockito.mock(Loan.class);
+        Mockito.when(mockLoan.getAmount()).thenReturn((double)StrategyPerRatingTest.MAXIMUM_ASK);
         Mockito.when(mockLoan.getRating()).thenReturn(StrategyPerRatingTest.STRATEGY.getRating());
 
         // term length within limits
@@ -61,26 +65,6 @@ public class StrategyPerRatingTest {
         // less than minimal term length
         Mockito.when(mockLoan.getTermInMonths()).thenReturn(0);
         Assertions.assertThat(StrategyPerRatingTest.STRATEGY.isAcceptable(mockLoan)).isFalse();
-    }
-
-    private void properLoanScenario(final double loanAmount) {
-        final Loan mockLoan = Mockito.mock(Loan.class);
-        Mockito.when(mockLoan.getTermInMonths()).thenReturn(StrategyPerRatingTest.TESTED_TERM_LENGTH - 1); // min term
-        Mockito.when(mockLoan.getRating()).thenReturn(StrategyPerRatingTest.STRATEGY.getRating());
-        Mockito.when(mockLoan.getAmount()).thenReturn(loanAmount);
-
-        final int recommendedInvestment = StrategyPerRatingTest.STRATEGY.recommendInvestmentAmount(mockLoan);
-        Assertions.assertThat(recommendedInvestment).isLessThanOrEqualTo(StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT);
-        Assertions.assertThat(recommendedInvestment).isGreaterThan(0);
-        final BigDecimal share = BigDecimal.valueOf(recommendedInvestment / mockLoan.getAmount());
-        Assertions.assertThat(share).isLessThanOrEqualTo(StrategyPerRatingTest.MAXIMUM_LOAN_SHARE);
-    }
-
-    @Test
-    public void properLoanShare() {
-        this.properLoanScenario(StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT);
-        this.properLoanScenario(StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT * 2);
-        this.properLoanScenario(StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT / 2);
     }
 
     @Test
@@ -107,40 +91,46 @@ public class StrategyPerRatingTest {
     @Test(expected = IllegalArgumentException.class)
     public void invalidTermInConstructor() {
         new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), -1, 0, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, true);
+                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
+                StrategyPerRatingTest.MAXIMUM_ASK, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void reversedTermsInConstructor() {
         new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 2, 1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, true);
+                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
+                StrategyPerRatingTest.MAXIMUM_ASK, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void subzeroShareInConstructor() {
         new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15),
                 StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                BigDecimal.ONE.negate(), true);
+                BigDecimal.ONE.negate(), StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void overShareInConstructor() {
         new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15),
                 StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                BigDecimal.TEN, true);
+                BigDecimal.TEN, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidAmountInConstructor() {
         new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, -1,
-                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, true);
+                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
+                StrategyPerRatingTest.MAXIMUM_ASK, true);
     }
 
     @Test
     public void boundaryValuesInConstructor() { // should not throw any exceptions
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ONE, true);
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ZERO, true);
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 1, 1, 0, BigDecimal.ZERO, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ONE,
+                StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ZERO,
+                StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 1, 1, 0, BigDecimal.ZERO,
+                StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
     }
 
 }

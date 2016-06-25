@@ -29,10 +29,12 @@ class StrategyPerRating {
     private final boolean preferLongerTerms;
     private final Rating rating;
     private final BigDecimal targetShare, maximumInvestmentShare;
-    private final int minimumAcceptableTerm, maximumAcceptableTerm, maximumInvestmentAmount;
+    private final int minimumAcceptableTerm, maximumAcceptableTerm, maximumInvestmentAmount, minimumAskAmount,
+            maximumAskAmount;
 
     public StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm, final int maxTerm,
-                             final int maxLoanAmount, final BigDecimal maxLoanShare, final boolean preferLongerTerms) {
+                             final int maxLoanAmount, final BigDecimal maxLoanShare, final int minAskAmount,
+                             final int maxAskAmount, final boolean preferLongerTerms) {
         this.rating = rating;
         this.minimumAcceptableTerm = Math.max(minTerm, 0);
         if (maxTerm == 0) {
@@ -47,6 +49,11 @@ class StrategyPerRating {
         if (this.maximumInvestmentAmount < 0) {
             throw new IllegalArgumentException("Maximum investment amount must not be negative.");
         }
+        this.minimumAskAmount = minAskAmount;
+        if (this.minimumAskAmount < 0) {
+            throw new IllegalArgumentException("Minimum asked amount must not be negative.");
+        }
+        this.maximumAskAmount = maxAskAmount < 0 ? Integer.MAX_VALUE : maxAskAmount;
         this.maximumInvestmentShare = maxLoanShare;
         final boolean shareSubZero = this.maximumInvestmentShare.compareTo(BigDecimal.ZERO) < 0;
         final boolean shareOverOne = this.maximumInvestmentShare.compareTo(BigDecimal.ONE) > 0;
@@ -73,12 +80,21 @@ class StrategyPerRating {
         return term >= this.minimumAcceptableTerm && term <= this.maximumAcceptableTerm;
     }
 
+    private boolean isAcceptableAsk(final Loan loan) {
+        final int ask = (int)loan.getAmount();
+        return ask >= this.minimumAskAmount && ask <= this.maximumAskAmount;
+    }
+
     public boolean isAcceptable(final Loan loan) {
         if (loan.getRating() != this.rating) {
             throw new IllegalArgumentException("Loan " + loan + " should never have gotten here.");
         } else if (!isAcceptableTerm(loan)) {
             StrategyPerRating.LOGGER.debug("Loan '{}' rejected; looking for loans with terms in range <{}, {}>.", loan,
                     this.minimumAcceptableTerm, this.maximumAcceptableTerm);
+            return false;
+        } else if (!isAcceptableAsk(loan)) {
+            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; looking for loans with amounts in range <{}, {}>.",
+                    loan, this.minimumAskAmount, this.maximumAskAmount);
             return false;
         }
         return true;
