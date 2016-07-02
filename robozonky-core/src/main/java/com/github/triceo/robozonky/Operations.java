@@ -21,10 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.authentication.Authentication;
@@ -40,8 +43,6 @@ import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
@@ -190,26 +191,26 @@ public class Operations {
      * @return Ratings in the order of decreasing demand. Over-invested ratings not present.
      */
     static List<Rating> rankRatingsByDemand(final OperationsContext oc, final Map<Rating, BigDecimal> currentShare) {
-        final MultiValuedMap<BigDecimal, Rating> mostWantedRatings = new HashSetValuedHashMap<>();
+        final SortedMap<BigDecimal, List<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {
             final BigDecimal maximumAllowedShare = oc.getStrategy().getTargetShare(r);
-            if (currentRatingShare.compareTo(maximumAllowedShare) >= 0) { // we bought too many of this rating; ignore
+            final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
+            if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; ignore
                 return;
             }
-            mostWantedRatings.put(maximumAllowedShare.subtract(currentRatingShare), r);
+            mostWantedRatings.compute(undershare, (k, v) -> { // each rating unique at source, so list works
+                final List<Rating> target = (v == null) ? new ArrayList<>(1) : v;
+                target.add(r);
+                return target;
+            });
         });
-        // and now output ratings in an order, bigger first
-        final List<Rating> result = new ArrayList<>(currentShare.size());
-        while (!mostWantedRatings.isEmpty()) {
-            BigDecimal biggestRanking = BigDecimal.ZERO;
-            for (final BigDecimal tested: mostWantedRatings.keySet()) {
-                if (tested.compareTo(biggestRanking) > 0) {
-                    biggestRanking = tested;
-                }
-            }
-            result.addAll(mostWantedRatings.remove(biggestRanking));
-        }
+        // and now output ratings in an order, more under-invested go first
+        final List<Rating> result = mostWantedRatings.entrySet().stream().map(Map.Entry::getValue)
+                .reduce(new ArrayList<>(Rating.values().length), (a, b) -> {
+                    a.addAll(b);
+                    return a;
+                });
         return Collections.unmodifiableList(result);
     }
 
