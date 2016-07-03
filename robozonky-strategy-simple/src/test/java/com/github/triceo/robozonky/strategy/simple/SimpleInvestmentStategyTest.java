@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.strategy;
+
+package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import org.assertj.core.api.Assertions;

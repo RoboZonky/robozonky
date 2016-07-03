@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.strategy;
+
+package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
 

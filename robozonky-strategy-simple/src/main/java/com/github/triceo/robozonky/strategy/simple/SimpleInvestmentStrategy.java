@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.strategy;
+package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,6 +30,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import org.slf4j.Logger;

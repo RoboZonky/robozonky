@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.triceo.robozonky.strategy;
 
 import java.math.BigDecimal;
@@ -22,6 +23,10 @@ import java.util.Map;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 
+/**
+ * Determines which loans will be invested into, and how much. What the strategy does or does not allow depends on the
+ * {@link InvestmentStrategyService} implementation.
+ */
 public interface InvestmentStrategy {
 
     int MINIMAL_INVESTMENT_INCREMENT = 200;

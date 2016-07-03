@@ -7,6 +7,7 @@
     <modules>
         <module>robozonky-core</module>
         <module>robozonky-app</module>
+        <module>robozonky-strategy-simple</module>
     </modules>
     <packaging>pom</packaging>
     <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -26,6 +27,11 @@
             <dependency>
                 <groupId>com.github.triceo.robozonky</groupId>
                 <artifactId>robozonky-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.triceo.robozonky</groupId>
+                <artifactId>robozonky-strategy-simple</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

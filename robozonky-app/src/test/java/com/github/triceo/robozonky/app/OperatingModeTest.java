@@ -54,7 +54,9 @@ public class OperatingModeTest extends AbstractNonExitingTest {
     public void standardUserDriven() {
         final CommandLineInterface cli = OperatingModeTest.mockCli(1000, 1);
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        final AppContext result = OperatingMode.USER_DRIVEN.setup(cli, auth);
+        final Optional<AppContext> optionalResult = OperatingMode.USER_DRIVEN.setup(cli, auth);
+        Assertions.assertThat(optionalResult).isPresent();
+        final AppContext result = optionalResult.get();
         Assertions.assertThat(result.getLoanId()).isEqualTo(cli.getLoanId().get());
         Assertions.assertThat(result.getLoanAmount()).isEqualTo(cli.getLoanAmount().get());
         Assertions.assertThat(result.getAuthenticationHandler()).isEqualTo(auth);
@@ -63,10 +65,6 @@ public class OperatingModeTest extends AbstractNonExitingTest {
 
     private void ensureExitCalled(final CommandLineInterface mock) {
         Mockito.verify(mock, Mockito.times(1)).printHelpAndExit(Mockito.any(), Mockito.eq(true));
-    }
-
-    private void ensureThrows(final CommandLineInterface mock, final Class<? extends Exception> ex) {
-        Mockito.verify(mock, Mockito.times(1)).printHelpAndExit(Mockito.any(), Mockito.any(ex));
     }
 
     @Test
@@ -104,7 +102,10 @@ public class OperatingModeTest extends AbstractNonExitingTest {
         Mockito.when(cli.getLoanAmount()).thenReturn(Optional.empty());
         Mockito.when(cli.getStrategyConfigurationFilePath())
                 .thenReturn(Optional.of("src/main/assembly/resources/robozonky-dynamic.cfg"));
-        final AppContext result = OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class));
+        final Optional<AppContext> optionalResult =
+                OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class));
+        Assertions.assertThat(optionalResult).isPresent();
+        final AppContext result = optionalResult.get();
         Assertions.assertThat(result.getInvestmentStrategy()).isNotNull();
         Assertions.assertThat(result.isDryRun()).isFalse();
     }
@@ -117,13 +118,12 @@ public class OperatingModeTest extends AbstractNonExitingTest {
         this.ensureExitCalled(cli);
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void strategyDrivenWrongFile() throws IOException {
         final CommandLineInterface cli = OperatingModeTest.mockCli();
         final File tmp = File.createTempFile("robozonky-", ".strategy"); // this is an empty (= invalid) strategy file
         Mockito.when(cli.getStrategyConfigurationFilePath()).thenReturn(Optional.of(tmp.getAbsolutePath()));
         OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class));
-        this.ensureThrows(cli, IllegalStateException.class);
     }
 }
 
