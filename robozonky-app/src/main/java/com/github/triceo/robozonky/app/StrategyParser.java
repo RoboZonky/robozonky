@@ -26,10 +26,7 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.StrategyBuilder;
 import org.apache.commons.configuration2.ImmutableConfiguration;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Parameters;
-import org.apache.commons.configuration2.builder.fluent.PropertiesBuilderParameters;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,12 +55,7 @@ class StrategyParser {
     }
 
     private static ImmutableConfiguration getConfig(final File strategyFile) throws ConfigurationException {
-        // read config file
-        final PropertiesBuilderParameters props = new Parameters().properties().setFile(strategyFile);
-        final FileBasedConfigurationBuilder<PropertiesConfiguration> builder
-                = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
-        builder.configure(props);
-        return builder.getConfiguration();
+        return new Configurations().properties(strategyFile);
     }
 
     public static InvestmentStrategy parse(final File strategyFile) throws ConfigurationException {
