@@ -31,10 +31,8 @@ public class StrategyPerRatingTest {
     private static final int MINIMUM_ASK = StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT / 10;
     private static final int MAXIMUM_ASK = StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT * 10;
     private static final BigDecimal MAXIMUM_LOAN_SHARE = BigDecimal.valueOf(0.01);
-    private static final StrategyPerRating STRATEGY = new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15),
-            StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-            StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
-            StrategyPerRatingTest.MAXIMUM_ASK, true);
+    private static final StrategyPerRating STRATEGY = new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT, StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+    );
 
     @Test(expected = IllegalArgumentException.class)
     public void loanIsNotAcceptableWithoutMatchingRating() {
@@ -90,47 +88,42 @@ public class StrategyPerRatingTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidTermInConstructor() {
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), -1, 0, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
-                StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), -1, 0, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT, StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void reversedTermsInConstructor() {
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 2, 1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
-                StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 2, 1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT, StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void subzeroShareInConstructor() {
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15),
-                StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                BigDecimal.ONE.negate(), StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.ONE.negate(), StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void overShareInConstructor() {
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15),
-                StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
-                BigDecimal.TEN, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.TEN, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidAmountInConstructor() {
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, -1,
-                StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
-                StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, -1, StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
     }
 
     @Test
     public void boundaryValuesInConstructor() { // should not throw any exceptions
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ONE,
-                StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ZERO,
-                StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
-        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 1, 1, 0, BigDecimal.ZERO,
-                StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true);
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ONE, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 0, -1, 0, BigDecimal.ZERO, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
+        new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15), 1, 1, 0, BigDecimal.ZERO, StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+        );
     }
 
 }

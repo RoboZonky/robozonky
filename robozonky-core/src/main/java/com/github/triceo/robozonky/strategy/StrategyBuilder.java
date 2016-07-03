@@ -39,8 +39,8 @@ public class StrategyBuilder {
         }
         StrategyBuilder.LOGGER.debug("Adding strategy for rating '{}'.", r.getCode());
         individualStrategies.put(r,
-                new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare, minAskAmount,
-                        maxAskAmount, preferLongerTerms));
+                new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare, minAskAmount, maxAskAmount, preferLongerTerms
+                ));
         StrategyBuilder.LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getCode(),
                 targetShare);
         StrategyBuilder.LOGGER.debug("Range of acceptable loan amounts for rating '{}' is <{}, {}> CZK.",
@@ -61,7 +61,7 @@ public class StrategyBuilder {
         if (individualStrategies.size() != Rating.values().length) {
             throw new IllegalStateException("Strategy is incomplete.");
         }
-        return new InvestmentStrategy(individualStrategies);
+        return new SimpleInvestmentStrategy(individualStrategies);
     }
 
 }

@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Investment;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -35,25 +34,7 @@ public class UtilTest {
     }
 
     @Test
-    public void properLoanSorting() {
-        // mock
-        final Loan shortLoan = Mockito.mock(Loan.class);
-        Mockito.when(shortLoan.getTermInMonths()).thenReturn(10);
-        final Loan mediumLoan = Mockito.mock(Loan.class);
-        Mockito.when(mediumLoan.getTermInMonths()).thenReturn(20);
-        final Loan longLoan = Mockito.mock(Loan.class);
-        Mockito.when(longLoan.getTermInMonths()).thenReturn(30);
-        // test
-        List<Loan> result = Util.sortLoansByTerm(Arrays.asList(longLoan, mediumLoan, shortLoan, longLoan), true);
-        Assertions.assertThat(result).hasSize(3);
-        Assertions.assertThat(result).containsSequence(longLoan, mediumLoan, shortLoan);
-        result = Util.sortLoansByTerm(Arrays.asList(longLoan, mediumLoan, shortLoan, longLoan), false);
-        Assertions.assertThat(result).hasSize(3);
-        Assertions.assertThat(result).containsSequence(shortLoan, mediumLoan, longLoan);
-    }
-
-    @Test
-    public void mergingTwoInvestmentCollectinsWorksProperly() {
+    public void mergingTwoInvestmentCollectionsWorksProperly() {
         final Investment I1 = UtilTest.getMockInvestmentWithId(1);
         final Investment I2 = UtilTest.getMockInvestmentWithId(2);
         final Investment I3 = UtilTest.getMockInvestmentWithId(3);
@@ -62,6 +43,13 @@ public class UtilTest {
         final List<Investment> a = Arrays.asList(I1, I2);
         final List<Investment> b = Arrays.asList(I2, I3);
         Assertions.assertThat(Util.mergeInvestments(a, b)).containsExactly(I1, I2, I3);
+
+        // toy around with empty lists
+        Assertions.assertThat(Util.mergeInvestments(Collections.emptyList(), Collections.emptyList())).isEmpty();
+        Assertions.assertThat(Util.mergeInvestments(Collections.emptyList(), a))
+                .containsExactly((Investment[]) a.toArray());
+        Assertions.assertThat(Util.mergeInvestments(b, Collections.emptyList()))
+                .containsExactly((Investment[]) b.toArray());
 
         // standard merging also works
         final List<Investment> c = Collections.singletonList(I3);

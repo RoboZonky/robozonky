@@ -21,13 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.authentication.Authentication;
@@ -145,76 +142,6 @@ public class Operations {
     }
 
     /**
-     * Choose from available loans of a given rating one loan to invest money into.
-     * @param oc Context for the current session.
-     * @param r Rating in question.
-     * @param loans Loans carrying that rating.
-     * @param loansInvested Previous loans invested either in this session or on the web.
-     * @param balance Latest known Zonky account balance.
-     * @return Present only if Zonky API confirmed money was invested or if dry run.
-     */
-    static Optional<Investment> identifyLoanToInvest(final OperationsContext oc, final Rating r,
-                                                     final Collection<Loan> loans,
-                                                     final Collection<Investment> loansInvested,
-                                                     final BigDecimal balance) {
-        if (loans == null || loans.size() == 0) {
-            Operations.LOGGER.info("There are no loans of rating '{}' matching the investment strategy.", r);
-            return Optional.empty();
-        } else {
-            Operations.LOGGER.debug("Zonky retrieved the following loans with rating '{}': {}", r,
-                    Util.loansToLoanIds(loans));
-        }
-        // sort loans by their term and start investing
-        final boolean prefersLongTerm = oc.getStrategy().prefersLongerTerms(r);
-        Operations.LOGGER.info("Investment strategy for rating '{}' prefers {} term loans.", r,
-                prefersLongTerm ? "longer" : "shorter");
-        for (final Loan l : Util.sortLoansByTerm(loans, prefersLongTerm)) {
-            if (Util.isLoanPresent(l, loansInvested)) {
-                Operations.LOGGER.debug("Already invested in loan {}, skipping.", l.getId());
-                continue;
-            } else if (!oc.getStrategy().isAcceptable(l)) {
-                Operations.LOGGER.info("According to the investment strategy, loan {} is not acceptable.", l.getId());
-                continue;
-            }
-            final Optional<Investment> investment = Operations.actuallyInvest(oc, l, balance);
-            if (investment.isPresent()) {
-                return investment;
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     *
-     * @param oc Context for the current session.
-     * @param currentShare Current share of investments in a given rating.
-     * @return Ratings in the order of decreasing demand. Over-invested ratings not present.
-     */
-    static List<Rating> rankRatingsByDemand(final OperationsContext oc, final Map<Rating, BigDecimal> currentShare) {
-        final SortedMap<BigDecimal, List<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
-        // put the ratings into buckets based on how much we're missing them
-        currentShare.forEach((r, currentRatingShare) -> {
-            final BigDecimal maximumAllowedShare = oc.getStrategy().getTargetShare(r);
-            final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
-            if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; ignore
-                return;
-            }
-            mostWantedRatings.compute(undershare, (k, v) -> { // each rating unique at source, so list works
-                final List<Rating> target = (v == null) ? new ArrayList<>(1) : v;
-                target.add(r);
-                return target;
-            });
-        });
-        // and now output ratings in an order, more under-invested go first
-        final List<Rating> result = mostWantedRatings.entrySet().stream().map(Map.Entry::getValue)
-                .reduce(new ArrayList<>(Rating.values().length), (a, b) -> {
-                    a.addAll(b);
-                    return a;
-                });
-        return Collections.unmodifiableList(result);
-    }
-
-    /**
      * Choose from available loans the most important loan to invest money into.
      * @param oc Context for the current session.
      * @param stats Statistics retrieved from Zonky.
@@ -227,16 +154,21 @@ public class Operations {
                                                      final BigDecimal balance) {
         // calculate share of particular ratings on the overall investment pie
         final Map<Rating, BigDecimal> shareOfRatings = Operations.calculateSharesPerRating(stats, investments);
-        final List<Rating> mostWantedRatings = Operations.rankRatingsByDemand(oc, shareOfRatings);
         Operations.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.", shareOfRatings);
-        Operations.LOGGER.info("According to the investment strategy, the portfolio is low on following ratings: {}.",
-                mostWantedRatings);
-        // find and sort available loans
-        final Map<Rating, Collection<Loan>> availableLoans =
-                Util.sortAvailableLoansByRating(oc.getZotifyApi().getLoans());
-        for (final Rating r : mostWantedRatings) { // try to invest in a given rating
-            final Optional<Investment> investment =
-                    Operations.identifyLoanToInvest(oc, r, availableLoans.get(r), investments, balance);
+        // find and sort acceptable loans
+        final List<Loan> allLoansFromApi = oc.getZotifyApi().getLoans();
+        final List<Loan> afterInvestmentsExcluded = allLoansFromApi.stream()
+                .filter(l -> !Util.isLoanPresent(l, investments)).collect(Collectors.toList());
+        final List<Loan> loans = oc.getStrategy().getMatchingLoans(afterInvestmentsExcluded, shareOfRatings);
+        if (loans == null || loans.size() == 0) {
+            Operations.LOGGER.info("There are no loans matching the investment strategy.");
+            return Optional.empty();
+        } else {
+            Operations.LOGGER.debug("Investment strategy accepted the following loans: {}", loans);
+        }
+        // and try investing for as long as one loan succeeds
+        for (final Loan l : loans) {
+            final Optional<Investment> investment = Operations.actuallyInvest(oc, l, balance);
             if (investment.isPresent()) {
                 return investment;
             }
@@ -278,7 +210,7 @@ public class Operations {
                 api.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
                 Operations.retrieveInvestmentsRepresentedByBlockedAmounts(oc));
         Operations.LOGGER.debug("The following loans are coming from the API as already invested into: {}",
-                Util.investmentsToLoanIds(investments));
+                investments);
         final Statistics stats = api.getStatistics();
         // and start investing
         final Collection<Investment> investmentsMade = new ArrayList<>();
