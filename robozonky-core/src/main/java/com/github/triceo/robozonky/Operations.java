@@ -118,30 +118,6 @@ public class Operations {
     }
 
     /**
-     * Put money into a pre-selected loan.
-     * @param oc Context for the current session.
-     * @param l Loan to invest into.
-     * @param balance Latest known Zonky account balance.
-     * @return Present only if Zonky API confirmed money was invested or if dry run.
-     */
-    static Optional<Investment> actuallyInvest(final OperationsContext oc, final Loan l, final BigDecimal balance) {
-        // figure out how much to invest
-        final int resultingInvestment = oc.getStrategy().recommendInvestmentAmount(l, balance);
-        Operations.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.", resultingInvestment,
-                balance.intValue());
-        if (resultingInvestment < Operations.MINIMAL_INVESTMENT_ALLOWED) {
-            Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
-                    l, resultingInvestment);
-            return Optional.empty();
-        } else if (resultingInvestment > balance.intValue()) {
-            Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) more than {} CZK balance.",
-                    l, resultingInvestment, balance);
-            return Optional.empty();
-        }
-        return Operations.invest(oc, l, resultingInvestment);
-    }
-
-    /**
      * Choose from available loans the most important loan to invest money into.
      * @param oc Context for the current session.
      * @param stats Statistics retrieved from Zonky.
@@ -159,21 +135,37 @@ public class Operations {
         final List<Loan> allLoansFromApi = oc.getZotifyApi().getLoans();
         final List<Loan> afterInvestmentsExcluded = allLoansFromApi.stream()
                 .filter(l -> !Util.isLoanPresent(l, investments)).collect(Collectors.toList());
-        final List<Loan> loans = oc.getStrategy().getMatchingLoans(afterInvestmentsExcluded, shareOfRatings);
+        final List<Loan> loans = oc.getStrategy().getMatchingLoans(afterInvestmentsExcluded, shareOfRatings, balance);
         if (loans == null || loans.size() == 0) {
             Operations.LOGGER.info("There are no loans matching the investment strategy.");
             return Optional.empty();
         } else {
             Operations.LOGGER.debug("Investment strategy accepted the following loans: {}", loans);
         }
-        // and try investing for as long as one loan succeeds
+        // and try investing until one loan succeeds
         for (final Loan l : loans) {
-            final Optional<Investment> investment = Operations.actuallyInvest(oc, l, balance);
+            final int invest = oc.getStrategy().recommendInvestmentAmount(l, shareOfRatings, balance);
+            Operations.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.", invest, balance);
+            final Optional<Investment> investment = Operations.actuallyInvest(oc, l, invest, balance);
             if (investment.isPresent()) {
                 return investment;
             }
         }
         return Optional.empty();
+    }
+
+    static Optional<Investment> actuallyInvest(final OperationsContext oc, final Loan l, final int investment,
+                                               final BigDecimal balance) {
+        if (investment < Operations.MINIMAL_INVESTMENT_ALLOWED) {
+            Operations.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
+                    l, investment);
+            return Optional.empty();
+        } else if (investment > balance.intValue()) {
+            Operations.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK balance.",
+                    l, investment, balance);
+            return Optional.empty();
+        }
+        return Operations.invest(oc, l, investment);
     }
 
     static BigDecimal getAvailableBalance(final OperationsContext oc) {

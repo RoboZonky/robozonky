@@ -97,7 +97,8 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public List<Loan> getMatchingLoans(final List<Loan> availableLoans, final Map<Rating, BigDecimal> shareOfRatings) {
+    public List<Loan> getMatchingLoans(final List<Loan> availableLoans, final Map<Rating, BigDecimal> shareOfRatings,
+                                       final BigDecimal availableBalance) {
         final List<Rating> mostWantedRatings = this.rankRatingsByDemand(shareOfRatings);
         SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, the portfolio is low "
                 + "on following ratings: {}.", mostWantedRatings);
@@ -119,7 +120,8 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public int recommendInvestmentAmount(final Loan loan, final BigDecimal balance) {
+    public int recommendInvestmentAmount(final Loan loan, final Map<Rating, BigDecimal> ratingShare,
+                                         final BigDecimal balance) {
         final BigDecimal maxAllowedInvestmentIncrement =
                 BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT);
         BigDecimal tmp = BigDecimal.valueOf(individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan));

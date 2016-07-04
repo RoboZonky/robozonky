@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-rules.RuleBasedInvestmentStrategyService
+com.github.triceo.robozonky.strategy.rules.RuleBasedInvestmentStrategyService

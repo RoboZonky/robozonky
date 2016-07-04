@@ -36,17 +36,20 @@ public interface InvestmentStrategy {
      *
      * @param availableLoans Loans to be evaluated for acceptability.
      * @param ratingShare How much money is invested in a given rating, compared to the sum total of all investments.
+     * @param availableBalance Balance available in the user's wallet.
      * @return List of acceptable loans, ordered by their priority.
      */
-    List<Loan> getMatchingLoans(List<Loan> availableLoans, Map<Rating, BigDecimal> ratingShare);
+    List<Loan> getMatchingLoans(List<Loan> availableLoans, Map<Rating, BigDecimal> ratingShare,
+                                BigDecimal availableBalance);
 
     /**
      * Recommend the size of an investment based on loan parameters.
      *
      * @param loan Loan in question.
-     * @param availableBalance User's available cash.
+     * @param ratingShare How much money is invested in a given rating, compared to the sum total of all investments.
+     * @param availableBalance Balance available in the user's wallet.
      * @return Amount in CZK, recommended to invest.
      */
-    int recommendInvestmentAmount(Loan loan, BigDecimal availableBalance);
+    int recommendInvestmentAmount(Loan loan, Map<Rating, BigDecimal> ratingShare, BigDecimal availableBalance);
 
 }

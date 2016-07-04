@@ -86,13 +86,13 @@ public class SimpleInvestmentStategyTest {
         // with unlimited balance
         final int maxInvestment = Math.min(loanAmount.multiply(SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A).intValue(),
                 SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT);
-        final int actualInvestment = overallStrategy.recommendInvestmentAmount(mockLoan,
+        final int actualInvestment = overallStrategy.recommendInvestmentAmount(mockLoan, null,
                 BigDecimal.valueOf(Integer.MAX_VALUE));
         Assertions.assertThat(actualInvestment).isLessThanOrEqualTo(maxInvestment);
 
         // with balance just a little less than the recommended investment
         final int adjustedForBalance =
-                overallStrategy.recommendInvestmentAmount(mockLoan, BigDecimal.valueOf(actualInvestment - 1));
+                overallStrategy.recommendInvestmentAmount(mockLoan, null, BigDecimal.valueOf(actualInvestment - 1));
         Assertions.assertThat(adjustedForBalance).isLessThanOrEqualTo(actualInvestment);
 
         // and make sure the recommendation is 200 times X, where X is a positive integer
