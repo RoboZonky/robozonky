@@ -160,7 +160,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     }
 
     @Override
-    public boolean isSupported(File strategyFile) {
+    public boolean isSupported(final File strategyFile) {
         return strategyFile.getAbsolutePath().endsWith(".cfg");
     }
 
