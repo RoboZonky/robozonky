@@ -18,38 +18,20 @@ package com.github.triceo.robozonky;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.Investment;
-
-import static java.util.Comparator.comparing;
+import com.github.triceo.robozonky.remote.Loan;
 
 public class Util {
 
-    protected static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
-    protected static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
-
-    static List<Loan> sortLoansByTerm(final Collection<Loan> loans, final boolean longestFirst) {
-        final List<Loan> sortedLoans = new ArrayList<>(new HashSet<>(loans)); // unique loans
-        Comparator<Loan> loanComparator = comparing(Loan::getTermInMonths);
-        if (longestFirst) {
-            loanComparator = loanComparator.reversed();
-        }
-        Collections.sort(sortedLoans, loanComparator);
-        return Collections.unmodifiableList(sortedLoans);
-    }
+    static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
+    static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
 
     /**
      * Determine whether or not a given loan is present among existing investments.
@@ -71,34 +53,13 @@ public class Util {
         return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    static List<Integer> investmentsToLoanIds(final Collection<Investment> investments) {
-        return investments.stream().map(Investment::getLoanId).collect(Collectors.toList());
-    }
-
-    static Map<Rating, Collection<Loan>> sortAvailableLoansByRating(final Collection<Loan> loans) {
-        final Map<Rating, Collection<Loan>> result = new EnumMap<>(Rating.class);
-        for (final Loan l: loans) {
-            if (l.getRemainingInvestment() < Operations.MINIMAL_INVESTMENT_ALLOWED) {
-                continue;
-            }
-            final Rating r = l.getRating();
-            if (!result.containsKey(r)) {
-                result.put(r, new ArrayList<>());
-            }
-            result.get(r).add(l);
-        }
-        return Collections.unmodifiableMap(result);
-    }
-
-    static List<Integer> loansToLoanIds(final Collection<Loan> loans) {
-        return loans.stream().map(Loan::getId).collect(Collectors.toList());
-    }
-
     static Collection<Investment> mergeInvestments(final Collection<Investment> left,
                                                    final Collection<Investment> right) {
-        if (left.size() == 0) {
+        if (left.isEmpty() && right.isEmpty()) {
+            return Collections.emptyList();
+        } else if (left.isEmpty()) {
             return Collections.unmodifiableCollection(right);
-        } else if (right.size() == 0) {
+        } else if (right.isEmpty()) {
             return Collections.unmodifiableCollection(left);
         } else {
             final Map<Integer, Investment> investments
@@ -116,7 +77,7 @@ public class Util {
             final Properties props = new Properties();
             props.load(url.openStream());
             return props.getProperty("version", Util.ZONKY_VERSION_UNKNOWN);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             return Util.ZONKY_VERSION_UNDETECTED;
         }
     }

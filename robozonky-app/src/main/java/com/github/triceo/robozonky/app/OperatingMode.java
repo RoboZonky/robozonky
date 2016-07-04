@@ -23,55 +23,61 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
+import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import org.apache.commons.cli.Option;
 
 enum OperatingMode {
 
     STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN) {
         @Override
-        public AppContext setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
+        public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
             if (cli.getLoanAmount().isPresent() || cli.getLoanId().isPresent()) {
                 cli.printHelpAndExit("Loan data makes no sense in this context.", true);
-                return null;
+                return Optional.empty();
             }
             final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
             if (!strategyFilePath.isPresent()) {
                 cli.printHelpAndExit("Strategy file must be provided.", true);
-                return null;
+                return Optional.empty();
             }
             final File strategyConfig = new File(strategyFilePath.get());
             if (!strategyConfig.canRead()) {
                 cli.printHelpAndExit("Investment strategy file must be readable.", true);
-                return null;
+                return Optional.empty();
             }
             try {
-                if (cli.isDryRun()) {
-                    return new AppContext(auth, StrategyParser.parse(strategyConfig), cli.getDryRunBalance());
+                final Optional<InvestmentStrategy> strategy = InvestmentStrategyLoader.load(strategyConfig);
+                if (!strategy.isPresent()) {
+                    throw new IllegalStateException("No investment strategy found to support "
+                            + strategyConfig.getAbsolutePath());
+                } else if (cli.isDryRun()) {
+                    return Optional.of(new AppContext(auth, strategy.get(), cli.getDryRunBalance()));
                 } else {
-                    return new AppContext(auth, StrategyParser.parse(strategyConfig));
+                    return Optional.of(new AppContext(auth, strategy.get()));
                 }
-            } catch (final Exception ex) {
+            } catch (final InvestmentStrategyParseException ex) {
                 cli.printHelpAndExit("Failed parsing strategy.", ex);
-                return null;
+                return Optional.empty();
             }
         }
     },
     USER_DRIVEN(CommandLineInterface.OPTION_INVESTMENT, CommandLineInterface.OPTION_AMOUNT,
             CommandLineInterface.OPTION_DRY_RUN) {
         @Override
-        public AppContext setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
+        public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
             final Optional<Integer> loanId = cli.getLoanId();
             final Optional<Integer> loanAmount = cli.getLoanAmount();
             if (!loanId.isPresent() || loanId.get() < 1) {
                 cli.printHelpAndExit("Loan ID must be provided and greater than 0.", true);
-                return null;
+                return Optional.empty();
             } else if (!loanAmount.isPresent() || loanAmount.get() < 1) {
                 cli.printHelpAndExit("Loan amount must be provided and greater than 0.", true);
-                return null;
+                return Optional.empty();
             } else if (cli.isDryRun()) {
-                return new AppContext(auth, loanId.get(), loanAmount.get(), cli.getDryRunBalance());
+                return Optional.of(new AppContext(auth, loanId.get(), loanAmount.get(), cli.getDryRunBalance()));
             } else {
-                return new AppContext(auth, loanId.get(), loanAmount.get());
+                return Optional.of(new AppContext(auth, loanId.get(), loanAmount.get()));
             }
         }
     };
@@ -92,5 +98,5 @@ enum OperatingMode {
         return otherOptions;
     }
 
-    public abstract AppContext setup(final CommandLineInterface cli, final AuthenticationHandler auth);
+    public abstract Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth);
 }

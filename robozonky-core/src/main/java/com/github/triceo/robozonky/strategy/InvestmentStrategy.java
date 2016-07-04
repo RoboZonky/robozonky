@@ -13,53 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.triceo.robozonky.strategy;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 
-public class InvestmentStrategy {
+/**
+ * Determines which loans will be invested into, and how much. What the strategy does or does not allow depends on the
+ * {@link InvestmentStrategyService} implementation.
+ */
+public interface InvestmentStrategy {
 
-    protected static final int MINIMAL_INVESTMENT_INCREMENT = 200;
-    private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
+    int MINIMAL_INVESTMENT_INCREMENT = 200;
 
-    InvestmentStrategy(final Map<Rating, StrategyPerRating> individualStrategies) {
-        for (final Rating r: Rating.values()) {
-            if (!individualStrategies.containsKey(r)) {
-                throw new IllegalArgumentException("Missing strategy for rating " + r);
-            }
-            final StrategyPerRating s = individualStrategies.get(r);
-            this.individualStrategies.put(r, s);
-        }
-    }
+    /**
+     * Retrieve a list of loans that are acceptable by the strategy, in the order in which they are to be evaluated.
+     *
+     * @param availableLoans Loans to be evaluated for acceptability.
+     * @param ratingShare How much money is invested in a given rating, compared to the sum total of all investments.
+     * @param availableBalance Balance available in the user's wallet.
+     * @return List of acceptable loans, ordered by their priority.
+     */
+    List<Loan> getMatchingLoans(List<Loan> availableLoans, Map<Rating, BigDecimal> ratingShare,
+                                BigDecimal availableBalance);
 
-    public BigDecimal getTargetShare(final Rating r) {
-        return this.individualStrategies.get(r).getTargetShare();
-    }
-
-    public boolean prefersLongerTerms(final Rating r) {
-        return this.individualStrategies.get(r).isPreferLongerTerms();
-    }
-
-    public boolean isAcceptable(final Loan loan) {
-        return individualStrategies.get(loan.getRating()).isAcceptable(loan);
-    }
-
-    public int recommendInvestmentAmount(final Loan loan, final BigDecimal balance) {
-        final BigDecimal maxAllowedInvestmentIncrement =
-                BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT);
-        BigDecimal tmp = BigDecimal.valueOf(individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan));
-        // round to nearest lower increment
-        tmp = tmp.min(balance);
-        tmp = tmp.divide(maxAllowedInvestmentIncrement, 0, RoundingMode.DOWN); // make sure we never exceed max allowed
-        tmp = tmp.multiply(maxAllowedInvestmentIncrement);
-        // make sure we never submit more than there is remaining in the loan
-        return Math.min(tmp.intValue(), (int) loan.getRemainingInvestment());
-    }
+    /**
+     * Recommend the size of an investment based on loan parameters.
+     *
+     * @param loan Loan in question.
+     * @param ratingShare How much money is invested in a given rating, compared to the sum total of all investments.
+     * @param availableBalance Balance available in the user's wallet.
+     * @return Amount in CZK, recommended to invest.
+     */
+    int recommendInvestmentAmount(Loan loan, Map<Rating, BigDecimal> ratingShare, BigDecimal availableBalance);
 
 }

@@ -162,16 +162,9 @@ public class Loan implements BaseEntity {
         final StringBuilder sb = new StringBuilder("Loan{");
         sb.append("id=").append(id);
         sb.append(", termInMonths=").append(termInMonths);
-        sb.append(", investmentsCount=").append(investmentsCount);
         sb.append(", userId=").append(userId);
         sb.append(", amount=").append(amount);
-        sb.append(", remainingInvestment=").append(remainingInvestment);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", interestRate=").append(interestRate);
-        sb.append(", datePublished=").append(datePublished);
-        sb.append(", deadline=").append(deadline);
         sb.append(", rating=").append(rating);
-        sb.append(", myInvestment=").append(myInvestment);
         sb.append('}');
         return sb.toString();
     }

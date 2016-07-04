@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.strategy;
+
+package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
 
@@ -32,7 +33,7 @@ class StrategyPerRating {
     private final int minimumAcceptableTerm, maximumAcceptableTerm, maximumInvestmentAmount, minimumAskAmount,
             maximumAskAmount;
 
-    public StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm, final int maxTerm,
+    StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm, final int maxTerm,
                              final int maxLoanAmount, final BigDecimal maxLoanShare, final int minAskAmount,
                              final int maxAskAmount, final boolean preferLongerTerms) {
         this.rating = rating;

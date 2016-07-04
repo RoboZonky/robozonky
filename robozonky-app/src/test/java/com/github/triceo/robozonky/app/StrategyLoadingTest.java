@@ -17,8 +17,11 @@
 package com.github.triceo.robozonky.app;
 
 import java.io.File;
+import java.util.Optional;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
+import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -41,8 +44,9 @@ public class StrategyLoadingTest {
     public File strategy;
 
     @Test
-    public void loadStrategy() throws ConfigurationException {
-        StrategyParser.parse(this.strategy);
+    public void loadStrategy() throws InvestmentStrategyParseException {
+        final Optional<InvestmentStrategy> inv = InvestmentStrategyLoader.load(this.strategy);
+        Assertions.assertThat(inv).isPresent();
     }
 
 }

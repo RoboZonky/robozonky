@@ -117,7 +117,12 @@ class App {
             cli.printHelpAndExit("", false);
             return null;
         }
-        return om.get().setup(cli, App.getAuthenticationMethod(cli));
+        final Optional<AppContext> ctx = om.get().setup(cli, App.getAuthenticationMethod(cli));
+        if (ctx.isPresent()) {
+            return ctx.get();
+        } else {
+            return null; // should never happen
+        }
     }
 
     public static void main(final String... args) {

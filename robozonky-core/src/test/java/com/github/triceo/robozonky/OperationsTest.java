@@ -33,62 +33,11 @@ import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class OperationsTest {
-
-    private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
-                                                           final BigDecimal ratingC) {
-        final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
-        map.put(Rating.A, ratingA);
-        map.put(Rating.B, ratingB);
-        map.put(Rating.C, ratingC);
-        return Collections.unmodifiableMap(map);
-    }
-
-    private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
-        Assertions.assertThat(result).hasSize(ratingsOrderedDown.length);
-        if (ratingsOrderedDown.length < 2) {
-            return;
-        } else if (ratingsOrderedDown.length > 3) {
-            throw new IllegalStateException("This should never happen in the test.");
-        }
-        final Rating first = result.get(0);
-        final Rating last = result.get(result.size() - 1);
-        Assertions.assertThat(first).isGreaterThan(last);
-        Assertions.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
-        Assertions.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
-    }
-
-    @Test
-    public void properRankingOfRatings() {
-        final BigDecimal targetShareA = BigDecimal.valueOf(0.001);
-        final BigDecimal targetShareB = targetShareA.multiply(BigDecimal.TEN);
-        final BigDecimal targetShareC = targetShareB.multiply(BigDecimal.TEN);
-
-        // prepare the mocks of strategy and context
-        final InvestmentStrategy strategy = Mockito.mock(InvestmentStrategy.class);
-        Mockito.when(strategy.getTargetShare(Rating.A)).thenReturn(targetShareA);
-        Mockito.when(strategy.getTargetShare(Rating.B)).thenReturn(targetShareB);
-        Mockito.when(strategy.getTargetShare(Rating.C)).thenReturn(targetShareC);
-        final OperationsContext ctx = Mockito.mock(OperationsContext.class);
-        Mockito.when(ctx.getStrategy()).thenReturn(strategy);
-
-        // all ratings have zero share; C > B > A
-        Map<Rating, BigDecimal> tmp = OperationsTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.C, Rating.B, Rating.A);
-
-        // A only; B, C overinvested
-        tmp = OperationsTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.TEN);
-        OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.A);
-
-        // B > C > A
-        tmp = OperationsTest.prepareShareMap(BigDecimal.valueOf(0.00095), BigDecimal.ZERO, BigDecimal.valueOf(0.099));
-        OperationsTest.assertOrder(Operations.rankRatingsByDemand(ctx, tmp), Rating.B, Rating.C, Rating.A);
-    }
 
     private static List<Investment> getMockInvestmentWithBalance(final int loanAmount) {
         final Investment i = Mockito.mock(Investment.class);
