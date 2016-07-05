@@ -34,13 +34,11 @@ public class PortfolioOverview {
 
     public static PortfolioOverview calculate(final BigDecimal balance, final Statistics stats,
                                               final Collection<Investment> investments) {
+        // first figure out how much we have in outstanding loans
         final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
                 Collectors.toMap(RiskPortfolio::getRating, risk -> BigDecimal.valueOf(risk.getUnpaid()))
         );
-        // make sure ratings are present even when there's 0 invested in them
-        Arrays.stream(Rating.values()).filter(r -> !amounts.containsKey(r))
-                .forEach(r -> amounts.put(r, BigDecimal.ZERO));
-        // make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
+        // then make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {
             final Rating r = previousInvestment.getRating();
             final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getAmount());
@@ -51,11 +49,20 @@ public class PortfolioOverview {
 
     private final BigDecimal czkAvailable, czkInvested;
     private final Map<Rating, BigDecimal> czkInvestedPerRating;
+    private final Map<Rating, BigDecimal> sharesOnInvestment;
 
     private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating) {
         this.czkAvailable = czkAvailable;
         this.czkInvested = Util.sum(czkInvestedPerRating.values());
         this.czkInvestedPerRating = czkInvestedPerRating;
+        if (this.czkInvested.intValue() == 0) {
+            this.sharesOnInvestment = Collections.emptyMap();
+        } else {
+            this.sharesOnInvestment = Arrays.stream(Rating.values()).collect(Collectors.toMap(
+                    Function.identity(),
+                    r -> this.getCzkInvested(r).divide(this.czkInvested, 4, RoundingMode.HALF_EVEN))
+            );
+        }
     }
 
     public BigDecimal getCzkAvailable() {
@@ -71,12 +78,10 @@ public class PortfolioOverview {
     }
 
     public BigDecimal getShareOnInvestment(final Rating r) {
-        return this.getCzkInvested(r).divide(this.getCzkInvested(), 4, RoundingMode.HALF_EVEN);
+        return this.sharesOnInvestment.getOrDefault(r, BigDecimal.ZERO);
     }
 
-    // FIXME optimize
     public Map<Rating, BigDecimal> getSharesOnInvestment() {
-        return Arrays.stream(Rating.values())
-                .collect(Collectors.toMap(Function.identity(), r -> this.getShareOnInvestment(r)));
+        return this.sharesOnInvestment;
     }
 }
