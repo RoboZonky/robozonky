@@ -21,13 +21,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -64,7 +65,7 @@ public class SimpleInvestmentStategyTest {
         strategies.put(SimpleInvestmentStategyTest.RATING_B, SimpleInvestmentStategyTest.STRATEGY_B);
         strategies.put(Rating.C, Mockito.mock(StrategyPerRating.class));
         strategies.put(Rating.D, Mockito.mock(StrategyPerRating.class));
-        overallStrategy = new SimpleInvestmentStrategy(strategies);
+        overallStrategy = new SimpleInvestmentStrategy(0, strategies);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -72,7 +73,7 @@ public class SimpleInvestmentStategyTest {
         final Map<Rating, StrategyPerRating> strategies = new EnumMap<>(Rating.class);
         strategies.put(SimpleInvestmentStategyTest.RATING_A, SimpleInvestmentStategyTest.STRATEGY_A);
         strategies.put(SimpleInvestmentStategyTest.RATING_B, SimpleInvestmentStategyTest.STRATEGY_B);
-        new SimpleInvestmentStrategy(strategies);
+        new SimpleInvestmentStrategy(0, strategies);
     }
 
     @Test
@@ -154,12 +155,12 @@ public class SimpleInvestmentStategyTest {
         final BigDecimal targetShareB = targetShareA.multiply(BigDecimal.TEN);
         final BigDecimal targetShareC = targetShareB.multiply(BigDecimal.TEN);
 
-        final Map<Rating, StrategyPerRating> strategies = new HashMap<>();
-        Arrays.stream(Rating.values()).forEach(r -> strategies.put(r, Mockito.mock(StrategyPerRating.class)));
+        final Map<Rating, StrategyPerRating> strategies = Arrays.stream(Rating.values())
+                .collect(Collectors.toMap(Function.identity(), r -> Mockito.mock(StrategyPerRating.class)));
         strategies.put(Rating.A, new StrategyPerRating(Rating.A, targetShareA, 1, 1, 1, BigDecimal.ONE, 1, 1, true));
         strategies.put(Rating.B, new StrategyPerRating(Rating.B, targetShareB, 1, 1, 1, BigDecimal.ONE, 1, 1, true));
         strategies.put(Rating.C, new StrategyPerRating(Rating.C, targetShareC, 1, 1, 1, BigDecimal.ONE, 1, 1, true));
-        final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(strategies);
+        final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(0, strategies);
 
         // all ratings have zero share; C > B > A
         Map<Rating, BigDecimal> tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO,
@@ -174,6 +175,36 @@ public class SimpleInvestmentStategyTest {
         tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.valueOf(0.00095), BigDecimal.ZERO,
                 BigDecimal.valueOf(0.099));
         SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(tmp), Rating.B, Rating.C, Rating.A);
+    }
+
+    @Test
+    public void doesNotAllowUnderinvesting() {
+        final int balance = 100;
+        final Map<Rating, StrategyPerRating> strategies = Arrays.stream(Rating.values())
+                .collect(Collectors.toMap(Function.identity(), r -> {
+                    final StrategyPerRating s = Mockito.mock(StrategyPerRating.class);
+                    Mockito.when(s.getRating()).thenReturn(r);
+                    Mockito.when(s.getTargetShare()).thenReturn(BigDecimal.valueOf(0.1));
+                    Mockito.when(s.isAcceptable(Mockito.any())).thenReturn(true);
+                    return s;
+                }));
+        final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(balance, strategies);
+
+        // all ratings have zero share; C > B > A
+        Map<Rating, BigDecimal> tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO);
+
+        // prepare some loans
+        final Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A);
+        final Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B);
+        final Loan c1 = SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C);
+        final Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A);
+        final List<Loan> loans = Arrays.asList(a1, b1, c1, a2);
+
+        // make sure we never go below the minimum balance
+        Assertions.assertThat(sis.getMatchingLoans(loans, tmp, BigDecimal.valueOf(balance + 1))).isNotEmpty();
+        Assertions.assertThat(sis.getMatchingLoans(loans, tmp, BigDecimal.valueOf(balance))).isNotEmpty();
+        Assertions.assertThat(sis.getMatchingLoans(loans, tmp, BigDecimal.valueOf(balance - 1))).isEmpty();
     }
 
 }

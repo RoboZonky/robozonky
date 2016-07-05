@@ -47,6 +47,8 @@ public interface InvestmentStrategy {
 
     /**
      * Retrieve a list of loans that are acceptable by the strategy, in the order in which they are to be evaluated.
+     * After an investment has been made into any single one of these loans, the strategy should be called again to
+     * re-evaluate the resulting situation.
      *
      * @param availableLoans Loans to be evaluated for acceptability.
      * @param ratingShare How much money is invested in a given rating, compared to the sum total of all investments.

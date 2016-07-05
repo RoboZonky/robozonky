@@ -20,7 +20,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.remote.Rating;
@@ -37,23 +37,29 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategyService.class);
 
-    private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property,
-                                  final Function<String, T> supplier) {
-        final String propertyName = property + '.' + r.name();
-        final String fallbackPropertyName = property + ".default";
-        if (config.containsKey(propertyName)) {
-            return supplier.apply(propertyName);
-        } else if (config.containsKey(fallbackPropertyName)) {
-            return supplier.apply(fallbackPropertyName);
+    private static <T> Optional<T> getValue(final ImmutableConfiguration config, final String property,
+                                            final Function<String, T> supplier) {
+        if (config.containsKey(property)) {
+            return Optional.of(supplier.apply(property));
         } else {
-            throw new IllegalStateException("Investment strategy is incomplete. Missing value for '" + property
-                    + "' and rating '" + r + '\'');
+            return Optional.empty();
         }
     }
 
     private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property,
-                                  final BiFunction<String, T, T> supplier, final T def) {
-        return SimpleInvestmentStrategyService.getValue(config, r, property, (a) -> supplier.apply(a, def));
+                                  final Function<String, T> supplier) {
+        final String propertyName = property + '.' + r.name();
+        final Optional<T> result = SimpleInvestmentStrategyService.getValue(config, propertyName, supplier);
+        if (result.isPresent()) {
+            return result.get();
+        }
+        final String fallbackPropertyName = property + ".default";
+        final Optional<T> fallback = SimpleInvestmentStrategyService.getValue(config, fallbackPropertyName, supplier);
+        if (fallback.isPresent()) {
+            return fallback.get();
+        }
+        throw new IllegalStateException("Investment strategy is incomplete. Missing value for '" + property
+                + "' and rating '" + r + '\'');
     }
 
     private static ImmutableConfiguration getConfig(final File strategyFile) throws InvestmentStrategyParseException {
@@ -81,13 +87,11 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             }
             sumShares = sumShares.add(targetShare);
             // terms
-            final int minTerm = SimpleInvestmentStrategyService.getValue(config, rating, "minimumTerm",
-                    config::getInteger, 0);
+            final int minTerm = SimpleInvestmentStrategyService.getValue(config, rating, "minimumTerm", config::getInt);
             if (minTerm < -1) {
                 throw new IllegalStateException("Minimum acceptable term for rating " + rating + " is negative.");
             }
-            final int maxTerm = SimpleInvestmentStrategyService.getValue(config, rating, "maximumTerm",
-                    config::getInteger, 0);
+            final int maxTerm = SimpleInvestmentStrategyService.getValue(config, rating, "maximumTerm", config::getInt);
             if (maxTerm < -1) {
                 throw new IllegalStateException("Maximum acceptable term for rating " + rating + " is negative.");
             } else if (minTerm > maxTerm && maxTerm != -1) {
@@ -96,12 +100,12 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             }
             // loan asks
             final int minAskAmount = SimpleInvestmentStrategyService.getValue(config, rating, "minimumAsk",
-                    config::getInteger, 0);
+                    config::getInt);
             if (minAskAmount < -1) {
                 throw new IllegalStateException("Minimum acceptable ask amount for rating " + rating + " is negative.");
             }
             final int maxAskAmount = SimpleInvestmentStrategyService.getValue(config, rating, "maximumAsk",
-                    config::getInteger, 0);
+                    config::getInt);
             if (maxAskAmount < -1) {
                 throw new IllegalStateException("Maximum acceptable ask for rating " + rating + " is negative.");
             } else if (minAskAmount > maxAskAmount && maxAskAmount != -1) {
@@ -110,7 +114,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             }
             // investment amounts
             final int maxLoanAmount = SimpleInvestmentStrategyService.getValue(config, rating, "maximumLoanAmount",
-                    config::getInteger, 0);
+                    config::getInt);
             if (maxLoanAmount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
                 throw new IllegalStateException("Maximum investment amount for rating " + rating
                         + "  is smaller than minimum.");
@@ -125,6 +129,16 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                     targetShare, minTerm, maxTerm, minAskAmount, maxAskAmount, maxLoanAmount, maxLoanShare,
                     preferLongerTerms));
         }
+        final Optional<Integer> maybeBalance = SimpleInvestmentStrategyService.getValue(config, "minimumBalance",
+                config::getInt);
+        if (!maybeBalance.isPresent()) {
+            throw new IllegalStateException("Minimum balance is missing.");
+        }
+        final int minimumBalance = maybeBalance.get();
+        if (minimumBalance < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
+            throw new IllegalStateException("Minimum balance is less than "
+                    + InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED + " CZK.");
+        }
         if (sumShares.compareTo(BigDecimal.ONE) > 0) {
             SimpleInvestmentStrategyService.LOGGER.warn("Sum of target shares ({}) is larger than 1. Some ratings are "
                     + "likely to be over-represented.", sumShares);
@@ -132,7 +146,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             SimpleInvestmentStrategyService.LOGGER.warn("Sum of target shares ({}) is smaller than 1. You are likely "
                     + "to leave money unspent in your wallet.", sumShares);
         }
-        return new SimpleInvestmentStrategy(individualStrategies);
+        return new SimpleInvestmentStrategy(minimumBalance, individualStrategies);
     }
 
     private static StrategyPerRating createIndividualStrategy(final Rating r, final BigDecimal targetShare,
@@ -141,21 +155,23 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                                                               final int maxLoanAmount, final BigDecimal maxLoanShare,
                                                               final boolean preferLongerTerms) {
         SimpleInvestmentStrategyService.LOGGER.debug("Adding strategy for rating '{}'.", r.getCode());
-        SimpleInvestmentStrategyService.LOGGER.debug("Target share for rating '{}' among total investments is {}.", r.getCode(),
-                targetShare);
-        SimpleInvestmentStrategyService.LOGGER.debug("Range of acceptable loan amounts for rating '{}' is <{}, {}> CZK.",
-                r.getCode(), minAskAmount, maxAskAmount < 0 ? "+inf" : maxAskAmount);
-        SimpleInvestmentStrategyService.LOGGER.debug("Range of acceptable investment terms for rating '{}' is <{}, {}) months.",
-                r.getCode(), minTerm == -1 ? 0 : minTerm, maxTerm < 0 ? "+inf" : maxTerm + 1);
-        SimpleInvestmentStrategyService.LOGGER.debug("Maximum investment amount for rating '{}' is {} CZK.", r.getCode(), maxLoanAmount);
-        SimpleInvestmentStrategyService.LOGGER.debug("Maximum investment share for rating '{}' is {}.", r.getCode(), maxLoanShare);
+        SimpleInvestmentStrategyService.LOGGER.debug("Target share for rating '{}' among total investments is {}.",
+                r.getCode(), targetShare);
+        SimpleInvestmentStrategyService.LOGGER.debug("Range of acceptable loan amounts for rating '{}' is "
+                + "<{}, {}> CZK.", r.getCode(), minAskAmount, maxAskAmount < 0 ? "+inf" : maxAskAmount);
+        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable range of investment terms for rating '{}' is "
+                + "<{}, {}) months.", r.getCode(), minTerm == -1 ? 0 : minTerm, maxTerm < 0 ? "+inf" : maxTerm + 1);
+        SimpleInvestmentStrategyService.LOGGER.debug("Maximum investment amount for rating '{}' is {} CZK.",
+                r.getCode(), maxLoanAmount);
+        SimpleInvestmentStrategyService.LOGGER.debug("Maximum investment share for rating '{}' is {}.", r.getCode(),
+                maxLoanShare);
         if (preferLongerTerms) {
             SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' will prefer longer terms.", r.getCode());
         } else {
             SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' will prefer shorter terms.", r.getCode());
         }
-        return new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare, minAskAmount,
-                maxAskAmount, preferLongerTerms);
+        return new StrategyPerRating(r, targetShare, minTerm, maxTerm, maxLoanAmount, maxLoanShare,
+                minAskAmount, maxAskAmount, preferLongerTerms);
     }
 
     @Override

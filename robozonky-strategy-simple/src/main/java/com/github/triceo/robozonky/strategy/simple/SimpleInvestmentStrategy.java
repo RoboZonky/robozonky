@@ -30,9 +30,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,6 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategy.class);
     private static final Comparator<Loan> BY_TERM =
             (l1, l2) -> Integer.compare(l1.getTermInMonths(), l2.getTermInMonths());
-
-    private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
 
     static Map<Rating, Collection<Loan>> sortLoansByRating(final Collection<Loan> loans) {
         final Map<Rating, Collection<Loan>> result = new EnumMap<>(Rating.class);
@@ -86,7 +84,11 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         return Collections.unmodifiableList(result);
     }
 
-    SimpleInvestmentStrategy(final Map<Rating, StrategyPerRating> individualStrategies) {
+    private final int minimumBalance;
+    private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
+
+    SimpleInvestmentStrategy(final int minimumBalance, final Map<Rating, StrategyPerRating> individualStrategies) {
+        this.minimumBalance = minimumBalance;
         for (final Rating r: Rating.values()) {
             if (!individualStrategies.containsKey(r)) {
                 throw new IllegalArgumentException("Missing strategy for rating " + r);
@@ -99,6 +101,11 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     @Override
     public List<Loan> getMatchingLoans(final List<Loan> availableLoans, final Map<Rating, BigDecimal> shareOfRatings,
                                        final BigDecimal availableBalance) {
+        if (availableBalance.intValue() < this.minimumBalance) {
+            SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, {} CZK balance is less than "
+                    + "minimum {} CZK. Not recommending any loans.", availableBalance, this.minimumBalance);
+            return Collections.emptyList();
+        }
         final List<Rating> mostWantedRatings = this.rankRatingsByDemand(shareOfRatings);
         SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, the portfolio is low "
                 + "on following ratings: {}.", mostWantedRatings);
