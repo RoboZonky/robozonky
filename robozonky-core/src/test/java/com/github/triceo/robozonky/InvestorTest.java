@@ -17,19 +17,14 @@
 package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.Rating;
-import com.github.triceo.robozonky.remote.RiskPortfolio;
-import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -74,56 +69,6 @@ public class InvestorTest {
         final List<Investment> e = Collections.singletonList(I3_2);
         Assertions.assertThat(Investor.mergeInvestments(c, e)).containsExactly(I3);
         Assertions.assertThat(Investor.mergeInvestments(e, c)).containsExactly(I3_2);
-    }
-
-    private static void assertProperRatingShare(final Map<Rating, BigDecimal> result, final Rating r, final int amount,
-                                                final int total) {
-        final BigDecimal expectedShare
-                = BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_EVEN);
-        Assertions.assertThat(result.get(r)).isEqualTo(expectedShare);
-    }
-
-    private static List<Investment> getMockInvestmentWithBalance(final int loanAmount) {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getAmount()).thenReturn(loanAmount);
-        return Collections.singletonList(i);
-    }
-
-    @Test
-    public void properRatingShareCalculation() {
-        // mock necessary structures
-        final int amountAA = 300, amountB = 200, amountD = 100;
-        final int totalPie = amountAA + amountB + amountD;
-        final RiskPortfolio riskAA = new RiskPortfolio(Rating.AA, -1, amountAA, -1, -1);
-        final RiskPortfolio riskB = new RiskPortfolio(Rating.B, -1, amountB, -1, -1);
-        final RiskPortfolio riskD = new RiskPortfolio(Rating.D, -1, amountD, -1, -1);
-        final Statistics stats = Mockito.mock(Statistics.class);
-        Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(riskAA, riskB, riskD));
-
-        // check standard operation
-        Map<Rating, BigDecimal> result = Investor.calculateSharesPerRating(stats, Collections.emptyList());
-        InvestorTest.assertProperRatingShare(result, Rating.AA, amountAA, totalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.B, amountB, totalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.D, amountD, totalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.AAAAA, 0, totalPie); // test other ratings included
-        InvestorTest.assertProperRatingShare(result, Rating.AAAA, 0, totalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.AAA, 0, totalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.A, 0, totalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.C, 0, totalPie);
-        // check operation with offline investments
-        final int increment = 200, newTotalPie = totalPie + increment;
-        final List<Investment> investments = InvestorTest.getMockInvestmentWithBalance(increment);
-        final Investment i = investments.get(0);
-        Mockito.when(i.getRating()).thenReturn(Rating.D);
-        result = Investor.calculateSharesPerRating(stats, investments);
-        InvestorTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.D, amountD + increment, newTotalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.AAAAA, 0, newTotalPie); // test other ratings included
-        InvestorTest.assertProperRatingShare(result, Rating.AAAA, 0, newTotalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.AAA, 0, newTotalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.A, 0, newTotalPie);
-        InvestorTest.assertProperRatingShare(result, Rating.C, 0, newTotalPie);
     }
 
     @Test

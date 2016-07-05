@@ -19,10 +19,9 @@ package com.github.triceo.robozonky.strategy.rules;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
+import com.github.triceo.robozonky.PortfolioOverview;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
@@ -65,21 +64,20 @@ public class RuleBasedInvestmentStrategyServiceTest {
         Mockito.when(d.getId()).thenReturn(6);
         Mockito.when(d.getAmount()).thenReturn(50000.0);
         Mockito.when(d.getRating()).thenReturn(Rating.D);
-        // prepare rating share map
-        final Map<Rating, BigDecimal> shares = new EnumMap<>(Rating.class);
-        shares.put(Rating.AAAAA, BigDecimal.ZERO);
-        shares.put(Rating.AAAA, BigDecimal.ZERO);
-        shares.put(Rating.AAA, BigDecimal.ONE);
-        shares.put(Rating.AA, BigDecimal.ZERO);
-        shares.put(Rating.B, BigDecimal.ZERO);
-        shares.put(Rating.D, BigDecimal.ZERO);
+        // prepare portfolio
+        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10000));
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(100000));
+        Arrays.stream(Rating.values())
+                .forEach(r -> Mockito.when(portfolio.getShareOnInvestment(r)).thenReturn(BigDecimal.ZERO));
+        Mockito.when(portfolio.getShareOnInvestment(Rating.AAA)).thenReturn(BigDecimal.ONE);
         // check investing logic
         final List<Loan> loans = Arrays.asList(aaaaa, aaaa, aaa, aa, b, d);
-        final List<Loan> result = is.getMatchingLoans(loans, shares, null);
+        final List<Loan> result = is.getMatchingLoans(loans, portfolio);
         Assertions.assertThat(result).containsExactly(d, aaaa);
-        Assertions.assertThat(is.recommendInvestmentAmount(d, null, BigDecimal.valueOf(10000))).isEqualTo(200);
-        Assertions.assertThat(is.recommendInvestmentAmount(aaaa, null, BigDecimal.valueOf(10000))).isEqualTo(400);
-        Assertions.assertThat(is.recommendInvestmentAmount(aa, null, BigDecimal.valueOf(10000))).isZero();
+        Assertions.assertThat(is.recommendInvestmentAmount(d, portfolio)).isEqualTo(200);
+        Assertions.assertThat(is.recommendInvestmentAmount(aaaa, portfolio)).isEqualTo(400);
+        Assertions.assertThat(is.recommendInvestmentAmount(aa, portfolio)).isZero();
     }
 
 }

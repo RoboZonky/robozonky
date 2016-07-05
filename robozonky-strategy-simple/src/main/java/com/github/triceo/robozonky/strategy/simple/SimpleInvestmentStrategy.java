@@ -30,6 +30,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.PortfolioOverview;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
@@ -84,11 +85,13 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         return Collections.unmodifiableList(result);
     }
 
-    private final int minimumBalance;
+    private final int minimumBalance, investmentCeiling;
     private final Map<Rating, StrategyPerRating> individualStrategies = new EnumMap<>(Rating.class);
 
-    SimpleInvestmentStrategy(final int minimumBalance, final Map<Rating, StrategyPerRating> individualStrategies) {
+    SimpleInvestmentStrategy(final int minimumBalance, final int investmentCeiling,
+                             final Map<Rating, StrategyPerRating> individualStrategies) {
         this.minimumBalance = minimumBalance;
+        this.investmentCeiling = investmentCeiling;
         for (final Rating r: Rating.values()) {
             if (!individualStrategies.containsKey(r)) {
                 throw new IllegalArgumentException("Missing strategy for rating " + r);
@@ -98,15 +101,28 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         }
     }
 
-    @Override
-    public List<Loan> getMatchingLoans(final List<Loan> availableLoans, final Map<Rating, BigDecimal> shareOfRatings,
-                                       final BigDecimal availableBalance) {
+    private boolean isAcceptable(final PortfolioOverview portfolio) {
+        final BigDecimal availableBalance = portfolio.getCzkAvailable();
         if (availableBalance.intValue() < this.minimumBalance) {
-            SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, {} CZK balance is less than "
+            SimpleInvestmentStrategy.LOGGER.debug("According to the investment strategy, {} CZK balance is less than "
                     + "minimum {} CZK. Not recommending any loans.", availableBalance, this.minimumBalance);
+            return false;
+        }
+        final BigDecimal invested = portfolio.getCzkInvested();
+        if (invested.intValue() > this.investmentCeiling) {
+            SimpleInvestmentStrategy.LOGGER.debug("According to the investment strategy, {} CZK total investment "
+                    + "exceeds {} CZK ceiling. Not recommending any loans.", invested, this.investmentCeiling);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public List<Loan> getMatchingLoans(final List<Loan> availableLoans, final PortfolioOverview portfolio) {
+        if (!this.isAcceptable(portfolio)) {
             return Collections.emptyList();
         }
-        final List<Rating> mostWantedRatings = this.rankRatingsByDemand(shareOfRatings);
+        final List<Rating> mostWantedRatings = this.rankRatingsByDemand(portfolio.getSharesOnInvestment());
         SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, the portfolio is low "
                 + "on following ratings: {}.", mostWantedRatings);
         final Map<Rating, Collection<Loan>> splitByRating = SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
@@ -127,13 +143,15 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public int recommendInvestmentAmount(final Loan loan, final Map<Rating, BigDecimal> ratingShare,
-                                         final BigDecimal balance) {
+    public int recommendInvestmentAmount(final Loan loan, final PortfolioOverview portfolio) {
+        if (!this.isAcceptable(portfolio)) {
+            return 0;
+        }
         final BigDecimal maxAllowedInvestmentIncrement =
                 BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT);
         BigDecimal tmp = BigDecimal.valueOf(individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan));
         // round to nearest lower increment
-        tmp = tmp.min(balance);
+        tmp = tmp.min(portfolio.getCzkAvailable());
         tmp = tmp.divide(maxAllowedInvestmentIncrement, 0, RoundingMode.DOWN); // make sure we never exceed max allowed
         tmp = tmp.multiply(maxAllowedInvestmentIncrement);
         // make sure we never submit more than there is remaining in the loan

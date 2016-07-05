@@ -17,14 +17,12 @@
 package com.github.triceo.robozonky.strategy;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
+import com.github.triceo.robozonky.PortfolioOverview;
 import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.Rating;
 
 /**
  * Determines which loans will be invested into, and how much. What the strategy does or does not allow depends on the
@@ -51,21 +49,18 @@ public interface InvestmentStrategy {
      * re-evaluate the resulting situation.
      *
      * @param availableLoans Loans to be evaluated for acceptability.
-     * @param ratingShare How much money is invested in a given rating, compared to the sum total of all investments.
-     * @param availableBalance Balance available in the user's wallet.
+     * @param portfolio Aggregation of information as to the sser's current portolio.
      * @return List of acceptable loans, ordered by their priority.
      */
-    List<Loan> getMatchingLoans(List<Loan> availableLoans, Map<Rating, BigDecimal> ratingShare,
-                                BigDecimal availableBalance);
+    List<Loan> getMatchingLoans(List<Loan> availableLoans, PortfolioOverview portfolio);
 
     /**
      * Recommend the size of an investment based on loan parameters.
      *
      * @param loan Loan in question.
-     * @param ratingShare How much money is invested in a given rating, compared to the sum total of all investments.
-     * @param availableBalance Balance available in the user's wallet.
+     * @param portfolio Aggregation of information as to the sser's current portolio.
      * @return Amount in CZK, recommended to invest.
      */
-    int recommendInvestmentAmount(Loan loan, Map<Rating, BigDecimal> ratingShare, BigDecimal availableBalance);
+    int recommendInvestmentAmount(Loan loan, PortfolioOverview portfolio);
 
 }

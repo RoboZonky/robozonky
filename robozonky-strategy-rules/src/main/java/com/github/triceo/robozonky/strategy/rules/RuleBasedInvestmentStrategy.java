@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.rules;
 
-import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +24,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.PortfolioOverview;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.rules.facts.AcceptedLoan;
 import com.github.triceo.robozonky.strategy.rules.facts.ProposedLoan;
 import com.github.triceo.robozonky.strategy.rules.facts.RatingShare;
+import com.github.triceo.robozonky.strategy.rules.facts.Wallet;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
@@ -51,22 +53,22 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
     private final KieContainer kieContainer;
     private final Map<Loan, Integer> recommendedAmounts = new HashMap<>();
 
-    public RuleBasedInvestmentStrategy(final KieContainer kieContainer) {
+    RuleBasedInvestmentStrategy(final KieContainer kieContainer) {
         this.kieContainer = kieContainer;
     }
 
     @Override
     public synchronized List<Loan> getMatchingLoans(final List<Loan> availableLoans,
-                                                    final Map<Rating, BigDecimal> shareOfRatings,
-                                                    final BigDecimal availableBalance) {
+                                                    final PortfolioOverview portfolio) {
         this.recommendedAmounts.clear();
         RuleBasedInvestmentStrategy.LOGGER.trace("Started matching loans.");
         final KieSession session = this.kieContainer.newKieSession();
         // insert facts into session
         availableLoans.stream().map(ProposedLoan::new).forEach(session::insert);
-        shareOfRatings.entrySet().stream()
-                .map(e -> new RatingShare(e.getKey(), e.getValue()))
+        Arrays.stream(Rating.values())
+                .map(r -> new RatingShare(r, portfolio.getShareOnInvestment(r)))
                 .forEach(session::insert);
+        session.insert(new Wallet(portfolio.getCzkAvailable(), portfolio.getCzkInvested()));
         // reason over facts and process results
         RuleBasedInvestmentStrategy.LOGGER.trace("Facts inserted into session.");
         session.fireAllRules();
@@ -90,8 +92,7 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public synchronized int recommendInvestmentAmount(final Loan loan, final Map<Rating, BigDecimal> ratingShare,
-                                                      final BigDecimal balance) {
+    public synchronized int recommendInvestmentAmount(final Loan loan, final PortfolioOverview portfolio) {
         final Integer result = this.recommendedAmounts.get(loan);
         return (result == null) ? 0 : result;
     }
