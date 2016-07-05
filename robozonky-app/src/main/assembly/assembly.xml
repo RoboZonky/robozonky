@@ -16,9 +16,6 @@
             <includes>
                 <include>*.jar</include>
             </includes>
-            <excludes>
-                <exclude>*dependencies*</exclude>
-            </excludes>
             <outputDirectory/>
         </fileSet>
         <fileSet><!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
