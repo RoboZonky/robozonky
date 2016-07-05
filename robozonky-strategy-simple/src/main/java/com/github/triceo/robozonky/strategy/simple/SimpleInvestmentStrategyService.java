@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.Operations;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
@@ -112,7 +111,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             // investment amounts
             final int maxLoanAmount = SimpleInvestmentStrategyService.getValue(config, rating, "maximumLoanAmount",
                     config::getInteger, 0);
-            if (maxLoanAmount < Operations.MINIMAL_INVESTMENT_ALLOWED) {
+            if (maxLoanAmount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
                 throw new IllegalStateException("Maximum investment amount for rating " + rating
                         + "  is smaller than minimum.");
             }

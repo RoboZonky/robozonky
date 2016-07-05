@@ -81,26 +81,27 @@ public class AuthenticationHandler {
         return this;
     }
 
-    private Authenticator buildWithPassword() {
-        return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
+    private Authenticator buildWithPassword(final boolean isDryRun) {
+        return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword(), isDryRun);
     }
 
     /**
      * Based on information received until this point, decide on the proper authentication method.
      *
+     * @param isDryRun Whether or not we should authenticate to an API that is not allowed to invest.
      * @return Authentication method matching user preferences.
      */
-    public Authenticator build() {
+    public Authenticator build(final boolean isDryRun) {
         final Optional<Reader> tokenStream = this.data.getToken();
         if (!this.tokenBased) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
             if (!this.data.setToken()) {
                 AuthenticationHandler.LOGGER.info("Failed to delete stale access token.");
             }
-            return this.buildWithPassword();
+            return this.buildWithPassword(isDryRun);
         } else if (!tokenStream.isPresent()) { // no token available, also using password-based
             AuthenticationHandler.LOGGER.debug("Token file not available, using password-based authentication.");
-            return this.buildWithPassword();
+            return this.buildWithPassword(isDryRun);
         }
         boolean deleteToken = false;
         try {
@@ -113,20 +114,20 @@ public class AuthenticationHandler {
                 AuthenticationHandler.LOGGER.debug("Token {} expired, using password-based authentication.",
                         token.getAccessToken());
                 deleteToken = true;
-                return this.buildWithPassword();
+                return this.buildWithPassword(isDryRun);
             }
             if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {
                 AuthenticationHandler.LOGGER.debug("Access token expiring, will be refreshed.");
                 deleteToken = true;
-                return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token);
+                return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token, isDryRun);
             } else {
                 AuthenticationHandler.LOGGER.debug("Reusing access token.");
-                return Authenticator.withAccessToken(this.data.getUsername(), token);
+                return Authenticator.withAccessToken(this.data.getUsername(), token, isDryRun);
             }
         } catch (final JAXBException ex) {
             AuthenticationHandler.LOGGER.warn("Failed parsing token, using password-based authentication.", ex);
             deleteToken = true;
-            return this.buildWithPassword();
+            return this.buildWithPassword(isDryRun);
         } finally {
             if (deleteToken && !this.data.setToken()) {
                 AuthenticationHandler.LOGGER.warn("Failed deleting token, authentication may stop working.");

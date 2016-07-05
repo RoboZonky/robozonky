@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.remote;
 
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+package com.github.triceo.robozonky.operations;
 
-/**
- * Simple Zonky API chache from zotify.cz.
- */
-@Path("/")
-@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-@Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-public interface ZotifyApi extends Api {
+import com.github.triceo.robozonky.remote.ZonkyApi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    @GET
-    @Path("/json")
+public class LogoutOperation extends Operation<ZonkyApi, Boolean> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogoutOperation.class);
+
     @Override
-    List<Loan> getLoans();
+    protected Logger getLogger() {
+        return LogoutOperation.LOGGER;
+    }
 
+    @Override
+    protected Boolean perform(final ZonkyApi input) {
+        input.logout();
+        return true;
+    }
 }
-

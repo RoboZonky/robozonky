@@ -45,7 +45,7 @@ public class StrategyLoadingTest {
 
     @Test
     public void loadStrategy() throws InvestmentStrategyParseException {
-        final Optional<InvestmentStrategy> inv = InvestmentStrategyLoader.load(this.strategy);
+        final Optional<InvestmentStrategy> inv = InvestmentStrategy.load(this.strategy);
         Assertions.assertThat(inv).isPresent();
     }
 

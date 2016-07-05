@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.app;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.security.KeyStoreException;
@@ -29,14 +30,17 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.Operations;
-import com.github.triceo.robozonky.OperationsContext;
+import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
+import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
+import com.github.triceo.robozonky.operations.LoginOperation;
+import com.github.triceo.robozonky.operations.LogoutOperation;
 import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,34 +176,44 @@ class App {
         }
     }
 
-    private static Collection<Investment> invest(final AppContext ctx) {
+    static BigDecimal getAvailableBalance(final AppContext ctx, final ZonkyApi api) {
+        final int dryRunInitialBalance = ctx.getDryRunBalance();
+        return (ctx.isDryRun() && dryRunInitialBalance > 0) ?
+                BigDecimal.valueOf(dryRunInitialBalance) : api.getWallet().getAvailableBalance();
+    }
+
+    private static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx) {
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         // figure out what to execute
-        final Function<OperationsContext, Collection<Investment>> op = useStrategy ? Operations::invest : oc -> {
-            final Optional<Investment> optional = Operations.invest(oc, ctx.getLoanId(), ctx.getLoanAmount());
+        return useStrategy ? Investor::invest : i -> {
+            final Optional<Investment> optional = i.invest(ctx.getLoanId(), ctx.getLoanAmount());
             if (optional.isPresent()) {
                 return Collections.singletonList(optional.get());
             } else {
                 return Collections.emptyList();
             }
         };
-        // then log in
+    }
+
+    private static Collection<Investment> invest(final AppContext ctx) {
+        // log in
         final AuthenticationHandler handler = ctx.getAuthenticationHandler();
-        final Authenticator auth = handler.build();
-        final Optional<Operations.LoginResult> possibleLogin = useStrategy ?
-                Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance(), ctx.getInvestmentStrategy()) :
-                Operations.login(auth, ctx.isDryRun(), ctx.getDryRunBalance());
+        final Authenticator auth = handler.build(ctx.isDryRun());
+        final Optional<Authentication> possibleLogin = new LoginOperation().apply(auth);
         if (!possibleLogin.isPresent()) {
             App.exit(ReturnCode.ERROR_LOGIN);
             return Collections.emptyList(); // should never get here
         }
-        final Operations.LoginResult login = possibleLogin.get();
+        final Authentication login = possibleLogin.get();
         final boolean logoutAllowed = handler.processToken(login.getZonkyApiToken());
         try { // execute the investment
-            return op.apply(login.getOperationsContext());
+            final BigDecimal balance = App.getAvailableBalance(ctx, login.getZonkyApi());
+            final Investor i = new Investor(login.getZonkyApi(), login.getZotifyApi(), ctx.getInvestmentStrategy(),
+                    balance);
+            return App.getInvestingFunction(ctx).apply(i);
         } finally { // make sure logout is processed at all costs
             if (logoutAllowed) {
-                Operations.logout(login.getOperationsContext());
+                new LogoutOperation().apply(login.getZonkyApi());
             } else { // if we're using the token, we should never log out
                 App.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
             }

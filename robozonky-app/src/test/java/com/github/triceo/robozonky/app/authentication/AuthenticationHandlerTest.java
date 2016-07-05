@@ -73,7 +73,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void simplePasswordBased() throws IOException, KeyStoreException {
         final AuthenticationHandler h = AuthenticationHandler.passwordBased(AuthenticationHandlerTest.getNewProvider());
-        final Authenticator a = h.build();
+        final Authenticator a = h.build(false);
         Assertions.assertThat(a.isTokenBased()).isFalse();
         final boolean shouldLogout = h.processToken(Mockito.mock(ZonkyApiToken.class));
         Assertions.assertThat(shouldLogout).isTrue();
@@ -82,7 +82,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void simpleTokenBasedWithoutExistingToken() throws IOException, KeyStoreException {
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(AuthenticationHandlerTest.getNewProvider());
-        final Authenticator a = h.build();
+        final Authenticator a = h.build(true);
         Assertions.assertThat(a.isTokenBased()).isFalse();
         final boolean shouldLogout = h.processToken(Mockito.mock(ZonkyApiToken.class));
         Assertions.assertThat(shouldLogout).isFalse();
@@ -93,7 +93,7 @@ public class AuthenticationHandlerTest {
         final AuthenticationHandler h =
                 AuthenticationHandler.tokenBased(AuthenticationHandlerTest.mockExistingProvider(LocalDateTime.now(),
                         true, true));
-        final Authenticator a = h.build();
+        final Authenticator a = h.build(false);
         Assertions.assertThat(a.isTokenBased()).isTrue();
         final boolean shouldLogout = h.processToken(Mockito.mock(ZonkyApiToken.class));
         Assertions.assertThat(shouldLogout).isFalse();
@@ -105,7 +105,7 @@ public class AuthenticationHandlerTest {
                 LocalDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() + 1, ChronoUnit.SECONDS);
         final AuthenticationHandler h =
                 AuthenticationHandler.tokenBased(AuthenticationHandlerTest.mockExistingProvider(expired, true, true));
-        final Authenticator a = h.build();
+        final Authenticator a = h.build(true);
         Assertions.assertThat(a.isTokenBased()).isFalse();
     }
 
@@ -116,7 +116,7 @@ public class AuthenticationHandlerTest {
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
                 AuthenticationHandlerTest.mockExistingProvider(expiring, true, true));
         h.withTokenRefreshingBeforeExpiration(10, ChronoUnit.SECONDS);
-        final Authenticator a = h.build();
+        final Authenticator a = h.build(false);
         Assertions.assertThat(a.isTokenBased()).isTrue();
     }
 
@@ -125,7 +125,7 @@ public class AuthenticationHandlerTest {
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
                 AuthenticationHandlerTest.mockExistingProvider("", LocalDateTime.now(), true, true));
         h.withTokenRefreshingBeforeExpiration(10, ChronoUnit.SECONDS);
-        final Authenticator a = h.build();
+        final Authenticator a = h.build(true);
         Assertions.assertThat(a.isTokenBased()).isFalse();
     }
 
@@ -137,7 +137,7 @@ public class AuthenticationHandlerTest {
         Mockito.when(p.getToken()).thenReturn(Optional.of(tokenReader));
         Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(LocalDateTime.now()));
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(p);
-        final Authenticator a = h.build();
+        final Authenticator a = h.build(false);
         Assertions.assertThat(a.isTokenBased()).isTrue();
         // now make sure token was deleted
         Mockito.when(p.getToken()).thenReturn(Optional.empty());

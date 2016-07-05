@@ -18,10 +18,13 @@ package com.github.triceo.robozonky.app;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.Wallet;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -66,6 +69,29 @@ public class AppTest extends AbstractNonExitingTest {
         Optional<File> result2 = App.storeInvestmentsMade(Collections.singleton(Mockito.mock(Investment.class)), false);
         Assertions.assertThat(result2).isPresent();
         Assertions.assertThat(result2.get().getAbsolutePath()).isNotEqualTo(result.get().getAbsolutePath());
+    }
+
+    @Test
+    public void properBalanceRetrievalInDryRun() {
+        // prepare context
+        final BigDecimal dryRunBalance = BigDecimal.valueOf(12345);
+        final AppContext ctx = Mockito.mock(AppContext.class);
+        Mockito.when(ctx.isDryRun()).thenReturn(true);
+        Mockito.when(ctx.getDryRunBalance()).thenReturn(dryRunBalance.intValue());
+        // test operation
+        Assertions.assertThat(App.getAvailableBalance(ctx, null)).isEqualTo(dryRunBalance);
+    }
+
+    @Test
+    public void properBalanceRetrievalInNormalMode() {
+        // prepare context
+        final BigDecimal remoteBalance = BigDecimal.valueOf(12345);
+        final Wallet wallet = new Wallet(-1, -1, BigDecimal.valueOf(100000), remoteBalance);
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        Mockito.when(api.getWallet()).thenReturn(wallet);
+        final AppContext ctx = Mockito.mock(AppContext.class);
+        // test operation
+        Assertions.assertThat(App.getAvailableBalance(ctx, api)).isEqualTo(remoteBalance);
     }
 
 }

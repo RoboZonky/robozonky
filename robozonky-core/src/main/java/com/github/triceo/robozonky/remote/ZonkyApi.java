@@ -18,21 +18,20 @@ package com.github.triceo.robozonky.remote;
 
 import java.util.Collection;
 import java.util.List;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
-@Path("/")
-@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-@Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public interface ZonkyApi extends Api {
+
+    Logger LOGGER = LoggerFactory.getLogger(ZonkyApi.class);
 
     String LOANS = "/loans";
     String MARKETPLACE = LOANS + "/marketplace";
@@ -101,7 +100,7 @@ public interface ZonkyApi extends Api {
 
     @GET
     @Path(ZonkyApi.ME + "/logout")
-    List<Loan> logout();
+    void logout();
 
     @GET
     @Path(ZonkyApi.INVESTMENTS + "/statistics")
@@ -116,10 +115,6 @@ public interface ZonkyApi extends Api {
     @GET
     @Path(ZonkyApi.INVESTMENTS)
     Collection<Investment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
-
-    @POST
-    @Path("/marketplace/investment")
-    void invest(Investment investment);
 
 }
 

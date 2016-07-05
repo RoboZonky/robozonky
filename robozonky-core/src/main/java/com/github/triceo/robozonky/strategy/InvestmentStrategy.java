@@ -16,9 +16,12 @@
 
 package com.github.triceo.robozonky.strategy;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
@@ -29,7 +32,18 @@ import com.github.triceo.robozonky.remote.Rating;
  */
 public interface InvestmentStrategy {
 
+    int MINIMAL_INVESTMENT_ALLOWED = 200;
     int MINIMAL_INVESTMENT_INCREMENT = 200;
+
+    /**
+     * Load the correct strategy using Java's {@link ServiceLoader}.
+     * @param file Investment strategy configuration file.
+     * @return Strategy to read that file, if found.
+     * @throws InvestmentStrategyParseException When problem found when parsing the strategy configuration file.
+     */
+    static Optional<InvestmentStrategy> load(final File file) throws InvestmentStrategyParseException {
+        return InvestmentStrategyLoader.load(file);
+    }
 
     /**
      * Retrieve a list of loans that are acceptable by the strategy, in the order in which they are to be evaluated.

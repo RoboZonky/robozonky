@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.strategy;
 
 import java.io.File;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +32,12 @@ class InvestmentStrategyLoader {
     private static final ServiceLoader<InvestmentStrategyService> STRATEGY_LOADER =
             ServiceLoader.load(InvestmentStrategyService.class);
 
-    public static Optional<InvestmentStrategy> load(final File file) throws InvestmentStrategyParseException {
+    static Optional<InvestmentStrategy> load(final File file) throws InvestmentStrategyParseException {
+        if (file == null) {
+            throw new NullPointerException("Strategy file can not be null.");
+        } else if (!file.canRead()) {
+            throw new InvestmentStrategyParseException("Strategy file not accessible: " + file.getAbsolutePath());
+        }
         InvestmentStrategyLoader.LOGGER.trace("Loading strategies.");
         try {
             for (final InvestmentStrategyService s : InvestmentStrategyLoader.STRATEGY_LOADER) {

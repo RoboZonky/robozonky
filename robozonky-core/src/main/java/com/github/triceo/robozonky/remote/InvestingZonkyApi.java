@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.github.triceo.robozonky.remote;
 
-package com.github.triceo.robozonky;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-import com.github.triceo.robozonky.remote.ZotifyApi;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+/**
+ * The version of {@link ZonkyApi} which is allowed to send a request to {@link #invest(Investment)}.
+ */
+@Path("/")
+@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+@Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+public interface InvestingZonkyApi extends ZonkyApi {
 
-public class TestUtil {
-
-    public static ZotifyApi newZotifyApi() {
-        final ResteasyClient client = new ResteasyClientBuilder().build();
-        return client.target("http://zotify.cz").proxy(ZotifyApi.class);
-    }
+    @POST
+    @Path("/marketplace/investment")
+    void invest(Investment investment);
 
 }
+

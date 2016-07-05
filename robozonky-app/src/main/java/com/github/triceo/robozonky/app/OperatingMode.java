@@ -47,7 +47,7 @@ enum OperatingMode {
                 return Optional.empty();
             }
             try {
-                final Optional<InvestmentStrategy> strategy = InvestmentStrategyLoader.load(strategyConfig);
+                final Optional<InvestmentStrategy> strategy = InvestmentStrategy.load(strategyConfig);
                 if (!strategy.isPresent()) {
                     throw new IllegalStateException("No investment strategy found to support "
                             + strategyConfig.getAbsolutePath());

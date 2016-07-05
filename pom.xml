@@ -331,7 +331,6 @@
                             <!-- Mostly interfaces; messing up stats -->
                             <param>com.github.triceo.robozonky.remote.*</param>
                             <!-- Mostly getters; messing up stats -->
-                            <param>com.github.triceo.robozonky.OperationsContext</param>
                             <param>com.github.triceo.robozonky.app.AppContext</param>
                         </excludedClasses>
                     </configuration>
