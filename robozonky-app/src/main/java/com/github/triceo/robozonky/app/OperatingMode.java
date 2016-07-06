@@ -52,7 +52,8 @@ enum OperatingMode {
                     throw new IllegalStateException("No investment strategy found to support "
                             + strategyConfig.getAbsolutePath());
                 } else if (cli.isDryRun()) {
-                    return Optional.of(new AppContext(auth, strategy.get(), cli.getDryRunBalance()));
+                    final int balance = cli.getDryRunBalance().orElse(-1);
+                    return Optional.of(new AppContext(auth, strategy.get(), balance));
                 } else {
                     return Optional.of(new AppContext(auth, strategy.get()));
                 }
@@ -75,7 +76,8 @@ enum OperatingMode {
                 cli.printHelpAndExit("Loan amount must be provided and greater than 0.", true);
                 return Optional.empty();
             } else if (cli.isDryRun()) {
-                return Optional.of(new AppContext(auth, loanId.get(), loanAmount.get(), cli.getDryRunBalance()));
+                final int balance = cli.getDryRunBalance().orElse(-1);
+                return Optional.of(new AppContext(auth, loanId.get(), loanAmount.get(), balance));
             } else {
                 return Optional.of(new AppContext(auth, loanId.get(), loanAmount.get()));
             }

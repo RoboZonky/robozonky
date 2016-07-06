@@ -28,6 +28,10 @@ public class SimpleInvestmentStrategyServiceTest {
             new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-sample.cfg");
     private static final File IMPROPER =
             new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-sample.badext");
+    private static final File WRONG_TERMS =
+            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-wrongterms.cfg");
+    private static final File WRONG_ASKS =
+            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-wrongasks.cfg");
     private static final File NONEXISTENT =
             new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/nonexistent.cfg");
 
@@ -51,4 +55,15 @@ public class SimpleInvestmentStrategyServiceTest {
         Assertions.assertThat(s.isSupported(SimpleInvestmentStrategyServiceTest.IMPROPER)).isFalse();
     }
 
+    @Test(expected = InvestmentStrategyParseException.class)
+    public void wrongTerms() throws InvestmentStrategyParseException {
+        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
+        s.parse(SimpleInvestmentStrategyServiceTest.WRONG_TERMS);
+    }
+
+    @Test(expected = InvestmentStrategyParseException.class)
+    public void wrongAsks() throws InvestmentStrategyParseException {
+        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
+        s.parse(SimpleInvestmentStrategyServiceTest.WRONG_ASKS);
+    }
 }

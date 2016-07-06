@@ -210,15 +210,19 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
 
     @Override
     public InvestmentStrategy parse(final File strategyFile) throws InvestmentStrategyParseException {
-        SimpleInvestmentStrategyService.LOGGER.info("Using strategy: '{}'", strategyFile.getAbsolutePath());
-        final ImmutableConfiguration c = SimpleInvestmentStrategyService.getConfig(strategyFile);
-        final Map<Rating, StrategyPerRating> individualStrategies = Arrays.stream(Rating.values())
-                .collect(Collectors.toMap(Function.identity(), r -> SimpleInvestmentStrategyService.parseRating(r, c)));
-        final int minimumBalance = SimpleInvestmentStrategyService.getMinimumBalance(c);
-        SimpleInvestmentStrategyService.LOGGER.debug("Minimum balance to invest must be {} CZK.", minimumBalance);
-        final int maximumInvestment = SimpleInvestmentStrategyService.getMaximumInvestment(c);
-        SimpleInvestmentStrategyService.LOGGER.debug("Maximum investment must not exceed {} CZK.", maximumInvestment);
-        return new SimpleInvestmentStrategy(minimumBalance, maximumInvestment, individualStrategies);
+        try {
+            SimpleInvestmentStrategyService.LOGGER.info("Using strategy: '{}'", strategyFile.getAbsolutePath());
+            final ImmutableConfiguration c = SimpleInvestmentStrategyService.getConfig(strategyFile);
+            final int minimumBalance = SimpleInvestmentStrategyService.getMinimumBalance(c);
+            SimpleInvestmentStrategyService.LOGGER.debug("Minimum balance to invest must be {} CZK.", minimumBalance);
+            final int maximumInvestment = SimpleInvestmentStrategyService.getMaximumInvestment(c);
+            SimpleInvestmentStrategyService.LOGGER.debug("Maximum investment must not exceed {} CZK.", maximumInvestment);
+            final Map<Rating, StrategyPerRating> individualStrategies = Arrays.stream(Rating.values())
+                    .collect(Collectors.toMap(Function.identity(), r -> SimpleInvestmentStrategyService.parseRating(r, c)));
+            return new SimpleInvestmentStrategy(minimumBalance, maximumInvestment, individualStrategies);
+        } catch (final RuntimeException ex) {
+            throw new InvestmentStrategyParseException(ex);
+        }
     }
 
     @Override

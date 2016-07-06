@@ -26,7 +26,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.operations.InvestOperation;
-import com.github.triceo.robozonky.remote.BlockedAmount;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.InvestmentStatus;
 import com.github.triceo.robozonky.remote.InvestmentStatuses;
@@ -41,11 +40,6 @@ import org.slf4j.LoggerFactory;
 public class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
-
-    private final ZonkyApi zonkyApi;
-    private final ZotifyApi zotifyApi;
-    private final BigDecimal initialBalance;
-    private final InvestmentStrategy strategy;
 
     /**
      * Determine whether or not a given loan is present among existing investments.
@@ -89,10 +83,28 @@ public class Investor {
             Investor.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK balance.",
                     l, amount, balance);
             return Optional.empty();
+        } else if (amount > l.getAmount()) {
+            Investor.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK loan amount.",
+                    l, amount, l.getAmount());
+            return Optional.empty();
         }
         final Investment investment = new Investment(l, amount);
         return new InvestOperation().apply(api, investment);
     }
+
+    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
+        return Collections.unmodifiableList(api.getBlockedAmounts().stream().map(blocked -> {
+            final Loan l = api.getLoan(blocked.getLoanId());
+            final Investment i = new Investment(l, blocked.getAmount());
+            Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", blocked.getAmount(), blocked.getLoanId());
+            return i;
+        }).collect(Collectors.toList()));
+    }
+
+    private final ZonkyApi zonkyApi;
+    private final ZotifyApi zotifyApi;
+    private final BigDecimal initialBalance;
+    private final InvestmentStrategy strategy;
 
     public Investor(final ZonkyApi zonky, final ZotifyApi zotify, final InvestmentStrategy strategy,
                     final BigDecimal initialBalance) {
@@ -110,8 +122,8 @@ public class Investor {
      * @param portfolio Overview of the current user's portfolio.
      * @return List of loans available to be invested into, in the order of decreasing priority.
      */
-    private List<Loan> askStrategyForLoans(final Collection<Investment> investments,
-                                           final PortfolioOverview portfolio) {
+    List<Loan> askStrategyForLoans(final Collection<Investment> investments,
+                                   final PortfolioOverview portfolio) {
         final List<Loan> allLoansFromApi = this.zotifyApi.getLoans();
         final List<Loan> afterInvestmentsExcluded = allLoansFromApi.stream()
                 .filter(l -> !Investor.isLoanPresent(l, investments)).collect(Collectors.toList());
@@ -125,7 +137,7 @@ public class Investor {
      * @param portfolio Overview of the current user's portfolio.
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
-    private Optional<Investment> findLoanAndInvest(final List<Loan> loans, final PortfolioOverview portfolio) {
+    Optional<Investment> findLoanAndInvest(final List<Loan> loans, final PortfolioOverview portfolio) {
         for (final Loan l : loans) { // try investing until one loan succeeds
             final int invest = this.strategy.recommendInvestmentAmount(l, portfolio);
             Investor.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.", invest,
@@ -139,18 +151,6 @@ public class Investor {
         return Optional.empty();
     }
 
-    private Collection<Investment> retrieveInvestmentsRepresentedByBlockedAmounts() {
-        final List<BlockedAmount> amounts = this.zonkyApi.getBlockedAmounts();
-        final List<Investment> investments = new ArrayList<>(amounts.size());
-        for (final BlockedAmount blocked: amounts) {
-            final Loan l = this.zonkyApi.getLoan(blocked.getLoanId());
-            final Investment i = new Investment(l, blocked.getAmount());
-            investments.add(i);
-            Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", blocked.getAmount(), blocked.getLoanId());
-        }
-        return investments;
-    }
-
     public Collection<Investment> invest() {
         // make sure we have enough money to invest
         final int minimumInvestmentAmount = InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED;
@@ -161,7 +161,7 @@ public class Investor {
         // retrieve a list of loans that the user already put money into
         Collection<Investment> investments = Investor.mergeInvestments(
                 this.zonkyApi.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
-                this.retrieveInvestmentsRepresentedByBlockedAmounts());
+                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi));
         Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}", investments);
         final Statistics stats = this.zonkyApi.getStatistics();
         // and start investing

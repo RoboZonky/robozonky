@@ -22,6 +22,7 @@
         <surefire.version>2.19.1</surefire.version>
         <version.org.jboss.resteasy>3.0.17.Final</version.org.jboss.resteasy>
         <version.org.drools>6.4.0.Final</version.org.drools>
+        <mutationThreshold>75</mutationThreshold>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -319,7 +320,7 @@
                     <configuration>
                         <timestampedReports>false</timestampedReports>
                         <detectInlinedCode>true</detectInlinedCode>
-                        <mutationThreshold>61</mutationThreshold>
+                        <mutationThreshold>${mutationThreshold}</mutationThreshold>
                         <maxDependencyDistance>2</maxDependencyDistance>
                         <targetClasses>
                             <param>com.github.triceo.robozonky.*</param>
@@ -327,11 +328,10 @@
                         <targetTests>
                             <param>com.github.triceo.robozonky.*Test</param> <!-- No IT -->
                         </targetTests>
-                        <excludedClasses>
-                            <!-- Mostly interfaces; messing up stats -->
+                        <excludedClasses> <!-- Mostly getters; messing up stats -->
                             <param>com.github.triceo.robozonky.remote.*</param>
-                            <!-- Mostly getters; messing up stats -->
                             <param>com.github.triceo.robozonky.app.AppContext</param>
+                            <param>com.github.triceo.robozonky.strategy.rules.facts.*</param>
                         </excludedClasses>
                     </configuration>
                 </plugin>

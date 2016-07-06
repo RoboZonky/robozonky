@@ -15,8 +15,6 @@
  */
 package com.github.triceo.robozonky.app;
 
-import java.util.Optional;
-
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 
@@ -25,20 +23,24 @@ class AppContext {
     private InvestmentStrategy investmentStrategy = null;
     private final AuthenticationHandler authenticator;
     private final OperatingMode operatingMode;
-    private boolean isDryRun = false;
+    private final boolean isDryRun;
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
 
-    public AppContext(final AuthenticationHandler authMethod, final int loanId, final int loanAmount) {
+    public AppContext(final AuthenticationHandler authenticator, final int loanId, final int loanAmount) {
         this.operatingMode = OperatingMode.USER_DRIVEN;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
-        this.authenticator = authMethod;
+        this.authenticator = authenticator;
+        this.isDryRun = false;
     }
 
     public AppContext(final AuthenticationHandler authenticator, final int loanId, final int loanAmount,
-                      final Optional<Integer> dryRunBalance) {
-        this(authenticator, loanId, loanAmount);
-        this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
+                      final int dryRunBalance) {
+        this.operatingMode = OperatingMode.USER_DRIVEN;
+        this.loanId = loanId;
+        this.loanAmount = loanAmount;
+        this.authenticator = authenticator;
+        this.dryRunBalance = dryRunBalance;
         this.isDryRun = true;
     }
 
@@ -46,12 +48,15 @@ class AppContext {
         this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
         this.investmentStrategy = investmentStrategy;
         this.authenticator = authenticator;
+        this.isDryRun = false;
     }
 
     public AppContext(final AuthenticationHandler authenticator, final InvestmentStrategy investmentStrategy,
-                      final Optional<Integer> dryRunBalance) {
-        this(authenticator, investmentStrategy);
-        this.dryRunBalance = dryRunBalance.isPresent() ? dryRunBalance.get() : -1;
+                      final int dryRunBalance) {
+        this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
+        this.investmentStrategy = investmentStrategy;
+        this.authenticator = authenticator;
+        this.dryRunBalance = dryRunBalance;
         this.isDryRun = true;
     }
 

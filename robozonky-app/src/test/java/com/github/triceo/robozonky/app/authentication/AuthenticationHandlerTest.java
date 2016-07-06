@@ -122,8 +122,9 @@ public class AuthenticationHandlerTest {
 
     @Test
     public void tokenBasedWithFailingToken() throws JAXBException {
-        final AuthenticationHandler h = AuthenticationHandler.tokenBased(
-                AuthenticationHandlerTest.mockExistingProvider("", LocalDateTime.now(), true, true));
+        final SensitiveInformationProvider provider =
+                AuthenticationHandlerTest.mockExistingProvider("", LocalDateTime.now(), true, true);
+        final AuthenticationHandler h = AuthenticationHandler.tokenBased(provider);
         h.withTokenRefreshingBeforeExpiration(10, ChronoUnit.SECONDS);
         final Authenticator a = h.build(true);
         Assertions.assertThat(a.isTokenBased()).isFalse();

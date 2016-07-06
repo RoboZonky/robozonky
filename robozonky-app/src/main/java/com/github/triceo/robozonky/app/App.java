@@ -49,10 +49,10 @@ class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
 
-    static boolean PERFORM_SYSTEM_EXIT = true; // purely for testing purposes
+    static boolean RUNNING_OUTSIDE_TESTS = true; // purely for testing purposes
 
     static void exit(final ReturnCode returnCode) {
-        if (App.PERFORM_SYSTEM_EXIT) {
+        if (App.RUNNING_OUTSIDE_TESTS) {
             App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
             System.exit(returnCode.getCode());
         } else {
@@ -60,8 +60,8 @@ class App {
         }
     }
 
-    private static SensitiveInformationProvider getSensitiveInformationProvider(final CommandLineInterface cli,
-                                                                                final File defaultKeyStore) {
+    static SensitiveInformationProvider getSensitiveInformationProvider(final CommandLineInterface cli,
+                                                                        final File defaultKeyStore) {
         final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
         if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
             final File store = keyStoreLocation.get();
@@ -178,11 +178,11 @@ class App {
 
     static BigDecimal getAvailableBalance(final AppContext ctx, final ZonkyApi api) {
         final int dryRunInitialBalance = ctx.getDryRunBalance();
-        return (ctx.isDryRun() && dryRunInitialBalance > 0) ?
+        return (ctx.isDryRun() && dryRunInitialBalance >= 0) ?
                 BigDecimal.valueOf(dryRunInitialBalance) : api.getWallet().getAvailableBalance();
     }
 
-    private static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx) {
+    static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx) {
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         // figure out what to execute
         return useStrategy ? Investor::invest : i -> {

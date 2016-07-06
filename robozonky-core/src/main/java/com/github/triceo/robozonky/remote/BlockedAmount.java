@@ -27,6 +27,11 @@ public class BlockedAmount implements BaseEntity {
     private String category, loanName;
     private Instant dateStart;
 
+    public BlockedAmount(final int loanId, final int loanAmount) {
+        this.loanId = loanId;
+        this.amount = loanAmount;
+    }
+
     private BlockedAmount() {
         // for JAXB
     }

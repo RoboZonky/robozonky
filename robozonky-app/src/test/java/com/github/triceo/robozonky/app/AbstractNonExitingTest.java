@@ -23,12 +23,12 @@ public abstract class AbstractNonExitingTest {
 
     @BeforeClass
     public static void disableSystemExit() {
-        App.PERFORM_SYSTEM_EXIT = false;
+        App.RUNNING_OUTSIDE_TESTS = false;
     }
 
     @AfterClass
     public static void enableSystemExit() {
-        App.PERFORM_SYSTEM_EXIT = true;
+        App.RUNNING_OUTSIDE_TESTS = true;
     }
 
 }

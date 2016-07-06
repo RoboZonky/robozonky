@@ -37,9 +37,4 @@ public class AppIT extends AbstractNonExitingTest {
         App.main("-a", "400", "-l", "66666", "-d", "2000", "-u", "someone", "-p", "somepassword");
     }
 
-    @Test(expected = RoboZonkyTestingExitException.class)
-    public void simpleHelp() {
-        App.main("-h");
-    }
-
 }

@@ -9,6 +9,7 @@
     <artifactId>robozonky-app</artifactId>
     <properties>
         <mainClass>com.github.triceo.robozonky.app.App</mainClass>
+        <mutationThreshold>65</mutationThreshold> <!-- No real way to get this higher -->
     </properties>
 
     <dependencies>

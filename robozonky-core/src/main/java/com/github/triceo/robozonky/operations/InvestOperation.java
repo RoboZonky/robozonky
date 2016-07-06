@@ -36,11 +36,9 @@ public class InvestOperation extends BiOperation<ZonkyApi, Investment, Investmen
         if (api instanceof InvestingZonkyApi) {
             ((InvestingZonkyApi)api).invest(i);
             InvestOperation.LOGGER.info("Invested {} CZK into loan {}.", i.getAmount(), i.getLoanId());
-        } else if (api instanceof ZonkyApi) {
+        } else {
             InvestOperation.LOGGER.info("Dry run. Otherwise would have invested {} CZK into loan {}.", i.getAmount(),
                     i.getLoanId());
-        } else {
-            throw new IllegalStateException("There is no way how this could have happened.");
         }
         return i;
     }
