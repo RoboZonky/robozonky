@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.operations.InvestOperation;
 import com.github.triceo.robozonky.remote.Investment;
@@ -48,13 +49,8 @@ public class Investor {
      * @param investments Known investments.
      * @return True if present.
      */
-    static boolean isLoanPresent(final Loan loan, final Iterable<Investment> investments) {
-        for (final Investment i : investments) {
-            if (loan.getId() == i.getLoanId()) {
-                return true;
-            }
-        }
-        return false;
+    private static boolean isLoanPresent(final Loan loan, final Collection<Investment> investments) {
+        return investments.stream().filter(i -> loan.getId() == i.getLoanId()).findFirst().isPresent();
     }
 
     static Collection<Investment> mergeInvestments(final Collection<Investment> left,
@@ -74,7 +70,8 @@ public class Investor {
         }
     }
 
-    static Optional<Investment> invest(final ZonkyApi api, final Loan l, final int amount, final BigDecimal balance) {
+    private static Optional<Investment> invest(final ZonkyApi api, final Loan l, final int amount,
+                                               final BigDecimal balance) {
         if (amount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             Investor.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
                     l, amount);
@@ -98,8 +95,7 @@ public class Investor {
                 .map(blocked -> {
                     final int loanId = blocked.getLoanId();
                     final int loanAmount = blocked.getAmount();
-                    final Loan l = api.getLoan(loanId);
-                    final Investment i = new Investment(l, loanAmount);
+                    final Investment i = new Investment(api.getLoan(loanId), loanAmount);
                     Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", loanAmount, loanId);
                     return i;
                 }).collect(Collectors.toList()));
@@ -142,24 +138,30 @@ public class Investor {
      * @return Present only if Zonky API confirmed money was invested or if dry run.
      */
     Optional<Investment> findLoanAndInvest(final List<Loan> loans, final PortfolioOverview portfolio) {
-        for (final Loan l : loans) { // try investing until one loan succeeds
+        return loans.stream().map(l -> {
             final int invest = this.strategy.recommendInvestmentAmount(l, portfolio);
-            Investor.LOGGER.debug("Strategy recommended to invest {} CZK on balance of {} CZK.", invest,
-                    portfolio.getCzkAvailable());
-            final Optional<Investment> investment = Investor.invest(this.zonkyApi, l, invest,
-                    portfolio.getCzkAvailable());
-            if (investment.isPresent()) {
-                return investment;
-            }
+            return Investor.invest(this.zonkyApi, l, invest, portfolio.getCzkAvailable());
+        }).flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty()).findFirst();
+    }
+
+    private Optional<Investment> investOnce(final PortfolioOverview portfolio,
+                                            final Collection<Investment> investmentsAlreadyMade) {
+        Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
+                portfolio.getSharesOnInvestment());
+        final List<Loan> loansAvailable = this.askStrategyForLoans(investmentsAlreadyMade, portfolio);
+        if (loansAvailable.isEmpty()) {
+            Investor.LOGGER.info("There are no loans matching the investment strategy.");
+            return Optional.empty();
         }
-        return Optional.empty();
+        Investor.LOGGER.debug("Investment strategy accepted the following loans: {}", loansAvailable);
+        return this.findLoanAndInvest(loansAvailable, portfolio);
     }
 
     public Collection<Investment> invest() {
         // make sure we have enough money to invest
-        final int minimumInvestmentAmount = InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED;
+        final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
         BigDecimal balance = this.initialBalance;
-        if (balance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) < 0) {
+        if (balance.compareTo(minimumInvestmentAmount) < 0) {
             return Collections.emptyList(); // no need to do anything else
         }
         // retrieve a list of loans that the user already put money into
@@ -171,28 +173,17 @@ public class Investor {
         // and start investing
         final Collection<Investment> investmentsMade = new ArrayList<>();
         do {
-            // calculate share of particular ratings on the overall investment pie
             final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, investments);
-            Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
-                    portfolio.getSharesOnInvestment());
-            final List<Loan> loans = this.askStrategyForLoans(investments, portfolio);
-            if (loans == null || loans.size() == 0) {
-                Investor.LOGGER.info("There are no loans matching the investment strategy.");
-                break;
-            } else {
-                Investor.LOGGER.debug("Investment strategy accepted the following loans: {}", loans);
-            }
-            final Optional<Investment> investment = this.findLoanAndInvest(loans, portfolio);
-            if (!investment.isPresent()) {
+            final Optional<Investment> investment = this.investOnce(portfolio, investments);
+            if (!investment.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }
             final Investment i = investment.get();
             investmentsMade.add(i);
             investments = Investor.mergeInvestments(investments, Collections.singletonList(i));
-            final BigDecimal amount = BigDecimal.valueOf(i.getAmount());
-            balance = balance.subtract(amount);
+            balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
             Investor.LOGGER.info("New account balance is {} CZK.", balance);
-        } while (balance.compareTo(BigDecimal.valueOf(minimumInvestmentAmount)) >= 0);
+        } while (balance.compareTo(minimumInvestmentAmount) >= 0);
         return Collections.unmodifiableCollection(investmentsMade);
     }
 
