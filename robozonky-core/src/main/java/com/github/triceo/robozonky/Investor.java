@@ -93,12 +93,16 @@ public class Investor {
     }
 
     static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
-        return Collections.unmodifiableList(api.getBlockedAmounts().stream().map(blocked -> {
-            final Loan l = api.getLoan(blocked.getLoanId());
-            final Investment i = new Investment(l, blocked.getAmount());
-            Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", blocked.getAmount(), blocked.getLoanId());
-            return i;
-        }).collect(Collectors.toList()));
+        return Collections.unmodifiableList(api.getBlockedAmounts().stream()
+                .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
+                .map(blocked -> {
+                    final int loanId = blocked.getLoanId();
+                    final int loanAmount = blocked.getAmount();
+                    final Loan l = api.getLoan(loanId);
+                    final Investment i = new Investment(l, loanAmount);
+                    Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", loanAmount, loanId);
+                    return i;
+                }).collect(Collectors.toList()));
     }
 
     private final ZonkyApi zonkyApi;

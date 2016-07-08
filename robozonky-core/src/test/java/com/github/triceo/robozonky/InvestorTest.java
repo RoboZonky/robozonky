@@ -176,9 +176,11 @@ public class InvestorTest {
         Mockito.when(api.getLoan(loan1id)).thenReturn(l1);
         Mockito.when(api.getLoan(loan2Id)).thenReturn(l2);
         Mockito.when(api.getBlockedAmounts()).thenReturn(
-                Arrays.asList(new BlockedAmount(loan1id, loan1amount), new BlockedAmount(loan2Id, loan2amount))
+                Arrays.asList(new BlockedAmount(0, 1000), new BlockedAmount(loan1id, loan1amount),
+                        new BlockedAmount(loan2Id, loan2amount))
         );
         final List<Investment> result = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(api);
+        // the 0 ID blocked amount is Zonky's investors' fee, which should not be looked up as a loan
         Assertions.assertThat(result).hasSize(2);
         Assertions.assertThat(result.get(0).getLoanId()).isEqualTo(l1.getId());
         Assertions.assertThat(result.get(1).getLoanId()).isEqualTo(l2.getId());
