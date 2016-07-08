@@ -255,10 +255,16 @@ public class Operations {
         final List<BlockedAmount> amounts = api.getBlockedAmounts();
         final List<Investment> investments = new ArrayList<>(amounts.size());
         for (final BlockedAmount blocked: amounts) {
-            final Loan l = api.getLoan(blocked.getLoanId());
-            final Investment i = new Investment(l, blocked.getAmount());
-            investments.add(i);
-            Operations.LOGGER.debug("{} CZK is being blocked by loan {}.", blocked.getAmount(), blocked.getLoanId());
+            final int loanId = blocked.getLoanId();
+            final int loanAmount = blocked.getAmount();
+            if (loanId == 0) {
+                Operations.LOGGER.debug("{} CZK is being blocked by Zonky investors' fee.", loanAmount);
+                continue;
+            }
+            final Loan loan = api.getLoan(loanId);
+            final Investment investment = new Investment(loan, loanAmount);
+            investments.add(investment);
+            Operations.LOGGER.debug("{} CZK is being blocked by loan {}.", loanAmount, loanId);
         }
         return investments;
     }
