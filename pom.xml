@@ -139,12 +139,6 @@
                 <artifactId>maven-gpg-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.5.1</version>
                 <dependencies>
