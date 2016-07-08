@@ -60,7 +60,7 @@ class CommandLineInterface {
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
             .build();
 
-    public static CommandLineInterface parse(final String... args) {
+    public static Optional<CommandLineInterface> parse(final String... args) {
         // create the mode of operation
         final OptionGroup operatingModes = new OptionGroup();
         operatingModes.setRequired(true);
@@ -83,10 +83,10 @@ class CommandLineInterface {
         final CommandLineParser parser = new DefaultParser();
         // and parse
         try {
-            return new CommandLineInterface(options, parser.parse(options, args));
+            return Optional.of(new CommandLineInterface(options, parser.parse(options, args)));
         } catch (final ParseException ex) {
             CommandLineInterface.printHelpAndExit(options, ex.getMessage(), true);
-            return null;
+            return Optional.empty();
         }
     }
 

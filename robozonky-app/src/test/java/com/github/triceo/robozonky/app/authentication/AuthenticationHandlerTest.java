@@ -56,8 +56,7 @@ public class AuthenticationHandlerTest {
                 storedOn, succeedInSavingTokens, succeedInDeletingToken);
     }
 
-    private static SensitiveInformationProvider mockExistingProvider(final String token,
-                                                                     final LocalDateTime storedOn,
+    private static SensitiveInformationProvider mockExistingProvider(final String token, final LocalDateTime storedOn,
                                                                      final boolean succeedInSavingTokens,
                                                                      final boolean succeedInDeletingToken)
             throws JAXBException {

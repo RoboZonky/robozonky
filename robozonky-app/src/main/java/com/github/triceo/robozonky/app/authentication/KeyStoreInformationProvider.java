@@ -45,22 +45,14 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
 
     @Override
     public String getPassword() {
-        final Optional<String> result = this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD);
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            throw new IllegalStateException("Password not present in KeyStore.");
-        }
+        return this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD)
+                .orElseThrow(() -> new IllegalStateException("Password not present in KeyStore."));
     }
 
     @Override
     public String getUsername() {
-        final Optional<String> result = this.ksh.get(KeyStoreInformationProvider.ALIAS_USERNAME);
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            throw new IllegalStateException("Username not present in KeyStore.");
-        }
+        return this.ksh.get(KeyStoreInformationProvider.ALIAS_USERNAME)
+                .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore."));
     }
 
     public boolean setPassword(final String password) {
@@ -109,11 +101,8 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
 
     @Override
     public Optional<LocalDateTime> getTokenSetDate() {
-        final Optional<String> stored = this.ksh.get(KeyStoreInformationProvider.ALIAS_TOKEN_DATE);
-        if (stored.isPresent()) {
-            return Optional.of(LocalDateTime.parse(stored.get()));
-        } else {
-            return Optional.empty();
-        }
+        return this.ksh.get(KeyStoreInformationProvider.ALIAS_TOKEN_DATE)
+                .map(s -> Optional.of(LocalDateTime.parse(s)))
+                .orElse(Optional.empty());
     }
 }

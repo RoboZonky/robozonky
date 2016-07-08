@@ -83,17 +83,12 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property,
                                   final Function<String, T> supplier) {
         final String propertyName = SimpleInvestmentStrategyService.join(property, r.name());
-        final Optional<T> result = SimpleInvestmentStrategyService.getValue(config, propertyName, supplier);
-        if (result.isPresent()) {
-            return result.get();
-        }
-        final String fallbackPropertyName = SimpleInvestmentStrategyService.join(property, "default");
-        final Optional<T> fallback = SimpleInvestmentStrategyService.getValue(config, fallbackPropertyName, supplier);
-        if (fallback.isPresent()) {
-            return fallback.get();
-        }
-        throw new IllegalStateException("Investment strategy is incomplete. Missing value for '" + property
-                + "' and rating '" + r + '\'');
+        return SimpleInvestmentStrategyService.getValue(config, propertyName, supplier).orElseGet(() -> {
+            final String fallbackPropertyName = SimpleInvestmentStrategyService.join(property, "default");
+            return SimpleInvestmentStrategyService.getValue(config, fallbackPropertyName, supplier)
+                    .orElseThrow(() -> new IllegalStateException("Investment strategy is incomplete. " +
+                            "Missing value for '" + property + "' and rating '" + r + '\''));
+        });
     }
 
     private static ImmutableConfiguration getConfig(final File strategyFile) throws InvestmentStrategyParseException {
@@ -105,12 +100,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     }
 
     private static int getMinimumBalance(final ImmutableConfiguration config) {
-        final Optional<Integer> maybeBalance = SimpleInvestmentStrategyService.getValue(config,
-                SimpleInvestmentStrategyService.PROPERTY_MINIMUM_BALANCE, config::getInt);
-        if (!maybeBalance.isPresent()) {
-            throw new IllegalStateException("Minimum balance is missing.");
-        }
-        final int minimumBalance = maybeBalance.get();
+        final int minimumBalance = SimpleInvestmentStrategyService.getValue(config,
+                SimpleInvestmentStrategyService.PROPERTY_MINIMUM_BALANCE, config::getInt)
+                .orElseThrow(() -> new IllegalStateException("Minimum balance is missing."));
         if (minimumBalance < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             throw new IllegalStateException("Minimum balance is less than "
                     + InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED + " CZK.");
@@ -119,12 +111,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     }
 
     private static int getMaximumInvestment(final ImmutableConfiguration config) {
-        final Optional<Integer> maybeCeiling = SimpleInvestmentStrategyService.getValue(config,
-                SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_INVESTMENT, config::getInt);
-        if (!maybeCeiling.isPresent()) {
-            throw new IllegalStateException("Maximum investment is missing.");
-        }
-        final int maximumInvestment = maybeCeiling.get();
+        final int maximumInvestment = SimpleInvestmentStrategyService.getValue(config,
+                SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_INVESTMENT, config::getInt)
+                .orElseThrow(() -> new IllegalStateException("Maximum investment is missing."));
         if (maximumInvestment < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             throw new IllegalStateException("Maximum investment is less than "
                     + InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED + " CZK.");

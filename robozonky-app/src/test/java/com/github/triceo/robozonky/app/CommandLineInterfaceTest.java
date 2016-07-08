@@ -19,9 +19,15 @@ package com.github.triceo.robozonky.app;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 public class CommandLineInterfaceTest extends AbstractNonExitingTest {
+
+    private static CommandLineInterface process(final Optional<CommandLineInterface> maybe) {
+        Assertions.assertThat(maybe).isPresent();
+        return maybe.get();
+    }
 
     @Test(expected = RoboZonkyTestingExitException.class)
     public void noArguments() {
@@ -30,73 +36,88 @@ public class CommandLineInterfaceTest extends AbstractNonExitingTest {
 
     @Test
     public void minimalStrategyDrivenCliWithKeyStoreAndToken() {
-        final CommandLineInterface cli = CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "5");
-        Assertions.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
-        Assertions.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
-        Assertions.assertThat(cli.getKeyStoreLocation()).isPresent();
-        Assertions.assertThat(cli.isTokenEnabled()).isTrue();
-        Assertions.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isPresent();
-        Assertions.assertThat(cli.getPassword()).isNotNull();
-        Assertions.assertThat(cli.getUsername()).isEmpty();
+        final CommandLineInterface cli = CommandLineInterfaceTest.process(
+                CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "5"));
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
+        softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
+        softly.assertThat(cli.getKeyStoreLocation()).isPresent();
+        softly.assertThat(cli.isTokenEnabled()).isTrue();
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isPresent();
+        softly.assertThat(cli.getPassword()).isNotNull();
+        softly.assertThat(cli.getUsername()).isEmpty();
+        softly.assertAll();
     }
 
     @Test
     public void minimalStrategyDrivenCliWithKeyStoreAndTokenNoRefresh() {
-        final CommandLineInterface cli = CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r");
-        Assertions.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
-        Assertions.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
-        Assertions.assertThat(cli.getKeyStoreLocation()).isPresent();
-        Assertions.assertThat(cli.isTokenEnabled()).isTrue();
-        Assertions.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
-        Assertions.assertThat(cli.getPassword()).isNotNull();
-        Assertions.assertThat(cli.getUsername()).isEmpty();
+        final CommandLineInterface cli = CommandLineInterfaceTest.process(
+                CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r"));
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
+        softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
+        softly.assertThat(cli.getKeyStoreLocation()).isPresent();
+        softly.assertThat(cli.isTokenEnabled()).isTrue();
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
+        softly.assertThat(cli.getPassword()).isNotNull();
+        softly.assertThat(cli.getUsername()).isEmpty();
+        softly.assertAll();
     }
 
     @Test
     public void minimalStrategyDrivenCli() {
-        final CommandLineInterface cli = CommandLineInterface.parse("-s", "somePath", "-u", "user", "-p", "password");
-        Assertions.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
-        Assertions.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
-        Assertions.assertThat(cli.getUsername()).isPresent();
-        Assertions.assertThat(cli.getPassword()).isNotNull();
-        Assertions.assertThat(cli.getLoanId()).isEmpty();
-        Assertions.assertThat(cli.getLoanAmount()).isEmpty();
-        Assertions.assertThat(cli.isDryRun()).isFalse();
-        Assertions.assertThat(cli.getDryRunBalance()).isEmpty();
-        Assertions.assertThat(cli.getKeyStoreLocation()).isEmpty();
-        Assertions.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
+        final CommandLineInterface cli = CommandLineInterfaceTest.process(
+                CommandLineInterface.parse("-s", "somePath", "-u", "user", "-p", "password"));
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
+        softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
+        softly.assertThat(cli.getUsername()).isPresent();
+        softly.assertThat(cli.getPassword()).isNotNull();
+        softly.assertThat(cli.getLoanId()).isEmpty();
+        softly.assertThat(cli.getLoanAmount()).isEmpty();
+        softly.assertThat(cli.isDryRun()).isFalse();
+        softly.assertThat(cli.getDryRunBalance()).isEmpty();
+        softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
+        softly.assertAll();
     }
 
     @Test
     public void minimalUserDrivenCli() {
-        final CommandLineInterface cli = CommandLineInterface.parse("-l", "1", "-a", "1000", "-u", "user", "-p", "pwd");
-        Assertions.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.USER_DRIVEN));
-        Assertions.assertThat(cli.getLoanId()).isPresent();
-        Assertions.assertThat(cli.getLoanAmount()).isPresent();
-        Assertions.assertThat(cli.getUsername()).isPresent();
-        Assertions.assertThat(cli.getPassword()).isNotNull();
-        Assertions.assertThat(cli.getStrategyConfigurationFilePath()).isEmpty();
-        Assertions.assertThat(cli.isDryRun()).isFalse();
-        Assertions.assertThat(cli.getDryRunBalance()).isEmpty();
-        Assertions.assertThat(cli.getKeyStoreLocation()).isEmpty();
-        Assertions.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
-        Assertions.assertThat(cli.isTokenEnabled()).isFalse();
+        final CommandLineInterface cli = CommandLineInterfaceTest.process(
+                        CommandLineInterface.parse("-l", "1", "-a", "1000", "-u", "user", "-p", "pwd"));
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.USER_DRIVEN));
+        softly.assertThat(cli.getLoanId()).isPresent();
+        softly.assertThat(cli.getLoanAmount()).isPresent();
+        softly.assertThat(cli.getUsername()).isPresent();
+        softly.assertThat(cli.getPassword()).isNotNull();
+        softly.assertThat(cli.getStrategyConfigurationFilePath()).isEmpty();
+        softly.assertThat(cli.isDryRun()).isFalse();
+        softly.assertThat(cli.getDryRunBalance()).isEmpty();
+        softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
+        softly.assertThat(cli.isTokenEnabled()).isFalse();
+        softly.assertAll();
     }
 
     @Test
     public void userDrivenCliWrongAmount() {
-        final CommandLineInterface cli = CommandLineInterface.parse("-l", "1", "-a", "10a0", "-u", "user", "-p", "pwd");
-        Assertions.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.USER_DRIVEN));
-        Assertions.assertThat(cli.getLoanId()).isPresent();
-        Assertions.assertThat(cli.getUsername()).isPresent();
-        Assertions.assertThat(cli.getLoanAmount()).isEmpty();
-        Assertions.assertThat(cli.getPassword()).isNotNull();
-        Assertions.assertThat(cli.getStrategyConfigurationFilePath()).isEmpty();
-        Assertions.assertThat(cli.isDryRun()).isFalse();
-        Assertions.assertThat(cli.getDryRunBalance()).isEmpty();
-        Assertions.assertThat(cli.getKeyStoreLocation()).isEmpty();
-        Assertions.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
-        Assertions.assertThat(cli.isTokenEnabled()).isFalse();
+        final CommandLineInterface cli = CommandLineInterfaceTest.process(
+                CommandLineInterface.parse("-l", "1", "-a", "10a0", "-u", "user", "-p", "pwd"));
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.USER_DRIVEN));
+        softly.assertThat(cli.getLoanId()).isPresent();
+        softly.assertThat(cli.getUsername()).isPresent();
+        softly.assertThat(cli.getLoanAmount()).isEmpty();
+        softly.assertThat(cli.getPassword()).isNotNull();
+        softly.assertThat(cli.getStrategyConfigurationFilePath()).isEmpty();
+        softly.assertThat(cli.isDryRun()).isFalse();
+        softly.assertThat(cli.getDryRunBalance()).isEmpty();
+        softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
+        softly.assertThat(cli.isTokenEnabled()).isFalse();
+        softly.assertAll();
     }
 
 }

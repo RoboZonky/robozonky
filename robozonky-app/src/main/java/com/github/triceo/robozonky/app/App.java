@@ -114,18 +114,11 @@ class App {
     }
 
     static AppContext processCommandLine(final String... args) {
-        final CommandLineInterface cli = CommandLineInterface.parse(args);
-        final Optional<OperatingMode> om = cli.getCliOperatingMode();
-        if (!om.isPresent()) {
+        final CommandLineInterface cli = CommandLineInterface.parse(args).orElse(null); // null will never happen
+        return cli.getCliOperatingMode().orElseGet(() -> {
             cli.printHelpAndExit("", false);
-            return null;
-        }
-        final Optional<AppContext> ctx = om.get().setup(cli, App.getAuthenticationMethod(cli));
-        if (ctx.isPresent()) {
-            return ctx.get();
-        } else {
-            return null; // should never happen
-        }
+            return null; // will never get here
+        }).setup(cli, App.getAuthenticationMethod(cli)).orElse(null); // null should never be returned
     }
 
     public static void main(final String... args) {
@@ -186,11 +179,7 @@ class App {
         // figure out what to execute
         return useStrategy ? Investor::invest : i -> {
             final Optional<Investment> optional = i.invest(ctx.getLoanId(), ctx.getLoanAmount());
-            if (optional.isPresent()) {
-                return Collections.singletonList(optional.get());
-            } else {
-                return Collections.emptyList();
-            }
+            return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
         };
     }
 
