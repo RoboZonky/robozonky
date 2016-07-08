@@ -275,7 +275,7 @@
                         <forkCount>1C</forkCount>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <reuseForks>false</reuseForks>
-                        <runOrder>alphabetical</runOrder>
+                        <runOrder>hourly</runOrder>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -286,7 +286,7 @@
                         <forkCount>1C</forkCount>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <reuseForks>false</reuseForks>
-                        <runOrder>alphabetical</runOrder>
+                        <runOrder>hourly</runOrder>
                     </configuration>
                     <executions>
                         <execution>
