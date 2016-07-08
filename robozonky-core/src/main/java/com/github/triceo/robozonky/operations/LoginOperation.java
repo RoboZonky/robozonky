@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.operations;
 
-import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -52,7 +51,7 @@ public class LoginOperation extends Operation<Authenticator, Authentication> {
         final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
         clientBuilder.providerFactory(LoginOperation.RESTEASY);
         final Authentication auth = input.authenticate(LoginOperation.ZONKY_URL, LoginOperation.ZOTIFY_URL,
-                Util.getRoboZonkyVersion(), clientBuilder);
+                clientBuilder);
         return auth;
 
     }

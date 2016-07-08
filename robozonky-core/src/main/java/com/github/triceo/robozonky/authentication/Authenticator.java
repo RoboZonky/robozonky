@@ -60,15 +60,15 @@ public class Authenticator {
     }
 
     private static Authentication newAuthenticatedApi(final ZonkyApiToken token, final String zonkyApiUrl,
-                                                      final String zotifyApiUrl, final String roboZonkyVersion,
+                                                      final String zotifyApiUrl,
                                                       final ResteasyClientBuilder clientBuilder,
                                                       final boolean isDryRun) {
-        final AuthenticatedFilter f = new AuthenticatedFilter(token, roboZonkyVersion);
+        final AuthenticatedFilter f = new AuthenticatedFilter(token);
         final ZonkyApi api = isDryRun ?
                 Authenticator.newApi(zonkyApiUrl, clientBuilder, f, ZonkyApi.class):
                 Authenticator.newApi(zonkyApiUrl, clientBuilder, f, InvestingZonkyApi.class);
         final ZotifyApi zotifyApi =
-                Authenticator.newApi(zotifyApiUrl, clientBuilder, new ZotifyFilter(roboZonkyVersion), ZotifyApi.class);
+                Authenticator.newApi(zotifyApiUrl, clientBuilder, new ZotifyFilter(), ZotifyApi.class);
         return new Authentication(api, token, zotifyApi);
     }
 
@@ -98,12 +98,11 @@ public class Authenticator {
     }
 
     public Authentication authenticate(final String zonkyApiUrl, final String zotifyApiUrl,
-                                       final String roboZonkyVersion, final ResteasyClientBuilder clientBuilder) {
-        final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder,
-                new AuthenticationFilter(roboZonkyVersion), ZonkyApi.class);
+                                       final ResteasyClientBuilder clientBuilder) {
+        final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticationFilter(),
+                ZonkyApi.class);
         final ZonkyApiToken token = authenticationMethod.apply(api);
-        return Authenticator.newAuthenticatedApi(token, zonkyApiUrl, zotifyApiUrl, roboZonkyVersion, clientBuilder,
-                isDryRun);
+        return Authenticator.newAuthenticatedApi(token, zonkyApiUrl, zotifyApiUrl, clientBuilder, isDryRun);
     }
 
 }

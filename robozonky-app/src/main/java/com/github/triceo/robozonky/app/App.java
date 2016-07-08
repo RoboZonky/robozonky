@@ -31,7 +31,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.Investor;
-import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
@@ -130,7 +129,7 @@ class App {
     }
 
     public static void main(final String... args) {
-        App.LOGGER.info("RoboZonky v{} loading.", Util.getRoboZonkyVersion());
+        App.LOGGER.info("RoboZonky v{} loading.", App.class.getPackage().getImplementationVersion());
         final AppContext ctx = App.processCommandLine(args);
         App.LOGGER.info("===== RoboZonky at your service! =====");
         try {

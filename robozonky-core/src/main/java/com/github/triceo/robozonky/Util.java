@@ -16,30 +16,12 @@
 package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.Properties;
 
 public class Util {
 
-    static final String ZONKY_VERSION_UNDETECTED = "UNDETECTED";
-    static final String ZONKY_VERSION_UNKNOWN = "UNKNOWN";
-
     static BigDecimal sum(final Collection<BigDecimal> vals) {
         return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public static String getRoboZonkyVersion() {
-        try {
-            final URLClassLoader cl = (URLClassLoader) Investor.class.getClassLoader();
-            final URL url = cl.findResource("META-INF/maven/com.github.triceo.robozonky/robozonky-core/pom.properties");
-            final Properties props = new Properties();
-            props.load(url.openStream());
-            return props.getProperty("version", Util.ZONKY_VERSION_UNKNOWN);
-        } catch (final Exception ex) {
-            return Util.ZONKY_VERSION_UNDETECTED;
-        }
     }
 
 }

@@ -28,8 +28,7 @@ class AuthenticatedFilter extends CommonFilter {
 
     private final char[] accessToken; // treat the access token as if it were a password
 
-    public AuthenticatedFilter(final ZonkyApiToken token, final String roboZonkyVersion) {
-        super(roboZonkyVersion);
+    public AuthenticatedFilter(final ZonkyApiToken token) {
         this.accessToken = token.getAccessToken() == null ? new char[] {} : token.getAccessToken().toCharArray();
     }
 

@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.strategy.rules;
 import java.io.File;
 import java.util.List;
 
-import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyService;
@@ -30,14 +29,14 @@ import org.kie.api.builder.Message;
 import org.kie.api.builder.ReleaseId;
 import org.kie.api.builder.model.KieModuleModel;
 import org.kie.api.io.KieResources;
+import org.kie.api.runtime.KieContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RuleBasedInvestmentStrategyService implements InvestmentStrategyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleBasedInvestmentStrategyService.class);
-    private static final ReleaseId RELID = KieServices.Factory.get().newReleaseId("com.github.triceo.robozonky",
-            "rule-based-strategy", Util.getRoboZonkyVersion());
+    private static final ReleaseId RELEASE_ID = KieServices.Factory.get().getRepository().getDefaultReleaseId();
 
     @Override
     public InvestmentStrategy parse(final File strategyFile) throws InvestmentStrategyParseException {
@@ -48,14 +47,15 @@ public class RuleBasedInvestmentStrategyService implements InvestmentStrategySer
         final KieFileSystem kfs = kieServices.newKieFileSystem();
         kfs.write(resources.newFileSystemResource(strategyFile));
         kfs.writeKModuleXML(kieModuleModel.toXML());
-        kfs.generateAndWritePomXML(RuleBasedInvestmentStrategyService.RELID);
+        kfs.generateAndWritePomXML(RuleBasedInvestmentStrategyService.RELEASE_ID);
         final KieBuilder builder = kieServices.newKieBuilder(kfs).buildAll();
         final List<Message> messages = builder.getResults().getMessages(Message.Level.ERROR);
         RuleBasedInvestmentStrategyService.LOGGER.trace("Parsing finished.");
         if (!messages.isEmpty()) {
             throw new InvestmentStrategyParseException("Failed parsing decision table. Reason: " + messages);
         }
-        return new RuleBasedInvestmentStrategy(kieServices.newKieContainer(RuleBasedInvestmentStrategyService.RELID));
+        final KieContainer container = kieServices.newKieContainer(RuleBasedInvestmentStrategyService.RELEASE_ID);
+        return new RuleBasedInvestmentStrategy(container);
     }
 
     @Override

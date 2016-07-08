@@ -21,7 +21,6 @@ import java.util.UUID;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
-import com.github.triceo.robozonky.Util;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
     @Override
     protected CommonFilter getTestedFilter() {
-        return new AuthenticatedFilter(token, Util.getRoboZonkyVersion());
+        return new AuthenticatedFilter(token);
     }
 
     @Test

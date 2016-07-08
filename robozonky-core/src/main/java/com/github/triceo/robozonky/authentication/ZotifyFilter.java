@@ -23,10 +23,6 @@ class ZotifyFilter extends CommonFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZotifyFilter.class);
 
-    public ZotifyFilter(final String roboZonkyVersion) {
-        super(roboZonkyVersion);
-    }
-
     @Override
     protected Logger getLogger() {
         return ZotifyFilter.LOGGER;

@@ -24,6 +24,7 @@ import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 public class LoginOperationTest {
@@ -34,7 +35,7 @@ public class LoginOperationTest {
         Mockito.when(tmp.getZonkyApi()).thenReturn(Mockito.mock(ZonkyApi.class));
         Mockito.when(tmp.getZonkyApiToken()).thenReturn(Mockito.mock(ZonkyApiToken.class));
         final Authenticator auth = Mockito.mock(Authenticator.class);
-        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tmp);
+        Mockito.when(auth.authenticate(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(tmp);
         final Optional<Authentication> optional = new LoginOperation().apply(auth);
         Assertions.assertThat(optional).isPresent();
         final Authentication c = optional.get();
@@ -44,9 +45,9 @@ public class LoginOperationTest {
     @Test
     public void failedLogin() {
         final Authenticator auth = Mockito.mock(Authenticator.class);
-        Mockito.when(auth.authenticate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.when(auth.authenticate(Matchers.any(), Matchers.any(), Matchers.any()))
                 .thenThrow(new IllegalStateException("Something bad happened."));
-        Optional<Authentication> result = new LoginOperation().apply(auth);
+        final Optional<Authentication> result = new LoginOperation().apply(auth);
         Assertions.assertThat(result).isEmpty();
     }
 

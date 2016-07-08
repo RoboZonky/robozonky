@@ -20,7 +20,6 @@ import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
-import com.github.triceo.robozonky.Util;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -29,7 +28,7 @@ public class AuthorizationFilterTest extends AbstractCommonFilterTest {
 
     @Override
     protected CommonFilter getTestedFilter() {
-        return new AuthenticationFilter(Util.getRoboZonkyVersion());
+        return new AuthenticationFilter();
     }
 
     @Test
