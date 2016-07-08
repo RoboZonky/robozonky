@@ -32,6 +32,10 @@ import com.github.triceo.robozonky.remote.Statistics;
 
 public class PortfolioOverview {
 
+    private static BigDecimal sum(final Collection<BigDecimal> vals) {
+        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     public static PortfolioOverview calculate(final BigDecimal balance, final Statistics stats,
                                               final Collection<Investment> investments) {
         // first figure out how much we have in outstanding loans
@@ -53,7 +57,7 @@ public class PortfolioOverview {
 
     private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating) {
         this.czkAvailable = czkAvailable;
-        this.czkInvested = Util.sum(czkInvestedPerRating.values());
+        this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
         this.czkInvestedPerRating = czkInvestedPerRating;
         if (this.czkInvested.intValue() == 0) {
             this.sharesOnInvestment = Collections.emptyMap();
