@@ -338,6 +338,9 @@
                             <param>com.github.triceo.robozonky.app.AppContext</param>
                             <param>com.github.triceo.robozonky.strategy.rules.facts.*</param>
                         </excludedClasses>
+                        <avoidCallsTo>
+                            <avoidCallsTo>org.slf4j</avoidCallsTo>
+                        </avoidCallsTo>
                     </configuration>
                 </plugin>
             </plugins>

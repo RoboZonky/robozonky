@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -38,7 +39,7 @@ public class IncompleteStrategyTest {
     @Parameterized.Parameters(name = "removed \"{0}\" from {1}")
     public static Collection<Object[]> getParameters() throws IOException {
         final List<String> lines = Files.lines(IncompleteStrategyTest.PROPER.toPath()).collect(Collectors.toList());
-        final Collection<Object[]> files = new ArrayList<>();
+        final Collection<Object[]> files = new ArrayList<>(lines.size());
         for (int i = 0; i < lines.size(); i++) {
             final List<String> newLines = new ArrayList<>(lines);
             final String line = newLines.remove(i);
@@ -55,9 +56,14 @@ public class IncompleteStrategyTest {
     @Parameterized.Parameter(1)
     public File strategyFile;
 
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void propertyIsMissing() throws InvestmentStrategyParseException {
-        new SimpleInvestmentStrategyService().parse(this.strategyFile);
+    @Test
+    public void propertyIsMissing() {
+        try {
+            new SimpleInvestmentStrategyService().parse(this.strategyFile);
+            Assertions.fail("Should have thrown an exception.");
+        } catch (final InvestmentStrategyParseException ex) {
+            Assertions.assertThat(ex).hasCauseInstanceOf(IllegalStateException.class);
+        }
     }
 
 }

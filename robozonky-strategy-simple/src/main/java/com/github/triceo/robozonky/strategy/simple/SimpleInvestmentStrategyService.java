@@ -209,7 +209,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             final Map<Rating, StrategyPerRating> individualStrategies = Arrays.stream(Rating.values())
                     .collect(Collectors.toMap(Function.identity(), r -> SimpleInvestmentStrategyService.parseRating(r, c)));
             return new SimpleInvestmentStrategy(minimumBalance, maximumInvestment, individualStrategies);
-        } catch (final RuntimeException ex) {
+        } catch (final IllegalStateException ex) {
             throw new InvestmentStrategyParseException(ex);
         }
     }

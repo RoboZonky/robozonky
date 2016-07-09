@@ -35,10 +35,9 @@ public class Loan implements BaseEntity {
     private Collection<Photo> photos;
     private BigDecimal investmentRate;
     private MyInvestment myInvestment;
-    // FIXME implement
-    private String mainIncomeType;
-    // FIXME implement
-    private int region, purpose;
+    private MainIncomeType mainIncomeType;
+    private Region region;
+    private Purpose purpose;
 
     @XmlElement
     public MyInvestment getMyInvestment() {
@@ -46,7 +45,7 @@ public class Loan implements BaseEntity {
     }
 
     @XmlElement
-    public String getMainIncomeType() {
+    public MainIncomeType getMainIncomeType() {
         return mainIncomeType;
     }
 
@@ -56,12 +55,14 @@ public class Loan implements BaseEntity {
     }
 
     @XmlElement
-    public int getRegion() {
+    @JsonDeserialize(using = RegionDeserializer.class)
+    public Region getRegion() {
         return region;
     }
 
     @XmlElement
-    public int getPurpose() {
+    @JsonDeserialize(using = PurposeDeserializer.class)
+    public Purpose getPurpose() {
         return purpose;
     }
 
