@@ -26,59 +26,63 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.OverallPortfolio;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 
 public class PortfolioOverview {
 
-    private static BigDecimal sum(final Collection<BigDecimal> vals) {
-        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+    private static int sum(final Collection<Integer> vals) {
+        return vals.stream().reduce(0, (a, b) -> a + b);
     }
 
     public static PortfolioOverview calculate(final BigDecimal balance, final Statistics stats,
                                               final Collection<Investment> investments) {
         // first figure out how much we have in outstanding loans
-        final Map<Rating, BigDecimal> amounts = stats.getRiskPortfolio().stream().collect(
-                Collectors.toMap(RiskPortfolio::getRating, risk -> BigDecimal.valueOf(risk.getUnpaid()))
+        final Map<Rating, Integer> amounts = stats.getRiskPortfolio().stream().collect(
+                Collectors.toMap(RiskPortfolio::getRating, OverallPortfolio::getUnpaid)
         );
         // then make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {
             final Rating r = previousInvestment.getRating();
-            final BigDecimal investment = BigDecimal.valueOf(previousInvestment.getAmount());
-            amounts.put(r, amounts.get(r).add(investment));
+            amounts.put(r, amounts.get(r) + previousInvestment.getAmount());
         });
         return new PortfolioOverview(balance, Collections.unmodifiableMap(amounts));
     }
 
-    private final BigDecimal czkAvailable, czkInvested;
-    private final Map<Rating, BigDecimal> czkInvestedPerRating;
+    private final int czkAvailable, czkInvested;
+    private final Map<Rating, Integer> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> sharesOnInvestment;
 
-    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating) {
-        this.czkAvailable = czkAvailable;
+    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
+        this.czkAvailable = czkAvailable.intValue();
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
         this.czkInvestedPerRating = czkInvestedPerRating;
-        if (this.czkInvested.intValue() == 0) {
+        if (this.czkInvested == 0) {
             this.sharesOnInvestment = Collections.emptyMap();
         } else {
             this.sharesOnInvestment = Arrays.stream(Rating.values()).collect(Collectors.toMap(
                     Function.identity(),
-                    r -> this.getCzkInvested(r).divide(this.czkInvested, 4, RoundingMode.HALF_EVEN))
+                    r -> {
+                        final BigDecimal invested = BigDecimal.valueOf(this.czkInvested);
+                        final BigDecimal investedPerRating = BigDecimal.valueOf(this.getCzkInvested(r));
+                        return investedPerRating.divide(invested, 4, RoundingMode.HALF_EVEN);
+                    })
             );
         }
     }
 
-    public BigDecimal getCzkAvailable() {
+    public int getCzkAvailable() {
         return this.czkAvailable;
     }
 
-    public BigDecimal getCzkInvested() {
+    public int getCzkInvested() {
         return this.czkInvested;
     }
 
-    public BigDecimal getCzkInvested(final Rating r) {
-        return this.czkInvestedPerRating.getOrDefault(r, BigDecimal.ZERO);
+    public int getCzkInvested(final Rating r) {
+        return this.czkInvestedPerRating.getOrDefault(r, 0);
     }
 
     public BigDecimal getShareOnInvestment(final Rating r) {

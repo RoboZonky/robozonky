@@ -59,7 +59,7 @@ public class PortfolioOverviewTest {
         // check standard operation
         final BigDecimal balance = BigDecimal.TEN;
         PortfolioOverview result = PortfolioOverview.calculate(balance, stats, Collections.emptyList());
-        Assertions.assertThat(result.getCzkAvailable()).isEqualTo(balance);
+        Assertions.assertThat(result.getCzkAvailable()).isEqualTo(balance.intValue());
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AA, amountAA, totalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.B, amountB, totalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.D, amountD, totalPie);
@@ -74,7 +74,7 @@ public class PortfolioOverviewTest {
         final Investment i = investments.get(0);
         Mockito.when(i.getRating()).thenReturn(Rating.D);
         result = PortfolioOverview.calculate(balance, stats, investments);
-        Assertions.assertThat(result.getCzkAvailable()).isEqualTo(balance);
+        Assertions.assertThat(result.getCzkAvailable()).isEqualTo(balance.intValue());
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.D, amountD + increment, newTotalPie);

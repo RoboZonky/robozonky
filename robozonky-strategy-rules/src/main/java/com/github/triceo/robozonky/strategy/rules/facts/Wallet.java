@@ -16,15 +16,13 @@
 
 package com.github.triceo.robozonky.strategy.rules.facts;
 
-import java.math.BigDecimal;
-
 public class Wallet {
 
     private int czkAvailable, czkInvested;
 
-    public Wallet(final BigDecimal czkAvailable, final BigDecimal czkInvested) {
-        this.czkAvailable = czkAvailable.intValue();
-        this.czkInvested = czkInvested.intValue();
+    public Wallet(final int czkAvailable, final int czkInvested) {
+        this.czkAvailable = czkAvailable;
+        this.czkInvested = czkInvested;
     }
 
     public int getCzkAvailable() {

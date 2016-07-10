@@ -119,7 +119,7 @@ public class InvestorTest {
         final Loan success = InvestorTest.getMockLoanWithIdAndAmount(5, amount);
         // prepare pre-conditions for the above loans
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance);
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance.intValue());
         final InvestmentStrategy strategy = Mockito.mock(InvestmentStrategy.class);
         Mockito.when(strategy.recommendInvestmentAmount(overBalance, portfolio)).thenReturn(balance.intValue() + 1);
         Mockito.when(strategy.recommendInvestmentAmount(underMinimum, portfolio)).thenReturn(0);

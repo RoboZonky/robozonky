@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -102,14 +101,14 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     }
 
     private boolean isAcceptable(final PortfolioOverview portfolio) {
-        final BigDecimal availableBalance = portfolio.getCzkAvailable();
-        if (availableBalance.intValue() < this.minimumBalance) {
+        final int availableBalance = portfolio.getCzkAvailable();
+        if (availableBalance < this.minimumBalance) {
             SimpleInvestmentStrategy.LOGGER.debug("According to the investment strategy, {} CZK balance is less than "
                     + "minimum {} CZK. Not recommending any loans.", availableBalance, this.minimumBalance);
             return false;
         }
-        final BigDecimal invested = portfolio.getCzkInvested();
-        if (invested.intValue() > this.investmentCeiling) {
+        final int invested = portfolio.getCzkInvested();
+        if (invested > this.investmentCeiling) {
             SimpleInvestmentStrategy.LOGGER.debug("According to the investment strategy, {} CZK total investment "
                     + "exceeds {} CZK ceiling. Not recommending any loans.", invested, this.investmentCeiling);
             return false;
@@ -147,15 +146,13 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         if (!this.isAcceptable(portfolio)) {
             return 0;
         }
-        final BigDecimal maxAllowedInvestmentIncrement =
-                BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT);
-        BigDecimal tmp = BigDecimal.valueOf(individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan));
+        final int maxAllowedInvestmentIncrement = InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT;
+        final int recommendation = individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan);
         // round to nearest lower increment
-        tmp = tmp.min(portfolio.getCzkAvailable());
-        tmp = tmp.divide(maxAllowedInvestmentIncrement, 0, RoundingMode.DOWN); // make sure we never exceed max allowed
-        tmp = tmp.multiply(maxAllowedInvestmentIncrement);
+        final int adjustedForBalance = Math.min(portfolio.getCzkAvailable(), recommendation);
+        final int result = (adjustedForBalance / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
         // make sure we never submit more than there is remaining in the loan
-        return Math.min(tmp.intValue(), (int) loan.getRemainingInvestment());
+        return Math.min(result, (int) loan.getRemainingInvestment());
     }
 
 }

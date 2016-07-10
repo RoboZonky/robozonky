@@ -88,8 +88,8 @@ public class SimpleInvestmentStategyTest {
 
         // with unlimited balance
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(Integer.MAX_VALUE));
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(0));
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
         final int maxInvestment = Math.min(
                 loanAmount.multiply(SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A).intValue(),
                 SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT);
@@ -97,7 +97,7 @@ public class SimpleInvestmentStategyTest {
         Assertions.assertThat(actualInvestment).isLessThanOrEqualTo(maxInvestment);
 
         // with balance just a little less than the recommended investment
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(actualInvestment - 1));
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(actualInvestment - 1);
         final int adjustedForBalance = overallStrategy.recommendInvestmentAmount(mockLoan, portfolio);
         Assertions.assertThat(adjustedForBalance).isLessThanOrEqualTo(actualInvestment);
 
@@ -214,12 +214,12 @@ public class SimpleInvestmentStategyTest {
         // make sure we never go below the minimum balance
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(0));
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance + 1));
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance + 1);
         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance));
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance);
         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(balance - 1));
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance - 1);
         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isEmpty();
     }
 
@@ -244,12 +244,12 @@ public class SimpleInvestmentStategyTest {
         // make sure we never go below the minimum balance
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(Integer.MAX_VALUE));
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(ceiling + 1));
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling + 1);
         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isEmpty();
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(ceiling));
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling);
         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(ceiling - 1));
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling - 1);
         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
     }
 
@@ -276,8 +276,8 @@ public class SimpleInvestmentStategyTest {
         // prepare portfolio
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(Integer.MAX_VALUE));
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.ZERO);
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
 
         // make sure the loans are properly sorted according to their terms
         final List<Loan> result = sis.getMatchingLoans(loans, portfolio);

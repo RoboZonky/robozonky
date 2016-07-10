@@ -70,13 +70,12 @@ public class Investor {
         }
     }
 
-    private static Optional<Investment> invest(final ZonkyApi api, final Loan l, final int amount,
-                                               final BigDecimal balance) {
+    private static Optional<Investment> invest(final ZonkyApi api, final Loan l, final int amount, final int balance) {
         if (amount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             Investor.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
                     l, amount);
             return Optional.empty();
-        } else if (amount > balance.intValue()) {
+        } else if (amount > balance) {
             Investor.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK balance.",
                     l, amount, balance);
             return Optional.empty();
@@ -188,7 +187,8 @@ public class Investor {
     }
 
     public Optional<Investment> invest(final int loanId, final int loanAmount) {
-        return Investor.invest(this.zonkyApi, this.zonkyApi.getLoan(loanId), loanAmount, this.initialBalance);
+        return Investor.invest(this.zonkyApi, this.zonkyApi.getLoan(loanId), loanAmount,
+                this.initialBalance.intValue());
     }
 
 }

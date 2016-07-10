@@ -66,8 +66,8 @@ public class RuleBasedInvestmentStrategyServiceTest {
         Mockito.when(d.getRating()).thenReturn(Rating.D);
         // prepare portfolio
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(BigDecimal.valueOf(10000));
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(BigDecimal.valueOf(100000));
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(10000);
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(100000);
         Arrays.stream(Rating.values())
                 .forEach(r -> Mockito.when(portfolio.getShareOnInvestment(r)).thenReturn(BigDecimal.ZERO));
         Mockito.when(portfolio.getShareOnInvestment(Rating.AAA)).thenReturn(BigDecimal.ONE);
