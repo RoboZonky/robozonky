@@ -58,6 +58,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     private static final String PROPERTY_MAXIMUM_LOAN_AMOUNT = SimpleInvestmentStrategyService.getMaximum("loanAmount");
     private static final String PROPERTY_MAXIMUM_LOAN_SHARE = SimpleInvestmentStrategyService.getMaximum("loanShare");
 
+    private static boolean isBetweenZeroAndOne(final BigDecimal target) {
+        return !(target.compareTo(BigDecimal.ZERO) < 0 || target.compareTo(BigDecimal.ONE) > 0);
+    }
 
     private static String get(final String prefix, final String str) {
         return prefix.toLowerCase() + str.substring(0, 1).toUpperCase() + str.substring(1);
@@ -151,7 +154,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                         SimpleInvestmentStrategyService.PROPERTY_PREFER_LONGER_TERMS, config::getBoolean);
         final BigDecimal targetShare = SimpleInvestmentStrategyService.getValue(config, rating,
                         SimpleInvestmentStrategyService.PROPERTY_TARGET_SHARE, config::getBigDecimal);
-        if (targetShare.compareTo(BigDecimal.ZERO) < 0 || targetShare.compareTo(BigDecimal.ONE) > 0) {
+        if (!SimpleInvestmentStrategyService.isBetweenZeroAndOne(targetShare)) {
             throw new IllegalStateException("Target share for rating " + rating + " outside of range <0, 1>: "
                     + targetShare);
         }
@@ -189,7 +192,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         }
         final BigDecimal maxLoanShare = SimpleInvestmentStrategyService.getValue(config, rating,
                 SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_LOAN_SHARE, config::getBigDecimal);
-        if (maxLoanShare.compareTo(BigDecimal.ZERO) < 0 || maxLoanShare.compareTo(BigDecimal.ONE) > 0) {
+        if (!SimpleInvestmentStrategyService.isBetweenZeroAndOne(maxLoanShare)) {
             throw new IllegalStateException("Maximum investment share for rating " + rating
                     + " outside of range <0, 1>: " + targetShare);
         }

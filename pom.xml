@@ -324,13 +324,14 @@
                     <version>1.1.10</version>
                     <configuration>
                         <timestampedReports>false</timestampedReports>
+                        <timeoutFactor>2</timeoutFactor>
                         <detectInlinedCode>true</detectInlinedCode>
                         <mutationThreshold>${mutationThreshold}</mutationThreshold>
-                        <maxDependencyDistance>2</maxDependencyDistance>
                         <targetClasses>
                             <param>com.github.triceo.robozonky.*</param>
                         </targetClasses>
                         <targetTests>
+                            <param>com.github.triceo.robozonky.*Test</param> <!-- No IT -->
                             <param>com.github.triceo.robozonky.*Test</param> <!-- No IT -->
                         </targetTests>
                         <excludedClasses> <!-- Mostly getters; messing up stats -->
