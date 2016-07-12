@@ -15,11 +15,9 @@
  */
 package com.github.triceo.robozonky.app;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.security.KeyStoreException;
 import java.time.LocalDateTime;
@@ -29,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
@@ -154,11 +153,11 @@ class App {
         if (result.size() == 0) {
             return Optional.empty();
         }
-        try (final BufferedWriter bw = Files.newBufferedWriter(target.toPath(), Charset.forName("UTF-8"))) {
-            for (final Investment i : result) {
-                bw.write("#" + i.getLoanId() + ": " + i.getAmount() + " CZK");
-                bw.newLine();
-            }
+        final Collection<String> output = result.stream()
+                .map(i -> "#" + i.getLoanId() + ": " + i.getAmount() + " CZK")
+                .collect(Collectors.toList());
+        try {
+            Files.write(target.toPath(), output);
             App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.",
                     target.getAbsolutePath());
             return Optional.of(target);
