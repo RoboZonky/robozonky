@@ -35,7 +35,7 @@ public class LoginOperationTest {
         Mockito.when(tmp.getZonkyApi()).thenReturn(Mockito.mock(ZonkyApi.class));
         Mockito.when(tmp.getZonkyApiToken()).thenReturn(Mockito.mock(ZonkyApiToken.class));
         final Authenticator auth = Mockito.mock(Authenticator.class);
-        Mockito.when(auth.authenticate(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(tmp);
+        Mockito.when(auth.authenticate(Matchers.any(), Matchers.any())).thenReturn(tmp);
         final Optional<Authentication> optional = new LoginOperation().apply(auth);
         Assertions.assertThat(optional).isPresent();
         final Authentication c = optional.get();
@@ -45,7 +45,7 @@ public class LoginOperationTest {
     @Test
     public void failedLogin() {
         final Authenticator auth = Mockito.mock(Authenticator.class);
-        Mockito.when(auth.authenticate(Matchers.any(), Matchers.any(), Matchers.any()))
+        Mockito.when(auth.authenticate(Matchers.any(), Matchers.any()))
                 .thenThrow(new IllegalStateException("Something bad happened."));
         final Optional<Authentication> result = new LoginOperation().apply(auth);
         Assertions.assertThat(result).isEmpty();

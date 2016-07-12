@@ -18,25 +18,12 @@ package com.github.triceo.robozonky.operations;
 
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginOperation extends Operation<Authenticator, Authentication> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginOperation.class);
-
-    private static final ResteasyProviderFactory RESTEASY;
-    static {
-        LoginOperation.LOGGER.trace("Initializing RESTEasy.");
-        RESTEASY = ResteasyProviderFactory.getInstance();
-        RegisterBuiltin.register(LoginOperation.RESTEASY);
-        RESTEASY.registerProvider(ResteasyJackson2Provider.class);
-        LoginOperation.LOGGER.trace("RESTEasy initialized.");
-    }
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
     private static final String ZOTIFY_URL = "http://zotify.cz";
@@ -48,11 +35,6 @@ public class LoginOperation extends Operation<Authenticator, Authentication> {
 
     @Override
     protected Authentication perform(final Authenticator input) {
-        final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
-        clientBuilder.providerFactory(LoginOperation.RESTEASY);
-        final Authentication auth = input.authenticate(LoginOperation.ZONKY_URL, LoginOperation.ZOTIFY_URL,
-                clientBuilder);
-        return auth;
-
+        return input.authenticate(LoginOperation.ZONKY_URL, LoginOperation.ZOTIFY_URL);
     }
 }

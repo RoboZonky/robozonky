@@ -20,6 +20,9 @@ import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import com.github.triceo.robozonky.remote.ZotifyApi;
 
+/**
+ * Immutable object representing the result of a successful authentication.
+ */
 public class Authentication {
 
     private final ZonkyApi api;
