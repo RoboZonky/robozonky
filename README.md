@@ -1,5 +1,8 @@
 # RoboZonky
 
+[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.github.triceo.robozonky/robozonky-app/badge.svg)](http://search.maven.org/#search|ga|1|robozonky-)
+[![Build Status](https://travis-ci.org/triceo/robozonky.svg)](https://travis-ci.org/triceo/robozonky)
+
 ## Odkazy
 
 * [Ke stažení](http://triceo.github.io/robozonky/).
