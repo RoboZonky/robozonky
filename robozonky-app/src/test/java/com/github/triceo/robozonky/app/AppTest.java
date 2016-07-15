@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.security.KeyStoreException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -37,26 +36,18 @@ import org.mockito.Mockito;
 
 import static com.github.triceo.robozonky.app.App.processCommandLine;
 
-public class AppTest extends AbstractNonExitingTest {
+public class AppTest {
 
     @Test
     public void simpleCommandLine() {
-        final AppContext ctx = processCommandLine("-s", "src/main/assembly/resources/robozonky-conservative.cfg",
-                "-u", "user", "-p", "pass");
+        final Optional<AppContext> optional = processCommandLine("-s",
+                "src/main/assembly/resources/robozonky-conservative.cfg", "-u", "user", "-p", "pass");
+        Assertions.assertThat(optional.isPresent());
+        final AppContext ctx = optional.get();
         Assertions.assertThat(ctx.getOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
         Assertions.assertThat(ctx.isDryRun()).isFalse();
         Assertions.assertThat(ctx.getAuthenticationHandler()).isNotNull();
         Assertions.assertThat(ctx.getInvestmentStrategy()).isNotNull();
-    }
-
-    @Test(expected = RoboZonkyTestingExitException.class)
-    public void unreadableStrategyFile() {
-        processCommandLine("-s", "something", "-u", "user", "-p", "pass");
-    }
-
-    @Test(expected = RoboZonkyTestingExitException.class)
-    public void nothingOnCommandLine() {
-        Assertions.assertThat(processCommandLine());
     }
 
     @Test
@@ -156,8 +147,7 @@ public class AppTest extends AbstractNonExitingTest {
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.getPassword()).thenReturn("password");
         Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.of(tmp));
-        App.getSensitiveInformationProvider(cli, null);
-        Mockito.verify(cli, Mockito.times(1)).printHelpAndExit(Matchers.any(), Matchers.any(KeyStoreException.class));
+        Assertions.assertThat(App.getSensitiveInformationProvider(cli, null)).isEmpty();
     }
 
 }

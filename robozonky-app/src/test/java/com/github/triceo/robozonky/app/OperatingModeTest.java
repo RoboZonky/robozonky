@@ -23,9 +23,10 @@ import java.util.Optional;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-public class OperatingModeTest extends AbstractNonExitingTest {
+public class OperatingModeTest {
 
     private static CommandLineInterface mockCli() {
         return OperatingModeTest.mockCli(Optional.empty(), Optional.empty());
@@ -64,7 +65,7 @@ public class OperatingModeTest extends AbstractNonExitingTest {
     }
 
     private void ensureExitCalled(final CommandLineInterface mock) {
-        Mockito.verify(mock, Mockito.times(1)).printHelpAndExit(Mockito.any(), Mockito.eq(true));
+        Mockito.verify(mock, Mockito.times(1)).printHelp(Matchers.any(), Matchers.eq(true));
     }
 
     @Test
@@ -118,12 +119,13 @@ public class OperatingModeTest extends AbstractNonExitingTest {
         this.ensureExitCalled(cli);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void strategyDrivenWrongFile() throws IOException {
         final CommandLineInterface cli = OperatingModeTest.mockCli();
         final File tmp = File.createTempFile("robozonky-", ".strategy"); // this is an empty (= invalid) strategy file
         Mockito.when(cli.getStrategyConfigurationFilePath()).thenReturn(Optional.of(tmp.getAbsolutePath()));
-        OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class));
+        Assertions.assertThat(OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+                .isEmpty();
     }
 }
 

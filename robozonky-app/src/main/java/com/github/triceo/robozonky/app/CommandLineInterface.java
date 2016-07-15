@@ -94,7 +94,7 @@ class CommandLineInterface {
         try {
             return Optional.of(new CommandLineInterface(options, parser.parse(options, args)));
         } catch (final ParseException ex) {
-            CommandLineInterface.printHelpAndExit(options, ex.getMessage(), true);
+            CommandLineInterface.printHelp(options, ex.getMessage(), true);
             return Optional.empty();
         }
     }
@@ -191,20 +191,14 @@ class CommandLineInterface {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
     }
 
-    static void printHelpAndExit(final Options options, final String message, final boolean isError) {
+    public static void printHelp(final Options options, final String message, final boolean isError) {
         final HelpFormatter formatter = new HelpFormatter();
         final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
         formatter.printHelp(scriptName, null, options, isError ? "Error: " + message : message, true);
-        App.exit(isError ? ReturnCode.ERROR_WRONG_PARAMETERS : ReturnCode.OK);
     }
 
-    public void printHelpAndExit(final String message, final boolean isError) {
-        CommandLineInterface.printHelpAndExit(this.options, message, isError);
-    }
-
-    public void printHelpAndExit(final String message, final Exception ex) {
-        CommandLineInterface.LOGGER.error("Encountered critical error ('{}'), application will exit.", message, ex);
-        CommandLineInterface.printHelpAndExit(this.options, message, true);
+    public void printHelp(final String message, final boolean isError) {
+        CommandLineInterface.printHelp(this.options, message, isError);
     }
 
 }

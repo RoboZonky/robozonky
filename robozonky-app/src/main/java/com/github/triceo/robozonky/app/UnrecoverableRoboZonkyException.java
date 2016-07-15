@@ -16,21 +16,21 @@
 
 package com.github.triceo.robozonky.app;
 
-class RoboZonkyTestingExitException extends RuntimeException {
+class UnrecoverableRoboZonkyException extends Exception {
 
-    public RoboZonkyTestingExitException() {
+    public UnrecoverableRoboZonkyException() {
         super();
     }
 
-    public RoboZonkyTestingExitException(final String message) {
+    public UnrecoverableRoboZonkyException(final String message) {
         super(message);
     }
 
-    public RoboZonkyTestingExitException(final String message, final Throwable cause) {
+    public UnrecoverableRoboZonkyException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public RoboZonkyTestingExitException(final Throwable cause) {
+    public UnrecoverableRoboZonkyException(final Throwable cause) {
         super(cause);
     }
 

@@ -26,6 +26,8 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import org.apache.commons.cli.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents different modes of operation of the application, their means of selection and setup.
@@ -39,32 +41,33 @@ enum OperatingMode {
         @Override
         public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
             if (cli.getLoanAmount().isPresent() || cli.getLoanId().isPresent()) {
-                cli.printHelpAndExit("Loan data makes no sense in this context.", true);
+                cli.printHelp("Loan data makes no sense in this context.", true);
                 return Optional.empty();
             }
             final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
             if (!strategyFilePath.isPresent()) {
-                cli.printHelpAndExit("Strategy file must be provided.", true);
+                cli.printHelp("Strategy file must be provided.", true);
                 return Optional.empty();
             }
             final File strategyConfig = new File(strategyFilePath.get());
             if (!strategyConfig.canRead()) {
-                cli.printHelpAndExit("Investment strategy file must be readable.", true);
+                cli.printHelp("Investment strategy file must be readable.", true);
                 return Optional.empty();
             }
             try {
-                final InvestmentStrategy strategy = InvestmentStrategy.load(strategyConfig).orElseThrow(() -> {
-                    throw new IllegalStateException("No investment strategy found to support "
-                            + strategyConfig.getAbsolutePath());
-                });
-                if (cli.isDryRun()) {
+                final Optional<InvestmentStrategy> strategy = InvestmentStrategy.load(strategyConfig);
+                if (!strategy.isPresent()) {
+                    OperatingMode.LOGGER.error("No investment strategy found to support {}.",
+                            strategyConfig.getAbsolutePath());
+                    return Optional.empty();
+                } else if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new AppContext(auth, strategy, balance));
+                    return Optional.of(new AppContext(auth, strategy.get(), balance));
                 } else {
-                    return Optional.of(new AppContext(auth, strategy));
+                    return Optional.of(new AppContext(auth, strategy.get()));
                 }
             } catch (final InvestmentStrategyParseException ex) {
-                cli.printHelpAndExit("Failed parsing strategy.", ex);
+                OperatingMode.LOGGER.error("Failed parsing strategy.", ex);
                 return Optional.empty();
             }
         }
@@ -79,10 +82,10 @@ enum OperatingMode {
             final Optional<Integer> loanId = cli.getLoanId();
             final Optional<Integer> loanAmount = cli.getLoanAmount();
             if (!loanId.isPresent() || loanId.get() < 1) {
-                cli.printHelpAndExit("Loan ID must be provided and greater than 0.", true);
+                cli.printHelp("Loan ID must be provided and greater than 0.", true);
                 return Optional.empty();
             } else if (!loanAmount.isPresent() || loanAmount.get() < 1) {
-                cli.printHelpAndExit("Loan amount must be provided and greater than 0.", true);
+                cli.printHelp("Loan amount must be provided and greater than 0.", true);
                 return Optional.empty();
             } else if (cli.isDryRun()) {
                 final int balance = cli.getDryRunBalance().orElse(-1);
@@ -92,6 +95,8 @@ enum OperatingMode {
             }
         }
     };
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperatingMode.class);
 
     private final Option selectingOption;
     private final Collection<Option> otherOptions;

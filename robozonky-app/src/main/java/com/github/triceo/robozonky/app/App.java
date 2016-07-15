@@ -47,28 +47,22 @@ class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
 
-    static boolean RUNNING_OUTSIDE_TESTS = true; // purely for testing purposes
-
-    static void exit(final ReturnCode returnCode) {
-        if (App.RUNNING_OUTSIDE_TESTS) {
-            App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
-            System.exit(returnCode.getCode());
-        } else {
-            throw new RoboZonkyTestingExitException("Return code: " + returnCode);
-        }
+    private static void exit(final ReturnCode returnCode) {
+        App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
+        System.exit(returnCode.getCode());
     }
 
-    static SensitiveInformationProvider getSensitiveInformationProvider(final CommandLineInterface cli,
-                                                                        final File defaultKeyStore) {
+    static Optional<SensitiveInformationProvider> getSensitiveInformationProvider(final CommandLineInterface cli,
+                                                                                  final File defaultKeyStore) {
         final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
         if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
             final File store = keyStoreLocation.get();
             try {
                 final KeyStoreHandler ksh = KeyStoreHandler.open(store, cli.getPassword());
-                return SensitiveInformationProvider.keyStoreBased(ksh);
+                return Optional.of(SensitiveInformationProvider.keyStoreBased(ksh));
             } catch (final IOException | KeyStoreException ex) {
-                cli.printHelpAndExit("Failed opening guarded storage.", ex);
-                return null;
+                App.LOGGER.error("Failed opening guarded storage.", ex);
+                return Optional.empty();
             }
         } else { // else everything is read from the cli and put into a keystore
             try {
@@ -79,52 +73,72 @@ class App {
                     if (defaultKeyStore.delete()) {
                         App.LOGGER.debug("Deleted pre-existing guarded storage.");
                     } else {
-                        throw new IllegalArgumentException("Stale guarded storage is present and can not be deleted.");
+                        App.LOGGER.error("Stale guarded storage is present and can not be deleted.");
+                        return Optional.empty();
                     }
                 }
                 final KeyStoreHandler ksh = KeyStoreHandler.create(defaultKeyStore, cli.getPassword());
                 if (!usernamePresent) {
-                    cli.printHelpAndExit("When not using guarded storage, username must be provided.", true);
+                    App.LOGGER.error("When not using guarded storage, username must be provided.");
+                    return Optional.empty();
                 } else if (storageExists) {
                     App.LOGGER.info("Using plain-text credentials when guarded storage available. Consider switching.");
                 } else {
                     App.LOGGER.info("Guarded storage has been created with your username and password: {}",
                             defaultKeyStore);
                 }
-                return SensitiveInformationProvider.keyStoreBased(ksh, usernameProvided.get(), cli.getPassword());
+                return Optional.of(SensitiveInformationProvider.keyStoreBased(ksh, usernameProvided.get(),
+                        cli.getPassword()));
             } catch (final IOException | KeyStoreException ex) {
-                cli.printHelpAndExit("Failed reading guarded storage.", ex);
-                return null;
+                App.LOGGER.error("Failed reading guarded storage.", ex);
+                return Optional.empty();
             }
         }
     }
 
-    private static AuthenticationHandler getAuthenticationMethod(final CommandLineInterface cli) {
+    private static Optional<AuthenticationHandler> getAuthenticationMethod(final CommandLineInterface cli) {
         final boolean useToken = cli.isTokenEnabled();
-        final SensitiveInformationProvider sensitive =
+        final Optional<SensitiveInformationProvider> optionalSensitive =
                 App.getSensitiveInformationProvider(cli, App.DEFAULT_KEYSTORE_FILE);
+        if (!optionalSensitive.isPresent()) {
+            return Optional.empty();
+        }
+        final SensitiveInformationProvider sensitive = optionalSensitive.get();
         final AuthenticationHandler auth = useToken ? AuthenticationHandler.tokenBased(sensitive)
                 : AuthenticationHandler.passwordBased(sensitive);
         final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
         if (secs.isPresent()) {
             auth.withTokenRefreshingBeforeExpiration(secs.get(), ChronoUnit.SECONDS);
         }
-        return auth;
+        return Optional.of(auth);
     }
 
-    static AppContext processCommandLine(final String... args) {
-        final CommandLineInterface cli = CommandLineInterface.parse(args).orElse(null); // null will never happen
-        return cli.getCliOperatingMode().orElseGet(() -> {
-            cli.printHelpAndExit("", false);
-            return null; // will never get here
-        }).setup(cli, App.getAuthenticationMethod(cli)).orElse(null); // null should never be returned
+    static Optional<AppContext> processCommandLine(final String... args) {
+        final Optional<CommandLineInterface> optionalCli = CommandLineInterface.parse(args);
+        if (!optionalCli.isPresent()) {
+            return Optional.empty();
+        }
+        final CommandLineInterface cli = optionalCli.get();
+        final Optional<OperatingMode> om = cli.getCliOperatingMode();
+        if (!om.isPresent()) {
+            return Optional.empty();
+        }
+        final Optional<AuthenticationHandler> auth = App.getAuthenticationMethod(cli);
+        if (!auth.isPresent()) {
+            return Optional.empty();
+        }
+        return om.get().setup(cli, auth.get());
     }
 
     public static void main(final String... args) {
         App.LOGGER.info("RoboZonky v{} loading.", App.class.getPackage().getImplementationVersion());
-        final AppContext ctx = App.processCommandLine(args);
-        App.LOGGER.info("===== RoboZonky at your service! =====");
         try {
+            final Optional<AppContext> optionalCtx = App.processCommandLine(args);
+            if (!optionalCtx.isPresent()) {
+                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+            }
+            final AppContext ctx = optionalCtx.get();
+            App.LOGGER.info("===== RoboZonky at your service! =====");
             final boolean isDryRun = ctx.isDryRun();
             if (isDryRun) {
                 App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
@@ -132,10 +146,14 @@ class App {
             final Collection<Investment> result = App.invest(ctx); // perform the investing operations
             App.storeInvestmentsMade(result, isDryRun);
             App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
+        } catch (final UnrecoverableRoboZonkyException ex) {
+            App.LOGGER.error("Application encountered an error during setup." , ex);
+            App.exit(ReturnCode.ERROR_SETUP);
+            return;
         } catch (final RuntimeException ex) {
             App.LOGGER.error("Unexpected error." , ex);
             App.exit(ReturnCode.ERROR_UNEXPECTED);
-            return; // non-tests will not get here
+            return;
         }
         App.LOGGER.info("===== RoboZonky out. =====");
         App.exit(ReturnCode.OK);
@@ -182,14 +200,13 @@ class App {
         };
     }
 
-    private static Collection<Investment> invest(final AppContext ctx) {
+    private static Collection<Investment> invest(final AppContext ctx) throws UnrecoverableRoboZonkyException {
         // log in
         final AuthenticationHandler handler = ctx.getAuthenticationHandler();
         final Authenticator auth = handler.build(ctx.isDryRun());
         final Optional<Authentication> possibleLogin = new LoginOperation().apply(auth);
         if (!possibleLogin.isPresent()) {
-            App.exit(ReturnCode.ERROR_LOGIN);
-            return Collections.emptyList(); // should never get here
+            throw new UnrecoverableRoboZonkyException("Login failed.");
         }
         final Authentication login = possibleLogin.get();
         final boolean logoutAllowed = handler.processToken(login.getZonkyApiToken());

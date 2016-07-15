@@ -22,16 +22,11 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
-public class CommandLineInterfaceTest extends AbstractNonExitingTest {
+public class CommandLineInterfaceTest {
 
     private static CommandLineInterface process(final Optional<CommandLineInterface> maybe) {
         Assertions.assertThat(maybe).isPresent();
         return maybe.get();
-    }
-
-    @Test(expected = RoboZonkyTestingExitException.class)
-    public void noArguments() {
-        CommandLineInterface.parse();
     }
 
     @Test
