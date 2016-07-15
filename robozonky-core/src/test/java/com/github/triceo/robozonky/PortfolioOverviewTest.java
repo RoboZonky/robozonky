@@ -72,16 +72,16 @@ public class PortfolioOverviewTest {
         final int increment = 200, newTotalPie = totalPie + increment;
         final List<Investment> investments = PortfolioOverviewTest.getMockInvestmentWithBalance(increment);
         final Investment i = investments.get(0);
-        Mockito.when(i.getRating()).thenReturn(Rating.D);
+        Mockito.when(i.getRating()).thenReturn(Rating.A);
         result = PortfolioOverview.calculate(balance, stats, investments);
         Assertions.assertThat(result.getCzkAvailable()).isEqualTo(balance.intValue());
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.D, amountD + increment, newTotalPie);
+        PortfolioOverviewTest.assertProperRatingShare(result, Rating.D, amountD, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAAA, 0, newTotalPie); // test other ratings included
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAA, 0, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAA, 0, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.A, 0, newTotalPie);
+        PortfolioOverviewTest.assertProperRatingShare(result, Rating.A, increment, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.C, 0, newTotalPie);
     }
 

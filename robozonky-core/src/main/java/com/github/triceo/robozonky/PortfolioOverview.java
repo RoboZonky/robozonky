@@ -58,7 +58,7 @@ public class PortfolioOverview {
         // then make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {
             final Rating r = previousInvestment.getRating();
-            amounts.put(r, amounts.get(r) + previousInvestment.getAmount());
+            amounts.compute(r, (k, v) -> (v == null ? 0 : v) + previousInvestment.getAmount());
         });
         return new PortfolioOverview(balance, Collections.unmodifiableMap(amounts));
     }
