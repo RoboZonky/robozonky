@@ -190,7 +190,8 @@ class CommandLineInterface {
     private static void printHelp(final Options options, final String message, final boolean isError) {
         final HelpFormatter formatter = new HelpFormatter();
         final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
-        formatter.printHelp(scriptName, null, options, isError ? "Error: " + message : message, true);
+        formatter.printHelp(scriptName, null, options, "", true);
+        System.out.println(isError ? "Error: " + message : message);
     }
 
     public void printHelp(final String message, final boolean isError) {
