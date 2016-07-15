@@ -64,7 +64,7 @@ public abstract class BaseInvestment implements BaseEntity {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Investment{");
+        final StringBuilder sb = new StringBuilder("BaseInvestment{");
         sb.append("id=").append(id);
         sb.append(", loanId=").append(this.getLoanId());
         sb.append(", amount=").append(this.getAmount());
