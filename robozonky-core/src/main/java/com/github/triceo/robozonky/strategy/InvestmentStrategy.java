@@ -49,7 +49,7 @@ public interface InvestmentStrategy {
      * re-evaluate the resulting situation.
      *
      * @param availableLoans Loans to be evaluated for acceptability.
-     * @param portfolio Aggregation of information as to the sser's current portolio.
+     * @param portfolio Aggregation of information as to the user's current portfolio.
      * @return List of acceptable loans, ordered by their priority.
      */
     List<Loan> getMatchingLoans(List<Loan> availableLoans, PortfolioOverview portfolio);
@@ -58,7 +58,7 @@ public interface InvestmentStrategy {
      * Recommend the size of an investment based on loan parameters.
      *
      * @param loan Loan in question.
-     * @param portfolio Aggregation of information as to the sser's current portolio.
+     * @param portfolio Aggregation of information as to the user's current portfolio.
      * @return Amount in CZK, recommended to invest.
      */
     int recommendInvestmentAmount(Loan loan, PortfolioOverview portfolio);

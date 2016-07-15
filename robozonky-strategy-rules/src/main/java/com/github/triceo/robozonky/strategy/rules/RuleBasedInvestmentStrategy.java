@@ -37,6 +37,12 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This strategy implements evaluation using a Drools decision table. See http://www.drools.org/
+ *
+ * Before {@link #recommendInvestmentAmount(Loan, PortfolioOverview)}, you must call
+ * {@link #getMatchingLoans(List, PortfolioOverview)}. Otherwise the strategy does not have the decision data.
+ */
 class RuleBasedInvestmentStrategy implements InvestmentStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleBasedInvestmentStrategy.class);
@@ -91,6 +97,14 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
         return finalResult;
     }
 
+    /**
+     * Does not actually do anything. Only returns a result that had previously been calculated when
+     * {@link #getMatchingLoans(List, PortfolioOverview)} was called.
+     *
+     * @param loan Loan in question.
+     * @param portfolio Aggregation of information as to the user's current portfolio.
+     * @return How much should be invested into the loan.
+     */
     @Override
     public synchronized int recommendInvestmentAmount(final Loan loan, final PortfolioOverview portfolio) {
         final Integer result = this.recommendedAmounts.get(loan);
