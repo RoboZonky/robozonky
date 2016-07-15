@@ -16,6 +16,10 @@
 
 package com.github.triceo.robozonky.app;
 
+/**
+ * Code should throw this exception when it encounters a known, yet unrecoverable error. The exception will bubble back
+ * up to {@link App#main(String...)}, where the proper error state will be reported.
+ */
 class UnrecoverableRoboZonkyException extends Exception {
 
     public UnrecoverableRoboZonkyException() {

@@ -15,8 +15,26 @@
  */
 package com.github.triceo.robozonky.app;
 
+/**
+ * These are possible return codes for this application's {@link System#exit(int)}.
+ */
 enum ReturnCode {
-    OK(0), ERROR_WRONG_PARAMETERS(1), ERROR_SETUP(2), ERROR_UNEXPECTED(255);
+    /**
+     * All is good.
+     */
+    OK(0),
+    /**
+     * Failure when parsing command line.
+     */
+    ERROR_WRONG_PARAMETERS(1),
+    /**
+     * Failure before the start of investing, most likely login.
+     */
+    ERROR_SETUP(2),
+    /**
+     * Unexpected error state, possibly app bug.
+     */
+    ERROR_UNEXPECTED(255);
 
     private final int code;
 

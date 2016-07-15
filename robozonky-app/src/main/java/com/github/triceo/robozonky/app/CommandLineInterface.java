@@ -30,15 +30,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Processes command line arguments and provides access to their values.
  */
 class CommandLineInterface {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -67,7 +63,7 @@ class CommandLineInterface {
      * Parse the command line.
      *
      * @param args Command line arguments as received by {@link App#main(String...)}.
-     * @return Non-empty optional if successful, {@link System#exit(int)} otherwise.
+     * @return Empty if parsing failed, at which point it will write standard help message to sysout.
      */
     public static Optional<CommandLineInterface> parse(final String... args) {
         // create the mode of operation
@@ -191,7 +187,7 @@ class CommandLineInterface {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
     }
 
-    public static void printHelp(final Options options, final String message, final boolean isError) {
+    private static void printHelp(final Options options, final String message, final boolean isError) {
         final HelpFormatter formatter = new HelpFormatter();
         final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
         formatter.printHelp(scriptName, null, options, isError ? "Error: " + message : message, true);

@@ -38,6 +38,12 @@ enum OperatingMode {
      * Requires a strategy and performs 0 or more investments based on the strategy.
      */
     STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN) {
+        /**
+         *
+         * @param cli Parsed command line.
+         * @param auth Pre-processed authentication information.
+         * @return Empty if strategy missing, not loaded or not parsed.
+         */
         @Override
         public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
             if (cli.getLoanAmount().isPresent() || cli.getLoanId().isPresent()) {
@@ -77,6 +83,12 @@ enum OperatingMode {
      */
     USER_DRIVEN(CommandLineInterface.OPTION_INVESTMENT, CommandLineInterface.OPTION_AMOUNT,
             CommandLineInterface.OPTION_DRY_RUN) {
+        /**
+         *
+         * @param cli Parsed command line.
+         * @param auth Pre-processed authentication information.
+         * @return Empty when loan ID or loan amount are empty or missing.
+         */
         @Override
         public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
             final Optional<Integer> loanId = cli.getLoanId();
@@ -127,7 +139,7 @@ enum OperatingMode {
      *
      * @param cli Parsed command line.
      * @param auth Pre-processed authentication information.
-     * @return All information required for proper execution of the application.
+     * @return All information required for proper execution of the application. Empty on failure.
      */
     public abstract Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth);
 }
