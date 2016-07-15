@@ -33,6 +33,9 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Processes command line arguments and provides access to their values.
+ */
 class CommandLineInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
@@ -60,6 +63,12 @@ class CommandLineInterface {
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
             .build();
 
+    /**
+     * Parse the command line.
+     *
+     * @param args Command line arguments as received by {@link App#main(String...)}.
+     * @return Non-empty optional if successful, {@link System#exit(int)} otherwise.
+     */
     public static Optional<CommandLineInterface> parse(final String... args) {
         // create the mode of operation
         final OptionGroup operatingModes = new OptionGroup();
@@ -107,8 +116,12 @@ class CommandLineInterface {
         return Optional.empty();
     }
 
+    private boolean hasOption(final Option option) {
+        return this.cli.hasOption(option.getOpt());
+    }
+
     private Optional<String> getOptionValue(final Option option) {
-        if (this.cli.hasOption(option.getOpt())) {
+        if (this.hasOption(option)) {
             final String val = this.cli.getOptionValue(option.getOpt());
             if (val == null || val.isEmpty()) {
                 return Optional.empty();
@@ -154,11 +167,11 @@ class CommandLineInterface {
     }
 
     boolean isDryRun() {
-        return this.cli.hasOption(CommandLineInterface.OPTION_DRY_RUN.getOpt());
+        return this.hasOption(CommandLineInterface.OPTION_DRY_RUN);
     }
 
     public boolean isTokenEnabled() {
-        return this.cli.hasOption(CommandLineInterface.OPTION_USE_TOKEN.getOpt());
+        return this.hasOption(CommandLineInterface.OPTION_USE_TOKEN);
     }
 
     public Optional<Integer> getTokenRefreshBeforeExpirationInSeconds() {

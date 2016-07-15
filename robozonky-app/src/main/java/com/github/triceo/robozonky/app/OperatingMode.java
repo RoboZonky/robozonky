@@ -27,8 +27,14 @@ import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import org.apache.commons.cli.Option;
 
+/**
+ * Represents different modes of operation of the application, their means of selection and setup.
+ */
 enum OperatingMode {
 
+    /**
+     * Requires a strategy and performs 0 or more investments based on the strategy.
+     */
     STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN) {
         @Override
         public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
@@ -47,15 +53,15 @@ enum OperatingMode {
                 return Optional.empty();
             }
             try {
-                final Optional<InvestmentStrategy> strategy = InvestmentStrategy.load(strategyConfig);
-                if (!strategy.isPresent()) {
+                final InvestmentStrategy strategy = InvestmentStrategy.load(strategyConfig).orElseThrow(() -> {
                     throw new IllegalStateException("No investment strategy found to support "
                             + strategyConfig.getAbsolutePath());
-                } else if (cli.isDryRun()) {
+                });
+                if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new AppContext(auth, strategy.get(), balance));
+                    return Optional.of(new AppContext(auth, strategy, balance));
                 } else {
-                    return Optional.of(new AppContext(auth, strategy.get()));
+                    return Optional.of(new AppContext(auth, strategy));
                 }
             } catch (final InvestmentStrategyParseException ex) {
                 cli.printHelpAndExit("Failed parsing strategy.", ex);
@@ -63,6 +69,9 @@ enum OperatingMode {
             }
         }
     },
+    /**
+     * Requires a loan ID, into which it will invest a given amount and terminate.
+     */
     USER_DRIVEN(CommandLineInterface.OPTION_INVESTMENT, CommandLineInterface.OPTION_AMOUNT,
             CommandLineInterface.OPTION_DRY_RUN) {
         @Override
@@ -92,13 +101,28 @@ enum OperatingMode {
         this.otherOptions = new LinkedHashSet<>(Arrays.asList(otherOptions));
     }
 
+    /**
+     * Option to be selected on the command line in order to activate this mode.
+     * @return Option in question.
+     */
     public Option getSelectingOption() {
         return selectingOption;
     }
 
+    /**
+     * Other options that are valid for this operating mode.
+     * @return Options in question.
+     */
     public Collection<Option> getOtherOptions() {
         return otherOptions;
     }
 
+    /**
+     * Properly set up the application with this operating mode.
+     *
+     * @param cli Parsed command line.
+     * @param auth Pre-processed authentication information.
+     * @return All information required for proper execution of the application.
+     */
     public abstract Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth);
 }
