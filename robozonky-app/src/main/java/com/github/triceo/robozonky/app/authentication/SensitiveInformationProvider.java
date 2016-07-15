@@ -61,7 +61,7 @@ public abstract class SensitiveInformationProvider {
     /**
      * Retrieve password used to connect to Zonky API.
      *
-     * @return
+     * @return The password.
      */
     abstract public String getPassword();
 
@@ -69,7 +69,7 @@ public abstract class SensitiveInformationProvider {
     /**
      * Retrieve username used to connect to Zonky API.
      *
-     * @return
+     * @return The username.
      */
     abstract public String getUsername();
 

@@ -64,7 +64,7 @@ public class KeyStoreHandler {
      *
      * @param keyStoreFile The file where the key store should be.
      * @param password Password to protect the key store.
-     * @return
+     * @return Freshly instantiated key store.
      * @throws IOException If file already exists or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
@@ -89,7 +89,7 @@ public class KeyStoreHandler {
      *
      * @param keyStoreFile The file where the key store is.
      * @param password Password that protects the key store.
-     * @return
+     * @return Key store that previously existed.
      * @throws IOException If file does not exist or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */

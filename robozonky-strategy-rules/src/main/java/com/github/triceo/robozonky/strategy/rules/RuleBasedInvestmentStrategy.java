@@ -64,6 +64,7 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public synchronized List<Loan> getMatchingLoans(final List<Loan> availableLoans,
                                                     final PortfolioOverview portfolio) {
         this.recommendedAmounts.clear();
