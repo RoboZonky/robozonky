@@ -28,8 +28,6 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.operations.InvestOperation;
 import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.InvestmentStatus;
-import com.github.triceo.robozonky.remote.InvestmentStatuses;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.ZonkyApi;
@@ -38,6 +36,9 @@ import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Controls the investments based on the strategy, user portfolio and balance.
+ */
 public class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
@@ -70,6 +71,16 @@ public class Investor {
         }
     }
 
+    /**
+     * The core investing call. Receives a particular loan, checks if the user has enough money to invest, and sends the
+     * command to the Zonky API.
+     *
+     * @param api Authenticated Zonky API, ready for {@link InvestOperation}.
+     * @param l Loan to invest into.
+     * @param amount Amount to invest into the loan.
+     * @param balance How much usable cash the user has in the wallet.
+     * @return Present if input valid and operation succeeded, empty otherwise.
+     */
     private static Optional<Investment> invest(final ZonkyApi api, final Loan l, final int amount, final int balance) {
         if (amount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             Investor.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
@@ -88,6 +99,20 @@ public class Investor {
         return new InvestOperation().apply(api, investment);
     }
 
+    /**
+     * Blocked amounts represent loans in various stages. Either the user has invested and the loan has not yet been
+     * funded to 100 % ("na tržišti"), or the user invested and the loan has been funded ("na cestě"). In the latter
+     * case, the loan has already disappeared from the marketplace, which means that it will not be available for
+     * investing any more. As far as I know, the next stage is "v pořádku", the blocked amount is cleared and the loan
+     * becomes an active investment.
+     *
+     * Based on that, this method deals with the first case - when the loan is still available for investing, but we've
+     * already invested as evidenced by the blocked amount. It also unnecessarily deals with the second case, since
+     * that is represented by a blocked amount as well. But that does no harm.
+     *
+     * @param api Authenticated API that will be used to retrieve the user's blocked amounts from the wallet.
+     * @return Every blocked amount represents a future investment. This method returns such investments.
+     */
     static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
         return Collections.unmodifiableList(api.getBlockedAmounts().stream()
                 .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
@@ -105,6 +130,14 @@ public class Investor {
     private final BigDecimal initialBalance;
     private final InvestmentStrategy strategy;
 
+    /**
+     * Standard constructor.
+     *
+     * @param zonky Authenticated API ready to retrieve user information.
+     * @param zotify Marketplace cache for reading loans out of.
+     * @param strategy Strategy used to determine the loans to invest in and the amounts to invest into them.
+     * @param initialBalance How much available cash the user has in their wallet.
+     */
     public Investor(final ZonkyApi zonky, final ZotifyApi zotify, final InvestmentStrategy strategy,
                     final BigDecimal initialBalance) {
         this.zonkyApi = zonky;
@@ -115,47 +148,36 @@ public class Investor {
     }
 
     /**
-     * Ask the strategy for a prioritized list of loans to invest into.
+     * Prepares a list of loans that are suitable for investment by asking the strategy. Then goes over that list one
+     * by one, in the order prescribed by the strategy, and attempts to invest into these loans. The first such
+     * investment operation that succeeds will return.
      *
-     * @param investments Investments already made, not to choose any particular loan twice.
-     * @param portfolio Overview of the current user's portfolio.
-     * @return List of loans available to be invested into, in the order of decreasing priority.
+     * @param balance How much money the user has in the wallet that can be used for investing.
+     * @param stats User's portfolio coming from the Zonky API.
+     * @param investmentsAlreadyMade Loans already invested into that have not yet disappeared from marketplace.
+     * @return The first {@link #invest(ZonkyApi, Loan, int, int)} which succeeds, or empty if none have.
      */
-    List<Loan> askStrategyForLoans(final Collection<Investment> investments,
-                                   final PortfolioOverview portfolio) {
-        final List<Loan> allLoansFromApi = this.zotifyApi.getLoans();
-        final List<Loan> afterInvestmentsExcluded = allLoansFromApi.stream()
-                .filter(l -> !Investor.isLoanPresent(l, investments)).collect(Collectors.toList());
-        return this.strategy.getMatchingLoans(afterInvestmentsExcluded, portfolio);
+    Optional<Investment> investOnce(final BigDecimal balance, final Statistics stats,
+                                    final Collection<Investment> investmentsAlreadyMade) {
+        final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, investmentsAlreadyMade);
+        Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
+                portfolio.getSharesOnInvestment());
+        return this.strategy.getMatchingLoans(this.zotifyApi.getLoans(), portfolio).stream()
+                .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade))
+                .map(l -> {
+                    final int invest = this.strategy.recommendInvestmentAmount(l, portfolio);
+                    return Investor.invest(this.zonkyApi, l, invest, portfolio.getCzkAvailable());
+                })
+                .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
+                .findFirst();
     }
 
     /**
-     * Choose from available loans the most important loan and invest into it.
+     * One of the two entry points to the investment API. This takes the strategy, determines suitable loans, and tries
+     * to invest in as many of them as the balance allows.
      *
-     * @param loans List of loans to choose from, ordered from most important.
-     * @param portfolio Overview of the current user's portfolio.
-     * @return Present only if Zonky API confirmed money was invested or if dry run.
+     * @return Investments made in the session.
      */
-    Optional<Investment> findLoanAndInvest(final List<Loan> loans, final PortfolioOverview portfolio) {
-        return loans.stream().map(l -> {
-            final int invest = this.strategy.recommendInvestmentAmount(l, portfolio);
-            return Investor.invest(this.zonkyApi, l, invest, portfolio.getCzkAvailable());
-        }).flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty()).findFirst();
-    }
-
-    private Optional<Investment> investOnce(final PortfolioOverview portfolio,
-                                            final Collection<Investment> investmentsAlreadyMade) {
-        Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
-                portfolio.getSharesOnInvestment());
-        final List<Loan> loansAvailable = this.askStrategyForLoans(investmentsAlreadyMade, portfolio);
-        if (loansAvailable.isEmpty()) {
-            Investor.LOGGER.info("There are no loans matching the investment strategy.");
-            return Optional.empty();
-        }
-        Investor.LOGGER.debug("Investment strategy accepted the following loans: {}", loansAvailable);
-        return this.findLoanAndInvest(loansAvailable, portfolio);
-    }
-
     public Collection<Investment> invest() {
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
@@ -163,17 +185,13 @@ public class Investor {
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
             return Collections.emptyList(); // no need to do anything else
         }
-        // retrieve a list of loans that the user already put money into
-        Collection<Investment> investments = Investor.mergeInvestments(
-                this.zonkyApi.getInvestments(InvestmentStatuses.of(InvestmentStatus.SIGNED)),
-                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi));
+        Collection<Investment> investments = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
         Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}", investments);
         final Statistics stats = this.zonkyApi.getStatistics();
         // and start investing
         final Collection<Investment> investmentsMade = new ArrayList<>();
         do {
-            final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, investments);
-            final Optional<Investment> investment = this.investOnce(portfolio, investments);
+            final Optional<Investment> investment = this.investOnce(balance, stats, investments);
             if (!investment.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }
@@ -186,6 +204,13 @@ public class Investor {
         return Collections.unmodifiableCollection(investmentsMade);
     }
 
+    /**
+     * One of the two entry points to the investment API. Takes a particular loan and invests a given amount into it.
+     *
+     * @param loanId ID of the loan that should be invested into.
+     * @param loanAmount Amount in CZK to be invested.
+     * @return Present if investment succeeded, empty otherwise.
+     */
     public Optional<Investment> invest(final int loanId, final int loanAmount) {
         return Investor.invest(this.zonkyApi, this.zonkyApi.getLoan(loanId), loanAmount,
                 this.initialBalance.intValue());

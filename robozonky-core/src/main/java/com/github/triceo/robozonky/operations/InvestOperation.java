@@ -22,6 +22,10 @@ import com.github.triceo.robozonky.remote.ZonkyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Sends the investment command to the Zonky API. If the API is not instance of {@link InvestingZonkyApi}, we are doing
+ * a dry run and no actual investments will be made.
+ */
 public class InvestOperation extends BiOperation<ZonkyApi, Investment, Investment> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestOperation.class);
