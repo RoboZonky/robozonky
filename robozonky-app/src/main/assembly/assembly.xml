@@ -41,6 +41,7 @@
             <filtered>true</filtered>
             <includes>
                 <include>*.bat</include>
+                <include>logback.xml</include>
             </includes>
             <outputDirectory/>
         </fileSet>
