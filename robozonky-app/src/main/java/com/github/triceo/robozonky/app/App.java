@@ -26,6 +26,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,7 @@ import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
+import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.operations.LoginOperation;
@@ -47,7 +50,8 @@ class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
 
-    private static void exit(final ReturnCode returnCode) {
+    private static void exit(final ReturnCode returnCode, final Future<String> versionFuture) {
+        App.versionCheck(versionFuture);
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         System.exit(returnCode.getCode());
     }
@@ -131,11 +135,12 @@ class App {
     }
 
     public static void main(final String... args) {
-        App.LOGGER.info("RoboZonky v{} loading.", App.class.getPackage().getImplementationVersion());
+        App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
+        final Future<String> latestVersion = VersionCheck.retrieveLatestVersion();
         try {
             final Optional<AppContext> optionalCtx = App.processCommandLine(args);
             if (!optionalCtx.isPresent()) {
-                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
             }
             final AppContext ctx = optionalCtx.get();
             App.LOGGER.info("===== RoboZonky at your service! =====");
@@ -148,15 +153,33 @@ class App {
             App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
         } catch (final UnrecoverableRoboZonkyException ex) {
             App.LOGGER.error("Application encountered an error during setup." , ex);
-            App.exit(ReturnCode.ERROR_SETUP);
+            App.exit(ReturnCode.ERROR_SETUP, latestVersion);
             return;
         } catch (final RuntimeException ex) {
             App.LOGGER.error("Unexpected error." , ex);
-            App.exit(ReturnCode.ERROR_UNEXPECTED);
+            App.exit(ReturnCode.ERROR_UNEXPECTED, latestVersion);
             return;
         }
         App.LOGGER.info("===== RoboZonky out. =====");
-        App.exit(ReturnCode.OK);
+        App.exit(ReturnCode.OK, latestVersion);
+    }
+
+    /**
+     * Check the current version against a different version. Print log message with results.
+     * @param futureVersion Version to check against.
+     */
+    private static void versionCheck(final Future<String> futureVersion) {
+        try {
+            final String version = futureVersion.get();
+            final boolean hasNewer = VersionCheck.isCurrentVersionOlderThan(version);
+            if (hasNewer) {
+                App.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to version {}.", version);
+            } else {
+                App.LOGGER.info("Your version of RoboZonky seems up to date.");
+            }
+        } catch (final InterruptedException | ExecutionException ex) {
+            App.LOGGER.trace("Version check failed.", ex);
+        }
     }
 
     static Optional<File> storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
