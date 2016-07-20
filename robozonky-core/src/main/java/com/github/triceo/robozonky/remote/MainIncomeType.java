@@ -20,6 +20,7 @@ public enum MainIncomeType {
 
     EMPLOYMENT, // "zaměstnanec"
     SELF_EMPLOYMENT, // "OSVČ"
-    ENTREPRENEUR // "podnikatel"
+    ENTREPRENEUR, // "podnikatel"
+    PENSION // "důchodce"
 
 }
