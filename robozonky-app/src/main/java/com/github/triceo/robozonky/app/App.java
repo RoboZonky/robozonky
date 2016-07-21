@@ -136,6 +136,9 @@ class App {
 
     public static void main(final String... args) {
         App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
+        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}).", System.getProperty("java.vendor"),
+                System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
+                System.getProperty("os.arch"));
         final Future<String> latestVersion = VersionCheck.retrieveLatestVersion();
         try {
             final Optional<AppContext> optionalCtx = App.processCommandLine(args);
