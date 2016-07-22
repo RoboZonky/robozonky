@@ -29,9 +29,6 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyService;
-import org.apache.commons.configuration2.ImmutableConfiguration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,11 +92,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     }
 
     private static ImmutableConfiguration getConfig(final File strategyFile) throws InvestmentStrategyParseException {
-        try {
-            return new Configurations().properties(strategyFile);
-        } catch (final ConfigurationException ex) {
-            throw new InvestmentStrategyParseException("Failed parsing strategy file.", ex);
-        }
+        return ImmutableConfiguration.from(strategyFile);
     }
 
     private static int getMinimumBalance(final ImmutableConfiguration config) {
