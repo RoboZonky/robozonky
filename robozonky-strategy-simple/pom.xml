@@ -24,8 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>robozonky-strategy-simple</artifactId>
-    <name>RoboZonky: Plain text investment strategy implementation</name>
-    <description>This module provides a simple plain-text investment strategy.</description>
+    <name>Plain text investment strategy implementation</name>
 
     <dependencies>
         <dependency>

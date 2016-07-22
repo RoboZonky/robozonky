@@ -24,8 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>robozonky-strategy-rules</artifactId>
-    <name>RoboZonky: Investment strategy implementation based on business rules</name>
-    <description>This module provides an investment strategy based on Drools, a business rule engine.</description>
+    <name>Investment strategy implementation based on business rules</name>
 
     <dependencies>
         <dependency>

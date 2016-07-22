@@ -6,8 +6,10 @@
         <version>1.4.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+
     <artifactId>robozonky-app</artifactId>
-    <description>RoboZonky: Command-line application wrapping core and the strategies</description>
+    <name>Command-line application wrapping core and the strategies</name>
+
     <properties>
         <mainClass>com.github.triceo.robozonky.app.App</mainClass>
         <mutationThreshold>65</mutationThreshold> <!-- No real way to get this higher -->
