@@ -24,8 +24,8 @@ import java.security.KeyStoreException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.app.util.IOUtils;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
-import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
