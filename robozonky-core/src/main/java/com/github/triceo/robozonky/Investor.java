@@ -125,6 +125,17 @@ public class Investor {
                 }).collect(Collectors.toList()));
     }
 
+    /**
+     * Zonky API may return {@link ZonkyApi#getStatistics()} as null if the account has no previous investments.
+     *
+     * @param api API to execute the operation.
+     * @return Either what the API returns, or an empty object.
+     */
+    static Statistics retrieveStatistics(final ZonkyApi api) {
+        final Statistics returned = api.getStatistics();
+        return returned == null ? new Statistics() : returned;
+    }
+
     private final ZonkyApi zonkyApi;
     private final ZotifyApi zotifyApi;
     private final BigDecimal initialBalance;
@@ -187,7 +198,7 @@ public class Investor {
         }
         Collection<Investment> investments = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
         Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}", investments);
-        final Statistics stats = this.zonkyApi.getStatistics();
+        final Statistics stats = Investor.retrieveStatistics(this.zonkyApi);
         // and start investing
         final Collection<Investment> investmentsMade = new ArrayList<>();
         do {

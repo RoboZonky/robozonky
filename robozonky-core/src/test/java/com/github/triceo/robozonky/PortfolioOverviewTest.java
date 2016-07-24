@@ -27,6 +27,7 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -43,6 +44,16 @@ public class PortfolioOverviewTest {
         final Investment i = Mockito.mock(Investment.class);
         Mockito.when(i.getAmount()).thenReturn(loanAmount);
         return Collections.singletonList(i);
+    }
+
+    @Test
+    public void emptyPortfolio() {
+        final Statistics s = Mockito.mock(Statistics.class);
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(5000.0), s, Collections.emptyList());
+        final SoftAssertions softly = new SoftAssertions();
+        for (final Rating r: Rating.values()) {
+            softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
+        }
     }
 
     @Test

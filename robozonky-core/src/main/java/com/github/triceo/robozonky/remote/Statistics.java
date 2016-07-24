@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.remote;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -30,6 +31,16 @@ public class Statistics implements BaseEntity {
     private OverallPortfolio overallPortfolio;
     private Collection<Instalment> cashFlow;
     private List<RiskPortfolio> riskPortfolio;
+
+    public Statistics() {
+        this.currentProfitability = BigDecimal.ZERO;
+        this.expectedProfitability = BigDecimal.ZERO;
+        this.cashFlow = Collections.emptyList();
+        this.riskPortfolio = Collections.emptyList();
+        this.currentOverview = new CurrentOverview();
+        this.overallOverview = new OverallOverview();
+        this.overallPortfolio = new OverallPortfolio();
+    }
 
     @XmlElement
     public BigDecimal getCurrentProfitability() {

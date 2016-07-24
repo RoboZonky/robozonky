@@ -60,7 +60,7 @@ public class PortfolioOverview {
             final Rating r = previousInvestment.getRating();
             amounts.compute(r, (k, v) -> (v == null ? 0 : v) + previousInvestment.getAmount());
         });
-        return new PortfolioOverview(balance, Collections.unmodifiableMap(amounts));
+        return new PortfolioOverview(balance, amounts);
     }
 
     private final int czkAvailable, czkInvested;
