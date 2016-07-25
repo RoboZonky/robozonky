@@ -16,6 +16,11 @@
 
 package com.github.triceo.robozonky.remote;
 
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.Supplier;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import org.slf4j.Logger;
@@ -25,6 +30,18 @@ interface BaseEntity {
 
     static Logger getLogger(final Class<?> classToLog) {
         return LoggerFactory.getLogger(classToLog);
+    }
+
+    default BigDecimal getOrDefault(final BigDecimal actualValue) {
+        return this.getOrDefault(actualValue, () -> BigDecimal.ZERO);
+    }
+
+    default <T> Collection<T> getOrDefault(final Collection<T> actualValue) {
+        return this.getOrDefault(actualValue, () -> Collections.emptyList());
+    }
+
+    default <T> T getOrDefault(final T actualValue, final Supplier<T> defaultValue) {
+        return actualValue == null ? defaultValue.get() : actualValue;
     }
 
     @JsonAnyGetter
