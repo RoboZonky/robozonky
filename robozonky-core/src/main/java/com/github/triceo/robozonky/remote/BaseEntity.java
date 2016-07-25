@@ -37,7 +37,7 @@ interface BaseEntity {
     }
 
     default <T> Collection<T> getOrDefault(final Collection<T> actualValue) {
-        return this.getOrDefault(actualValue, () -> Collections.emptyList());
+        return actualValue == null ? Collections.emptyList() : actualValue;
     }
 
     default <T> T getOrDefault(final T actualValue, final Supplier<T> defaultValue) {
