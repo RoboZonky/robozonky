@@ -22,25 +22,17 @@ import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class Statistics implements BaseEntity {
 
-    private BigDecimal currentProfitability, expectedProfitability;
-    private CurrentOverview currentOverview;
-    private OverallOverview overallOverview;
-    private OverallPortfolio overallPortfolio;
-    private Collection<Instalment> cashFlow;
-    private List<RiskPortfolio> riskPortfolio;
-
-    public Statistics() {
-        this.currentProfitability = BigDecimal.ZERO;
-        this.expectedProfitability = BigDecimal.ZERO;
-        this.cashFlow = Collections.emptyList();
-        this.riskPortfolio = Collections.emptyList();
-        this.currentOverview = new CurrentOverview();
-        this.overallOverview = new OverallOverview();
-        this.overallPortfolio = new OverallPortfolio();
-    }
+    private BigDecimal currentProfitability = BigDecimal.ZERO, expectedProfitability = BigDecimal.ZERO;
+    private CurrentOverview currentOverview = new CurrentOverview();
+    private OverallOverview overallOverview = new OverallOverview();
+    private OverallPortfolio overallPortfolio = new OverallPortfolio();
+    private Collection<Instalment> cashFlow = Collections.emptyList();
+    private List<RiskPortfolio> riskPortfolio = Collections.emptyList();
 
     @XmlElement
     public BigDecimal getCurrentProfitability() {

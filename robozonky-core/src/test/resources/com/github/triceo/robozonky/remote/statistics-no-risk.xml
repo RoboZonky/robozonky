@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<statistics>
+    <cashFlow/>
+    <currentOverview>
+        <interestPaid>0</interestPaid>
+        <investmentCount>0</investmentCount>
+        <principalPaid>0</principalPaid>
+        <totalInvestment>0</totalInvestment>
+        <interestLeft>0</interestLeft>
+        <interestLeftDue>0</interestLeftDue>
+        <interestLeftToPay>0</interestLeftToPay>
+        <interestPlanned>0</interestPlanned>
+        <principalLeft>0</principalLeft>
+        <principalLeftDue>0</principalLeftDue>
+        <principalLeftToPay>0</principalLeftToPay>
+    </currentOverview>
+    <currentProfitability>0</currentProfitability>
+    <expectedProfitability>0</expectedProfitability>
+    <overallOverview>
+        <interestPaid>0</interestPaid>
+        <investmentCount>0</investmentCount>
+        <principalPaid>0</principalPaid>
+        <totalInvestment>0</totalInvestment>
+        <feesAmount>0</feesAmount>
+        <netIncome>0</netIncome>
+        <principalLost>0</principalLost>
+    </overallOverview>
+    <overallPortfolio>
+        <due>0</due>
+        <paid>0</paid>
+        <unpaid>0</unpaid>
+    </overallPortfolio>
+</statistics>
