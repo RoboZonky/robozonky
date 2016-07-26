@@ -23,7 +23,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -37,7 +36,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +58,11 @@ public class KeyStoreHandler {
     }
 
     /**
-     * Create brand new key store protected by a given password.
+     * Create brand new key store protected by a given password, and store it in a file.
      *
      * @param keyStoreFile The file where the key store should be.
      * @param password Password to protect the key store.
-     * @return Freshly instantiated key store.
+     * @return Freshly instantiated key store, in a newly created file.
      * @throws IOException If file already exists or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
@@ -81,7 +79,11 @@ public class KeyStoreHandler {
         } catch (final NoSuchAlgorithmException | CertificateException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
-        return new KeyStoreHandler(ks, passwordArray, keyStoreFile, KeyStoreHandler.getSecretKeyFactory());
+        // store the newly created key store
+        final SecretKeyFactory skf = KeyStoreHandler.getSecretKeyFactory();
+        final KeyStoreHandler ksh = new KeyStoreHandler(ks, passwordArray, keyStoreFile, skf, true);
+        ksh.save();
+        return ksh;
     }
 
     /**
@@ -109,32 +111,34 @@ public class KeyStoreHandler {
         }
     }
 
-    private final AtomicBoolean dirty = new AtomicBoolean(false);
+    private final AtomicBoolean dirty;
     private final char[] password;
     private final File keyStoreFile;
     private final KeyStore keyStore;
     private final KeyStore.ProtectionParameter protectionParameter;
     private final SecretKeyFactory keyFactory;
 
+    /**
+     * Create a new instance, where {@link #isDirty()} will be false.
+     *
+     * @param keyStore KeyStore to use as the backend.
+     * @param password Password to protect the keys.
+     * @param keyStoreFile File that will represent the keystore.
+     * @param keyFactory Factory to create the keys.
+     */
     private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
                             final SecretKeyFactory keyFactory) {
+        this(keyStore, password, keyStoreFile, keyFactory, false);
+    }
+
+    private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
+                            final SecretKeyFactory keyFactory, final boolean isDirty) {
         this.keyStore = keyStore;
         this.password = password;
         this.protectionParameter = new KeyStore.PasswordProtection("NO_PASSWORD".toCharArray()); // FIXME is this safe?
         this.keyStoreFile = keyStoreFile;
         this.keyFactory = keyFactory;
-    }
-
-    /**
-     * Set a key in the key store. Uses {@link SecretKey} as the implementation. Overwrites previous contents, if any.
-     *
-     * @param alias Alias to store the key under.
-     * @param valueStream Will be converted to a {@link String} and stored.
-     * @return True if success.
-     * @throws IOException If stream failed to read.
-     */
-    public boolean set(final String alias, final Reader valueStream) throws IOException {
-        return this.set(alias, IOUtils.toString(valueStream));
+        this.dirty = new AtomicBoolean(isDirty);
     }
 
     /**

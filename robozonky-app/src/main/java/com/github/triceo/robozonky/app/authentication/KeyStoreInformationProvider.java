@@ -23,9 +23,13 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Every set*() operation must result in a {@link KeyStoreHandler#save()} call.
+ */
 class KeyStoreInformationProvider extends SensitiveInformationProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreInformationProvider.class);
@@ -43,6 +47,40 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
         this.ksh = ksh;
     }
 
+    /**
+     * Set a key in the key store.
+     *
+     * @param alias Alias to store the key under.
+     * @param valueStream Will be converted to a {@link String} and stored.
+     * @return True if success.
+     */
+    private boolean set(final String alias, final Reader valueStream) {
+        try {
+            return this.set(alias, IOUtils.toString(valueStream));
+        } catch (final IOException ex) {
+            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
+            return false;
+        }
+    }
+
+    /**
+     * Set a key in the key store.
+     *
+     * @param alias Alias to store the key under.
+     * @param value Will be stored.
+     * @return True if success.
+     */
+    private boolean set(final String alias, final String value) {
+        try {
+            final boolean result = this.ksh.set(alias, value);
+            this.ksh.save();
+            return result;
+        } catch (final IOException ex) {
+            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
+            return false;
+        }
+    }
+
     @Override
     public String getPassword() {
         return this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD)
@@ -56,11 +94,11 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     }
 
     public boolean setPassword(final String password) {
-        return this.ksh.set(KeyStoreInformationProvider.ALIAS_PASSWORD, password);
+        return this.set(KeyStoreInformationProvider.ALIAS_PASSWORD, password);
     }
 
     public boolean setUsername(final String username) {
-        return this.ksh.set(KeyStoreInformationProvider.ALIAS_USERNAME, username);
+        return this.set(KeyStoreInformationProvider.ALIAS_USERNAME, username);
     }
 
     @Override
@@ -75,15 +113,10 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
 
     @Override
     public boolean setToken(final Reader token) {
-        try {
-            this.ksh.set(KeyStoreInformationProvider.ALIAS_TOKEN, token);
-            this.ksh.set(KeyStoreInformationProvider.ALIAS_TOKEN_DATE, LocalDateTime.now().toString());
-            this.ksh.save();
-            return true;
-        } catch (final IOException ex) {
-            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
-            return false;
-        }
+        final boolean firstSuccessful = this.set(KeyStoreInformationProvider.ALIAS_TOKEN, token);
+        final boolean secondSuccessful = this.set(KeyStoreInformationProvider.ALIAS_TOKEN_DATE,
+                LocalDateTime.now().toString());
+        return firstSuccessful && secondSuccessful;
     }
 
     @Override

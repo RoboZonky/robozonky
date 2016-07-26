@@ -18,7 +18,6 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.security.KeyStoreException;
 import java.time.LocalDateTime;
@@ -138,9 +137,8 @@ public class KeyStoreInformationProviderTest {
         Mockito.doThrow(IOException.class).when(ksh).save();
         final KeyStoreInformationProvider p = new KeyStoreInformationProvider(ksh);
         Assertions.assertThat(p.setToken(new StringReader("something"))).isFalse();
-        Mockito.verify(ksh, Mockito.times(1)).save();
-        Mockito.verify(ksh, Mockito.times(1)).set(Mockito.any(), Mockito.any(String.class));
-        Mockito.verify(ksh, Mockito.times(1)).set(Mockito.any(), Mockito.any(Reader.class));
+        Mockito.verify(ksh, Mockito.atLeast(1)).save();
+        Mockito.verify(ksh, Mockito.times(2)).set(Mockito.any(), Mockito.any(String.class));
     }
 
 }
