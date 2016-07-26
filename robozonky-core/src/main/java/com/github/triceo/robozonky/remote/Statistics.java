@@ -21,7 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class Statistics implements BaseEntity {
 
     private BigDecimal currentProfitability, expectedProfitability;
@@ -33,37 +35,38 @@ public class Statistics implements BaseEntity {
 
     @XmlElement
     public BigDecimal getCurrentProfitability() {
-        return currentProfitability;
+        return this.getOrDefault(this.currentProfitability);
     }
 
     @XmlElement
     public BigDecimal getExpectedProfitability() {
-        return expectedProfitability;
+        return this.getOrDefault(this.expectedProfitability);
     }
 
     @XmlElement
     public CurrentOverview getCurrentOverview() {
-        return currentOverview;
+        return this.getOrDefault(this.currentOverview, CurrentOverview::new);
     }
 
     @XmlElement
     public OverallOverview getOverallOverview() {
-        return overallOverview;
+        return this.getOrDefault(this.overallOverview, OverallOverview::new);
+
     }
 
     @XmlElement
     public OverallPortfolio getOverallPortfolio() {
-        return overallPortfolio;
+        return this.getOrDefault(this.overallPortfolio, OverallPortfolio::new);
     }
 
     @XmlElementWrapper
     public Collection<Instalment> getCashFlow() {
-        return cashFlow;
+        return this.getOrDefault(this.cashFlow);
     }
 
     @XmlElementWrapper
     public Collection<RiskPortfolio> getRiskPortfolio() {
-        return riskPortfolio;
+        return this.getOrDefault(this.riskPortfolio);
     }
 
     @Override

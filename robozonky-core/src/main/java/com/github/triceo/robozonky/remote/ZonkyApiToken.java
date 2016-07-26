@@ -88,6 +88,10 @@ public class ZonkyApiToken implements BaseEntity {
         return type;
     }
 
+    /**
+     * Interval in seconds in which the token will expire.
+     * @return Time left before token expiration, in seconds, at the time token was retrieved.
+     */
     public int getExpiresIn() {
         return expiresIn;
     }
