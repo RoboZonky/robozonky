@@ -45,7 +45,10 @@ public class KeyStoreHandlerTest {
         final String key = "abc";
         final String value = "def";
         // store
+        Assertions.assertThat(KeyStoreHandlerTest.TARGET).doesNotExist();
         final KeyStoreHandler ksh = KeyStoreHandler.create(KeyStoreHandlerTest.TARGET, KeyStoreHandlerTest.PASSWORD);
+        Assertions.assertThat(ksh.isDirty()).isFalse();
+        Assertions.assertThat(KeyStoreHandlerTest.TARGET).exists();
         final boolean isStored = ksh.set(key, value);
         Assertions.assertThat(isStored).isTrue();
         Assertions.assertThat(ksh.isDirty()).isTrue();
@@ -56,6 +59,7 @@ public class KeyStoreHandlerTest {
         Assertions.assertThat(ksh.get(key)).contains(value);
         // read new
         final KeyStoreHandler ksh2 = KeyStoreHandler.open(KeyStoreHandlerTest.TARGET, KeyStoreHandlerTest.PASSWORD);
+        Assertions.assertThat(ksh2.isDirty()).isFalse();
         Assertions.assertThat(ksh2.get(key)).isPresent();
         Assertions.assertThat(ksh2.get(key)).contains(value);
         // delete
