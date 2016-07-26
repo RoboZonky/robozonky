@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>SimpleInvestmentStategyTest xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../../testapidocs/com/github/triceo/robozonky/strategy/simple/SimpleInvestmentStategyTest.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright 2016 Lukáš Petrovický</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">package</strong> com.github.triceo.robozonky.strategy.simple;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> java.math.BigDecimal;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.EnumMap;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.function.Function;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.stream.Collectors;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.PortfolioOverview;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.remote.Loan;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.remote.Rating;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.strategy.InvestmentStrategy;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.assertj.core.api.Assertions;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.mockito.Matchers;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.mockito.Mockito;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../com/github/triceo/robozonky/strategy/simple/SimpleInvestmentStategyTest.html">SimpleInvestmentStategyTest</a> {
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Rating RATING_A = Rating.A;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Rating RATING_B = Rating.B;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> TESTED_TERM_LENGTH = 2;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAXIMUM_LOAN_INVESTMENT = 10000;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MINIMUM_ASK = SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT / 10;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAXIMUM_ASK = SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT * 10;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> BigDecimal MAXIMUM_LOAN_SHARE_A = BigDecimal.valueOf(0.01);
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> BigDecimal TARGET_SHARE_A = BigDecimal.valueOf(0.2);
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> StrategyPerRating STRATEGY_A = <strong class="jxr_keyword">new</strong> StrategyPerRating(SimpleInvestmentStategyTest.RATING_A,
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>              SimpleInvestmentStategyTest.TARGET_SHARE_A, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, -1, SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A, SimpleInvestmentStategyTest.MINIMUM_ASK, SimpleInvestmentStategyTest.MAXIMUM_ASK, <strong class="jxr_keyword">true</strong>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      );
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> BigDecimal MAXIMUM_LOAN_SHARE_B = BigDecimal.valueOf(0.001);
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> BigDecimal TARGET_SHARE_B = SimpleInvestmentStategyTest.TARGET_SHARE_A.add(BigDecimal.valueOf(0.5));
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> StrategyPerRating STRATEGY_B = <strong class="jxr_keyword">new</strong> StrategyPerRating(SimpleInvestmentStategyTest.RATING_B,
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>              SimpleInvestmentStategyTest.TARGET_SHARE_B, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH + 1, SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_B, SimpleInvestmentStategyTest.MINIMUM_ASK, SimpleInvestmentStategyTest.MAXIMUM_ASK, false
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      );
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> InvestmentStrategy overallStrategy;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      <strong class="jxr_keyword">public</strong> <a href="../../../../../../com/github/triceo/robozonky/strategy/simple/SimpleInvestmentStategyTest.html">SimpleInvestmentStategyTest</a>() {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>          <strong class="jxr_keyword">final</strong> Map&lt;Rating, StrategyPerRating&gt; strategies = <strong class="jxr_keyword">new</strong> EnumMap&lt;&gt;(Rating.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          strategies.put(Rating.AAAAA, Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          strategies.put(Rating.AAAA, Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>          strategies.put(Rating.AAA, Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>          strategies.put(Rating.AA, Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>          strategies.put(SimpleInvestmentStategyTest.RATING_A, SimpleInvestmentStategyTest.STRATEGY_A);
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>          strategies.put(SimpleInvestmentStategyTest.RATING_B, SimpleInvestmentStategyTest.STRATEGY_B);
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          strategies.put(Rating.C, Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          strategies.put(Rating.D, Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          overallStrategy = <strong class="jxr_keyword">new</strong> SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      }
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>      @Test(expected = IllegalArgumentException.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> constructorEnsuringAllStrategiesPresent() {
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          <strong class="jxr_keyword">final</strong> Map&lt;Rating, StrategyPerRating&gt; strategies = <strong class="jxr_keyword">new</strong> EnumMap&lt;&gt;(Rating.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          strategies.put(SimpleInvestmentStategyTest.RATING_A, SimpleInvestmentStategyTest.STRATEGY_A);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          strategies.put(SimpleInvestmentStategyTest.RATING_B, SimpleInvestmentStategyTest.STRATEGY_B);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>          <strong class="jxr_keyword">new</strong> SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>      }
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>      @Test
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> properlyRecommendingInvestmentSize() {
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          <strong class="jxr_keyword">final</strong> BigDecimal loanAmount = BigDecimal.valueOf(100000.0);
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>          <strong class="jxr_keyword">final</strong> Loan mockLoan = Mockito.mock(Loan.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>          Mockito.when(mockLoan.getRating()).thenReturn(SimpleInvestmentStategyTest.RATING_A);
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          Mockito.when(mockLoan.getRemainingInvestment()).thenReturn(loanAmount.doubleValue());
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>          Mockito.when(mockLoan.getAmount()).thenReturn(loanAmount.doubleValue());
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>          <em class="jxr_comment">// with unlimited balance</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>          <strong class="jxr_keyword">final</strong> PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>          Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>          Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>          <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> maxInvestment = Math.min(
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>                  loanAmount.multiply(SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A).intValue(),
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>                  SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT);
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>          <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> actualInvestment = overallStrategy.recommendInvestmentAmount(mockLoan, portfolio);
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          Assertions.assertThat(actualInvestment).isLessThanOrEqualTo(maxInvestment);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          <em class="jxr_comment">// with balance just a little less than the recommended investment</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         Mockito.when(portfolio.getCzkAvailable()).thenReturn(actualInvestment - 1);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> adjustedForBalance = overallStrategy.recommendInvestmentAmount(mockLoan, portfolio);
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         Assertions.assertThat(adjustedForBalance).isLessThanOrEqualTo(actualInvestment);
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         <em class="jxr_comment">// and make sure the recommendation is 200 times X, where X is a positive integer</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>         <strong class="jxr_keyword">final</strong> BigDecimal remainder = BigDecimal.valueOf(adjustedForBalance)
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>                 .remainder(BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT));
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         Assertions.assertThat(remainder.intValue()).isEqualTo(0);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>     }
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;Rating, BigDecimal&gt; prepareShareMap(<strong class="jxr_keyword">final</strong> BigDecimal ratingA, <strong class="jxr_keyword">final</strong> BigDecimal ratingB,
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>                                                            <strong class="jxr_keyword">final</strong> BigDecimal ratingC) {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>         <strong class="jxr_keyword">final</strong> Map&lt;Rating, BigDecimal&gt; map = <strong class="jxr_keyword">new</strong> EnumMap&lt;&gt;(Rating.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>         map.put(Rating.A, ratingA);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>         map.put(Rating.B, ratingB);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>         map.put(Rating.C, ratingC);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>         <strong class="jxr_keyword">return</strong> Collections.unmodifiableMap(map);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     }
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> assertOrder(<strong class="jxr_keyword">final</strong> List&lt;Rating&gt; result, <strong class="jxr_keyword">final</strong> Rating... ratingsOrderedDown) {
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>         Assertions.assertThat(result).hasSize(ratingsOrderedDown.length);
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>         <strong class="jxr_keyword">if</strong> (ratingsOrderedDown.length &lt; 2) {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ratingsOrderedDown.length &gt; 3) {
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException(<span class="jxr_string">"This should never happen in the test."</span>);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>         }
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>         <strong class="jxr_keyword">final</strong> Rating first = result.get(0);
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>         <strong class="jxr_keyword">final</strong> Rating last = result.get(result.size() - 1);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         Assertions.assertThat(first).isGreaterThan(last);
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>         Assertions.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>         Assertions.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>     }
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Loan mockLoan(<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> id, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> amount, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> term, <strong class="jxr_keyword">final</strong> Rating rating) {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>         <strong class="jxr_keyword">final</strong> Loan loan = Mockito.mock(Loan.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>         Mockito.when(loan.getRemainingInvestment()).thenReturn(amount * 2);
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>         Mockito.when(loan.getAmount()).thenReturn(amount);
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>         Mockito.when(loan.getId()).thenReturn(id);
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>         Mockito.when(loan.getTermInMonths()).thenReturn(term);
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>         Mockito.when(loan.getRating()).thenReturn(rating);
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>         <strong class="jxr_keyword">return</strong> loan;
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>     }
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>     @Test
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testProperSorting() {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         <strong class="jxr_keyword">final</strong> Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>         <strong class="jxr_keyword">final</strong> Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B);
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>         <strong class="jxr_keyword">final</strong> Loan c1 = SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C);
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         <strong class="jxr_keyword">final</strong> Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A);
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         <strong class="jxr_keyword">final</strong> Collection&lt;Loan&gt; loans = Arrays.asList(a1, b1, c1, a2, b1, c1);
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>         <strong class="jxr_keyword">final</strong> Map&lt;Rating, Collection&lt;Loan&gt;&gt; result = SimpleInvestmentStrategy.sortLoansByRating(loans);
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>         Assertions.assertThat(result).containsOnlyKeys(Rating.A, Rating.B, Rating.C);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>         Assertions.assertThat(result.get(Rating.A)).containsExactly(a1, a2);
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         Assertions.assertThat(result.get(Rating.B)).containsExactly(b1);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         Assertions.assertThat(result.get(Rating.C)).containsExactly(c1);
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>     }
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>     @Test
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> properRankingOfRatings() {
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <strong class="jxr_keyword">final</strong> BigDecimal targetShareA = BigDecimal.valueOf(0.001);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <strong class="jxr_keyword">final</strong> BigDecimal targetShareB = targetShareA.multiply(BigDecimal.TEN);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         <strong class="jxr_keyword">final</strong> BigDecimal targetShareC = targetShareB.multiply(BigDecimal.TEN);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         <strong class="jxr_keyword">final</strong> Map&lt;Rating, StrategyPerRating&gt; strategies = Arrays.stream(Rating.values())
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>                 .collect(Collectors.toMap(Function.identity(), r -&gt; Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>)));
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>         strategies.put(Rating.A, <strong class="jxr_keyword">new</strong> StrategyPerRating(Rating.A, targetShareA, 1, 1, 1, BigDecimal.ONE, 1, 1, <strong class="jxr_keyword">true</strong>));
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>         strategies.put(Rating.B, <strong class="jxr_keyword">new</strong> StrategyPerRating(Rating.B, targetShareB, 1, 1, 1, BigDecimal.ONE, 1, 1, <strong class="jxr_keyword">true</strong>));
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>         strategies.put(Rating.C, <strong class="jxr_keyword">new</strong> StrategyPerRating(Rating.C, targetShareC, 1, 1, 1, BigDecimal.ONE, 1, 1, <strong class="jxr_keyword">true</strong>));
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         <strong class="jxr_keyword">final</strong> SimpleInvestmentStrategy sis = <strong class="jxr_keyword">new</strong> SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         <em class="jxr_comment">// all ratings have zero share; C &gt; B &gt; A</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         Map&lt;Rating, BigDecimal&gt; tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO,
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>                 BigDecimal.ZERO);
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>         SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(tmp), Rating.C, Rating.B, Rating.A);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <em class="jxr_comment">// A only; B, C overinvested</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>         tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.TEN);
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(tmp), Rating.A);
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>         <em class="jxr_comment">// B &gt; C &gt; A</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>         tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.valueOf(0.00095), BigDecimal.ZERO,
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>                 BigDecimal.valueOf(0.099));
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(tmp), Rating.B, Rating.C, Rating.A);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>     }
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;Rating, StrategyPerRating&gt; mockStrategies() {
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>         <strong class="jxr_keyword">return</strong> Arrays.stream(Rating.values())
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>                 .collect(Collectors.toMap(Function.identity(), r -&gt; {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>                     <strong class="jxr_keyword">final</strong> StrategyPerRating s = Mockito.mock(StrategyPerRating.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>                     Mockito.when(s.isPreferLongerTerms()).thenReturn(r.ordinal() % 2 == 0); <em class="jxr_comment">// exercise both branches</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                     Mockito.when(s.getRating()).thenReturn(r);
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                     Mockito.when(s.getTargetShare()).thenReturn(BigDecimal.valueOf(0.1));
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>                     Mockito.when(s.isAcceptable(Matchers.any())).thenReturn(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>                     <strong class="jxr_keyword">return</strong> s;
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>                 }));
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>     }
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     @Test
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> doesNotAllowUnderinvesting() {
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> balance = 100;
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>         <strong class="jxr_keyword">final</strong> SimpleInvestmentStrategy sis =
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>                 <strong class="jxr_keyword">new</strong> SimpleInvestmentStrategy(balance, 100000, SimpleInvestmentStategyTest.mockStrategies());
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>         <em class="jxr_comment">// all ratings have zero share; C &gt; B &gt; A</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>         <strong class="jxr_keyword">final</strong> Map&lt;Rating, BigDecimal&gt; tmp =
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>                 SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>         <em class="jxr_comment">// prepare some loans</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>         <strong class="jxr_keyword">final</strong> Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A);
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>         <strong class="jxr_keyword">final</strong> Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B);
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>         <strong class="jxr_keyword">final</strong> Loan c1 = SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C);
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>         <strong class="jxr_keyword">final</strong> Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A);
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>         <strong class="jxr_keyword">final</strong> List&lt;Loan&gt; loans = Arrays.asList(a1, b1, c1, a2);
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>         <em class="jxr_comment">// make sure we never go below the minimum balance</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>         <strong class="jxr_keyword">final</strong> PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>         Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>         Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance + 1);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance);
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance - 1);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isEmpty();
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>     }
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>     @Test
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> doesNotAllowInvestingOverCeiling() {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> balance = 10000;
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> ceiling = 100000;
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>         <strong class="jxr_keyword">final</strong> SimpleInvestmentStrategy sis =
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>                 <strong class="jxr_keyword">new</strong> SimpleInvestmentStrategy(balance, ceiling, SimpleInvestmentStategyTest.mockStrategies());
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>         <em class="jxr_comment">// all ratings have zero share; C &gt; B &gt; A</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>         <strong class="jxr_keyword">final</strong> Map&lt;Rating, BigDecimal&gt; tmp =
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>                 SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>         <em class="jxr_comment">// prepare some loans</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>         <strong class="jxr_keyword">final</strong> Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A);
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>         <strong class="jxr_keyword">final</strong> Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B);
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>         <strong class="jxr_keyword">final</strong> Loan c1 = SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C);
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>         <strong class="jxr_keyword">final</strong> Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A);
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>         <strong class="jxr_keyword">final</strong> List&lt;Loan&gt; loans = Arrays.asList(a1, b1, c1, a2);
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>         <em class="jxr_comment">// make sure we never go below the minimum balance</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>         <strong class="jxr_keyword">final</strong> PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>         Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling + 1);
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isEmpty();
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling);
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling - 1);
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>         Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>     }
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>     @Test
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> properlySortsMatchesOnTerms() {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> balance = 10000;
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> ceiling = 100000;
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>         <strong class="jxr_keyword">final</strong> SimpleInvestmentStrategy sis =
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>                 <strong class="jxr_keyword">new</strong> SimpleInvestmentStrategy(balance, ceiling, SimpleInvestmentStategyTest.mockStrategies());
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>         <em class="jxr_comment">// all ratings have zero share; C &gt; B &gt; A</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>         <strong class="jxr_keyword">final</strong> Map&lt;Rating, BigDecimal&gt; tmp =
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>                 SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>         <em class="jxr_comment">// prepare some loans</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> aTerm = 3, bTerm = 4;
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>         <strong class="jxr_keyword">final</strong> Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 200, aTerm, Rating.A);
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>         <strong class="jxr_keyword">final</strong> Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 500, bTerm, Rating.B);
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>         <strong class="jxr_keyword">final</strong> Loan b2 = SimpleInvestmentStategyTest.mockLoan(7, 800, bTerm + 1, Rating.B);
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>         <strong class="jxr_keyword">final</strong> Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 1100, aTerm + 1, Rating.A);
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>         <strong class="jxr_keyword">final</strong> List&lt;Loan&gt; loans = Arrays.asList(a1, b1, a2, b2);
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>         <em class="jxr_comment">// prepare portfolio</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>         <strong class="jxr_keyword">final</strong> PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>         Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>         Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> 
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>         <em class="jxr_comment">// make sure the loans are properly sorted according to their terms</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>         <strong class="jxr_keyword">final</strong> List&lt;Loan&gt; result = sis.getMatchingLoans(loans, portfolio);
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>         Assertions.assertThat(result).isNotEmpty();
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>         Assertions.assertThat(result).containsExactly(a2, a1, b1, b2);
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>     }
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2016. All rights reserved.</div>
+</body>
+</html>
