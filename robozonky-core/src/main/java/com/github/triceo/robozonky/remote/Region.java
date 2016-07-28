@@ -16,9 +16,12 @@
 
 package com.github.triceo.robozonky.remote;
 
+/**
+ * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
+ * its integer ID after all other values already got one.
+ */
 public enum Region {
 
     PRAHA, STREDOCESKY, JIHOCESKY, PLZENSKY, KARLOVARSKY, USTECKY, LIBERECKY, KRALOVEHRADECKY, PARDUBICKY, VYSOCINA,
-    JIHOMORAVSKY, OLOMOUCKY, MORAVSKOSLEZSKY, ZLINSKY;
-
+    JIHOMORAVSKY, OLOMOUCKY, MORAVSKOSLEZSKY, ZLINSKY, UNKNOWN;
 }

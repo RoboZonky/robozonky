@@ -93,7 +93,7 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    // FIXME implement as enum
+    // FIXME implement as enum, do not forget error-catching deserializer
     public String getPaymentStatus() {
         return paymentStatus;
     }
