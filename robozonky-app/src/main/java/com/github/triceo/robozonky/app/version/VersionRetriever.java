@@ -48,7 +48,7 @@ class VersionRetriever implements Callable<String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionRetriever.class);
 
     private static final String GROUP_ID = VersionRetriever.class.getPackage().getImplementationVendor();
-    private static final String ARTIFACT_ID = VersionRetriever.class.getPackage().getSpecificationTitle();
+    private static final String ARTIFACT_ID = "robozonky-app";
     private static final Pattern COMPILE = Pattern.compile("\\Q.\\E");
 
     private final String groupId, artifactId;
@@ -56,7 +56,7 @@ class VersionRetriever implements Callable<String> {
     // tests only; VersionCheck.class.getPackage() does not contain anything then
     VersionRetriever(final String groupId, final String artifactId) {
         this.groupId = groupId == null ? "com.github.triceo.robozonky" : groupId;
-        this.artifactId = artifactId == null ? "robozonky-app" : artifactId;
+        this.artifactId = artifactId == null ? VersionRetriever.ARTIFACT_ID : artifactId;
     }
 
     public VersionRetriever() {

@@ -5,6 +5,9 @@
     <version>1.5</version>
   </skin>
   <body>
+    <links>
+      <item name="RoboZonky website" href="http://triceo.github.io/robozonky" />
+    </links>
     <menu ref="parent" inherit="top" />
     <menu ref="modules" inherit="bottom" />
     <menu ref="reports" inherit="bottom" />
