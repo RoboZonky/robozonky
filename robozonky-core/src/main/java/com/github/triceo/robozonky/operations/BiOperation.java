@@ -35,7 +35,7 @@ public abstract class BiOperation<In1, In2, Out> implements BiFunction<In1, In2,
             this.getLogger().trace("Succeeded with result '{}'.", result);
             return Optional.of(result);
         } catch (final Exception ex) {
-            this.getLogger().error("Failed.", ex);
+            this.getLogger().warn("Failed, attempting to continue.", ex);
             return Optional.empty();
         }
     }
