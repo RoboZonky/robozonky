@@ -31,8 +31,10 @@ import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZotifyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.jboss.resteasy.spi.BadRequestException;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -90,6 +92,32 @@ public class InvestorTest {
     }
 
     @Test
+    public void recoverOnFailedInvestment() {
+        // the strategy will recommend two different investments
+        final Loan mockLoan1 = InvestorTest.getMockLoanWithId(1);
+        final Loan mockLoan2 = InvestorTest.getMockLoanWithId(2);
+        final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
+        Mockito.when(strategyMock.getMatchingLoans(Matchers.any(), Matchers.any()))
+                .thenReturn(Arrays.asList(mockLoan1, mockLoan2));
+        Mockito.when(strategyMock.recommendInvestmentAmount(Matchers.any(), Matchers.any())).thenReturn(400);
+        // fail on the first loan, accept the second
+        final InvestingZonkyApi mockApi = Mockito.mock(InvestingZonkyApi.class);
+        Mockito.doThrow(BadRequestException.class)
+                .when(mockApi).invest(Matchers.argThat(new InvestorTest.InvestmentBaseMatcher(mockLoan1)));
+        // finally test
+        final Investor investor = new Investor(mockApi, Mockito.mock(ZotifyApi.class), strategyMock,
+                BigDecimal.valueOf(1000));
+        final Optional<Investment> result = investor.investOnce(BigDecimal.valueOf(1000), new Statistics(),
+                Collections.emptyList());
+        // check that the first loan properly failed over to the second
+        Mockito.verify(mockApi, Mockito.times(2)).invest(Matchers.any());
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(result).isPresent();
+        softly.assertThat(result.get().getLoanId()).isEqualTo(mockLoan2.getId());
+        softly.assertAll();
+    }
+
+    @Test
     public void investOnRecommendations() {
         // prepare loans so that only one will survive
         final BigDecimal balance = BigDecimal.valueOf(1000);
@@ -98,7 +126,6 @@ public class InvestorTest {
                 InvestorTest.getMockLoanWithIdAndAmount(2, InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
         final int amount = 500;
         final Loan overAmount = InvestorTest.getMockLoanWithIdAndAmount(3, amount);
-        final Loan failing = InvestorTest.getMockLoanWithIdAndAmount(4, 400);
         final Loan success = InvestorTest.getMockLoanWithIdAndAmount(5, amount);
         final Statistics stats = Mockito.mock(Statistics.class);
         Mockito.when(stats.getRiskPortfolio()).thenReturn(Collections.emptyList());
@@ -109,27 +136,24 @@ public class InvestorTest {
         Mockito.when(strategy.recommendInvestmentAmount(Matchers.eq(underMinimum), Matchers.any())).thenReturn(0);
         Mockito.when(strategy.recommendInvestmentAmount(Matchers.eq(overAmount), Matchers.any()))
                 .thenReturn(amount + 1);
-        Mockito.when(strategy.recommendInvestmentAmount(Matchers.eq(failing), Matchers.any())).thenReturn(200);
         Mockito.when(strategy.recommendInvestmentAmount(Matchers.eq(success), Matchers.any())).thenReturn(amount / 2);
         final InvestingZonkyApi api = Mockito.mock(InvestingZonkyApi.class);
-        Mockito.doThrow(IllegalStateException.class)
-                .when(api).invest(Matchers.argThat(new InvestorTest.InvestmentBaseMatcher(failing)));
         final ZotifyApi zotifyApi = Mockito.mock(ZotifyApi.class);
         // and now actually test that the succeeding loan will be invested into ...
         final Investor i = new Investor(api, zotifyApi, strategy, balance);
         Mockito.when(strategy.getMatchingLoans(Matchers.any(), Matchers.any()))
-                .thenReturn(Arrays.asList(overBalance, underMinimum, overAmount, failing, success));
+                .thenReturn(Arrays.asList(overBalance, underMinimum, overAmount, success));
         final Optional<Investment> result = i.investOnce(balance, stats, Collections.emptyList());
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(result.get().getLoanId()).isEqualTo(success.getId());
-        Mockito.verify(api, Mockito.times(2)).invest(Matchers.any());
+        Mockito.verify(api, Mockito.times(1)).invest(Matchers.any());
         // ... no matter which place it takes
         Mockito.when(strategy.getMatchingLoans(Matchers.any(), Matchers.any()))
-                .thenReturn(Arrays.asList(success, overBalance, underMinimum, overAmount, failing));
+                .thenReturn(Arrays.asList(success, overBalance, underMinimum, overAmount));
         final Optional<Investment> result2 = i.investOnce(balance, stats, Collections.emptyList());
         Assertions.assertThat(result2).isPresent();
         Assertions.assertThat(result2.get().getLoanId()).isEqualTo(success.getId());
-        Mockito.verify(api, Mockito.times(3)).invest(Matchers.any());
+        Mockito.verify(api, Mockito.times(2)).invest(Matchers.any());
         // ... even when nothing is accepted
         final Loan alreadyPresent = InvestorTest.getMockLoanWithIdAndAmount(6, 10000);
         Mockito.when(strategy.getMatchingLoans(Matchers.any(), Matchers.any()))
@@ -141,20 +165,20 @@ public class InvestorTest {
     }
 
     private static class InvestmentBaseMatcher extends BaseMatcher<Investment> {
-        private final Loan failing;
+        private final Loan matching;
 
-        public InvestmentBaseMatcher(final Loan failing) {
-            this.failing = failing;
+        public InvestmentBaseMatcher(final Loan matching) {
+            this.matching = matching;
         }
 
         @Override
         public void describeTo(final Description description) {
-            description.appendText("Matches only the investment related to a loan that is supposed to fail.");
+            description.appendText("Matches only the investment matching a specified loan.");
         }
 
         @Override
         public boolean matches(final Object item) {
-            return ((Investment) item).getLoanId() == failing.getId();
+            return ((Investment) item).getLoanId() == matching.getId();
         }
     }
 

@@ -173,8 +173,10 @@ public class Investor {
         final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, investmentsAlreadyMade);
         Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
                 portfolio.getSharesOnInvestment());
-        return this.strategy.getMatchingLoans(this.zotifyApi.getLoans(), portfolio).stream()
-                .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade))
+        final Collection<Loan> loans = this.strategy.getMatchingLoans(this.zotifyApi.getLoans(), portfolio).stream()
+                .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade)).collect(Collectors.toList());
+        Investor.LOGGER.debug("Strategy recommends the following unseen loans: {}.", loans);
+        return loans.stream()
                 .map(l -> {
                     final int invest = this.strategy.recommendInvestmentAmount(l, portfolio);
                     return Investor.invest(this.zonkyApi, l, invest, portfolio.getCzkAvailable());
