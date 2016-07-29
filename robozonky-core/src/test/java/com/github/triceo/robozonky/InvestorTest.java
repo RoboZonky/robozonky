@@ -167,7 +167,7 @@ public class InvestorTest {
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getLoan(loan1id)).thenReturn(l1);
         Mockito.when(api.getLoan(loan2Id)).thenReturn(l2);
-        Mockito.when(api.getBlockedAmounts()).thenReturn(
+        Mockito.when(api.getBlockedAmounts(Matchers.any(), Matchers.any())).thenReturn(
                 Arrays.asList(new BlockedAmount(0, 1000), new BlockedAmount(loan1id, loan1amount),
                         new BlockedAmount(loan2Id, loan2amount))
         );

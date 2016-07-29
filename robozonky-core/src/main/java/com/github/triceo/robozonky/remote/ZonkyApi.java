@@ -21,6 +21,7 @@ import java.util.List;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -61,7 +62,7 @@ public interface ZonkyApi extends Api {
 
     @GET
     @Path(ZonkyApi.WALLET + "/blocked-amounts")
-    List<BlockedAmount> getBlockedAmounts();
+    List<BlockedAmount> getBlockedAmounts(@HeaderParam("X-Size") int pageSize, @HeaderParam("X-Page") int pageNo);
 
     @GET
     @Path(ZonkyApi.LOANS + "/{loanId}")

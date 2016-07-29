@@ -114,7 +114,7 @@ public class Investor {
      * @return Every blocked amount represents a future investment. This method returns such investments.
      */
     static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
-        return Collections.unmodifiableList(api.getBlockedAmounts().stream()
+        return Collections.unmodifiableList(api.getBlockedAmounts(99, 1).stream()
                 .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
                 .map(blocked -> {
                     final int loanId = blocked.getLoanId();
