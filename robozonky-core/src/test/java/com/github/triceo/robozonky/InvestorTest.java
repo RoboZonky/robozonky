@@ -189,9 +189,9 @@ public class InvestorTest {
         final int loan2Id = 2, loan2amount = 200;
         final Loan l2 = InvestorTest.getMockLoanWithIdAndAmount(loan2Id, loan2amount);
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
-        Mockito.when(api.getLoan(loan1id)).thenReturn(l1);
-        Mockito.when(api.getLoan(loan2Id)).thenReturn(l2);
-        Mockito.when(api.getBlockedAmounts(Matchers.any(), Matchers.any())).thenReturn(
+        Mockito.when(api.getLoan(Matchers.eq(loan1id))).thenReturn(l1);
+        Mockito.when(api.getLoan(Matchers.eq(loan2Id))).thenReturn(l2);
+        Mockito.when(api.getBlockedAmounts(Matchers.anyInt(), Matchers.anyInt())).thenReturn(
                 Arrays.asList(new BlockedAmount(0, 1000), new BlockedAmount(loan1id, loan1amount),
                         new BlockedAmount(loan2Id, loan2amount))
         );
