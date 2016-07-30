@@ -73,7 +73,7 @@ class CommandLineInterface {
     private static void logOptionValues(final CommandLine cli) {
         final List<String> optionsString = Arrays.stream(cli.getOptions())
                 .filter(o -> cli.hasOption(o.getOpt()))
-                .filter(o -> o != CommandLineInterface.OPTION_PASSWORD)
+                .filter(o -> !o.equals(CommandLineInterface.OPTION_PASSWORD))
                 .map(o -> {
                     String result = "-" + o.getOpt();
                     final String value = cli.getOptionValue(o.getOpt());
