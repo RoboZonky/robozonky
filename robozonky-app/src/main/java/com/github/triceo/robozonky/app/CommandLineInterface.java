@@ -17,9 +17,12 @@
 package com.github.triceo.robozonky.app;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
@@ -30,11 +33,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processes command line arguments and provides access to their values.
  */
 class CommandLineInterface {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -58,6 +65,25 @@ class CommandLineInterface {
     static final Option OPTION_DRY_RUN = Option.builder("d").hasArg().optionalArg(true).
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
             .build();
+
+    /**
+     * Convert the command line arguments into a string and log it.
+     * @param cli Parsed command line.
+     */
+    private static void logOptionValues(final CommandLine cli) {
+        final List<String> optionsString = Arrays.stream(cli.getOptions())
+                .filter(o -> cli.hasOption(o.getOpt()))
+                .filter(o -> o != CommandLineInterface.OPTION_PASSWORD)
+                .map(o -> {
+                    String result = "-" + o.getOpt();
+                    final String value = cli.getOptionValue(o.getOpt());
+                    if (value != null) {
+                        result += " " + value;
+                    }
+                    return result;
+                }).collect(Collectors.toList());
+        CommandLineInterface.LOGGER.debug("Processing command line: {}.", optionsString);
+    }
 
     /**
      * Parse the command line.
@@ -88,7 +114,9 @@ class CommandLineInterface {
         final CommandLineParser parser = new DefaultParser();
         // and parse
         try {
-            return Optional.of(new CommandLineInterface(options, parser.parse(options, args)));
+            final CommandLine cli = parser.parse(options, args);
+            CommandLineInterface.logOptionValues(cli);
+            return Optional.of(new CommandLineInterface(options, cli));
         } catch (final ParseException ex) {
             CommandLineInterface.printHelp(options, ex.getMessage(), true);
             return Optional.empty();
