@@ -22,5 +22,7 @@ public enum MainIncomeType {
     SELF_EMPLOYMENT, // "OSVČ"
     ENTREPRENEUR, // "podnikatel"
     PENSION, // "důchodce"
+    STUDENT, // "student"
+    LIBERAL_PROFESSION, // "svobodné povolání"
     OTHERS_MAIN // "ostatní"
 }
