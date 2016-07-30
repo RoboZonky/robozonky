@@ -19,10 +19,12 @@ package com.github.triceo.robozonky.remote;
 public enum MainIncomeType {
 
     EMPLOYMENT, // "zaměstnanec"
-    SELF_EMPLOYMENT, // "OSVČ"
     ENTREPRENEUR, // "podnikatel"
+    SELF_EMPLOYMENT, // "OSVČ"
     PENSION, // "důchodce"
+    MATERNITY_LEAVE, // "na rodičovské dovolené"
     STUDENT, // "student"
+    UNEMPLOYED, // "bez zaměstnání"
     LIBERAL_PROFESSION, // "svobodné povolání"
     OTHERS_MAIN // "ostatní"
 }
