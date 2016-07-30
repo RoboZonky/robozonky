@@ -56,11 +56,13 @@ enum OperatingMode {
                 return Optional.empty();
             }
             final File strategyConfig = new File(strategyFilePath.get());
-            if (!strategyConfig.canRead()) {
-                cli.printHelp("Investment strategy file must be readable.", true);
+            if (!strategyConfig.exists()) {
+                cli.printHelp("Investment strategy file does not exist: " + strategyConfig.getAbsolutePath(), true);
                 return Optional.empty();
-            }
-            try {
+            } else if (!strategyConfig.canRead()) {
+                cli.printHelp("Investment strategy file can not be read: " + strategyConfig.getAbsolutePath(), true);
+                return Optional.empty();
+            } else try {
                 final Optional<InvestmentStrategy> strategy = InvestmentStrategy.load(strategyConfig);
                 if (!strategy.isPresent()) {
                     OperatingMode.LOGGER.error("No investment strategy found to support {}.",
