@@ -102,6 +102,17 @@ public class AuthenticationHandler {
         this.tokenBased = tokenBased;
     }
 
+    public boolean isTokenBased() {
+        return tokenBased;
+    }
+
+    public boolean isDryRun() {
+        return dryRun;
+    }
+
+    public long getTokenRefreshBeforeExpirationInSeconds() {
+        return tokenRefreshBeforeExpirationInSeconds;
+    }
 
     private Authenticator buildWithPassword() {
         return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword(), this.dryRun);
@@ -115,7 +126,7 @@ public class AuthenticationHandler {
     Authenticator build() {
         if (!this.tokenBased) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
-            if (!this.data.setToken()) {
+            if (!this.data.deleteToken()) {
                 AuthenticationHandler.LOGGER.info("Failed to delete stale access token.");
             }
             return this.buildWithPassword();
@@ -151,7 +162,7 @@ public class AuthenticationHandler {
             deleteToken = true;
             return this.buildWithPassword();
         } finally {
-            if (deleteToken && !this.data.setToken()) {
+            if (deleteToken && !this.data.deleteToken()) {
                 AuthenticationHandler.LOGGER.warn("Failed deleting token, authentication may stop working.");
             }
         }

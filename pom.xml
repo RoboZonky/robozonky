@@ -22,7 +22,6 @@
         <surefire.version>2.19.1</surefire.version>
         <version.org.jboss.resteasy>3.0.18.Final</version.org.jboss.resteasy>
         <version.org.drools>7.0.0.Beta1</version.org.drools>
-        <mutationThreshold>75</mutationThreshold>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -316,7 +315,7 @@
                         <timestampedReports>false</timestampedReports>
                         <timeoutFactor>2</timeoutFactor>
                         <detectInlinedCode>true</detectInlinedCode>
-                        <mutationThreshold>${mutationThreshold}</mutationThreshold>
+                        <mutationThreshold>75</mutationThreshold>
                         <targetClasses>
                             <param>com.github.triceo.robozonky.*</param>
                         </targetClasses>

@@ -22,8 +22,8 @@ import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.app.util.IOUtils;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,12 +55,7 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
      * @return True if success.
      */
     private boolean set(final String alias, final Reader valueStream) {
-        try {
-            return this.set(alias, IOUtils.toString(valueStream));
-        } catch (final IOException ex) {
-            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
-            return false;
-        }
+        return this.set(alias, IOUtils.toString(valueStream));
     }
 
     /**
@@ -120,7 +115,7 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
     }
 
     @Override
-    public boolean setToken() {
+    public boolean deleteToken() {
         boolean result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN);
         result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN_DATE) && result;
         try {

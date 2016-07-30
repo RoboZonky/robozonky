@@ -23,12 +23,16 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import com.github.triceo.robozonky.Investor;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Assume;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -141,13 +145,80 @@ public class AppTest {
         Assertions.assertThat(result2).containsExactly(investment);
     }
 
-    @Test()
+    @Test
     public void wrongFormatKeyStoreProvided() throws IOException {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.getPassword()).thenReturn("password");
         Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.of(tmp));
         Assertions.assertThat(App.getSensitiveInformationProvider(cli, null)).isEmpty();
+    }
+
+    @Test
+    public void failedDeletingKeyStore() throws IOException {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
+        final File f = Mockito.mock(File.class);
+        Mockito.when(f.canRead()).thenReturn(true);
+        Mockito.when(f.delete()).thenReturn(false);
+        Assertions.assertThat(App.getSensitiveInformationProvider(cli, f)).isEmpty();
+    }
+
+    @Test
+    public void noKeyStoreNoUsername() throws IOException {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
+        Mockito.when(cli.getUsername()).thenReturn(Optional.empty());
+        final File f = Mockito.mock(File.class);
+        Mockito.when(f.canRead()).thenReturn(false);
+        Assertions.assertThat(App.getSensitiveInformationProvider(cli, f)).isEmpty();
+    }
+
+    @Test
+    public void versionCheckFailed() throws InterruptedException, ExecutionException {
+        final Future<String> future = Mockito.mock(Future.class);
+        Mockito.doThrow(new InterruptedException()).when(future).get();
+        Assertions.assertThat(App.newerRoboZonkyVersionExists(future)).isFalse();
+    }
+
+    @Test
+    public void versionCheckNotFoundNewerVersion() throws InterruptedException, ExecutionException {
+        final Future<String> future = Mockito.mock(Future.class);
+        Mockito.when(future.get()).thenReturn("1.0.0");
+        Assertions.assertThat(App.newerRoboZonkyVersionExists(future)).isFalse();
+    }
+
+    @Test
+    public void authenticationHandlerWithoutToken() {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.isTokenEnabled()).thenReturn(false);
+        final AuthenticationHandler a = App.instantiateAuthenticationHandler(null, cli);
+        Assertions.assertThat(a.isTokenBased()).isFalse();
+    }
+
+    @Test
+    public void authenticationHandlerWithTokenAndNoExpiration() {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.isTokenEnabled()).thenReturn(true);
+        Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(Optional.empty());
+        final AuthenticationHandler a = App.instantiateAuthenticationHandler(null, cli);
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(a.isTokenBased()).isTrue();
+        softly.assertThat(a.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
+        softly.assertAll();
+    }
+
+    @Test
+    public void authenticationHandlerWithTokenAndExpiration() {
+        final int expiration = 120;
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.isTokenEnabled()).thenReturn(true);
+        Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(Optional.of(expiration));
+        final AuthenticationHandler a = App.instantiateAuthenticationHandler(null, cli);
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(a.isTokenBased()).isTrue();
+        softly.assertThat(a.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(expiration);
+        softly.assertAll();
     }
 
 }

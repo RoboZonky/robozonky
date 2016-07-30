@@ -27,6 +27,7 @@ import com.github.triceo.robozonky.app.util.IOUtils;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 public class KeyStoreInformationProviderTest {
@@ -116,7 +117,7 @@ public class KeyStoreInformationProviderTest {
         final LocalDateTime storedOn = p.getTokenSetDate().get();
         Assertions.assertThat(storedOn).isAfter(beforeStoring);
         // clear token
-        p.setToken();
+        p.deleteToken();
         Assertions.assertThat(p.getToken()).isEmpty();
         Assertions.assertThat(p.getTokenSetDate()).isEmpty();
     }
@@ -126,7 +127,17 @@ public class KeyStoreInformationProviderTest {
         final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
         Mockito.doThrow(IOException.class).when(ksh).save();
         final KeyStoreInformationProvider p = new KeyStoreInformationProvider(ksh);
-        Assertions.assertThat(p.setToken()).isFalse();
+        Assertions.assertThat(p.deleteToken()).isFalse();
+        Mockito.verify(ksh, Mockito.times(1)).save();
+        Mockito.verify(ksh, Mockito.times(2)).delete(Mockito.any());
+    }
+
+    @Test
+    public void tokenDeleteSucceeded() throws IOException {
+        final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
+        Mockito.doReturn(true).when(ksh).delete(Matchers.any());
+        final KeyStoreInformationProvider p = new KeyStoreInformationProvider(ksh);
+        Assertions.assertThat(p.deleteToken()).isTrue();
         Mockito.verify(ksh, Mockito.times(1)).save();
         Mockito.verify(ksh, Mockito.times(2)).delete(Mockito.any());
     }
@@ -139,6 +150,11 @@ public class KeyStoreInformationProviderTest {
         Assertions.assertThat(p.setToken(new StringReader("something"))).isFalse();
         Mockito.verify(ksh, Mockito.atLeast(1)).save();
         Mockito.verify(ksh, Mockito.times(2)).set(Mockito.any(), Mockito.any(String.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void noKeyStoreHandlerProvided() {
+        new KeyStoreInformationProvider(null);
     }
 
 }

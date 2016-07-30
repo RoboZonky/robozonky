@@ -50,11 +50,14 @@ public class VersionCheck {
      * @return True if the {@link #retrieveCurrentVersion()} is older than the version in question.
      */
     public static boolean isCurrentVersionOlderThan(final String latestVersion) {
-        final String currentVersion = VersionCheck.retrieveCurrentVersion();
-        if (currentVersion == null) { // this is a development snapshot during tests
+        return VersionCheck.isSmallerThan(VersionCheck.retrieveCurrentVersion(), latestVersion);
+    }
+
+    static boolean isSmallerThan(final String first, final String second) {
+        if (first == null || second == null) { // this is a development snapshot during tests
             return false;
         }
-        return new VersionComparator().compare(currentVersion, latestVersion) < 0;
+        return new VersionComparator().compare(first, second) < 0;
     }
 
 }

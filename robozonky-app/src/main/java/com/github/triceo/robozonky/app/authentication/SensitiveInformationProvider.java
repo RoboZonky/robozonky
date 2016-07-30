@@ -76,7 +76,7 @@ public abstract class SensitiveInformationProvider {
     /**
      * Retrieve serialization of Zonky's OAuth token.
      *
-     * @return Present if {@link #setToken(Reader)} previously called, unless {@link #setToken()} was called after
+     * @return Present if {@link #setToken(Reader)} previously called, unless {@link #deleteToken()} was called after
      * that.
      */
     abstract public Optional<Reader> getToken();
@@ -94,12 +94,12 @@ public abstract class SensitiveInformationProvider {
      *
      * @return True if no token stored anymore.
      */
-    abstract public boolean setToken();
+    abstract public boolean deleteToken();
 
     /**
      * Retrieve the timestamp of the stored token.
      *
-     * @return the last time when {@link #setToken(Reader)} was called, unless {@link #setToken()} called after
+     * @return the last time when {@link #setToken(Reader)} was called, unless {@link #deleteToken()} called after
      * that.
      */
     abstract public Optional<LocalDateTime> getTokenSetDate();

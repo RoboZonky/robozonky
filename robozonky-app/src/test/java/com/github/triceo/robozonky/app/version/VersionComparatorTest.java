@@ -53,27 +53,21 @@ public class VersionComparatorTest {
 
     @Test
     public void compares() {
-        final VersionComparator c = new VersionComparator();
-        final int result = c.compare(this.left, this.right);
-        if (compareResult == 0) {
-            Assertions.assertThat(result).isEqualTo(0);
-        } else if (compareResult == 1) {
-            Assertions.assertThat(result).isGreaterThan(0);
+        final boolean result = VersionCheck.isSmallerThan(this.left, this.right);
+        if (compareResult > -1) {
+            Assertions.assertThat(result).isFalse();
         } else {
-            Assertions.assertThat(result).isLessThan(0);
+            Assertions.assertThat(result).isTrue();
         }
     }
 
     @Test
     public void comparesReverse() {
-        final VersionComparator c = new VersionComparator();
-        final int result = c.compare(this.right, this.left);
-        if (compareResult == 0) {
-            Assertions.assertThat(result).isEqualTo(0);
-        } else if (compareResult == 1) {
-            Assertions.assertThat(result).isLessThan(0);
+        final boolean result = VersionCheck.isSmallerThan(this.right, this.left);
+        if (compareResult < 1) {
+            Assertions.assertThat(result).isFalse();
         } else {
-            Assertions.assertThat(result).isGreaterThan(0);
+            Assertions.assertThat(result).isTrue();
         }
     }
 

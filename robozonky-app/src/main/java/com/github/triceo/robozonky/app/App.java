@@ -49,7 +49,7 @@ class App {
     private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
 
     private static void exit(final ReturnCode returnCode, final Future<String> versionFuture) {
-        App.versionCheck(versionFuture);
+        App.newerRoboZonkyVersionExists(versionFuture);
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         System.exit(returnCode.getCode());
     }
@@ -58,32 +58,30 @@ class App {
                                                                                   final File defaultKeyStore) {
         final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
         if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
-            final File store = keyStoreLocation.get();
             try {
-                final KeyStoreHandler ksh = KeyStoreHandler.open(store, cli.getPassword());
+                final KeyStoreHandler ksh = KeyStoreHandler.open(keyStoreLocation.get(), cli.getPassword());
                 return Optional.of(SensitiveInformationProvider.keyStoreBased(ksh));
             } catch (final IOException | KeyStoreException ex) {
                 App.LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.empty();
             }
         } else { // else everything is read from the cli and put into a keystore
-            try {
-                final Optional<String> usernameProvided = cli.getUsername();
-                final boolean usernamePresent = usernameProvided.isPresent();
-                final boolean storageExists = defaultKeyStore.canRead();
-                if (storageExists) {
-                    if (defaultKeyStore.delete()) {
-                        App.LOGGER.debug("Deleted pre-existing guarded storage.");
-                    } else {
-                        App.LOGGER.error("Stale guarded storage is present and can not be deleted.");
-                        return Optional.empty();
-                    }
-                }
-                final KeyStoreHandler ksh = KeyStoreHandler.create(defaultKeyStore, cli.getPassword());
-                if (!usernamePresent) {
-                    App.LOGGER.error("When not using guarded storage, username must be provided.");
+            final Optional<String> usernameProvided = cli.getUsername();
+            final boolean storageExists = defaultKeyStore.canRead();
+            if (storageExists) {
+                if (defaultKeyStore.delete()) {
+                    App.LOGGER.debug("Deleted pre-existing guarded storage.");
+                } else {
+                    App.LOGGER.error("Stale guarded storage is present and can not be deleted.");
                     return Optional.empty();
-                } else if (storageExists) {
+                }
+            } else if (!usernameProvided.isPresent()) {
+                App.LOGGER.error("When not using guarded storage, username must be provided.");
+                return Optional.empty();
+            }
+            try {
+                final KeyStoreHandler ksh = KeyStoreHandler.create(defaultKeyStore, cli.getPassword());
+                if (storageExists) {
                     App.LOGGER.info("Using plain-text credentials when guarded storage available. Consider switching.");
                 } else {
                     App.LOGGER.info("Guarded storage has been created with your username and password: {}",
@@ -98,7 +96,7 @@ class App {
         }
     }
 
-    private static AuthenticationHandler instantiateAuthenticationHandler(final SensitiveInformationProvider provider,
+    static AuthenticationHandler instantiateAuthenticationHandler(final SensitiveInformationProvider provider,
                                                                           final CommandLineInterface cli) {
         if (cli.isTokenEnabled()) {
             final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
@@ -126,15 +124,23 @@ class App {
             return Optional.empty();
         }
         final CommandLineInterface cli = optionalCli.get();
-        final Optional<OperatingMode> om = cli.getCliOperatingMode();
-        if (!om.isPresent()) {
-            return Optional.empty();
-        }
         final Optional<AuthenticationHandler> auth = App.getAuthenticationMethod(cli);
         if (!auth.isPresent()) {
             return Optional.empty();
         }
-        return om.get().setup(cli, auth.get());
+        return cli.getCliOperatingMode().setup(cli, auth.get());
+    }
+
+    private static void core(final AppContext ctx) throws UnrecoverableRoboZonkyException {
+        App.LOGGER.info("===== RoboZonky at your service! =====");
+        final boolean isDryRun = ctx.isDryRun();
+        if (isDryRun) {
+            App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
+        }
+        final Collection<Investment> result = App.invest(ctx); // perform the investing operations
+        App.storeInvestmentsMade(result, isDryRun);
+        App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
+        App.LOGGER.info("===== RoboZonky out. =====");
     }
 
     public static void main(final String... args) {
@@ -145,46 +151,40 @@ class App {
         final Future<String> latestVersion = VersionCheck.retrieveLatestVersion();
         try {
             final Optional<AppContext> optionalCtx = App.processCommandLine(args);
-            if (!optionalCtx.isPresent()) {
+            if (optionalCtx.isPresent()) {
+                App.core(optionalCtx.get());
+                App.exit(ReturnCode.OK, latestVersion);
+            } else {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
             }
-            final AppContext ctx = optionalCtx.get();
-            App.LOGGER.info("===== RoboZonky at your service! =====");
-            final boolean isDryRun = ctx.isDryRun();
-            if (isDryRun) {
-                App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
-            }
-            final Collection<Investment> result = App.invest(ctx); // perform the investing operations
-            App.storeInvestmentsMade(result, isDryRun);
-            App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
         } catch (final UnrecoverableRoboZonkyException ex) {
             App.LOGGER.error("Application encountered an error during setup." , ex);
             App.exit(ReturnCode.ERROR_SETUP, latestVersion);
-            return;
         } catch (final RuntimeException ex) {
             App.LOGGER.error("Unexpected error." , ex);
             App.exit(ReturnCode.ERROR_UNEXPECTED, latestVersion);
-            return;
         }
-        App.LOGGER.info("===== RoboZonky out. =====");
-        App.exit(ReturnCode.OK, latestVersion);
     }
 
     /**
      * Check the current version against a different version. Print log message with results.
      * @param futureVersion Version to check against.
+     * @return True when a more recent version was found.
      */
-    private static void versionCheck(final Future<String> futureVersion) {
+    static boolean newerRoboZonkyVersionExists(final Future<String> futureVersion) {
         try {
             final String version = futureVersion.get();
             final boolean hasNewer = VersionCheck.isCurrentVersionOlderThan(version);
             if (hasNewer) {
                 App.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to version {}.", version);
+                return true;
             } else {
                 App.LOGGER.info("Your version of RoboZonky seems up to date.");
+                return false;
             }
         } catch (final InterruptedException | ExecutionException ex) {
             App.LOGGER.trace("Version check failed.", ex);
+            return false;
         }
     }
 

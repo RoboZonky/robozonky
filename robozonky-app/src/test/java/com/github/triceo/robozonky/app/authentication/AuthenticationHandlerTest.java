@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
+import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
@@ -66,7 +67,7 @@ public class AuthenticationHandlerTest {
         Mockito.when(p.getToken()).thenReturn(Optional.of(tokenReader));
         Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(storedOn));
         Mockito.when(p.setToken(Matchers.any())).thenReturn(succeedInSavingTokens);
-        Mockito.when(p.setToken()).thenReturn(succeedInDeletingToken);
+        Mockito.when(p.deleteToken()).thenReturn(succeedInDeletingToken);
         return p;
     }
 
@@ -155,4 +156,14 @@ public class AuthenticationHandlerTest {
         Mockito.when(p.setToken(Matchers.any())).thenThrow(JAXBException.class); // instead of marshalling throwing
         Assertions.assertThat(h.isLogoutAllowed(Mockito.mock(ZonkyApiToken.class))).isTrue();
     }
+
+    @Test
+    public void noLogout() {
+        final SensitiveInformationProvider sip = Mockito.mock(SensitiveInformationProvider.class);
+        Mockito.when(sip.getToken()).thenReturn(Optional.of(Mockito.mock(Reader.class)));
+        final AuthenticationHandler a = AuthenticationHandler.tokenBased(sip, true);
+        final boolean result = a.logout(Mockito.mock(Authentication.class));
+        Assertions.assertThat(result).isFalse();
+    }
+
 }

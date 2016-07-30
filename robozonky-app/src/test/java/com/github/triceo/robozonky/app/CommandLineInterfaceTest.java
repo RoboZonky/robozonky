@@ -30,11 +30,17 @@ public class CommandLineInterfaceTest {
     }
 
     @Test
+    public void failingCli() {
+        final Optional<CommandLineInterface> cli = CommandLineInterface.parse();
+        Assertions.assertThat(cli).isEmpty();
+    }
+
+    @Test
     public void minimalStrategyDrivenCliWithKeyStoreAndToken() {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "5"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
         softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
         softly.assertThat(cli.getKeyStoreLocation()).isPresent();
         softly.assertThat(cli.isTokenEnabled()).isTrue();
@@ -49,7 +55,7 @@ public class CommandLineInterfaceTest {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
         softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
         softly.assertThat(cli.getKeyStoreLocation()).isPresent();
         softly.assertThat(cli.isTokenEnabled()).isTrue();
@@ -64,7 +70,7 @@ public class CommandLineInterfaceTest {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-s", "somePath", "-u", "user", "-p", "password"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.STRATEGY_DRIVEN));
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
         softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
         softly.assertThat(cli.getUsername()).isPresent();
         softly.assertThat(cli.getPassword()).isNotNull();
@@ -82,7 +88,7 @@ public class CommandLineInterfaceTest {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                         CommandLineInterface.parse("-l", "1", "-a", "1000", "-u", "user", "-p", "pwd"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.USER_DRIVEN));
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(OperatingMode.USER_DRIVEN);
         softly.assertThat(cli.getLoanId()).isPresent();
         softly.assertThat(cli.getLoanAmount()).isPresent();
         softly.assertThat(cli.getUsername()).isPresent();
@@ -101,7 +107,7 @@ public class CommandLineInterfaceTest {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-l", "1", "-a", "10a0", "-u", "user", "-p", "pwd"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(Optional.of(OperatingMode.USER_DRIVEN));
+        softly.assertThat(cli.getCliOperatingMode()).isEqualTo(OperatingMode.USER_DRIVEN);
         softly.assertThat(cli.getLoanId()).isPresent();
         softly.assertThat(cli.getUsername()).isPresent();
         softly.assertThat(cli.getLoanAmount()).isEmpty();

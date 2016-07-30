@@ -68,7 +68,9 @@ public class KeyStoreHandler {
      */
     public static KeyStoreHandler create(final File keyStoreFile, final String password)
             throws IOException, KeyStoreException {
-        if (keyStoreFile.exists()) {
+        if (keyStoreFile == null) {
+            throw new FileNotFoundException(null);
+        } else if (keyStoreFile.exists()) {
             throw new FileAlreadyExistsException(keyStoreFile.getAbsolutePath());
         }
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);

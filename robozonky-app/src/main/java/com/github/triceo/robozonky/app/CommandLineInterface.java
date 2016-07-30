@@ -103,13 +103,14 @@ class CommandLineInterface {
         this.cli = cli;
     }
 
-    Optional<OperatingMode> getCliOperatingMode() {
+    OperatingMode getCliOperatingMode() {
         for (final OperatingMode mode: OperatingMode.values()) {
-            if (cli.hasOption(mode.getSelectingOption().getOpt())) {
-                return Optional.of(mode);
+            if (this.hasOption(mode.getSelectingOption())) {
+                return mode;
             }
         }
-        return Optional.empty();
+        // a choice of the operating mode is mandatory; parsing the command line will never get here
+        throw new IllegalStateException("This situation is impossible.");
     }
 
     private boolean hasOption(final Option option) {
