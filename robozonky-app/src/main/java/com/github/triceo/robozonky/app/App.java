@@ -35,11 +35,9 @@ import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
+import com.github.triceo.robozonky.app.util.UnrecoverableRoboZonkyException;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.authentication.Authentication;
-import com.github.triceo.robozonky.authentication.Authenticator;
-import com.github.triceo.robozonky.operations.LoginOperation;
-import com.github.triceo.robozonky.operations.LogoutOperation;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import org.slf4j.Logger;
@@ -100,21 +98,26 @@ class App {
         }
     }
 
+    private static AuthenticationHandler instantiateAuthenticationHandler(final SensitiveInformationProvider provider,
+                                                                          final CommandLineInterface cli) {
+        if (cli.isTokenEnabled()) {
+            final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
+            return secs.isPresent()
+                    ? AuthenticationHandler.tokenBased(provider, cli.isDryRun(), secs.get(), ChronoUnit.SECONDS)
+                    : AuthenticationHandler.tokenBased(provider, cli.isDryRun());
+        } else {
+            return AuthenticationHandler.passwordBased(provider, cli.isDryRun());
+        }
+    }
+
     private static Optional<AuthenticationHandler> getAuthenticationMethod(final CommandLineInterface cli) {
-        final boolean useToken = cli.isTokenEnabled();
         final Optional<SensitiveInformationProvider> optionalSensitive =
                 App.getSensitiveInformationProvider(cli, App.DEFAULT_KEYSTORE_FILE);
         if (!optionalSensitive.isPresent()) {
             return Optional.empty();
         }
         final SensitiveInformationProvider sensitive = optionalSensitive.get();
-        final AuthenticationHandler auth = useToken ? AuthenticationHandler.tokenBased(sensitive)
-                : AuthenticationHandler.passwordBased(sensitive);
-        final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
-        if (secs.isPresent()) {
-            auth.withTokenRefreshingBeforeExpiration(secs.get(), ChronoUnit.SECONDS);
-        }
-        return Optional.of(auth);
+        return Optional.of(App.instantiateAuthenticationHandler(sensitive, cli));
     }
 
     static Optional<AppContext> processCommandLine(final String... args) {
@@ -227,26 +230,15 @@ class App {
     }
 
     private static Collection<Investment> invest(final AppContext ctx) throws UnrecoverableRoboZonkyException {
-        // log in
         final AuthenticationHandler handler = ctx.getAuthenticationHandler();
-        final Authenticator auth = handler.build(ctx.isDryRun());
-        final Optional<Authentication> possibleLogin = new LoginOperation().apply(auth);
-        if (!possibleLogin.isPresent()) {
-            throw new UnrecoverableRoboZonkyException("Login failed.");
-        }
-        final Authentication login = possibleLogin.get();
-        final boolean logoutAllowed = handler.processToken(login.getZonkyApiToken());
+        final Authentication login = handler.login();
         try { // execute the investment
             final BigDecimal balance = App.getAvailableBalance(ctx, login.getZonkyApi());
             final Investor i = new Investor(login.getZonkyApi(), login.getZotifyApi(), ctx.getInvestmentStrategy(),
                     balance);
             return App.getInvestingFunction(ctx).apply(i);
         } finally { // make sure logout is processed at all costs
-            if (logoutAllowed) {
-                new LogoutOperation().apply(login.getZonkyApi());
-            } else { // if we're using the token, we should never log out
-                App.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
-            }
+            handler.logout(login);
         }
     }
 

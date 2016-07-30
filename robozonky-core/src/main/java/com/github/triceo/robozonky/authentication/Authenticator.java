@@ -150,7 +150,7 @@ public class Authenticator {
      * @return Information about the authentication.
      */
     Authentication authenticate(final String zonkyApiUrl, final String zotifyApiUrl,
-                                       final ResteasyClientBuilder clientBuilder) {
+                                final ResteasyClientBuilder clientBuilder) {
         final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticationFilter(),
                 ZonkyApi.class);
         final ZonkyApiToken token = authenticationMethod.apply(api);

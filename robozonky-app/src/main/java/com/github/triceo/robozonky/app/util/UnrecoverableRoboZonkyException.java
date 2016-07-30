@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.app.util;
 
 /**
- * Code should throw this exception when it encounters a known, yet unrecoverable error. The exception will bubble back
- * up to {@link App#main(String...)}, where the proper error state will be reported.
+ * Code should throw this exception when it encounters a known, yet unrecoverable error.
  */
-class UnrecoverableRoboZonkyException extends Exception {
+public class UnrecoverableRoboZonkyException extends Exception {
 
     public UnrecoverableRoboZonkyException() {
         super();
