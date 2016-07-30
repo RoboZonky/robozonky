@@ -29,7 +29,7 @@ import com.github.triceo.robozonky.app.util.KeyStoreHandler;
  * Users shall not be given access to these children - instead, they should get them by calling static methods on this
  * class, such as {@link #keyStoreBased(KeyStoreHandler)}.
  */
-public abstract class SensitiveInformationProvider {
+public abstract class SecretProvider {
 
     /**
      * Create a @{@link KeyStore}-based provider based on a given key store.
@@ -37,8 +37,8 @@ public abstract class SensitiveInformationProvider {
      * @param ksh Initialized KeyStore for the provider to work with.
      * @return The provider.
      */
-    public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh) {
-        return new KeyStoreInformationProvider(ksh);
+    public static SecretProvider keyStoreBased(final KeyStoreHandler ksh) {
+        return new KeyStoreSecretProvider(ksh);
     }
 
     /**
@@ -49,10 +49,9 @@ public abstract class SensitiveInformationProvider {
      * @param password Zonky password to store in the key store.
      * @return The provider.
      */
-    public static SensitiveInformationProvider keyStoreBased(final KeyStoreHandler ksh, final String username,
-                                                             final String password) {
-        final KeyStoreInformationProvider ks
-                = (KeyStoreInformationProvider)SensitiveInformationProvider.keyStoreBased(ksh);
+    public static SecretProvider keyStoreBased(final KeyStoreHandler ksh, final String username,
+                                               final String password) {
+        final KeyStoreSecretProvider ks = (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh);
         ks.setPassword(password);
         ks.setUsername(username);
         return ks;

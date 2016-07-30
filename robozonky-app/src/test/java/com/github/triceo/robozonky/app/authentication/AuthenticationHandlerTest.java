@@ -41,29 +41,27 @@ public class AuthenticationHandlerTest {
     private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
             UUID.randomUUID().toString(), 299, "A", "B");
 
-    private static SensitiveInformationProvider getNewProvider() throws IOException, KeyStoreException {
+    private static SecretProvider getNewProvider() throws IOException, KeyStoreException {
         final File file = File.createTempFile("robozonky-", ".keystore");
         file.delete();
         final String username = "user";
         final String password = "pass";
         final KeyStoreHandler ksh = KeyStoreHandler.create(file, password);
-        return SensitiveInformationProvider.keyStoreBased(ksh, username, password);
+        return SecretProvider.keyStoreBased(ksh, username, password);
     }
 
-    private static SensitiveInformationProvider mockExistingProvider(final LocalDateTime storedOn,
-                                                                     final boolean succeedInSavingTokens,
-                                                                     final boolean succeedInDeletingToken)
-            throws JAXBException {
+    private static SecretProvider mockExistingProvider(final LocalDateTime storedOn,
+                                                       final boolean succeedInSavingTokens,
+                                                       final boolean succeedInDeletingToken) throws JAXBException {
         return AuthenticationHandlerTest.mockExistingProvider(ZonkyApiToken.marshal(AuthenticationHandlerTest.TOKEN),
                 storedOn, succeedInSavingTokens, succeedInDeletingToken);
     }
 
-    private static SensitiveInformationProvider mockExistingProvider(final String token, final LocalDateTime storedOn,
-                                                                     final boolean succeedInSavingTokens,
-                                                                     final boolean succeedInDeletingToken)
-            throws JAXBException {
+    private static SecretProvider mockExistingProvider(final String token, final LocalDateTime storedOn,
+                                                       final boolean succeedInSavingTokens,
+                                                       final boolean succeedInDeletingToken) throws JAXBException {
         final Reader tokenReader = new StringReader(token);
-        final SensitiveInformationProvider p = Mockito.mock(SensitiveInformationProvider.class);
+        final SecretProvider p = Mockito.mock(SecretProvider.class);
         Mockito.when(p.getToken()).thenReturn(Optional.of(tokenReader));
         Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(storedOn));
         Mockito.when(p.setToken(Matchers.any())).thenReturn(succeedInSavingTokens);
@@ -125,7 +123,7 @@ public class AuthenticationHandlerTest {
 
     @Test
     public void tokenBasedWithFailingToken() throws JAXBException {
-        final SensitiveInformationProvider provider =
+        final SecretProvider provider =
                 AuthenticationHandlerTest.mockExistingProvider("", LocalDateTime.now(), true, true);
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(provider, true, 10, ChronoUnit.SECONDS);
         final Authenticator a = h.build();
@@ -137,7 +135,7 @@ public class AuthenticationHandlerTest {
     public void tokenBasedWithNoTokenToProcess() throws JAXBException {
         // prepare data
         final Reader tokenReader = new StringReader(ZonkyApiToken.marshal(AuthenticationHandlerTest.TOKEN));
-        final SensitiveInformationProvider p = Mockito.mock(SensitiveInformationProvider.class);
+        final SecretProvider p = Mockito.mock(SecretProvider.class);
         Mockito.when(p.getToken()).thenReturn(Optional.of(tokenReader));
         Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(LocalDateTime.now()));
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(p, false);
@@ -159,7 +157,7 @@ public class AuthenticationHandlerTest {
 
     @Test
     public void noLogout() {
-        final SensitiveInformationProvider sip = Mockito.mock(SensitiveInformationProvider.class);
+        final SecretProvider sip = Mockito.mock(SecretProvider.class);
         Mockito.when(sip.getToken()).thenReturn(Optional.of(Mockito.mock(Reader.class)));
         final AuthenticationHandler a = AuthenticationHandler.tokenBased(sip, true);
         final boolean result = a.logout(Mockito.mock(Authentication.class));

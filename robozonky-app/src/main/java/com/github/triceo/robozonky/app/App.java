@@ -19,10 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.security.KeyStoreException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -33,8 +31,6 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.authentication.SensitiveInformationProvider;
-import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import com.github.triceo.robozonky.app.util.UnrecoverableRoboZonkyException;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.authentication.Authentication;
@@ -46,76 +42,11 @@ import org.slf4j.LoggerFactory;
 class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
 
     private static void exit(final ReturnCode returnCode, final Future<String> versionFuture) {
         App.newerRoboZonkyVersionExists(versionFuture);
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         System.exit(returnCode.getCode());
-    }
-
-    static Optional<SensitiveInformationProvider> getSensitiveInformationProvider(final CommandLineInterface cli,
-                                                                                  final File defaultKeyStore) {
-        final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
-        if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
-            try {
-                final KeyStoreHandler ksh = KeyStoreHandler.open(keyStoreLocation.get(), cli.getPassword());
-                return Optional.of(SensitiveInformationProvider.keyStoreBased(ksh));
-            } catch (final IOException | KeyStoreException ex) {
-                App.LOGGER.error("Failed opening guarded storage.", ex);
-                return Optional.empty();
-            }
-        } else { // else everything is read from the cli and put into a keystore
-            final Optional<String> usernameProvided = cli.getUsername();
-            final boolean storageExists = defaultKeyStore.canRead();
-            if (storageExists) {
-                if (defaultKeyStore.delete()) {
-                    App.LOGGER.debug("Deleted pre-existing guarded storage.");
-                } else {
-                    App.LOGGER.error("Stale guarded storage is present and can not be deleted.");
-                    return Optional.empty();
-                }
-            } else if (!usernameProvided.isPresent()) {
-                App.LOGGER.error("When not using guarded storage, username must be provided.");
-                return Optional.empty();
-            }
-            try {
-                final KeyStoreHandler ksh = KeyStoreHandler.create(defaultKeyStore, cli.getPassword());
-                if (storageExists) {
-                    App.LOGGER.info("Using plain-text credentials when guarded storage available. Consider switching.");
-                } else {
-                    App.LOGGER.info("Guarded storage has been created with your username and password: {}",
-                            defaultKeyStore);
-                }
-                return Optional.of(SensitiveInformationProvider.keyStoreBased(ksh, usernameProvided.get(),
-                        cli.getPassword()));
-            } catch (final IOException | KeyStoreException ex) {
-                App.LOGGER.error("Failed reading guarded storage.", ex);
-                return Optional.empty();
-            }
-        }
-    }
-
-    static AuthenticationHandler instantiateAuthenticationHandler(final SensitiveInformationProvider provider,
-                                                                          final CommandLineInterface cli) {
-        if (cli.isTokenEnabled()) {
-            final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
-            return secs.isPresent()
-                    ? AuthenticationHandler.tokenBased(provider, cli.isDryRun(), secs.get(), ChronoUnit.SECONDS)
-                    : AuthenticationHandler.tokenBased(provider, cli.isDryRun());
-        } else {
-            return AuthenticationHandler.passwordBased(provider, cli.isDryRun());
-        }
-    }
-
-    private static Optional<AuthenticationHandler> getAuthenticationMethod(final CommandLineInterface cli) {
-        final Optional<SensitiveInformationProvider> optionalSensitive =
-                App.getSensitiveInformationProvider(cli, App.DEFAULT_KEYSTORE_FILE);
-        if (!optionalSensitive.isPresent()) {
-            return Optional.empty();
-        }
-        final SensitiveInformationProvider sensitive = optionalSensitive.get();
-        return Optional.of(App.instantiateAuthenticationHandler(sensitive, cli));
     }
 
     static Optional<AppContext> processCommandLine(final String... args) {
@@ -124,7 +55,7 @@ class App {
             return Optional.empty();
         }
         final CommandLineInterface cli = optionalCli.get();
-        final Optional<AuthenticationHandler> auth = App.getAuthenticationMethod(cli);
+        final Optional<AuthenticationHandler> auth = new AuthenticationHandlerProvider().apply(cli);
         if (!auth.isPresent()) {
             return Optional.empty();
         }

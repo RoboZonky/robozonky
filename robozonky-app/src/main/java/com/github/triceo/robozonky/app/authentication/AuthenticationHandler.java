@@ -50,7 +50,7 @@ public class AuthenticationHandler {
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler tokenBased(final SensitiveInformationProvider data, final boolean isDryRun) {
+    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun) {
         return new AuthenticationHandler(data, isDryRun, true);
     }
 
@@ -68,9 +68,9 @@ public class AuthenticationHandler {
      * @param unit Unit of time applied to the previous argument.
      * @return This.
      */
-    public static AuthenticationHandler tokenBased(final SensitiveInformationProvider data, final boolean isDryRun,
-                                                   final long time, final TemporalUnit unit) {
-        return new AuthenticationHandler(data, isDryRun, Duration.of(time, unit).getSeconds(), true);
+    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun, final long time,
+                                                   final TemporalUnit unit) {
+        return new AuthenticationHandler(data, isDryRun, true, Duration.of(time, unit).getSeconds());
     }
 
     /**
@@ -81,21 +81,20 @@ public class AuthenticationHandler {
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler passwordBased(final SensitiveInformationProvider data, final boolean isDryRun) {
+    public static AuthenticationHandler passwordBased(final SecretProvider data, final boolean isDryRun) {
         return new AuthenticationHandler(data, isDryRun, false);
     }
 
     private final boolean tokenBased, dryRun;
-    private final SensitiveInformationProvider data;
+    private final SecretProvider data;
     private final long tokenRefreshBeforeExpirationInSeconds;
 
-    private AuthenticationHandler(final SensitiveInformationProvider data, final boolean isDryRun,
-                                  final boolean tokenBased) {
-        this(data, isDryRun, 60, tokenBased);
+    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased) {
+        this(data, isDryRun, tokenBased, 60);
     }
 
-    private AuthenticationHandler(final SensitiveInformationProvider data, final boolean isDryRun,
-                                  final long tokenRefreshBeforeExpirationInSeconds, final boolean tokenBased) {
+    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased,
+                                  final long tokenRefreshBeforeExpirationInSeconds) {
         this.data = data;
         this.dryRun = isDryRun;
         this.tokenRefreshBeforeExpirationInSeconds = tokenRefreshBeforeExpirationInSeconds;

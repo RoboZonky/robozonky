@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Every set*() operation must result in a {@link KeyStoreHandler#save()} call.
  */
-class KeyStoreInformationProvider extends SensitiveInformationProvider {
+class KeyStoreSecretProvider extends SecretProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreInformationProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreSecretProvider.class);
     private static final String ALIAS_PASSWORD = "pwd";
     private static final String ALIAS_USERNAME = "usr";
     private static final String ALIAS_TOKEN = "tkn";
@@ -40,7 +40,7 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
 
     private final KeyStoreHandler ksh;
 
-    public KeyStoreInformationProvider(final KeyStoreHandler ksh) {
+    public KeyStoreSecretProvider(final KeyStoreHandler ksh) {
         if (ksh == null) {
             throw new IllegalArgumentException("KeyStoreHandler must be provided.");
         }
@@ -71,34 +71,34 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
             this.ksh.save();
             return result;
         } catch (final IOException ex) {
-            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
+            KeyStoreSecretProvider.LOGGER.warn("Failed saving keystore.", ex);
             return false;
         }
     }
 
     @Override
     public String getPassword() {
-        return this.ksh.get(KeyStoreInformationProvider.ALIAS_PASSWORD)
+        return this.ksh.get(KeyStoreSecretProvider.ALIAS_PASSWORD)
                 .orElseThrow(() -> new IllegalStateException("Password not present in KeyStore."));
     }
 
     @Override
     public String getUsername() {
-        return this.ksh.get(KeyStoreInformationProvider.ALIAS_USERNAME)
+        return this.ksh.get(KeyStoreSecretProvider.ALIAS_USERNAME)
                 .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore."));
     }
 
     public boolean setPassword(final String password) {
-        return this.set(KeyStoreInformationProvider.ALIAS_PASSWORD, password);
+        return this.set(KeyStoreSecretProvider.ALIAS_PASSWORD, password);
     }
 
     public boolean setUsername(final String username) {
-        return this.set(KeyStoreInformationProvider.ALIAS_USERNAME, username);
+        return this.set(KeyStoreSecretProvider.ALIAS_USERNAME, username);
     }
 
     @Override
     public Optional<Reader> getToken() {
-        final Optional<String> stored = this.ksh.get(KeyStoreInformationProvider.ALIAS_TOKEN);
+        final Optional<String> stored = this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN);
         if (stored.isPresent()) {
             return Optional.of(new StringReader(stored.get()));
         } else {
@@ -108,28 +108,28 @@ class KeyStoreInformationProvider extends SensitiveInformationProvider {
 
     @Override
     public boolean setToken(final Reader token) {
-        final boolean firstSuccessful = this.set(KeyStoreInformationProvider.ALIAS_TOKEN, token);
-        final boolean secondSuccessful = this.set(KeyStoreInformationProvider.ALIAS_TOKEN_DATE,
+        final boolean firstSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN, token);
+        final boolean secondSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN_DATE,
                 LocalDateTime.now().toString());
         return firstSuccessful && secondSuccessful;
     }
 
     @Override
     public boolean deleteToken() {
-        boolean result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN);
-        result = this.ksh.delete(KeyStoreInformationProvider.ALIAS_TOKEN_DATE) && result;
+        boolean result = this.ksh.delete(KeyStoreSecretProvider.ALIAS_TOKEN);
+        result = this.ksh.delete(KeyStoreSecretProvider.ALIAS_TOKEN_DATE) && result;
         try {
             this.ksh.save();
             return result;
         } catch (final IOException ex) {
-            KeyStoreInformationProvider.LOGGER.warn("Failed saving keystore.", ex);
+            KeyStoreSecretProvider.LOGGER.warn("Failed saving keystore.", ex);
             return false;
         }
     }
 
     @Override
     public Optional<LocalDateTime> getTokenSetDate() {
-        return this.ksh.get(KeyStoreInformationProvider.ALIAS_TOKEN_DATE)
+        return this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN_DATE)
                 .map(s -> Optional.of(LocalDateTime.parse(s)))
                 .orElse(Optional.empty());
     }
