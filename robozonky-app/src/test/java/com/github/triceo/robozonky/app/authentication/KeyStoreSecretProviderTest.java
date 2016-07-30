@@ -83,17 +83,16 @@ public class KeyStoreSecretProviderTest {
     @Test
     public void setUsernameAndPassword() {
         final KeyStoreSecretProvider p =
-                KeyStoreSecretProviderTest.newProvider(KeyStoreSecretProviderTest.USR,
-                        KeyStoreSecretProviderTest.PWD);
+                KeyStoreSecretProviderTest.newProvider(KeyStoreSecretProviderTest.USR, KeyStoreSecretProviderTest.PWD);
         // make sure original values were set
         Assertions.assertThat(p.getUsername()).isEqualTo(KeyStoreSecretProviderTest.USR);
         Assertions.assertThat(p.getPassword()).isEqualTo(KeyStoreSecretProviderTest.PWD);
         // make sure updating them works
         final String usr = "something";
-        p.setUsername(usr);
+        Assertions.assertThat(p.setUsername(usr)).isTrue();
         Assertions.assertThat(p.getUsername()).isEqualTo(usr);
         final String pwd = "somethingElse";
-        p.setPassword(pwd);
+        Assertions.assertThat(p.setPassword(pwd)).isTrue();
         Assertions.assertThat(p.getPassword()).isEqualTo(pwd);
     }
 
