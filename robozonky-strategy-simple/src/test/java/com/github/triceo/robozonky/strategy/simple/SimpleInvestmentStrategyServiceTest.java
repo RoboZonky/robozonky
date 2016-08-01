@@ -17,6 +17,9 @@
 package com.github.triceo.robozonky.strategy.simple;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import org.assertj.core.api.Assertions;
@@ -65,5 +68,22 @@ public class SimpleInvestmentStrategyServiceTest {
     public void wrongAsks() throws InvestmentStrategyParseException {
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
         s.parse(SimpleInvestmentStrategyServiceTest.WRONG_ASKS);
+    }
+
+    @Test
+    public void whitespace() throws InvestmentStrategyParseException, IOException {
+        // my IDE keeps removing whitespace at the end of lines in files, so let's generate a file on the run
+        final String[] lines = new String[] {
+            "minimumBalance                = 200 ", "maximumInvestment             = 20000\t",
+                "targetShare.default           = 0.20   ", "minimumTerm.default           = \t0  ",
+                "maximumTerm.default           = -1", "minimumAsk.default            = 0",
+                "maximumAsk.default            = -1   ", "maximumLoanAmount.default     = 400",
+                "maximumLoanShare.default      = 0.01", "preferLongerTerms.default     = false   ",
+        };
+        final File f = File.createTempFile("robozonky-", ".cfg");
+        Files.write(f.toPath(), Arrays.asList(lines));
+        // make sure that the file reads properly
+        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
+        s.parse(f);
     }
 }

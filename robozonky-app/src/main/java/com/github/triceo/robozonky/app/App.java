@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -76,9 +77,9 @@ class App {
 
     public static void main(final String... args) {
         App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
-        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}).", System.getProperty("java.vendor"),
+        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
-                System.getProperty("os.arch"));
+                System.getProperty("os.arch"), Locale.getDefault());
         final Future<String> latestVersion = VersionCheck.retrieveLatestVersion();
         try {
             final Optional<AppContext> optionalCtx = App.processCommandLine(args);
