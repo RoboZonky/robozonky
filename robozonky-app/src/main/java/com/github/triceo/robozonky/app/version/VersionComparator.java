@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.version;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
@@ -23,7 +24,7 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 /**
  * Uses Maven's {@link ComparableVersion} to ensure 100 % compatibility with Maven versioning scheme.
  */
-public class VersionComparator implements Comparator<String> {
+public class VersionComparator implements Comparator<String>, Serializable {
 
     @Override
     public int compare(final String s1, final String s2) {

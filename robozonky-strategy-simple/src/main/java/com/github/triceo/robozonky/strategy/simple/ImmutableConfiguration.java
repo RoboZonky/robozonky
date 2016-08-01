@@ -22,15 +22,32 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.Properties;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple wrapper around a property file that replaces the unnecessarily complex commons-configuration2 which was being
  * used before.
  */
 class ImmutableConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImmutableConfiguration.class);
+    private static final DecimalFormat DECIMAL_FORMAT;
+
+    static {
+        final DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setGroupingSeparator(',');
+        symbols.setDecimalSeparator('.');
+        final String pattern = "#,##0.0#";
+        DECIMAL_FORMAT = new DecimalFormat(pattern, symbols);
+        ImmutableConfiguration.DECIMAL_FORMAT.setParseBigDecimal(true);
+    }
 
     /**
      * Load the strategy from a file, representing a {@link Properties} file.
@@ -63,6 +80,17 @@ class ImmutableConfiguration {
         this.properties = properties;
     }
 
+    private String getValue(final String key, final String def) {
+        final String result = properties.getProperty(key);
+        if (result == null) {
+            ImmutableConfiguration.LOGGER.trace("Property '{}' has no value.", key);
+            return def;
+        } else {
+            ImmutableConfiguration.LOGGER.trace("Property '{}' has value '{}'.", key, result);
+            return result.trim();
+        }
+    }
+
     /**
      * Whether or not the configuration contains a given key.
      * @param key Key in question.
@@ -80,7 +108,7 @@ class ImmutableConfiguration {
      * @return The value for the key.
      */
     public int getInt(final String key) {
-        return Integer.parseInt(properties.getProperty(key));
+        return Integer.parseInt(this.getValue(key, "0"));
     }
 
     /**
@@ -91,7 +119,7 @@ class ImmutableConfiguration {
      * @return The value for the key.
      */
     public boolean getBoolean(final String key) {
-        return Boolean.parseBoolean(properties.getProperty(key));
+        return Boolean.parseBoolean(this.getValue(key, "false"));
     }
 
     /**
@@ -102,7 +130,12 @@ class ImmutableConfiguration {
      * @return The value for the key.
      */
     public BigDecimal getBigDecimal(final String key) {
-        return new BigDecimal(properties.getProperty(key));
+        final String value = this.getValue(key, "0.0");
+        try {
+            return (BigDecimal) ImmutableConfiguration.DECIMAL_FORMAT.parse(value);
+        } catch (final ParseException ex) {
+            throw new IllegalStateException("Invalid value for property '" + key + "': '" + value + "'", ex);
+        }
     }
 
 }
