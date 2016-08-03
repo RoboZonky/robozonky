@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
@@ -29,38 +30,24 @@ class StrategyPerRating {
 
     private final boolean preferLongerTerms;
     private final Rating rating;
-    private final BigDecimal targetShare, maximumInvestmentShare;
-    private final int minimumAcceptableTerm, maximumAcceptableTerm, maximumInvestmentAmount, minimumAskAmount,
-            maximumAskAmount;
+    private final BigDecimal targetShare, minimumInvestmentShare, maximumInvestmentShare;
+    private final int minimumAcceptableTerm, maximumAcceptableTerm, minimumInvestmentAmount, maximumInvestmentAmount,
+            minimumAskAmount, maximumAskAmount;
 
-    StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm,
-                      final int maxTerm, final int maxLoanAmount, final BigDecimal maxLoanShare, final int minAskAmount,
-                      final int maxAskAmount, final boolean preferLongerTerms) {
+    StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm, final int maxTerm,
+                      final int minLoanAmount, final int maxLoanAmount, final BigDecimal minLoanShare,
+                      final BigDecimal maxLoanShare, final int minAskAmount, final int maxAskAmount,
+                      final boolean preferLongerTerms) {
         this.rating = rating;
         this.minimumAcceptableTerm = Math.max(minTerm, 0);
-        if (maxTerm == 0) {
-            throw new IllegalArgumentException("Maximum acceptable term must not be 0.");
-        }
         this.maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
-        if (this.minimumAcceptableTerm > this.maximumAcceptableTerm) {
-            throw new IllegalArgumentException("Maximum acceptable term must be greater than or equal to minimum.");
-        }
         this.targetShare = targetShare;
+        this.minimumInvestmentAmount = minLoanAmount;
         this.maximumInvestmentAmount = maxLoanAmount;
-        if (this.maximumInvestmentAmount < 0) {
-            throw new IllegalArgumentException("Maximum investment amount must not be negative.");
-        }
         this.minimumAskAmount = minAskAmount;
-        if (this.minimumAskAmount < 0) {
-            throw new IllegalArgumentException("Minimum asked amount must not be negative.");
-        }
         this.maximumAskAmount = maxAskAmount < 0 ? Integer.MAX_VALUE : maxAskAmount;
+        this.minimumInvestmentShare = minLoanShare;
         this.maximumInvestmentShare = maxLoanShare;
-        final boolean shareSubZero = this.maximumInvestmentShare.compareTo(BigDecimal.ZERO) < 0;
-        final boolean shareOverOne = this.maximumInvestmentShare.compareTo(BigDecimal.ONE) > 0;
-        if (shareSubZero || shareOverOne) {
-            throw new IllegalArgumentException("Maximum investment share must be in range of <0, 1>.");
-        }
         this.preferLongerTerms = preferLongerTerms;
     }
 
@@ -101,15 +88,22 @@ class StrategyPerRating {
         return true;
     }
 
-    public int recommendInvestmentAmount(final Loan loan) {
+    public Optional<int[]> recommendInvestmentAmount(final Loan loan) {
         if (loan.getRating() != this.rating) {
             throw new IllegalArgumentException("Loan " + loan + " should never have gotten here.");
         } else if (!this.isAcceptable(loan)) {
-            return 0; // loan is not acceptable
+            return Optional.empty();
         }
+        final int minimumInvestmentByShare =
+                BigDecimal.valueOf(loan.getAmount()).multiply(this.minimumInvestmentShare).intValue();
+        final int minimumInvestment = Math.max(minimumInvestmentByShare, this.minimumInvestmentAmount);
         final int maximumInvestmentByShare =
                 BigDecimal.valueOf(loan.getAmount()).multiply(this.maximumInvestmentShare).intValue();
-        return Math.min(maximumInvestmentByShare, this.maximumInvestmentAmount);
+        final int maximumInvestment = Math.min(maximumInvestmentByShare, this.maximumInvestmentAmount);
+        if (maximumInvestment < minimumInvestment) {
+            return Optional.empty();
+        }
+        return Optional.of(new int[] {minimumInvestment, maximumInvestment});
 
     }
 }

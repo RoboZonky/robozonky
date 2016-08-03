@@ -46,13 +46,20 @@ public class SimpleInvestmentStategyTest {
     private static final BigDecimal MAXIMUM_LOAN_SHARE_A = BigDecimal.valueOf(0.01);
     private static final BigDecimal TARGET_SHARE_A = BigDecimal.valueOf(0.2);
     private static final StrategyPerRating STRATEGY_A = new StrategyPerRating(SimpleInvestmentStategyTest.RATING_A,
-            SimpleInvestmentStategyTest.TARGET_SHARE_A, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, -1, SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A, SimpleInvestmentStategyTest.MINIMUM_ASK, SimpleInvestmentStategyTest.MAXIMUM_ASK, true
+            SimpleInvestmentStategyTest.TARGET_SHARE_A, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, -1, 200,
+            SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.ZERO,
+            SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A, SimpleInvestmentStategyTest.MINIMUM_ASK,
+            SimpleInvestmentStategyTest.MAXIMUM_ASK, true
     );
 
     private static final BigDecimal MAXIMUM_LOAN_SHARE_B = BigDecimal.valueOf(0.001);
     private static final BigDecimal TARGET_SHARE_B = SimpleInvestmentStategyTest.TARGET_SHARE_A.add(BigDecimal.valueOf(0.5));
     private static final StrategyPerRating STRATEGY_B = new StrategyPerRating(SimpleInvestmentStategyTest.RATING_B,
-            SimpleInvestmentStategyTest.TARGET_SHARE_B, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH + 1, SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_B, SimpleInvestmentStategyTest.MINIMUM_ASK, SimpleInvestmentStategyTest.MAXIMUM_ASK, false
+            SimpleInvestmentStategyTest.TARGET_SHARE_B, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1,
+            SimpleInvestmentStategyTest.TESTED_TERM_LENGTH + 1, 200,
+            SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.ZERO,
+            SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_B, SimpleInvestmentStategyTest.MINIMUM_ASK,
+            SimpleInvestmentStategyTest.MAXIMUM_ASK, false
     );
 
     private final InvestmentStrategy overallStrategy;
@@ -162,9 +169,12 @@ public class SimpleInvestmentStategyTest {
 
         final Map<Rating, StrategyPerRating> strategies = Arrays.stream(Rating.values())
                 .collect(Collectors.toMap(Function.identity(), r -> Mockito.mock(StrategyPerRating.class)));
-        strategies.put(Rating.A, new StrategyPerRating(Rating.A, targetShareA, 1, 1, 1, BigDecimal.ONE, 1, 1, true));
-        strategies.put(Rating.B, new StrategyPerRating(Rating.B, targetShareB, 1, 1, 1, BigDecimal.ONE, 1, 1, true));
-        strategies.put(Rating.C, new StrategyPerRating(Rating.C, targetShareC, 1, 1, 1, BigDecimal.ONE, 1, 1, true));
+        strategies.put(Rating.A, new StrategyPerRating(Rating.A, targetShareA, 1, 1, 1, 1, BigDecimal.ZERO,
+                BigDecimal.ONE, 1, 1, true));
+        strategies.put(Rating.B, new StrategyPerRating(Rating.B, targetShareB, 1, 1, 1, 1, BigDecimal.ZERO,
+                BigDecimal.ONE, 1, 1, true));
+        strategies.put(Rating.C, new StrategyPerRating(Rating.C, targetShareC, 1, 1, 1, 1, BigDecimal.ZERO,
+                BigDecimal.ONE, 1, 1, true));
         final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
 
         // all ratings have zero share; C > B > A

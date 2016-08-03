@@ -77,7 +77,8 @@ public class SimpleInvestmentStrategyServiceTest {
             "minimumBalance                = 200 ", "maximumInvestment             = 20000\t",
                 "targetShare.default           = 0.20   ", "minimumTerm.default           = \t0  ",
                 "maximumTerm.default           = -1", "minimumAsk.default            = 0",
-                "maximumAsk.default            = -1   ", "maximumLoanAmount.default     = 400",
+                "maximumAsk.default            = -1   ", "minimumLoanAmount.default     = 200",
+                "maximumLoanAmount.default     = 400", "minimumLoanShare.default      = 0",
                 "maximumLoanShare.default      = 0.01", "preferLongerTerms.default     = false   ",
         };
         final File f = File.createTempFile("robozonky-", ".cfg");

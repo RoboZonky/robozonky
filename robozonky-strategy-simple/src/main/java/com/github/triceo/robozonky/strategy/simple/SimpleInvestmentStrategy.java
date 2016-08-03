@@ -25,6 +25,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -44,14 +45,11 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
 
     static Map<Rating, Collection<Loan>> sortLoansByRating(final Collection<Loan> loans) {
         final Map<Rating, Collection<Loan>> result = new EnumMap<>(Rating.class);
-        loans.stream().forEach(l -> {
-                    final Rating r = l.getRating();
-                    result.compute(r, (k, v) -> {
-                        final Collection<Loan> values = (v == null) ? new LinkedHashSet<>() : v;
-                        values.add(l);
-                        return values;
-                    });
-                });
+        loans.forEach(l -> result.compute(l.getRating(), (k, v) -> {
+            final Collection<Loan> values = (v == null) ? new LinkedHashSet<>(loans.size() / 2) : v;
+            values.add(l);
+            return values;
+        }));
         return Collections.unmodifiableMap(result);
     }
 
@@ -146,13 +144,27 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         if (!this.isAcceptable(portfolio)) {
             return 0;
         }
-        final int maxAllowedInvestmentIncrement = InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT;
-        final int recommendation = individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan);
+        final Optional<int[]> recommend = individualStrategies.get(loan.getRating()).recommendInvestmentAmount(loan);
+        if (!recommend.isPresent()) { // does not match the strategy
+            return 0;
+        }
+        final int minimumRecommendation = recommend.get()[0];
+        final int maximumRecommendation = recommend.get()[1];
+        SimpleInvestmentStrategy.LOGGER.debug("Recommended investment range of <{}; {}> CZK.", minimumRecommendation,
+                maximumRecommendation);
         // round to nearest lower increment
-        final int adjustedForBalance = Math.min(portfolio.getCzkAvailable(), recommendation);
-        final int result = (adjustedForBalance / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
-        // make sure we never submit more than there is remaining in the loan
-        return Math.min(result, (int) loan.getRemainingInvestment());
+        if (minimumRecommendation > portfolio.getCzkAvailable()) {
+            return 0;
+        } else if (minimumRecommendation > loan.getRemainingInvestment()) {
+            return 0;
+        }
+        final int maxAllowedInvestmentIncrement = InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT;
+        final int result = (maximumRecommendation / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
+        if (result < minimumRecommendation) {
+            return 0;
+        } else {
+            return result;
+        }
     }
 
 }
