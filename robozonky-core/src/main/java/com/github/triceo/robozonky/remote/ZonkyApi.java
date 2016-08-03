@@ -60,6 +60,14 @@ public interface ZonkyApi extends Api {
     @Path(ZonkyApi.WALLET)
     Wallet getWallet();
 
+    /**
+     * Retrieve blocked amounts in the wallet, that either represent a pending investment, or investor's fee. This
+     * query is paginated.
+     *
+     * @param pageSize How many items should be listed on the page.
+     * @param pageNo Number of the page to show, where 0 is the first page.
+     * @return Blocked amount on that particular page.
+     */
     @GET
     @Path(ZonkyApi.WALLET + "/blocked-amounts")
     List<BlockedAmount> getBlockedAmounts(@HeaderParam("X-Size") int pageSize, @HeaderParam("X-Page") int pageNo);
