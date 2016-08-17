@@ -41,10 +41,8 @@ import org.mockito.Mockito;
 
 public class InvestorTest {
 
-    private static Investment getMockInvestmentWithId(final int id) {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getLoanId()).thenReturn(id);
-        return i;
+    private static Investment getInvestmentWithLoanId(final int id) {
+        return new Investment(InvestorTest.getMockLoanWithId(id), 200);
     }
 
     private static Loan getMockLoanWithId(final int id) {
@@ -60,9 +58,9 @@ public class InvestorTest {
 
     @Test
     public void mergingTwoInvestmentCollectionsWorksProperly() {
-        final Investment I1 = InvestorTest.getMockInvestmentWithId(1);
-        final Investment I2 = InvestorTest.getMockInvestmentWithId(2);
-        final Investment I3 = InvestorTest.getMockInvestmentWithId(3);
+        final Investment I1 = InvestorTest.getInvestmentWithLoanId(1);
+        final Investment I2 = InvestorTest.getInvestmentWithLoanId(2);
+        final Investment I3 = InvestorTest.getInvestmentWithLoanId(3);
 
         // two identical investments will result in one
         final List<Investment> a = Arrays.asList(I1, I2);
@@ -83,12 +81,6 @@ public class InvestorTest {
         // reverse-order merging works
         final List<Investment> d = Arrays.asList(I2, I1);
         Assertions.assertThat(Investor.mergeInvestments(a, d)).containsExactly(I1, I2);
-
-        // two non-identical loans with same ID are merged in the order in which they came
-        final Investment I3_2 = InvestorTest.getMockInvestmentWithId(3);
-        final List<Investment> e = Collections.singletonList(I3_2);
-        Assertions.assertThat(Investor.mergeInvestments(c, e)).containsExactly(I3);
-        Assertions.assertThat(Investor.mergeInvestments(e, c)).containsExactly(I3_2);
     }
 
     @Test
@@ -186,19 +178,27 @@ public class InvestorTest {
     public void properBlockedAmountRetrieval() {
         final int loan1id = 1, loan1amount = 100;
         final Loan l1 = InvestorTest.getMockLoanWithIdAndAmount(loan1id, loan1amount);
-        final int loan2Id = 2, loan2amount = 200;
-        final Loan l2 = InvestorTest.getMockLoanWithIdAndAmount(loan2Id, loan2amount);
+        final int loan2id = loan1id + 1, loan2amount = 200;
+        final Loan l2 = InvestorTest.getMockLoanWithIdAndAmount(loan2id, loan2amount);
+        final int loan3amount = 400;
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getLoan(Matchers.eq(loan1id))).thenReturn(l1);
-        Mockito.when(api.getLoan(Matchers.eq(loan2Id))).thenReturn(l2);
+        Mockito.when(api.getLoan(Matchers.eq(loan2id))).thenReturn(l2);
         Mockito.when(api.getBlockedAmounts(Matchers.anyInt(), Matchers.anyInt())).thenReturn(
                 Arrays.asList(new BlockedAmount(0, 1000), new BlockedAmount(loan1id, loan1amount),
-                        new BlockedAmount(loan2Id, loan2amount))
+                        new BlockedAmount(loan2id, loan2amount), new BlockedAmount(loan1id, loan3amount))
         );
         final List<Investment> result = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(api);
         // the 0 ID blocked amount is Zonky's investors' fee, which should not be looked up as a loan
-        Assertions.assertThat(result).hasSize(2);
-        Assertions.assertThat(result.get(0).getLoanId()).isEqualTo(l1.getId());
-        Assertions.assertThat(result.get(1).getLoanId()).isEqualTo(l2.getId());
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(result).hasSize(2);
+        final Investment i1 = result.get(0);
+        softly.assertThat(i1.getLoanId()).isEqualTo(loan1id);
+        softly.assertThat(i1.getAmount()).isEqualTo(loan1amount + loan3amount);
+        final Investment i2 = result.get(1);
+        softly.assertThat(i2.getLoanId()).isEqualTo(loan2id);
+        softly.assertThat(i2.getAmount()).isEqualTo(loan2amount);
+        softly.assertAll();
     }
+
 }

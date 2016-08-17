@@ -19,14 +19,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.operations.InvestOperation;
+import com.github.triceo.robozonky.remote.BlockedAmount;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Statistics;
@@ -54,21 +56,19 @@ public class Investor {
         return investments.stream().filter(i -> loan.getId() == i.getLoanId()).findFirst().isPresent();
     }
 
+    /**
+     * Merge two collections of investments with one another. Every investment will only by represented once, no matter
+     * how many times it was present in source collections. No order guarantees are made.
+     *
+     * @param left First collection of investments to be merged with the second.
+     * @param right Second collection of investments to be merged with the first.
+     * @return Unmodifiable collection containing all the investments from both arguments.
+     */
     static Collection<Investment> mergeInvestments(final Collection<Investment> left,
                                                    final Collection<Investment> right) {
-        if (left.isEmpty() && right.isEmpty()) {
-            return Collections.emptyList();
-        } else if (left.isEmpty()) {
-            return Collections.unmodifiableCollection(right);
-        } else if (right.isEmpty()) {
-            return Collections.unmodifiableCollection(left);
-        } else {
-            final Map<Integer, Investment> investments
-                    = left.stream().collect(Collectors.toMap(Investment::getLoanId, Function.identity()));
-            right.stream().filter(investment -> !investments.containsKey(investment.getLoanId()))
-                    .forEach(investment -> investments.put(investment.getLoanId(), investment));
-            return Collections.unmodifiableCollection(investments.values());
-        }
+        return Collections.unmodifiableCollection(Stream.concat(left.stream(), right.stream())
+                .distinct()
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -110,19 +110,35 @@ public class Investor {
      * already invested as evidenced by the blocked amount. It also unnecessarily deals with the second case, since
      * that is represented by a blocked amount as well. But that does no harm.
      *
+     * In case user has made repeated investments into a particular loan, this will show up as multiple blocked amounts.
+     * The method needs to handle this as well.
+     *
      * @param api Authenticated API that will be used to retrieve the user's blocked amounts from the wallet.
      * @return Every blocked amount represents a future investment. This method returns such investments.
      */
     static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
-        return Collections.unmodifiableList(api.getBlockedAmounts(99, 0).stream()
+        final Collection<BlockedAmount> amounts = api.getBlockedAmounts(99, 0).stream()
                 .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
-                .map(blocked -> {
-                    final int loanId = blocked.getLoanId();
-                    final int loanAmount = blocked.getAmount();
-                    final Investment i = new Investment(api.getLoan(loanId), loanAmount);
-                    Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", loanAmount, loanId);
-                    return i;
-                }).collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        // cache loan instances in case multiple blocked amounts relate to a single loan, not to make extra API queries
+        final Map<Integer, Loan> loans = new HashMap<>(amounts.size());
+        amounts.forEach(amount -> {
+            final int loanAmount = amount.getAmount();
+            final int loanId = amount.getLoanId();
+            Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", loanAmount, loanId);
+            loans.compute(loanId, (k, v) -> v == null ? api.getLoan(k) : v);
+        });
+        // sum blocked amounts per loan
+        final Map<Loan, Integer> amountsBlockedByLoans = new LinkedHashMap<>(amounts.size());
+        amounts.forEach(amount -> {
+            final Loan l = loans.get(amount.getLoanId());
+            final int a = amount.getAmount();
+            amountsBlockedByLoans.compute(l, (k, v) -> v == null ? a : v + a);
+        });
+        // finally return the investments representing the overall sum of blocked amounts
+        return Collections.unmodifiableList(amountsBlockedByLoans.entrySet().stream()
+                .map(entry -> new Investment(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()));
     }
 
     /**
