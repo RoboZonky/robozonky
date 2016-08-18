@@ -26,7 +26,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.OverallPortfolio;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.remote.RiskPortfolio;
 import com.github.triceo.robozonky.remote.Statistics;
@@ -44,6 +43,7 @@ public class PortfolioOverview {
 
     /**
      * Prepare an immutable portfolio overview, based on the provided information.
+     *
      * @param balance Current available balance in the wallet.
      * @param stats Statistics retrived from the Zonky API.
      * @param investments Investments not yet reflected in the Zonky API.
@@ -53,7 +53,7 @@ public class PortfolioOverview {
                                               final Collection<Investment> investments) {
         // first figure out how much we have in outstanding loans
         final Map<Rating, Integer> amounts = stats.getRiskPortfolio().stream().collect(
-                Collectors.toMap(RiskPortfolio::getRating, OverallPortfolio::getUnpaid)
+                Collectors.toMap(RiskPortfolio::getRating, p -> p.getTotalAmount() - p.getPaid())
         );
         // then make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {

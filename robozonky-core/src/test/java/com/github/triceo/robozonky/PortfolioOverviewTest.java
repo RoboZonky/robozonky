@@ -61,9 +61,9 @@ public class PortfolioOverviewTest {
         // mock necessary structures
         final int amountAA = 300, amountB = 200, amountD = 100;
         final int totalPie = amountAA + amountB + amountD;
-        final RiskPortfolio riskAA = new RiskPortfolio(Rating.AA, -1, amountAA, -1, -1);
-        final RiskPortfolio riskB = new RiskPortfolio(Rating.B, -1, amountB, -1, -1);
-        final RiskPortfolio riskD = new RiskPortfolio(Rating.D, -1, amountD, -1, -1);
+        final RiskPortfolio riskAA = new RiskPortfolio(Rating.AA, 0, amountAA, 0);
+        final RiskPortfolio riskB = new RiskPortfolio(Rating.B, 0, amountB, 0);
+        final RiskPortfolio riskD = new RiskPortfolio(Rating.D, 0, amountD, 0);
         final Statistics stats = Mockito.mock(Statistics.class);
         Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(riskAA, riskB, riskD));
 

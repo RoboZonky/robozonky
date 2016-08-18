@@ -27,10 +27,10 @@ public class RiskPortfolio extends OverallPortfolio {
         // for JAXB
     }
 
-    public RiskPortfolio(final Rating rating, final int paid, final int unpaid, final int due, final int totalAmount) {
+    public RiskPortfolio(final Rating rating, final int paid, final int unpaid, final int due) {
         super(paid, unpaid, due);
         this.rating = rating;
-        this.totalAmount = totalAmount;
+        this.totalAmount = paid + unpaid + due;
     }
 
     @XmlElement
