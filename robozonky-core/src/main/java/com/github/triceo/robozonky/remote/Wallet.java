@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class Wallet implements BaseEntity {
 
     private int id;
-    private BigDecimal balance, availableBalance, blockedBalance;
+    private BigDecimal balance, availableBalance, blockedBalance, creditSum, debitSum;
     private int variableSymbol;
     private BankAccount account;
 
@@ -36,6 +36,8 @@ public class Wallet implements BaseEntity {
         this.balance = balance;
         this.variableSymbol = variableSymbol;
         this.blockedBalance = balance.subtract(availableBalance);
+        this.creditSum = balance;
+        this.debitSum = BigDecimal.ZERO;
     }
 
     @XmlElement
@@ -59,6 +61,16 @@ public class Wallet implements BaseEntity {
     }
 
     @XmlElement
+    public BigDecimal getCreditSum() {
+        return creditSum;
+    }
+
+    @XmlElement
+    public BigDecimal getDebitSum() {
+        return debitSum;
+    }
+
+    @XmlElement
     public int getVariableSymbol() {
         return variableSymbol;
     }
@@ -75,8 +87,10 @@ public class Wallet implements BaseEntity {
         sb.append(", balance=").append(balance);
         sb.append(", availableBalance=").append(availableBalance);
         sb.append(", blockedBalance=").append(blockedBalance);
-        sb.append(", account=").append(account);
+        sb.append(", creditSum=").append(creditSum);
+        sb.append(", debitSum=").append(debitSum);
         sb.append(", variableSymbol=").append(variableSymbol);
+        sb.append(", account=").append(account);
         sb.append('}');
         return sb.toString();
     }
