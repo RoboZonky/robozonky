@@ -190,7 +190,8 @@ public class Investor {
         Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
                 portfolio.getSharesOnInvestment());
         final Collection<Loan> loans = this.strategy.getMatchingLoans(this.zotifyApi.getLoans(), portfolio).stream()
-                .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade)).collect(Collectors.toList());
+                .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade))
+                .collect(Collectors.toList());
         Investor.LOGGER.debug("Strategy recommends the following unseen loans: {}.", loans);
         return loans.stream()
                 .map(l -> {
@@ -217,6 +218,8 @@ public class Investor {
         Collection<Investment> investments = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
         Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}", investments);
         final Statistics stats = Investor.retrieveStatistics(this.zonkyApi);
+        Investor.LOGGER.debug("The sum total of principal remaining on active loans is {} CZK.",
+                stats.getCurrentOverview().getPrincipalLeft());
         // and start investing
         final Collection<Investment> investmentsMade = new ArrayList<>();
         do {
