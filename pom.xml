@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <surefire.version>2.19.1</surefire.version>
-        <version.org.jboss.resteasy>3.0.18.Final</version.org.jboss.resteasy>
+        <version.org.jboss.resteasy>3.0.19.Final</version.org.jboss.resteasy>
         <version.org.drools>7.0.0.Beta1</version.org.drools>
     </properties>
     <dependencyManagement>
