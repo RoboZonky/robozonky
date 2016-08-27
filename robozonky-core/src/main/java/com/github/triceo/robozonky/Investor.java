@@ -27,8 +27,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.operations.InvestOperation;
 import com.github.triceo.robozonky.remote.BlockedAmount;
+import com.github.triceo.robozonky.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Statistics;
@@ -75,7 +75,7 @@ public class Investor {
      * The core investing call. Receives a particular loan, checks if the user has enough money to invest, and sends the
      * command to the Zonky API.
      *
-     * @param api Authenticated Zonky API, ready for {@link InvestOperation}.
+     * @param api Authenticated Zonky API, ready for investing.
      * @param l Loan to invest into.
      * @param amount Amount to invest into the loan.
      * @param balance How much usable cash the user has in the wallet.
@@ -96,7 +96,14 @@ public class Investor {
             return Optional.empty();
         }
         final Investment investment = new Investment(l, amount);
-        return new InvestOperation().apply(api, investment);
+        if (api instanceof InvestingZonkyApi) {
+            ((InvestingZonkyApi)api).invest(investment);
+            Investor.LOGGER.info("Invested {} CZK into loan {}.", investment.getAmount(), investment.getLoanId());
+        } else {
+            Investor.LOGGER.info("Dry run. Otherwise would have invested {} CZK into loan {}.", investment.getAmount(),
+                    investment.getLoanId());
+        }
+        return Optional.of(investment);
     }
 
     /**

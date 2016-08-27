@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.version;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -27,13 +26,11 @@ public class VersionCheck {
 
     /**
      * Will retrieve the latest version available in Maven Central. Executes in single thread executor.
+     * @param e Executor service to use for executing the HTTP request.
      * @return Latest known release version of RoboZonky, as a {@link Future} to be retrieved later.
      */
-    public static Future<String> retrieveLatestVersion() {
-        final ExecutorService e = Executors.newSingleThreadExecutor();
-        final Future<String> result = e.submit(new VersionRetriever());
-        e.shutdown();
-        return result;
+    public static Future<String> retrieveLatestVersion(final ExecutorService e) {
+        return e.submit(new VersionRetriever());
     }
 
     /**

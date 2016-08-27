@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import org.apache.commons.cli.Option;
@@ -41,11 +40,10 @@ enum OperatingMode {
         /**
          *
          * @param cli Parsed command line.
-         * @param auth Pre-processed authentication information.
          * @return Empty if strategy missing, not loaded or not parsed.
          */
         @Override
-        public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
+        public Optional<AppContext> setup(final CommandLineInterface cli) {
             if (cli.getLoanAmount().isPresent() || cli.getLoanId().isPresent()) {
                 cli.printHelp("Loan data makes no sense in this context.", true);
                 return Optional.empty();
@@ -70,9 +68,9 @@ enum OperatingMode {
                     return Optional.empty();
                 } else if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new AppContext(auth, strategy.get(), balance));
+                    return Optional.of(new AppContext(strategy.get(), balance));
                 } else {
-                    return Optional.of(new AppContext(auth, strategy.get()));
+                    return Optional.of(new AppContext(strategy.get()));
                 }
             } catch (final InvestmentStrategyParseException ex) {
                 OperatingMode.LOGGER.error("Failed parsing strategy.", ex);
@@ -88,11 +86,10 @@ enum OperatingMode {
         /**
          *
          * @param cli Parsed command line.
-         * @param auth Pre-processed authentication information.
          * @return Empty when loan ID or loan amount are empty or missing.
          */
         @Override
-        public Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth) {
+        public Optional<AppContext> setup(final CommandLineInterface cli) {
             final Optional<Integer> loanId = cli.getLoanId();
             final Optional<Integer> loanAmount = cli.getLoanAmount();
             if (!loanId.isPresent() || loanId.get() < 1) {
@@ -103,9 +100,9 @@ enum OperatingMode {
                 return Optional.empty();
             } else if (cli.isDryRun()) {
                 final int balance = cli.getDryRunBalance().orElse(-1);
-                return Optional.of(new AppContext(auth, loanId.get(), loanAmount.get(), balance));
+                return Optional.of(new AppContext(loanId.get(), loanAmount.get(), balance));
             } else {
-                return Optional.of(new AppContext(auth, loanId.get(), loanAmount.get()));
+                return Optional.of(new AppContext(loanId.get(), loanAmount.get()));
             }
         }
     };
@@ -140,8 +137,7 @@ enum OperatingMode {
      * Properly set up the application with this operating mode.
      *
      * @param cli Parsed command line.
-     * @param auth Pre-processed authentication information.
      * @return All information required for proper execution of the application. Empty on failure.
      */
-    public abstract Optional<AppContext> setup(final CommandLineInterface cli, final AuthenticationHandler auth);
+    public abstract Optional<AppContext> setup(final CommandLineInterface cli);
 }

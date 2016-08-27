@@ -90,4 +90,41 @@ public class AuthenticationHandlerProviderTest {
         softly.assertAll();
     }
 
+    private static final File returnTempFile() throws IOException {
+        final File f = File.createTempFile("robozonky-", ".keystore");
+        f.delete();
+        return f;
+    }
+
+    @Test
+    public void usernameMissing() throws IOException {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getKeyStoreLocation())
+                .thenReturn(Optional.of(AuthenticationHandlerProviderTest.returnTempFile()));
+        Mockito.when(cli.getUsername()).thenReturn(Optional.empty());
+        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
+        Assertions.assertThat(ahp.apply(cli)).isEmpty();
+    }
+
+    @Test
+    public void fileNonexistent() throws IOException {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getKeyStoreLocation())
+                .thenReturn(Optional.of(AuthenticationHandlerProviderTest.returnTempFile()));
+        Mockito.when(cli.getUsername()).thenReturn(Optional.of("username"));
+        Mockito.when(cli.getPassword()).thenReturn("password");
+        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
+        Assertions.assertThat(ahp.apply(cli)).isEmpty();
+    }
+
+    @Test
+    public void correctCreationOfNew() throws IOException {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
+        Mockito.when(cli.getUsername()).thenReturn(Optional.of("username"));
+        Mockito.when(cli.getPassword()).thenReturn("password");
+        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
+        Assertions.assertThat(ahp.apply(cli)).isPresent();
+    }
+
 }

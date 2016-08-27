@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.version;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.assertj.core.api.Assertions;
@@ -30,7 +31,7 @@ public class VersionCheckTest {
 
     @Test
     public void retrieveLatestVersion() throws Exception {
-        final Future<String> version = VersionCheck.retrieveLatestVersion();
+        final Future<String> version = VersionCheck.retrieveLatestVersion(Executors.newWorkStealingPool());
         Assertions.assertThat(version).isNotNull();
         Assertions.assertThat(version.get()).isNotNull();
     }

@@ -62,6 +62,8 @@ class CommandLineInterface {
     static final Option OPTION_USE_TOKEN = Option.builder("r").hasArg().optionalArg(true)
             .argName("Seconds before expiration").longOpt("refresh")
             .desc("Once logged in, RoboZonky will never log out unless login expires. Use with caution.").build();
+    static final Option OPTION_FAULT_TOLERANT = Option.builder("t").longOpt("fault-tolerant")
+            .desc("RoboZonky will not report errors if it thinks Zonky is down. Use with caution.").build();
     static final Option OPTION_DRY_RUN = Option.builder("d").hasArg().optionalArg(true).
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
             .build();
@@ -106,6 +108,7 @@ class CommandLineInterface {
         authenticationModes.addOption(CommandLineInterface.OPTION_KEYSTORE);
         ops.add(CommandLineInterface.OPTION_PASSWORD);
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
+        ops.add(CommandLineInterface.OPTION_FAULT_TOLERANT);
         // join all in a single config
         final Options options = new Options();
         options.addOptionGroup(operatingModes);
@@ -197,6 +200,10 @@ class CommandLineInterface {
 
     public boolean isTokenEnabled() {
         return this.hasOption(CommandLineInterface.OPTION_USE_TOKEN);
+    }
+
+    public boolean isFaultTolerant() {
+        return this.hasOption(CommandLineInterface.OPTION_FAULT_TOLERANT);
     }
 
     public Optional<Integer> getTokenRefreshBeforeExpirationInSeconds() {

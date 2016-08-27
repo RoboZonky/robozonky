@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.app;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,53 +27,70 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotAllowedException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.util.UnrecoverableRoboZonkyException;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    private static final ExecutorService HTTP_EXECUTOR = Executors.newWorkStealingPool();
 
     private static void exit(final ReturnCode returnCode, final Future<String> versionFuture) {
+        App.HTTP_EXECUTOR.shutdown();
         App.newerRoboZonkyVersionExists(versionFuture);
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
+        App.LOGGER.info("===== RoboZonky out. =====");
         System.exit(returnCode.getCode());
     }
 
-    static Optional<AppContext> processCommandLine(final String... args) {
-        final Optional<CommandLineInterface> optionalCli = CommandLineInterface.parse(args);
-        if (!optionalCli.isPresent()) {
-            return Optional.empty();
-        }
-        final CommandLineInterface cli = optionalCli.get();
-        final Optional<AuthenticationHandler> auth = new AuthenticationHandlerProvider().apply(cli);
-        if (!auth.isPresent()) {
-            return Optional.empty();
-        }
-        return cli.getCliOperatingMode().setup(cli, auth.get());
-    }
-
-    private static void core(final AppContext ctx) throws UnrecoverableRoboZonkyException {
+    /**
+     * Core investing algorithm. Will log in, invest and log out.
+     *
+     * @param ctx
+     * @param auth
+     * @return True if login succeeded and the algorithm moved over to investing.
+     * @throws RuntimeException Any exception on login and logout will be caught and logged, therefore any runtime
+     * exception thrown is a problem during the investing operation itself.
+     */
+    private static boolean core(final AppContext ctx, final AuthenticationHandler auth) {
         App.LOGGER.info("===== RoboZonky at your service! =====");
         final boolean isDryRun = ctx.isDryRun();
         if (isDryRun) {
             App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        final Collection<Investment> result = App.invest(ctx); // perform the investing operations
+        final Authentication login;
+        try { // catch this exception here, so that anything coming from the invest() method can be thrown separately
+            login = auth.login();
+        } catch (final BadRequestException ex) {
+            App.LOGGER.error("Failed authenticating with Zonky.", ex);
+            return false;
+        }
+        final Collection<Investment> result = App.invest(ctx, login.getZonkyApi(), login.getZotifyApi());
+        try { // log out and ignore any resulting error
+            auth.logout(login);
+        } catch (final RuntimeException ex) {
+            App.LOGGER.warn("Failed logging out of Zonky.", ex);
+        }
         App.storeInvestmentsMade(result, isDryRun);
         App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
-        App.LOGGER.info("===== RoboZonky out. =====");
+        return true;
     }
 
     public static void main(final String... args) {
@@ -80,22 +98,58 @@ class App {
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Locale.getDefault());
-        final Future<String> latestVersion = VersionCheck.retrieveLatestVersion();
+        final Future<String> latestVersion = VersionCheck.retrieveLatestVersion(App.HTTP_EXECUTOR);
+        boolean faultTolerant = false;
         try {
-            final Optional<AppContext> optionalCtx = App.processCommandLine(args);
-            if (optionalCtx.isPresent()) {
-                App.core(optionalCtx.get());
-                App.exit(ReturnCode.OK, latestVersion);
-            } else {
+            final Optional<CommandLineInterface> optionalCli = CommandLineInterface.parse(args);
+            if (!optionalCli.isPresent()) {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
             }
-        } catch (final UnrecoverableRoboZonkyException ex) {
-            App.LOGGER.error("Application encountered an error during setup." , ex);
-            App.exit(ReturnCode.ERROR_SETUP, latestVersion);
+            final CommandLineInterface cli = optionalCli.get();
+            faultTolerant = cli.isFaultTolerant();
+            if (faultTolerant) {
+                App.LOGGER.info("RoboZonky is in fault-tolerant mode. Certain errors may not be reported as such.");
+            }
+            final Optional<AppContext> optionalCtx = cli.getCliOperatingMode().setup(cli);
+            if (!optionalCtx.isPresent()) {
+                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
+            }
+            final Optional<AuthenticationHandler> optionalAuth = new AuthenticationHandlerProvider().apply(cli);
+            if (!optionalAuth.isPresent()) {
+                App.exit(ReturnCode.ERROR_SETUP, latestVersion);
+            }
+            final boolean loginSucceeded = App.core(optionalCtx.get(), optionalAuth.get());
+            if (!loginSucceeded) {
+                App.exit(ReturnCode.ERROR_SETUP, latestVersion);
+            } else {
+                App.exit(ReturnCode.OK, latestVersion);
+            }
+        } catch (final ProcessingException ex) {
+            final Throwable cause = ex.getCause();
+            if (cause instanceof SocketException) {
+                App.handleZonkyMaintenanceError(ex, latestVersion, faultTolerant);
+            } else {
+                App.handleUnexpectedError(ex, latestVersion);
+            }
+        } catch (final NotAllowedException ex) {
+            App.handleZonkyMaintenanceError(ex, latestVersion, faultTolerant);
+        } catch (final WebApplicationException ex) {
+            App.LOGGER.error("Application encountered remote API error.", ex);
+            App.exit(ReturnCode.ERROR_REMOTE, latestVersion);
         } catch (final RuntimeException ex) {
-            App.LOGGER.error("Unexpected error." , ex);
-            App.exit(ReturnCode.ERROR_UNEXPECTED, latestVersion);
+            App.handleUnexpectedError(ex, latestVersion);
         }
+    }
+
+    private static void handleUnexpectedError(final RuntimeException ex, final Future<String> latestVersion) {
+        App.LOGGER.error("Unexpected error, likely RoboZonky bug." , ex);
+        App.exit(ReturnCode.ERROR_UNEXPECTED, latestVersion);
+    }
+
+    private static void handleZonkyMaintenanceError(final RuntimeException ex, final Future<String> latestVersion,
+                                                    final boolean faultTolerant) {
+        App.LOGGER.warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
+        App.exit(faultTolerant ? ReturnCode.OK : ReturnCode.ERROR_DOWN, latestVersion);
     }
 
     /**
@@ -161,17 +215,10 @@ class App {
         };
     }
 
-    private static Collection<Investment> invest(final AppContext ctx) throws UnrecoverableRoboZonkyException {
-        final AuthenticationHandler handler = ctx.getAuthenticationHandler();
-        final Authentication login = handler.login();
-        try { // execute the investment
-            final BigDecimal balance = App.getAvailableBalance(ctx, login.getZonkyApi());
-            final Investor i = new Investor(login.getZonkyApi(), login.getZotifyApi(), ctx.getInvestmentStrategy(),
-                    balance);
-            return App.getInvestingFunction(ctx).apply(i);
-        } finally { // make sure logout is processed at all costs
-            handler.logout(login);
-        }
+    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky, final ZotifyApi zotify) {
+        final BigDecimal balance = App.getAvailableBalance(ctx, zonky);
+        final Investor i = new Investor(zonky, zotify, ctx.getInvestmentStrategy(), balance);
+        return App.getInvestingFunction(ctx).apply(i);
     }
 
 }

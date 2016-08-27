@@ -30,27 +30,14 @@ import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import static com.github.triceo.robozonky.app.App.processCommandLine;
-
 public class AppTest {
-
-    @Test
-    public void simpleCommandLine() {
-        final Optional<AppContext> optional = processCommandLine("-s",
-                "src/main/assembly/resources/robozonky-conservative.cfg", "-u", "user", "-p", "pass");
-        Assertions.assertThat(optional.isPresent());
-        final AppContext ctx = optional.get();
-        Assertions.assertThat(ctx.getOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
-        Assertions.assertThat(ctx.isDryRun()).isFalse();
-        Assertions.assertThat(ctx.getAuthenticationHandler()).isNotNull();
-        Assertions.assertThat(ctx.getInvestmentStrategy()).isNotNull();
-    }
 
     @Test
     public void storeInvestmentData() throws IOException {
@@ -113,7 +100,17 @@ public class AppTest {
         Mockito.when(ctx.getLoanId()).thenReturn(1);
         Mockito.when(ctx.getLoanAmount()).thenReturn(1000);
         Mockito.when(ctx.getOperatingMode()).thenReturn(mode);
+        Mockito.when(ctx.getDryRunBalance()).thenReturn(10000);
         return ctx;
+    }
+
+    @Test
+    public void simpleInvestment() {
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        Mockito.when(api.getWallet()).thenReturn(new Wallet(0, 0, BigDecimal.ZERO, BigDecimal.ZERO));
+        final Collection<Investment> result =
+                App.invest(Mockito.mock(AppContext.class), api, Mockito.mock(ZotifyApi.class));
+        Assertions.assertThat(result).isEmpty();
     }
 
     @Test

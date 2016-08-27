@@ -32,6 +32,14 @@ enum ReturnCode {
      */
     ERROR_SETUP(2),
     /**
+     * Zonky API not accepting calls.
+     */
+    ERROR_DOWN(3),
+    /**
+     * Remote API call failed.
+     */
+    ERROR_REMOTE(4),
+    /**
      * Unexpected error state, possibly app bug.
      */
     ERROR_UNEXPECTED(255);

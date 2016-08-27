@@ -51,9 +51,9 @@ public class CommandLineInterfaceTest {
     }
 
     @Test
-    public void minimalStrategyDrivenCliWithKeyStoreAndTokenNoRefresh() {
+    public void minimalFaultTolerantStrategyDrivenCliWithKeyStoreAndTokenNoRefresh() {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
-                CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r"));
+                CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "-t"));
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(cli.getCliOperatingMode()).isEqualTo(OperatingMode.STRATEGY_DRIVEN);
         softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
@@ -62,6 +62,7 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
         softly.assertThat(cli.getPassword()).isNotNull();
         softly.assertThat(cli.getUsername()).isEmpty();
+        softly.assertThat(cli.isFaultTolerant()).isTrue();
         softly.assertAll();
     }
 
@@ -80,6 +81,7 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getDryRunBalance()).isEmpty();
         softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
         softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
+        softly.assertThat(cli.isFaultTolerant()).isFalse();
         softly.assertAll();
     }
 
@@ -99,6 +101,7 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
         softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
         softly.assertThat(cli.isTokenEnabled()).isFalse();
+        softly.assertThat(cli.isFaultTolerant()).isFalse();
         softly.assertAll();
     }
 

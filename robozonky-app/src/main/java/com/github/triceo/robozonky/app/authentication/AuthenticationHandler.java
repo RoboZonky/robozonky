@@ -25,16 +25,16 @@ import java.time.temporal.TemporalUnit;
 import java.util.Optional;
 import javax.xml.bind.JAXBException;
 
-import com.github.triceo.robozonky.app.util.UnrecoverableRoboZonkyException;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
-import com.github.triceo.robozonky.operations.LoginOperation;
-import com.github.triceo.robozonky.operations.LogoutOperation;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AuthenticationHandler {
+
+    private static final String ZONKY_URL = "https://api.zonky.cz";
+    private static final String ZOTIFY_URL = "http://zotify.cz";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandler.class);
 
@@ -200,15 +200,9 @@ public class AuthenticationHandler {
      * Log into Zonky API.
      *
      * @return Authenticated APIs.
-     * @throws UnrecoverableRoboZonkyException When login fails.
      */
-    public Authentication login() throws UnrecoverableRoboZonkyException {
-        final Authenticator auth = this.build();
-        final Optional<Authentication> possibleLogin = new LoginOperation().apply(auth);
-        if (!possibleLogin.isPresent()) {
-            throw new UnrecoverableRoboZonkyException("Login failed.");
-        }
-        return possibleLogin.get();
+    public Authentication login() {
+        return this.build().authenticate(AuthenticationHandler.ZONKY_URL, AuthenticationHandler.ZOTIFY_URL);
     }
 
     /**
@@ -220,7 +214,7 @@ public class AuthenticationHandler {
     public boolean logout(final Authentication login) {
         final boolean logoutAllowed = this.isLogoutAllowed(login.getZonkyApiToken());
         if (logoutAllowed) {
-            new LogoutOperation().apply(login.getZonkyApi());
+            login.getZonkyApi().logout();
             return true;
         } else { // if we're using the token, we should never log out
             AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");

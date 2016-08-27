@@ -31,7 +31,7 @@ public class InvestmentStrategyTest {
 
     @Test
     public void loadStrategy() throws InvestmentStrategyParseException {
-        final Optional<InvestmentStrategy> inv = InvestmentStrategyLoader.load(InvestmentStrategyTest.CORRECT_FILE);
+        final Optional<InvestmentStrategy> inv = InvestmentStrategy.load(InvestmentStrategyTest.CORRECT_FILE);
         Assertions.assertThat(inv).isEmpty(); // no strategies are on the classpath
     }
 

@@ -83,14 +83,13 @@ public class InvestorTest {
         Assertions.assertThat(Investor.mergeInvestments(a, d)).containsExactly(I1, I2);
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void recoverOnFailedInvestment() {
         // the strategy will recommend two different investments
         final Loan mockLoan1 = InvestorTest.getMockLoanWithId(1);
-        final Loan mockLoan2 = InvestorTest.getMockLoanWithId(2);
         final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
         Mockito.when(strategyMock.getMatchingLoans(Matchers.any(), Matchers.any()))
-                .thenReturn(Arrays.asList(mockLoan1, mockLoan2));
+                .thenReturn(Collections.singletonList(mockLoan1));
         Mockito.when(strategyMock.recommendInvestmentAmount(Matchers.any(), Matchers.any())).thenReturn(400);
         // fail on the first loan, accept the second
         final InvestingZonkyApi mockApi = Mockito.mock(InvestingZonkyApi.class);
@@ -99,14 +98,7 @@ public class InvestorTest {
         // finally test
         final Investor investor = new Investor(mockApi, Mockito.mock(ZotifyApi.class), strategyMock,
                 BigDecimal.valueOf(1000));
-        final Optional<Investment> result = investor.investOnce(BigDecimal.valueOf(1000), new Statistics(),
-                Collections.emptyList());
-        // check that the first loan properly failed over to the second
-        Mockito.verify(mockApi, Mockito.times(2)).invest(Matchers.any());
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(result).isPresent();
-        softly.assertThat(result.get().getLoanId()).isEqualTo(mockLoan2.getId());
-        softly.assertAll();
+        investor.invest();
     }
 
     @Test

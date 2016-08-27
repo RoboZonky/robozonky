@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Assume;
@@ -56,13 +55,11 @@ public class OperatingModeTest {
     @Test
     public void standardUserDriven() {
         final CommandLineInterface cli = OperatingModeTest.mockCli(1000, 1);
-        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        final Optional<AppContext> optionalResult = OperatingMode.USER_DRIVEN.setup(cli, auth);
+        final Optional<AppContext> optionalResult = OperatingMode.USER_DRIVEN.setup(cli);
         Assertions.assertThat(optionalResult).isPresent();
         final AppContext result = optionalResult.get();
         Assertions.assertThat(result.getLoanId()).isEqualTo(cli.getLoanId().get());
         Assertions.assertThat(result.getLoanAmount()).isEqualTo(cli.getLoanAmount().get());
-        Assertions.assertThat(result.getAuthenticationHandler()).isEqualTo(auth);
         Assertions.assertThat(result.isDryRun()).isFalse();
     }
 
@@ -72,61 +69,59 @@ public class OperatingModeTest {
         final CommandLineInterface cli = OperatingModeTest.mockCli(1000, 1);
         Mockito.when(cli.isDryRun()).thenReturn(true);
         Mockito.when(cli.getDryRunBalance()).thenReturn(Optional.of(balance));
-        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        final Optional<AppContext> optionalResult = OperatingMode.USER_DRIVEN.setup(cli, auth);
+        final Optional<AppContext> optionalResult = OperatingMode.USER_DRIVEN.setup(cli);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(optionalResult).isPresent();
         final AppContext result = optionalResult.get();
         softly.assertThat(result.getLoanId()).isEqualTo(cli.getLoanId().get());
         softly.assertThat(result.getLoanAmount()).isEqualTo(cli.getLoanAmount().get());
-        softly.assertThat(result.getAuthenticationHandler()).isEqualTo(auth);
         softly.assertThat(result.isDryRun()).isTrue();
         softly.assertThat(result.getDryRunBalance()).isEqualTo(100);
         softly.assertAll();
     }
 
-    private void ensureHelpCalled(final CommandLineInterface mock) {
+    private static void ensureHelpCalled(final CommandLineInterface mock) {
         Mockito.verify(mock, Mockito.times(1)).printHelp(Matchers.any(), Matchers.eq(true));
     }
 
     @Test
     public void userDrivenLoanAmountMissing() {
         final CommandLineInterface cli = OperatingModeTest.mockCliNoAmount(1);
-        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli))
                 .isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 
     @Test
     public void userDrivenLoanAmountWrong() {
         final CommandLineInterface cli = OperatingModeTest.mockCli(1, 0);
-        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli))
                 .isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 
     @Test
     public void userDrivenLoanDataMissing() {
         final CommandLineInterface cli = OperatingModeTest.mockCli();
-        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli))
                 .isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 
     @Test
     public void userDrivenLoanIdMissing() {
         final CommandLineInterface cli = OperatingModeTest.mockCliNoLoanId(1000);
-        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli))
                 .isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 
     @Test
     public void userDrivenLoanIdWrong() {
         final CommandLineInterface cli = OperatingModeTest.mockCli(0, 1000);
-        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+        Assertions.assertThat(OperatingMode.USER_DRIVEN.setup(cli))
                 .isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 
     @Test
@@ -137,7 +132,7 @@ public class OperatingModeTest {
         Mockito.when(cli.getStrategyConfigurationFilePath())
                 .thenReturn(Optional.of("src/main/assembly/resources/robozonky-dynamic.cfg"));
         final Optional<AppContext> optionalResult =
-                OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class));
+                OperatingMode.STRATEGY_DRIVEN.setup(cli);
         Assertions.assertThat(optionalResult).isPresent();
         final AppContext result = optionalResult.get();
         Assertions.assertThat(result.getInvestmentStrategy()).isNotNull();
@@ -149,9 +144,9 @@ public class OperatingModeTest {
         final CommandLineInterface cli = OperatingModeTest.mockCli();
         Mockito.when(cli.getStrategyConfigurationFilePath()).thenReturn(Optional.empty());
         final Optional<AppContext> result =
-            OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class));
+            OperatingMode.STRATEGY_DRIVEN.setup(cli);
         Assertions.assertThat(result).isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 
     @Test
@@ -159,9 +154,9 @@ public class OperatingModeTest {
         final CommandLineInterface cli = OperatingModeTest.mockCli(1, 2);
         Mockito.when(cli.getStrategyConfigurationFilePath()).thenReturn(Optional.empty());
         final Optional<AppContext> result =
-                OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class));
+                OperatingMode.STRATEGY_DRIVEN.setup(cli);
         Assertions.assertThat(result).isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 
     @Test
@@ -169,7 +164,7 @@ public class OperatingModeTest {
         final CommandLineInterface cli = OperatingModeTest.mockCli();
         final File tmp = File.createTempFile("robozonky-", ".strategy"); // this is an empty (= invalid) strategy file
         Mockito.when(cli.getStrategyConfigurationFilePath()).thenReturn(Optional.of(tmp.getAbsolutePath()));
-        Assertions.assertThat(OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+        Assertions.assertThat(OperatingMode.STRATEGY_DRIVEN.setup(cli))
                 .isEmpty();
     }
 
@@ -179,9 +174,9 @@ public class OperatingModeTest {
         final File tmp = File.createTempFile("robozonky-", ".strategy"); // this is an empty (= invalid) strategy file
         Assume.assumeTrue(tmp.delete());
         Mockito.when(cli.getStrategyConfigurationFilePath()).thenReturn(Optional.of(tmp.getAbsolutePath()));
-        Assertions.assertThat(OperatingMode.STRATEGY_DRIVEN.setup(cli, Mockito.mock(AuthenticationHandler.class)))
+        Assertions.assertThat(OperatingMode.STRATEGY_DRIVEN.setup(cli))
                 .isEmpty();
-        this.ensureHelpCalled(cli);
+        OperatingModeTest.ensureHelpCalled(cli);
     }
 }
 
