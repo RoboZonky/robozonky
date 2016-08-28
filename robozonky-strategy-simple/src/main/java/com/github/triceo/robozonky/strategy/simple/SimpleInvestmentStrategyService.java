@@ -21,7 +21,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,67 +35,17 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategyService.class);
     // below are strings that identify different variables in the strategy file
-    private static final String MINIMUM = "minimum";
-    private static final String MAXIMUM = "maximum";
-    private static final String ASK = "ask";
-    private static final String TERM = "term";
-    private static final String LOAN_AMOUNT = "loanAmount";
-    private static final String LOAN_SHARE = "loanShare";
-    private static final String PROPERTY_TARGET_SHARE = "targetShare";
-    private static final String PROPERTY_PREFER_LONGER_TERMS = "preferLongerTerms";
-    private static final String PROPERTY_MINIMUM_BALANCE = SimpleInvestmentStrategyService.getMinimum("balance");
-    private static final String PROPERTY_MAXIMUM_INVESTMENT = SimpleInvestmentStrategyService.getMaximum("investment");
-    private static final String PROPERTY_MINIMUM_TERM =
-            SimpleInvestmentStrategyService.getMinimum(SimpleInvestmentStrategyService.TERM);
-    private static final String PROPERTY_MINIMUM_ASK =
-            SimpleInvestmentStrategyService.getMinimum(SimpleInvestmentStrategyService.ASK);
-    private static final String PROPERTY_MAXIMUM_TERM =
-            SimpleInvestmentStrategyService.getMaximum(SimpleInvestmentStrategyService.TERM);
-    private static final String PROPERTY_MAXIMUM_ASK =
-            SimpleInvestmentStrategyService.getMaximum(SimpleInvestmentStrategyService.ASK);
-    private static final String PROPERTY_MINIMUM_LOAN_AMOUNT =
-            SimpleInvestmentStrategyService.getMinimum(SimpleInvestmentStrategyService.LOAN_AMOUNT);
-    private static final String PROPERTY_MINIMUM_LOAN_SHARE =
-            SimpleInvestmentStrategyService.getMinimum(SimpleInvestmentStrategyService.LOAN_SHARE);
-    private static final String PROPERTY_MAXIMUM_LOAN_AMOUNT =
-            SimpleInvestmentStrategyService.getMaximum(SimpleInvestmentStrategyService.LOAN_AMOUNT);
-    private static final String PROPERTY_MAXIMUM_LOAN_SHARE =
-            SimpleInvestmentStrategyService.getMaximum(SimpleInvestmentStrategyService.LOAN_SHARE);
-
-    private static boolean isBetweenZeroAndOne(final BigDecimal target) {
-        return SimpleInvestmentStrategyService.isBetweenAAndB(target, BigDecimal.ZERO, BigDecimal.ONE);
-    }
-
-    private static boolean isBetweenAAndB(final BigDecimal target, final BigDecimal a, final BigDecimal b) {
-        return !(target.compareTo(a) < 0 || target.compareTo(b) > 0);
-    }
-
-    private static String get(final String prefix, final String str) {
-        return prefix.toLowerCase() + str.substring(0, 1).toUpperCase() + str.substring(1);
-    }
-
-    private static String getMinimum(final String str) {
-        return SimpleInvestmentStrategyService.get(SimpleInvestmentStrategyService.MINIMUM, str);
-    }
-
-    private static String getMaximum(final String str) {
-        return SimpleInvestmentStrategyService.get(SimpleInvestmentStrategyService.MAXIMUM, str);
-    }
 
     private static <T> Optional<T> getValue(final ImmutableConfiguration config, final String property,
                                             final Function<String, T> supplier) {
         return config.containsKey(property) ? Optional.of(supplier.apply(property)) : Optional.empty();
     }
 
-    private static String join(final String left, final String right) {
-        return new StringJoiner(".").add(left).add(right).toString();
-    }
-
     private static <T> T getValue(final ImmutableConfiguration config, final Rating r, final String property,
                                   final Function<String, T> supplier) {
-        final String propertyName = SimpleInvestmentStrategyService.join(property, r.name());
+        final String propertyName = Util.join(property, r.name());
         return SimpleInvestmentStrategyService.getValue(config, propertyName, supplier).orElseGet(() -> {
-            final String fallbackPropertyName = SimpleInvestmentStrategyService.join(property, "default");
+            final String fallbackPropertyName = Util.join(property, "default");
             return SimpleInvestmentStrategyService.getValue(config, fallbackPropertyName, supplier)
                     .orElseThrow(() -> new IllegalStateException("Investment strategy is incomplete. " +
                             "Missing value for '" + property + "' and rating '" + r + '\''));
@@ -107,9 +56,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         return ImmutableConfiguration.from(strategyFile);
     }
 
-    private static int getMinimumBalance(final ImmutableConfiguration config) {
+    static int getMinimumBalance(final ImmutableConfiguration config) {
         final int minimumBalance = SimpleInvestmentStrategyService.getValue(config,
-                SimpleInvestmentStrategyService.PROPERTY_MINIMUM_BALANCE, config::getInt)
+                StrategyFileProperties.MINIMUM_BALANCE, config::getInt)
                 .orElseThrow(() -> new IllegalStateException("Minimum balance is missing."));
         if (minimumBalance < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             throw new IllegalStateException("Minimum balance is less than "
@@ -118,9 +67,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         return minimumBalance;
     }
 
-    private static int getMaximumInvestment(final ImmutableConfiguration config) {
+    static int getMaximumInvestment(final ImmutableConfiguration config) {
         final int maximumInvestment = SimpleInvestmentStrategyService.getValue(config,
-                SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_INVESTMENT, config::getInt)
+                StrategyFileProperties.MAXIMUM_INVESTMENT, config::getInt)
                 .orElseThrow(() -> new IllegalStateException("Maximum investment is missing."));
         if (maximumInvestment < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             throw new IllegalStateException("Maximum investment is less than "
@@ -158,21 +107,21 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
 
     private static StrategyPerRating parseRating(final Rating rating, final ImmutableConfiguration config) {
         final boolean preferLongerTerms = SimpleInvestmentStrategyService.getValue(config, rating,
-                        SimpleInvestmentStrategyService.PROPERTY_PREFER_LONGER_TERMS, config::getBoolean);
+                StrategyFileProperties.PREFER_LONGER_TERMS, config::getBoolean);
         final BigDecimal targetShare = SimpleInvestmentStrategyService.getValue(config, rating,
-                        SimpleInvestmentStrategyService.PROPERTY_TARGET_SHARE, config::getBigDecimal);
-        if (!SimpleInvestmentStrategyService.isBetweenZeroAndOne(targetShare)) {
+                StrategyFileProperties.TARGET_SHARE, config::getBigDecimal);
+        if (!Util.isBetweenZeroAndOne(targetShare)) {
             throw new IllegalStateException("Target share for rating " + rating + " outside of range <0, 1>: "
                     + targetShare);
         }
         // terms
         final int minTerm = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MINIMUM_TERM, config::getInt);
+                StrategyFileProperties.MINIMUM_TERM, config::getInt);
         if (minTerm < -1) {
             throw new IllegalStateException("Minimum acceptable term for rating " + rating + " negative.");
         }
         final int maxTerm = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_TERM, config::getInt);
+                StrategyFileProperties.MAXIMUM_TERM, config::getInt);
         if (maxTerm < -1) {
             throw new IllegalStateException("Maximum acceptable term for rating " + rating + " negative.");
         } else if (minTerm > maxTerm && maxTerm != -1) {
@@ -180,12 +129,12 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         }
         // loan asks
         final int minAskAmount = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MINIMUM_ASK, config::getInt);
+                StrategyFileProperties.MINIMUM_ASK, config::getInt);
         if (minAskAmount < -1) {
             throw new IllegalStateException("Minimum acceptable ask amount for rating " + rating + " negative.");
         }
         final int maxAskAmount = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_ASK, config::getInt);
+                StrategyFileProperties.MAXIMUM_ASK, config::getInt);
         if (maxAskAmount < -1) {
             throw new IllegalStateException("Maximum acceptable ask for rating " + rating + " negative.");
         } else if (minAskAmount > maxAskAmount && maxAskAmount != -1) {
@@ -193,25 +142,25 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         }
         // investment amounts
         final int minLoanAmount = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MINIMUM_LOAN_AMOUNT, config::getInt);
+                StrategyFileProperties.MINIMUM_LOAN_AMOUNT, config::getInt);
         if (minLoanAmount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             throw new IllegalStateException("Minimum investment amount for rating " + rating
                     + " less than minimum investment allowed.");
         }
         final int maxLoanAmount = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_LOAN_AMOUNT, config::getInt);
+                StrategyFileProperties.MAXIMUM_LOAN_AMOUNT, config::getInt);
         if (maxLoanAmount != -1 && maxLoanAmount < minLoanAmount) {
             throw new IllegalStateException("Maximum investment amount for rating " + rating + " less than minimum.");
         }
         final BigDecimal minLoanShare = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MINIMUM_LOAN_SHARE, config::getBigDecimal);
-        if (!SimpleInvestmentStrategyService.isBetweenZeroAndOne(minLoanShare)) {
+                StrategyFileProperties.MINIMUM_LOAN_SHARE, config::getBigDecimal);
+        if (!Util.isBetweenZeroAndOne(minLoanShare)) {
             throw new IllegalStateException("Minimum investment share for rating " + rating
                     + " outside of range <0, 1>: " + targetShare);
         }
         final BigDecimal maxLoanShare = SimpleInvestmentStrategyService.getValue(config, rating,
-                SimpleInvestmentStrategyService.PROPERTY_MAXIMUM_LOAN_SHARE, config::getBigDecimal);
-        if (!SimpleInvestmentStrategyService.isBetweenAAndB(maxLoanShare, minLoanShare, BigDecimal.ONE)) {
+                StrategyFileProperties.MAXIMUM_LOAN_SHARE, config::getBigDecimal);
+        if (!Util.isBetweenAAndB(maxLoanShare, minLoanShare, BigDecimal.ONE)) {
             throw new IllegalStateException("Maximum investment share for rating " + rating
                     + " outside of range (min, 1>: " + targetShare);
         }

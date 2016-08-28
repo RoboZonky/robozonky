@@ -328,6 +328,8 @@
                         <timestampedReports>false</timestampedReports>
                         <detectInlinedCode>true</detectInlinedCode>
                         <mutationThreshold>75</mutationThreshold>
+                        <timeoutFactor>2</timeoutFactor>
+                        <timeoutConstant>1</timeoutConstant>
                         <targetClasses>
                             <param>com.github.triceo.robozonky.*</param>
                         </targetClasses>

@@ -70,6 +70,7 @@ public class SimpleInvestmentStrategyServiceTest {
         s.parse(SimpleInvestmentStrategyServiceTest.WRONG_ASKS);
     }
 
+
     @Test
     public void whitespace() throws InvestmentStrategyParseException, IOException {
         // my IDE keeps removing whitespace at the end of lines in files, so let's generate a file on the run
