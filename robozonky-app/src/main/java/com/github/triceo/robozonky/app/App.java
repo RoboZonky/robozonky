@@ -69,7 +69,7 @@ class App {
      * @throws RuntimeException Any exception on login and logout will be caught and logged, therefore any runtime
      * exception thrown is a problem during the investing operation itself.
      */
-    private static boolean core(final AppContext ctx, final AuthenticationHandler auth) {
+    static boolean core(final AppContext ctx, final AuthenticationHandler auth) {
         App.LOGGER.info("===== RoboZonky at your service! =====");
         final boolean isDryRun = ctx.isDryRun();
         if (isDryRun) {

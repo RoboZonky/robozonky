@@ -25,8 +25,11 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import javax.ws.rs.BadRequestException;
 
 import com.github.triceo.robozonky.Investor;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
@@ -154,4 +157,36 @@ public class AppTest {
         Assertions.assertThat(App.newerRoboZonkyVersionExists(future)).isFalse();
     }
 
+    @Test
+    public void loginFailOnCredentials() {
+        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        Mockito.doThrow(BadRequestException.class).when(auth).login();
+        Assertions.assertThat(App.core(Mockito.mock(AppContext.class), auth)).isFalse();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void loginFailOnUnknownException() {
+        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        Mockito.doThrow(IllegalStateException.class).when(auth).login();
+        App.core(Mockito.mock(AppContext.class), auth);
+    }
+
+    @Test
+    public void successfulInvestOnZeroBalance() {
+        // prepare login and logout
+        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        final Authentication result = Mockito.mock(Authentication.class);
+        Mockito.when(result.getZonkyApi()).thenReturn(Mockito.mock(ZonkyApi.class));
+        Mockito.when(auth.login()).thenReturn(result);
+        Mockito.doThrow(IllegalStateException.class).when(auth).logout(Matchers.eq(result));
+        // prepare context for a 0-balance dry run investing run
+        final AppContext ctx = Mockito.mock(AppContext.class);
+        Mockito.when(ctx.getOperatingMode()).thenReturn(OperatingMode.USER_DRIVEN);
+        Mockito.when(ctx.getLoanId()).thenReturn(1);
+        Mockito.when(ctx.getLoanAmount()).thenReturn(200);
+        Mockito.when(ctx.isDryRun()).thenReturn(true);
+        Mockito.when(ctx.getDryRunBalance()).thenReturn(0);
+        // and finally make the run
+        Assertions.assertThat(App.core(ctx, auth)).isTrue();
+    }
 }

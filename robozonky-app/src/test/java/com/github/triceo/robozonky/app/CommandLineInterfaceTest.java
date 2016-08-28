@@ -124,4 +124,12 @@ public class CommandLineInterfaceTest {
         softly.assertAll();
     }
 
+    @Test
+    public void properScriptIdentification() {
+        System.setProperty("os.name", "Some Windows System");
+        Assertions.assertThat(CommandLineInterface.getScriptIdentifier()).isEqualTo("robozonky.bat");
+        System.setProperty("os.name", "Any Other System");
+        Assertions.assertThat(CommandLineInterface.getScriptIdentifier()).isEqualTo("robozonky.sh");
+    }
+
 }

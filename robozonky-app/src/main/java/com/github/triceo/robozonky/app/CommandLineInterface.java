@@ -223,11 +223,13 @@ class CommandLineInterface {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
     }
 
+    static String getScriptIdentifier() {
+        return System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
+    }
+
     private static void printHelp(final Options options, final String message, final boolean isError) {
-        final HelpFormatter formatter = new HelpFormatter();
-        final String scriptName = System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
-        formatter.printHelp(scriptName, null, options, "", true);
-        System.out.println(isError ? "Error: " + message : message);
+        new HelpFormatter().printHelp(CommandLineInterface.getScriptIdentifier(), null, options,
+                isError ? "Error: " + message : message, true);
     }
 
     public void printHelp(final String message, final boolean isError) {
