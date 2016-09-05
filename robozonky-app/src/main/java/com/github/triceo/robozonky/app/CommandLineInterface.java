@@ -16,25 +16,14 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Processes command line arguments and provides access to their values.
@@ -43,6 +32,9 @@ class CommandLineInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
 
+    static final Option OPTION_PUSH_KEY = Option.builder("k").hasArg().longOpt("key")
+            .argName("PushBullet API key").desc("Api key to pushBullet account which is subscribed to zonky.cz channel https://www.pushbullet.com/channel?tag=zonky")
+            .build();
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
             .build();
@@ -109,6 +101,7 @@ class CommandLineInterface {
         ops.add(CommandLineInterface.OPTION_PASSWORD);
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
         ops.add(CommandLineInterface.OPTION_FAULT_TOLERANT);
+        ops.add(CommandLineInterface.OPTION_PUSH_KEY);
         // join all in a single config
         final Options options = new Options();
         options.addOptionGroup(operatingModes);
@@ -208,6 +201,10 @@ class CommandLineInterface {
 
     public Optional<Integer> getTokenRefreshBeforeExpirationInSeconds() {
         return this.getIntegerOptionValue(CommandLineInterface.OPTION_USE_TOKEN);
+    }
+
+    public Optional<String> getPushKey(){
+        return this.getOptionValue(CommandLineInterface.OPTION_PUSH_KEY);
     }
 
     public Optional<File> getKeyStoreLocation() {

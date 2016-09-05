@@ -16,17 +16,17 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 import org.apache.commons.cli.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 
 /**
  * Represents different modes of operation of the application, their means of selection and setup.
@@ -119,6 +119,7 @@ enum OperatingMode {
 
     /**
      * Option to be selected on the command line in order to activate this mode.
+     *
      * @return Option in question.
      */
     public Option getSelectingOption() {
@@ -127,6 +128,7 @@ enum OperatingMode {
 
     /**
      * Other options that are valid for this operating mode.
+     *
      * @return Options in question.
      */
     public Collection<Option> getOtherOptions() {

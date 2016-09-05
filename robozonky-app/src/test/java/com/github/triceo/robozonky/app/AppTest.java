@@ -16,6 +16,16 @@
 
 package com.github.triceo.robozonky.app;
 
+import com.github.triceo.robozonky.Investor;
+import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.Wallet;
+import com.github.triceo.robozonky.remote.ZonkyApi;
+import org.assertj.core.api.Assertions;
+import org.junit.Assume;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,17 +35,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
-import com.github.triceo.robozonky.Investor;
-import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.Wallet;
-import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZotifyApi;
-import org.assertj.core.api.Assertions;
-import org.junit.Assume;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 public class AppTest {
 
@@ -102,15 +101,6 @@ public class AppTest {
         Mockito.when(ctx.getOperatingMode()).thenReturn(mode);
         Mockito.when(ctx.getDryRunBalance()).thenReturn(10000);
         return ctx;
-    }
-
-    @Test
-    public void simpleInvestment() {
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
-        Mockito.when(api.getWallet()).thenReturn(new Wallet(0, 0, BigDecimal.ZERO, BigDecimal.ZERO));
-        final Collection<Investment> result =
-                App.invest(Mockito.mock(AppContext.class), api, Mockito.mock(ZotifyApi.class));
-        Assertions.assertThat(result).isEmpty();
     }
 
     @Test

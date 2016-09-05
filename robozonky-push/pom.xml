@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>robozonky</artifactId>
+        <groupId>com.github.triceo.robozonky</groupId>
+        <version>1.5.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.triceo.robozonky</groupId>
+    <artifactId>robozonky-push</artifactId>
+<dependencies>
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-util -->
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-util</artifactId>
+        <version>9.4.0.M0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-http -->
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-http</artifactId>
+        <version>9.4.0.M0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-io -->
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-io</artifactId>
+        <version>9.4.0.M0</version>
+    </dependency>
+
+
+    <dependency>
+        <groupId>org.java-websocket</groupId>
+        <artifactId>Java-WebSocket</artifactId>
+        <version>1.3.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-websocket -->
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-websocket -->
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-websocket</artifactId>
+        <version>8.1.19.v20160209</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-api -->
+    <dependency>
+        <groupId>org.eclipse.jetty.websocket</groupId>
+        <artifactId>websocket-api</artifactId>
+        <version>9.4.0.M0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-client -->
+    <dependency>
+        <groupId>org.eclipse.jetty.websocket</groupId>
+        <artifactId>websocket-client</artifactId>
+        <version>9.4.0.M0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+
+</dependencies>
+
+</project>

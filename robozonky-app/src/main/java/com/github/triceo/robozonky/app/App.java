@@ -15,6 +15,17 @@
  */
 package com.github.triceo.robozonky.app;
 
+import com.github.triceo.robozonky.Investor;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.version.VersionCheck;
+import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.ZonkyApi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.NotAllowedException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,20 +43,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotAllowedException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-
-import com.github.triceo.robozonky.Investor;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.version.VersionCheck;
-import com.github.triceo.robozonky.authentication.Authentication;
-import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZotifyApi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class App {
 
@@ -67,31 +64,8 @@ class App {
      * @param auth
      * @return True if login succeeded and the algorithm moved over to investing.
      * @throws RuntimeException Any exception on login and logout will be caught and logged, therefore any runtime
-     * exception thrown is a problem during the investing operation itself.
+     *                          exception thrown is a problem during the investing operation itself.
      */
-    private static boolean core(final AppContext ctx, final AuthenticationHandler auth) {
-        App.LOGGER.info("===== RoboZonky at your service! =====");
-        final boolean isDryRun = ctx.isDryRun();
-        if (isDryRun) {
-            App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
-        }
-        final Authentication login;
-        try { // catch this exception here, so that anything coming from the invest() method can be thrown separately
-            login = auth.login();
-        } catch (final BadRequestException ex) {
-            App.LOGGER.error("Failed authenticating with Zonky.", ex);
-            return false;
-        }
-        final Collection<Investment> result = App.invest(ctx, login.getZonkyApi(), login.getZotifyApi());
-        try { // log out and ignore any resulting error
-            auth.logout(login);
-        } catch (final RuntimeException ex) {
-            App.LOGGER.warn("Failed logging out of Zonky.", ex);
-        }
-        App.storeInvestmentsMade(result, isDryRun);
-        App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
-        return true;
-    }
 
     public static void main(final String... args) {
         App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
@@ -118,7 +92,7 @@ class App {
             if (!optionalAuth.isPresent()) {
                 App.exit(ReturnCode.ERROR_SETUP, latestVersion);
             }
-            final boolean loginSucceeded = App.core(optionalCtx.get(), optionalAuth.get());
+            final boolean loginSucceeded = new ZonkyCore(optionalCtx.get(), optionalAuth.get(), cli.getPushKey().get()).work();
             if (!loginSucceeded) {
                 App.exit(ReturnCode.ERROR_SETUP, latestVersion);
             } else {
@@ -142,7 +116,7 @@ class App {
     }
 
     private static void handleUnexpectedError(final RuntimeException ex, final Future<String> latestVersion) {
-        App.LOGGER.error("Unexpected error, likely RoboZonky bug." , ex);
+        App.LOGGER.error("Unexpected error, likely RoboZonky bug.", ex);
         App.exit(ReturnCode.ERROR_UNEXPECTED, latestVersion);
     }
 
@@ -154,6 +128,7 @@ class App {
 
     /**
      * Check the current version against a different version. Print log message with results.
+     *
      * @param futureVersion Version to check against.
      * @return True when a more recent version was found.
      */
@@ -213,12 +188,6 @@ class App {
             final Optional<Investment> optional = i.invest(ctx.getLoanId(), ctx.getLoanAmount());
             return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
         };
-    }
-
-    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky, final ZotifyApi zotify) {
-        final BigDecimal balance = App.getAvailableBalance(ctx, zonky);
-        final Investor i = new Investor(zonky, zotify, ctx.getInvestmentStrategy(), balance);
-        return App.getInvestingFunction(ctx).apply(i);
     }
 
 }
