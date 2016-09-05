@@ -9,6 +9,7 @@
         <module>robozonky-app</module>
         <module>robozonky-strategy-simple</module>
         <module>robozonky-strategy-rules</module>
+        <module>robozonky-push</module>
     </modules>
     <packaging>pom</packaging>
     <name>RoboZonky: Easy automated investing with Zonky</name>
