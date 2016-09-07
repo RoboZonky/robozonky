@@ -1,5 +1,8 @@
 install: true
 script: "mvn clean post-integration-test"
 language: java
+os:
+  - linux
+  - osx
 jdk:
   - oraclejdk8
