@@ -46,7 +46,10 @@ public class Authenticator {
         Authenticator.LOGGER.trace("Initializing RESTEasy.");
         RESTEASY = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(Authenticator.RESTEASY);
-        RESTEASY.registerProvider(ResteasyJackson2Provider.class);
+        final Class<?> jsonProvider = ResteasyJackson2Provider.class;
+        if (!Authenticator.RESTEASY.isRegistered(jsonProvider)) { // https://github.com/triceo/robozonky/issues/56
+            Authenticator.RESTEASY.registerProvider(jsonProvider);
+        }
         Authenticator.LOGGER.trace("RESTEasy initialized.");
     }
 
