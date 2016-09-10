@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,14 +30,16 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class StrategyLoadingTest {
 
-    private static final String root = "src/main/assembly/resources/";
+    private static String getRoot() {
+        return IoTestUtil.findMainSource("assembly", "resources");
+    }
 
     @Parameterized.Parameters
     public static Object[][] getParameters() {
         return new File[][] {
-            new File[] {new File(root, "robozonky-balanced.cfg")},
-                new File[] {new File(root, "robozonky-conservative.cfg")},
-                new File[] {new File(root, "robozonky-dynamic.cfg")}
+            new File[] {new File(StrategyLoadingTest.getRoot(), "robozonky-balanced.cfg")},
+                new File[] {new File(StrategyLoadingTest.getRoot(), "robozonky-conservative.cfg")},
+                new File[] {new File(StrategyLoadingTest.getRoot(), "robozonky-dynamic.cfg")}
         };
     }
 

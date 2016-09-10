@@ -23,44 +23,54 @@ class AppContext {
     private final OperatingMode operatingMode;
     private final boolean isDryRun;
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
-    private final int captchaDelayInSeconds;
+    private final int captchaDelayInSeconds, sleepPeriodInMinutes;
 
-    public AppContext(final int loanId, final int loanAmount, final int captchaDelayInSeconds) {
+    public AppContext(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
+                      final int captchaDelayInSeconds) {
         this.operatingMode = OperatingMode.USER_DRIVEN;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
+        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.isDryRun = false;
     }
 
-    public AppContext(final int loanId, final int loanAmount, final int captchaDelayInSeconds,
-                      final int dryRunBalance) {
+    public AppContext(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
+                      final int captchaDelayInSeconds, final int dryRunBalance) {
         this.operatingMode = OperatingMode.USER_DRIVEN;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
+        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.dryRunBalance = dryRunBalance;
         this.isDryRun = true;
     }
 
-    public AppContext(final InvestmentStrategy investmentStrategy, final int captchaDelayInSeconds) {
+    public AppContext(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
+                      final int captchaDelayInSeconds) {
         this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
         this.investmentStrategy = investmentStrategy;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
+        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.isDryRun = false;
     }
 
-    public AppContext(final InvestmentStrategy investmentStrategy, final int captchaDelayInSeconds,
-                      final int dryRunBalance) {
+    public AppContext(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
+                      final int captchaDelayInSeconds, final int dryRunBalance) {
         this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
         this.investmentStrategy = investmentStrategy;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.dryRunBalance = dryRunBalance;
+        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.isDryRun = true;
     }
 
     public int getCaptchaDelayInSeconds() {
         return captchaDelayInSeconds;
+    }
+
+    public int getSleepPeriodInMinutes() {
+        return sleepPeriodInMinutes;
     }
 
     public OperatingMode getOperatingMode() {

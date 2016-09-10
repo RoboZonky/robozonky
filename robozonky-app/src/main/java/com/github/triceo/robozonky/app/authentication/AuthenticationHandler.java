@@ -39,9 +39,6 @@ import org.slf4j.LoggerFactory;
 
 public class AuthenticationHandler {
 
-    private static final String ZONKY_URL = "https://api.zonky.cz";
-    private static final String ZOTIFY_URL = "http://zotify.cz";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandler.class);
 
     /**

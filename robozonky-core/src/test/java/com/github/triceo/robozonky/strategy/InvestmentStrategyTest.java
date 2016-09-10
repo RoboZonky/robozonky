@@ -18,20 +18,23 @@ package com.github.triceo.robozonky.strategy;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Test;
 
 public class InvestmentStrategyTest {
 
-    private static final File CORRECT_FILE =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/strategy-correct.cfg");
+    private static final InputStream CORRECT_STRATEGY =
+            InvestmentStrategyTest.class.getResourceAsStream("strategy-correct.cfg");
 
     @Test
-    public void loadStrategy() throws InvestmentStrategyParseException {
-        final Optional<InvestmentStrategy> inv = InvestmentStrategy.load(InvestmentStrategyTest.CORRECT_FILE);
+    public void loadStrategy() throws InvestmentStrategyParseException, IOException {
+        final File strategyFile = IoTestUtil.streamToFile(InvestmentStrategyTest.CORRECT_STRATEGY);
+        final Optional<InvestmentStrategy> inv = InvestmentStrategy.load(strategyFile);
         Assertions.assertThat(inv).isEmpty(); // no strategies are on the classpath
     }
 

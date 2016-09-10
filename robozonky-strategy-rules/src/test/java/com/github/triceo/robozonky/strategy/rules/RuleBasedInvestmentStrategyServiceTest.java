@@ -17,6 +17,8 @@
 package com.github.triceo.robozonky.strategy.rules;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -26,20 +28,22 @@ import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class RuleBasedInvestmentStrategyServiceTest {
 
-    private static final File FILE =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/rules/ExampleStrategy.xlsx");
+    private static final InputStream FILE =
+            RuleBasedInvestmentStrategyServiceTest.class.getResourceAsStream("ExampleStrategy.xlsx");
 
     @Test
-    public void simple() throws InvestmentStrategyParseException {
+    public void simple() throws InvestmentStrategyParseException, IOException {
         final RuleBasedInvestmentStrategyService s = new RuleBasedInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(RuleBasedInvestmentStrategyServiceTest.FILE)).isTrue();
-        final InvestmentStrategy is = s.parse(RuleBasedInvestmentStrategyServiceTest.FILE);
+        final File f = IoTestUtil.streamToFile(RuleBasedInvestmentStrategyServiceTest.FILE, ".xlsx");
+        Assertions.assertThat(s.isSupported(f)).isTrue();
+        final InvestmentStrategy is = s.parse(f);
         Assertions.assertThat(is).isNotNull();
         // let's make up some loans; B will not be accepted, D will be prioritized over A
         final Loan aaaaa = Mockito.mock(Loan.class); // will not be accepted since AAAAA are ignored

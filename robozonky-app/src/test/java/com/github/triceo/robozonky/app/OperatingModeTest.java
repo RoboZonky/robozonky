@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Assume;
@@ -130,9 +131,8 @@ public class OperatingModeTest {
         Mockito.when(cli.getLoanId()).thenReturn(Optional.empty());
         Mockito.when(cli.getLoanAmount()).thenReturn(Optional.empty());
         Mockito.when(cli.getStrategyConfigurationFilePath())
-                .thenReturn(Optional.of("src/main/assembly/resources/robozonky-dynamic.cfg"));
-        final Optional<AppContext> optionalResult =
-                OperatingMode.STRATEGY_DRIVEN.setup(cli);
+                .thenReturn(Optional.of(IoTestUtil.findMainSource("assembly", "resources", "robozonky-dynamic.cfg")));
+        final Optional<AppContext> optionalResult = OperatingMode.STRATEGY_DRIVEN.setup(cli);
         Assertions.assertThat(optionalResult).isPresent();
         final AppContext result = optionalResult.get();
         Assertions.assertThat(result.getInvestmentStrategy()).isNotNull();

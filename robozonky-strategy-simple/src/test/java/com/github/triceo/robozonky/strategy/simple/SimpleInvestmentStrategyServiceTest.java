@@ -18,31 +18,33 @@ package com.github.triceo.robozonky.strategy.simple;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class SimpleInvestmentStrategyServiceTest {
 
-    private static final File PROPER =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-sample.cfg");
-    private static final File IMPROPER =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-sample.badext");
-    private static final File WRONG_TERMS =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-wrongterms.cfg");
-    private static final File WRONG_ASKS =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-wrongasks.cfg");
-    private static final File NONEXISTENT =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/nonexistent.cfg");
+    private static final InputStream PROPER =
+            SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-sample.cfg");
+    private static final InputStream IMPROPER =
+            SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-sample.badext");
+    private static final InputStream WRONG_TERMS =
+            SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-wrongterms.cfg");
+    private static final InputStream WRONG_ASKS =
+            SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-wrongasks.cfg");
+    private static final File NONEXISTENT = new File("strategy-nonexistent.cfg");
 
     @Test
-    public void proper() throws InvestmentStrategyParseException {
+    public void proper() throws InvestmentStrategyParseException, IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.PROPER, ".cfg");
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(SimpleInvestmentStrategyServiceTest.PROPER)).isTrue();
-        Assertions.assertThat(s.parse(SimpleInvestmentStrategyServiceTest.PROPER)).isNotNull();
+        Assertions.assertThat(s.isSupported(f)).isTrue();
+        Assertions.assertThat(s.parse(f)).isNotNull();
     }
 
     @Test(expected = InvestmentStrategyParseException.class)
@@ -53,21 +55,24 @@ public class SimpleInvestmentStrategyServiceTest {
     }
 
     @Test
-    public void improper() throws InvestmentStrategyParseException {
+    public void improper() throws InvestmentStrategyParseException, IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.IMPROPER);
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(SimpleInvestmentStrategyServiceTest.IMPROPER)).isFalse();
+        Assertions.assertThat(s.isSupported(f)).isFalse();
     }
 
     @Test(expected = InvestmentStrategyParseException.class)
-    public void wrongTerms() throws InvestmentStrategyParseException {
+    public void wrongTerms() throws InvestmentStrategyParseException, IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_TERMS, ".cfg");
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        s.parse(SimpleInvestmentStrategyServiceTest.WRONG_TERMS);
+        s.parse(f);
     }
 
     @Test(expected = InvestmentStrategyParseException.class)
-    public void wrongAsks() throws InvestmentStrategyParseException {
+    public void wrongAsks() throws InvestmentStrategyParseException, IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_ASKS, ".cfg");
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        s.parse(SimpleInvestmentStrategyServiceTest.WRONG_ASKS);
+        s.parse(f);
     }
 
 

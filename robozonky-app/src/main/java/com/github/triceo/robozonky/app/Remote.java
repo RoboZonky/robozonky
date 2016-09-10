@@ -19,14 +19,15 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.time.Instant;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,9 +41,14 @@ import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The base investing algorithm, ready to be executed with {@link ScheduledExecutorService}.
+ */
 public class Remote implements Callable<Optional<Collection<Investment>>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Remote.class);
+    static final Path MARKETPLACE_TIMESTAMP =
+            Paths.get(System.getProperty("user.dir"), "robozonky.lastMarketplaceCheck.timestamp");
 
     static Optional<File> storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
         final String suffix = dryRun ? "dry" : "invested";
@@ -70,11 +76,21 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         }
     }
 
-    static Collection<Loan> getAvailableLoans(final ZotifyApi api, final int delay) {
-        Remote.LOGGER.info("Ignoring loans published earlier than {} seconds ago.", delay);
-        return api.getLoans().stream()
-                .filter(l -> Instant.now().isAfter(l.getDatePublished().plus(delay, ChronoUnit.SECONDS)))
-                .collect(Collectors.toList());
+    static Collection<Loan> getAvailableLoans(final AppContext ctx, final ZotifyApi api) {
+        final MarketplaceView view = Marketplace.from(api).newView(ctx, Remote.MARKETPLACE_TIMESTAMP);
+        final boolean shouldSleep = view.shouldSleep();
+        /*
+         * only persist (= change marketplace check timestamp) when we're intending to execute some actual investing,
+         * otherwise the pre-configured awakening would never happen.
+         */
+        if (shouldSleep) {
+            Remote.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
+            return Collections.emptyList();
+        } else {
+            view.persist();
+            Remote.LOGGER.info("Ignoring loans published earlier than {} seconds ago.", ctx.getCaptchaDelayInSeconds());
+            return Collections.unmodifiableList(view.getAvailableLoans());
+        }
     }
 
     static BigDecimal getAvailableBalance(final AppContext ctx, final ZonkyApi api) {
@@ -108,20 +124,16 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         this.auth = authenticationHandler;
     }
 
-    /**
-     * Core investing algorithm. Will log in, invest and log out.
-     *
-     * @return True if login succeeded and the algorithm moved over to investing.
-     * @throws RuntimeException Any exception on login and logout will be caught and logged, therefore any runtime
-     * exception thrown is a problem during the investing operation itself.
-     */
     public Optional<Collection<Investment>> call() {
         final boolean isDryRun = this.ctx.isDryRun();
         if (isDryRun) {
             Remote.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
         final ApiProvider apiProvider = new ApiProvider();
-        final Collection<Loan> loans = Remote.getAvailableLoans(apiProvider.cache(), ctx.getCaptchaDelayInSeconds());
+        final Collection<Loan> loans = Remote.getAvailableLoans(this.ctx, apiProvider.cache());
+        if (loans.isEmpty()) { // let's fall asleep
+            return Optional.of(Collections.emptyList());
+        }
         final Optional<Collection<Investment>> optionalResult =
                 this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, loans));
         if (optionalResult.isPresent()) {

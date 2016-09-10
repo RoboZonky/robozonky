@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.strategy.simple;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,12 +35,12 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class IncompleteStrategyTest {
 
-    private static final File PROPER =
-            new File("src/test/resources/com/github/triceo/robozonky/strategy/simple/strategy-sample.cfg");
+    private static final InputStream PROPER = IncompleteStrategyTest.class.getResourceAsStream("strategy-sample.cfg");
 
     @Parameterized.Parameters(name = "removed \"{0}\" from {1}")
     public static Collection<Object[]> getParameters() throws IOException {
-        final List<String> lines = Files.lines(IncompleteStrategyTest.PROPER.toPath()).collect(Collectors.toList());
+        final File f = IoTestUtil.streamToFile(IncompleteStrategyTest.PROPER);
+        final List<String> lines = Files.lines(f.toPath()).collect(Collectors.toList());
         final Collection<Object[]> files = new ArrayList<>(lines.size());
         for (int i = 0; i < lines.size(); i++) {
             final List<String> newLines = new ArrayList<>(lines);

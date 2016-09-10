@@ -46,10 +46,10 @@ import org.mockito.Mockito;
 
 /**
  * This class mixes tests for both {@link App} and {@link Remote}, because if I separate them, PITest s***s the bed,
- * failing with a very well hidden error message
+ * failing with a superbly hidden error message
  * "Could not initialize class java.nio.file.FileSystems$DefaultFileSystemHolder" and no stack trace.
  */
-public class AppTest {
+public class AppTest extends BaseMarketplaceTest {
 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
@@ -129,19 +129,23 @@ public class AppTest {
     public void properLoanDelay() {
         final int delayInSeconds = 120;
         final Loan loanOldEnough = Mockito.mock(Loan.class);
+        Mockito.when(loanOldEnough.getRemainingInvestment()).thenReturn(1000.0);
         Mockito.when(loanOldEnough.getDatePublished())
                 .thenReturn(Instant.now().minus(delayInSeconds + 1, ChronoUnit.SECONDS));
         final Loan loanOldExactly = Mockito.mock(Loan.class);
+        Mockito.when(loanOldExactly.getRemainingInvestment()).thenReturn(200.0);
         Mockito.when(loanOldExactly.getDatePublished())
                 .thenReturn(Instant.now().minus(delayInSeconds, ChronoUnit.SECONDS));
         final Loan youngLoan = Mockito.mock(Loan.class);
+        Mockito.when(youngLoan.getRemainingInvestment()).thenReturn(600.0);
         Mockito.when(youngLoan.getDatePublished())
                 .thenReturn(Instant.now().minus(delayInSeconds - 1, ChronoUnit.SECONDS));
         final ZotifyApi apiMock = Mockito.mock(ZotifyApi.class);
         Mockito.when(apiMock.getLoans()).thenReturn(Arrays.asList(loanOldEnough, loanOldExactly, youngLoan));
         final AppContext ctx = Mockito.mock(AppContext.class);
         Mockito.when(ctx.getCaptchaDelayInSeconds()).thenReturn(delayInSeconds);
-        final Collection<Loan> result = Remote.getAvailableLoans(apiMock, delayInSeconds);
+        Mockito.when(ctx.getSleepPeriodInMinutes()).thenReturn(60);
+        final Collection<Loan> result = Remote.getAvailableLoans(ctx, apiMock);
         Assertions.assertThat(result).containsOnly(loanOldEnough, loanOldExactly);
     }
 

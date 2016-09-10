@@ -43,6 +43,7 @@ class   CommandLineInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
     private static final int DEFAULT_CAPTCHA_DELAY_SECONDS = 2 * 60;
+    private static final int DEFAULT_SLEEP_PERIOD_MINUTES = 60;
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -71,6 +72,9 @@ class   CommandLineInterface {
     static final Option OPTION_CLOSED_SEASON = Option.builder("c").hasArg()
             .argName("Delay in seconds before new loans are made available for investing.").longOpt("closed-season")
             .desc("Allows to override the default CAPTCHA loan delay.").build();
+    static final Option OPTION_ZONK = Option.builder("z").hasArg()
+            .argName("The longest amount of time in minutes for which Zonky is allowed to sleep.").longOpt("zonk")
+            .desc("Allows to override the default length of sleep period.").build();
 
     /**
      * Convert the command line arguments into a string and log it.
@@ -114,6 +118,7 @@ class   CommandLineInterface {
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
         ops.add(CommandLineInterface.OPTION_FAULT_TOLERANT);
         ops.add(CommandLineInterface.OPTION_CLOSED_SEASON);
+        ops.add(CommandLineInterface.OPTION_ZONK);
         // join all in a single config
         final Options options = new Options();
         options.addOptionGroup(operatingModes);
@@ -216,6 +221,13 @@ class   CommandLineInterface {
                 this.getIntegerOptionValue(CommandLineInterface.OPTION_CLOSED_SEASON)
                         .orElseThrow(() -> new IllegalStateException("Missing mandatory argument value.")) :
                 CommandLineInterface.DEFAULT_CAPTCHA_DELAY_SECONDS;
+    }
+
+    public int getMaximumSleepPeriodInMinutes() { // FIXME do not allow negaive values
+        return this.hasOption(CommandLineInterface.OPTION_ZONK) ?
+                this.getIntegerOptionValue(CommandLineInterface.OPTION_ZONK)
+                        .orElseThrow(() -> new IllegalStateException("Missing mandatory argument value.")) :
+                CommandLineInterface.DEFAULT_SLEEP_PERIOD_MINUTES;
     }
 
     public Optional<Integer> getTokenRefreshBeforeExpirationInSeconds() {
