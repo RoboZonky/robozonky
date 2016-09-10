@@ -28,8 +28,18 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.remote.Api;
 import com.github.triceo.robozonky.remote.Loan;
 
+/**
+ * Simple abstraction over {@link Api#getLoans()} which provides additional intelligence. Use {@link #from(Api)} as
+ * entry point to the API and {@link #newView(AppContext, Path)} to work with the sleep functionality.
+ */
 class Marketplace {
 
+    /**
+     * Instantiate the marketplace.
+     *
+     * @param api Remote API from which to load all loans.
+     * @return Marketplace backed by the API.
+     */
     public static Marketplace from(final Api api) {
         return new Marketplace(api.getLoans());
     }
@@ -43,22 +53,45 @@ class Marketplace {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Retrieve all loans in the marketplace which have not yet been fully funded.
+     * @return Ordered by publishing time descending.
+     */
     public List<Loan> getAllLoans() {
         return this.recentLoansDescending;
     }
 
+    /**
+     * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published at least
+     * a certain time ago.
+     * @param delayInSeconds How long ago at the very least should the loans have been published.
+     * @return Ordered by publishing time descending.
+     */
     public List<Loan> getLoansOlderThan(final int delayInSeconds) {
         return this.recentLoansDescending.stream()
                 .filter(l -> Instant.now().isAfter(l.getDatePublished().plus(delayInSeconds, ChronoUnit.SECONDS)))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published past a
+     * certain point in time.
+     * @param instant The earliest point in time for the loans to published on.
+     * @return Ordered by publishing time descending.
+     */
     public List<Loan> getLoansNewerThan(final Instant instant) {
         return this.recentLoansDescending.stream()
                 .filter(l -> l.getDatePublished().isAfter(instant))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Entry point to the sleep functionality.
+     *
+     * @param ctx Application context.
+     * @param state Path to the file holding marketplace state from the last time this application was run.
+     * @return Additional logic based on application settings.
+     */
     public MarketplaceView newView(final AppContext ctx, final Path state) {
         return new MarketplaceView(ctx, this, state);
     }

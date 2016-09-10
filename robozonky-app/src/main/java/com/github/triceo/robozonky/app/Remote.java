@@ -79,15 +79,10 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     static Collection<Loan> getAvailableLoans(final AppContext ctx, final ZotifyApi api) {
         final MarketplaceView view = Marketplace.from(api).newView(ctx, Remote.MARKETPLACE_TIMESTAMP);
         final boolean shouldSleep = view.shouldSleep();
-        /*
-         * only persist (= change marketplace check timestamp) when we're intending to execute some actual investing,
-         * otherwise the pre-configured awakening would never happen.
-         */
         if (shouldSleep) {
             Remote.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
             return Collections.emptyList();
         } else {
-            view.persist();
             Remote.LOGGER.info("Ignoring loans published earlier than {} seconds ago.", ctx.getCaptchaDelayInSeconds());
             return Collections.unmodifiableList(view.getAvailableLoans());
         }

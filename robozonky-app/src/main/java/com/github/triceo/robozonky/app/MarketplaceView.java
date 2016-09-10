@@ -30,6 +30,11 @@ import com.github.triceo.robozonky.remote.Loan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Decides whether or not the application should fall asleep because of general marketplace inactivity. Uses two sources
+ * of data to make the decision: the marketplace, and the app's internal state concerning the last time the marketplace
+ * was checked.
+ */
 public class MarketplaceView {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketplaceView.class);
@@ -39,7 +44,7 @@ public class MarketplaceView {
     private final Path state;
     private final Marketplace marketplace;
 
-    public MarketplaceView(final AppContext ctx, final Marketplace marketplace, final Path state) {
+    MarketplaceView(final AppContext ctx, final Marketplace marketplace, final Path state) {
         this.closedSeasonInSeconds = ctx.getCaptchaDelayInSeconds();
         this.sleepIntervalInMinutes = ctx.getSleepPeriodInMinutes();
         this.marketplace = marketplace;
@@ -64,31 +69,51 @@ public class MarketplaceView {
         return this.marketplace.getLoansOlderThan(closedSeasonInSeconds).stream()
                 .findFirst()
                 .map(Loan::getDatePublished)
-                .orElse(Instant.EPOCH);
+                .orElse(Instant.now());
     }
 
+    /**
+     * Retrieves loans that are available for robotic investing, ie. not protected by CAPTCHA.
+     *
+     * @return Loans ordered by their time of publishing, descending.
+     */
     public List<Loan> getAvailableLoans() {
         return this.marketplace.getLoansOlderThan(closedSeasonInSeconds);
     }
 
+    /**
+     * Whether or not the application should fall asleep and not make any further contact with API.
+     *
+     * @return True if no further contact should be made during this run of the app.
+     */
     public boolean shouldSleep() {
-        final Instant lastMarketplaceAction = this.getLatestMarketplaceAction();
-        if (!this.marketplace.getLoansNewerThan(lastMarketplaceAction).isEmpty()) {
+        final Instant lastKnownMarketplaceAction = this.getLatestMarketplaceAction();
+        boolean shouldSleep = true;
+        if (!this.marketplace.getLoansNewerThan(lastKnownMarketplaceAction).isEmpty()) {
             // try investing since there are loans we haven't seen yet
             MarketplaceView.LOGGER.debug("Will not sleep due to new loans.");
-            return false;
-        } else if (lastMarketplaceAction.plus(sleepIntervalInMinutes, ChronoUnit.MINUTES).isAfter(Instant.now())) {
+            shouldSleep = false;
+        } else if (lastKnownMarketplaceAction.plus(sleepIntervalInMinutes, ChronoUnit.MINUTES).isAfter(Instant.now())) {
             // try investing since we haven't tried in a while; maybe we have some more funds now
             MarketplaceView.LOGGER.debug("Will not sleep due to already sleeping too much.");
-            return false;
-        } else { // don't try investing since nothing changed
-            return true;
+            shouldSleep = false;
         }
+        if (shouldSleep) {
+            /*
+             * only persist (= change marketplace check timestamp) when we're intending to execute some actual
+             * investing, otherwise the pre-configured awakening would never happen.
+             */
+            this.persist(lastKnownMarketplaceAction);
+        }
+        return shouldSleep;
     }
 
-    public void persist() {
+    private void persist(final Instant stateBasedLastAction) {
         try (final BufferedWriter writer = Files.newBufferedWriter(this.state, StandardCharsets.UTF_8)) {
-            final String result = this.getLastActionableLoanPublishing().toString();
+            final Instant marketplaceBasedLastAction = this.getLastActionableLoanPublishing();
+            final Instant moreRecent = marketplaceBasedLastAction.isAfter(stateBasedLastAction)
+                    ? marketplaceBasedLastAction : stateBasedLastAction;
+            final String result = moreRecent.toString();
             MarketplaceView.LOGGER.debug("New marketplace last checked time is {},", result);
             writer.write(result);
         } catch (final IOException ex) {
