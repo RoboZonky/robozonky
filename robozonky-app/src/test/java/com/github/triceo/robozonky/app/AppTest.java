@@ -20,6 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -27,10 +30,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.ws.rs.BadRequestException;
 
+import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZotifyApi;
@@ -108,11 +113,33 @@ public class AppTest {
     }
 
     @Test
+    public void properLoanDelay() {
+        final int delayInSeconds = 120;
+        final Loan loanOldEnough = Mockito.mock(Loan.class);
+        Mockito.when(loanOldEnough.getDatePublished())
+                .thenReturn(Instant.now().minus(delayInSeconds + 1, ChronoUnit.SECONDS));
+        final Loan loanOldExactly = Mockito.mock(Loan.class);
+        Mockito.when(loanOldExactly.getDatePublished())
+                .thenReturn(Instant.now().minus(delayInSeconds, ChronoUnit.SECONDS));
+        final Loan youngLoan = Mockito.mock(Loan.class);
+        Mockito.when(youngLoan.getDatePublished())
+                .thenReturn(Instant.now().minus(delayInSeconds - 1, ChronoUnit.SECONDS));
+        final ZotifyApi apiMock = Mockito.mock(ZotifyApi.class);
+        Mockito.when(apiMock.getLoans()).thenReturn(Arrays.asList(loanOldEnough, loanOldExactly, youngLoan));
+        final ApiProvider apis = Mockito.mock(ApiProvider.class);
+        Mockito.when(apis.cache()).thenReturn(apiMock);
+        final AppContext ctx = Mockito.mock(AppContext.class);
+        Mockito.when(ctx.getCaptchaDelayInSeconds()).thenReturn(delayInSeconds);
+        Mockito.when(ctx.getApiProvider()).thenReturn(apis);
+        final Collection<Loan> result = App.getAvailableLoans(ctx);
+        Assertions.assertThat(result).containsOnly(loanOldEnough, loanOldExactly);
+    }
+
+    @Test
     public void simpleInvestment() {
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getWallet()).thenReturn(new Wallet(0, 0, BigDecimal.ZERO, BigDecimal.ZERO));
-        final Collection<Investment> result =
-                App.invest(Mockito.mock(AppContext.class), api, Mockito.mock(ZotifyApi.class));
+        final Collection<Investment> result = App.invest(Mockito.mock(AppContext.class), api, null);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -121,9 +148,9 @@ public class AppTest {
         final AppContext ctx = AppTest.mockContext(OperatingMode.STRATEGY_DRIVEN);
         final Investor i = Mockito.mock(Investor.class);
         final Investment investment = Mockito.mock(Investment.class);
-        Mockito.when(i.invest()).thenReturn(Collections.singletonList(investment));
-        final Collection<Investment> result = App.getInvestingFunction(ctx).apply(i);
-        Mockito.verify(i, Mockito.times(1)).invest();
+        Mockito.when(i.invest(Matchers.any(), Matchers.any())).thenReturn(Collections.singletonList(investment));
+        final Collection<Investment> result = App.getInvestingFunction(ctx, null).apply(i);
+        Mockito.verify(i, Mockito.times(1)).invest(Matchers.any(), Matchers.any());
         Assertions.assertThat(result).containsExactly(investment);
     }
 
@@ -133,13 +160,13 @@ public class AppTest {
         final Investor i = Mockito.mock(Investor.class);
         // check what happens when nothing is invested)
         Mockito.when(i.invest(Matchers.anyInt(), Matchers.anyInt())).thenReturn(Optional.empty());
-        final Collection<Investment> result = App.getInvestingFunction(ctx).apply(i);
+        final Collection<Investment> result = App.getInvestingFunction(ctx, null).apply(i);
         Mockito.verify(i, Mockito.times(1)).invest(ctx.getLoanId(), ctx.getLoanAmount());
         Assertions.assertThat(result).isEmpty();
         // check what happens when something is invested
         final Investment investment = Mockito.mock(Investment.class);
         Mockito.when(i.invest(Matchers.anyInt(), Matchers.anyInt())).thenReturn(Optional.of(investment));
-        final Collection<Investment> result2 = App.getInvestingFunction(ctx).apply(i);
+        final Collection<Investment> result2 = App.getInvestingFunction(ctx, null).apply(i);
         Assertions.assertThat(result2).containsExactly(investment);
     }
 
@@ -161,14 +188,18 @@ public class AppTest {
     public void loginFailOnCredentials() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(BadRequestException.class).when(auth).login();
-        Assertions.assertThat(App.core(Mockito.mock(AppContext.class), auth)).isFalse();
+        final AppContext ctx = Mockito.mock(AppContext.class);
+        Mockito.when(ctx.getApiProvider()).thenReturn(new ApiProvider());
+        Assertions.assertThat(App.core(ctx, auth)).isFalse();
     }
 
     @Test(expected = IllegalStateException.class)
     public void loginFailOnUnknownException() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).login();
-        App.core(Mockito.mock(AppContext.class), auth);
+        final AppContext ctx = Mockito.mock(AppContext.class);
+        Mockito.when(ctx.getApiProvider()).thenReturn(new ApiProvider());
+        App.core(ctx, auth);
     }
 
     @Test
@@ -181,6 +212,7 @@ public class AppTest {
         Mockito.doThrow(IllegalStateException.class).when(auth).logout(Matchers.eq(result));
         // prepare context for a 0-balance dry run investing run
         final AppContext ctx = Mockito.mock(AppContext.class);
+        Mockito.when(ctx.getApiProvider()).thenReturn(new ApiProvider());
         Mockito.when(ctx.getOperatingMode()).thenReturn(OperatingMode.USER_DRIVEN);
         Mockito.when(ctx.getLoanId()).thenReturn(1);
         Mockito.when(ctx.getLoanAmount()).thenReturn(200);

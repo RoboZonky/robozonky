@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.triceo.robozonky.authentication;
 
 import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
 
+import com.github.triceo.robozonky.CommonFilter;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,7 @@ class AuthenticatedFilter extends CommonFilter {
     private final char[] accessToken; // treat the access token as if it were a password
 
     public AuthenticatedFilter(final ZonkyApiToken token) {
-        this.accessToken = token.getAccessToken() == null ? new char[] {} : token.getAccessToken().toCharArray();
+        this.accessToken = token.getAccessToken() == null ? new char[0] : token.getAccessToken().toCharArray();
     }
 
     @Override

@@ -16,11 +16,11 @@
 
 package com.github.triceo.robozonky.authentication;
 
-import java.util.function.Consumer;
-
+import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
+import com.github.triceo.robozonky.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -29,6 +29,9 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsEmptyValues;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class AuthenticatorTest {
 
@@ -36,38 +39,54 @@ public class AuthenticatorTest {
     private static final String DUMMY_USER = "a";
     private static final String DUMMY_PWD = "b";
 
-    private static ResteasyClientBuilder mockResteasy(final String url, final ZonkyApiToken token) {
-        final ZonkyApi dryMock = Mockito.mock(ZonkyApi.class);
-        final InvestingZonkyApi liveMock = Mockito.mock(InvestingZonkyApi.class);
-        final Consumer<ZonkyApi> task = api -> {
-            Mockito.when(api.login(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(token);
-            Mockito.when(api.refresh(Matchers.any(), Matchers.any(), Matchers.any()))
-                    .thenReturn(Mockito.mock(ZonkyApiToken.class));
-        };
-        task.accept(dryMock);
-        task.accept(liveMock);
+    private static class AnswerWithSelf implements Answer<Object> {
+        private final Answer<Object> delegate = new ReturnsEmptyValues();
+        private final Class<?> clazz;
+
+        public AnswerWithSelf(final Class<?> clazz) {
+            this.clazz = clazz;
+        }
+
+        public Object answer(final InvocationOnMock invocation) throws Throwable {
+            final Class<?> returnType = invocation.getMethod().getReturnType();
+            if (returnType == clazz) {
+                return invocation.getMock();
+            } else {
+                return delegate.answer(invocation);
+            }
+        }
+    }
+
+    private static ResteasyClientBuilder mockResteasy(final ZonkyApiToken token) {
+        final ZonkyOAuthApi mock = Mockito.mock(ZonkyOAuthApi.class);
+        Mockito.when(mock.login(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(token);
+        Mockito.when(mock.refresh(Matchers.any(), Matchers.any(), Matchers.any()))
+                .thenReturn(Mockito.mock(ZonkyApiToken.class));
         final ResteasyWebTarget target = Mockito.mock(ResteasyWebTarget.class);
-        Mockito.when(target.proxy(ZonkyApi.class)).thenReturn(dryMock);
-        Mockito.when(target.proxy(InvestingZonkyApi.class)).thenReturn(liveMock);
+        Mockito.when(target.proxy(ZonkyOAuthApi.class)).thenReturn(mock);
+        Mockito.when(target.proxy(ZonkyApi.class)).thenReturn(Mockito.mock(ZonkyApi.class));
+        Mockito.when(target.proxy(InvestingZonkyApi.class)).thenReturn(Mockito.mock(InvestingZonkyApi.class));
         Mockito.when(target.proxy(ZotifyApi.class)).thenReturn(Mockito.mock(ZotifyApi.class));
-        final ResteasyClient client = Mockito.mock(ResteasyClient.class);
-        Mockito.when(client.target(url)).thenReturn(target);
+        final ResteasyClient client =
+                Mockito.mock(ResteasyClient.class, new AuthenticatorTest.AnswerWithSelf(ResteasyClient.class));
+        Mockito.when(client.target(Matchers.anyString())).thenReturn(target);
         final ResteasyClientBuilder builder = Mockito.mock(ResteasyClientBuilder.class);
         Mockito.when(builder.build()).thenReturn(client);
         return builder;
     }
 
-    public static ResteasyClientBuilder mockResteasy(final String url, final boolean dry) {
-        return AuthenticatorTest.mockResteasy(url, Mockito.mock(ZonkyApiToken.class));
+    public static ResteasyClientBuilder mockResteasy() {
+        return AuthenticatorTest.mockResteasy(Mockito.mock(ZonkyApiToken.class));
     }
 
     @Test
     public void credentialBasedAuthentication() {
         final boolean dry = false;
-        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(AuthenticatorTest.DUMMY_URL, dry);
-        final ZonkyApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyApi.class);
+        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy();
+        final ZonkyOAuthApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyOAuthApi.class);
+        final ApiProvider provider = new ApiProvider(mock);
         Authenticator.withCredentials(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.DUMMY_PWD, dry)
-                .authenticate(AuthenticatorTest.DUMMY_URL, AuthenticatorTest.DUMMY_URL, mock);
+                .authenticate(provider);
         Mockito.verify(apiMock, Mockito.times(1))
                 .login(Matchers.eq(AuthenticatorTest.DUMMY_USER), Matchers.eq(AuthenticatorTest.DUMMY_PWD),
                         Matchers.any(), Matchers.any());
@@ -78,10 +97,11 @@ public class AuthenticatorTest {
     @Test
     public void credentialBasedAuthenticationDry() {
         final boolean dry = true;
-        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(AuthenticatorTest.DUMMY_URL, dry);
-        final ZonkyApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyApi.class);
+        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy();
+        final ZonkyOAuthApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyOAuthApi.class);
+        final ApiProvider provider = new ApiProvider(mock);
         Authenticator.withCredentials(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.DUMMY_PWD, dry)
-                .authenticate(AuthenticatorTest.DUMMY_URL, AuthenticatorTest.DUMMY_URL, mock);
+                .authenticate(provider);
         Mockito.verify(apiMock, Mockito.times(1))
                 .login(Matchers.eq(AuthenticatorTest.DUMMY_USER), Matchers.eq(AuthenticatorTest.DUMMY_PWD),
                         Matchers.any(), Matchers.any());
@@ -94,12 +114,12 @@ public class AuthenticatorTest {
     public void tokenBasedAuthentication() {
         final boolean dry = false;
         final ZonkyApiToken mockToken = Mockito.mock(ZonkyApiToken.class);
-        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(AuthenticatorTest.DUMMY_URL, mockToken);
-        final ZonkyApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(InvestingZonkyApi.class);
+        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(mockToken);
+        final ZonkyOAuthApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyOAuthApi.class);
+        final ApiProvider provider = new ApiProvider(mock);
         final Authentication result = Authenticator.withAccessToken(AuthenticatorTest.DUMMY_USER, mockToken, dry)
-                .authenticate(AuthenticatorTest.DUMMY_URL, AuthenticatorTest.DUMMY_URL, mock);
-        Mockito.verify(apiMock, Mockito.never())
-                .login(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any());
+                .authenticate(provider);
+        Mockito.verify(apiMock, Mockito.never()).login(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any());
         Mockito.verify(apiMock, Mockito.never()).refresh(Matchers.any(), Matchers.any(), Matchers.any());
         Assertions.assertThat(result.getZonkyApiToken()).isEqualTo(mockToken);
     }
@@ -108,13 +128,12 @@ public class AuthenticatorTest {
     public void tokenBasedAuthenticationWithRefresh() {
         final boolean dry = false;
         final ZonkyApiToken mockToken = Mockito.mock(ZonkyApiToken.class);
-        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(AuthenticatorTest.DUMMY_URL, mockToken);
-        final ZonkyApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyApi.class);
+        final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy(mockToken);
+        final ZonkyOAuthApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyOAuthApi.class);
+        final ApiProvider provider = new ApiProvider(mock);
         final Authentication result = Authenticator
-                .withAccessTokenAndRefresh(AuthenticatorTest.DUMMY_USER, mockToken, dry)
-                .authenticate(AuthenticatorTest.DUMMY_URL, AuthenticatorTest.DUMMY_URL, mock);
-        Mockito.verify(apiMock, Mockito.never())
-                .login(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any());
+                .withAccessTokenAndRefresh(AuthenticatorTest.DUMMY_USER, mockToken, dry).authenticate(provider);
+        Mockito.verify(apiMock, Mockito.never()).login(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any());
         Mockito.verify(apiMock, Mockito.times(1)).refresh(Matchers.any(), Matchers.any(), Matchers.any());
         Assertions.assertThat(result.getZonkyApiToken()).isNotEqualTo(mockToken);
     }

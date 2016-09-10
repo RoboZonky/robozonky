@@ -15,6 +15,7 @@
  */
 package com.github.triceo.robozonky.app;
 
+import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 
 class AppContext {
@@ -22,34 +23,50 @@ class AppContext {
     private InvestmentStrategy investmentStrategy = null;
     private final OperatingMode operatingMode;
     private final boolean isDryRun;
+    private final ApiProvider apiProvider = new ApiProvider();
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
+    private final int captchaDelayInSeconds;
 
-    public AppContext(final int loanId, final int loanAmount) {
+    public AppContext(final int loanId, final int loanAmount, final int captchaDelayInSeconds) {
         this.operatingMode = OperatingMode.USER_DRIVEN;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
+        this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.isDryRun = false;
     }
 
-    public AppContext(final int loanId, final int loanAmount, final int dryRunBalance) {
+    public AppContext(final int loanId, final int loanAmount, final int captchaDelayInSeconds,
+                      final int dryRunBalance) {
         this.operatingMode = OperatingMode.USER_DRIVEN;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
+        this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.dryRunBalance = dryRunBalance;
         this.isDryRun = true;
     }
 
-    public AppContext(final InvestmentStrategy investmentStrategy) {
+    public AppContext(final InvestmentStrategy investmentStrategy, final int captchaDelayInSeconds) {
         this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
         this.investmentStrategy = investmentStrategy;
+        this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.isDryRun = false;
     }
 
-    public AppContext(final InvestmentStrategy investmentStrategy, final int dryRunBalance) {
+    public AppContext(final InvestmentStrategy investmentStrategy, final int captchaDelayInSeconds,
+                      final int dryRunBalance) {
         this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
         this.investmentStrategy = investmentStrategy;
+        this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.dryRunBalance = dryRunBalance;
         this.isDryRun = true;
+    }
+
+    public int getCaptchaDelayInSeconds() {
+        return captchaDelayInSeconds;
+    }
+
+    public ApiProvider getApiProvider() {
+        return apiProvider;
     }
 
     public OperatingMode getOperatingMode() {

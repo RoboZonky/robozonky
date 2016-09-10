@@ -18,16 +18,10 @@ package com.github.triceo.robozonky.authentication;
 
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.remote.Api;
-import com.github.triceo.robozonky.remote.InvestingZonkyApi;
+import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
-import com.github.triceo.robozonky.remote.ZotifyApi;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import com.github.triceo.robozonky.remote.ZonkyOAuthApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,18 +35,6 @@ public class Authenticator {
     private static final Logger LOGGER = LoggerFactory.getLogger(Authenticator.class);
     private static final String TARGET_SCOPE = "SCOPE_APP_WEB";
 
-    private static final ResteasyProviderFactory RESTEASY;
-    static {
-        Authenticator.LOGGER.trace("Initializing RESTEasy.");
-        RESTEASY = ResteasyProviderFactory.getInstance();
-        RegisterBuiltin.register(Authenticator.RESTEASY);
-        final Class<?> jsonProvider = ResteasyJackson2Provider.class;
-        if (!Authenticator.RESTEASY.isRegistered(jsonProvider)) { // https://github.com/triceo/robozonky/issues/56
-            Authenticator.RESTEASY.registerProvider(jsonProvider);
-        }
-        Authenticator.LOGGER.trace("RESTEasy initialized.");
-    }
-
     /**
      * Prepare for authentication using username and password.
      *
@@ -62,7 +44,7 @@ public class Authenticator {
      * @return Instance ready for authentication.
      */
     public static Authenticator withCredentials(final String username, final String password, final boolean isDryRun) {
-        return new Authenticator((ZonkyApi api) -> {
+        return new Authenticator(api -> {
             final ZonkyApiToken token = api.login(username, password, "password", Authenticator.TARGET_SCOPE);
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}' using password.", username);
             return token;
@@ -79,7 +61,7 @@ public class Authenticator {
      */
     public static Authenticator withAccessToken(final String username, final ZonkyApiToken token,
                                                 final boolean isDryRun) {
-        return new Authenticator((ZonkyApi api) -> {
+        return new Authenticator(api -> {
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}' with existing access token.", username);
             return token;
         }, true, isDryRun);
@@ -95,7 +77,7 @@ public class Authenticator {
      */
     public static Authenticator withAccessTokenAndRefresh(final String username, final ZonkyApiToken token,
                                                           final boolean isDryRun) {
-        return new Authenticator((ZonkyApi api) -> {
+        return new Authenticator(api -> {
             final String tokenId = token.getRefreshToken();
             final ZonkyApiToken newToken = api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}', refreshing existing access token.", username);
@@ -103,31 +85,10 @@ public class Authenticator {
         }, true, isDryRun);
     }
 
-    private static Authentication newAuthenticatedApi(final ZonkyApiToken token, final String zonkyApiUrl,
-                                                      final String zotifyApiUrl,
-                                                      final ResteasyClientBuilder clientBuilder,
-                                                      final boolean isDryRun) {
-        final AuthenticatedFilter f = new AuthenticatedFilter(token);
-        final ZonkyApi api = isDryRun ?
-                Authenticator.newApi(zonkyApiUrl, clientBuilder, f, ZonkyApi.class):
-                Authenticator.newApi(zonkyApiUrl, clientBuilder, f, InvestingZonkyApi.class);
-        final ZotifyApi zotifyApi =
-                Authenticator.newApi(zotifyApiUrl, clientBuilder, new ZotifyFilter(), ZotifyApi.class);
-        return new Authentication(api, token, zotifyApi);
-    }
-
-    private static <T extends Api> T newApi(final String zonkyApiUrl, final ResteasyClientBuilder clientBuilder,
-                                            final CommonFilter filter, final Class<T> api) {
-        // FIXME clients are never closed
-        final ResteasyClient client = clientBuilder.build();
-        client.register(filter);
-        return client.target(zonkyApiUrl).proxy(api);
-    }
-
-    private final Function<ZonkyApi, ZonkyApiToken> authenticationMethod;
+    private final Function<ZonkyOAuthApi, ZonkyApiToken> authenticationMethod;
     private final boolean tokenBased, isDryRun;
 
-    private Authenticator(final Function<ZonkyApi, ZonkyApiToken> authenticationMethod, final boolean tokenBased,
+    private Authenticator(final Function<ZonkyOAuthApi, ZonkyApiToken> authenticationMethod, final boolean tokenBased,
                           final boolean isDryRun) {
         if (authenticationMethod == null) {
             throw new IllegalArgumentException("Authentication method must be provided.");
@@ -146,30 +107,16 @@ public class Authenticator {
     }
 
     /**
-     * Perform the actual authentication.
-     * @param zonkyApiUrl URL to use to connect to Zonky.
-     * @param zotifyApiUrl URL to use to connect to the Zotify marketplace cache.
-     * @param clientBuilder The builder to use for the RESTEasy client proxy.
-     * @return Information about the authentication.
-     */
-    Authentication authenticate(final String zonkyApiUrl, final String zotifyApiUrl,
-                                final ResteasyClientBuilder clientBuilder) {
-        final ZonkyApi api = Authenticator.newApi(zonkyApiUrl, clientBuilder, new AuthenticationFilter(),
-                ZonkyApi.class);
-        final ZonkyApiToken token = authenticationMethod.apply(api);
-        return Authenticator.newAuthenticatedApi(token, zonkyApiUrl, zotifyApiUrl, clientBuilder, isDryRun);
-    }
-
-    /**
      * Perform the actual authentication. Will throw an unchecked exception in case authentication failed.
-     * @param zonkyApiUrl URL to use to connect to Zonky.
-     * @param zotifyApiUrl URL to use to connect to the Zotify marketplace cache.
+     * @param provider The provider to be used when constructing the APIs.
      * @return Information about the authentication.
      */
-    public Authentication authenticate(final String zonkyApiUrl, final String zotifyApiUrl) {
-        final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
-        clientBuilder.providerFactory(Authenticator.RESTEASY);
-        return this.authenticate(zonkyApiUrl, zotifyApiUrl, clientBuilder);
+    public Authentication authenticate(final ApiProvider provider) {
+        final ZonkyOAuthApi api = provider.oauth(new AuthenticationFilter());
+        final ZonkyApiToken token = authenticationMethod.apply(api);
+        final AuthenticatedFilter f = new AuthenticatedFilter(token);
+        final ZonkyApi result = isDryRun ? provider.authenticatedNonInvesting(f) : provider.authenticated(f);
+        return new Authentication(result, token);
     }
 
 }

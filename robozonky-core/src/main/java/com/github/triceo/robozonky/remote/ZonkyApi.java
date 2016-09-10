@@ -19,10 +19,8 @@ package com.github.triceo.robozonky.remote;
 import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -39,22 +37,6 @@ public interface ZonkyApi extends Api {
     String ME = "/users/me";
     String WALLET = ME + "/wallet";
     String INVESTMENTS = ME + "/investments";
-    String OAUTH = "/oauth/token";
-
-    @POST
-    @Path(ZonkyApi.OAUTH)
-    ZonkyApiToken login(
-            @FormParam("username") String username,
-            @FormParam("password") String password,
-            @FormParam("grant_type") @DefaultValue("password") String grantType,
-            @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
-
-    @POST
-    @Path(ZonkyApi.OAUTH)
-    ZonkyApiToken refresh(
-            @FormParam("refresh_token") String refreshToken,
-            @FormParam("grant_type") @DefaultValue("refresh_token") String grantType,
-            @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
 
     @GET
     @Path(ZonkyApi.WALLET)

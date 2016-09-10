@@ -39,9 +39,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Processes command line arguments and provides access to their values.
  */
-class CommandLineInterface {
+class   CommandLineInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
+    private static final int DEFAULT_CAPTCHA_DELAY_SECONDS = 2 * 60;
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
@@ -67,6 +68,9 @@ class CommandLineInterface {
     static final Option OPTION_DRY_RUN = Option.builder("d").hasArg().optionalArg(true).
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
             .build();
+    static final Option OPTION_CLOSED_SEASON = Option.builder("c").hasArg()
+            .argName("Delay in seconds before new loans are made available for investing.").longOpt("closed-season")
+            .desc("Allows to override the default CAPTCHA loan delay.").build();
 
     /**
      * Convert the command line arguments into a string and log it.
@@ -109,6 +113,7 @@ class CommandLineInterface {
         ops.add(CommandLineInterface.OPTION_PASSWORD);
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
         ops.add(CommandLineInterface.OPTION_FAULT_TOLERANT);
+        ops.add(CommandLineInterface.OPTION_CLOSED_SEASON);
         // join all in a single config
         final Options options = new Options();
         options.addOptionGroup(operatingModes);
@@ -204,6 +209,13 @@ class CommandLineInterface {
 
     public boolean isFaultTolerant() {
         return this.hasOption(CommandLineInterface.OPTION_FAULT_TOLERANT);
+    }
+
+    public int getCaptchaPreventingInvestingDelayInSeconds() { // FIXME do not allow negaive values
+        return this.hasOption(CommandLineInterface.OPTION_CLOSED_SEASON) ?
+                this.getIntegerOptionValue(CommandLineInterface.OPTION_CLOSED_SEASON)
+                        .orElseThrow(() -> new IllegalStateException("Missing mandatory argument value.")) :
+                CommandLineInterface.DEFAULT_CAPTCHA_DELAY_SECONDS;
     }
 
     public Optional<Integer> getTokenRefreshBeforeExpirationInSeconds() {

@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.SocketException;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
@@ -42,8 +44,8 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +60,14 @@ class App {
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         App.LOGGER.info("===== RoboZonky out. =====");
         System.exit(returnCode.getCode());
+    }
+
+    static Collection<Loan> getAvailableLoans(final AppContext ctx) {
+        final int delay = ctx.getCaptchaDelayInSeconds();
+        App.LOGGER.info("Ignoring loans published earlier than {} seconds ago.", delay);
+        return ctx.getApiProvider().cache().getLoans().stream()
+                .filter(l -> Instant.now().isAfter(l.getDatePublished().plus(delay, ChronoUnit.SECONDS)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -75,6 +85,7 @@ class App {
         if (isDryRun) {
             App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
+        final Collection<Loan> loans = App.getAvailableLoans(ctx);
         final Authentication login;
         try { // catch this exception here, so that anything coming from the invest() method can be thrown separately
             login = auth.login();
@@ -82,7 +93,7 @@ class App {
             App.LOGGER.error("Failed authenticating with Zonky.", ex);
             return false;
         }
-        final Collection<Investment> result = App.invest(ctx, login.getZonkyApi(), login.getZotifyApi());
+        final Collection<Investment> result = App.invest(ctx, login.getZonkyApi(), loans);
         try { // log out and ignore any resulting error
             auth.logout(login);
         } catch (final RuntimeException ex) {
@@ -114,11 +125,13 @@ class App {
             if (!optionalCtx.isPresent()) {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
             }
-            final Optional<AuthenticationHandler> optionalAuth = new AuthenticationHandlerProvider().apply(cli);
+            final AppContext ctx = optionalCtx.get();
+            final Optional<AuthenticationHandler> optionalAuth =
+                    new AuthenticationHandlerProvider(ctx.getApiProvider()).apply(cli);
             if (!optionalAuth.isPresent()) {
                 App.exit(ReturnCode.ERROR_SETUP, latestVersion);
             }
-            final boolean loginSucceeded = App.core(optionalCtx.get(), optionalAuth.get());
+            final boolean loginSucceeded = App.core(ctx, optionalAuth.get());
             if (!loginSucceeded) {
                 App.exit(ReturnCode.ERROR_SETUP, latestVersion);
             } else {
@@ -206,19 +219,21 @@ class App {
                 BigDecimal.valueOf(dryRunInitialBalance) : api.getWallet().getAvailableBalance();
     }
 
-    static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx) {
+    static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx,
+                                                                           final Collection<Loan> availableLoans) {
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         // figure out what to execute
-        return useStrategy ? Investor::invest : i -> {
+        return useStrategy ? i -> i.invest(ctx.getInvestmentStrategy(), availableLoans) : i -> {
             final Optional<Investment> optional = i.invest(ctx.getLoanId(), ctx.getLoanAmount());
             return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
         };
     }
 
-    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky, final ZotifyApi zotify) {
+    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky,
+                                         final Collection<Loan> availableLoans) {
         final BigDecimal balance = App.getAvailableBalance(ctx, zonky);
-        final Investor i = new Investor(zonky, zotify, ctx.getInvestmentStrategy(), balance);
-        return App.getInvestingFunction(ctx).apply(i);
+        final Investor i = new Investor(zonky, balance);
+        return App.getInvestingFunction(ctx, availableLoans).apply(i);
     }
 
 }

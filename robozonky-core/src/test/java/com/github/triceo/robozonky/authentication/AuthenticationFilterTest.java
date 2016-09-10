@@ -20,21 +20,26 @@ import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
+import com.github.triceo.robozonky.AbstractCommonFilterTest;
+import com.github.triceo.robozonky.CommonFilter;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public abstract class AbstractCommonFilterTest {
+public class AuthenticationFilterTest extends AbstractCommonFilterTest {
 
-    protected abstract CommonFilter getTestedFilter();
+    @Override
+    protected CommonFilter getTestedFilter() {
+        return new AuthenticationFilter();
+    }
 
     @Test
-    public void wasUserAgentHeaderAdded() throws IOException {
+    public void wasAuthorizationAdded() throws IOException {
         final ClientRequestContext crc = Mockito.mock(ClientRequestContext.class);
         Mockito.when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
 
         this.getTestedFilter().filter(crc);
-        Assertions.assertThat(crc.getHeaders().getFirst("User-Agent")).matches(o -> ((String)o).contains("RoboZonky"));
+        Assertions.assertThat(crc.getHeaders()).containsKey("Authorization");
     }
 
 }

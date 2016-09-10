@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.authentication;
+package com.github.triceo.robozonky;
 
 import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
@@ -24,20 +24,17 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class AuthorizationFilterTest extends AbstractCommonFilterTest {
+public abstract class AbstractCommonFilterTest {
 
-    @Override
-    protected CommonFilter getTestedFilter() {
-        return new AuthenticationFilter();
-    }
+    protected abstract CommonFilter getTestedFilter();
 
     @Test
-    public void wasAuthorizationAdded() throws IOException {
+    public void wasUserAgentHeaderAdded() throws IOException {
         final ClientRequestContext crc = Mockito.mock(ClientRequestContext.class);
         Mockito.when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
 
         this.getTestedFilter().filter(crc);
-        Assertions.assertThat(crc.getHeaders()).containsKey("Authorization");
+        Assertions.assertThat(crc.getHeaders().getFirst("User-Agent")).matches(o -> ((String)o).contains("RoboZonky"));
     }
 
 }

@@ -68,9 +68,11 @@ enum OperatingMode {
                     return Optional.empty();
                 } else if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new AppContext(strategy.get(), balance));
+                    return Optional.of(new AppContext(strategy.get(),
+                            cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
                 } else {
-                    return Optional.of(new AppContext(strategy.get()));
+                    return Optional.of(new AppContext(strategy.get(),
+                            cli.getCaptchaPreventingInvestingDelayInSeconds()));
                 }
             } catch (final InvestmentStrategyParseException ex) {
                 OperatingMode.LOGGER.error("Failed parsing strategy.", ex);
@@ -100,9 +102,11 @@ enum OperatingMode {
                 return Optional.empty();
             } else if (cli.isDryRun()) {
                 final int balance = cli.getDryRunBalance().orElse(-1);
-                return Optional.of(new AppContext(loanId.get(), loanAmount.get(), balance));
+                return Optional.of(new AppContext(loanId.get(), loanAmount.get(),
+                        cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
             } else {
-                return Optional.of(new AppContext(loanId.get(), loanAmount.get()));
+                return Optional.of(new AppContext(loanId.get(), loanAmount.get(),
+                        cli.getCaptchaPreventingInvestingDelayInSeconds()));
             }
         }
     };

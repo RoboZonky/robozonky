@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.authentication;
+
+package com.github.triceo.robozonky;
 
 import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
@@ -23,7 +24,12 @@ import javax.ws.rs.client.ClientResponseFilter;
 
 import org.slf4j.Logger;
 
-abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter {
+/**
+ * Decorates the request with User-Agent and adds some simple request logging.
+ *
+ * If ever a filter is needed for JAX-RS communication, this class should serve as the base class for that filter.
+ */
+public abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter {
 
     protected abstract Logger getLogger();
 

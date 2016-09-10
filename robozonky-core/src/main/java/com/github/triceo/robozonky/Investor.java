@@ -33,7 +33,6 @@ import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Statistics;
 import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZotifyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,25 +159,18 @@ public class Investor {
     }
 
     private final ZonkyApi zonkyApi;
-    private final ZotifyApi zotifyApi;
     private final BigDecimal initialBalance;
-    private final InvestmentStrategy strategy;
 
     /**
      * Standard constructor.
      *
      * @param zonky Authenticated API ready to retrieve user information.
-     * @param zotify Marketplace cache for reading loans out of.
-     * @param strategy Strategy used to determine the loans to invest in and the amounts to invest into them.
      * @param initialBalance How much available cash the user has in their wallet.
      */
-    public Investor(final ZonkyApi zonky, final ZotifyApi zotify, final InvestmentStrategy strategy,
-                    final BigDecimal initialBalance) {
+    public Investor(final ZonkyApi zonky, final BigDecimal initialBalance) {
         this.zonkyApi = zonky;
-        this.zotifyApi = zotify;
         this.initialBalance = initialBalance;
         Investor.LOGGER.info("RoboZonky starting account balance is {} CZK.", this.initialBalance);
-        this.strategy = strategy;
     }
 
     /**
@@ -186,23 +178,26 @@ public class Investor {
      * by one, in the order prescribed by the strategy, and attempts to invest into these loans. The first such
      * investment operation that succeeds will return.
      *
+     * @param strategy The investment strategy to pick loans from the list.
+     * @param availableLoans Loans available to be chosen from.
      * @param balance How much money the user has in the wallet that can be used for investing.
      * @param stats User's portfolio coming from the Zonky API.
      * @param investmentsAlreadyMade Loans already invested into that have not yet disappeared from marketplace.
      * @return The first {@link #invest(ZonkyApi, Loan, int, int)} which succeeds, or empty if none have.
      */
-    Optional<Investment> investOnce(final BigDecimal balance, final Statistics stats,
+    Optional<Investment> investOnce(final InvestmentStrategy strategy, final List<Loan> availableLoans,
+                                    final BigDecimal balance, final Statistics stats,
                                     final Collection<Investment> investmentsAlreadyMade) {
         final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, investmentsAlreadyMade);
         Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
                 portfolio.getSharesOnInvestment());
-        final Collection<Loan> loans = this.strategy.getMatchingLoans(this.zotifyApi.getLoans(), portfolio).stream()
+        final Collection<Loan> loans = strategy.getMatchingLoans(availableLoans, portfolio).stream()
                 .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade))
                 .collect(Collectors.toList());
         Investor.LOGGER.debug("Strategy recommends the following unseen loans: {}.", loans);
         return loans.stream()
                 .map(l -> {
-                    final int invest = this.strategy.recommendInvestmentAmount(l, portfolio);
+                    final int invest = strategy.recommendInvestmentAmount(l, portfolio);
                     return Investor.invest(this.zonkyApi, l, invest, portfolio.getCzkAvailable());
                 })
                 .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
@@ -213,9 +208,13 @@ public class Investor {
      * One of the two entry points to the investment API. This takes the strategy, determines suitable loans, and tries
      * to invest in as many of them as the balance allows.
      *
+     * @param strategy The investment strategy to use.
+     * @param loans Loans that are available on the marketplace. These must not include CAPTCHA-protected loans.
      * @return Investments made in the session.
      */
-    public Collection<Investment> invest() {
+    public Collection<Investment> invest(final InvestmentStrategy strategy, final Collection<Loan> loans) {
+        Investor.LOGGER.info("The following loans are available for robotic investing: {}.",
+                loans.stream().map(Loan::getId).collect(Collectors.toList()));
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
         BigDecimal balance = this.initialBalance;
@@ -228,9 +227,11 @@ public class Investor {
         Investor.LOGGER.debug("The sum total of principal remaining on active loans is {} CZK.",
                 stats.getCurrentOverview().getPrincipalLeft());
         // and start investing
+        final List<Loan> availableLoans = new ArrayList<>(loans);
         final Collection<Investment> investmentsMade = new ArrayList<>();
         do {
-            final Optional<Investment> investment = this.investOnce(balance, stats, investments);
+            final Optional<Investment> investment =
+                    this.investOnce(strategy, availableLoans, balance, stats, investments);
             if (!investment.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }

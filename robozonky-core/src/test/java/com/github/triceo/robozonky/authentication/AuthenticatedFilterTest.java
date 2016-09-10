@@ -21,6 +21,8 @@ import java.util.UUID;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
+import com.github.triceo.robozonky.AbstractCommonFilterTest;
+import com.github.triceo.robozonky.CommonFilter;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;

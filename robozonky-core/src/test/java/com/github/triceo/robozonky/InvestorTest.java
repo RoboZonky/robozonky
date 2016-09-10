@@ -84,7 +84,7 @@ public class InvestorTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void recoverOnFailedInvestment() {
+    public void terminateOnFailedInvestment() {
         // the strategy will recommend two different investments
         final Loan mockLoan1 = InvestorTest.getMockLoanWithId(1);
         final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
@@ -96,9 +96,8 @@ public class InvestorTest {
         Mockito.doThrow(BadRequestException.class)
                 .when(mockApi).invest(Matchers.argThat(new InvestorTest.InvestmentBaseMatcher(mockLoan1)));
         // finally test
-        final Investor investor = new Investor(mockApi, Mockito.mock(ZotifyApi.class), strategyMock,
-                BigDecimal.valueOf(1000));
-        investor.invest();
+        final Investor investor = new Investor(mockApi, BigDecimal.valueOf(1000));
+        investor.invest(strategyMock, Collections.singletonList(mockLoan1));
     }
 
     @Test
@@ -124,17 +123,17 @@ public class InvestorTest {
         final InvestingZonkyApi api = Mockito.mock(InvestingZonkyApi.class);
         final ZotifyApi zotifyApi = Mockito.mock(ZotifyApi.class);
         // and now actually test that the succeeding loan will be invested into ...
-        final Investor i = new Investor(api, zotifyApi, strategy, balance);
+        final Investor i = new Investor(api, balance);
         Mockito.when(strategy.getMatchingLoans(Matchers.any(), Matchers.any()))
                 .thenReturn(Arrays.asList(overBalance, underMinimum, overAmount, success));
-        final Optional<Investment> result = i.investOnce(balance, stats, Collections.emptyList());
+        final Optional<Investment> result = i.investOnce(strategy, null, balance, stats, Collections.emptyList());
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(result.get().getLoanId()).isEqualTo(success.getId());
         Mockito.verify(api, Mockito.times(1)).invest(Matchers.any());
         // ... no matter which place it takes
         Mockito.when(strategy.getMatchingLoans(Matchers.any(), Matchers.any()))
                 .thenReturn(Arrays.asList(success, overBalance, underMinimum, overAmount));
-        final Optional<Investment> result2 = i.investOnce(balance, stats, Collections.emptyList());
+        final Optional<Investment> result2 = i.investOnce(strategy, null, balance, stats, Collections.emptyList());
         Assertions.assertThat(result2).isPresent();
         Assertions.assertThat(result2.get().getLoanId()).isEqualTo(success.getId());
         Mockito.verify(api, Mockito.times(2)).invest(Matchers.any());
@@ -144,7 +143,7 @@ public class InvestorTest {
                 .thenReturn(Arrays.asList(overBalance, underMinimum, overAmount, alreadyPresent));
         final Investment alreadyPresentInvestment = new Investment(alreadyPresent, 200);
         final Optional<Investment> result3 =
-                i.investOnce(balance, stats, Collections.singletonList(alreadyPresentInvestment));
+                i.investOnce(strategy, null, balance, stats, Collections.singletonList(alreadyPresentInvestment));
         Assertions.assertThat(result3).isEmpty();
     }
 

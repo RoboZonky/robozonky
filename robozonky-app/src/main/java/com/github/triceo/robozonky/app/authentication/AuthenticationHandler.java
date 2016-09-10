@@ -25,6 +25,7 @@ import java.time.temporal.TemporalUnit;
 import java.util.Optional;
 import javax.xml.bind.JAXBException;
 
+import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
@@ -46,12 +47,14 @@ public class AuthenticationHandler {
      * The token will only be refreshed if RoboZonky is launched some time between the token expiration and 60 seconds
      * before then.
      *
+     * @param apiProvider Provider for the Zonky API implementations.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun) {
-        return new AuthenticationHandler(data, isDryRun, true);
+    public static AuthenticationHandler tokenBased(final ApiProvider apiProvider, final SecretProvider data,
+                                                   final boolean isDryRun) {
+        return new AuthenticationHandler(apiProvider, data, isDryRun, true);
     }
 
     /**
@@ -62,39 +65,45 @@ public class AuthenticationHandler {
      * The token will only be refreshed if RoboZonky is launched between token expiration and X second before token
      * expiration, where X comes from the arguments of this method.
      *
+     * @param apiProvider Provider for the Zonky API implementations.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @param time Access token will be refreshed after expiration minus this.
      * @param unit Unit of time applied to the previous argument.
      * @return This.
      */
-    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun, final long time,
-                                                   final TemporalUnit unit) {
-        return new AuthenticationHandler(data, isDryRun, true, Duration.of(time, unit).getSeconds());
+    public static AuthenticationHandler tokenBased(final ApiProvider apiProvider, final SecretProvider data,
+                                                   final boolean isDryRun, final long time, final TemporalUnit unit) {
+        return new AuthenticationHandler(apiProvider, data, isDryRun, true, Duration.of(time, unit).getSeconds());
     }
 
     /**
      * Build authentication mechanism that will log out at the end of RoboZonky's operations. This will ignore the
      * access tokens.
      *
+     * @param apiProvider Provider for the Zonky API implementations.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler passwordBased(final SecretProvider data, final boolean isDryRun) {
-        return new AuthenticationHandler(data, isDryRun, false);
+    public static AuthenticationHandler passwordBased(final ApiProvider apiProvider, final SecretProvider data,
+                                                      final boolean isDryRun) {
+        return new AuthenticationHandler(apiProvider, data, isDryRun, false);
     }
 
     private final boolean tokenBased, dryRun;
     private final SecretProvider data;
     private final long tokenRefreshBeforeExpirationInSeconds;
+    private final ApiProvider apiProvider;
 
-    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased) {
-        this(data, isDryRun, tokenBased, 60);
+    private AuthenticationHandler(final ApiProvider api, final SecretProvider data, final boolean isDryRun,
+                                  final boolean tokenBased) {
+        this(api, data, isDryRun, tokenBased, 60);
     }
 
-    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased,
-                                  final long tokenRefreshBeforeExpirationInSeconds) {
+    private AuthenticationHandler(final ApiProvider api, final SecretProvider data, final boolean isDryRun,
+                                  final boolean tokenBased, final long tokenRefreshBeforeExpirationInSeconds) {
+        this.apiProvider = api;
         this.data = data;
         this.dryRun = isDryRun;
         this.tokenRefreshBeforeExpirationInSeconds = tokenRefreshBeforeExpirationInSeconds;
@@ -202,7 +211,7 @@ public class AuthenticationHandler {
      * @return Authenticated APIs.
      */
     public Authentication login() {
-        return this.build().authenticate(AuthenticationHandler.ZONKY_URL, AuthenticationHandler.ZOTIFY_URL);
+        return this.build().authenticate(this.apiProvider);
     }
 
     /**
@@ -212,13 +221,17 @@ public class AuthenticationHandler {
      * @return True if it was decided to log out.
      */
     public boolean logout(final Authentication login) {
-        final boolean logoutAllowed = this.isLogoutAllowed(login.getZonkyApiToken());
-        if (logoutAllowed) {
-            login.getZonkyApi().logout();
-            return true;
-        } else { // if we're using the token, we should never log out
-            AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
-            return false;
+        try {
+            final boolean logoutAllowed = this.isLogoutAllowed(login.getZonkyApiToken());
+            if (logoutAllowed) {
+                login.getZonkyApi().logout();
+                return true;
+            } else { // if we're using the token, we should never log out
+                AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
+                return false;
+            }
+        } finally {
+            this.apiProvider.destroy(); // close all clients
         }
     }
 
