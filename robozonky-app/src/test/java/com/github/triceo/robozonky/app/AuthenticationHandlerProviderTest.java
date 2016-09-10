@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -63,7 +62,7 @@ public class AuthenticationHandlerProviderTest {
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.isTokenEnabled()).thenReturn(false);
         final AuthenticationHandler a =
-                AuthenticationHandlerProvider.instantiateAuthenticationHandler(new ApiProvider(), null, cli);
+                AuthenticationHandlerProvider.instantiateAuthenticationHandler(null, cli);
         Assertions.assertThat(a.isTokenBased()).isFalse();
     }
 
@@ -73,7 +72,7 @@ public class AuthenticationHandlerProviderTest {
         Mockito.when(cli.isTokenEnabled()).thenReturn(true);
         Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(Optional.empty());
         final AuthenticationHandler a =
-                AuthenticationHandlerProvider.instantiateAuthenticationHandler(new ApiProvider(), null, cli);
+                AuthenticationHandlerProvider.instantiateAuthenticationHandler(null, cli);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(a.isTokenBased()).isTrue();
         softly.assertThat(a.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
@@ -87,7 +86,7 @@ public class AuthenticationHandlerProviderTest {
         Mockito.when(cli.isTokenEnabled()).thenReturn(true);
         Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(Optional.of(expiration));
         final AuthenticationHandler a =
-                AuthenticationHandlerProvider.instantiateAuthenticationHandler(new ApiProvider(), null, cli);
+                AuthenticationHandlerProvider.instantiateAuthenticationHandler(null, cli);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(a.isTokenBased()).isTrue();
         softly.assertThat(a.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(expiration);
@@ -106,7 +105,7 @@ public class AuthenticationHandlerProviderTest {
         Mockito.when(cli.getKeyStoreLocation())
                 .thenReturn(Optional.of(AuthenticationHandlerProviderTest.returnTempFile()));
         Mockito.when(cli.getUsername()).thenReturn(Optional.empty());
-        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider(new ApiProvider());
+        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
         Assertions.assertThat(ahp.apply(cli)).isEmpty();
     }
 
@@ -117,7 +116,7 @@ public class AuthenticationHandlerProviderTest {
                 .thenReturn(Optional.of(AuthenticationHandlerProviderTest.returnTempFile()));
         Mockito.when(cli.getUsername()).thenReturn(Optional.of("username"));
         Mockito.when(cli.getPassword()).thenReturn("password");
-        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider(new ApiProvider());
+        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
         Assertions.assertThat(ahp.apply(cli)).isEmpty();
     }
 
@@ -127,7 +126,7 @@ public class AuthenticationHandlerProviderTest {
         Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
         Mockito.when(cli.getUsername()).thenReturn(Optional.of("username"));
         Mockito.when(cli.getPassword()).thenReturn("password");
-        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider(new ApiProvider());
+        final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
         Assertions.assertThat(ahp.apply(cli)).isPresent();
     }
 

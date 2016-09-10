@@ -22,12 +22,17 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
+import javax.ws.rs.BadRequestException;
 import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.authentication.Authentication;
 import com.github.triceo.robozonky.authentication.Authenticator;
+import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +52,12 @@ public class AuthenticationHandler {
      * The token will only be refreshed if RoboZonky is launched some time between the token expiration and 60 seconds
      * before then.
      *
-     * @param apiProvider Provider for the Zonky API implementations.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler tokenBased(final ApiProvider apiProvider, final SecretProvider data,
-                                                   final boolean isDryRun) {
-        return new AuthenticationHandler(apiProvider, data, isDryRun, true);
+    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun) {
+        return new AuthenticationHandler(data, isDryRun, true);
     }
 
     /**
@@ -65,45 +68,39 @@ public class AuthenticationHandler {
      * The token will only be refreshed if RoboZonky is launched between token expiration and X second before token
      * expiration, where X comes from the arguments of this method.
      *
-     * @param apiProvider Provider for the Zonky API implementations.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @param time Access token will be refreshed after expiration minus this.
      * @param unit Unit of time applied to the previous argument.
      * @return This.
      */
-    public static AuthenticationHandler tokenBased(final ApiProvider apiProvider, final SecretProvider data,
-                                                   final boolean isDryRun, final long time, final TemporalUnit unit) {
-        return new AuthenticationHandler(apiProvider, data, isDryRun, true, Duration.of(time, unit).getSeconds());
+    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun, final long time,
+                                                   final TemporalUnit unit) {
+        return new AuthenticationHandler(data, isDryRun, true, Duration.of(time, unit).getSeconds());
     }
 
     /**
      * Build authentication mechanism that will log out at the end of RoboZonky's operations. This will ignore the
      * access tokens.
      *
-     * @param apiProvider Provider for the Zonky API implementations.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler passwordBased(final ApiProvider apiProvider, final SecretProvider data,
-                                                      final boolean isDryRun) {
-        return new AuthenticationHandler(apiProvider, data, isDryRun, false);
+    public static AuthenticationHandler passwordBased(final SecretProvider data, final boolean isDryRun) {
+        return new AuthenticationHandler(data, isDryRun, false);
     }
 
     private final boolean tokenBased, dryRun;
     private final SecretProvider data;
     private final long tokenRefreshBeforeExpirationInSeconds;
-    private final ApiProvider apiProvider;
 
-    private AuthenticationHandler(final ApiProvider api, final SecretProvider data, final boolean isDryRun,
-                                  final boolean tokenBased) {
-        this(api, data, isDryRun, tokenBased, 60);
+    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased) {
+        this(data, isDryRun, tokenBased, 60);
     }
 
-    private AuthenticationHandler(final ApiProvider api, final SecretProvider data, final boolean isDryRun,
-                                  final boolean tokenBased, final long tokenRefreshBeforeExpirationInSeconds) {
-        this.apiProvider = api;
+    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased,
+                                  final long tokenRefreshBeforeExpirationInSeconds) {
         this.data = data;
         this.dryRun = isDryRun;
         this.tokenRefreshBeforeExpirationInSeconds = tokenRefreshBeforeExpirationInSeconds;
@@ -205,22 +202,25 @@ public class AuthenticationHandler {
         }
     }
 
-    /**
-     * Log into Zonky API.
-     *
-     * @return Authenticated APIs.
-     */
-    public Authentication login() {
-        return this.build().authenticate(this.apiProvider);
+    public Optional<Collection<Investment>> execute(final ApiProvider provider,
+                                                    final Function<ZonkyApi, Collection<Investment>> operation) {
+        final Authentication login;
+        try { // catch this exception here, so that anything coming from the invest() method can be thrown separately
+            login = this.build().authenticate(provider);
+        } catch (final BadRequestException ex) {
+            AuthenticationHandler.LOGGER.error("Failed authenticating with Zonky.", ex);
+            return Optional.empty();
+        }
+        final Collection<Investment> result = operation.apply(login.getZonkyApi());
+        try { // log out and ignore any resulting error
+            this.logout(login, provider);
+        } catch (final RuntimeException ex) {
+            AuthenticationHandler.LOGGER.warn("Failed logging out of Zonky.", ex);
+        }
+        return Optional.of(result);
     }
 
-    /**
-     * Log out of the Zonky API, if necessary. Will not log out if there is an active token.
-     *
-     * @param login Previously returned by {@link #login()}.
-     * @return True if it was decided to log out.
-     */
-    public boolean logout(final Authentication login) {
+    private boolean logout(final Authentication login, final ApiProvider apiProvider) {
         try {
             final boolean logoutAllowed = this.isLogoutAllowed(login.getZonkyApiToken());
             if (logoutAllowed) {
@@ -231,7 +231,7 @@ public class AuthenticationHandler {
                 return false;
             }
         } finally {
-            this.apiProvider.destroy(); // close all clients
+            apiProvider.destroy(); // close all clients
         }
     }
 

@@ -15,37 +15,19 @@
  */
 package com.github.triceo.robozonky.app;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.SocketException;
-import java.nio.file.Files;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
-import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.version.VersionCheck;
-import com.github.triceo.robozonky.authentication.Authentication;
-import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.ZonkyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,48 +42,6 @@ class App {
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         App.LOGGER.info("===== RoboZonky out. =====");
         System.exit(returnCode.getCode());
-    }
-
-    static Collection<Loan> getAvailableLoans(final AppContext ctx) {
-        final int delay = ctx.getCaptchaDelayInSeconds();
-        App.LOGGER.info("Ignoring loans published earlier than {} seconds ago.", delay);
-        return ctx.getApiProvider().cache().getLoans().stream()
-                .filter(l -> Instant.now().isAfter(l.getDatePublished().plus(delay, ChronoUnit.SECONDS)))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Core investing algorithm. Will log in, invest and log out.
-     *
-     * @param ctx
-     * @param auth
-     * @return True if login succeeded and the algorithm moved over to investing.
-     * @throws RuntimeException Any exception on login and logout will be caught and logged, therefore any runtime
-     * exception thrown is a problem during the investing operation itself.
-     */
-    static boolean core(final AppContext ctx, final AuthenticationHandler auth) {
-        App.LOGGER.info("===== RoboZonky at your service! =====");
-        final boolean isDryRun = ctx.isDryRun();
-        if (isDryRun) {
-            App.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
-        }
-        final Collection<Loan> loans = App.getAvailableLoans(ctx);
-        final Authentication login;
-        try { // catch this exception here, so that anything coming from the invest() method can be thrown separately
-            login = auth.login();
-        } catch (final BadRequestException ex) {
-            App.LOGGER.error("Failed authenticating with Zonky.", ex);
-            return false;
-        }
-        final Collection<Investment> result = App.invest(ctx, login.getZonkyApi(), loans);
-        try { // log out and ignore any resulting error
-            auth.logout(login);
-        } catch (final RuntimeException ex) {
-            App.LOGGER.warn("Failed logging out of Zonky.", ex);
-        }
-        App.storeInvestmentsMade(result, isDryRun);
-        App.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
-        return true;
     }
 
     public static void main(final String... args) {
@@ -126,12 +66,12 @@ class App {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
             }
             final AppContext ctx = optionalCtx.get();
-            final Optional<AuthenticationHandler> optionalAuth =
-                    new AuthenticationHandlerProvider(ctx.getApiProvider()).apply(cli);
+            final Optional<AuthenticationHandler> optionalAuth = new AuthenticationHandlerProvider().apply(cli);
             if (!optionalAuth.isPresent()) {
                 App.exit(ReturnCode.ERROR_SETUP, latestVersion);
             }
-            final boolean loginSucceeded = App.core(ctx, optionalAuth.get());
+            App.LOGGER.info("===== RoboZonky at your service! =====");
+            final boolean loginSucceeded = new Remote(ctx, optionalAuth.get()).call().isPresent();
             if (!loginSucceeded) {
                 App.exit(ReturnCode.ERROR_SETUP, latestVersion);
             } else {
@@ -185,55 +125,6 @@ class App {
             App.LOGGER.trace("Version check failed.", ex);
             return false;
         }
-    }
-
-    static Optional<File> storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
-        final String suffix = dryRun ? "dry" : "invested";
-        final LocalDateTime now = LocalDateTime.now();
-        final String filename =
-                "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
-        return App.storeInvestmentsMade(new File(filename), result);
-    }
-
-    static Optional<File> storeInvestmentsMade(final File target, final Collection<Investment> result) {
-        if (result.size() == 0) {
-            return Optional.empty();
-        }
-        final Collection<String> output = result.stream()
-                .map(i -> "#" + i.getLoanId() + ": " + i.getAmount() + " CZK")
-                .collect(Collectors.toList());
-        try {
-            Files.write(target.toPath(), output);
-            App.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.",
-                    target.getAbsolutePath());
-            return Optional.of(target);
-        } catch (final IOException ex) {
-            App.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
-            return Optional.empty();
-        }
-    }
-
-    static BigDecimal getAvailableBalance(final AppContext ctx, final ZonkyApi api) {
-        final int dryRunInitialBalance = ctx.getDryRunBalance();
-        return (ctx.isDryRun() && dryRunInitialBalance >= 0) ?
-                BigDecimal.valueOf(dryRunInitialBalance) : api.getWallet().getAvailableBalance();
-    }
-
-    static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx,
-                                                                           final Collection<Loan> availableLoans) {
-        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
-        // figure out what to execute
-        return useStrategy ? i -> i.invest(ctx.getInvestmentStrategy(), availableLoans) : i -> {
-            final Optional<Investment> optional = i.invest(ctx.getLoanId(), ctx.getLoanAmount());
-            return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
-        };
-    }
-
-    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky,
-                                         final Collection<Loan> availableLoans) {
-        final BigDecimal balance = App.getAvailableBalance(ctx, zonky);
-        final Investor i = new Investor(zonky, balance);
-        return App.getInvestingFunction(ctx, availableLoans).apply(i);
     }
 
 }

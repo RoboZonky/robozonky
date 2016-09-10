@@ -15,7 +15,6 @@
  */
 package com.github.triceo.robozonky.app;
 
-import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 
 class AppContext {
@@ -23,7 +22,6 @@ class AppContext {
     private InvestmentStrategy investmentStrategy = null;
     private final OperatingMode operatingMode;
     private final boolean isDryRun;
-    private final ApiProvider apiProvider = new ApiProvider();
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
     private final int captchaDelayInSeconds;
 
@@ -63,10 +61,6 @@ class AppContext {
 
     public int getCaptchaDelayInSeconds() {
         return captchaDelayInSeconds;
-    }
-
-    public ApiProvider getApiProvider() {
-        return apiProvider;
     }
 
     public OperatingMode getOperatingMode() {

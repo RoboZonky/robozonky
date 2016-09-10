@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
@@ -88,24 +87,16 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
         }
     }
 
-    static AuthenticationHandler instantiateAuthenticationHandler(final ApiProvider apiProvider,
-                                                                  final SecretProvider secProvider,
+    static AuthenticationHandler instantiateAuthenticationHandler(final SecretProvider secProvider,
                                                                   final CommandLineInterface cli) {
         if (cli.isTokenEnabled()) {
             final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
             return secs.isPresent() ?
-                    AuthenticationHandler.tokenBased(apiProvider, secProvider, cli.isDryRun(), secs.get(),
-                            ChronoUnit.SECONDS) :
-                    AuthenticationHandler.tokenBased(apiProvider, secProvider, cli.isDryRun());
+                    AuthenticationHandler.tokenBased(secProvider, cli.isDryRun(), secs.get(), ChronoUnit.SECONDS) :
+                    AuthenticationHandler.tokenBased(secProvider, cli.isDryRun());
         } else {
-            return AuthenticationHandler.passwordBased(apiProvider, secProvider, cli.isDryRun());
+            return AuthenticationHandler.passwordBased(secProvider, cli.isDryRun());
         }
-    }
-
-    private final ApiProvider apiProvider;
-
-    public AuthenticationHandlerProvider(final ApiProvider apiProvider) {
-        this.apiProvider = apiProvider;
     }
 
     @Override
@@ -117,7 +108,7 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
             return Optional.empty();
         }
         final SecretProvider sensitive = optionalSensitive.get();
-        return Optional.of(AuthenticationHandlerProvider.instantiateAuthenticationHandler(this.apiProvider, sensitive,
+        return Optional.of(AuthenticationHandlerProvider.instantiateAuthenticationHandler(sensitive,
                 commandLineInterface));
     }
 }
