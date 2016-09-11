@@ -41,7 +41,6 @@ import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 /**
@@ -162,9 +161,9 @@ public class AppTest extends BaseMarketplaceTest {
         final AppContext ctx = AppTest.mockContext(OperatingMode.STRATEGY_DRIVEN);
         final Investor i = Mockito.mock(Investor.class);
         final Investment investment = Mockito.mock(Investment.class);
-        Mockito.when(i.invest(Matchers.any(), Matchers.any())).thenReturn(Collections.singletonList(investment));
+        Mockito.when(i.invest(Mockito.any(), Mockito.any())).thenReturn(Collections.singletonList(investment));
         final Collection<Investment> result = Remote.getInvestingFunction(ctx, null).apply(i);
-        Mockito.verify(i, Mockito.times(1)).invest(Matchers.any(), Matchers.any());
+        Mockito.verify(i, Mockito.times(1)).invest(Mockito.any(), Mockito.any());
         Assertions.assertThat(result).containsExactly(investment);
     }
 
@@ -173,13 +172,13 @@ public class AppTest extends BaseMarketplaceTest {
         final AppContext ctx = AppTest.mockContext(OperatingMode.USER_DRIVEN);
         final Investor i = Mockito.mock(Investor.class);
         // check what happens when nothing is invested)
-        Mockito.when(i.invest(Matchers.anyInt(), Matchers.anyInt())).thenReturn(Optional.empty());
+        Mockito.when(i.invest(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Optional.empty());
         final Collection<Investment> result = Remote.getInvestingFunction(ctx, null).apply(i);
         Mockito.verify(i, Mockito.times(1)).invest(ctx.getLoanId(), ctx.getLoanAmount());
         Assertions.assertThat(result).isEmpty();
         // check what happens when something is invested
         final Investment investment = Mockito.mock(Investment.class);
-        Mockito.when(i.invest(Matchers.anyInt(), Matchers.anyInt())).thenReturn(Optional.of(investment));
+        Mockito.when(i.invest(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Optional.of(investment));
         final Collection<Investment> result2 = Remote.getInvestingFunction(ctx, null).apply(i);
         Assertions.assertThat(result2).containsExactly(investment);
     }
@@ -201,7 +200,7 @@ public class AppTest extends BaseMarketplaceTest {
     @Test
     public void loginFailOnCredentials() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        Mockito.when(auth.execute(Matchers.any(), Matchers.any())).thenReturn(Optional.empty());
+        Mockito.when(auth.execute(Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
         final AppContext ctx = Mockito.mock(AppContext.class);
         Assertions.assertThat(new Remote(ctx, auth).call()).isEmpty();
     }
@@ -209,7 +208,7 @@ public class AppTest extends BaseMarketplaceTest {
     @Test(expected = IllegalStateException.class)
     public void loginFailOnUnknownException() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        Mockito.doThrow(IllegalStateException.class).when(auth).execute(Matchers.any(), Matchers.any());
+        Mockito.doThrow(IllegalStateException.class).when(auth).execute(Mockito.any(), Mockito.any());
         final AppContext ctx = Mockito.mock(AppContext.class);
         new Remote(ctx, auth).call();
     }

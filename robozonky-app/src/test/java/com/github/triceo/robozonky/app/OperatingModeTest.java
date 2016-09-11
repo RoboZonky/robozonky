@@ -25,7 +25,6 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Assume;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 public class OperatingModeTest {
@@ -82,7 +81,7 @@ public class OperatingModeTest {
     }
 
     private static void ensureHelpCalled(final CommandLineInterface mock) {
-        Mockito.verify(mock, Mockito.times(1)).printHelp(Matchers.any(), Matchers.eq(true));
+        Mockito.verify(mock, Mockito.times(1)).printHelp(Mockito.any(), Mockito.eq(true));
     }
 
     @Test

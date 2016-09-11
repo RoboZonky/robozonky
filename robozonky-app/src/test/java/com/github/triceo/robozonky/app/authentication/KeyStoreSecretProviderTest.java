@@ -27,7 +27,6 @@ import com.github.triceo.robozonky.app.util.IOUtils;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 public class KeyStoreSecretProviderTest {
@@ -134,7 +133,7 @@ public class KeyStoreSecretProviderTest {
     @Test
     public void tokenDeleteSucceeded() throws IOException {
         final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
-        Mockito.doReturn(true).when(ksh).delete(Matchers.any());
+        Mockito.doReturn(true).when(ksh).delete(Mockito.any());
         final KeyStoreSecretProvider p = new KeyStoreSecretProvider(ksh);
         Assertions.assertThat(p.deleteToken()).isTrue();
         Mockito.verify(ksh, Mockito.times(1)).save();

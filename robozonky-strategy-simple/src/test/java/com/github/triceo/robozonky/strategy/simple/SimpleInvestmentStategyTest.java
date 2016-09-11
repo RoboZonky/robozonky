@@ -32,7 +32,6 @@ import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 public class SimpleInvestmentStategyTest {
@@ -199,7 +198,7 @@ public class SimpleInvestmentStategyTest {
                     Mockito.when(s.isPreferLongerTerms()).thenReturn(r.ordinal() % 2 == 0); // exercise both branches
                     Mockito.when(s.getRating()).thenReturn(r);
                     Mockito.when(s.getTargetShare()).thenReturn(BigDecimal.valueOf(0.1));
-                    Mockito.when(s.isAcceptable(Matchers.any())).thenReturn(true);
+                    Mockito.when(s.isAcceptable(Mockito.any())).thenReturn(true);
                     return s;
                 }));
     }

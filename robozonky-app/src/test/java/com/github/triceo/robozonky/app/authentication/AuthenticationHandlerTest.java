@@ -32,7 +32,6 @@ import com.github.triceo.robozonky.authentication.Authenticator;
 import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 public class AuthenticationHandlerTest {
@@ -63,7 +62,7 @@ public class AuthenticationHandlerTest {
         final SecretProvider p = Mockito.mock(SecretProvider.class);
         Mockito.when(p.getToken()).thenReturn(Optional.of(tokenReader));
         Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(storedOn));
-        Mockito.when(p.setToken(Matchers.any())).thenReturn(succeedInSavingTokens);
+        Mockito.when(p.setToken(Mockito.any())).thenReturn(succeedInSavingTokens);
         Mockito.when(p.deleteToken()).thenReturn(succeedInDeletingToken);
         return p;
     }
@@ -143,13 +142,13 @@ public class AuthenticationHandlerTest {
         Mockito.when(p.getToken()).thenReturn(Optional.empty());
         Mockito.when(p.getToken()).thenReturn(Optional.empty());
         // make sure that when new token stored, logout not necessary
-        Mockito.when(p.setToken(Matchers.any())).thenReturn(true);
+        Mockito.when(p.setToken(Mockito.any())).thenReturn(true);
         Assertions.assertThat(h.isLogoutAllowed(AuthenticationHandlerTest.TOKEN)).isFalse();
         // make sure that when new token not stored, logout forced
-        Mockito.when(p.setToken(Matchers.any())).thenReturn(false);
+        Mockito.when(p.setToken(Mockito.any())).thenReturn(false);
         Assertions.assertThat(h.isLogoutAllowed(AuthenticationHandlerTest.TOKEN)).isTrue();
         // make sure when wrong token, logout forced
-        Mockito.when(p.setToken(Matchers.any())).thenThrow(JAXBException.class); // instead of marshalling throwing
+        Mockito.when(p.setToken(Mockito.any())).thenThrow(JAXBException.class); // instead of marshalling throwing
         Assertions.assertThat(h.isLogoutAllowed(Mockito.mock(ZonkyApiToken.class))).isTrue();
     }
 
