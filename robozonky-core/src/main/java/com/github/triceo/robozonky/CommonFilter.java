@@ -34,11 +34,11 @@ public abstract class CommonFilter implements ClientRequestFilter, ClientRespons
     protected abstract Logger getLogger();
 
     private static final String VERSION = CommonFilter.class.getPackage().getImplementationVersion();
-    private static final String URL = "http://triceo.github.io/robozonky/";
+    private static final String URL = "https://triceo.github.io/robozonky/";
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        clientRequestContext.getHeaders().putSingle("User-Agent", "RoboZonky " + CommonFilter.VERSION +
+        clientRequestContext.getHeaders().putSingle("User-Agent", "RoboZonky/" + CommonFilter.VERSION +
                 " (" + CommonFilter.URL + ")");
         this.getLogger().trace("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
