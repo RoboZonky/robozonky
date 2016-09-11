@@ -46,9 +46,10 @@ class App {
 
     public static void main(final String... args) {
         App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
-        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {}).", System.getProperty("java.vendor"),
-                System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
-                System.getProperty("os.arch"), Locale.getDefault());
+        App.LOGGER.debug("Running {} {} v{} on {} v{} ({}, {}).", System.getProperty("java.vendor"),
+                System.getProperty("java.runtime.name"), System.getProperty("java.runtime.version"),
+                System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
+                Locale.getDefault());
         final Future<String> latestVersion = VersionCheck.retrieveLatestVersion(App.HTTP_EXECUTOR);
         boolean faultTolerant = false;
         try {
