@@ -153,13 +153,15 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         SimpleInvestmentStrategy.LOGGER.debug("Recommended investment range of <{}; {}> CZK.", minimumRecommendation,
                 maximumRecommendation);
         // round to nearest lower increment
-        if (minimumRecommendation > portfolio.getCzkAvailable()) {
+        final int balance = portfolio.getCzkAvailable();
+        if (minimumRecommendation > balance) {
             return 0;
         } else if (minimumRecommendation > loan.getRemainingInvestment()) {
             return 0;
         }
         final int maxAllowedInvestmentIncrement = InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT;
-        final int result = (maximumRecommendation / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
+        final int recommendedAmount = Math.min(balance, maximumRecommendation); // to never go over balance
+        final int result = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
         if (result < minimumRecommendation) {
             return 0;
         } else {
