@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -292,5 +293,32 @@ public class SimpleInvestmentStategyTest {
         final List<Loan> result = sis.getMatchingLoans(loans, portfolio);
         Assertions.assertThat(result).isNotEmpty();
         Assertions.assertThat(result).containsExactly(a2, a1, b1, b2);
+    }
+
+    @Test
+    public void investingDoesNotGoOverBalance() { // https://github.com/triceo/robozonky/issues/62
+        // prepare loan
+        final int balance = 260;
+        final int ceiling = 100000;
+        final Rating rating = Rating.A;
+        final Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 1000, 24, rating);
+        // mock core strategies
+        final Map<Rating, StrategyPerRating> s = SimpleInvestmentStategyTest.mockStrategies();
+        final StrategyPerRating strategyMock = s.get(rating);
+        Mockito.when(strategyMock.recommendInvestmentAmount(Mockito.eq(a1)))
+                .thenReturn(Optional.of(new int[] {200, 600}));
+        final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(balance, ceiling, s);
+        // all ratings have zero share
+        final Map<Rating, BigDecimal> tmp =
+                SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        // prepare portfolio
+        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
+        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance);
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
+
+        // make sure the loans are properly sorted according to their terms
+        final int result = sis.recommendInvestmentAmount(a1, portfolio);
+        Assertions.assertThat(result).isEqualTo(200);
     }
 }

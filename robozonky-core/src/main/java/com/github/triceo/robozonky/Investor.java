@@ -85,7 +85,7 @@ public class Investor {
             Investor.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
                     l, amount);
             return Optional.empty();
-        } else if (amount > balance) {
+        } else if (amount > balance) { // strategy should not allow this
             Investor.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK balance.",
                     l, amount, balance);
             return Optional.empty();

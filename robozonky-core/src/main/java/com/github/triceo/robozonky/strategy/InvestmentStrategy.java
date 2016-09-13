@@ -55,7 +55,8 @@ public interface InvestmentStrategy {
     List<Loan> getMatchingLoans(List<Loan> availableLoans, PortfolioOverview portfolio);
 
     /**
-     * Recommend the size of an investment based on loan parameters.
+     * Recommend the size of an investment based on loan parameters. Must not be larger than available balance as
+     * reported by {@link PortfolioOverview}.
      *
      * @param loan Loan in question.
      * @param portfolio Aggregation of information as to the user's current portfolio.
