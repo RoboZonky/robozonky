@@ -56,6 +56,8 @@ public class AppTest extends BaseMarketplaceTest {
     @Test
     public void invalidCli() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
+        exit.checkAssertionAfterwards(() -> Assertions.assertThat(App.EXCLUSIVITY.isEnsured()).isFalse());
+        Assertions.assertThat(App.EXCLUSIVITY.isEnsured()).isFalse();
         App.main();
     }
 

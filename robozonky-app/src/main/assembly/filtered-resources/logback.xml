@@ -1,4 +1,5 @@
 <configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
@@ -9,18 +10,25 @@
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>robozonky.log</file>
+        <prudent>true</prudent> <!-- So that multiple RoboZonky processes don't overwrite each other's logs -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>robozonky.%d{yyyyMMddHHmm}.log</fileNamePattern>
             <maxHistory>43200</maxHistory> <!-- 1 month worth of logs -->
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread@%X{process_id}] %-5level %logger{36} %msg%n</pattern>
         </encoder>
+    </appender>
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- Don't block RoboZonky run due to logging; since "prudent" locks the log file, this is now possible. -->
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="FILE" />
     </appender>
     <logger name="org.apache.http" level="INFO"/>
     <root level="TRACE">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ASYNC"/>
     </root>
 </configuration>

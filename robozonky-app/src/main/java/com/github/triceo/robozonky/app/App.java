@@ -15,6 +15,8 @@
  */
 package com.github.triceo.robozonky.app;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.SocketException;
 import java.util.Locale;
 import java.util.Optional;
@@ -30,31 +32,59 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
+/**
+ * You are required to exit this app by calling {@link #exit(ReturnCode)}.
+ */
 class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final ExecutorService HTTP_EXECUTOR = Executors.newWorkStealingPool();
+    private static Future<String> VERSION_CHECK = null;
+    static final Exclusivity EXCLUSIVITY = Exclusivity.INSTANCE;
 
-    private static void exit(final ReturnCode returnCode, final Future<String> versionFuture) {
+    /**
+     * Will terminate the application. Call this on every exit of the app to ensure proper termination. Failure to do
+     * so may result in unpredictable behavior of this instance of RoboZonky or future ones.
+     * @param returnCode Will be passed to {@link System#exit(int)}.
+     */
+    private static void exit(final ReturnCode returnCode) {
         App.HTTP_EXECUTOR.shutdown();
-        App.newerRoboZonkyVersionExists(versionFuture);
+        if (App.VERSION_CHECK != null) {
+            App.newerRoboZonkyVersionExists(App.VERSION_CHECK);
+        }
         App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         App.LOGGER.info("===== RoboZonky out. =====");
+        try { // other RoboZonky instances can now start executing
+            App.EXCLUSIVITY.waive();
+        } catch (final IOException ex) {
+            App.LOGGER.warn("Failed releasing file lock, other RoboZonky processes may fail to launch.", ex);
+        }
         System.exit(returnCode.getCode());
+
     }
 
     public static void main(final String... args) {
+        // add process identification to log files
+        MDC.put("process_id", ManagementFactory.getRuntimeMXBean().getName());
+        try { // make sure other RoboZonky processes are excluded
+            App.EXCLUSIVITY.ensure();
+        } catch (final IOException ex) {
+            App.LOGGER.error("Failed acquiring file lock, another RoboZonky process likely running.", ex);
+            App.exit(ReturnCode.ERROR_LOCK);
+        }
+        // and actually start running
         App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Locale.getDefault());
-        final Future<String> latestVersion = VersionCheck.retrieveLatestVersion(App.HTTP_EXECUTOR);
+        App.VERSION_CHECK = VersionCheck.retrieveLatestVersion(App.HTTP_EXECUTOR);
         boolean faultTolerant = false;
         try {
             final Optional<CommandLineInterface> optionalCli = CommandLineInterface.parse(args);
             if (!optionalCli.isPresent()) {
-                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
+                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
             }
             final CommandLineInterface cli = optionalCli.get();
             faultTolerant = cli.isFaultTolerant();
@@ -63,46 +93,45 @@ class App {
             }
             final Optional<AppContext> optionalCtx = cli.getCliOperatingMode().setup(cli);
             if (!optionalCtx.isPresent()) {
-                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS, latestVersion);
+                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
             }
             final AppContext ctx = optionalCtx.get();
             final Optional<AuthenticationHandler> optionalAuth = new AuthenticationHandlerProvider().apply(cli);
             if (!optionalAuth.isPresent()) {
-                App.exit(ReturnCode.ERROR_SETUP, latestVersion);
+                App.exit(ReturnCode.ERROR_SETUP);
             }
             App.LOGGER.info("===== RoboZonky at your service! =====");
             final boolean loginSucceeded = new Remote(ctx, optionalAuth.get()).call().isPresent();
             if (!loginSucceeded) {
-                App.exit(ReturnCode.ERROR_SETUP, latestVersion);
+                App.exit(ReturnCode.ERROR_SETUP);
             } else {
-                App.exit(ReturnCode.OK, latestVersion);
+                App.exit(ReturnCode.OK);
             }
         } catch (final ProcessingException ex) {
             final Throwable cause = ex.getCause();
             if (cause instanceof SocketException) {
-                App.handleZonkyMaintenanceError(ex, latestVersion, faultTolerant);
+                App.handleZonkyMaintenanceError(ex, faultTolerant);
             } else {
-                App.handleUnexpectedError(ex, latestVersion);
+                App.handleUnexpectedError(ex);
             }
         } catch (final NotAllowedException ex) {
-            App.handleZonkyMaintenanceError(ex, latestVersion, faultTolerant);
+            App.handleZonkyMaintenanceError(ex, faultTolerant);
         } catch (final WebApplicationException ex) {
             App.LOGGER.error("Application encountered remote API error.", ex);
-            App.exit(ReturnCode.ERROR_REMOTE, latestVersion);
+            App.exit(ReturnCode.ERROR_REMOTE);
         } catch (final RuntimeException ex) {
-            App.handleUnexpectedError(ex, latestVersion);
+            App.handleUnexpectedError(ex);
         }
     }
 
-    private static void handleUnexpectedError(final RuntimeException ex, final Future<String> latestVersion) {
+    private static void handleUnexpectedError(final RuntimeException ex) {
         App.LOGGER.error("Unexpected error, likely RoboZonky bug." , ex);
-        App.exit(ReturnCode.ERROR_UNEXPECTED, latestVersion);
+        App.exit(ReturnCode.ERROR_UNEXPECTED);
     }
 
-    private static void handleZonkyMaintenanceError(final RuntimeException ex, final Future<String> latestVersion,
-                                                    final boolean faultTolerant) {
+    private static void handleZonkyMaintenanceError(final RuntimeException ex, final boolean faultTolerant) {
         App.LOGGER.warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
-        App.exit(faultTolerant ? ReturnCode.OK : ReturnCode.ERROR_DOWN, latestVersion);
+        App.exit(faultTolerant ? ReturnCode.OK : ReturnCode.ERROR_DOWN);
     }
 
     /**

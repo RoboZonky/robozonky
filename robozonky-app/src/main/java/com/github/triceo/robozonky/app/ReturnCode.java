@@ -40,6 +40,10 @@ enum ReturnCode {
      */
     ERROR_REMOTE(4),
     /**
+     * Failed acquiring run lock for an unknown reason.
+     */
+    ERROR_LOCK(5),
+    /**
      * Unexpected error state, possibly app bug.
      */
     ERROR_UNEXPECTED(255);
