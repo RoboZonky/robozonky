@@ -79,14 +79,14 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     }
 
     static Collection<Loan> getAvailableLoans(final AppContext ctx, final ZotifyApi api) {
-        final MarketplaceView view = Marketplace.from(api).newView(ctx, Remote.MARKETPLACE_TIMESTAMP);
-        final boolean shouldSleep = view.shouldSleep();
+        final Activity activity = new Activity(ctx, api, Remote.MARKETPLACE_TIMESTAMP);
+        final boolean shouldSleep = activity.shouldSleep();
         if (shouldSleep) {
             Remote.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
             return Collections.emptyList();
         } else {
             Remote.LOGGER.info("Ignoring loans published earlier than {} seconds ago.", ctx.getCaptchaDelayInSeconds());
-            return Collections.unmodifiableList(view.getAvailableLoans());
+            return Collections.unmodifiableList(activity.getAvailableLoans());
         }
     }
 
