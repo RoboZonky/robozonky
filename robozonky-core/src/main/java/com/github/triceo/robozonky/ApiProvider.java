@@ -75,7 +75,8 @@ public class ApiProvider {
 
     /**
      * Create a new instance of the API provider that will use a given instance of {@link ResteasyClientBuilder}. It is
-     * the responsibility of the caller to make sure that the builder and all clients are thread-safe.
+     * the responsibility of the caller to make sure that the builder and all clients are thread-safe and can process
+     * parallel HTTP requests.
      *
      * @param clientBuilder Client builder to use to instantiate all the APIs.
      */

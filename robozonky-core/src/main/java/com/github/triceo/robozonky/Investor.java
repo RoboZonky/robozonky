@@ -24,9 +24,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.remote.BaseInvestment;
 import com.github.triceo.robozonky.remote.BlockedAmount;
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.remote.Investment;
@@ -75,12 +79,14 @@ public class Investor {
      * command to the Zonky API.
      *
      * @param api Authenticated Zonky API, ready for investing.
-     * @param l Loan to invest into.
+     * @param loanId Loan to invest into. Will be fetched fresh to make sure it is really available.
      * @param amount Amount to invest into the loan.
      * @param balance How much usable cash the user has in the wallet.
      * @return Present if input valid and operation succeeded, empty otherwise.
      */
-    private static Optional<Investment> invest(final ZonkyApi api, final Loan l, final int amount, final int balance) {
+    private static Optional<Investment> invest(final ZonkyApi api, final int loanId, final int amount,
+                                               final int balance) {
+        final Loan l = api.getLoan(loanId);
         if (amount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
             Investor.LOGGER.info("Not investing into loan '{}', since investment ({} CZK) less than bare minimum.",
                     l, amount);
@@ -89,9 +95,9 @@ public class Investor {
             Investor.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK balance.",
                     l, amount, balance);
             return Optional.empty();
-        } else if (amount > l.getAmount()) {
-            Investor.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK loan amount.",
-                    l, amount, l.getAmount());
+        } else if (amount > l.getRemainingInvestment()) {
+            Investor.LOGGER.info("Not investing into loan '{}', {} CZK to invest is more than {} CZK loan remaining.",
+                    l, amount, l.getRemainingInvestment());
             return Optional.empty();
         }
         final Investment investment = new Investment(l, amount);
@@ -103,6 +109,25 @@ public class Investor {
                     investment.getLoanId());
         }
         return Optional.of(investment);
+    }
+
+    private static Future<Loan> scheduleLoanRetrieval(final ZonkyApi api, final int loanId,
+                                                      final ExecutorService executor) {
+        Investor.LOGGER.trace("Scheduling retrieval of loan #{} from Zonky.", loanId);
+        return executor.submit(() -> {
+            Investor.LOGGER.trace("Retrieving loan #{} from Zonky.", loanId);
+            final Loan loan = api.getLoan(loanId);
+            Investor.LOGGER.trace("Retrieved loan #{} from Zonky.", loanId);
+            return loan;
+        });
+    }
+
+    private static Loan retrieveLoan(final Future<Loan> future) {
+        try {
+            return future.get();
+        } catch (final InterruptedException | ExecutionException ex) {
+            throw new IllegalStateException("Failed retrieving loan data from remote API.", ex);
+        }
     }
 
     /**
@@ -120,24 +145,29 @@ public class Investor {
      * The method needs to handle this as well.
      *
      * @param api Authenticated API that will be used to retrieve the user's blocked amounts from the wallet.
+     * @param e Executor service to execute background threads fetching the loans.
      * @return Every blocked amount represents a future investment. This method returns such investments.
      */
-    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
+    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api, final ExecutorService e) {
         final Collection<BlockedAmount> amounts = api.getBlockedAmounts(99, 0).stream()
                 .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
                 .collect(Collectors.toList());
         // cache loan instances in case multiple blocked amounts relate to a single loan, not to make extra API queries
-        final Map<Integer, Loan> loans = new HashMap<>(amounts.size());
+        final Map<Integer, Future<Loan>> loans = new HashMap<>(amounts.size());
         amounts.forEach(amount -> {
             final int loanAmount = amount.getAmount();
             final int loanId = amount.getLoanId();
             Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", loanAmount, loanId);
-            loans.compute(loanId, (k, v) -> v == null ? api.getLoan(k) : v);
+            /*
+             * read actual loan data from remote API. this is necessary since we'll need to know loan ratings later when
+             * we're calculating rating shares.
+             */
+            loans.compute(loanId, (k, v) -> v == null ? Investor.scheduleLoanRetrieval(api, k, e) : v);
         });
         // sum blocked amounts per loan
         final Map<Loan, Integer> amountsBlockedByLoans = new LinkedHashMap<>(amounts.size());
         amounts.forEach(amount -> {
-            final Loan l = loans.get(amount.getLoanId());
+            final Loan l = Investor.retrieveLoan(loans.get(amount.getLoanId()));
             final int a = amount.getAmount();
             amountsBlockedByLoans.compute(l, (k, v) -> v == null ? a : v + a);
         });
@@ -160,16 +190,19 @@ public class Investor {
 
     private final ZonkyApi zonkyApi;
     private final BigDecimal initialBalance;
+    private final ExecutorService executor;
 
     /**
      * Standard constructor.
      *
      * @param zonky Authenticated API ready to retrieve user information.
      * @param initialBalance How much available cash the user has in their wallet.
+     * @param executor The executor that will be used for API operations that can be performed in parallel.
      */
-    public Investor(final ZonkyApi zonky, final BigDecimal initialBalance) {
+    public Investor(final ZonkyApi zonky, final BigDecimal initialBalance, final ExecutorService executor) {
         this.zonkyApi = zonky;
         this.initialBalance = initialBalance;
+        this.executor = executor;
         Investor.LOGGER.info("RoboZonky starting account balance is {} CZK.", this.initialBalance);
     }
 
@@ -183,7 +216,7 @@ public class Investor {
      * @param balance How much money the user has in the wallet that can be used for investing.
      * @param stats User's portfolio coming from the Zonky API.
      * @param investmentsAlreadyMade Loans already invested into that have not yet disappeared from marketplace.
-     * @return The first {@link #invest(ZonkyApi, Loan, int, int)} which succeeds, or empty if none have.
+     * @return The first {@link #invest(ZonkyApi, int, int, int)} which succeeds, or empty if none have.
      */
     Optional<Investment> investOnce(final InvestmentStrategy strategy, final List<Loan> availableLoans,
                                     final BigDecimal balance, final Statistics stats,
@@ -198,7 +231,7 @@ public class Investor {
         return loans.stream()
                 .map(l -> {
                     final int invest = strategy.recommendInvestmentAmount(l, portfolio);
-                    return Investor.invest(this.zonkyApi, l, invest, portfolio.getCzkAvailable());
+                    return Investor.invest(this.zonkyApi, l.getId(), invest, portfolio.getCzkAvailable());
                 })
                 .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
                 .findFirst();
@@ -221,8 +254,10 @@ public class Investor {
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
             return Collections.emptyList(); // no need to do anything else
         }
-        Collection<Investment> investments = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
-        Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}", investments);
+        Collection<Investment> investments =
+                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi, this.executor);
+        Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}",
+                investments.stream().map(BaseInvestment::getLoanId).collect(Collectors.toList()));
         final Statistics stats = Investor.retrieveStatistics(this.zonkyApi);
         Investor.LOGGER.debug("The sum total of principal remaining on active loans is {} CZK.",
                 stats.getCurrentOverview().getPrincipalLeft());
@@ -252,8 +287,7 @@ public class Investor {
      * @return Present if investment succeeded, empty otherwise.
      */
     public Optional<Investment> invest(final int loanId, final int loanAmount) {
-        return Investor.invest(this.zonkyApi, this.zonkyApi.getLoan(loanId), loanAmount,
-                this.initialBalance.intValue());
+        return Investor.invest(this.zonkyApi, loanId, loanAmount, this.initialBalance.intValue());
     }
 
 }

@@ -40,7 +40,7 @@ import org.slf4j.MDC;
 class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final ExecutorService HTTP_EXECUTOR = Executors.newWorkStealingPool();
+    private static final ExecutorService HTTP_EXECUTOR = Executors.newFixedThreadPool(1);
     private static Future<String> VERSION_CHECK = null;
     static final Exclusivity EXCLUSIVITY = Exclusivity.INSTANCE;
 
