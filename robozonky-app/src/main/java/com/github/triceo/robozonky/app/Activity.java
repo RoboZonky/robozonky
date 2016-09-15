@@ -125,6 +125,10 @@ class Activity {
         }
     }
 
+    private List<Loan> getUnactionableLoans() {
+        return this.marketplace.getLoansNewerThan(Instant.now().minus(this.closedSeasonInSeconds, ChronoUnit.SECONDS));
+    }
+
     /**
      * Retrieves loans that are available for robotic investing, ie. not protected by CAPTCHA.
      *
@@ -141,6 +145,7 @@ class Activity {
      */
     public boolean shouldSleep() {
         final Instant lastKnownMarketplaceAction = this.getLatestMarketplaceAction();
+        final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
         boolean shouldSleep = true;
         if (!this.marketplace.getLoansNewerThan(lastKnownMarketplaceAction).isEmpty()) {
             // try investing since there are loans we haven't seen yet
@@ -151,20 +156,28 @@ class Activity {
             Activity.LOGGER.debug("Will not sleep due to already sleeping too much.");
             shouldSleep = false;
         }
-        if (!shouldSleep) {
+        if (!shouldSleep || hasUnactionableLoans) {
             /*
              * only persist (= change marketplace check timestamp) when we're intending to execute some actual
              * investing.
              */
-            this.persist();
+            this.persist(hasUnactionableLoans);
         }
         return shouldSleep;
     }
 
-    private void persist() {
+    private void persist(final boolean hasUnactionableLoans) {
         try (final BufferedWriter writer = Files.newBufferedWriter(this.state, StandardCharsets.UTF_8)) {
-            final Instant result = Instant.now();
-            Activity.LOGGER.debug("New marketplace last checked time is {},", result);
+            // make sure the unactionable loans are never included in the time the marketplace was last checked
+            final Instant result = hasUnactionableLoans ?
+                    Instant.now().minus(this.closedSeasonInSeconds + 30, ChronoUnit.SECONDS)
+                    : Instant.now();
+            if (hasUnactionableLoans) {
+                Activity.LOGGER.debug("New marketplace last checked time placed before beginning of closed season: {}.",
+                        result);
+            } else {
+                Activity.LOGGER.debug("New marketplace last checked time is {}.", result);
+            }
             writer.write(result.toString());
         } catch (final IOException ex) {
             Activity.LOGGER.info("Failed write marketplace timestamp, sleep feature will be disabled.", ex);

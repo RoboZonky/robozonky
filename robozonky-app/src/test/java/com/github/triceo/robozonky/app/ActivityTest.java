@@ -63,9 +63,9 @@ public class ActivityTest {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final Instant timestamp = Instant.now().minus(ActivityTest.CHECK_TIMEOUT_MINUTES / 2, ChronoUnit.MINUTES);
         Files.write(activityCheckFile.toPath(), Collections.singleton(timestamp.toString()));
-        // load API that has loans more recent than that
+        // load API that has loans more recent than that, but makes sure not to come within the closed period
         final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getDatePublished()).thenReturn(Instant.now());
+        Mockito.when(l.getDatePublished()).thenReturn(timestamp.plus(10, ChronoUnit.MINUTES));
         Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
         final Api zonkyApi = Mockito.mock(Api.class);
         Mockito.when(zonkyApi.getLoans()).thenReturn(Collections.singletonList(l));
@@ -77,6 +77,25 @@ public class ActivityTest {
         // and make sure that the timestamp has changed to a new reasonable value
         final Instant newTimestamp = Instant.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
         Assertions.assertThat(newTimestamp.isAfter(l.getDatePublished()));
+    }
+
+    @Test
+    public void doesTakeIntoAccountClosedPeriod() throws IOException {
+        // make sure we have a marketplace check timestamp that would fall into sleeping range
+        final Instant timestamp = Instant.now();
+        Files.write(activityCheckFile.toPath(), Collections.singleton(timestamp.toString()));
+        // load API that has loans within the closed period
+        final Loan l = Mockito.mock(Loan.class);
+        Mockito.when(l.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
+        Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
+        final Api zonkyApi = Mockito.mock(Api.class);
+        Mockito.when(zonkyApi.getLoans()).thenReturn(Collections.singletonList(l));
+        // there is nothing to do, so the app should fall asleep...
+        final Activity activity = new Activity(ctx, zonkyApi, activityCheckFile.toPath());
+        Assertions.assertThat(activity.shouldSleep()).isTrue();
+        // ... but reconfigure the timestamp so that we wake up in time
+        final Instant newTimestamp = Instant.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
+        Assertions.assertThat(newTimestamp).isLessThan(l.getDatePublished());
     }
 
 }
