@@ -12,8 +12,8 @@
         <file>robozonky.log</file>
         <prudent>true</prudent> <!-- So that multiple RoboZonky processes don't overwrite each other's logs -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>robozonky.%d{yyyyMMddHHmm}.log</fileNamePattern>
-            <maxHistory>43200</maxHistory> <!-- 1 month worth of logs -->
+            <fileNamePattern>robozonky.%d{yyyyMMdd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
