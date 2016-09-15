@@ -93,7 +93,7 @@ public class ActivityTest {
         // there is nothing to do, so the app should fall asleep...
         final Activity activity = new Activity(ctx, zonkyApi, activityCheckFile.toPath());
         Assertions.assertThat(activity.shouldSleep()).isTrue();
-        // ... but reconfigure the timestamp so that we wake up in time
+        // ... but reconfigure the timestamp so that we treat the closed-season loans as new loans
         final Instant newTimestamp = Instant.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
         Assertions.assertThat(newTimestamp).isLessThan(l.getDatePublished());
     }
