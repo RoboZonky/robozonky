@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.version.VersionIdentifier;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Wallet;
@@ -188,15 +189,8 @@ public class AppTest extends BaseMarketplaceTest {
 
     @Test
     public void versionCheckFailed() throws InterruptedException, ExecutionException {
-        final Future<String> future = Mockito.mock(Future.class);
+        final Future<VersionIdentifier> future = Mockito.mock(Future.class);
         Mockito.doThrow(new InterruptedException()).when(future).get();
-        Assertions.assertThat(App.newerRoboZonkyVersionExists(future)).isFalse();
-    }
-
-    @Test
-    public void versionCheckNotFoundNewerVersion() throws InterruptedException, ExecutionException {
-        final Future<String> future = Mockito.mock(Future.class);
-        Mockito.when(future.get()).thenReturn("1.0.0");
         Assertions.assertThat(App.newerRoboZonkyVersionExists(future)).isFalse();
     }
 

@@ -26,7 +26,7 @@ public class VersionRetrieverTest {
     @Test
     public void checkRetrieval() throws Exception {
         final VersionRetriever v = new VersionRetriever("com.github.triceo.robozonky", "robozonky-app");
-        Assertions.assertThat(v.call()).isNotEmpty();
+        Assertions.assertThat(v.call()).isNotNull();
     }
 
     @Test(expected = FileNotFoundException.class)

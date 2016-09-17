@@ -30,6 +30,7 @@ import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.version.VersionCheck;
+import com.github.triceo.robozonky.app.version.VersionIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -46,7 +47,7 @@ class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final Shutdown SHUTDOWN = new Shutdown();
-    private static Future<String> VERSION_CHECK = null;
+    private static Future<VersionIdentifier> VERSION_CHECK = null;
     static final Exclusivity EXCLUSIVITY = Exclusivity.INSTANCE;
 
     /**
@@ -148,17 +149,25 @@ class App {
      * @param futureVersion Version to check against.
      * @return True when a more recent version was found.
      */
-    static boolean newerRoboZonkyVersionExists(final Future<String> futureVersion) {
+    static boolean newerRoboZonkyVersionExists(final Future<VersionIdentifier> futureVersion) {
         try {
-            final String version = futureVersion.get();
-            final boolean hasNewer = VersionCheck.isCurrentVersionOlderThan(version);
-            if (hasNewer) {
-                App.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to version {}.", version);
-                return true;
+            final VersionIdentifier version = futureVersion.get();
+            final Optional<String> latestUnstable = version.getLatestUnstable();
+            final String latestStable = version.getLatestStable();
+            final boolean hasNewerStable = VersionCheck.isCurrentVersionOlderThan(latestStable);
+            if (hasNewerStable) {
+                App.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to version {}.",
+                        version);
             } else {
-                App.LOGGER.info("Your version of RoboZonky seems up to date.");
-                return false;
+                App.LOGGER.info("You are using the latest stable version of RoboZonky.");
             }
+            final boolean hasNewerUnstable =
+                    latestUnstable.isPresent() && VersionCheck.isCurrentVersionOlderThan(latestUnstable.get());
+            if (hasNewerUnstable) {
+                App.LOGGER.info("There is a new beta version of RoboZonky available. Give a try to version {}, " +
+                        " if you feel adventurous.", version);
+            }
+            return hasNewerStable || hasNewerUnstable;
         } catch (final InterruptedException | ExecutionException ex) {
             App.LOGGER.trace("Version check failed.", ex);
             return false;

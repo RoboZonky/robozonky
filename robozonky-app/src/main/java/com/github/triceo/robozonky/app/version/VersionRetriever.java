@@ -21,8 +21,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.SortedSet;
 import java.util.StringJoiner;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
@@ -37,19 +40,21 @@ import javax.xml.xpath.XPathFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
  * Retrieve latest released version from Maven Central. By default will check
  * https://repo1.maven.org/maven2/com/github/triceo/robozonky/robozonky-app/maven-metadata.xml.
  */
-class VersionRetriever implements Callable<String> {
+class VersionRetriever implements Callable<VersionIdentifier> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionRetriever.class);
 
     private static final String GROUP_ID = VersionRetriever.class.getPackage().getImplementationVendor();
     private static final String ARTIFACT_ID = "robozonky-app";
-    private static final Pattern COMPILE = Pattern.compile("\\Q.\\E");
+    private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
+    private static final Pattern PATTERN_STABLE_VERSION = Pattern.compile("\\A[1-9][0-9]*\\.[0-9]+\\.[0-9]+\\z");
 
     private final String groupId, artifactId;
 
@@ -74,10 +79,39 @@ class VersionRetriever implements Callable<String> {
         final String urlSeparator = "/";
         final StringJoiner joiner = new StringJoiner(urlSeparator);
         joiner.add("https://repo1.maven.org/maven2");
-        joiner.add(Arrays.stream(VersionRetriever.COMPILE.split(groupId)).collect(Collectors.joining(urlSeparator)));
+        joiner.add(Arrays.stream(VersionRetriever.PATTERN_DOT.split(groupId)).collect(Collectors.joining(urlSeparator)));
         joiner.add(artifactId);
         joiner.add("maven-metadata.xml");
         return new URL(joiner.toString());
+    }
+
+    private static boolean isStable(final String version) {
+        final Matcher matcher = VersionRetriever.PATTERN_STABLE_VERSION.matcher(version);
+        return matcher.find();
+    }
+
+    private static String findLastStable(final SortedSet<String> versions) {
+        return versions.stream()
+                .sorted(new VersionComparator().reversed())
+                .filter(VersionRetriever::isStable)
+                .findFirst().orElseThrow(() -> new IllegalStateException("Impossible."));
+    }
+
+    private static VersionIdentifier parseNodeList(final NodeList nodeList) {
+        final SortedSet<String> versions = new TreeSet<>(new VersionComparator());
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            final String version = nodeList.item(i).getTextContent();
+            versions.add(version);
+        }
+        // find latest stable
+        final String stable = VersionRetriever.findLastStable(versions);
+        // and check if it is followed by any other versions
+        final SortedSet<String> tail = versions.tailSet(stable);
+        if (tail.isEmpty()) {
+            return new VersionIdentifier(stable);
+        } else {
+            return new VersionIdentifier(stable, tail.last());
+        }
     }
 
     /**
@@ -89,19 +123,19 @@ class VersionRetriever implements Callable<String> {
      * @throws SAXException Failed reading XML.
      * @throws XPathExpressionException XPath parsing problem.
      */
-    private static String parseVersionString(final InputStream xml) throws ParserConfigurationException, IOException,
-            SAXException, XPathExpressionException {
+    private static VersionIdentifier parseVersionString(final InputStream xml) throws ParserConfigurationException,
+            IOException, SAXException, XPathExpressionException {
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder builder = factory.newDocumentBuilder();
         final Document doc = builder.parse(xml);
         final XPathFactory xPathfactory = XPathFactory.newInstance();
         final XPath xpath = xPathfactory.newXPath();
-        final XPathExpression expr = xpath.compile("/metadata/versioning/latest");
-        return (String)expr.evaluate(doc, XPathConstants.STRING);
+        final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
+        return VersionRetriever.parseNodeList((NodeList)expr.evaluate(doc, XPathConstants.NODESET));
     }
 
     @Override
-    public String call() throws Exception {
+    public VersionIdentifier call() throws Exception {
         final URL url = VersionRetriever.getMavenCentralUrl(this.groupId, this.artifactId);
         VersionRetriever.LOGGER.trace("RoboZonky version check starting from {}.", url);
         try (final InputStream urlStream = url.openStream()) {

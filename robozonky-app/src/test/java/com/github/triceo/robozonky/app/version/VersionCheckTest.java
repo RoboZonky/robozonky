@@ -31,7 +31,7 @@ public class VersionCheckTest {
 
     @Test
     public void retrieveLatestVersion() throws Exception {
-        final Future<String> version = VersionCheck.retrieveLatestVersion(Executors.newWorkStealingPool());
+        final Future<VersionIdentifier> version = VersionCheck.retrieveLatestVersion(Executors.newWorkStealingPool());
         Assertions.assertThat(version).isNotNull();
         Assertions.assertThat(version.get()).isNotNull();
     }

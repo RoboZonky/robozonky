@@ -29,7 +29,7 @@ public class VersionCheck {
      * @param e Executor service to use for executing the HTTP request.
      * @return Latest known release version of RoboZonky, as a {@link Future} to be retrieved later.
      */
-    public static Future<String> retrieveLatestVersion(final ExecutorService e) {
+    public static Future<VersionIdentifier> retrieveLatestVersion(final ExecutorService e) {
         return e.submit(new VersionRetriever());
     }
 
