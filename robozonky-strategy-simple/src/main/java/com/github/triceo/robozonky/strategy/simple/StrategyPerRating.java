@@ -30,18 +30,19 @@ class StrategyPerRating {
 
     private final boolean preferLongerTerms;
     private final Rating rating;
-    private final BigDecimal targetShare, minimumInvestmentShare, maximumInvestmentShare;
+    private final BigDecimal targetShare, maximumShare, minimumInvestmentShare, maximumInvestmentShare;
     private final int minimumAcceptableTerm, maximumAcceptableTerm, minimumInvestmentAmount, maximumInvestmentAmount,
             minimumAskAmount, maximumAskAmount;
 
-    StrategyPerRating(final Rating rating, final BigDecimal targetShare, final int minTerm, final int maxTerm,
-                      final int minLoanAmount, final int maxLoanAmount, final BigDecimal minLoanShare,
-                      final BigDecimal maxLoanShare, final int minAskAmount, final int maxAskAmount,
-                      final boolean preferLongerTerms) {
+    StrategyPerRating(final Rating rating, final BigDecimal targetShare, final BigDecimal maxShare, final int minTerm,
+                      final int maxTerm, final int minLoanAmount, final int maxLoanAmount,
+                      final BigDecimal minLoanShare, final BigDecimal maxLoanShare, final int minAskAmount,
+                      final int maxAskAmount, final boolean preferLongerTerms) {
         this.rating = rating;
         this.minimumAcceptableTerm = Math.max(minTerm, 0);
         this.maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
         this.targetShare = targetShare;
+        this.maximumShare = maxShare;
         this.minimumInvestmentAmount = minLoanAmount;
         this.maximumInvestmentAmount = maxLoanAmount;
         this.minimumAskAmount = minAskAmount;
@@ -57,6 +58,10 @@ class StrategyPerRating {
 
     public BigDecimal getTargetShare() {
         return this.targetShare;
+    }
+
+    public BigDecimal getMaximumShare() {
+        return this.maximumShare;
     }
 
     public Rating getRating() {

@@ -36,10 +36,10 @@ public class StrategyPerRatingTest {
     private static final BigDecimal MINIMUM_LOAN_SHARE = BigDecimal.valueOf(0.01);
     private static final BigDecimal MAXIMUM_LOAN_SHARE = BigDecimal.valueOf(0.1);
     private static final StrategyPerRating STRATEGY = new StrategyPerRating(Rating.A, BigDecimal.valueOf(0.15),
-            StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1, StrategyPerRatingTest.MINIMUM_LOAN_INVESTMENT,
-            StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT, StrategyPerRatingTest.MINIMUM_LOAN_SHARE,
-            StrategyPerRatingTest.MAXIMUM_LOAN_SHARE, StrategyPerRatingTest.MINIMUM_ASK,
-            StrategyPerRatingTest.MAXIMUM_ASK, true
+            BigDecimal.ONE, StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1,
+            StrategyPerRatingTest.MINIMUM_LOAN_INVESTMENT, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
+            StrategyPerRatingTest.MINIMUM_LOAN_SHARE, StrategyPerRatingTest.MAXIMUM_LOAN_SHARE,
+            StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
     );
 
     @Test(expected = IllegalArgumentException.class)

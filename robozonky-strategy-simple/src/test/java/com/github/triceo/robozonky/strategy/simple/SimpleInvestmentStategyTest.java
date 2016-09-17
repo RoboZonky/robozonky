@@ -32,6 +32,7 @@ import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -46,7 +47,8 @@ public class SimpleInvestmentStategyTest {
     private static final BigDecimal MAXIMUM_LOAN_SHARE_A = BigDecimal.valueOf(0.01);
     private static final BigDecimal TARGET_SHARE_A = BigDecimal.valueOf(0.2);
     private static final StrategyPerRating STRATEGY_A = new StrategyPerRating(SimpleInvestmentStategyTest.RATING_A,
-            SimpleInvestmentStategyTest.TARGET_SHARE_A, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, -1, 200,
+            SimpleInvestmentStategyTest.TARGET_SHARE_A, BigDecimal.ONE,
+            SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, -1, 200,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.ZERO,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A, SimpleInvestmentStategyTest.MINIMUM_ASK,
             SimpleInvestmentStategyTest.MAXIMUM_ASK, true
@@ -55,7 +57,8 @@ public class SimpleInvestmentStategyTest {
     private static final BigDecimal MAXIMUM_LOAN_SHARE_B = BigDecimal.valueOf(0.001);
     private static final BigDecimal TARGET_SHARE_B = SimpleInvestmentStategyTest.TARGET_SHARE_A.add(BigDecimal.valueOf(0.5));
     private static final StrategyPerRating STRATEGY_B = new StrategyPerRating(SimpleInvestmentStategyTest.RATING_B,
-            SimpleInvestmentStategyTest.TARGET_SHARE_B, SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1,
+            SimpleInvestmentStategyTest.TARGET_SHARE_B, BigDecimal.ONE,
+            SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1,
             SimpleInvestmentStategyTest.TESTED_TERM_LENGTH + 1, 200,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.ZERO,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_B, SimpleInvestmentStategyTest.MINIMUM_ASK,
@@ -117,6 +120,7 @@ public class SimpleInvestmentStategyTest {
     private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
                                                            final BigDecimal ratingC) {
         final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
+        Arrays.stream(Rating.values()).forEach(r -> map.put(r, BigDecimal.ZERO));
         map.put(Rating.A, ratingA);
         map.put(Rating.B, ratingB);
         map.put(Rating.C, ratingC);
@@ -124,17 +128,17 @@ public class SimpleInvestmentStategyTest {
     }
 
     private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
-        Assertions.assertThat(result).hasSize(ratingsOrderedDown.length);
-        if (ratingsOrderedDown.length < 2) {
-            return;
-        } else if (ratingsOrderedDown.length > 3) {
-            throw new IllegalStateException("This should never happen in the test.");
-        }
         final Rating first = result.get(0);
-        final Rating last = result.get(result.size() - 1);
-        Assertions.assertThat(first).isGreaterThan(last);
-        Assertions.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
-        Assertions.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
+        final Rating last = result.get(ratingsOrderedDown.length - 1);
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(first).isGreaterThan(last);
+        softly.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
+        softly.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
+        softly.assertAll();
+    }
+
+    private static void assertOrder(final List<Rating> result, final Rating r) {
+        Assertions.assertThat(result.get(0)).isEqualTo(r);
     }
 
     private static Loan mockLoan(final int id, final double amount, final int term, final Rating rating) {
@@ -167,14 +171,14 @@ public class SimpleInvestmentStategyTest {
         final BigDecimal targetShareB = targetShareA.multiply(BigDecimal.TEN);
         final BigDecimal targetShareC = targetShareB.multiply(BigDecimal.TEN);
 
-        final Map<Rating, StrategyPerRating> strategies = Arrays.stream(Rating.values())
-                .collect(Collectors.toMap(Function.identity(), r -> Mockito.mock(StrategyPerRating.class)));
-        strategies.put(Rating.A, new StrategyPerRating(Rating.A, targetShareA, 1, 1, 1, 1, BigDecimal.ZERO,
-                BigDecimal.ONE, 1, 1, true));
-        strategies.put(Rating.B, new StrategyPerRating(Rating.B, targetShareB, 1, 1, 1, 1, BigDecimal.ZERO,
-                BigDecimal.ONE, 1, 1, true));
-        strategies.put(Rating.C, new StrategyPerRating(Rating.C, targetShareC, 1, 1, 1, 1, BigDecimal.ZERO,
-                BigDecimal.ONE, 1, 1, true));
+        final Map<Rating, StrategyPerRating> strategies =
+                SimpleInvestmentStategyTest.mockStrategies(BigDecimal.ZERO);
+        strategies.put(Rating.A, new StrategyPerRating(Rating.A, targetShareA, BigDecimal.ONE, 1, 1, 1, 1,
+                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true));
+        strategies.put(Rating.B, new StrategyPerRating(Rating.B, targetShareB, BigDecimal.ONE, 1, 1, 1, 1,
+                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true));
+        strategies.put(Rating.C, new StrategyPerRating(Rating.C, targetShareC, BigDecimal.ONE, 1, 1, 1, 1,
+                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true));
         final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
 
         // all ratings have zero share; C > B > A
@@ -193,12 +197,17 @@ public class SimpleInvestmentStategyTest {
     }
 
     private static Map<Rating, StrategyPerRating> mockStrategies() {
+        return SimpleInvestmentStategyTest.mockStrategies(BigDecimal.valueOf(0.1));
+    }
+
+    private static Map<Rating, StrategyPerRating> mockStrategies(final BigDecimal defaultTargetShare) {
         return Arrays.stream(Rating.values())
                 .collect(Collectors.toMap(Function.identity(), r -> {
                     final StrategyPerRating s = Mockito.mock(StrategyPerRating.class);
                     Mockito.when(s.isPreferLongerTerms()).thenReturn(r.ordinal() % 2 == 0); // exercise both branches
                     Mockito.when(s.getRating()).thenReturn(r);
-                    Mockito.when(s.getTargetShare()).thenReturn(BigDecimal.valueOf(0.1));
+                    Mockito.when(s.getTargetShare()).thenReturn(defaultTargetShare);
+                    Mockito.when(s.getMaximumShare()).thenReturn(BigDecimal.ONE);
                     Mockito.when(s.isAcceptable(Mockito.any())).thenReturn(true);
                     return s;
                 }));

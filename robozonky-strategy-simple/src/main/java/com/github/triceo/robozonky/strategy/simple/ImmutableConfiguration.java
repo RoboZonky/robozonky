@@ -25,11 +25,10 @@ import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import java.util.Optional;
 import java.util.Properties;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Simple wrapper around a property file that replaces the unnecessarily complex commons-configuration2 which was being
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
  */
 class ImmutableConfiguration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImmutableConfiguration.class);
     private static final DecimalFormat DECIMAL_FORMAT;
 
     static {
@@ -83,10 +81,8 @@ class ImmutableConfiguration {
     private String getValue(final String key, final String def) {
         final String result = properties.getProperty(key);
         if (result == null) {
-            ImmutableConfiguration.LOGGER.trace("Property '{}' has no value.", key);
             return def;
         } else {
-            ImmutableConfiguration.LOGGER.trace("Property '{}' has value '{}'.", key, result);
             return result.trim();
         }
     }
@@ -96,43 +92,51 @@ class ImmutableConfiguration {
      * @param key Key in question.
      * @return True if contains.
      */
-    public boolean containsKey(final String key) {
+    boolean containsKey(final String key) {
         return properties.containsKey(key);
     }
 
     /**
-     * Retrieve a given configuration value and convert it to an int. Make sure to call {@link #containsKey(String)}
-     * before calling this.
+     * Retrieve a given configuration value and convert it to an int.
      *
      * @param key Key to look up.
      * @return The value for the key.
      */
-    public int getInt(final String key) {
-        return Integer.parseInt(this.getValue(key, "0"));
+    public Optional<Integer> getInt(final String key) {
+        if (this.containsKey(key)) {
+            return Optional.of(Integer.parseInt(this.getValue(key, "0")));
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**
-     * Retrieve a given configuration value and convert it to {@link String}. Make sure to call
-     * {@link #containsKey(String)} before calling this.
+     * Retrieve a given configuration value and convert it to {@link String}.
      *
      * @param key Key to look up.
      * @return The value for the key.
      */
-    public boolean getBoolean(final String key) {
-        return Boolean.parseBoolean(this.getValue(key, "false"));
+    public Optional<Boolean> getBoolean(final String key) {
+        if (this.containsKey(key)) {
+            return Optional.of(Boolean.parseBoolean(this.getValue(key, "false")));
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**
-     * Retrieve a given configuration value and convert it to {@link BigDecimal}. Make sure to call
-     * {@link #containsKey(String)} before calling this.
+     * Retrieve a given configuration value and convert it to {@link BigDecimal}.
      *
      * @param key Key to look up.
      * @return The value for the key.
      */
-    public BigDecimal getBigDecimal(final String key) {
+    public Optional<BigDecimal> getBigDecimal(final String key) {
+        if (!this.containsKey(key)) {
+            return Optional.empty();
+        }
         final String value = this.getValue(key, "0.0");
         try {
-            return (BigDecimal) ImmutableConfiguration.DECIMAL_FORMAT.parse(value);
+            return Optional.of((BigDecimal) ImmutableConfiguration.DECIMAL_FORMAT.parse(value));
         } catch (final ParseException ex) {
             throw new IllegalStateException("Invalid value for property '" + key + "': '" + value + "'", ex);
         }

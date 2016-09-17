@@ -33,6 +33,8 @@ public class SimpleInvestmentStrategyServiceTest {
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-sample.cfg");
     private static final InputStream IMPROPER =
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-sample.badext");
+    private static final InputStream WRONG_SHARES =
+            SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-wrongshares.cfg");
     private static final InputStream WRONG_TERMS =
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-wrongterms.cfg");
     private static final InputStream WRONG_ASKS =
@@ -61,6 +63,13 @@ public class SimpleInvestmentStrategyServiceTest {
         Assertions.assertThat(s.isSupported(f)).isFalse();
     }
 
+    @Test
+    public void wrongShares() throws InvestmentStrategyParseException, IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_SHARES);
+        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
+        Assertions.assertThat(s.isSupported(f)).isFalse();
+    }
+
     @Test(expected = InvestmentStrategyParseException.class)
     public void wrongTerms() throws InvestmentStrategyParseException, IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_TERMS, ".cfg");
@@ -81,11 +90,12 @@ public class SimpleInvestmentStrategyServiceTest {
         // my IDE keeps removing whitespace at the end of lines in files, so let's generate a file on the run
         final String[] lines = new String[] {
             "minimumBalance                = 200 ", "maximumInvestment             = 20000\t",
-                "targetShare.default           = 0.20   ", "minimumTerm.default           = \t0  ",
-                "maximumTerm.default           = -1", "minimumAsk.default            = 0",
-                "maximumAsk.default            = -1   ", "minimumLoanAmount.default     = 200",
-                "maximumLoanAmount.default     = 400", "minimumLoanShare.default      = 0",
-                "maximumLoanShare.default      = 0.01", "preferLongerTerms.default     = false   ",
+                "   maximumShare.default          = 1", "targetShare.default           = 0.125   ",
+                "minimumTerm.default           = \t0  ", "maximumTerm.default           = -1",
+                "minimumAsk.default            = 0", "maximumAsk.default            = -1   ",
+                "minimumLoanAmount.default     = 200", "maximumLoanAmount.default     = 400",
+                "minimumLoanShare.default      = 0", "maximumLoanShare.default      = 0.01",
+                "preferLongerTerms.default     = false   ",
         };
         final File f = File.createTempFile("robozonky-", ".cfg");
         Files.write(f.toPath(), Arrays.asList(lines));

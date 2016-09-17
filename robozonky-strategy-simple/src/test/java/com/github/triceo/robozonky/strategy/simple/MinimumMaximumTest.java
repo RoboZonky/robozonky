@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.strategy.simple;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -34,9 +35,9 @@ public class MinimumMaximumTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
         return Arrays.asList(
-                new Object[] {(Supplier<String>) () -> StrategyFileProperties.MAXIMUM_INVESTMENT,
+                new Object[] {(Supplier<String>) StrategyFileProperty.MAXIMUM_INVESTMENT::getKey,
                         (Function<ImmutableConfiguration, Integer>) SimpleInvestmentStrategyService::getMaximumInvestment},
-                new Object[] {(Supplier<String>) () -> StrategyFileProperties.MINIMUM_BALANCE,
+                new Object[] {(Supplier<String>) StrategyFileProperty.MINIMUM_BALANCE::getKey,
                         (Function<ImmutableConfiguration, Integer>) SimpleInvestmentStrategyService::getMinimumBalance}
         );
     }
@@ -61,7 +62,8 @@ public class MinimumMaximumTest {
         final String propertyName = keyRetrieval.get();
         final ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.class);
         Mockito.when(config.containsKey(propertyName)).thenReturn(true);
-        Mockito.when(config.getInt(propertyName)).thenReturn(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED - 1);
+        Mockito.when(config.getInt(propertyName))
+                .thenReturn(Optional.of(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED - 1));
         valueRetrieval.apply(config);
     }
 
@@ -71,7 +73,7 @@ public class MinimumMaximumTest {
         final int result = InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED;
         final ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.class);
         Mockito.when(config.containsKey(propertyName)).thenReturn(true);
-        Mockito.when(config.getInt(propertyName)).thenReturn(result);
+        Mockito.when(config.getInt(propertyName)).thenReturn(Optional.of(result));
         Assertions.assertThat(valueRetrieval.apply(config)).isEqualTo(result);
     }
 

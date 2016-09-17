@@ -28,7 +28,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.PortfolioOverview;
 import com.github.triceo.robozonky.remote.Loan;
@@ -53,18 +55,14 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         return Collections.unmodifiableMap(result);
     }
 
-    /**
-     *
-     * @param currentShare Current share of investments in a given rating.
-     * @return Ratings in the order of decreasing demand. Over-invested ratings not present.
-     */
-    List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
+    private List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare,
+                                             final Function<StrategyPerRating, BigDecimal> metric) {
         final SortedMap<BigDecimal, List<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {
-            final BigDecimal maximumAllowedShare = this.individualStrategies.get(r).getTargetShare();
+            final BigDecimal maximumAllowedShare = metric.apply(this.individualStrategies.get(r));
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
-            if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; ignore
+            if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
                 return;
             }
             mostWantedRatings.compute(undershare, (k, v) -> { // each rating unique at source, so list works
@@ -73,12 +71,28 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
                 return target;
             });
         });
-        // and now output ratings in an order, more under-invested go first
-        final List<Rating> result = mostWantedRatings.entrySet().stream().map(Map.Entry::getValue)
+        return mostWantedRatings.entrySet().stream()
+                .map(Map.Entry::getValue)
                 .reduce(new ArrayList<>(Rating.values().length), (a, b) -> {
                     a.addAll(b);
                     return a;
                 });
+    }
+
+    /**
+     * Ranks the ratings in the portfolio which need to have their overall share increased. First on this list will be
+     * ratings which are under their target share. Following them will be ratings which are under their maximum share.
+     * Ratings with their respective shares over the maximum will not be present.
+     *
+     * @param currentShare Current share of investments in a given rating.
+     * @return Ratings in the order of decreasing demand.
+     */
+    List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
+        final List<Rating> ratingsUnderTarget = rankRatingsByDemand(currentShare, StrategyPerRating::getTargetShare);
+        final List<Rating> ratingsUnderMaximum = rankRatingsByDemand(currentShare, StrategyPerRating::getMaximumShare);
+        final List<Rating> result = Stream.concat(ratingsUnderTarget.stream(), ratingsUnderMaximum.stream())
+                .distinct()
+                .collect(Collectors.toList());
         return Collections.unmodifiableList(result);
     }
 
@@ -121,7 +135,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         }
         final List<Rating> mostWantedRatings = this.rankRatingsByDemand(portfolio.getSharesOnInvestment());
         SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, the portfolio is low "
-                + "on following ratings: {}.", mostWantedRatings);
+                + "on following ratings: {}. The most under-invested come first.", mostWantedRatings);
         final Map<Rating, Collection<Loan>> splitByRating = SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
         final List<Loan> acceptableLoans = new ArrayList<>(availableLoans.size());
         mostWantedRatings.forEach(rating -> {

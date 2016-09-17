@@ -34,7 +34,7 @@ public class StrategyLoadingTest {
         return IoTestUtil.findMainSource("assembly", "resources");
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Object[][] getParameters() {
         return new File[][] {
             new File[] {new File(StrategyLoadingTest.getRoot(), "robozonky-balanced.cfg")},
