@@ -109,8 +109,9 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         final BigDecimal balance = Remote.getAvailableBalance(ctx, zonky);
         final ExecutorService executor = Executors.newWorkStealingPool();
         final Investor i = new Investor(zonky, balance, executor);
+        final Collection<Investment> result = Remote.getInvestingFunction(ctx, availableLoans).apply(i);
         executor.shutdownNow();
-        return Remote.getInvestingFunction(ctx, availableLoans).apply(i);
+        return Collections.unmodifiableCollection(result);
     }
 
     private final AuthenticationHandler auth;
