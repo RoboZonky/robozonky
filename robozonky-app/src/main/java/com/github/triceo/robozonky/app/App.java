@@ -79,9 +79,9 @@ class App {
         }
         // and actually start running
         App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
-        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {}).", System.getProperty("java.vendor"),
+        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
-                System.getProperty("os.arch"), Locale.getDefault());
+                System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
         // start the check for new version, making sure it is properly handled during shutdown
         App.VERSION_CHECK = VersionCheck.retrieveLatestVersion(executor);
         App.SHUTDOWN.before((code) -> {
