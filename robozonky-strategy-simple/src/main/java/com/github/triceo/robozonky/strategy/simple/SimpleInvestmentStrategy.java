@@ -90,6 +90,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
         final List<Rating> ratingsUnderTarget = rankRatingsByDemand(currentShare, StrategyPerRating::getTargetShare);
         final List<Rating> ratingsUnderMaximum = rankRatingsByDemand(currentShare, StrategyPerRating::getMaximumShare);
+        Collections.reverse(ratingsUnderMaximum); // the closer we get to maximum share, the less desirable
         final List<Rating> result = Stream.concat(ratingsUnderTarget.stream(), ratingsUnderMaximum.stream())
                 .distinct()
                 .collect(Collectors.toList());
