@@ -43,7 +43,7 @@ public class AuthenticationHandlerTest {
         final File file = File.createTempFile("robozonky-", ".keystore");
         file.delete();
         final String username = "user";
-        final String password = "pass";
+        final char[] password = "pass".toCharArray();
         final KeyStoreHandler ksh = KeyStoreHandler.create(file, password);
         return SecretProvider.keyStoreBased(ksh, username, password);
     }

@@ -27,7 +27,7 @@ import org.junit.Test;
 public class KeyStoreHandlerTest {
 
     private static File TARGET;
-    private static final String PASSWORD = "ABš CD1234-";
+    private static final char[] PASSWORD = "ABš CD1234-".toCharArray();
 
     @BeforeClass
     public static void createTempFile() {
@@ -49,19 +49,19 @@ public class KeyStoreHandlerTest {
         final KeyStoreHandler ksh = KeyStoreHandler.create(KeyStoreHandlerTest.TARGET, KeyStoreHandlerTest.PASSWORD);
         Assertions.assertThat(ksh.isDirty()).isFalse();
         Assertions.assertThat(KeyStoreHandlerTest.TARGET).exists();
-        final boolean isStored = ksh.set(key, value);
+        final boolean isStored = ksh.set(key, value.toCharArray());
         Assertions.assertThat(isStored).isTrue();
         Assertions.assertThat(ksh.isDirty()).isTrue();
         ksh.save();
         Assertions.assertThat(ksh.isDirty()).isFalse();
         // read same
         Assertions.assertThat(ksh.get(key)).isPresent();
-        Assertions.assertThat(ksh.get(key)).contains(value);
+        Assertions.assertThat(ksh.get(key)).contains(value.toCharArray());
         // read new
         final KeyStoreHandler ksh2 = KeyStoreHandler.open(KeyStoreHandlerTest.TARGET, KeyStoreHandlerTest.PASSWORD);
         Assertions.assertThat(ksh2.isDirty()).isFalse();
         Assertions.assertThat(ksh2.get(key)).isPresent();
-        Assertions.assertThat(ksh2.get(key)).contains(value);
+        Assertions.assertThat(ksh2.get(key)).contains(value.toCharArray());
         // delete
         final boolean isDeleted = ksh2.delete(key);
         Assertions.assertThat(isDeleted).isTrue();

@@ -192,8 +192,8 @@ class   CommandLineInterface {
         return this.getOptionValue(CommandLineInterface.OPTION_USERNAME);
     }
 
-    public String getPassword() {
-        return this.getOptionValue(CommandLineInterface.OPTION_PASSWORD).get();
+    public char[] getPassword() {
+        return this.getOptionValue(CommandLineInterface.OPTION_PASSWORD).get().toCharArray();
     }
 
     Optional<Integer> getLoanId() {

@@ -66,7 +66,7 @@ public class KeyStoreHandler {
      * @throws IOException If file already exists or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
-    public static KeyStoreHandler create(final File keyStoreFile, final String password)
+    public static KeyStoreHandler create(final File keyStoreFile, final char[] password)
             throws IOException, KeyStoreException {
         if (keyStoreFile == null) {
             throw new FileNotFoundException(null);
@@ -75,15 +75,14 @@ public class KeyStoreHandler {
         }
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
-        final char[] passwordArray = password.toCharArray();
         try {
-            ks.load(null, passwordArray);
+            ks.load(null, password);
         } catch (final NoSuchAlgorithmException | CertificateException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
         // store the newly created key store
         final SecretKeyFactory skf = KeyStoreHandler.getSecretKeyFactory();
-        final KeyStoreHandler ksh = new KeyStoreHandler(ks, passwordArray, keyStoreFile, skf, true);
+        final KeyStoreHandler ksh = new KeyStoreHandler(ks, password, keyStoreFile, skf, true);
         ksh.save();
         return ksh;
     }
@@ -97,17 +96,16 @@ public class KeyStoreHandler {
      * @throws IOException If file does not exist or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
-    public static KeyStoreHandler open(final File keyStoreFile, final String password)
+    public static KeyStoreHandler open(final File keyStoreFile, final char[] password)
             throws IOException, KeyStoreException {
         if (!keyStoreFile.exists()) {
             throw new FileNotFoundException(keyStoreFile.getAbsolutePath());
         }
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
-        final char[] passwordArray = password.toCharArray();
         try (final FileInputStream fis = new FileInputStream(keyStoreFile)) {
-            ks.load(fis, passwordArray);
-            return new KeyStoreHandler(ks, passwordArray, keyStoreFile, KeyStoreHandler.getSecretKeyFactory());
+            ks.load(fis, password);
+            return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory());
         } catch (final NoSuchAlgorithmException | CertificateException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
@@ -150,9 +148,9 @@ public class KeyStoreHandler {
      * @param value The value to be stored.
      * @return True if stored in the key store.
      */
-    public boolean set(final String alias, final String value) {
+    public boolean set(final String alias, final char[] value) {
         try {
-            final SecretKey secret = this.keyFactory.generateSecret(new PBEKeySpec(value.toCharArray()));
+            final SecretKey secret = this.keyFactory.generateSecret(new PBEKeySpec(value));
             final KeyStore.Entry skEntry = new KeyStore.SecretKeyEntry(secret);
             this.keyStore.setEntry(alias, skEntry, this.protectionParameter);
             this.dirty.set(true);
@@ -169,7 +167,7 @@ public class KeyStoreHandler {
      * @param alias The alias under which the key will be looked up.
      * @return Present if the alias is present in the key store.
      */
-    public Optional<String> get(final String alias) {
+    public Optional<char[]> get(final String alias) {
         try {
             final KeyStore.SecretKeyEntry skEntry =
                     (KeyStore.SecretKeyEntry)this.keyStore.getEntry(alias, this.protectionParameter);
@@ -177,7 +175,7 @@ public class KeyStoreHandler {
                 return Optional.empty();
             }
             final PBEKeySpec keySpec = (PBEKeySpec)this.keyFactory.getKeySpec(skEntry.getSecretKey(), PBEKeySpec.class);
-            return Optional.of(new String(keySpec.getPassword()));
+            return Optional.of(keySpec.getPassword());
         } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         } catch (final UnrecoverableEntryException ex) {
@@ -205,7 +203,7 @@ public class KeyStoreHandler {
 
     /**
      * Whether or not there are unsaved changes.
-     * @return Whether a {@link #set(String, String)} occurred after last {@link #save()}.
+     * @return Whether a {@link #set(String, char[])} occurred after last {@link #save()}.
      */
     public boolean isDirty() {
         return this.dirty.get();

@@ -31,10 +31,10 @@ import org.slf4j.LoggerFactory;
 
 class AuthenticationHandlerProvider implements Function<CommandLineInterface, Optional<AuthenticationHandler>> {
 
-    private static final File DEFAULT_KEYSTORE_FILE = new File("robozonky.keystore");
+    private static final File DEFAULT_KEYSTORE = new File("robozonky.keystore");
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandlerProvider.class);
 
-    private static SecretProvider newSecretProvider(final String username, final String password,
+    private static SecretProvider newSecretProvider(final String username, final char[] password,
                                                     final File keyStoreLocation) throws IOException, KeyStoreException {
         final KeyStoreHandler ksh = KeyStoreHandler.create(keyStoreLocation, password);
         AuthenticationHandlerProvider.LOGGER.info("Guarded storage was created with your username and password: {}",
@@ -43,20 +43,29 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
 
     }
 
-    private static SecretProvider existingSecretProvider(final String password, final File keyStoreLocation)
+    private static SecretProvider existingSecretProvider(final char[] password, final File keyStoreLocation)
             throws IOException, KeyStoreException {
         final KeyStoreHandler ksh = KeyStoreHandler.open(keyStoreLocation, password);
         return SecretProvider.keyStoreBased(ksh);
     }
 
-    static Optional<SecretProvider> getSecretProvider(final CommandLineInterface cli, final File defaultKeyStore) {
+    /**
+     * Obtain keystore-based secret provider if possible.
+     *
+     * @param cli Command line interface coming from the application.
+     * @param defaultKeyStore The default file to store the keystore in when the user specified none.
+     * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
+     * @throws KeyStoreException In case keystores are unsupported on this JRE. Unlikely with Java 8, but seen happen.
+     */
+    static Optional<SecretProvider> getSecretProvider(final CommandLineInterface cli, final File defaultKeyStore)
+            throws KeyStoreException {
         final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
-        final String password = cli.getPassword();
+        final char[] password = cli.getPassword();
         if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
             try {
                 return Optional.of(AuthenticationHandlerProvider.existingSecretProvider(password,
                         keyStoreLocation.get()));
-            } catch (final IOException | KeyStoreException ex) {
+            } catch (final IOException ex) {
                 AuthenticationHandlerProvider.LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.empty();
             }
@@ -80,7 +89,7 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
             try {
                 return Optional.of(AuthenticationHandlerProvider.newSecretProvider(usernameProvided.get(), password,
                         defaultKeyStore));
-            } catch (final IOException | KeyStoreException ex) {
+            } catch (final IOException ex) {
                 AuthenticationHandlerProvider.LOGGER.error("Failed reading guarded storage.", ex);
                 return Optional.empty();
             }
@@ -100,15 +109,27 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
     }
 
     @Override
-    public Optional<AuthenticationHandler> apply(final CommandLineInterface commandLineInterface) {
-        final Optional<SecretProvider> optionalSensitive =
-                AuthenticationHandlerProvider.getSecretProvider(commandLineInterface,
-                        AuthenticationHandlerProvider.DEFAULT_KEYSTORE_FILE);
-        if (!optionalSensitive.isPresent()) {
-            return Optional.empty();
+    public Optional<AuthenticationHandler> apply(final CommandLineInterface cli) {
+        try {
+            final Optional<SecretProvider> optionalSensitive =
+                    AuthenticationHandlerProvider.getSecretProvider(cli, AuthenticationHandlerProvider.DEFAULT_KEYSTORE);
+            if (optionalSensitive.isPresent()) {
+                final SecretProvider sensitive = optionalSensitive.get();
+                return Optional.of(AuthenticationHandlerProvider.instantiateAuthenticationHandler(sensitive, cli));
+            } else {
+                return Optional.empty();
+            }
+        } catch (final KeyStoreException ex) {
+            AuthenticationHandlerProvider.LOGGER.info("You should get a better Java runtime.");
+            final Optional<File> optionalKeyStore = cli.getKeyStoreLocation();
+            if (optionalKeyStore.isPresent()) { // keystore is demanded but apparently unsupported, fail
+                AuthenticationHandlerProvider.LOGGER.error("No KeyStore support detected, yet it is demanded.");
+                return Optional.empty();
+            } else { // keystore is optional, fall back to other means
+                AuthenticationHandlerProvider.LOGGER.warn("No KeyStore support detected, storing password insecurely.");
+                final SecretProvider sensitive = SecretProvider.fallback(cli.getUsername().get(), cli.getPassword());
+                return Optional.of(AuthenticationHandlerProvider.instantiateAuthenticationHandler(sensitive, cli));
+            }
         }
-        final SecretProvider sensitive = optionalSensitive.get();
-        return Optional.of(AuthenticationHandlerProvider.instantiateAuthenticationHandler(sensitive,
-                commandLineInterface));
     }
 }

@@ -27,7 +27,7 @@ import com.github.triceo.robozonky.app.util.KeyStoreHandler;
  * Children of this class implement various ways of providing sensitive information, such as passwords or access tokens.
  *
  * Users shall not be given access to these children - instead, they should get them by calling static methods on this
- * class, such as {@link #keyStoreBased(KeyStoreHandler)}.
+ * class, such as {@link #keyStoreBased(KeyStoreHandler)} or {@link #fallback(String, char[])}.
  */
 public abstract class SecretProvider {
 
@@ -45,16 +45,26 @@ public abstract class SecretProvider {
      * Create a @{@link KeyStore}-based provider based on a given key store, filled with initial username and password.
      *
      * @param ksh Initialized KeyStore for the provider to work with.
-     * @param username Zonky username to store in the key store.
+     * @param user Zonky username to store in the key store.
      * @param password Zonky password to store in the key store.
      * @return The provider.
      */
-    public static SecretProvider keyStoreBased(final KeyStoreHandler ksh, final String username,
-                                               final String password) {
+    public static SecretProvider keyStoreBased(final KeyStoreHandler ksh, final String user, final char[] password) {
         final KeyStoreSecretProvider ks = (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh);
         ks.setPassword(password);
-        ks.setUsername(username);
+        ks.setUsername(user);
         return ks;
+    }
+
+    /**
+     * For cases where there is no KeyStore support available in JDK, this secret provider stores all secrets in plain
+     * text.
+     * @param username Zonky username.
+     * @param password Zonky password.
+     * @return The provider.
+     */
+    public static SecretProvider fallback(final String username, final char[] password) {
+        return new FallbackSecretProvider(username, password);
     }
 
     /**
@@ -62,7 +72,7 @@ public abstract class SecretProvider {
      *
      * @return The password.
      */
-    abstract public String getPassword();
+    abstract public char[] getPassword();
 
 
     /**

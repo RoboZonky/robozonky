@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Used to authenticate to the Zonky API. Use either {@link #withAccessToken(String, ZonkyApiToken, boolean)},
  * {@link #withAccessTokenAndRefresh(String, ZonkyApiToken, boolean)} or
- * {@link #withCredentials(String, String, boolean)} to log in.
+ * {@link #withCredentials(String, char[], boolean)} to log in.
  */
 public class Authenticator {
 
@@ -43,9 +43,10 @@ public class Authenticator {
      * @param isDryRun Whether or not we are authenticating for a dry run.
      * @return Instance ready for authentication.
      */
-    public static Authenticator withCredentials(final String username, final String password, final boolean isDryRun) {
+    public static Authenticator withCredentials(final String username, final char[] password, final boolean isDryRun) {
         return new Authenticator(api -> {
-            final ZonkyApiToken token = api.login(username, password, "password", Authenticator.TARGET_SCOPE);
+            final ZonkyApiToken token =
+                    api.login(username, new String(password), "password", Authenticator.TARGET_SCOPE);
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}' using password.", username);
             return token;
         }, false, isDryRun);

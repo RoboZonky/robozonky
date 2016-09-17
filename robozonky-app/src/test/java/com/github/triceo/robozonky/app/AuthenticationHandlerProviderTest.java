@@ -29,16 +29,16 @@ import org.mockito.Mockito;
 public class AuthenticationHandlerProviderTest {
 
     @Test
-    public void wrongFormatKeyStoreProvided() throws IOException {
+    public void wrongFormatKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
-        Mockito.when(cli.getPassword()).thenReturn("password");
+        Mockito.when(cli.getPassword()).thenReturn("password".toCharArray());
         Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.of(tmp));
         Assertions.assertThat(AuthenticationHandlerProvider.getSecretProvider(cli, null)).isEmpty();
     }
 
     @Test
-    public void failedDeletingKeyStore() throws IOException {
+    public void failedDeletingKeyStore() throws Exception {
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
         final File f = Mockito.mock(File.class);
@@ -48,7 +48,7 @@ public class AuthenticationHandlerProviderTest {
     }
 
     @Test
-    public void noKeyStoreNoUsername() throws IOException {
+    public void noKeyStoreNoUsername() throws Exception {
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
         Mockito.when(cli.getUsername()).thenReturn(Optional.empty());
@@ -115,7 +115,7 @@ public class AuthenticationHandlerProviderTest {
         Mockito.when(cli.getKeyStoreLocation())
                 .thenReturn(Optional.of(AuthenticationHandlerProviderTest.returnTempFile()));
         Mockito.when(cli.getUsername()).thenReturn(Optional.of("username"));
-        Mockito.when(cli.getPassword()).thenReturn("password");
+        Mockito.when(cli.getPassword()).thenReturn("password".toCharArray());
         final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
         Assertions.assertThat(ahp.apply(cli)).isEmpty();
     }
@@ -125,7 +125,7 @@ public class AuthenticationHandlerProviderTest {
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
         Mockito.when(cli.getUsername()).thenReturn(Optional.of("username"));
-        Mockito.when(cli.getPassword()).thenReturn("password");
+        Mockito.when(cli.getPassword()).thenReturn("password".toCharArray());
         final AuthenticationHandlerProvider ahp = new AuthenticationHandlerProvider();
         Assertions.assertThat(ahp.apply(cli)).isPresent();
     }

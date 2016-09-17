@@ -16,9 +16,9 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Every set*() operation must result in a {@link KeyStoreHandler#save()} call.
  */
-class KeyStoreSecretProvider extends SecretProvider {
+final class KeyStoreSecretProvider extends SecretProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreSecretProvider.class);
     private static final String ALIAS_PASSWORD = "pwd";
@@ -66,6 +66,17 @@ class KeyStoreSecretProvider extends SecretProvider {
      * @return True if success.
      */
     private boolean set(final String alias, final String value) {
+        return this.set(alias, value.toCharArray());
+    }
+
+    /**
+     * Set a key in the key store.
+     *
+     * @param alias Alias to store the key under.
+     * @param value Will be stored.
+     * @return True if success.
+     */
+    private boolean set(final String alias, final char[] value) {
         try {
             final boolean result = this.ksh.set(alias, value);
             this.ksh.save();
@@ -77,18 +88,18 @@ class KeyStoreSecretProvider extends SecretProvider {
     }
 
     @Override
-    public String getPassword() {
+    public char[] getPassword() {
         return this.ksh.get(KeyStoreSecretProvider.ALIAS_PASSWORD)
                 .orElseThrow(() -> new IllegalStateException("Password not present in KeyStore."));
     }
 
     @Override
     public String getUsername() {
-        return this.ksh.get(KeyStoreSecretProvider.ALIAS_USERNAME)
-                .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore."));
+        return new String(this.ksh.get(KeyStoreSecretProvider.ALIAS_USERNAME)
+                .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore.")));
     }
 
-    public boolean setPassword(final String password) {
+    public boolean setPassword(final char[] password) {
         return this.set(KeyStoreSecretProvider.ALIAS_PASSWORD, password);
     }
 
@@ -98,9 +109,9 @@ class KeyStoreSecretProvider extends SecretProvider {
 
     @Override
     public Optional<Reader> getToken() {
-        final Optional<String> stored = this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN);
+        final Optional<char[]> stored = this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN);
         if (stored.isPresent()) {
-            return Optional.of(new StringReader(stored.get()));
+            return Optional.of(new CharArrayReader(stored.get()));
         } else {
             return Optional.empty();
         }
@@ -130,7 +141,7 @@ class KeyStoreSecretProvider extends SecretProvider {
     @Override
     public Optional<LocalDateTime> getTokenSetDate() {
         return this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN_DATE)
-                .map(s -> Optional.of(LocalDateTime.parse(s)))
+                .map(s -> Optional.of(LocalDateTime.parse(new String(s))))
                 .orElse(Optional.empty());
     }
 }
