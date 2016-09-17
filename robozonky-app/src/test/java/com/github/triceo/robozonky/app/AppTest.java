@@ -146,7 +146,8 @@ public class AppTest extends BaseMarketplaceTest {
         final AppContext ctx = Mockito.mock(AppContext.class);
         Mockito.when(ctx.getCaptchaDelayInSeconds()).thenReturn(delayInSeconds);
         Mockito.when(ctx.getSleepPeriodInMinutes()).thenReturn(60);
-        final Collection<Loan> result = Remote.getAvailableLoans(ctx, apiMock);
+        final Activity activity = new Activity(ctx, apiMock, Remote.MARKETPLACE_TIMESTAMP);
+        final Collection<Loan> result = Remote.getAvailableLoans(ctx, activity);
         Assertions.assertThat(result).containsOnly(loanOldEnough, loanOldExactly);
     }
 

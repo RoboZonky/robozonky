@@ -39,6 +39,9 @@ import org.slf4j.LoggerFactory;
  * Decides whether or not the application should fall asleep because of general marketplace inactivity. Uses two sources
  * of data to make the decision: the marketplace, and the app's internal state concerning the last time the marketplace
  * was checked.
+ *
+ * In order for the state to be persisted, the App needs to eventually call {@link #settle()} after calling
+ * {@link #shouldSleep()}.
  */
 class Activity {
 
@@ -99,6 +102,7 @@ class Activity {
     private final int sleepIntervalInMinutes;
     private final Path state;
     private final Activity.Marketplace marketplace;
+    private Runnable settler = null;
 
     Activity(final AppContext ctx, final Api api, final Path state) {
         this.closedSeasonInSeconds = ctx.getCaptchaDelayInSeconds();
@@ -156,14 +160,33 @@ class Activity {
             Activity.LOGGER.debug("Will not sleep due to already sleeping too much.");
             shouldSleep = false;
         }
-        if (!shouldSleep || hasUnactionableLoans) {
+        synchronized (this) { // do not allow concurrent modification of the settler variable
+            if (this.settler != null) {
+                Activity.LOGGER.warn("Scrapping unsettled activity.");
+            }
+            if (!shouldSleep || hasUnactionableLoans) {
             /*
              * only persist (= change marketplace check timestamp) when we're intending to execute some actual
              * investing.
              */
-            this.persist(hasUnactionableLoans);
+                this.settler = () -> this.persist(hasUnactionableLoans);
+            } else {
+                this.settler = null;
+            }
         }
         return shouldSleep;
+    }
+
+    /**
+     * Persists the new marketplace state following a {@link #shouldSleep()} call.
+     */
+    public synchronized void settle() {
+        if (this.settler == null) {
+            Activity.LOGGER.debug("No activity to settle.");
+        } else {
+            this.settler.run();
+            this.settler = null;
+        }
     }
 
     private void persist(final boolean hasUnactionableLoans) {

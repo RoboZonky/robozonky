@@ -39,8 +39,13 @@ import org.slf4j.MDC;
  */
 class App {
 
+    static {
+        // add process identification to log files
+        MDC.put("process_id", ManagementFactory.getRuntimeMXBean().getName());
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final ExecutorService HTTP_EXECUTOR = Executors.newFixedThreadPool(1);
+    private static final Shutdown SHUTDOWN = new Shutdown();
     private static Future<String> VERSION_CHECK = null;
     static final Exclusivity EXCLUSIVITY = Exclusivity.INSTANCE;
 
@@ -50,26 +55,23 @@ class App {
      * @param returnCode Will be passed to {@link System#exit(int)}.
      */
     private static void exit(final ReturnCode returnCode) {
-        App.HTTP_EXECUTOR.shutdown();
-        if (App.VERSION_CHECK != null) {
-            App.newerRoboZonkyVersionExists(App.VERSION_CHECK);
-        }
-        App.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
-        App.LOGGER.info("===== RoboZonky out. =====");
-        try { // other RoboZonky instances can now start executing
-            App.EXCLUSIVITY.waive();
-        } catch (final IOException ex) {
-            App.LOGGER.warn("Failed releasing file lock, other RoboZonky processes may fail to launch.", ex);
-        }
-        System.exit(returnCode.getCode());
-
+        App.SHUTDOWN.now(returnCode);
     }
 
     public static void main(final String... args) {
-        // add process identification to log files
-        MDC.put("process_id", ManagementFactory.getRuntimeMXBean().getName());
-        try { // make sure other RoboZonky processes are excluded
+        // prepare executor for further use by various tasks
+        final ExecutorService executor = Executors.newFixedThreadPool(1);
+        App.SHUTDOWN.before((code) -> executor.shutdown());
+        // make sure other RoboZonky processes are excluded
+        try {
             App.EXCLUSIVITY.ensure();
+            App.SHUTDOWN.before((code) -> {
+                try { // other RoboZonky instances can now start executing
+                    App.EXCLUSIVITY.waive();
+                } catch (final IOException ex) {
+                    App.LOGGER.warn("Failed releasing file lock, other RoboZonky processes may fail to launch.", ex);
+                }
+            });
         } catch (final IOException ex) {
             App.LOGGER.error("Failed acquiring file lock, another RoboZonky process likely running.", ex);
             App.exit(ReturnCode.ERROR_LOCK);
@@ -79,7 +81,14 @@ class App {
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Locale.getDefault());
-        App.VERSION_CHECK = VersionCheck.retrieveLatestVersion(App.HTTP_EXECUTOR);
+        // start the check for new version, making sure it is properly handled during shutdown
+        App.VERSION_CHECK = VersionCheck.retrieveLatestVersion(executor);
+        App.SHUTDOWN.before((code) -> {
+            if (App.VERSION_CHECK != null) {
+                App.newerRoboZonkyVersionExists(App.VERSION_CHECK);
+            }
+        });
+        // read the command line and execute the runtime
         boolean faultTolerant = false;
         try {
             final Optional<CommandLineInterface> optionalCli = CommandLineInterface.parse(args);

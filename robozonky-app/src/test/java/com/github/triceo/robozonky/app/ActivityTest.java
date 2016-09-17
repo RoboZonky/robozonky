@@ -54,6 +54,7 @@ public class ActivityTest {
     public void doesNotSleepWhenFirstRunButSleepsOnSecondAttempt() {
         final Activity activity = new Activity(ctx, Mockito.mock(Api.class), activityCheckFile.toPath());
         Assertions.assertThat(activity.shouldSleep()).isFalse();
+        activity.settle();
         // this will show that the marketplace check works
         Assertions.assertThat(activity.shouldSleep()).isTrue();
     }
@@ -72,6 +73,7 @@ public class ActivityTest {
         // test proper wakeup
         final Activity activity = new Activity(ctx, zonkyApi, activityCheckFile.toPath());
         Assertions.assertThat(activity.shouldSleep()).isFalse();
+        activity.settle();
         // after which it should properly fall asleep again
         Assertions.assertThat(activity.shouldSleep()).isTrue();
         // and make sure that the timestamp has changed to a new reasonable value
@@ -93,6 +95,7 @@ public class ActivityTest {
         // there is nothing to do, so the app should fall asleep...
         final Activity activity = new Activity(ctx, zonkyApi, activityCheckFile.toPath());
         Assertions.assertThat(activity.shouldSleep()).isTrue();
+        activity.settle();
         // ... but reconfigure the timestamp so that we treat the closed-season loans as new loans
         final Instant newTimestamp = Instant.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
         Assertions.assertThat(newTimestamp).isLessThan(l.getDatePublished());

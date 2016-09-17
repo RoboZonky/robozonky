@@ -39,7 +39,6 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +77,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         }
     }
 
-    static Collection<Loan> getAvailableLoans(final AppContext ctx, final ZotifyApi api) {
-        final Activity activity = new Activity(ctx, api, Remote.MARKETPLACE_TIMESTAMP);
+    static Collection<Loan> getAvailableLoans(final AppContext ctx, final Activity activity) {
         final boolean shouldSleep = activity.shouldSleep();
         if (shouldSleep) {
             Remote.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
@@ -128,13 +126,15 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         if (isDryRun) {
             Remote.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        final ApiProvider apiProvider = new ApiProvider();
-        final Collection<Loan> loans = Remote.getAvailableLoans(this.ctx, apiProvider.cache());
+        final ApiProvider apiProvider = new ApiProvider(); // prepare fresh API factory
+        final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
+        final Collection<Loan> loans = Remote.getAvailableLoans(this.ctx, activity);
         if (loans.isEmpty()) { // let's fall asleep
             return Optional.of(Collections.emptyList());
         }
         final Optional<Collection<Investment>> optionalResult =
                 this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, loans));
+        activity.settle(); // only settle the marketplace activity when we're sure the app is no longer likely to fail
         if (optionalResult.isPresent()) {
             final Collection<Investment> result = optionalResult.get();
             Remote.storeInvestmentsMade(result, isDryRun);
