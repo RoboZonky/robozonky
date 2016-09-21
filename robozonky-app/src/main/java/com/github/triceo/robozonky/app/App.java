@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.app;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -119,7 +120,7 @@ class App {
             }
         } catch (final ProcessingException ex) {
             final Throwable cause = ex.getCause();
-            if (cause instanceof SocketException) {
+            if (cause instanceof SocketException || cause instanceof UnknownHostException) {
                 App.handleZonkyMaintenanceError(ex, faultTolerant);
             } else {
                 App.handleUnexpectedError(ex);
