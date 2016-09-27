@@ -63,11 +63,12 @@ class Activity {
 
         private final List<Loan> recentLoansDescending;
 
-        private Marketplace(final Collection<Loan> loans) {
-            this.recentLoansDescending = Collections.unmodifiableList(loans.stream()
-                    .filter(l -> l.getRemainingInvestment() > 0)
-                    .sorted(Comparator.comparing(Loan::getDatePublished).reversed())
-                    .collect(Collectors.toList()));
+        private Marketplace(final Collection<Loan> loans) { // Zotify occasionally returns null loans for unknown reason
+            this.recentLoansDescending = loans == null ? Collections.emptyList() :
+                    Collections.unmodifiableList(loans.stream()
+                            .filter(l -> l.getRemainingInvestment() > 0)
+                            .sorted(Comparator.comparing(Loan::getDatePublished).reversed())
+                            .collect(Collectors.toList()));
         }
 
         /**
