@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>App xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../apidocs/com/github/triceo/robozonky/app/App.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *  Copyright 2016 Lukáš Petrovický</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> *  Licensed under the Apache License, Version 2.0 (the "License");</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *  you may not use this file except in compliance with the License.</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *       <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *  Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *  distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *  See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *  limitations under the License.</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">package</strong> com.github.triceo.robozonky.app;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> java.lang.management.ManagementFactory;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> java.net.SocketException;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> java.net.UnknownHostException;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.util.Locale;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.util.Optional;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> javax.ws.rs.NotAllowedException;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> javax.ws.rs.ProcessingException;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> javax.ws.rs.WebApplicationException;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.app.version.VersionCheck;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.slf4j.Logger;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.slf4j.LoggerFactory;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.slf4j.MDC;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * You are required to exit this app by calling {@link #exit(ReturnCode)}.</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/github/triceo/robozonky/app/App.html">App</a> {
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>      <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>          <em class="jxr_comment">// add process identification to log files</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>          MDC.put(<span class="jxr_string">"process_id"</span>, ManagementFactory.getRuntimeMXBean().getName());
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      }
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger LOGGER = LoggerFactory.getLogger(App.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../com/github/triceo/robozonky/app/State.html">State</a> STATE = <strong class="jxr_keyword">new</strong> <a href="../../../../../com/github/triceo/robozonky/app/State.html">State</a>();
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">     * Will terminate the application. Call this on every exit of the app to ensure proper termination. Failure to do</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">     * so may result in unpredictable behavior of this instance of RoboZonky or future ones.</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment">     * @param returnCode Will be passed to {@link System#exit(int)}.</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> exit(<strong class="jxr_keyword">final</strong> <a href="../../../../../com/github/triceo/robozonky/app/ReturnCode.html">ReturnCode</a> returnCode) {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          App.STATE.shutdown(returnCode);
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>      }
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(<strong class="jxr_keyword">final</strong> String... args) {
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>          <em class="jxr_comment">// make sure other RoboZonky processes are excluded</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>          <strong class="jxr_keyword">if</strong> (!App.STATE.register(<strong class="jxr_keyword">new</strong> ExclusivityGuarantee())) {
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>              App.exit(ReturnCode.ERROR_LOCK);
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>          }
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>          <em class="jxr_comment">// and actually start running</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>          App.LOGGER.info(<span class="jxr_string">"RoboZonky v{} loading."</span>, VersionCheck.retrieveCurrentVersion());
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          App.LOGGER.debug(<span class="jxr_string">"Running {} Java v{} on {} v{} ({}, {} CPUs, {})."</span>, System.getProperty(<span class="jxr_string">"java.vendor"</span>),
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>                  System.getProperty(<span class="jxr_string">"java.version"</span>), System.getProperty(<span class="jxr_string">"os.name"</span>), System.getProperty(<span class="jxr_string">"os.version"</span>),
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>                  System.getProperty(<span class="jxr_string">"os.arch"</span>), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>          <em class="jxr_comment">// start the check for new version, making sure it is properly handled during shutdown</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>          App.STATE.register(<strong class="jxr_keyword">new</strong> <a href="../../../../../com/github/triceo/robozonky/app/VersionChecker.html">VersionChecker</a>());
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>          <em class="jxr_comment">// read the command line and execute the runtime</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          <strong class="jxr_keyword">boolean</strong> faultTolerant = false;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>              <strong class="jxr_keyword">final</strong> Optional&lt;CommandLineInterface&gt; optionalCli = CommandLineInterface.parse(args);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>              <strong class="jxr_keyword">if</strong> (!optionalCli.isPresent()) {
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>                  App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>              }
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>              <strong class="jxr_keyword">final</strong> <a href="../../../../../com/github/triceo/robozonky/app/CommandLineInterface.html">CommandLineInterface</a> cli = optionalCli.get();
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>              faultTolerant = cli.isFaultTolerant();
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>              <strong class="jxr_keyword">if</strong> (faultTolerant) {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>                  App.LOGGER.info(<span class="jxr_string">"RoboZonky is in fault-tolerant mode. Certain errors may not be reported as such."</span>);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>              }
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>              <strong class="jxr_keyword">final</strong> Optional&lt;AppContext&gt; optionalCtx = cli.getCliOperatingMode().setup(cli);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>              <strong class="jxr_keyword">if</strong> (!optionalCtx.isPresent()) {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>                  App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>              }
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>              <strong class="jxr_keyword">final</strong> <a href="../../../../../com/github/triceo/robozonky/app/AppContext.html">AppContext</a> ctx = optionalCtx.get();
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>              <strong class="jxr_keyword">final</strong> Optional&lt;AuthenticationHandler&gt; optionalAuth = <strong class="jxr_keyword">new</strong> <a href="../../../../../com/github/triceo/robozonky/app/AuthenticationHandlerProvider.html">AuthenticationHandlerProvider</a>().apply(cli);
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>              <strong class="jxr_keyword">if</strong> (!optionalAuth.isPresent()) {
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>                  App.exit(ReturnCode.ERROR_SETUP);
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>              }
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>              App.LOGGER.info(<span class="jxr_string">"===== RoboZonky at your service! ====="</span>);
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>              <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> loginSucceeded = <strong class="jxr_keyword">new</strong> <a href="../../../../../com/github/triceo/robozonky/app/Remote.html">Remote</a>(ctx, optionalAuth.get()).call().isPresent();
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>              <strong class="jxr_keyword">if</strong> (!loginSucceeded) {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>                  App.exit(ReturnCode.ERROR_SETUP);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>              } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>                  App.exit(ReturnCode.OK);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>              }
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>          } <strong class="jxr_keyword">catch</strong> (<strong class="jxr_keyword">final</strong> ProcessingException ex) {
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>              <strong class="jxr_keyword">final</strong> Throwable cause = ex.getCause();
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>              <strong class="jxr_keyword">if</strong> (cause instanceof SocketException || cause instanceof UnknownHostException) {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>                  App.handleZonkyMaintenanceError(ex, faultTolerant);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>              } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>                 App.handleUnexpectedError(ex);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>             }
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         } <strong class="jxr_keyword">catch</strong> (<strong class="jxr_keyword">final</strong> NotAllowedException ex) {
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>             App.handleZonkyMaintenanceError(ex, faultTolerant);
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         } <strong class="jxr_keyword">catch</strong> (<strong class="jxr_keyword">final</strong> WebApplicationException ex) {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>             App.LOGGER.error(<span class="jxr_string">"Application encountered remote API error."</span>, ex);
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>             App.exit(ReturnCode.ERROR_REMOTE);
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         } <strong class="jxr_keyword">catch</strong> (<strong class="jxr_keyword">final</strong> RuntimeException ex) {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>             App.handleUnexpectedError(ex);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         }
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     }
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> handleUnexpectedError(<strong class="jxr_keyword">final</strong> RuntimeException ex) {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>         App.LOGGER.error(<span class="jxr_string">"Unexpected error, likely RoboZonky bug."</span> , ex);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>         App.exit(ReturnCode.ERROR_UNEXPECTED);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     }
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> handleZonkyMaintenanceError(<strong class="jxr_keyword">final</strong> RuntimeException ex, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> faultTolerant) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>         App.LOGGER.warn(<span class="jxr_string">"Application not allowed to access remote API, Zonky likely down for maintenance."</span>, ex);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>         App.exit(faultTolerant ? ReturnCode.OK : ReturnCode.ERROR_DOWN);
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     }
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2016. All rights reserved.</div>
+</body>
+</html>
