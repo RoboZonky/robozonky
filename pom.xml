@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
     <name>RoboZonky: Easy automated investing with Zonky</name>
     <description>Automated investing on Zonky. Define investment strategy, run repeatedly, profit.</description>
-    <url>https://triceo.github.io/robozonky/maven/${project.version}</url>
+    <url>https://triceo.github.io/robozonky/</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
