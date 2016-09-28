@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
@@ -59,19 +60,21 @@ enum Exclusivity {
             Exclusivity.LOGGER.debug("Already waived.");
             return;
         }
-        final FileLock currentLock = lock;
+        final FileLock currentLock = this.lock;
         try {
             currentLock.release();
             this.lock = null;
             Exclusivity.LOGGER.debug("File lock released.");
         } finally {
-            final FileChannel channel = currentLock.channel();
-            if (channel.isOpen()) {
-                try {
+            try (final Channel channel = currentLock.acquiredBy()) {
+                if (channel.isOpen()) {
                     channel.close();
-                    Exclusivity.ROBOZONKY_LOCK.delete();
-                } catch (final IOException ex) {
-                    Exclusivity.LOGGER.debug("Failed closing lock file channel.", ex);
+                }
+            } catch (final IOException ex) {
+                Exclusivity.LOGGER.debug("Failed closing lock file channel.", ex);
+            } finally {
+                if (!Exclusivity.ROBOZONKY_LOCK.delete()) {
+                    Exclusivity.LOGGER.debug("Failed deleting lock file.");
                 }
             }
         }
@@ -89,17 +92,8 @@ enum Exclusivity {
         Exclusivity.LOGGER.info("Checking we're the only RoboZonky running.");
         Exclusivity.LOGGER.debug("Acquiring file lock: {}.", Exclusivity.ROBOZONKY_LOCK.getAbsolutePath());
         final FileChannel ch = new RandomAccessFile(Exclusivity.ROBOZONKY_LOCK, "rw").getChannel();
-        try {
-            this.lock = ch.lock();
-            Exclusivity.LOGGER.debug("File lock acquired.");
-        } catch (final IOException ex) {
-            try { // close channel in case lock acquisition failed
-                ch.close();
-            } catch (final IOException ex2) {
-                Exclusivity.LOGGER.debug("Failed closing lock file channel.", ex2);
-            }
-            throw ex;
-        }
+        this.lock = ch.lock();
+        Exclusivity.LOGGER.debug("File lock acquired.");
     }
 
 }
