@@ -15,14 +15,11 @@
  */
 package com.github.triceo.robozonky.app;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -36,40 +33,15 @@ import org.slf4j.MDC;
 /**
  * You are required to exit this app by calling {@link #exit(ReturnCode)}.
  */
-class App {
+public class App {
 
     static {
         // add process identification to log files
         MDC.put("process_id", ManagementFactory.getRuntimeMXBean().getName());
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final State STATE = new State();
-
-    /**
-     * Makes sure that RoboZonky only proceeds after all other instances of RoboZonky have terminated.
-     */
-    private static class ExclusivityGuarantee implements Supplier<Optional<Consumer<ReturnCode>>> {
-
-        private final Exclusivity exclusivity = Exclusivity.INSTANCE;
-
-        @Override
-        public Optional<Consumer<ReturnCode>> get() {
-            try {
-                this.exclusivity.ensure();
-            } catch (final IOException ex) {
-                App.LOGGER.error("Failed acquiring file lock, another RoboZonky process likely running.", ex);
-                return Optional.empty();
-            }
-            return Optional.of((code) -> {
-                try { // other RoboZonky instances can now start executing
-                    this.exclusivity.waive();
-                } catch (final IOException ex) {
-                    App.LOGGER.warn("Failed releasing file lock, other RoboZonky processes may fail to launch.", ex);
-                }
-            });
-        }
-    }
 
     /**
      * Will terminate the application. Call this on every exit of the app to ensure proper termination. Failure to do
@@ -82,7 +54,7 @@ class App {
 
     public static void main(final String... args) {
         // make sure other RoboZonky processes are excluded
-        if (!App.STATE.register(new App.ExclusivityGuarantee())) {
+        if (!App.STATE.register(new ExclusivityGuarantee())) {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
