@@ -15,7 +15,7 @@
  */
 package com.github.triceo.robozonky.strategy.rules.facts;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Rating;
@@ -37,7 +37,7 @@ public class ProposedLoan {
     private final int id, termInMonths, investmentsCount;
     private final int amount, remainingInvestment;
     private final double interestRate;
-    private final Instant deadline;
+    private final OffsetDateTime deadline;
     private final Rating rating;
     private final double investmentRate;
 
@@ -69,7 +69,7 @@ public class ProposedLoan {
         return remainingInvestment;
     }
 
-    public Instant getDeadline() {
+    public OffsetDateTime getDeadline() {
         return deadline;
     }
 

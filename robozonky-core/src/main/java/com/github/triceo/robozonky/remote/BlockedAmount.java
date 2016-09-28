@@ -16,16 +16,14 @@
 
 package com.github.triceo.robozonky.remote;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class BlockedAmount implements BaseEntity {
 
     private int amount, loanId;
     private String category, loanName;
-    private Instant dateStart;
+    private OffsetDateTime dateStart;
 
     public BlockedAmount(final int loanId, final int loanAmount) {
         this.loanId = loanId;
@@ -57,8 +55,7 @@ public class BlockedAmount implements BaseEntity {
     }
 
     @XmlElement
-    @JsonDeserialize(using = InstantDeserializer.class)
-    public Instant getDateStart() {
+    public OffsetDateTime getDateStart() {
         return dateStart;
     }
 

@@ -23,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,7 +81,8 @@ class Activity {
          */
         public List<Loan> getLoansOlderThan(final int delayInSeconds) {
             return this.recentLoansDescending.stream()
-                    .filter(l -> Instant.now().isAfter(l.getDatePublished().plus(delayInSeconds, ChronoUnit.SECONDS)))
+                    .filter(l -> OffsetDateTime.now()
+                            .isAfter(l.getDatePublished().plus(delayInSeconds, ChronoUnit.SECONDS)))
                     .collect(Collectors.toList());
         }
 
@@ -89,7 +92,7 @@ class Activity {
          * @param instant The earliest point in time for the loans to published on.
          * @return Ordered by publishing time descending.
          */
-        public List<Loan> getLoansNewerThan(final Instant instant) {
+        public List<Loan> getLoansNewerThan(final OffsetDateTime instant) {
             return this.recentLoansDescending.stream()
                     .filter(l -> l.getDatePublished().isAfter(instant))
                     .collect(Collectors.toList());
@@ -98,6 +101,7 @@ class Activity {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
+    private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
 
     private final int closedSeasonInSeconds;
     private final int sleepIntervalInMinutes;
@@ -116,21 +120,23 @@ class Activity {
         return this.state.toFile().exists();
     }
 
-    private Instant getLatestMarketplaceAction() {
+    private OffsetDateTime getLatestMarketplaceAction() {
         if (!this.wasMarketplaceCheckedBefore()) {
-            return Instant.EPOCH;
+            return Activity.EPOCH;
         }
         try (final BufferedReader reader = Files.newBufferedReader(this.state, StandardCharsets.UTF_8)) {
             final String instantString = reader.readLine();
-            return Instant.parse(instantString);
+            return OffsetDateTime.parse(instantString);
         } catch (final IOException ex) {
             Activity.LOGGER.debug("Failed read marketplace timestamp.", ex);
-            return Instant.EPOCH;
+            return Activity.EPOCH;
         }
     }
 
     private List<Loan> getUnactionableLoans() {
-        return this.marketplace.getLoansNewerThan(Instant.now().minus(this.closedSeasonInSeconds, ChronoUnit.SECONDS));
+        return this.marketplace.getLoansNewerThan(
+                OffsetDateTime.now().minus(this.closedSeasonInSeconds, ChronoUnit.SECONDS)
+        );
     }
 
     /**
@@ -148,16 +154,16 @@ class Activity {
      * @return True if no further contact should be made during this run of the app.
      */
     public boolean shouldSleep() {
-        final Instant lastKnownMarketplaceAction = this.getLatestMarketplaceAction();
+        final OffsetDateTime lastKnownAction = this.getLatestMarketplaceAction();
         final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
         Activity.LOGGER.debug("Marketplace last checked on {}, has un-actionable loans: {}.",
-                lastKnownMarketplaceAction, hasUnactionableLoans);
+                lastKnownAction, hasUnactionableLoans);
         boolean shouldSleep = true;
-        if (!this.marketplace.getLoansNewerThan(lastKnownMarketplaceAction).isEmpty()) {
+        if (!this.marketplace.getLoansNewerThan(lastKnownAction).isEmpty()) {
             // try investing since there are loans we haven't seen yet
             Activity.LOGGER.debug("Will not sleep due to new loans.");
             shouldSleep = false;
-        } else if (lastKnownMarketplaceAction.plus(sleepIntervalInMinutes, ChronoUnit.MINUTES).isBefore(Instant.now())) {
+        } else if (lastKnownAction.plus(sleepIntervalInMinutes, ChronoUnit.MINUTES).isBefore(OffsetDateTime.now())) {
             // try investing since we haven't tried in a while; maybe we have some more funds now
             Activity.LOGGER.debug("Will not sleep due to already sleeping too much.");
             shouldSleep = false;

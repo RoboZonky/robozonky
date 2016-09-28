@@ -15,16 +15,14 @@
  */
 package com.github.triceo.robozonky.remote;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class MyInvestment extends BaseInvestment {
 
     private int investorId;
     private String status, investorNickname;
-    private Instant timeCreated;
+    private OffsetDateTime timeCreated;
 
     MyInvestment() {
         // for JAXB
@@ -46,8 +44,7 @@ public class MyInvestment extends BaseInvestment {
     }
 
     @XmlElement
-    @JsonDeserialize(using = InstantDeserializer.class)
-    public Instant getTimeCreated() {
+    public OffsetDateTime getTimeCreated() {
         return timeCreated;
     }
 

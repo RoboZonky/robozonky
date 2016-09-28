@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
@@ -128,15 +128,15 @@ public class AppTest extends BaseMarketplaceTest {
         final Loan loanOldEnough = Mockito.mock(Loan.class);
         Mockito.when(loanOldEnough.getRemainingInvestment()).thenReturn(1000.0);
         Mockito.when(loanOldEnough.getDatePublished())
-                .thenReturn(Instant.now().minus(delayInSeconds + 1, ChronoUnit.SECONDS));
+                .thenReturn(OffsetDateTime.now().minus(delayInSeconds + 1, ChronoUnit.SECONDS));
         final Loan loanOldExactly = Mockito.mock(Loan.class);
         Mockito.when(loanOldExactly.getRemainingInvestment()).thenReturn(200.0);
         Mockito.when(loanOldExactly.getDatePublished())
-                .thenReturn(Instant.now().minus(delayInSeconds, ChronoUnit.SECONDS));
+                .thenReturn(OffsetDateTime.now().minus(delayInSeconds, ChronoUnit.SECONDS));
         final Loan youngLoan = Mockito.mock(Loan.class);
         Mockito.when(youngLoan.getRemainingInvestment()).thenReturn(600.0);
         Mockito.when(youngLoan.getDatePublished())
-                .thenReturn(Instant.now().minus(delayInSeconds - 1, ChronoUnit.SECONDS));
+                .thenReturn(OffsetDateTime.now().minus(delayInSeconds - 1, ChronoUnit.SECONDS));
         final ZotifyApi apiMock = Mockito.mock(ZotifyApi.class);
         Mockito.when(apiMock.getLoans()).thenReturn(Arrays.asList(loanOldEnough, loanOldExactly, youngLoan));
         final AppContext ctx = Mockito.mock(AppContext.class);

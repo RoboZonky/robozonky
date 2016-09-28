@@ -16,15 +16,13 @@
 package com.github.triceo.robozonky.remote;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class Instalment implements BaseEntity {
 
     private BigDecimal instalmentAmount, principalPaid, interestPaid;
-    private Instant month;
+    private OffsetDateTime month;
 
     Instalment() {
         // for JAXB
@@ -46,8 +44,7 @@ public class Instalment implements BaseEntity {
     }
 
     @XmlElement
-    @JsonDeserialize(using = InstantDeserializer.class)
-    public Instant getMonth() {
+    public OffsetDateTime getMonth() {
         return month;
     }
 

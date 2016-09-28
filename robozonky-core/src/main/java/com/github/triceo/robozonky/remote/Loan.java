@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.remote;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -96,7 +96,7 @@ public class Loan implements BaseEntity {
     private double amount, remainingInvestment;
     private String name, story, nickName;
     private BigDecimal interestRate;
-    private Instant datePublished, deadline;
+    private OffsetDateTime datePublished, deadline;
     private Rating rating;
     private Collection<Photo> photos;
     private BigDecimal investmentRate;
@@ -194,14 +194,12 @@ public class Loan implements BaseEntity {
     }
 
     @XmlElement
-    @JsonDeserialize(using = InstantDeserializer.class)
-    public Instant getDatePublished() {
+    public OffsetDateTime getDatePublished() {
         return datePublished;
     }
 
     @XmlElement
-    @JsonDeserialize(using = InstantDeserializer.class)
-    public Instant getDeadline() {
+    public OffsetDateTime getDeadline() {
         return deadline;
     }
 

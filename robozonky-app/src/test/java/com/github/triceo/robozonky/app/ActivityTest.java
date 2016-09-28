@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
@@ -62,7 +62,8 @@ public class ActivityTest {
     @Test
     public void doesWakeUpWhenNewLoanAndThenSleeps() throws IOException {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
-        final Instant timestamp = Instant.now().minus(ActivityTest.CHECK_TIMEOUT_MINUTES / 2, ChronoUnit.MINUTES);
+        final OffsetDateTime timestamp =
+                OffsetDateTime.now().minus(ActivityTest.CHECK_TIMEOUT_MINUTES / 2, ChronoUnit.MINUTES);
         Files.write(activityCheckFile.toPath(), Collections.singleton(timestamp.toString()));
         // load API that has loans more recent than that, but makes sure not to come within the closed period
         final Loan l = Mockito.mock(Loan.class);
@@ -77,14 +78,14 @@ public class ActivityTest {
         // after which it should properly fall asleep again
         Assertions.assertThat(activity.shouldSleep()).isTrue();
         // and make sure that the timestamp has changed to a new reasonable value
-        final Instant newTimestamp = Instant.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
+        final OffsetDateTime newTimestamp = OffsetDateTime.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
         Assertions.assertThat(newTimestamp.isAfter(l.getDatePublished()));
     }
 
     @Test
     public void doesTakeIntoAccountClosedPeriod() throws IOException {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
-        final Instant timestamp = Instant.now();
+        final OffsetDateTime timestamp = OffsetDateTime.now();
         Files.write(activityCheckFile.toPath(), Collections.singleton(timestamp.toString()));
         // load API that has loans within the closed period
         final Loan l = Mockito.mock(Loan.class);
@@ -97,8 +98,8 @@ public class ActivityTest {
         Assertions.assertThat(activity.shouldSleep()).isTrue();
         activity.settle();
         // ... but reconfigure the timestamp so that we treat the closed-season loans as new loans
-        final Instant newTimestamp = Instant.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
-        Assertions.assertThat(newTimestamp).isLessThan(l.getDatePublished());
+        final OffsetDateTime newTimestamp = OffsetDateTime.parse(Files.readAllLines(activityCheckFile.toPath()).get(0));
+        Assertions.assertThat(newTimestamp).isBefore(l.getDatePublished());
     }
 
 }

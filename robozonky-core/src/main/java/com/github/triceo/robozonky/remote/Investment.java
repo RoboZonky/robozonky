@@ -16,16 +16,14 @@
 package com.github.triceo.robozonky.remote;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class Investment extends BaseInvestment {
 
     private int dpd, loanTermInMonth, currentTerm;
     private String loanName, nickname, firstName, surname, paymentStatus;
-    private Instant investmentDate, nextPaymentDate;
+    private OffsetDateTime investmentDate, nextPaymentDate;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal, expectedInterest;
     private Rating rating;
 
@@ -48,7 +46,7 @@ public class Investment extends BaseInvestment {
         if (loan.getMyInvestment() != null) {
             this.investmentDate = loan.getMyInvestment().getTimeCreated();
         } else {
-            this.investmentDate = Instant.now();
+            this.investmentDate = OffsetDateTime.now();
         }
     }
 
@@ -99,14 +97,12 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    @JsonDeserialize(using = InstantDeserializer.class)
-    public Instant getInvestmentDate() {
+    public OffsetDateTime getInvestmentDate() {
         return investmentDate;
     }
 
     @XmlElement
-    @JsonDeserialize(using = InstantDeserializer.class)
-    public Instant getNextPaymentDate() {
+    public OffsetDateTime getNextPaymentDate() {
         return nextPaymentDate;
     }
 
