@@ -34,7 +34,7 @@ public class Investment extends BaseInvestment {
     public Investment(final Loan loan, final int amount) {
         super(loan, amount);
         this.loanName = loan.getName();
-        this.nickname = loan.getNickName();
+        this.nickname = loan.getNickname();
         this.rating = loan.getRating();
         this.loanTermInMonth = loan.getTermInMonths();
         this.interestRate = loan.getInterestRate();
