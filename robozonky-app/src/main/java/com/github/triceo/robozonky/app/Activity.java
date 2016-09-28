@@ -122,7 +122,6 @@ class Activity {
         }
         try (final BufferedReader reader = Files.newBufferedReader(this.state, StandardCharsets.UTF_8)) {
             final String instantString = reader.readLine();
-            Activity.LOGGER.debug("Marketplace last checked on {},", instantString);
             return Instant.parse(instantString);
         } catch (final IOException ex) {
             Activity.LOGGER.debug("Failed read marketplace timestamp.", ex);
@@ -151,6 +150,8 @@ class Activity {
     public boolean shouldSleep() {
         final Instant lastKnownMarketplaceAction = this.getLatestMarketplaceAction();
         final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
+        Activity.LOGGER.debug("Marketplace last checked on {}, has un-actionable loans: {}.",
+                lastKnownMarketplaceAction, hasUnactionableLoans);
         boolean shouldSleep = true;
         if (!this.marketplace.getLoansNewerThan(lastKnownMarketplaceAction).isEmpty()) {
             // try investing since there are loans we haven't seen yet
