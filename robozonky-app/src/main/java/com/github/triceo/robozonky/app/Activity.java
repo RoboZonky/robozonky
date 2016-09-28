@@ -19,12 +19,10 @@ package com.github.triceo.robozonky.app;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.Defaults;
 import com.github.triceo.robozonky.remote.Api;
 import com.github.triceo.robozonky.remote.Loan;
 import org.slf4j.Logger;
@@ -101,7 +100,7 @@ class Activity {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
-    private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
+    private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
 
     private final int closedSeasonInSeconds;
     private final int sleepIntervalInMinutes;
@@ -124,7 +123,7 @@ class Activity {
         if (!this.wasMarketplaceCheckedBefore()) {
             return Activity.EPOCH;
         }
-        try (final BufferedReader reader = Files.newBufferedReader(this.state, StandardCharsets.UTF_8)) {
+        try (final BufferedReader reader = Files.newBufferedReader(this.state, Defaults.CHARSET)) {
             final String instantString = reader.readLine();
             return OffsetDateTime.parse(instantString);
         } catch (final IOException ex) {
@@ -198,7 +197,7 @@ class Activity {
     }
 
     private void persist(final boolean hasUnactionableLoans) {
-        try (final BufferedWriter writer = Files.newBufferedWriter(this.state, StandardCharsets.UTF_8)) {
+        try (final BufferedWriter writer = Files.newBufferedWriter(this.state, Defaults.CHARSET)) {
             // make sure the unactionable loans are never included in the time the marketplace was last checked
             final Instant result = hasUnactionableLoans ?
                     Instant.now().minus(this.closedSeasonInSeconds + 30, ChronoUnit.SECONDS)

@@ -17,11 +17,11 @@
 package com.github.triceo.robozonky.authentication;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import javax.ws.rs.client.ClientRequestContext;
 
 import com.github.triceo.robozonky.CommonFilter;
+import com.github.triceo.robozonky.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ class AuthenticationFilter extends CommonFilter {
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes(StandardCharsets.UTF_8));
+        final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes(Defaults.CHARSET));
         clientRequestContext.getHeaders().add("Authorization", "Basic " + authCode);
         super.filter(clientRequestContext);
     }

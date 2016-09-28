@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
 
+import com.github.triceo.robozonky.Defaults;
 import com.github.triceo.robozonky.remote.Rating;
 
 enum StrategyFileProperty {
@@ -55,8 +56,8 @@ enum StrategyFileProperty {
 
     private static String get(final String prefix, final String str) {
         return new StringJoiner("")
-                .add(prefix.toLowerCase())
-                .add(str.substring(0, 1).toUpperCase())
+                .add(prefix.toLowerCase(Defaults.LOCALE))
+                .add(str.substring(0, 1).toUpperCase(Defaults.LOCALE))
                 .add(str.substring(1))
                 .toString();
     }

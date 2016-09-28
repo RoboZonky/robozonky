@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -28,6 +27,7 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.Properties;
 
+import com.github.triceo.robozonky.Defaults;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
 
 /**
@@ -54,7 +54,7 @@ class ImmutableConfiguration {
      * @throws InvestmentStrategyParseException When there was a problem reading the file.
      */
     public static ImmutableConfiguration from(final File properties) throws InvestmentStrategyParseException {
-        try (final Reader reader = Files.newBufferedReader(properties.toPath(), StandardCharsets.UTF_8)) {
+        try (final Reader reader = Files.newBufferedReader(properties.toPath(), Defaults.CHARSET)) {
             final Properties props = new Properties();
             props.load(reader);
             return ImmutableConfiguration.from(props);

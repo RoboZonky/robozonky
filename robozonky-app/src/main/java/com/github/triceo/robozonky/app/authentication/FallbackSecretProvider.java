@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
@@ -31,6 +30,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ final class FallbackSecretProvider extends SecretProvider {
     @Override
     public Optional<Reader> getToken() {
         try (final BufferedReader br =
-                     Files.newBufferedReader(FallbackSecretProvider.TOKEN.toPath(), StandardCharsets.UTF_8)){
+                     Files.newBufferedReader(FallbackSecretProvider.TOKEN.toPath(), Defaults.CHARSET)){
             final String result = br.readLine();
             return (result == null) ? Optional.empty() : Optional.of(new StringReader(result));
         } catch (final IOException ex) {
@@ -76,7 +76,7 @@ final class FallbackSecretProvider extends SecretProvider {
     @Override
     public boolean setToken(final Reader token) {
         try (final BufferedReader r = new BufferedReader(token); final BufferedWriter bw =
-                Files.newBufferedWriter(FallbackSecretProvider.TOKEN.toPath(), StandardCharsets.UTF_8,
+                Files.newBufferedWriter(FallbackSecretProvider.TOKEN.toPath(), Defaults.CHARSET,
                         StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
             bw.write(r.readLine());
             bw.newLine();
