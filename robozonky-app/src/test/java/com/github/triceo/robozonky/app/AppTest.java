@@ -26,12 +26,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.version.VersionIdentifier;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Wallet;
@@ -183,13 +180,6 @@ public class AppTest extends BaseMarketplaceTest {
         Mockito.when(i.invest(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Optional.of(investment));
         final Collection<Investment> result2 = Remote.getInvestingFunction(ctx, null).apply(i);
         Assertions.assertThat(result2).containsExactly(investment);
-    }
-
-    @Test
-    public void versionCheckFailed() throws InterruptedException, ExecutionException {
-        final Future<VersionIdentifier> future = Mockito.mock(Future.class);
-        Mockito.doThrow(new InterruptedException()).when(future).get();
-        Assertions.assertThat(App.newerRoboZonkyVersionExists(future)).isFalse();
     }
 
     @Test

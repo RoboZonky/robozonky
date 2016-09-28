@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.app;
 /**
  * These are possible return codes for this application's {@link System#exit(int)}.
  */
-enum ReturnCode {
+public enum ReturnCode {
     /**
      * All is good.
      */
