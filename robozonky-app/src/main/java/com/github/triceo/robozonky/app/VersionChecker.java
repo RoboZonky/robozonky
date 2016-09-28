@@ -59,7 +59,7 @@ class VersionChecker implements Supplier<Optional<Consumer<ReturnCode>>> {
             final boolean hasNewerStable = VersionCheck.isCurrentVersionOlderThan(latestStable);
             if (hasNewerStable) {
                 VersionChecker.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to {}.",
-                        version);
+                        latestStable);
                 return true;
             }
             // check for latest unstable version
@@ -69,7 +69,7 @@ class VersionChecker implements Supplier<Optional<Consumer<ReturnCode>>> {
             if (hasNewerUnstable) {
                 VersionChecker.LOGGER.info("You are using the latest stable version of RoboZonky.");
                 VersionChecker.LOGGER.info("There is a new beta version of RoboZonky available. Try version {}, " +
-                        " if you feel adventurous.", version);
+                        " if you feel adventurous.", latestUnstable.get());
                 return true;
             } else {
                 VersionChecker.LOGGER.info("You are using the latest version of RoboZonky.");
