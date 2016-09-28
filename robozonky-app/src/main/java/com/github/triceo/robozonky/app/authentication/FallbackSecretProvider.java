@@ -66,7 +66,7 @@ final class FallbackSecretProvider extends SecretProvider {
         try (final BufferedReader br =
                      Files.newBufferedReader(FallbackSecretProvider.TOKEN.toPath(), StandardCharsets.UTF_8)){
             final String result = br.readLine();
-            return Optional.of(new StringReader(result));
+            return (result == null) ? Optional.empty() : Optional.of(new StringReader(result));
         } catch (final IOException ex) {
             FallbackSecretProvider.LOGGER.warn("Failed obtaining token.", ex);
             return Optional.empty();
