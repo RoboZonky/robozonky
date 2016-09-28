@@ -172,10 +172,10 @@ class Activity {
                 Activity.LOGGER.warn("Scrapping unsettled activity.");
             }
             if (!shouldSleep || hasUnactionableLoans) {
-            /*
-             * only persist (= change marketplace check timestamp) when we're intending to execute some actual
-             * investing.
-             */
+                /*
+                 * only persist (= change marketplace check timestamp) when we're intending to execute some actual
+                 * investing.
+                 */
                 this.settler = () -> this.persist(hasUnactionableLoans);
             } else {
                 this.settler = null;
@@ -199,9 +199,9 @@ class Activity {
     private void persist(final boolean hasUnactionableLoans) {
         try (final BufferedWriter writer = Files.newBufferedWriter(this.state, Defaults.CHARSET)) {
             // make sure the unactionable loans are never included in the time the marketplace was last checked
-            final Instant result = hasUnactionableLoans ?
-                    Instant.now().minus(this.closedSeasonInSeconds + 30, ChronoUnit.SECONDS)
-                    : Instant.now();
+            final OffsetDateTime result = hasUnactionableLoans ?
+                    OffsetDateTime.now().minus(this.closedSeasonInSeconds + 30, ChronoUnit.SECONDS)
+                    : OffsetDateTime.now();
             if (hasUnactionableLoans) {
                 Activity.LOGGER.debug("New marketplace last checked time placed before beginning of closed season: {}.",
                         result);
