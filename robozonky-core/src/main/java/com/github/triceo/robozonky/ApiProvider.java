@@ -19,6 +19,8 @@ package com.github.triceo.robozonky;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.xml.ws.WebServiceClient;
 
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
@@ -28,8 +30,9 @@ import com.github.triceo.robozonky.remote.ZotifyApi;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
@@ -69,9 +72,9 @@ public class ApiProvider {
 
     }
 
-    private final ResteasyClientBuilder clientBuilder;
+    private final ClientBuilder clientBuilder;
     private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
-    private final Collection<ResteasyClient> clients = new HashSet<>();
+    private final Collection<Client> clients = new HashSet<>();
 
     /**
      * Create a new instance of the API provider that will use a given instance of {@link ResteasyClientBuilder}. It is
@@ -92,8 +95,8 @@ public class ApiProvider {
         this(ApiProvider.newResteasyClientBuilder());
     }
 
-    private synchronized ResteasyClient newClient() {
-        final ResteasyClient client = this.clientBuilder.build();
+    private synchronized Client newClient() {
+        final Client client = this.clientBuilder.build();
         ApiProvider.LOGGER.trace("Registering new RESTEasy client: {}.", client);
         this.clients.add(client);
         return client;
@@ -107,10 +110,9 @@ public class ApiProvider {
 
     private <T> T obtain(final Class<T> api, final String apiUrl, final CommonFilter filter) {
         this.ensureNotDestroyed();
-        return this.newClient()
-                .register(filter)
-                .target(apiUrl)
-                .proxy(api);
+        final ResteasyWebTarget target = (ResteasyWebTarget)this.newClient().register(filter).target(apiUrl);
+        target.register(new BrowserCacheFeature()); // honor server-sent cache-related headers
+        return target.proxy(api);
     }
 
     /**
