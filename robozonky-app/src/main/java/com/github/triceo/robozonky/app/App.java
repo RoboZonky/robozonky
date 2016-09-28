@@ -25,6 +25,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -47,9 +49,49 @@ class App {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final Shutdown SHUTDOWN = new Shutdown();
-    private static Future<VersionIdentifier> VERSION_CHECK = null;
-    static final Exclusivity EXCLUSIVITY = Exclusivity.INSTANCE;
+    private static final State STATE = new State();
+
+    /**
+     * Executes a version check on the background.
+     */
+    private static class VersionChecker implements Supplier<Optional<Consumer<ReturnCode>>> {
+
+        private final ExecutorService executor = Executors.newWorkStealingPool();
+
+        @Override
+        public Optional<Consumer<ReturnCode>> get() {
+            final Future<VersionIdentifier> future = VersionCheck.retrieveLatestVersion(this.executor);
+            return Optional.of((code) -> {
+                App.newerRoboZonkyVersionExists(future);
+                this.executor.shutdown();
+            });
+        }
+    }
+
+    /**
+     * Makes sure that RoboZonky only proceeds after all other instances of RoboZonky have terminated.
+     */
+    private static class ExclusivityGuarantee implements Supplier<Optional<Consumer<ReturnCode>>> {
+
+        private final Exclusivity exclusivity = Exclusivity.INSTANCE;
+
+        @Override
+        public Optional<Consumer<ReturnCode>> get() {
+            try {
+                this.exclusivity.ensure();
+            } catch (final IOException ex) {
+                App.LOGGER.error("Failed acquiring file lock, another RoboZonky process likely running.", ex);
+                return Optional.empty();
+            }
+            return Optional.of((code) -> {
+                try { // other RoboZonky instances can now start executing
+                    this.exclusivity.waive();
+                } catch (final IOException ex) {
+                    App.LOGGER.warn("Failed releasing file lock, other RoboZonky processes may fail to launch.", ex);
+                }
+            });
+        }
+    }
 
     /**
      * Will terminate the application. Call this on every exit of the app to ensure proper termination. Failure to do
@@ -57,25 +99,12 @@ class App {
      * @param returnCode Will be passed to {@link System#exit(int)}.
      */
     private static void exit(final ReturnCode returnCode) {
-        App.SHUTDOWN.now(returnCode);
+        App.STATE.shutdown(returnCode);
     }
 
     public static void main(final String... args) {
-        // prepare executor for further use by various tasks
-        final ExecutorService executor = Executors.newFixedThreadPool(1);
-        App.SHUTDOWN.before((code) -> executor.shutdown());
         // make sure other RoboZonky processes are excluded
-        try {
-            App.EXCLUSIVITY.ensure();
-            App.SHUTDOWN.before((code) -> {
-                try { // other RoboZonky instances can now start executing
-                    App.EXCLUSIVITY.waive();
-                } catch (final IOException ex) {
-                    App.LOGGER.warn("Failed releasing file lock, other RoboZonky processes may fail to launch.", ex);
-                }
-            });
-        } catch (final IOException ex) {
-            App.LOGGER.error("Failed acquiring file lock, another RoboZonky process likely running.", ex);
+        if (!App.STATE.register(new App.ExclusivityGuarantee())) {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
@@ -84,12 +113,7 @@ class App {
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
         // start the check for new version, making sure it is properly handled during shutdown
-        App.VERSION_CHECK = VersionCheck.retrieveLatestVersion(executor);
-        App.SHUTDOWN.before((code) -> {
-            if (App.VERSION_CHECK != null) {
-                App.newerRoboZonkyVersionExists(App.VERSION_CHECK);
-            }
-        });
+        App.STATE.register(new App.VersionChecker());
         // read the command line and execute the runtime
         boolean faultTolerant = false;
         try {
