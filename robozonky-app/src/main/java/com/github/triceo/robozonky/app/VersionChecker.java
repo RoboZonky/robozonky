@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 class VersionChecker implements Supplier<Optional<Consumer<ReturnCode>>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionChecker.class);
-    private final ExecutorService executor = Executors.newWorkStealingPool();
+    private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
     @Override
     public Optional<Consumer<ReturnCode>> get() {
@@ -53,8 +53,8 @@ class VersionChecker implements Supplier<Optional<Consumer<ReturnCode>>> {
      */
     static boolean newerRoboZonkyVersionExists(final Future<VersionIdentifier> futureVersion) {
         try {
+            // check for latest stable version
             final VersionIdentifier version = futureVersion.get();
-            final Optional<String> latestUnstable = version.getLatestUnstable();
             final String latestStable = version.getLatestStable();
             final boolean hasNewerStable = VersionCheck.isCurrentVersionOlderThan(latestStable);
             if (hasNewerStable) {
@@ -62,16 +62,19 @@ class VersionChecker implements Supplier<Optional<Consumer<ReturnCode>>> {
                         version);
                 return true;
             }
+            // check for latest unstable version
+            final Optional<String> latestUnstable = version.getLatestUnstable();
             final boolean hasNewerUnstable =
                     latestUnstable.isPresent() && VersionCheck.isCurrentVersionOlderThan(latestUnstable.get());
             if (hasNewerUnstable) {
                 VersionChecker.LOGGER.info("You are using the latest stable version of RoboZonky.");
                 VersionChecker.LOGGER.info("There is a new beta version of RoboZonky available. Try version {}, " +
                         " if you feel adventurous.", version);
+                return true;
             } else {
                 VersionChecker.LOGGER.info("You are using the latest version of RoboZonky.");
+                return false;
             }
-            return hasNewerStable || hasNewerUnstable;
         } catch (final InterruptedException | ExecutionException ex) {
             VersionChecker.LOGGER.trace("Version check failed.", ex);
             return false;
