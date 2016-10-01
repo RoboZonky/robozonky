@@ -148,8 +148,8 @@ public class Loan implements BaseEntity {
         return story;
     }
 
-    @XmlElement(name = "nickName")
-    public String getNickname() {
+    @XmlElement
+    public String getNickName() {
         return nickName;
     }
 
