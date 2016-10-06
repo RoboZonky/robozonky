@@ -19,14 +19,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -111,25 +106,6 @@ public class Investor {
         return Optional.of(investment);
     }
 
-    private static Future<Loan> scheduleLoanRetrieval(final ZonkyApi api, final int loanId,
-                                                      final ExecutorService executor) {
-        Investor.LOGGER.trace("Scheduling retrieval of loan #{} from Zonky.", loanId);
-        return executor.submit(() -> {
-            Investor.LOGGER.trace("Retrieving loan #{} from Zonky.", loanId);
-            final Loan loan = api.getLoan(loanId);
-            Investor.LOGGER.trace("Retrieved loan #{} from Zonky.", loanId);
-            return loan;
-        });
-    }
-
-    private static Loan retrieveLoan(final Future<Loan> future) {
-        try {
-            return future.get();
-        } catch (final InterruptedException | ExecutionException ex) {
-            throw new IllegalStateException("Failed retrieving loan data from remote API.", ex);
-        }
-    }
-
     /**
      * Blocked amounts represent loans in various stages. Either the user has invested and the loan has not yet been
      * funded to 100 % ("na tržišti"), or the user invested and the loan has been funded ("na cestě"). In the latter
@@ -145,35 +121,17 @@ public class Investor {
      * The method needs to handle this as well.
      *
      * @param api Authenticated API that will be used to retrieve the user's blocked amounts from the wallet.
-     * @param e Executor service to execute background threads fetching the loans.
      * @return Every blocked amount represents a future investment. This method returns such investments.
      */
-    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api, final ExecutorService e) {
-        final Collection<BlockedAmount> amounts = api.getBlockedAmounts(99, 0).stream()
+    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
+        // first group all blocked amounts by the loan ID and sum them
+        final Map<Integer, Integer> amountsBlockedByLoans = api.getBlockedAmounts(99, 0).stream()
                 .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
-                .collect(Collectors.toList());
-        // cache loan instances in case multiple blocked amounts relate to a single loan, not to make extra API queries
-        final Map<Integer, Future<Loan>> loans = new HashMap<>(amounts.size());
-        amounts.forEach(amount -> {
-            final int loanAmount = amount.getAmount();
-            final int loanId = amount.getLoanId();
-            Investor.LOGGER.debug("{} CZK is being blocked by loan {}.", loanAmount, loanId);
-            /*
-             * read actual loan data from remote API. this is necessary since we'll need to know loan ratings later when
-             * we're calculating rating shares.
-             */
-            loans.compute(loanId, (k, v) -> v == null ? Investor.scheduleLoanRetrieval(api, k, e) : v);
-        });
-        // sum blocked amounts per loan
-        final Map<Loan, Integer> amountsBlockedByLoans = new LinkedHashMap<>(amounts.size());
-        amounts.forEach(amount -> {
-            final Loan l = Investor.retrieveLoan(loans.get(amount.getLoanId()));
-            final int a = amount.getAmount();
-            amountsBlockedByLoans.compute(l, (k, v) -> v == null ? a : v + a);
-        });
-        // finally return the investments representing the overall sum of blocked amounts
-        return Collections.unmodifiableList(amountsBlockedByLoans.entrySet().stream()
-                .map(entry -> new Investment(entry.getKey(), entry.getValue()))
+                .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
+                        Collectors.summingInt(BlockedAmount::getAmount)));
+        // and then fetch all the loans in parallel, converting them into investments
+        return Collections.unmodifiableList(amountsBlockedByLoans.entrySet().parallelStream()
+                .map(entry -> new Investment(api.getLoan(entry.getKey()), entry.getValue()))
                 .collect(Collectors.toList()));
     }
 
@@ -190,19 +148,15 @@ public class Investor {
 
     private final ZonkyApi zonkyApi;
     private final BigDecimal initialBalance;
-    private final ExecutorService executor;
 
     /**
      * Standard constructor.
-     *
-     * @param zonky Authenticated API ready to retrieve user information.
+     *  @param zonky Authenticated API ready to retrieve user information.
      * @param initialBalance How much available cash the user has in their wallet.
-     * @param executor The executor that will be used for API operations that can be performed in parallel.
      */
-    public Investor(final ZonkyApi zonky, final BigDecimal initialBalance, final ExecutorService executor) {
+    public Investor(final ZonkyApi zonky, final BigDecimal initialBalance) {
         this.zonkyApi = zonky;
         this.initialBalance = initialBalance;
-        this.executor = executor;
         Investor.LOGGER.info("RoboZonky starting account balance is {} CZK.", this.initialBalance);
     }
 
@@ -255,7 +209,7 @@ public class Investor {
             return Collections.emptyList(); // no need to do anything else
         }
         Collection<Investment> investments =
-                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi, this.executor);
+                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
         Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}",
                 investments.stream().map(BaseInvestment::getLoanId).collect(Collectors.toList()));
         final Statistics stats = Investor.retrieveStatistics(this.zonkyApi);

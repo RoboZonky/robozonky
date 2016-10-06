@@ -27,8 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -107,10 +105,8 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky,
                                          final Collection<Loan> availableLoans) {
         final BigDecimal balance = Remote.getAvailableBalance(ctx, zonky);
-        final ExecutorService executor = Executors.newWorkStealingPool();
-        final Investor i = new Investor(zonky, balance, executor);
+        final Investor i = new Investor(zonky, balance);
         final Collection<Investment> result = Remote.getInvestingFunction(ctx, availableLoans).apply(i);
-        executor.shutdownNow();
         return Collections.unmodifiableCollection(result);
     }
 

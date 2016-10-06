@@ -98,7 +98,7 @@ public class InvestorTest {
         Mockito.doThrow(BadRequestException.class)
                 .when(mockApi).invest(Mockito.argThat(new InvestorTest.InvestmentBaseMatcher(mockLoan1)));
         // finally test
-        final Investor investor = new Investor(mockApi, BigDecimal.valueOf(1000), InvestorTest.EXECUTOR);
+        final Investor investor = new Investor(mockApi, BigDecimal.valueOf(1000));
         investor.invest(strategyMock, Collections.singletonList(mockLoan1));
     }
 
@@ -129,7 +129,7 @@ public class InvestorTest {
             Mockito.when(api.getLoan(Mockito.eq(l.getId()))).thenReturn(l);
         }
         // and now actually test that the succeeding loan will be invested into ...
-        final Investor i = new Investor(api, balance, InvestorTest.EXECUTOR);
+        final Investor i = new Investor(api, balance);
         Mockito.when(strategy.getMatchingLoans(Mockito.any(), Mockito.any())).thenReturn(allLoans);
         final Optional<Investment> result = i.investOnce(strategy, allLoans, balance, stats, Collections.emptyList());
         Assertions.assertThat(result).isPresent();
@@ -180,7 +180,7 @@ public class InvestorTest {
                         new BlockedAmount(loan2id, loan2amount), new BlockedAmount(loan1id, loan3amount))
         );
         final List<Investment> result =
-                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(api, InvestorTest.EXECUTOR);
+                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(api);
         // the 0 ID blocked amount is Zonky's investors' fee, which should not be looked up as a loan
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(result).hasSize(2);
