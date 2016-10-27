@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app.authentication;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.util.IOUtils;
@@ -121,7 +121,7 @@ final class KeyStoreSecretProvider extends SecretProvider {
     public boolean setToken(final Reader token) {
         final boolean firstSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN, token);
         final boolean secondSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN_DATE,
-                LocalDateTime.now().toString());
+                OffsetDateTime.now().toString());
         return firstSuccessful && secondSuccessful;
     }
 
@@ -139,9 +139,9 @@ final class KeyStoreSecretProvider extends SecretProvider {
     }
 
     @Override
-    public Optional<LocalDateTime> getTokenSetDate() {
+    public Optional<OffsetDateTime> getTokenSetDate() {
         return this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN_DATE)
-                .map(s -> Optional.of(LocalDateTime.parse(new String(s))))
+                .map(s -> Optional.of(OffsetDateTime.parse(new String(s))))
                 .orElse(Optional.empty());
     }
 }

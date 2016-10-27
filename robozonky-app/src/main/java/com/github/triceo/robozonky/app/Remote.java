@@ -21,8 +21,9 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +53,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
 
     static Optional<File> storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
         final String suffix = dryRun ? "dry" : "invested";
-        final LocalDateTime now = LocalDateTime.now();
+        final Temporal now = OffsetDateTime.now();
         final String filename =
                 "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
         return Remote.storeInvestmentsMade(new File(filename), result);

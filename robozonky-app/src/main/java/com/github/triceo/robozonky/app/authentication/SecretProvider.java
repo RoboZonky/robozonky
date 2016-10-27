@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.io.Reader;
 import java.security.KeyStore;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
@@ -111,6 +111,6 @@ public abstract class SecretProvider {
      * @return the last time when {@link #setToken(Reader)} was called, unless {@link #deleteToken()} called after
      * that.
      */
-    abstract public Optional<LocalDateTime> getTokenSetDate();
+    abstract public Optional<OffsetDateTime> getTokenSetDate();
 
 }

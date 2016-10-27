@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky.app.authentication;
 
 import java.io.StringReader;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
@@ -48,7 +48,7 @@ public class FallbackSecretProviderTest {
         softly.assertThat(p.setToken(new StringReader(token))).isTrue();
         softly.assertThat(FallbackSecretProvider.TOKEN).exists();
         softly.assertThat(p.getTokenSetDate()).isPresent();
-        softly.assertThat(p.getTokenSetDate().get()).isBefore(LocalDateTime.now());
+        softly.assertThat(p.getTokenSetDate().get()).isBefore(OffsetDateTime.now());
         softly.assertAll();
         // delete created token
         softly = new SoftAssertions();

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.security.KeyStoreException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,14 +48,14 @@ public class AuthenticationHandlerTest {
         return SecretProvider.keyStoreBased(ksh, username, password);
     }
 
-    private static SecretProvider mockExistingProvider(final LocalDateTime storedOn,
+    private static SecretProvider mockExistingProvider(final OffsetDateTime storedOn,
                                                        final boolean succeedInSavingTokens,
                                                        final boolean succeedInDeletingToken) throws JAXBException {
         return AuthenticationHandlerTest.mockExistingProvider(ZonkyApiToken.marshal(AuthenticationHandlerTest.TOKEN),
                 storedOn, succeedInSavingTokens, succeedInDeletingToken);
     }
 
-    private static SecretProvider mockExistingProvider(final String token, final LocalDateTime storedOn,
+    private static SecretProvider mockExistingProvider(final String token, final OffsetDateTime storedOn,
                                                        final boolean succeedInSavingTokens,
                                                        final boolean succeedInDeletingToken) throws JAXBException {
         final Reader tokenReader = new StringReader(token);
@@ -90,7 +90,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void simpleTokenBasedWithExistingToken() throws JAXBException {
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
-                AuthenticationHandlerTest.mockExistingProvider(LocalDateTime.now(), true, true), false);
+                AuthenticationHandlerTest.mockExistingProvider(OffsetDateTime.now(), true, true), false);
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isTrue();
         final boolean shouldLogout = h.isLogoutAllowed(Mockito.mock(ZonkyApiToken.class));
@@ -99,8 +99,8 @@ public class AuthenticationHandlerTest {
 
     @Test
     public void tokenBasedWithExpiredToken() throws JAXBException {
-        final LocalDateTime expired =
-                LocalDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() + 1, ChronoUnit.SECONDS);
+        final OffsetDateTime expired =
+                OffsetDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() + 1, ChronoUnit.SECONDS);
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
                 AuthenticationHandlerTest.mockExistingProvider(expired, true, true), true);
         final Authenticator a = h.build();
@@ -109,8 +109,8 @@ public class AuthenticationHandlerTest {
 
     @Test
     public void tokenBasedWithExpiringToken() throws JAXBException {
-        final LocalDateTime expiring =
-                LocalDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() - 1, ChronoUnit.SECONDS);
+        final OffsetDateTime expiring =
+                OffsetDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() - 1, ChronoUnit.SECONDS);
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
                 AuthenticationHandlerTest.mockExistingProvider(expiring, true, true), false, 10, ChronoUnit.SECONDS);
         final Authenticator a = h.build();
@@ -120,7 +120,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void tokenBasedWithFailingToken() throws JAXBException {
         final SecretProvider provider =
-                AuthenticationHandlerTest.mockExistingProvider("", LocalDateTime.now(), true, true);
+                AuthenticationHandlerTest.mockExistingProvider("", OffsetDateTime.now(), true, true);
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(provider, true, 10,
                 ChronoUnit.SECONDS);
         final Authenticator a = h.build();
@@ -134,7 +134,7 @@ public class AuthenticationHandlerTest {
         final Reader tokenReader = new StringReader(ZonkyApiToken.marshal(AuthenticationHandlerTest.TOKEN));
         final SecretProvider p = Mockito.mock(SecretProvider.class);
         Mockito.when(p.getToken()).thenReturn(Optional.of(tokenReader));
-        Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(LocalDateTime.now()));
+        Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(OffsetDateTime.now()));
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(p, false);
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isTrue();

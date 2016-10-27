@@ -25,7 +25,7 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -93,12 +93,11 @@ final class FallbackSecretProvider extends SecretProvider {
     }
 
     @Override
-    public Optional<LocalDateTime> getTokenSetDate() {
+    public Optional<OffsetDateTime> getTokenSetDate() {
         if (FallbackSecretProvider.TOKEN.exists()) {
             final long millisSinceEpoch = FallbackSecretProvider.TOKEN.lastModified();
             final Instant then = Instant.EPOCH.plus(millisSinceEpoch, ChronoUnit.MILLIS);
-            final LocalDateTime ldt = LocalDateTime.ofInstant(then, ZoneId.systemDefault());
-            return Optional.of(ldt);
+            return Optional.of(OffsetDateTime.ofInstant(then, ZoneId.systemDefault()));
         } else {
             return Optional.empty();
         }

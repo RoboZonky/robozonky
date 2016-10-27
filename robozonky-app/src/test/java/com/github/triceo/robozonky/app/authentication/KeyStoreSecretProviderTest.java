@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.KeyStoreException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.util.IOUtils;
@@ -100,7 +100,7 @@ public class KeyStoreSecretProviderTest {
         final KeyStoreSecretProvider p = KeyStoreSecretProviderTest.newProvider();
         final String toStore = "something";
         // store token
-        final LocalDateTime beforeStoring = LocalDateTime.now();
+        final OffsetDateTime beforeStoring = OffsetDateTime.now();
         try {
             // makes sure the following code is always executed on a later timestamp than the previous code
             Thread.sleep(1);
@@ -112,7 +112,7 @@ public class KeyStoreSecretProviderTest {
         final String stored = IOUtils.toString(p.getToken().get());
         Assertions.assertThat(stored).isEqualTo(toStore);
         Assertions.assertThat(p.getTokenSetDate()).isPresent();
-        final LocalDateTime storedOn = p.getTokenSetDate().get();
+        final OffsetDateTime storedOn = p.getTokenSetDate().get();
         Assertions.assertThat(storedOn).isAfter(beforeStoring);
         // clear token
         p.deleteToken();

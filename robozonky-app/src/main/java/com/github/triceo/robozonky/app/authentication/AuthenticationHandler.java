@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app.authentication;
 import java.io.Reader;
 import java.io.StringReader;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
@@ -141,10 +141,10 @@ public class AuthenticationHandler {
         boolean deleteToken = false;
         try {
             final ZonkyApiToken token = ZonkyApiToken.unmarshal(tokenStream.get());
-            final LocalDateTime obtained = this.data.getTokenSetDate().get();
-            final LocalDateTime expires = obtained.plus(token.getExpiresIn(), ChronoUnit.SECONDS);
+            final OffsetDateTime obtained = this.data.getTokenSetDate().get();
+            final OffsetDateTime expires = obtained.plus(token.getExpiresIn(), ChronoUnit.SECONDS);
             AuthenticationHandler.LOGGER.debug("Token obtained on {}, expires on {}.", obtained, expires);
-            final LocalDateTime now = LocalDateTime.now();
+            final OffsetDateTime now = OffsetDateTime.now();
             if (expires.isBefore(now)) {
                 AuthenticationHandler.LOGGER.debug("Token {} expired, using password-based authentication.",
                         token.getAccessToken());
