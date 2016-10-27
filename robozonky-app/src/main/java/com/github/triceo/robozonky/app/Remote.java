@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
@@ -75,7 +76,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         }
     }
 
-    static Collection<Loan> getAvailableLoans(final AppContext ctx, final Activity activity) {
+    static List<Loan> getAvailableLoans(final AppContext ctx, final Activity activity) {
         final boolean shouldSleep = activity.shouldSleep();
         if (shouldSleep) {
             Remote.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
@@ -93,7 +94,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     }
 
     static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx,
-                                                                           final Collection<Loan> availableLoans) {
+                                                                           final List<Loan> availableLoans) {
         final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
         // figure out what to execute
         return useStrategy ? i -> i.invest(ctx.getInvestmentStrategy(), availableLoans) : i -> {
@@ -102,8 +103,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         };
     }
 
-    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky,
-                                         final Collection<Loan> availableLoans) {
+    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky, final List<Loan> availableLoans) {
         final BigDecimal balance = Remote.getAvailableBalance(ctx, zonky);
         final Investor i = new Investor(zonky, balance);
         final Collection<Investment> result = Remote.getInvestingFunction(ctx, availableLoans).apply(i);
@@ -120,7 +120,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
 
     private Optional<Collection<Investment>> execute(final ApiProvider apiProvider, final boolean isDryRun) {
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
-        final Collection<Loan> loans = Remote.getAvailableLoans(this.ctx, activity);
+        final List<Loan> loans = Remote.getAvailableLoans(this.ctx, activity);
         if (loans.isEmpty()) { // let's fall asleep
             return Optional.of(Collections.emptyList());
         }

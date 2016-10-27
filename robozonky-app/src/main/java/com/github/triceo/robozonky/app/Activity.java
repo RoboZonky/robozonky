@@ -73,8 +73,8 @@ class Activity {
         }
 
         /**
-         * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published at least
-         * a certain time ago.
+         * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published at
+         * least a certain time ago.
          * @param delayInSeconds How long ago at the very least should the loans have been published.
          * @return Ordered by publishing time descending.
          */
@@ -86,8 +86,8 @@ class Activity {
         }
 
         /**
-         * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published past a
-         * certain point in time.
+         * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published past
+         * a certain point in time.
          * @param instant The earliest point in time for the loans to published on.
          * @return Ordered by publishing time descending.
          */

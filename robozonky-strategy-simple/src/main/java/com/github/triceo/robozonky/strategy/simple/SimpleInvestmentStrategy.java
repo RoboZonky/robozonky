@@ -135,8 +135,8 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
             return Collections.emptyList();
         }
         final List<Rating> mostWantedRatings = this.rankRatingsByDemand(portfolio.getSharesOnInvestment());
-        SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, the portfolio is low "
-                + "on following ratings: {}. The most under-invested come first.", mostWantedRatings);
+        SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, the portfolio is low on following" +
+                " ratings: {}. The most under-invested come first.", mostWantedRatings);
         final Map<Rating, Collection<Loan>> splitByRating = SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
         final List<Loan> acceptableLoans = new ArrayList<>(availableLoans.size());
         mostWantedRatings.forEach(rating -> {
@@ -151,6 +151,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
                     .collect(Collectors.toList());
             acceptableLoans.addAll(acceptable);
         });
+        SimpleInvestmentStrategy.LOGGER.debug("Strategy recommends the following unseen loans: {}.", acceptableLoans);
         return Collections.unmodifiableList(acceptableLoans);
     }
 

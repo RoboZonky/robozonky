@@ -39,12 +39,11 @@ public class InvestmentStatuses {
         if (parts.length == 1 && parts[0].trim().length() == 0) { // only contains whitespace
             return InvestmentStatuses.of();
         }
-        // trim the parts
-        final Collection<String> strings = Stream.of(parts).map(String::trim).collect(Collectors.toList());
-        // convert string representations to actual instances
-        final Collection<InvestmentStatus> converted =
-                strings.stream().map(InvestmentStatus::valueOf).collect(Collectors.toList());
-        return InvestmentStatuses.of(converted);
+        // and finally convert
+        return InvestmentStatuses.of(Stream.of(parts)
+                .map(String::trim)
+                .map(InvestmentStatus::valueOf)
+                .collect(Collectors.toList()));
     }
 
     public static InvestmentStatuses of(final InvestmentStatus... statuses) {

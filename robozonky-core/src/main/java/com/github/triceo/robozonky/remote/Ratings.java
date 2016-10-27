@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,26 +31,25 @@ public class Ratings {
         final String trimmed = ratings.trim();
         if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
             throw new IllegalArgumentException("Expecting string in the format of [\"A\", \"B\"], got " + ratings);
-        }
-        if (trimmed.length() == 2) { // only contains []
+        } else if (trimmed.length() == 2) { // only contains []
             return Ratings.of();
         }
         final String[] parts = trimmed.substring(1, trimmed.length() - 1).split("\\Q,\\E");
         if (parts.length == 1 && parts[0].trim().length() == 0) { // only contains whitespace
             return Ratings.of();
         }
-        // trim the parts and remove surrounding quotes
-        final Collection<String> strings = new LinkedHashSet<>(parts.length);
-        for (final String part: parts) {
-            final String trimmedPart = part.trim();
-            if (!trimmedPart.startsWith("\"") && !trimmedPart.endsWith("\"") && trimmedPart.length() < 3) {
-                throw new IllegalArgumentException("Expecting part of string to be quoted, got " + part);
-            }
-            strings.add(trimmedPart.substring(1, trimmedPart.length() - 1));
-        }
-        // convert string representations to actual instances
-        final Collection<Rating> converted = strings.stream().map(Rating::valueOf).collect(Collectors.toList());
-        return Ratings.of(converted);
+        // get the list of ratings represented by the parts of the string
+        return Ratings.of(Arrays.stream(parts)
+                .map(String::trim)
+                .filter(part -> {
+                    if (!part.startsWith("\"") && !part.endsWith("\"") && part.length() < 3) {
+                        throw new IllegalArgumentException("Expecting part of string to be quoted, got " + part);
+                    }
+                    return true;
+                })
+                .map(part -> part.substring(1, part.length() - 1)) // remove surrounding quotes
+                .map(Rating::valueOf) // convert string representations to actual instances
+                .collect(Collectors.toList()));
     }
 
     public static Ratings of(final Rating... ratings) {

@@ -22,10 +22,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.remote.BaseInvestment;
 import com.github.triceo.robozonky.remote.BlockedAmount;
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.remote.Investment;
@@ -141,7 +141,7 @@ public class Investor {
      * @param api API to execute the operation.
      * @return Either what the API returns, or an empty object.
      */
-    static Statistics retrieveStatistics(final ZonkyApi api) {
+    private static Statistics retrieveStatistics(final ZonkyApi api) {
         final Statistics returned = api.getStatistics();
         return returned == null ? new Statistics() : returned;
     }
@@ -175,20 +175,22 @@ public class Investor {
     Optional<Investment> investOnce(final InvestmentStrategy strategy, final List<Loan> availableLoans,
                                     final BigDecimal balance, final Statistics stats,
                                     final Collection<Investment> investmentsAlreadyMade) {
-        final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, investmentsAlreadyMade);
-        Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
-                portfolio.getSharesOnInvestment());
-        final Collection<Loan> loans = strategy.getMatchingLoans(availableLoans, portfolio).stream()
+        final PortfolioOverview p = PortfolioOverview.calculate(balance, stats, investmentsAlreadyMade);
+        Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.", p.getSharesOnInvestment());
+        return strategy.getMatchingLoans(availableLoans, p).stream()
                 .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade))
-                .collect(Collectors.toList());
-        Investor.LOGGER.debug("Strategy recommends the following unseen loans: {}.", loans);
-        return loans.stream()
                 .map(l -> {
-                    final int invest = strategy.recommendInvestmentAmount(l, portfolio);
-                    return Investor.invest(this.zonkyApi, l.getId(), invest, portfolio.getCzkAvailable());
+                    final int loanId = l.getId();
+                    Investor.LOGGER.debug("Strategy recommends loan #{}.", loanId);
+                    final int invest = strategy.recommendInvestmentAmount(l, p);
+                    return Investor.invest(this.zonkyApi, loanId, invest, p.getCzkAvailable());
                 })
                 .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
                 .findFirst();
+    }
+
+    private static <T> String collectionToString(final Collection<T> collection, final Function<T, String> reduction) {
+        return collection.stream().map(reduction).collect(Collectors.joining(", ", "[", "]"));
     }
 
     /**
@@ -199,28 +201,25 @@ public class Investor {
      * @param loans Loans that are available on the marketplace. These must not include CAPTCHA-protected loans.
      * @return Investments made in the session.
      */
-    public Collection<Investment> invest(final InvestmentStrategy strategy, final Collection<Loan> loans) {
+    public Collection<Investment> invest(final InvestmentStrategy strategy, final List<Loan> loans) {
         Investor.LOGGER.info("The following loans are available for robotic investing: {}.",
-                loans.stream().map(Loan::getId).collect(Collectors.toList()));
+                Investor.collectionToString(loans, l -> String.valueOf(l.getId())));
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
         BigDecimal balance = this.initialBalance;
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
             return Collections.emptyList(); // no need to do anything else
         }
-        Collection<Investment> investments =
-                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
-        Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}",
-                investments.stream().map(BaseInvestment::getLoanId).collect(Collectors.toList()));
+        Collection<Investment> investments = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
+        Investor.LOGGER.debug("The following loans are coming from the API as already invested into: {}.",
+                Investor.collectionToString(investments, i -> String.valueOf(i.getLoanId())));
         final Statistics stats = Investor.retrieveStatistics(this.zonkyApi);
         Investor.LOGGER.debug("The sum total of principal remaining on active loans is {} CZK.",
                 stats.getCurrentOverview().getPrincipalLeft());
         // and start investing
-        final List<Loan> availableLoans = new ArrayList<>(loans);
         final Collection<Investment> investmentsMade = new ArrayList<>();
         do {
-            final Optional<Investment> investment =
-                    this.investOnce(strategy, availableLoans, balance, stats, investments);
+            final Optional<Investment> investment = this.investOnce(strategy, loans, balance, stats, investments);
             if (!investment.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }

@@ -106,14 +106,14 @@ class   CommandLineInterface {
         final OptionGroup operatingModes = new OptionGroup();
         operatingModes.setRequired(true);
         Stream.of(OperatingMode.values()).forEach(mode -> operatingModes.addOption(mode.getSelectingOption()));
-        // find all options from all modes of operation
-        final Collection<Option> ops = Stream.of(OperatingMode.values()).map(OperatingMode::getOtherOptions)
-                .collect(LinkedHashSet::new, LinkedHashSet::addAll, LinkedHashSet::addAll);
         // include authentication options
         final OptionGroup authenticationModes = new OptionGroup();
         authenticationModes.setRequired(true);
         authenticationModes.addOption(CommandLineInterface.OPTION_USERNAME);
         authenticationModes.addOption(CommandLineInterface.OPTION_KEYSTORE);
+        // find all options from all modes of operation
+        final Collection<Option> ops = Stream.of(OperatingMode.values()).map(OperatingMode::getOtherOptions)
+                .collect(LinkedHashSet::new, LinkedHashSet::addAll, LinkedHashSet::addAll);
         ops.add(CommandLineInterface.OPTION_PASSWORD);
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
         ops.add(CommandLineInterface.OPTION_FAULT_TOLERANT);
@@ -145,13 +145,10 @@ class   CommandLineInterface {
     }
 
     OperatingMode getCliOperatingMode() {
-        for (final OperatingMode mode: OperatingMode.values()) {
-            if (this.hasOption(mode.getSelectingOption())) {
-                return mode;
-            }
-        }
-        // a choice of the operating mode is mandatory; parsing the command line will never get here
-        throw new IllegalStateException("This situation is impossible.");
+        return Stream.of(OperatingMode.values())
+                .filter(mode -> this.hasOption(mode.getSelectingOption()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("This situation is impossible."));
     }
 
     private boolean hasOption(final Option option) {
