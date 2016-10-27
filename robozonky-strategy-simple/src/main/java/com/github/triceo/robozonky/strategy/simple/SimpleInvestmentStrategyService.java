@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 public class SimpleInvestmentStrategyService implements InvestmentStrategyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategyService.class);
-    // below are strings that identify different variables in the strategy file
 
     private static ImmutableConfiguration getConfig(final File strategyFile) throws InvestmentStrategyParseException {
         return ImmutableConfiguration.from(strategyFile);
@@ -66,27 +65,21 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                                                               final int maxLoanAmount, final BigDecimal minLoanShare,
                                                               final BigDecimal maxLoanShare,
                                                               final boolean preferLongerTerms) {
-        SimpleInvestmentStrategyService.LOGGER.debug("Adding strategy for rating '{}'.", r.getCode());
-        SimpleInvestmentStrategyService.LOGGER.debug("Range of acceptable share for rating '{}' among total " +
-                        "investments is <{}, {}>.", r.getCode(), targetShare, maxShare);
-        SimpleInvestmentStrategyService.LOGGER.debug("Range of acceptable loan amounts for rating '{}' is "
-                + "<{}, {}> CZK.", r.getCode(), minAskAmount, maxAskAmount < 0 ? "+inf" : maxAskAmount);
-        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable range of investment terms for rating '{}' is "
-                + "<{}, {}) months.", r.getCode(), minTerm == -1 ? 0 : minTerm, maxTerm < 0 ? "+inf" : maxTerm + 1);
-        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable range of investment amount for rating '{}' is "
-                + "<{}, {}>.", r.getCode(), minLoanAmount, maxLoanAmount < 0 ? "+inf" : maxLoanAmount);
-        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable range of investment share for rating '{}' is "
-                + "<{}, {}>.", r.getCode(), minLoanShare, maxLoanShare);
-        if (preferLongerTerms) {
-            SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' will prefer longer terms.", r.getCode());
-        } else {
-            SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' will prefer shorter terms.", r.getCode());
-        }
+        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable shares of rating '{}' on total investments is " +
+                "between {} and {}.", r.getCode(), targetShare, maxShare);
+        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable loans for rating '{}' are between {} and {} CZK on " +
+                        "terms between {} and {} months, {} preferred.", r.getCode(), minAskAmount,
+                maxAskAmount < 0 ? "+inf" : maxAskAmount, minTerm == -1 ? 0 : minTerm,
+                maxTerm < 0 ? "+inf" : maxTerm + 1, preferLongerTerms ? "longer" : "shorter");
+        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable investment for a loan of rating '{}' is between {} " +
+                        "and {} CZK with investment share between {} and {}.", r.getCode(), minLoanAmount,
+                maxLoanAmount < 0 ? "+inf" : maxLoanAmount, minLoanShare, maxLoanShare);
         return new StrategyPerRating(r, targetShare, maxShare, minTerm, maxTerm, minLoanAmount, maxLoanAmount,
                 minLoanShare, maxLoanShare, minAskAmount, maxAskAmount, preferLongerTerms);
     }
 
     private static StrategyPerRating parseRating(final Rating rating, final ImmutableConfiguration config) {
+        SimpleInvestmentStrategyService.LOGGER.debug("- Adding strategy for rating '{}'.", rating.getCode());
         final boolean preferLongerTerms = StrategyFileProperty.PREFER_LONGER_TERMS.getValue(rating, config::getBoolean);
         // shares of a rating on the total pie
         final BigDecimal targetShare = StrategyFileProperty.TARGET_SHARE.getValue(rating, config::getBigDecimal);
@@ -147,7 +140,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                 maxLoanShare, preferLongerTerms);
     }
 
-    private void checkIndividualStrategies(final Map<Rating, StrategyPerRating> strategies) {
+    private static void checkIndividualStrategies(final Map<Rating, StrategyPerRating> strategies) {
         final BigDecimal ratingShareSum = strategies.values().stream()
                 .map(StrategyPerRating::getTargetShare)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -167,7 +160,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             SimpleInvestmentStrategyService.LOGGER.debug("Maximum investment must not exceed {} CZK.", maximumInvestment);
             final Map<Rating, StrategyPerRating> individualStrategies = Arrays.stream(Rating.values())
                     .collect(Collectors.toMap(Function.identity(), r -> SimpleInvestmentStrategyService.parseRating(r, c)));
-            this.checkIndividualStrategies(individualStrategies);
+            SimpleInvestmentStrategyService.checkIndividualStrategies(individualStrategies);
             return new SimpleInvestmentStrategy(minimumBalance, maximumInvestment, individualStrategies);
         } catch (final IllegalStateException ex) {
             throw new InvestmentStrategyParseException(ex);
