@@ -181,8 +181,8 @@ public class Investor {
                 .filter(l -> !Investor.isLoanPresent(l, investmentsAlreadyMade))
                 .map(l -> {
                     final int loanId = l.getId();
-                    Investor.LOGGER.debug("Strategy recommends loan #{}.", loanId);
                     final int invest = strategy.recommendInvestmentAmount(l, p);
+                    Investor.LOGGER.debug("Strategy recommends investment of {} CZK for loan #{}.", invest, loanId);
                     return Investor.invest(this.zonkyApi, loanId, invest, p.getCzkAvailable());
                 })
                 .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
