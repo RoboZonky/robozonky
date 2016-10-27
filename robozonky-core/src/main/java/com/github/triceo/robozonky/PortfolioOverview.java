@@ -55,7 +55,7 @@ public class PortfolioOverview {
         final Map<Rating, Integer> amounts = stats.getRiskPortfolio().stream().collect(
                 Collectors.toMap(RiskPortfolio::getRating, p -> p.getTotalAmount() - p.getPaid())
         );
-        // then make sure the share reflects investments made by ZonkyBot which have not yet been reflected in the API
+        // then make sure the share reflects investments made by RoboZonky which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {
             final Rating r = previousInvestment.getRating();
             amounts.compute(r, (k, v) -> (v == null ? 0 : v) + previousInvestment.getAmount());
