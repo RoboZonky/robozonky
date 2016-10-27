@@ -16,8 +16,8 @@
 
 package com.github.triceo.robozonky;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides instances of Zonky and Zotify API for the rest of RoboZonky to use. When no longer needed, the ApiProvider
- * needs to be {@link #destroy()}ed in order to not leak {@link WebServiceClient}s.
+ * needs to be {@link #close()}ed in order to not leak {@link WebServiceClient}s.
  */
-public class ApiProvider {
+public class ApiProvider implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiProvider.class);
     private static final String ZONKY_URL = "https://api.zonky.cz";
@@ -74,7 +74,7 @@ public class ApiProvider {
 
     private final ClientBuilder clientBuilder;
     private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
-    private final Collection<Client> clients = new HashSet<>();
+    private final Collection<Client> clients = new ArrayList<>();
 
     /**
      * Create a new instance of the API provider that will use a given instance of {@link ResteasyClientBuilder}. It is
@@ -119,7 +119,7 @@ public class ApiProvider {
      * Retrieve Zotify's marketplace cache.
      *
      * @return New API instance.
-     * @throws IllegalStateException If {@link #destroy()} already called.
+     * @throws IllegalStateException If {@link #close()} already called.
      */
     public ZotifyApi cache() {
         return this.obtain(ZotifyApi.class, ApiProvider.ZOTIFY_URL, new ZotifyFilter());
@@ -130,7 +130,7 @@ public class ApiProvider {
      *
      * @param filter Filter that will decorate the requests with OAuth headers.
      * @return New API instance.
-     * @throws IllegalStateException If {@link #destroy()} already called.
+     * @throws IllegalStateException If {@link #close()} already called.
      */
     public ZonkyOAuthApi oauth(final CommonFilter filter) {
         return this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, filter);
@@ -142,7 +142,7 @@ public class ApiProvider {
      *
      * @param filter Filter that will decorate the requests with OAuth headers.
      * @return New API instance.
-     * @throws IllegalStateException If {@link #destroy()} already called.
+     * @throws IllegalStateException If {@link #close()} already called.
      */
     public ZonkyApi authenticatedNonInvesting(final CommonFilter filter) {
         return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, filter);
@@ -153,13 +153,14 @@ public class ApiProvider {
      *
      * @param filter Filter that will decorate the requests with OAuth headers.
      * @return New API instance.
-     * @throws IllegalStateException If {@link #destroy()} already called.
+     * @throws IllegalStateException If {@link #close()} already called.
      */
     public InvestingZonkyApi authenticated(final CommonFilter filter) {
         return this.obtain(InvestingZonkyApi.class, ApiProvider.ZONKY_URL, filter);
     }
 
-    public synchronized void destroy() {
+    @Override
+    public synchronized void close() {
         this.ensureNotDestroyed();
         this.clients.forEach(c -> {
             ApiProvider.LOGGER.trace("Destroying RESTEasy client: {}.", c);

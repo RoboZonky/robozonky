@@ -118,12 +118,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         this.auth = authenticationHandler;
     }
 
-    public Optional<Collection<Investment>> call() {
-        final boolean isDryRun = this.ctx.isDryRun();
-        if (isDryRun) {
-            Remote.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
-        }
-        final ApiProvider apiProvider = new ApiProvider(); // prepare fresh API factory
+    private Optional<Collection<Investment>> execute(final ApiProvider apiProvider, final boolean isDryRun) {
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
         final Collection<Loan> loans = Remote.getAvailableLoans(this.ctx, activity);
         if (loans.isEmpty()) { // let's fall asleep
@@ -139,6 +134,16 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
             return Optional.of(result);
         } else {
             return Optional.empty();
+        }
+    }
+
+    public Optional<Collection<Investment>> call() {
+        final boolean isDryRun = this.ctx.isDryRun();
+        if (isDryRun) {
+            Remote.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
+        }
+        try (final ApiProvider apiProvider = new ApiProvider()) { // auto-close the API clients
+            return this.execute(apiProvider, isDryRun);
         }
     }
 

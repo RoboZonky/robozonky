@@ -210,25 +210,21 @@ public class AuthenticationHandler {
         }
         final Collection<Investment> result = operation.apply(login.getZonkyApi());
         try { // log out and ignore any resulting error
-            this.logout(login, provider);
+            this.logout(login);
         } catch (final RuntimeException ex) {
             AuthenticationHandler.LOGGER.warn("Failed logging out of Zonky.", ex);
         }
         return Optional.of(result);
     }
 
-    private boolean logout(final Authentication login, final ApiProvider apiProvider) {
-        try {
-            final boolean logoutAllowed = this.isLogoutAllowed(login.getZonkyApiToken());
-            if (logoutAllowed) {
-                login.getZonkyApi().logout();
-                return true;
-            } else { // if we're using the token, we should never log out
-                AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
-                return false;
-            }
-        } finally {
-            apiProvider.destroy(); // close all clients
+    private boolean logout(final Authentication login) {
+        final boolean logoutAllowed = this.isLogoutAllowed(login.getZonkyApiToken());
+        if (logoutAllowed) {
+            login.getZonkyApi().logout();
+            return true;
+        } else { // if we're using the token, we should never log out
+            AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
+            return false;
         }
     }
 

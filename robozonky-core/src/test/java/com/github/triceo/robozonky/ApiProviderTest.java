@@ -24,16 +24,14 @@ public class ApiProviderTest {
 
     @Test
     public void obtainAndDestroy() {
-        final ApiProvider provider = new ApiProvider();
-        // make sure API was provided
-        final ZotifyApi cache = provider.cache();
-        Assertions.assertThat(cache).isNotNull();
-        Assertions.assertThat(cache.getLoans()).isNotEmpty();
-        // make sure the API was destroyed
-        provider.destroy();
-        Assertions.assertThatThrownBy(cache::getLoans).isNotNull();
-        // make sure the API can not be called again
-        Assertions.assertThatThrownBy(provider::destroy).isNotNull();
+        ZotifyApi cache = null;
+        try (final ApiProvider provider = new ApiProvider()) {
+            cache = provider.cache(); // make sure API was provided
+            Assertions.assertThat(cache).isNotNull();
+            Assertions.assertThat(cache.getLoans()).isNotEmpty();
+        } finally { // make sure the client was closed
+            Assertions.assertThatThrownBy(cache::getLoans).isNotNull();
+        }
     }
 
 }
