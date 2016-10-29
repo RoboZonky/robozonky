@@ -41,7 +41,6 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
         AuthenticationHandlerProvider.LOGGER.info("Guarded storage was created with your username and password: {}",
                 keyStoreLocation);
         return SecretProvider.keyStoreBased(ksh, username, password);
-
     }
 
     private static SecretProvider existingSecretProvider(final char[] password, final File keyStoreLocation)

@@ -43,7 +43,7 @@ public class App {
         MDC.put("process_id", ManagementFactory.getRuntimeMXBean().getName());
     }
 
-    static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final State STATE = new State();
 
     /**
