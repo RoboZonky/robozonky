@@ -119,7 +119,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         this.auth = authenticationHandler;
     }
 
-    private Optional<Collection<Investment>> execute(final ApiProvider apiProvider, final boolean isDryRun) {
+    private Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
         final List<Loan> loans = Remote.getAvailableLoans(this.ctx, activity);
         if (loans.isEmpty()) { // let's fall asleep
@@ -130,6 +130,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         activity.settle(); // only settle the marketplace activity when we're sure the app is no longer likely to fail
         if (optionalResult.isPresent()) {
             final Collection<Investment> result = optionalResult.get();
+            final boolean isDryRun = apiProvider.isDryRun();
             Remote.storeInvestmentsMade(result, isDryRun);
             Remote.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
             return Optional.of(result);
@@ -143,8 +144,8 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         if (isDryRun) {
             Remote.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
-        try (final ApiProvider apiProvider = new ApiProvider()) { // auto-close the API clients
-            return this.execute(apiProvider, isDryRun);
+        try (final ApiProvider apiProvider = new ApiProvider(isDryRun)) { // auto-close the API clients
+            return this.execute(apiProvider);
         }
     }
 

@@ -101,10 +101,10 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
         if (cli.isTokenEnabled()) {
             final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
             return secs.isPresent() ?
-                    AuthenticationHandler.tokenBased(secProvider, cli.isDryRun(), secs.get(), ChronoUnit.SECONDS) :
-                    AuthenticationHandler.tokenBased(secProvider, cli.isDryRun());
+                    AuthenticationHandler.tokenBased(secProvider, secs.get(), ChronoUnit.SECONDS) :
+                    AuthenticationHandler.tokenBased(secProvider);
         } else {
-            return AuthenticationHandler.passwordBased(secProvider, cli.isDryRun());
+            return AuthenticationHandler.passwordBased(secProvider);
         }
     }
 

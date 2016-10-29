@@ -72,6 +72,7 @@ public class ApiProvider implements AutoCloseable {
 
     }
 
+    private final boolean isDryRun;
     private final ClientBuilder clientBuilder;
     private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
     private final Collection<Client> clients = new ArrayList<>();
@@ -83,16 +84,17 @@ public class ApiProvider implements AutoCloseable {
      *
      * @param clientBuilder Client builder to use to instantiate all the APIs.
      */
-    public ApiProvider(final ResteasyClientBuilder clientBuilder) {
+    public ApiProvider(final boolean isDryRun, final ResteasyClientBuilder clientBuilder) {
         this.clientBuilder = clientBuilder;
+        this.isDryRun = isDryRun;
     }
 
     /**
      * Create a new instance of the API provider that will use a fresh instance of {@link ResteasyClientBuilder}. This
      * client will be thread-safe.
      */
-    public ApiProvider() {
-        this(ApiProvider.newResteasyClientBuilder());
+    public ApiProvider(final boolean isDryRun) {
+        this(isDryRun, ApiProvider.newResteasyClientBuilder());
     }
 
     private synchronized Client newClient() {
@@ -137,26 +139,22 @@ public class ApiProvider implements AutoCloseable {
     }
 
     /**
-     * Retrieve user-specific Zonky API which requires authentication but does not support investment operations. This
-     * is useful in dry mode.
-     *
-     * @param filter Filter that will decorate the requests with OAuth headers.
-     * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
-     */
-    public ZonkyApi authenticatedNonInvesting(final CommonFilter filter) {
-        return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, filter);
-    }
-
-    /**
      * Retrieve user-specific Zonky API which requires authentication.
      *
      * @param filter Filter that will decorate the requests with OAuth headers.
-     * @return New API instance.
+     * @return New API instance. If {@link #isDryRun()} is false, returns instance of {@link InvestingZonkyApi}.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public InvestingZonkyApi authenticated(final CommonFilter filter) {
-        return this.obtain(InvestingZonkyApi.class, ApiProvider.ZONKY_URL, filter);
+    public ZonkyApi authenticated(final CommonFilter filter) {
+        if (this.isDryRun) {
+            return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, filter);
+        } else {
+            return this.obtain(InvestingZonkyApi.class, ApiProvider.ZONKY_URL, filter);
+        }
+    }
+
+    public boolean isDryRun() {
+        return isDryRun;
     }
 
     @Override

@@ -16,22 +16,48 @@
 
 package com.github.triceo.robozonky;
 
-import com.github.triceo.robozonky.remote.ZotifyApi;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import com.github.triceo.robozonky.remote.InvestingZonkyApi;
+import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.remote.ZotifyApi;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
+
+@RunWith(Parameterized.class)
 public class ApiProviderTest {
+
+    @Parameterized.Parameters(name = "isDryRun={0} -> {1}")
+    public static Collection<Object[]> getParameters() {
+        final List<Object[]> result = new ArrayList<>(2);
+        result.add(new Object[] {true, ZonkyApi.class});
+        result.add(new Object[] {false, InvestingZonkyApi.class});
+        return result;
+    }
+
+    @Parameterized.Parameter
+    public boolean isDryRun;
+    @Parameterized.Parameter(1)
+    public Class<?> type;
 
     @Test
     public void obtainAndDestroy() {
         ZotifyApi cache = null;
-        try (final ApiProvider provider = new ApiProvider()) {
+        final SoftAssertions softly = new SoftAssertions();
+        try (final ApiProvider provider = new ApiProvider(isDryRun)) {
             cache = provider.cache(); // make sure API was provided
-            Assertions.assertThat(cache).isNotNull();
-            Assertions.assertThat(cache.getLoans()).isNotEmpty();
+            softly.assertThat(provider.authenticated(Mockito.mock(CommonFilter.class))).isInstanceOf(type);
+            softly.assertThat(cache).isNotNull();
+            softly.assertThat(cache.getLoans()).isNotEmpty();
         } finally { // make sure the client was closed
-            Assertions.assertThatThrownBy(cache::getLoans).isNotNull();
+            softly.assertThatThrownBy(cache::getLoans).isNotNull();
         }
+        softly.assertAll();
     }
 
 }

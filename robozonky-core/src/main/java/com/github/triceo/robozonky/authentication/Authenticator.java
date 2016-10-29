@@ -26,9 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Used to authenticate to the Zonky API. Use either {@link #withAccessToken(String, ZonkyApiToken, boolean)},
- * {@link #withAccessTokenAndRefresh(String, ZonkyApiToken, boolean)} or
- * {@link #withCredentials(String, char[], boolean)} to log in.
+ * Used to authenticate to the Zonky API. Use either {@link #withAccessToken(String, ZonkyApiToken)},
+ * {@link #withAccessTokenAndRefresh(String, ZonkyApiToken)} or
+ * {@link #withCredentials(String, char[])} to log in.
  */
 public class Authenticator {
 
@@ -40,16 +40,15 @@ public class Authenticator {
      *
      * @param username Zonky username.
      * @param password Zonky password.
-     * @param isDryRun Whether or not we are authenticating for a dry run.
      * @return Instance ready for authentication.
      */
-    public static Authenticator withCredentials(final String username, final char[] password, final boolean isDryRun) {
+    public static Authenticator withCredentials(final String username, final char[] password) {
         return new Authenticator(api -> {
             final ZonkyApiToken token =
                     api.login(username, new String(password), "password", Authenticator.TARGET_SCOPE);
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}' using password.", username);
             return token;
-        }, false, isDryRun);
+        }, false);
     }
 
     /**
@@ -57,15 +56,13 @@ public class Authenticator {
      *
      * @param username Zonky username.
      * @param token OAuth token.
-     * @param isDryRun Whether or not we are authenticating for a dry run.
      * @return Instance ready for authentication.
      */
-    public static Authenticator withAccessToken(final String username, final ZonkyApiToken token,
-                                                final boolean isDryRun) {
+    public static Authenticator withAccessToken(final String username, final ZonkyApiToken token) {
         return new Authenticator(api -> {
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}' with existing access token.", username);
             return token;
-        }, true, isDryRun);
+        }, true);
     }
 
     /**
@@ -73,30 +70,26 @@ public class Authenticator {
      *
      * @param username Zonky username.
      * @param token OAuth token.
-     * @param isDryRun Whether or not we are authenticating for a dry run.
      * @return Instance ready for authentication.
      */
-    public static Authenticator withAccessTokenAndRefresh(final String username, final ZonkyApiToken token,
-                                                          final boolean isDryRun) {
+    public static Authenticator withAccessTokenAndRefresh(final String username, final ZonkyApiToken token) {
         return new Authenticator(api -> {
             final String tokenId = token.getRefreshToken();
             final ZonkyApiToken newToken = api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
             Authenticator.LOGGER.info("Logged in with Zonky as user '{}', refreshing existing access token.", username);
             return newToken;
-        }, true, isDryRun);
+        }, true);
     }
 
     private final Function<ZonkyOAuthApi, ZonkyApiToken> authenticationMethod;
-    private final boolean tokenBased, isDryRun;
+    private final boolean tokenBased;
 
-    private Authenticator(final Function<ZonkyOAuthApi, ZonkyApiToken> authenticationMethod, final boolean tokenBased,
-                          final boolean isDryRun) {
+    private Authenticator(final Function<ZonkyOAuthApi, ZonkyApiToken> authenticationMethod, final boolean tokenBased) {
         if (authenticationMethod == null) {
             throw new IllegalArgumentException("Authentication method must be provided.");
         }
         this.authenticationMethod = authenticationMethod;
         this.tokenBased = tokenBased;
-        this.isDryRun = isDryRun;
     }
 
     /**
@@ -116,7 +109,7 @@ public class Authenticator {
         final ZonkyOAuthApi api = provider.oauth(new AuthenticationFilter());
         final ZonkyApiToken token = authenticationMethod.apply(api);
         final AuthenticatedFilter f = new AuthenticatedFilter(token);
-        final ZonkyApi result = isDryRun ? provider.authenticatedNonInvesting(f) : provider.authenticated(f);
+        final ZonkyApi result = provider.authenticated(f);
         return new Authentication(result, token);
     }
 

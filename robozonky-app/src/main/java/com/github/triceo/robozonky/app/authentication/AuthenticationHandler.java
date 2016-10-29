@@ -50,11 +50,10 @@ public class AuthenticationHandler {
      * before then.
      *
      * @param data Provider for the sensitive information, such as passwords and tokens.
-     * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun) {
-        return new AuthenticationHandler(data, isDryRun, true);
+    public static AuthenticationHandler tokenBased(final SecretProvider data) {
+        return new AuthenticationHandler(data, true);
     }
 
     /**
@@ -66,14 +65,13 @@ public class AuthenticationHandler {
      * expiration, where X comes from the arguments of this method.
      *
      * @param data Provider for the sensitive information, such as passwords and tokens.
-     * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @param time Access token will be refreshed after expiration minus this.
      * @param unit Unit of time applied to the previous argument.
      * @return This.
      */
-    public static AuthenticationHandler tokenBased(final SecretProvider data, final boolean isDryRun, final long time,
+    public static AuthenticationHandler tokenBased(final SecretProvider data, final long time,
                                                    final TemporalUnit unit) {
-        return new AuthenticationHandler(data, isDryRun, true, Duration.of(time, unit).getSeconds());
+        return new AuthenticationHandler(data, true, Duration.of(time, unit).getSeconds());
     }
 
     /**
@@ -81,25 +79,23 @@ public class AuthenticationHandler {
      * access tokens.
      *
      * @param data Provider for the sensitive information, such as passwords and tokens.
-     * @param isDryRun Whether or not the API should be allowed to invest actual money.
      * @return The desired authentication method.
      */
-    public static AuthenticationHandler passwordBased(final SecretProvider data, final boolean isDryRun) {
-        return new AuthenticationHandler(data, isDryRun, false);
+    public static AuthenticationHandler passwordBased(final SecretProvider data) {
+        return new AuthenticationHandler(data, false);
     }
 
-    private final boolean tokenBased, dryRun;
+    private final boolean tokenBased;
     private final SecretProvider data;
     private final long tokenRefreshBeforeExpirationInSeconds;
 
-    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased) {
-        this(data, isDryRun, tokenBased, 60);
+    private AuthenticationHandler(final SecretProvider data, final boolean tokenBased) {
+        this(data, tokenBased, 60);
     }
 
-    private AuthenticationHandler(final SecretProvider data, final boolean isDryRun, final boolean tokenBased,
+    private AuthenticationHandler(final SecretProvider data, final boolean tokenBased,
                                   final long tokenRefreshBeforeExpirationInSeconds) {
         this.data = data;
-        this.dryRun = isDryRun;
         this.tokenRefreshBeforeExpirationInSeconds = tokenRefreshBeforeExpirationInSeconds;
         this.tokenBased = tokenBased;
     }
@@ -108,16 +104,12 @@ public class AuthenticationHandler {
         return tokenBased;
     }
 
-    public boolean isDryRun() {
-        return dryRun;
-    }
-
     public long getTokenRefreshBeforeExpirationInSeconds() {
         return tokenRefreshBeforeExpirationInSeconds;
     }
 
     private Authenticator buildWithPassword() {
-        return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword(), this.dryRun);
+        return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
     }
 
     /**
@@ -154,10 +146,10 @@ public class AuthenticationHandler {
             if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {
                 AuthenticationHandler.LOGGER.debug("Access token expiring, will be refreshed.");
                 deleteToken = true;
-                return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token, this.dryRun);
+                return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token);
             } else {
                 AuthenticationHandler.LOGGER.debug("Reusing access token.");
-                return Authenticator.withAccessToken(this.data.getUsername(), token, this.dryRun);
+                return Authenticator.withAccessToken(this.data.getUsername(), token);
             }
         } catch (final JAXBException ex) {
             AuthenticationHandler.LOGGER.warn("Failed parsing token, using password-based authentication.", ex);

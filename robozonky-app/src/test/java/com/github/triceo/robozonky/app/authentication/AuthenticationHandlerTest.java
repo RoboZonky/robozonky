@@ -70,7 +70,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void simplePasswordBased() throws IOException, KeyStoreException {
         final AuthenticationHandler h = AuthenticationHandler.passwordBased(
-                AuthenticationHandlerTest.getNewProvider(), false);
+                AuthenticationHandlerTest.getNewProvider());
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isFalse();
         final boolean shouldLogout = h.isLogoutAllowed(Mockito.mock(ZonkyApiToken.class));
@@ -80,7 +80,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void simpleTokenBasedWithoutExistingToken() throws IOException, KeyStoreException {
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
-                AuthenticationHandlerTest.getNewProvider(), true);
+                AuthenticationHandlerTest.getNewProvider());
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isFalse();
         final boolean shouldLogout = h.isLogoutAllowed(Mockito.mock(ZonkyApiToken.class));
@@ -90,7 +90,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void simpleTokenBasedWithExistingToken() throws JAXBException {
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
-                AuthenticationHandlerTest.mockExistingProvider(OffsetDateTime.now(), true, true), false);
+                AuthenticationHandlerTest.mockExistingProvider(OffsetDateTime.now(), true, true));
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isTrue();
         final boolean shouldLogout = h.isLogoutAllowed(Mockito.mock(ZonkyApiToken.class));
@@ -102,7 +102,7 @@ public class AuthenticationHandlerTest {
         final OffsetDateTime expired =
                 OffsetDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() + 1, ChronoUnit.SECONDS);
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
-                AuthenticationHandlerTest.mockExistingProvider(expired, true, true), true);
+                AuthenticationHandlerTest.mockExistingProvider(expired, true, true));
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isFalse();
     }
@@ -112,7 +112,7 @@ public class AuthenticationHandlerTest {
         final OffsetDateTime expiring =
                 OffsetDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() - 1, ChronoUnit.SECONDS);
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
-                AuthenticationHandlerTest.mockExistingProvider(expiring, true, true), false, 10, ChronoUnit.SECONDS);
+                AuthenticationHandlerTest.mockExistingProvider(expiring, true, true), 10, ChronoUnit.SECONDS);
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isTrue();
     }
@@ -121,7 +121,7 @@ public class AuthenticationHandlerTest {
     public void tokenBasedWithFailingToken() throws JAXBException {
         final SecretProvider provider =
                 AuthenticationHandlerTest.mockExistingProvider("", OffsetDateTime.now(), true, true);
-        final AuthenticationHandler h = AuthenticationHandler.tokenBased(provider, true, 10,
+        final AuthenticationHandler h = AuthenticationHandler.tokenBased(provider, 10,
                 ChronoUnit.SECONDS);
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isFalse();
@@ -135,7 +135,7 @@ public class AuthenticationHandlerTest {
         final SecretProvider p = Mockito.mock(SecretProvider.class);
         Mockito.when(p.getToken()).thenReturn(Optional.of(tokenReader));
         Mockito.when(p.getTokenSetDate()).thenReturn(Optional.of(OffsetDateTime.now()));
-        final AuthenticationHandler h = AuthenticationHandler.tokenBased(p, false);
+        final AuthenticationHandler h = AuthenticationHandler.tokenBased(p);
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isTrue();
         // now make sure token was deleted
