@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
+import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.remote.Api;
 import com.github.triceo.robozonky.remote.Loan;
 import org.assertj.core.api.Assertions;
@@ -35,7 +36,7 @@ public class ActivityTest {
     private static final int CHECK_TIMEOUT_MINUTES = 60;
 
     private final File activityCheckFile;
-    private final AppContext ctx = new AppContext(1, 200, ActivityTest.CHECK_TIMEOUT_MINUTES, 120);
+    private final Configuration ctx = new Configuration(1, 200, ActivityTest.CHECK_TIMEOUT_MINUTES, 120);
 
     public ActivityTest() {
         try {

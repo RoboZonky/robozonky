@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.app;
+
+package com.github.triceo.robozonky.app.configuration;
+
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 
-class AppContext {
+public class Configuration {
 
     private InvestmentStrategy investmentStrategy = null;
-    private final OperatingMode operatingMode;
     private final boolean isDryRun;
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
     private final int captchaDelayInSeconds, sleepPeriodInMinutes;
 
-    public AppContext(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
-                      final int captchaDelayInSeconds) {
-        this.operatingMode = OperatingMode.USER_DRIVEN;
+    public Configuration(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
+                         final int captchaDelayInSeconds) {
         this.loanId = loanId;
         this.loanAmount = loanAmount;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
@@ -35,9 +37,8 @@ class AppContext {
         this.isDryRun = false;
     }
 
-    public AppContext(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
-                      final int captchaDelayInSeconds, final int dryRunBalance) {
-        this.operatingMode = OperatingMode.USER_DRIVEN;
+    public Configuration(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
+                         final int captchaDelayInSeconds, final int dryRunBalance) {
         this.loanId = loanId;
         this.loanAmount = loanAmount;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
@@ -46,18 +47,16 @@ class AppContext {
         this.isDryRun = true;
     }
 
-    public AppContext(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
-                      final int captchaDelayInSeconds) {
-        this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
+    public Configuration(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
+                         final int captchaDelayInSeconds) {
         this.investmentStrategy = investmentStrategy;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.isDryRun = false;
     }
 
-    public AppContext(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
-                      final int captchaDelayInSeconds, final int dryRunBalance) {
-        this.operatingMode = OperatingMode.STRATEGY_DRIVEN;
+    public Configuration(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
+                         final int captchaDelayInSeconds, final int dryRunBalance) {
         this.investmentStrategy = investmentStrategy;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.dryRunBalance = dryRunBalance;
@@ -73,27 +72,23 @@ class AppContext {
         return sleepPeriodInMinutes;
     }
 
-    public OperatingMode getOperatingMode() {
-        return operatingMode;
+    public OptionalInt getLoanId() {
+        return loanId < 1 ? OptionalInt.empty() : OptionalInt.of(loanId);
     }
 
-    public int getLoanId() {
-        return loanId;
-    }
-
-    public int getLoanAmount() {
-        return loanAmount;
+    public OptionalInt getLoanAmount() {
+        return loanAmount < 0 ? OptionalInt.empty() : OptionalInt.of(loanAmount);
     }
 
     public boolean isDryRun() {
         return isDryRun;
     }
 
-    public int getDryRunBalance() {
-        return dryRunBalance;
+    public OptionalInt getDryRunBalance() {
+        return dryRunBalance < 0 ? OptionalInt.empty() : OptionalInt.of(dryRunBalance);
     }
 
-    public InvestmentStrategy getInvestmentStrategy() {
-        return investmentStrategy;
+    public Optional<InvestmentStrategy> getInvestmentStrategy() {
+        return investmentStrategy == null ? Optional.empty() : Optional.of(investmentStrategy);
     }
 }

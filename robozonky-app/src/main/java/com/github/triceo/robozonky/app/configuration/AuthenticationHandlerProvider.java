@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
@@ -99,9 +100,9 @@ class AuthenticationHandlerProvider implements Function<CommandLineInterface, Op
     static AuthenticationHandler instantiateAuthenticationHandler(final SecretProvider secProvider,
                                                                   final CommandLineInterface cli) {
         if (cli.isTokenEnabled()) {
-            final Optional<Integer> secs = cli.getTokenRefreshBeforeExpirationInSeconds();
+            final OptionalInt secs = cli.getTokenRefreshBeforeExpirationInSeconds();
             return secs.isPresent() ?
-                    AuthenticationHandler.tokenBased(secProvider, secs.get(), ChronoUnit.SECONDS) :
+                    AuthenticationHandler.tokenBased(secProvider, secs.getAsInt(), ChronoUnit.SECONDS) :
                     AuthenticationHandler.tokenBased(secProvider);
         } else {
             return AuthenticationHandler.passwordBased(secProvider);

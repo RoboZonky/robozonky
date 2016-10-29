@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.OptionalInt;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.app.App;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -33,15 +33,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Processes command line arguments and provides access to their values.
  */
-class   CommandLineInterface {
+public class CommandLineInterface {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
     private static final int DEFAULT_CAPTCHA_DELAY_SECONDS = 2 * 60;
     private static final int DEFAULT_SLEEP_PERIOD_MINUTES = 60;
 
@@ -77,25 +74,6 @@ class   CommandLineInterface {
             .desc("Allows to override the default length of sleep period.").build();
 
     /**
-     * Convert the command line arguments into a string and log it.
-     * @param cli Parsed command line.
-     */
-    private static void logOptionValues(final CommandLine cli) {
-        final List<String> optionsString = Arrays.stream(cli.getOptions())
-                .filter(o -> cli.hasOption(o.getOpt()))
-                .filter(o -> !o.equals(CommandLineInterface.OPTION_PASSWORD))
-                .map(o -> {
-                    String result = "-" + o.getOpt();
-                    final String value = cli.getOptionValue(o.getOpt());
-                    if (value != null) {
-                        result += " " + value;
-                    }
-                    return result;
-                }).collect(Collectors.toList());
-        CommandLineInterface.LOGGER.debug("Processing command line: {}.", optionsString);
-    }
-
-    /**
      * Parse the command line.
      *
      * @param args Command line arguments as received by {@link App#main(String...)}.
@@ -128,7 +106,6 @@ class   CommandLineInterface {
         // and parse
         try {
             final CommandLine cli = parser.parse(options, args);
-            CommandLineInterface.logOptionValues(cli);
             return Optional.of(new CommandLineInterface(options, cli));
         } catch (final ParseException ex) {
             CommandLineInterface.printHelp(options, ex.getMessage(), true);
@@ -136,103 +113,78 @@ class   CommandLineInterface {
         }
     }
 
-    private final CommandLine cli;
+    private final CommandLineWrapper commandLine;
     private final Options options;
 
     private CommandLineInterface(final Options options, final CommandLine cli) {
         this.options = options;
-        this.cli = cli;
+        this.commandLine = new CommandLineWrapper(cli);
     }
 
-    OperatingMode getCliOperatingMode() {
-        return Stream.of(OperatingMode.values())
-                .filter(mode -> this.hasOption(mode.getSelectingOption()))
+    public Optional<Configuration> newApplicationConfiguration() {
+        final OperatingMode om = Stream.of(OperatingMode.values())
+                .filter(mode -> this.commandLine.hasOption(mode.getSelectingOption()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("This situation is impossible."));
+        return om.apply(this);
     }
 
-    private boolean hasOption(final Option option) {
-        return this.cli.hasOption(option.getOpt());
-    }
-
-    private Optional<String> getOptionValue(final Option option) {
-        if (this.hasOption(option)) {
-            final String val = this.cli.getOptionValue(option.getOpt());
-            if (val == null || val.isEmpty()) {
-                return Optional.empty();
-            } else {
-                return Optional.of(val);
-            }
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<Integer> getIntegerOptionValue(final Option option) {
-        final Optional<String> result = this.getOptionValue(option);
-        if (result.isPresent()) {
-            try {
-                return Optional.of(Integer.valueOf(result.get()));
-            } catch (final NumberFormatException ex) {
-                return Optional.empty();
-            }
-        } else {
-            return Optional.empty();
-        }
+    public Optional<AuthenticationHandler> newAuthenticationHandler() {
+        return new AuthenticationHandlerProvider().apply(this);
     }
 
     Optional<String> getStrategyConfigurationFilePath() {
-        return this.getOptionValue(OperatingMode.STRATEGY_DRIVEN.getSelectingOption());
+        return this.commandLine.getOptionValue(OperatingMode.STRATEGY_DRIVEN.getSelectingOption());
     }
 
-    public Optional<String> getUsername() {
-        return this.getOptionValue(CommandLineInterface.OPTION_USERNAME);
+    Optional<String> getUsername() {
+        return this.commandLine.getOptionValue(CommandLineInterface.OPTION_USERNAME);
     }
 
-    public char[] getPassword() {
-        return this.getOptionValue(CommandLineInterface.OPTION_PASSWORD).get().toCharArray();
+    char[] getPassword() {
+        return this.commandLine.getOptionValue(CommandLineInterface.OPTION_PASSWORD).get().toCharArray();
     }
 
-    Optional<Integer> getLoanId() {
-        return this.getIntegerOptionValue(CommandLineInterface.OPTION_INVESTMENT);
+    OptionalInt getLoanId() {
+        return this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_INVESTMENT);
     }
 
-    Optional<Integer> getLoanAmount() {
-        return this.getIntegerOptionValue(CommandLineInterface.OPTION_AMOUNT);
+    OptionalInt getLoanAmount() {
+        return this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_AMOUNT);
     }
 
     boolean isDryRun() {
-        return this.hasOption(CommandLineInterface.OPTION_DRY_RUN);
+        return this.commandLine.hasOption(CommandLineInterface.OPTION_DRY_RUN);
     }
 
-    public boolean isTokenEnabled() {
-        return this.hasOption(CommandLineInterface.OPTION_USE_TOKEN);
+    boolean isTokenEnabled() {
+        return this.commandLine.hasOption(CommandLineInterface.OPTION_USE_TOKEN);
     }
 
     public boolean isFaultTolerant() {
-        return this.hasOption(CommandLineInterface.OPTION_FAULT_TOLERANT);
+        return this.commandLine.hasOption(CommandLineInterface.OPTION_FAULT_TOLERANT);
     }
 
-    public int getCaptchaPreventingInvestingDelayInSeconds() { // FIXME do not allow negaive values
-        return this.hasOption(CommandLineInterface.OPTION_CLOSED_SEASON) ?
-                this.getIntegerOptionValue(CommandLineInterface.OPTION_CLOSED_SEASON)
+    int getCaptchaPreventingInvestingDelayInSeconds() { // FIXME do not allow negative values
+        return this.commandLine.hasOption(CommandLineInterface.OPTION_CLOSED_SEASON) ?
+                this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_CLOSED_SEASON)
                         .orElseThrow(() -> new IllegalStateException("Missing mandatory argument value.")) :
                 CommandLineInterface.DEFAULT_CAPTCHA_DELAY_SECONDS;
     }
 
-    public int getMaximumSleepPeriodInMinutes() { // FIXME do not allow negaive values
-        return this.hasOption(CommandLineInterface.OPTION_ZONK) ?
-                this.getIntegerOptionValue(CommandLineInterface.OPTION_ZONK)
+    int getMaximumSleepPeriodInMinutes() { // FIXME do not allow negative values
+        return this.commandLine.hasOption(CommandLineInterface.OPTION_ZONK) ?
+                this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_ZONK)
                         .orElseThrow(() -> new IllegalStateException("Missing mandatory argument value.")) :
                 CommandLineInterface.DEFAULT_SLEEP_PERIOD_MINUTES;
     }
 
-    public Optional<Integer> getTokenRefreshBeforeExpirationInSeconds() {
-        return this.getIntegerOptionValue(CommandLineInterface.OPTION_USE_TOKEN);
+    OptionalInt getTokenRefreshBeforeExpirationInSeconds() {
+        return this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_USE_TOKEN);
     }
 
-    public Optional<File> getKeyStoreLocation() {
-        final Optional<String> value = this.getOptionValue(CommandLineInterface.OPTION_KEYSTORE);
+    Optional<File> getKeyStoreLocation() {
+        final Optional<String> value = this.commandLine.getOptionValue(CommandLineInterface.OPTION_KEYSTORE);
         if (value.isPresent()) {
             return Optional.of(new File(value.get()));
         } else {
@@ -240,8 +192,8 @@ class   CommandLineInterface {
         }
     }
 
-    Optional<Integer> getDryRunBalance() {
-        return this.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
+    OptionalInt getDryRunBalance() {
+        return this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
     }
 
     static String getScriptIdentifier() {
@@ -253,7 +205,7 @@ class   CommandLineInterface {
                 isError ? "Error: " + message : message, true);
     }
 
-    public void printHelp(final String message, final boolean isError) {
+    void printHelp(final String message, final boolean isError) {
         CommandLineInterface.printHelp(this.options, message, isError);
     }
 

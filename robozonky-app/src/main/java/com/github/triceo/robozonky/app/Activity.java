@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.Defaults;
+import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.remote.Api;
 import com.github.triceo.robozonky.remote.Loan;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ class Activity {
     private final Activity.Marketplace marketplace;
     private Runnable settler = null;
 
-    Activity(final AppContext ctx, final Api api, final Path state) {
+    Activity(final Configuration ctx, final Api api, final Path state) {
         this.closedSeasonInSeconds = ctx.getCaptchaDelayInSeconds();
         this.sleepIntervalInMinutes = ctx.getSleepPeriodInMinutes();
         this.marketplace = Activity.Marketplace.from(api);

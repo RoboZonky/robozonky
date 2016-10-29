@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Function;
 
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
@@ -29,9 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Represents different modes of operation of the application, their means of selection and setup.
+ * Represents different modes of operation of the application, their means of selection and apply.
  */
-enum OperatingMode {
+enum OperatingMode implements Function<CommandLineInterface, Optional<Configuration>> {
 
     /**
      * Requires a strategy and performs 0 or more investments based on the strategy.
@@ -43,7 +45,7 @@ enum OperatingMode {
          * @return Empty if strategy missing, not loaded or not parsed.
          */
         @Override
-        public Optional<AppContext> setup(final CommandLineInterface cli) {
+        public Optional<Configuration> apply(final CommandLineInterface cli) {
             if (cli.getLoanAmount().isPresent() || cli.getLoanId().isPresent()) {
                 cli.printHelp("Loan data makes no sense in this context.", true);
                 return Optional.empty();
@@ -68,10 +70,10 @@ enum OperatingMode {
                     return Optional.empty();
                 } else if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new AppContext(strategy.get(), cli.getMaximumSleepPeriodInMinutes(),
+                    return Optional.of(new Configuration(strategy.get(), cli.getMaximumSleepPeriodInMinutes(),
                             cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
                 } else {
-                    return Optional.of(new AppContext(strategy.get(), cli.getMaximumSleepPeriodInMinutes(),
+                    return Optional.of(new Configuration(strategy.get(), cli.getMaximumSleepPeriodInMinutes(),
                             cli.getCaptchaPreventingInvestingDelayInSeconds()));
                 }
             } catch (final InvestmentStrategyParseException ex) {
@@ -91,22 +93,23 @@ enum OperatingMode {
          * @return Empty when loan ID or loan amount are empty or missing.
          */
         @Override
-        public Optional<AppContext> setup(final CommandLineInterface cli) {
-            final Optional<Integer> loanId = cli.getLoanId();
-            final Optional<Integer> loanAmount = cli.getLoanAmount();
-            if (!loanId.isPresent() || loanId.get() < 1) {
+        public Optional<Configuration> apply(final CommandLineInterface cli) {
+            final OptionalInt loanId = cli.getLoanId();
+            final OptionalInt loanAmount = cli.getLoanAmount();
+            if (!loanId.isPresent() || loanId.getAsInt() < 1) {
                 cli.printHelp("Loan ID must be provided and greater than 0.", true);
                 return Optional.empty();
-            } else if (!loanAmount.isPresent() || loanAmount.get() < 1) {
+            } else if (!loanAmount.isPresent() || loanAmount.getAsInt() < 1) {
                 cli.printHelp("Loan amount must be provided and greater than 0.", true);
                 return Optional.empty();
             } else if (cli.isDryRun()) {
                 final int balance = cli.getDryRunBalance().orElse(-1);
-                return Optional.of(new AppContext(loanId.get(), loanAmount.get(), cli.getMaximumSleepPeriodInMinutes(),
-                        cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
+                return Optional.of(new Configuration(loanId.getAsInt(), loanAmount.getAsInt(),
+                        cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds(),
+                        balance));
             } else {
-                return Optional.of(new AppContext(loanId.get(), loanAmount.get(), cli.getMaximumSleepPeriodInMinutes(),
-                        cli.getCaptchaPreventingInvestingDelayInSeconds()));
+                return Optional.of(new Configuration(loanId.getAsInt(), loanAmount.getAsInt(),
+                        cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds()));
             }
         }
     };
@@ -137,11 +140,4 @@ enum OperatingMode {
         return otherOptions;
     }
 
-    /**
-     * Properly set up the application with this operating mode.
-     *
-     * @param cli Parsed command line.
-     * @return All information required for proper execution of the application. Empty on failure.
-     */
-    public abstract Optional<AppContext> setup(final CommandLineInterface cli);
 }

@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.ZonkyApi;
@@ -77,7 +78,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         }
     }
 
-    static List<Loan> getAvailableLoans(final AppContext ctx, final Activity activity) {
+    static List<Loan> getAvailableLoans(final Configuration ctx, final Activity activity) {
         final boolean shouldSleep = activity.shouldSleep();
         if (shouldSleep) {
             Remote.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
@@ -88,23 +89,23 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         }
     }
 
-    static BigDecimal getAvailableBalance(final AppContext ctx, final ZonkyApi api) {
-        final int dryRunInitialBalance = ctx.getDryRunBalance();
-        return (ctx.isDryRun() && dryRunInitialBalance >= 0) ?
-                BigDecimal.valueOf(dryRunInitialBalance) : api.getWallet().getAvailableBalance();
+    static BigDecimal getAvailableBalance(final Configuration ctx, final ZonkyApi api) {
+        return (ctx.isDryRun() && ctx.getDryRunBalance().isPresent()) ?
+                BigDecimal.valueOf(ctx.getDryRunBalance().getAsInt()) : api.getWallet().getAvailableBalance();
     }
 
-    static Function<Investor, Collection<Investment>> getInvestingFunction(final AppContext ctx,
+    static Function<Investor, Collection<Investment>> getInvestingFunction(final Configuration ctx,
                                                                            final List<Loan> availableLoans) {
-        final boolean useStrategy = ctx.getOperatingMode() == OperatingMode.STRATEGY_DRIVEN;
+        final boolean useStrategy = ctx.getInvestmentStrategy().isPresent();
         // figure out what to execute
-        return useStrategy ? i -> i.invest(ctx.getInvestmentStrategy(), availableLoans) : i -> {
-            final Optional<Investment> optional = i.invest(ctx.getLoanId(), ctx.getLoanAmount());
+        return useStrategy ? i -> i.invest(ctx.getInvestmentStrategy().get(), availableLoans) : i -> {
+            final Optional<Investment> optional = i.invest(ctx.getLoanId().getAsInt(), ctx.getLoanAmount().getAsInt());
             return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
         };
     }
 
-    static Collection<Investment> invest(final AppContext ctx, final ZonkyApi zonky, final List<Loan> availableLoans) {
+    static Collection<Investment> invest(final Configuration ctx, final ZonkyApi zonky,
+                                         final List<Loan> availableLoans) {
         final BigDecimal balance = Remote.getAvailableBalance(ctx, zonky);
         final Investor i = new Investor(zonky, balance);
         final Collection<Investment> result = Remote.getInvestingFunction(ctx, availableLoans).apply(i);
@@ -112,9 +113,9 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     }
 
     private final AuthenticationHandler auth;
-    private final AppContext ctx;
+    private final Configuration ctx;
 
-    public Remote(final AppContext ctx, final AuthenticationHandler authenticationHandler) {
+    public Remote(final Configuration ctx, final AuthenticationHandler authenticationHandler) {
         this.ctx = ctx;
         this.auth = authenticationHandler;
     }

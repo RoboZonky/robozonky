@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import org.assertj.core.api.Assertions;
@@ -70,7 +71,7 @@ public class AuthenticationHandlerProviderTest {
     public void authenticationHandlerWithTokenAndNoExpiration() {
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.isTokenEnabled()).thenReturn(true);
-        Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(Optional.empty());
+        Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(OptionalInt.empty());
         final AuthenticationHandler a =
                 AuthenticationHandlerProvider.instantiateAuthenticationHandler(null, cli);
         final SoftAssertions softly = new SoftAssertions();
@@ -84,7 +85,7 @@ public class AuthenticationHandlerProviderTest {
         final int expiration = 120;
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.isTokenEnabled()).thenReturn(true);
-        Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(Optional.of(expiration));
+        Mockito.when(cli.getTokenRefreshBeforeExpirationInSeconds()).thenReturn(OptionalInt.of(expiration));
         final AuthenticationHandler a =
                 AuthenticationHandlerProvider.instantiateAuthenticationHandler(null, cli);
         final SoftAssertions softly = new SoftAssertions();

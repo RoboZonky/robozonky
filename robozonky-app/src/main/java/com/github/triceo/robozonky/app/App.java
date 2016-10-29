@@ -1,18 +1,19 @@
 /*
+ * Copyright 2016 Lukáš Petrovický
  *
- *  Copyright 2016 Lukáš Petrovický
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.github.triceo.robozonky.app;
 
 import java.lang.management.ManagementFactory;
@@ -25,6 +26,8 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
+import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,17 +79,16 @@ public class App {
             if (faultTolerant) {
                 App.LOGGER.info("RoboZonky is in fault-tolerant mode. Certain errors may not be reported as such.");
             }
-            final Optional<AppContext> optionalCtx = cli.getCliOperatingMode().setup(cli);
+            final Optional<Configuration> optionalCtx = cli.newApplicationConfiguration();
             if (!optionalCtx.isPresent()) {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
             }
-            final AppContext ctx = optionalCtx.get();
-            final Optional<AuthenticationHandler> optionalAuth = new AuthenticationHandlerProvider().apply(cli);
+            final Optional<AuthenticationHandler> optionalAuth = cli.newAuthenticationHandler();
             if (!optionalAuth.isPresent()) {
                 App.exit(ReturnCode.ERROR_SETUP);
             }
             App.LOGGER.info("===== RoboZonky at your service! =====");
-            final boolean loginSucceeded = new Remote(ctx, optionalAuth.get()).call().isPresent();
+            final boolean loginSucceeded = new Remote(optionalCtx.get(), optionalAuth.get()).call().isPresent();
             if (!loginSucceeded) {
                 App.exit(ReturnCode.ERROR_SETUP);
             } else {

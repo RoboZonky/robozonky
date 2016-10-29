@@ -26,14 +26,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Wallet;
 import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZotifyApi;
+import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Rule;
@@ -94,9 +97,9 @@ public class AppTest extends BaseMarketplaceTest {
     public void properBalanceRetrievalInDryRun() {
         // prepare context
         final BigDecimal dryRunBalance = BigDecimal.valueOf(12345);
-        final AppContext ctx = Mockito.mock(AppContext.class);
+        final Configuration ctx = Mockito.mock(Configuration.class);
         Mockito.when(ctx.isDryRun()).thenReturn(true);
-        Mockito.when(ctx.getDryRunBalance()).thenReturn(dryRunBalance.intValue());
+        Mockito.when(ctx.getDryRunBalance()).thenReturn(OptionalInt.of(dryRunBalance.intValue()));
         // test operation
         Assertions.assertThat(Remote.getAvailableBalance(ctx, null)).isEqualTo(dryRunBalance);
     }
@@ -108,17 +111,21 @@ public class AppTest extends BaseMarketplaceTest {
         final Wallet wallet = new Wallet(-1, -1, BigDecimal.valueOf(100000), remoteBalance);
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getWallet()).thenReturn(wallet);
-        final AppContext ctx = Mockito.mock(AppContext.class);
+        final Configuration ctx = Mockito.mock(Configuration.class);
         // test operation
         Assertions.assertThat(Remote.getAvailableBalance(ctx, api)).isEqualTo(remoteBalance);
     }
 
-    private static AppContext mockContext(final OperatingMode mode) {
-        final AppContext ctx = Mockito.mock(AppContext.class);
-        Mockito.when(ctx.getLoanId()).thenReturn(1);
-        Mockito.when(ctx.getLoanAmount()).thenReturn(1000);
-        Mockito.when(ctx.getOperatingMode()).thenReturn(mode);
-        Mockito.when(ctx.getDryRunBalance()).thenReturn(10000);
+    private static Configuration mockContext(final boolean usesStrategy) {
+        final Configuration ctx = Mockito.mock(Configuration.class);
+        Mockito.when(ctx.getLoanId()).thenReturn(OptionalInt.of(1));
+        Mockito.when(ctx.getLoanAmount()).thenReturn(OptionalInt.of(1000));
+        if (usesStrategy) {
+            Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.of(Mockito.mock(InvestmentStrategy.class)));
+        } else {
+            Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.empty());
+        }
+        Mockito.when(ctx.getDryRunBalance()).thenReturn(OptionalInt.of(10000));
         return ctx;
     }
 
@@ -139,7 +146,7 @@ public class AppTest extends BaseMarketplaceTest {
                 .thenReturn(OffsetDateTime.now().minus(delayInSeconds - 1, ChronoUnit.SECONDS));
         final ZotifyApi apiMock = Mockito.mock(ZotifyApi.class);
         Mockito.when(apiMock.getLoans()).thenReturn(Arrays.asList(loanOldEnough, loanOldExactly, youngLoan));
-        final AppContext ctx = Mockito.mock(AppContext.class);
+        final Configuration ctx = Mockito.mock(Configuration.class);
         Mockito.when(ctx.getCaptchaDelayInSeconds()).thenReturn(delayInSeconds);
         Mockito.when(ctx.getSleepPeriodInMinutes()).thenReturn(60);
         final Activity activity = new Activity(ctx, apiMock, Remote.MARKETPLACE_TIMESTAMP);
@@ -151,13 +158,16 @@ public class AppTest extends BaseMarketplaceTest {
     public void simpleInvestment() {
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getWallet()).thenReturn(new Wallet(0, 0, BigDecimal.ZERO, BigDecimal.ZERO));
-        final Collection<Investment> result = Remote.invest(Mockito.mock(AppContext.class), api, null);
+        final Configuration c = Mockito.mock(Configuration.class);
+        Mockito.when(c.getLoanId()).thenReturn(OptionalInt.of(1));
+        Mockito.when(c.getLoanAmount()).thenReturn(OptionalInt.of(1000));
+        final Collection<Investment> result = Remote.invest(c, api, null);
         Assertions.assertThat(result).isEmpty();
     }
 
     @Test
     public void strategyDrivenInvestingFunction() {
-        final AppContext ctx = AppTest.mockContext(OperatingMode.STRATEGY_DRIVEN);
+        final Configuration ctx = AppTest.mockContext(true);
         final Investor i = Mockito.mock(Investor.class);
         final Investment investment = Mockito.mock(Investment.class);
         Mockito.when(i.invest(Mockito.any(), Mockito.any())).thenReturn(Collections.singletonList(investment));
@@ -168,12 +178,12 @@ public class AppTest extends BaseMarketplaceTest {
 
     @Test
     public void userDrivenInvestingFunction() {
-        final AppContext ctx = AppTest.mockContext(OperatingMode.USER_DRIVEN);
+        final Configuration ctx = AppTest.mockContext(false);
         final Investor i = Mockito.mock(Investor.class);
         // check what happens when nothing is invested)
         Mockito.when(i.invest(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Optional.empty());
         final Collection<Investment> result = Remote.getInvestingFunction(ctx, null).apply(i);
-        Mockito.verify(i, Mockito.times(1)).invest(ctx.getLoanId(), ctx.getLoanAmount());
+        Mockito.verify(i, Mockito.times(1)).invest(ctx.getLoanId().getAsInt(), ctx.getLoanAmount().getAsInt());
         Assertions.assertThat(result).isEmpty();
         // check what happens when something is invested
         final Investment investment = Mockito.mock(Investment.class);
@@ -186,7 +196,7 @@ public class AppTest extends BaseMarketplaceTest {
     public void loginFailOnCredentials() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.execute(Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
-        final AppContext ctx = Mockito.mock(AppContext.class);
+        final Configuration ctx = Mockito.mock(Configuration.class);
         Assertions.assertThat(new Remote(ctx, auth).call()).isEmpty();
     }
 
@@ -194,7 +204,7 @@ public class AppTest extends BaseMarketplaceTest {
     public void loginFailOnUnknownException() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(Mockito.any(), Mockito.any());
-        final AppContext ctx = Mockito.mock(AppContext.class);
+        final Configuration ctx = Mockito.mock(Configuration.class);
         new Remote(ctx, auth).call();
     }
 
