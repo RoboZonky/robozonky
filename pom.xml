@@ -56,17 +56,6 @@
             <!-- RESTEasy -->
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jaxrs</artifactId>
-                <version>${version.org.jboss.resteasy}</version>
-                <exclusions>
-                    <exclusion>  <!-- needs to be replaced by SLF4J -->
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-jackson2-provider</artifactId>
                 <version>${version.org.jboss.resteasy}</version>
             </dependency>
@@ -74,11 +63,12 @@
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-client</artifactId>
                 <version>${version.org.jboss.resteasy}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.2</version>
+                <exclusions>
+                  <exclusion> <!-- needs to be replaced by SLF4J -->
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <!-- Drools -->
             <dependency>
