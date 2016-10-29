@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.remote;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public abstract class BaseOverview implements BaseEntity {
+abstract class BaseOverview implements BaseEntity {
 
     private int totalInvestment, principalPaid, interestPaid, investmentCount;
 
