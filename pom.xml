@@ -302,26 +302,6 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${surefire.version}</version>
-                    <configuration>
-                        <argLine>-Xmx64m</argLine>
-                        <forkCount>1C</forkCount>
-                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                        <reuseForks>false</reuseForks>
-                        <runOrder>hourly</runOrder>
-                        <workingDirectory>${basedir}/target</workingDirectory>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.6</version>
                 </plugin>
