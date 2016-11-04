@@ -131,7 +131,12 @@ public class Investor {
                         Collectors.summingInt(BlockedAmount::getAmount)));
         // and then fetch all the loans in parallel, converting them into investments
         return Collections.unmodifiableList(amountsBlockedByLoans.entrySet().parallelStream()
-                .map(entry -> new Investment(api.getLoan(entry.getKey()), entry.getValue()))
+                .map(entry -> {
+                    final Loan l = LoanRetriever.getLoan(api, entry.getKey()).orElseThrow(
+                            () -> new RuntimeException("Loan retrieval failed.")
+                    );
+                    return new Investment(l, entry.getValue());
+                })
                 .collect(Collectors.toList()));
     }
 
