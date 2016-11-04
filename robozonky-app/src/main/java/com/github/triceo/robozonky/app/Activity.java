@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
@@ -127,7 +128,7 @@ class Activity {
         try (final BufferedReader reader = Files.newBufferedReader(this.state, Defaults.CHARSET)) {
             final String instantString = reader.readLine();
             return OffsetDateTime.parse(instantString);
-        } catch (final IOException ex) {
+        } catch (final IOException | DateTimeParseException ex) {
             Activity.LOGGER.debug("Failed read marketplace timestamp.", ex);
             return Activity.EPOCH;
         }

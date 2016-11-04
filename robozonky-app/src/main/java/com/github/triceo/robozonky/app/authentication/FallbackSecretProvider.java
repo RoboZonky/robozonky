@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -97,7 +96,7 @@ final class FallbackSecretProvider extends SecretProvider {
         if (FallbackSecretProvider.TOKEN.exists()) {
             final long millisSinceEpoch = FallbackSecretProvider.TOKEN.lastModified();
             final Instant then = Instant.EPOCH.plus(millisSinceEpoch, ChronoUnit.MILLIS);
-            return Optional.of(OffsetDateTime.ofInstant(then, ZoneId.systemDefault()));
+            return Optional.of(OffsetDateTime.ofInstant(then, Defaults.ZONE_ID));
         } else {
             return Optional.empty();
         }

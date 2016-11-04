@@ -19,9 +19,12 @@ package com.github.triceo.robozonky.app.authentication;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.Defaults;
 import com.github.triceo.robozonky.app.util.IOUtils;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import org.slf4j.Logger;
@@ -140,8 +143,13 @@ final class KeyStoreSecretProvider extends SecretProvider {
 
     @Override
     public Optional<OffsetDateTime> getTokenSetDate() {
-        return this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN_DATE)
-                .map(s -> Optional.of(OffsetDateTime.parse(new String(s))))
-                .orElse(Optional.empty());
+        try {
+            return this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN_DATE)
+                    .map(s -> Optional.of(OffsetDateTime.parse(new String(s))))
+                    .orElse(Optional.empty());
+        } catch (final DateTimeParseException ex) {
+            // if parsing the date failed for whatever reason, return the beginning of time
+            return Optional.of(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
+        }
     }
 }
