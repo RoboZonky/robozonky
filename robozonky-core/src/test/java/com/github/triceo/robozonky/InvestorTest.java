@@ -18,10 +18,19 @@ package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.events.Event;
+import com.github.triceo.robozonky.events.EventListener;
+import com.github.triceo.robozonky.events.EventRegistry;
+import com.github.triceo.robozonky.events.InvestmentMadeEvent;
+import com.github.triceo.robozonky.events.InvestmentRequestedEvent;
+import com.github.triceo.robozonky.events.LoanEvaluationEvent;
+import com.github.triceo.robozonky.events.StrategyCompleteEvent;
+import com.github.triceo.robozonky.events.StrategyStartedEvent;
 import com.github.triceo.robozonky.remote.BlockedAmount;
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.remote.Investment;
@@ -34,6 +43,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class InvestorTest {
@@ -65,6 +75,42 @@ public class InvestorTest {
         // finally test
         final Investor investor = new Investor(mockApi, BigDecimal.valueOf(1000));
         investor.invest(strategyMock, Collections.singletonList(mockLoan1));
+    }
+
+    @Test
+    public void properEventsFiring() {
+        // create two loans to exercise the strategy
+        final int loan1Id = 1;
+        final Loan loan1 = InvestorTest.getMockLoanWithId(loan1Id);
+        final int loan2Id = 2;
+        final Loan loan2 = InvestorTest.getMockLoanWithId(loan2Id);
+        // prepare the strategy; loan1 is acceptable, subsequently loan2 is
+        final InvestmentStrategy strategy = Mockito.mock(InvestmentStrategy.class);
+        Mockito.when(strategy.getMatchingLoans(ArgumentMatchers.argThat((a) -> a != null && a.size() == 2),
+                ArgumentMatchers.any())).thenReturn(Collections.singletonList(loan1));
+        Mockito.when(strategy.getMatchingLoans(ArgumentMatchers.argThat((a) -> a != null && a.size() == 1),
+                ArgumentMatchers.any())).thenReturn(Collections.singletonList(loan2));
+        Mockito.when(strategy.recommendInvestmentAmount(ArgumentMatchers.eq(loan1), ArgumentMatchers.any()))
+                .thenReturn(400);
+        Mockito.when(strategy.recommendInvestmentAmount(ArgumentMatchers.eq(loan2), ArgumentMatchers.any()))
+                .thenReturn(0); // do not invest the second time
+        // configure API to retrieve the loans
+        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        Mockito.when(api.getLoan(ArgumentMatchers.eq(loan1Id))).thenReturn(loan1);
+        Mockito.when(api.getLoan(ArgumentMatchers.eq(loan2Id))).thenReturn(loan2);
+        // execute the actual test
+        final EventListener<Event> listener = Mockito.mock(EventListener.class);
+        EventRegistry.INSTANCE.addListener(listener);
+        final Investor investor = new Investor(api, BigDecimal.valueOf(1000));
+        final Collection<Investment> result = investor.invest(strategy, Arrays.asList(loan1, loan2));
+        Assertions.assertThat(result).hasSize(1);
+        // and check for the proper event listener invocations
+        Mockito.verify(listener, Mockito.times(6)).handle(ArgumentMatchers.any());
+        Mockito.verify(listener, Mockito.times(1)).handle(ArgumentMatchers.any(StrategyStartedEvent.class));
+        Mockito.verify(listener, Mockito.times(2)).handle(ArgumentMatchers.any(LoanEvaluationEvent.class));
+        Mockito.verify(listener, Mockito.times(1)).handle(ArgumentMatchers.any(InvestmentRequestedEvent.class));
+        Mockito.verify(listener, Mockito.times(1)).handle(ArgumentMatchers.any(InvestmentMadeEvent.class));
+        Mockito.verify(listener, Mockito.times(1)).handle(ArgumentMatchers.any(StrategyCompleteEvent.class));
     }
 
     @Test

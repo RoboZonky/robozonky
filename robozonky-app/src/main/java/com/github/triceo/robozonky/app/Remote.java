@@ -132,7 +132,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         this.auth = authenticationHandler;
     }
 
-    private Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
+    Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
         // check marketplace for loans
         EventRegistry.fire(new MarketplaceCheckStartedEvent());
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);

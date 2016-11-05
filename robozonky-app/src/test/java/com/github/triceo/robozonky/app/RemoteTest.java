@@ -28,9 +28,19 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.Configuration;
+import com.github.triceo.robozonky.app.events.CaptchaProtectedLoanArrivalEvent;
+import com.github.triceo.robozonky.app.events.ExecutionCompleteEvent;
+import com.github.triceo.robozonky.app.events.ExecutionStartedEvent;
+import com.github.triceo.robozonky.app.events.MarketplaceCheckCompleteEvent;
+import com.github.triceo.robozonky.app.events.MarketplaceCheckStartedEvent;
+import com.github.triceo.robozonky.app.events.UnprotectedLoanArrivalEvent;
+import com.github.triceo.robozonky.events.Event;
+import com.github.triceo.robozonky.events.EventListener;
+import com.github.triceo.robozonky.events.EventRegistry;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
 import com.github.triceo.robozonky.remote.Wallet;
@@ -40,6 +50,7 @@ import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class RemoteTest extends BaseMarketplaceTest {
@@ -190,6 +201,47 @@ public class RemoteTest extends BaseMarketplaceTest {
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(Mockito.any(), Mockito.any());
         final Configuration ctx = Mockito.mock(Configuration.class);
         new Remote(ctx, auth).call();
+    }
+
+    @Test
+    public void eventsFiringProperly() {
+        final int captchaDelayInSeconds = 120;
+        // prepare the context so that we have a fixed CAPTCHA delay
+        final Configuration ctx = Mockito.mock(Configuration.class);
+        Mockito.when(ctx.getCaptchaDelayInSeconds()).thenReturn(captchaDelayInSeconds);
+        // prepare two different loans - one protected, one not
+        final Loan protectedLoan = Mockito.mock(Loan.class);
+        Mockito.when(protectedLoan.getRemainingInvestment()).thenReturn(1000.0);
+        Mockito.when(protectedLoan.getDatePublished()).thenReturn(OffsetDateTime.now().minus(1, ChronoUnit.SECONDS));
+        final Loan unprotectedLoan = Mockito.mock(Loan.class);
+        Mockito.when(unprotectedLoan.getRemainingInvestment()).thenReturn(2000.0);
+        Mockito.when(unprotectedLoan.getDatePublished()).thenReturn(OffsetDateTime.now()
+                .minus(captchaDelayInSeconds + 1, ChronoUnit.SECONDS));
+        // prepare the APIs to return those two loans
+        final ZotifyApi api = Mockito.mock(ZotifyApi.class);
+        Mockito.when(api.getLoans()).thenReturn(Arrays.asList(protectedLoan, unprotectedLoan));
+        final ApiProvider apis = Mockito.mock(ApiProvider.class);
+        Mockito.when(apis.cache()).thenReturn(api);
+        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        // execute the actual test
+        final EventListener<Event> globalListener = Mockito.mock(EventListener.class);
+        EventRegistry.INSTANCE.addListener(globalListener);
+        final Remote r = new Remote(ctx, auth);
+        r.execute(apis);
+        // and check for the proper invocations
+        Mockito.verify(globalListener, Mockito.times(6)).handle(ArgumentMatchers.any());
+        Mockito.verify(globalListener, Mockito.times(1))
+                .handle(ArgumentMatchers.any(MarketplaceCheckStartedEvent.class));
+        Mockito.verify(globalListener, Mockito.times(1))
+                .handle(ArgumentMatchers.any(CaptchaProtectedLoanArrivalEvent.class));
+        Mockito.verify(globalListener, Mockito.times(1))
+                .handle(ArgumentMatchers.any(UnprotectedLoanArrivalEvent.class));
+        Mockito.verify(globalListener, Mockito.times(1))
+                .handle(ArgumentMatchers.any(MarketplaceCheckCompleteEvent.class));
+        Mockito.verify(globalListener, Mockito.times(1))
+                .handle(ArgumentMatchers.any(ExecutionStartedEvent.class));
+        Mockito.verify(globalListener, Mockito.times(1))
+                .handle(ArgumentMatchers.any(ExecutionCompleteEvent.class));
     }
 
 }
