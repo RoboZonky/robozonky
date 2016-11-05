@@ -340,6 +340,7 @@
                             <param>com.github.triceo.robozonky.*Test</param> <!-- No IT -->
                         </targetTests>
                         <excludedClasses> <!-- Mostly getters; messing up stats -->
+                            <param>com.github.triceo.robozonky.events.*Event</param>
                             <param>com.github.triceo.robozonky.remote.*</param>
                             <param>com.github.triceo.robozonky.strategy.rules.facts.*</param>
                         </excludedClasses>

@@ -26,6 +26,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.events.EventRegistry;
+import com.github.triceo.robozonky.events.InvestmentMadeEvent;
+import com.github.triceo.robozonky.events.InvestmentRequestedEvent;
+import com.github.triceo.robozonky.events.LoanEvaluationEvent;
+import com.github.triceo.robozonky.events.StrategyCompleteEvent;
+import com.github.triceo.robozonky.events.StrategyStartedEvent;
 import com.github.triceo.robozonky.remote.BlockedAmount;
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.remote.Investment;
@@ -82,6 +88,7 @@ public class Investor {
             return Optional.empty();
         }
         final Investment investment = new Investment(l, amount);
+        EventRegistry.fire(new InvestmentRequestedEvent(investment));
         if (api instanceof InvestingZonkyApi) {
             ((InvestingZonkyApi)api).invest(investment);
             Investor.LOGGER.info("Invested {} CZK into loan {}.", investment.getAmount(), investment.getLoanId());
@@ -89,6 +96,7 @@ public class Investor {
             Investor.LOGGER.info("Dry run. Otherwise would have invested {} CZK into loan {}.", investment.getAmount(),
                     investment.getLoanId());
         }
+        EventRegistry.fire(new InvestmentMadeEvent(investment));
         return Optional.of(investment);
     }
 
@@ -166,8 +174,11 @@ public class Investor {
         Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
                 portfolio.getSharesOnInvestment());
         return strategy.getMatchingLoans(availableLoans, portfolio).stream()
-                .map(l -> Investor.invest(this.zonkyApi, l.getId(), strategy.recommendInvestmentAmount(l, portfolio),
-                        portfolio.getCzkAvailable()))
+                .map(l -> {
+                    EventRegistry.fire(new LoanEvaluationEvent(l));
+                    return Investor.invest(this.zonkyApi, l.getId(), strategy.recommendInvestmentAmount(l, portfolio),
+                            portfolio.getCzkAvailable());
+                })
                 .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
                 .findFirst();
     }
@@ -190,7 +201,9 @@ public class Investor {
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
         BigDecimal balance = this.initialBalance;
+        EventRegistry.fire(new StrategyStartedEvent(strategy, loans, balance));
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
+            EventRegistry.fire(new StrategyCompleteEvent(strategy, Collections.emptyList(), balance));
             return Collections.emptyList(); // no need to do anything else
         }
         // read our investment statistics
@@ -224,9 +237,11 @@ public class Investor {
             balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
             Investor.LOGGER.info("New account balance is {} CZK.", balance);
         } while (balance.compareTo(minimumInvestmentAmount) >= 0);
-        return Collections.unmodifiableCollection(allInvestments.stream()
+        final Collection<Investment> result = allInvestments.stream()
                 .filter(i -> !preexistingInvestments.contains(i))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        EventRegistry.fire(new StrategyCompleteEvent(strategy, result, balance));
+        return Collections.unmodifiableCollection(result);
     }
 
     /**
