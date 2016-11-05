@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.github.triceo.robozonky.remote.BlockedAmount;
 import com.github.triceo.robozonky.remote.InvestingZonkyApi;
@@ -40,10 +38,6 @@ import org.mockito.Mockito;
 
 public class InvestorTest {
 
-    private static Investment getInvestmentWithLoanId(final int id) {
-        return new Investment(InvestorTest.getMockLoanWithId(id), 200);
-    }
-
     private static Loan getMockLoanWithId(final int id) {
         return InvestorTest.getMockLoanWithIdAndAmount(id, 1000);
     }
@@ -53,35 +47,6 @@ public class InvestorTest {
         Mockito.when(l.getId()).thenReturn(id);
         Mockito.when(l.getRemainingInvestment()).thenReturn((double)amount);
         return l;
-    }
-
-    private static final ExecutorService EXECUTOR = Executors.newWorkStealingPool();
-
-    @Test
-    public void mergingTwoInvestmentCollectionsWorksProperly() {
-        final Investment I1 = InvestorTest.getInvestmentWithLoanId(1);
-        final Investment I2 = InvestorTest.getInvestmentWithLoanId(2);
-        final Investment I3 = InvestorTest.getInvestmentWithLoanId(3);
-
-        // two identical investments will result in one
-        final List<Investment> a = Arrays.asList(I1, I2);
-        final List<Investment> b = Arrays.asList(I2, I3);
-        Assertions.assertThat(Investor.mergeInvestments(a, b)).containsExactly(I1, I2, I3);
-
-        // toy around with empty lists
-        Assertions.assertThat(Investor.mergeInvestments(Collections.emptyList(), Collections.emptyList())).isEmpty();
-        Assertions.assertThat(Investor.mergeInvestments(Collections.emptyList(), a))
-                .containsExactly((Investment[]) a.toArray());
-        Assertions.assertThat(Investor.mergeInvestments(b, Collections.emptyList()))
-                .containsExactly((Investment[]) b.toArray());
-
-        // standard merging also works
-        final List<Investment> c = Collections.singletonList(I3);
-        Assertions.assertThat(Investor.mergeInvestments(a, c)).containsExactly(I1, I2, I3);
-
-        // reverse-order merging works
-        final List<Investment> d = Arrays.asList(I2, I1);
-        Assertions.assertThat(Investor.mergeInvestments(a, d)).containsExactly(I1, I2);
     }
 
     @Test(expected = BadRequestException.class)
@@ -131,14 +96,16 @@ public class InvestorTest {
         // and now actually test that the succeeding loan will be invested into ...
         final Investor i = new Investor(api, balance);
         Mockito.when(strategy.getMatchingLoans(Mockito.any(), Mockito.any())).thenReturn(allLoans);
-        final Optional<Investment> result = i.investOnce(strategy, allLoans, balance, stats, Collections.emptyList());
+        final Optional<Investment> result = i.investOnce(strategy, allLoans,
+                PortfolioOverview.calculate(balance, stats, Collections.emptyList()));
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(result.get().getLoanId()).isEqualTo(success.getId());
         Mockito.verify(api, Mockito.times(1)).invest(Mockito.any());
         // ... no matter which place it takes
         Mockito.when(strategy.getMatchingLoans(Mockito.any(), Mockito.any()))
                 .thenReturn(Arrays.asList(success, overBalance, underMinimum, overAmount));
-        final Optional<Investment> result2 = i.investOnce(strategy, allLoans, balance, stats, Collections.emptyList());
+        final Optional<Investment> result2 = i.investOnce(strategy, allLoans,
+                PortfolioOverview.calculate(balance, stats, Collections.emptyList()));
         Assertions.assertThat(result2).isPresent();
         Assertions.assertThat(result2.get().getLoanId()).isEqualTo(success.getId());
         Mockito.verify(api, Mockito.times(2)).invest(Mockito.any());
@@ -147,8 +114,8 @@ public class InvestorTest {
         Mockito.when(strategy.getMatchingLoans(Mockito.any(), Mockito.any()))
                 .thenReturn(Arrays.asList(overBalance, underMinimum, overAmount, alreadyPresent));
         final Investment alreadyPresentInvestment = new Investment(alreadyPresent, 200);
-        final Optional<Investment> result3 =
-                i.investOnce(strategy, null, balance, stats, Collections.singletonList(alreadyPresentInvestment));
+        final Optional<Investment> result3 = i.investOnce(strategy, null,
+                PortfolioOverview.calculate(balance, stats, Collections.singletonList(alreadyPresentInvestment)));
         Assertions.assertThat(result3).isEmpty();
     }
 
