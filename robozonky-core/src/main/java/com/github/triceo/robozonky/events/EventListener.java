@@ -22,6 +22,11 @@ package com.github.triceo.robozonky.events;
  */
 public interface EventListener<E extends Event> extends java.util.EventListener {
 
+    /**
+     * Never include any time-consuming logic, since RoboZonky core will block until all of this code is executed. If
+     * you need to submit a long-running task, do it asynchronously and do not block on the result.
+     * @param event Event that is being listened to.
+     */
     void handle(E event);
 
 }

@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,9 +38,12 @@ import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.Configuration;
+import com.github.triceo.robozonky.app.events.CaptchaProtectedLoanArrivalEvent;
 import com.github.triceo.robozonky.app.events.ExecutionCompleteEvent;
 import com.github.triceo.robozonky.app.events.ExecutionStartedEvent;
-import com.github.triceo.robozonky.app.events.MarketplaceCheckEvent;
+import com.github.triceo.robozonky.app.events.MarketplaceCheckCompleteEvent;
+import com.github.triceo.robozonky.app.events.MarketplaceCheckStartedEvent;
+import com.github.triceo.robozonky.app.events.UnprotectedLoanArrivalEvent;
 import com.github.triceo.robozonky.events.EventRegistry;
 import com.github.triceo.robozonky.remote.Investment;
 import com.github.triceo.robozonky.remote.Loan;
@@ -116,6 +120,10 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         return Collections.unmodifiableCollection(result);
     }
 
+    private static OffsetDateTime findEndOfClosedSeason(final Loan l, final Configuration ctx) {
+        return l.getDatePublished().plus(ctx.getCaptchaDelayInSeconds(), ChronoUnit.SECONDS);
+    }
+
     private final AuthenticationHandler auth;
     private final Configuration ctx;
 
@@ -125,15 +133,23 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     }
 
     private Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
-        EventRegistry.fire(new MarketplaceCheckEvent());
+        // check marketplace for loans
+        EventRegistry.fire(new MarketplaceCheckStartedEvent());
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
-        final List<Loan> loans = Remote.getAvailableLoans(this.ctx, activity);
-        if (loans.isEmpty()) { // let's fall asleep
+        final List<Loan> captchaProtected = activity.getUnactionableLoans();
+        captchaProtected.forEach(l ->
+                EventRegistry.fire(new CaptchaProtectedLoanArrivalEvent(l, Remote.findEndOfClosedSeason(l, this.ctx)))
+        );
+        final List<Loan> unprotected = Remote.getAvailableLoans(this.ctx, activity);
+        unprotected.forEach(l -> EventRegistry.fire(new UnprotectedLoanArrivalEvent(l)));
+        EventRegistry.fire(new MarketplaceCheckCompleteEvent());
+        if (unprotected.isEmpty()) { // let's fall asleep
             return Optional.of(Collections.emptyList());
         }
-        EventRegistry.fire(new ExecutionStartedEvent(loans));
+        // start the core investing algorithm
+        EventRegistry.fire(new ExecutionStartedEvent(unprotected));
         final Optional<Collection<Investment>> optionalResult =
-                this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, loans));
+                this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, unprotected));
         activity.settle(); // only settle the marketplace activity when we're sure the app is no longer likely to fail
         if (optionalResult.isPresent()) {
             final Collection<Investment> result = optionalResult.get();

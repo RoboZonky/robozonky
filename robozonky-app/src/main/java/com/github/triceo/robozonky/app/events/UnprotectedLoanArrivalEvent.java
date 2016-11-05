@@ -17,10 +17,25 @@
 package com.github.triceo.robozonky.app.events;
 
 import com.github.triceo.robozonky.events.Event;
+import com.github.triceo.robozonky.remote.Loan;
 
 /**
- * Fired immediately before the marketplace is checked for new loans. May be followed by {@link ExecutionStartedEvent}.
+ * Immediately after @{@link MarketplaceCheckStartedEvent}, when a loan is present that can be invested into right
+ * away.
  */
-public class MarketplaceCheckEvent implements Event {
+public class UnprotectedLoanArrivalEvent implements Event {
+
+    private final Loan loan;
+
+    public UnprotectedLoanArrivalEvent(final Loan loan) {
+        this.loan = loan;
+    }
+
+    /**
+     * @return The loan in question.
+     */
+    public Loan getLoan() {
+        return loan;
+    }
 
 }

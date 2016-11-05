@@ -134,7 +134,7 @@ class Activity {
         }
     }
 
-    private List<Loan> getUnactionableLoans() {
+    public List<Loan> getUnactionableLoans() {
         return this.marketplace.getLoansNewerThan(
                 OffsetDateTime.now().minus(this.closedSeasonInSeconds, ChronoUnit.SECONDS)
         );
