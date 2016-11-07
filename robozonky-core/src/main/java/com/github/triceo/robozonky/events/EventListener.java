@@ -17,14 +17,19 @@
 package com.github.triceo.robozonky.events;
 
 /**
- * Implement in user code to allow handling @{@link Event}s.
+ * Implement in user code to allow handling @{@link Event}s. Different listeners for the same event may be executed
+ * by different threads and concurrently. If multiple listeners are somehow interconnected, synchronization between
+ * them must be maintained by the listeners themselves.
+ *
  * @param <E> Event type to handle. Omit if global listener through {@link EventRegistry#addListener(EventListener)}
  */
 public interface EventListener<E extends Event> extends java.util.EventListener {
 
     /**
-     * Never include any time-consuming logic, since RoboZonky core will block until all of this code is executed. If
-     * you need to submit a long-running task, do it asynchronously and do not block on the result.
+     * Implementation must be thread-safe. Never include any time-consuming logic, since RoboZonky core will block
+     * until all of this code is executed. If you need to submit a long-running task, do it asynchronously and do not
+     * block on the result.
+     *
      * @param event Event that is being listened to.
      */
     void handle(E event);

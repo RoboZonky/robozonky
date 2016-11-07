@@ -70,11 +70,13 @@ public class App {
         // read the command line and execute the runtime
         boolean faultTolerant = false;
         try {
+            // prepare command line
             final Optional<CommandLineInterface> optionalCli = CommandLineInterface.parse(args);
             if (!optionalCli.isPresent()) {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
             }
             final CommandLineInterface cli = optionalCli.get();
+            // configure application
             faultTolerant = cli.isFaultTolerant();
             if (faultTolerant) {
                 App.LOGGER.info("RoboZonky is in fault-tolerant mode. Certain errors may not be reported as such.");
@@ -82,13 +84,18 @@ public class App {
             final Optional<Configuration> optionalCtx = cli.newApplicationConfiguration();
             if (!optionalCtx.isPresent()) {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+
             }
             final Optional<AuthenticationHandler> optionalAuth = cli.newAuthenticationHandler();
             if (!optionalAuth.isPresent()) {
                 App.exit(ReturnCode.ERROR_SETUP);
             }
+            // start the app
             App.LOGGER.info("===== RoboZonky at your service! =====");
-            final boolean loginSucceeded = new Remote(optionalCtx.get(), optionalAuth.get()).call().isPresent();
+            final Configuration ctx = optionalCtx.get();
+            App.STATE.register(new InvestmentReportingListener(ctx.isDryRun()));
+            final boolean loginSucceeded = new Remote(ctx, optionalAuth.get()).call().isPresent();
+            // shut down the app
             if (!loginSucceeded) {
                 App.exit(ReturnCode.ERROR_SETUP);
             } else {

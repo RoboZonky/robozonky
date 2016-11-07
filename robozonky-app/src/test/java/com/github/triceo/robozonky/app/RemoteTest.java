@@ -16,10 +16,7 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -48,45 +45,11 @@ import com.github.triceo.robozonky.remote.ZonkyApi;
 import com.github.triceo.robozonky.remote.ZotifyApi;
 import com.github.triceo.robozonky.strategy.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
-import org.junit.Assume;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class RemoteTest extends BaseMarketplaceTest {
-
-    @Test
-    public void storeInvestmentData() throws IOException {
-        final Investment mock = Mockito.mock(Investment.class);
-        Mockito.when(mock.getLoanId()).thenReturn(1);
-        Mockito.when(mock.getAmount()).thenReturn(2);
-        final String expectedResult = "#1: 2 CZK";
-
-        final File f = File.createTempFile("robozonky-", ".investments");
-        f.delete();
-        Assume.assumeFalse(f.exists());
-
-        final Optional<File> result = Remote.storeInvestmentsMade(f, Collections.singleton(mock));
-        Assertions.assertThat(result).contains(f);
-        Assertions.assertThat(f).exists();
-        Assertions.assertThat(Files.lines(f.toPath())).containsExactly(expectedResult);
-    }
-
-    @Test
-    public void storeNoInvestmentData() throws IOException {
-        Assertions.assertThat(Remote.storeInvestmentsMade(null, Collections.emptySet())).isEmpty();
-    }
-
-    @Test
-    public void storeInvestmentDataWithDryRun() throws IOException {
-        final Optional<File> result =
-                Remote.storeInvestmentsMade(Collections.singleton(Mockito.mock(Investment.class)), true);
-        Assertions.assertThat(result).isPresent();
-        final Optional<File> result2 =
-                Remote.storeInvestmentsMade(Collections.singleton(Mockito.mock(Investment.class)), false);
-        Assertions.assertThat(result2).isPresent();
-        Assertions.assertThat(result2.get().getAbsolutePath()).isNotEqualTo(result.get().getAbsolutePath());
-    }
 
     @Test
     public void properBalanceRetrievalInDryRun() {

@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
  * Local listeners only listen for events of a specific type and are registered through
  * {@link #addListener(Class, EventListener)}. Global listeners listen for all types of events and are registered
  * through {@link #addListener(EventListener)}.
+ *
+ * No guarantees are given as to the order in which the listeners will be executed.
  */
 public enum EventRegistry {
 
@@ -71,6 +73,10 @@ public enum EventRegistry {
     /**
      * Distribute a particular event to all listeners that have been added and not yet removed for that particular event
      * and to all such global listeners. This MUST NOT be called by users and is not part of the public API.
+     *
+     * The listeners may be executed in parallel, no execution order guarantees are given. When this method returns,
+     * all listeners' {@link EventListener#handle(Event)} method will have returned.
+     *
      * @param event Event to distribute.
      * @param <E> Event type to distribute. Ignored for global listeners.
      */
@@ -82,14 +88,14 @@ public enum EventRegistry {
         synchronized (EventRegistry.INSTANCE) {
             globals = new LinkedHashSet<>(EventRegistry.INSTANCE.globalListeners);
         }
-        globals.forEach(l -> EventRegistry.fire(event, l));
+        globals.parallelStream().forEach(l -> EventRegistry.fire(event, l));
         // fire event-specific listeners
         final EventRegistry.EventSpecific<E> registry;
         synchronized (EventRegistry.INSTANCE) {
             registry = (EventRegistry.EventSpecific<E>) EventRegistry.INSTANCE.registries.get(event.getClass());
         }
         if (registry != null) {
-            registry.getListeners().forEach(l -> EventRegistry.fire(event, l));
+            registry.getListeners().parallelStream().forEach(l -> EventRegistry.fire(event, l));
         }
     }
 

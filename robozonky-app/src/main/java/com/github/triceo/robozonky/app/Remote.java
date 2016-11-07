@@ -15,16 +15,11 @@
  */
 package com.github.triceo.robozonky.app;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +27,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
@@ -59,32 +53,6 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Remote.class);
     static final Path MARKETPLACE_TIMESTAMP =
             Paths.get(System.getProperty("user.dir"), "robozonky.lastMarketplaceCheck.timestamp");
-
-    static Optional<File> storeInvestmentsMade(final Collection<Investment> result, final boolean dryRun) {
-        final String suffix = dryRun ? "dry" : "invested";
-        final Temporal now = OffsetDateTime.now();
-        final String filename =
-                "robozonky." + DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(now) + '.' + suffix;
-        return Remote.storeInvestmentsMade(new File(filename), result);
-    }
-
-    static Optional<File> storeInvestmentsMade(final File target, final Collection<Investment> result) {
-        if (result.size() == 0) {
-            return Optional.empty();
-        }
-        final Collection<String> output = result.stream()
-                .map(i -> "#" + i.getLoanId() + ": " + i.getAmount() + " CZK")
-                .collect(Collectors.toList());
-        try {
-            Files.write(target.toPath(), output);
-            Remote.LOGGER.info("Investments made by RoboZonky during the session were stored in file '{}'.",
-                    target.getAbsolutePath());
-            return Optional.of(target);
-        } catch (final IOException ex) {
-            Remote.LOGGER.warn("Failed writing out the list of investments made in this session.", ex);
-            return Optional.empty();
-        }
-    }
 
     static List<Loan> getAvailableLoans(final Configuration ctx, final Activity activity) {
         final boolean shouldSleep = activity.shouldSleep();
@@ -154,9 +122,8 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         if (optionalResult.isPresent()) {
             final Collection<Investment> result = optionalResult.get();
             EventRegistry.fire(new ExecutionCompleteEvent(result));
-            final boolean isDryRun = apiProvider.isDryRun();
-            Remote.storeInvestmentsMade(result, isDryRun);
-            Remote.LOGGER.info("RoboZonky {}invested into {} loans.", isDryRun ? "would have " : "", result.size());
+            Remote.LOGGER.info("RoboZonky {}invested into {} loans.", apiProvider.isDryRun() ? "would have " : "",
+                    result.size());
             return Optional.of(result);
         } else {
             EventRegistry.fire(new ExecutionCompleteEvent(Collections.emptyList()));
