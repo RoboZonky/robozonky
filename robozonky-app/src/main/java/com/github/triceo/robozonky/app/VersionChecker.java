@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.app.version.VersionIdentifier;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Executes a version check on the background.
  */
-class VersionChecker implements Supplier<Optional<Consumer<ReturnCode>>> {
+class VersionChecker implements State.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionChecker.class);
     private final ExecutorService executor = Executors.newFixedThreadPool(1);

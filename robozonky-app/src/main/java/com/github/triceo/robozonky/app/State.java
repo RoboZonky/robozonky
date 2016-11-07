@@ -19,16 +19,30 @@ package com.github.triceo.robozonky.app;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handler for things that need to be executed at shutdown. Use {@link #register(Supplier)} to specify such actions and
- * {@link #shutdown(ReturnCode)} when it's time to shut down.
+ * Used for things that need to be executed at app start and shutdown. Use {@link #register(State.Handler)} to specify
+ * such actions and {@link #shutdown(ReturnCode)} when it's time to shut the app down.
  */
 class State {
+
+    /**
+     * Represents a unit of state in the application.
+     */
+    public interface Handler {
+
+        /**
+         * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
+         * {@link State#shutdown(ReturnCode)}.
+         *
+         * @return Will be called during app shutdown, if present.
+         */
+        Optional<Consumer<ReturnCode>> get();
+
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(State.class);
 
@@ -40,7 +54,7 @@ class State {
      * @param handler Needs to return the shutdown handler and optionally perform other things.
      * @return True if the handler was registered and will be executed during shutdown.
      */
-    public boolean register(final Supplier<Optional<Consumer<ReturnCode>>> handler) {
+    public boolean register(final State.Handler handler) {
         try {
             final Optional<Consumer<ReturnCode>> end = handler.get();
             if (end.isPresent()) {
@@ -56,8 +70,8 @@ class State {
     }
 
     /**
-     * Execute and remove all handlers that were previously {@link #register(Supplier)}ed, in the reverse order of their
-     * registration. If any handler throws an exception, it will be skipped.
+     * Execute and remove all handlers that were previously {@link #register(State.Handler)}ed, in the reverse order of
+     * their registration. If any handler throws an exception, it will be ignored.
      *
      * @param returnCode The application's return code to pass to the handlers.
      */

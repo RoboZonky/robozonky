@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Makes sure that RoboZonky only proceeds after all other instances of RoboZonky have terminated.
  */
-class ExclusivityGuarantee implements Supplier<Optional<Consumer<ReturnCode>>> {
+class ExclusivityGuarantee implements State.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExclusivityGuarantee.class);
 

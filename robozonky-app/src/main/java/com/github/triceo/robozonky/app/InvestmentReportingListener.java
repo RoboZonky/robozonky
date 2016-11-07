@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.events.EventListener;
 import com.github.triceo.robozonky.events.EventRegistry;
@@ -38,8 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Will convert an investment into a timestamped file informing user of when the investment was made.
  */
-class InvestmentReportingListener implements EventListener<InvestmentMadeEvent>,
-        Supplier<Optional<Consumer<ReturnCode>>> {
+class InvestmentReportingListener implements EventListener<InvestmentMadeEvent>, State.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentReportingListener.class);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -76,7 +74,7 @@ class InvestmentReportingListener implements EventListener<InvestmentMadeEvent>,
     }
 
     @Override
-    public Optional<Consumer<ReturnCode>> get() { // register as an app state
+    public Optional<Consumer<ReturnCode>> get() { // register as app state handler
         EventRegistry.INSTANCE.addListener(InvestmentMadeEvent.class, this);
         return Optional.of((code) -> EventRegistry.INSTANCE.removeListener(InvestmentMadeEvent.class, this));
     }
