@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;

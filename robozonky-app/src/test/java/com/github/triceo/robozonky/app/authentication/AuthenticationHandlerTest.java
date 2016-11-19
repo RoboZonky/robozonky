@@ -27,9 +27,9 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.xml.bind.JAXBException;
 
+import com.github.triceo.robozonky.Authenticator;
+import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
-import com.github.triceo.robozonky.authentication.Authenticator;
-import com.github.triceo.robozonky.remote.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -37,7 +37,7 @@ import org.mockito.Mockito;
 public class AuthenticationHandlerTest {
 
     private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(), 299, "A", "B");
+            UUID.randomUUID().toString(), 299);
 
     private static SecretProvider getNewProvider() throws IOException, KeyStoreException {
         final File file = File.createTempFile("robozonky-", ".keystore");

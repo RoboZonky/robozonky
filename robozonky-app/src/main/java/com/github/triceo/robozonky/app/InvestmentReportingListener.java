@@ -27,10 +27,10 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.github.triceo.robozonky.events.EventListener;
-import com.github.triceo.robozonky.events.EventRegistry;
-import com.github.triceo.robozonky.events.InvestmentMadeEvent;
-import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.api.events.EventListener;
+import com.github.triceo.robozonky.api.events.EventRegistry;
+import com.github.triceo.robozonky.api.events.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

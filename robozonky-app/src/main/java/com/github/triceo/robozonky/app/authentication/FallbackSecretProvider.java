@@ -29,7 +29,7 @@ import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.Defaults;
+import com.github.triceo.robozonky.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

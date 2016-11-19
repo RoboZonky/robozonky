@@ -27,8 +27,8 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.Properties;
 
-import com.github.triceo.robozonky.Defaults;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 
 /**
  * Simple wrapper around a property file that replaces the unnecessarily complex commons-configuration2 which was being

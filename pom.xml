@@ -5,10 +5,11 @@
     <artifactId>robozonky</artifactId>
     <version>1.7.0-SNAPSHOT</version>
     <modules>
+        <module>robozonky-api</module>
         <module>robozonky-core</module>
-        <module>robozonky-app</module>
         <module>robozonky-strategy-simple</module>
         <module>robozonky-strategy-rules</module>
+        <module>robozonky-app</module>
     </modules>
     <packaging>pom</packaging>
     <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -27,13 +28,18 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+              <groupId>com.github.triceo.robozonky</groupId>
+              <artifactId>robozonky-api</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.triceo.robozonky</groupId>
                 <artifactId>robozonky-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.triceo.robozonky</groupId>
-                <artifactId>robozonky-core</artifactId>
+                <artifactId>robozonky-api</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type> <!-- Primary place for test utils -->
                 <scope>test</scope>
@@ -54,6 +60,11 @@
                 <version>${project.version}</version>
             </dependency>
             <!-- RESTEasy -->
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jaxrs</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+            </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-jackson2-provider</artifactId>
@@ -303,7 +314,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -340,8 +351,7 @@
                             <param>com.github.triceo.robozonky.*Test</param> <!-- No IT -->
                         </targetTests>
                         <excludedClasses> <!-- Mostly getters; messing up stats -->
-                            <param>com.github.triceo.robozonky.events.*Event</param>
-                            <param>com.github.triceo.robozonky.remote.*</param>
+                            <param>com.github.triceo.robozonky.api.remote.entities.*</param>
                             <param>com.github.triceo.robozonky.strategy.rules.facts.*</param>
                         </excludedClasses>
                         <avoidCallsTo>

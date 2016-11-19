@@ -30,18 +30,18 @@ import java.util.function.Function;
 
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
+import com.github.triceo.robozonky.api.events.CaptchaProtectedLoanArrivalEvent;
+import com.github.triceo.robozonky.api.events.EventRegistry;
+import com.github.triceo.robozonky.api.events.ExecutionCompleteEvent;
+import com.github.triceo.robozonky.api.events.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.events.MarketplaceCheckCompleteEvent;
+import com.github.triceo.robozonky.api.events.MarketplaceCheckStartedEvent;
+import com.github.triceo.robozonky.api.events.UnprotectedLoanArrivalEvent;
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.app.events.CaptchaProtectedLoanArrivalEvent;
-import com.github.triceo.robozonky.app.events.ExecutionCompleteEvent;
-import com.github.triceo.robozonky.app.events.ExecutionStartedEvent;
-import com.github.triceo.robozonky.app.events.MarketplaceCheckCompleteEvent;
-import com.github.triceo.robozonky.app.events.MarketplaceCheckStartedEvent;
-import com.github.triceo.robozonky.app.events.UnprotectedLoanArrivalEvent;
-import com.github.triceo.robozonky.events.EventRegistry;
-import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.ZonkyApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,31 +102,40 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
 
     Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
         // check marketplace for loans
-        EventRegistry.fire(new MarketplaceCheckStartedEvent());
+        EventRegistry.fire(new MarketplaceCheckStartedEvent() {});
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
         final List<Loan> captchaProtected = activity.getUnactionableLoans();
-        captchaProtected.forEach(l ->
-                EventRegistry.fire(new CaptchaProtectedLoanArrivalEvent(l, Remote.findEndOfClosedSeason(l, this.ctx)))
-        );
+        captchaProtected.forEach(l -> EventRegistry.fire(new CaptchaProtectedLoanArrivalEvent() {
+
+            @Override
+            public OffsetDateTime getCaptchaProtectionEnds() {
+                return Remote.findEndOfClosedSeason(l, ctx);
+            }
+
+            @Override
+            public Loan getLoan() {
+                return l;
+            }
+        }));
         final List<Loan> unprotected = Remote.getAvailableLoans(this.ctx, activity);
-        unprotected.forEach(l -> EventRegistry.fire(new UnprotectedLoanArrivalEvent(l)));
-        EventRegistry.fire(new MarketplaceCheckCompleteEvent());
+        unprotected.forEach(l -> EventRegistry.fire((UnprotectedLoanArrivalEvent) () -> l));
+        EventRegistry.fire(new MarketplaceCheckCompleteEvent() {});
         if (unprotected.isEmpty()) { // let's fall asleep
             return Optional.of(Collections.emptyList());
         }
         // start the core investing algorithm
-        EventRegistry.fire(new ExecutionStartedEvent(unprotected));
+        EventRegistry.fire((ExecutionStartedEvent) () -> unprotected);
         final Optional<Collection<Investment>> optionalResult =
                 this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, unprotected));
         activity.settle(); // only settle the marketplace activity when we're sure the app is no longer likely to fail
         if (optionalResult.isPresent()) {
             final Collection<Investment> result = optionalResult.get();
-            EventRegistry.fire(new ExecutionCompleteEvent(result));
+            EventRegistry.fire((ExecutionCompleteEvent) () -> result);
             Remote.LOGGER.info("RoboZonky {}invested into {} loans.", apiProvider.isDryRun() ? "would have " : "",
                     result.size());
             return Optional.of(result);
         } else {
-            EventRegistry.fire(new ExecutionCompleteEvent(Collections.emptyList()));
+            EventRegistry.fire((ExecutionCompleteEvent) Collections::emptyList);
             return Optional.empty();
         }
     }

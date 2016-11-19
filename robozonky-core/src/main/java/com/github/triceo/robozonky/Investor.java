@@ -26,19 +26,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.events.EventRegistry;
-import com.github.triceo.robozonky.events.InvestmentMadeEvent;
-import com.github.triceo.robozonky.events.InvestmentRequestedEvent;
-import com.github.triceo.robozonky.events.LoanEvaluationEvent;
-import com.github.triceo.robozonky.events.StrategyCompleteEvent;
-import com.github.triceo.robozonky.events.StrategyStartedEvent;
-import com.github.triceo.robozonky.remote.BlockedAmount;
-import com.github.triceo.robozonky.remote.InvestingZonkyApi;
-import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.Statistics;
-import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
+import com.github.triceo.robozonky.api.events.EventRegistry;
+import com.github.triceo.robozonky.api.events.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.events.InvestmentRequestedEvent;
+import com.github.triceo.robozonky.api.events.LoanEvaluationEvent;
+import com.github.triceo.robozonky.api.remote.InvestingZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Statistics;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +86,19 @@ public class Investor {
                     l, amount, l.getRemainingInvestment());
             return Optional.empty();
         }
+        EventRegistry.fire(new InvestmentRequestedEvent() {
+
+            @Override
+            public Loan getLoan() {
+                return l;
+            }
+
+            @Override
+            public int getAmount() {
+                return amount;
+            }
+        });
         final Investment investment = new Investment(l, amount);
-        EventRegistry.fire(new InvestmentRequestedEvent(investment));
         if (api instanceof InvestingZonkyApi) {
             ((InvestingZonkyApi)api).invest(investment);
             Investor.LOGGER.info("Invested {} CZK into loan {}.", investment.getAmount(), investment.getLoanId());
@@ -96,7 +106,7 @@ public class Investor {
             Investor.LOGGER.info("Dry run. Otherwise would have invested {} CZK into loan {}.", investment.getAmount(),
                     investment.getLoanId());
         }
-        EventRegistry.fire(new InvestmentMadeEvent(investment));
+        EventRegistry.fire((InvestmentMadeEvent) () -> investment);
         return Optional.of(investment);
     }
 
@@ -175,7 +185,7 @@ public class Investor {
                 portfolio.getSharesOnInvestment());
         return strategy.getMatchingLoans(availableLoans, portfolio).stream()
                 .map(l -> {
-                    EventRegistry.fire(new LoanEvaluationEvent(l));
+                    EventRegistry.fire((LoanEvaluationEvent) () -> l);
                     return Investor.invest(this.zonkyApi, l.getId(), strategy.recommendInvestmentAmount(l, portfolio),
                             portfolio.getCzkAvailable());
                 })
@@ -201,9 +211,9 @@ public class Investor {
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
         BigDecimal balance = this.initialBalance;
-        EventRegistry.fire(new StrategyStartedEvent(strategy, loans, balance));
+        EventRegistry.fire(new StrategyStartedEventImpl(strategy, loans, balance));
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
-            EventRegistry.fire(new StrategyCompleteEvent(strategy, Collections.emptyList(), balance));
+            EventRegistry.fire(new StrategyCompleteEventImpl(strategy, Collections.emptyList(), balance));
             return Collections.emptyList(); // no need to do anything else
         }
         // read our investment statistics
@@ -240,7 +250,7 @@ public class Investor {
         final Collection<Investment> result = allInvestments.stream()
                 .filter(i -> !preexistingInvestments.contains(i))
                 .collect(Collectors.toList());
-        EventRegistry.fire(new StrategyCompleteEvent(strategy, result, balance));
+        EventRegistry.fire(new StrategyCompleteEventImpl(strategy, result, balance));
         return Collections.unmodifiableCollection(result);
     }
 

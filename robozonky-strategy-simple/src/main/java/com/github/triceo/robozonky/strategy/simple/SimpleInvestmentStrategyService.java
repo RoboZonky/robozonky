@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.remote.Rating;
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyService;
+import com.github.triceo.robozonky.api.remote.entities.Rating;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

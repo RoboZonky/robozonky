@@ -23,10 +23,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.xml.ws.WebServiceClient;
 
-import com.github.triceo.robozonky.remote.InvestingZonkyApi;
-import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZonkyOAuthApi;
-import com.github.triceo.robozonky.remote.ZotifyApi;
+import com.github.triceo.robozonky.api.remote.InvestingZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
+import com.github.triceo.robozonky.api.remote.ZotifyApi;
+import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -124,28 +125,28 @@ public class ApiProvider implements AutoCloseable {
      * @throws IllegalStateException If {@link #close()} already called.
      */
     public ZotifyApi cache() {
-        return this.obtain(ZotifyApi.class, ApiProvider.ZOTIFY_URL, new ZotifyFilter());
+        return this.obtain(ZotifyApi.class, ApiProvider.ZOTIFY_URL, new ApiProvider.ZotifyFilter());
     }
 
     /**
      * Retrieve Zonky's OAuth endpoint.
      *
-     * @param filter Filter that will decorate the requests with OAuth headers.
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ZonkyOAuthApi oauth(final CommonFilter filter) {
-        return this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, filter);
+    public ZonkyOAuthApi oauth() {
+        return this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter());
     }
 
     /**
      * Retrieve user-specific Zonky API which requires authentication.
      *
-     * @param filter Filter that will decorate the requests with OAuth headers.
+     * @param token The Zonky API token, representing an authenticated user.
      * @return New API instance. If {@link #isDryRun()} is false, returns instance of {@link InvestingZonkyApi}.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ZonkyApi authenticated(final CommonFilter filter) {
+    public ZonkyApi authenticated(final ZonkyApiToken token) {
+        final AuthenticatedFilter filter = new AuthenticatedFilter(token);
         if (this.isDryRun) {
             return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, filter);
         } else {
@@ -168,4 +169,7 @@ public class ApiProvider implements AutoCloseable {
         this.isDestroyed.set(true);
     }
 
+    private static class ZotifyFilter extends CommonFilter {
+        // dummy
+    }
 }

@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app.configuration;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 
 public class Configuration {
 

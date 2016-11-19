@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app.authentication;
 import java.io.Reader;
 import java.io.StringReader;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
@@ -29,11 +30,12 @@ import javax.ws.rs.BadRequestException;
 import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.ApiProvider;
-import com.github.triceo.robozonky.authentication.Authentication;
-import com.github.triceo.robozonky.authentication.Authenticator;
-import com.github.triceo.robozonky.remote.Investment;
-import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZonkyApiToken;
+import com.github.triceo.robozonky.Authentication;
+import com.github.triceo.robozonky.Authenticator;
+import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,17 +135,16 @@ public class AuthenticationHandler {
         boolean deleteToken = false;
         try {
             final ZonkyApiToken token = ZonkyApiToken.unmarshal(tokenStream.get());
-            final OffsetDateTime obtained = this.data.getTokenSetDate().get();
+            final OffsetDateTime obtained = this.data.getTokenSetDate()
+                    .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
             final OffsetDateTime expires = obtained.plus(token.getExpiresIn(), ChronoUnit.SECONDS);
             AuthenticationHandler.LOGGER.debug("Token obtained on {}, expires on {}.", obtained, expires);
             final OffsetDateTime now = OffsetDateTime.now();
             if (expires.isBefore(now)) {
-                AuthenticationHandler.LOGGER.debug("Token {} expired, using password-based authentication.",
-                        token.getAccessToken());
+                AuthenticationHandler.LOGGER.debug("Token expired, using password-based authentication.");
                 deleteToken = true;
                 return this.buildWithPassword();
-            }
-            if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {
+            } else if (expires.minus(this.tokenRefreshBeforeExpirationInSeconds, ChronoUnit.SECONDS).isBefore(now)) {
                 AuthenticationHandler.LOGGER.debug("Access token expiring, will be refreshed.");
                 deleteToken = true;
                 return Authenticator.withAccessTokenAndRefresh(this.data.getUsername(), token);

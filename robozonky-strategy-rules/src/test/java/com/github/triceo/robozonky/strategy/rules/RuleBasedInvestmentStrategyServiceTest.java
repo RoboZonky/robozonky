@@ -23,11 +23,11 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-import com.github.triceo.robozonky.PortfolioOverview;
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.Rating;
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Rating;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;

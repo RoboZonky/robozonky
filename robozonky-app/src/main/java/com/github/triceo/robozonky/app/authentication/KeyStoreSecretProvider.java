@@ -24,7 +24,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.Defaults;
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.app.util.IOUtils;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import org.slf4j.Logger;

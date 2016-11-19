@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;

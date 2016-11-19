@@ -31,10 +31,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.Defaults;
+import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.remote.Api;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.remote.Api;
-import com.github.triceo.robozonky.remote.Loan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

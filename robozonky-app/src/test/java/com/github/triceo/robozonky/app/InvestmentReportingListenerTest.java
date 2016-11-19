@@ -26,8 +26,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.events.InvestmentMadeEvent;
-import com.github.triceo.robozonky.remote.Investment;
+import com.github.triceo.robozonky.api.events.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
@@ -75,7 +75,7 @@ public class InvestmentReportingListenerTest {
         Mockito.when(mock.getLoanId()).thenReturn(1);
         Mockito.when(mock.getAmount()).thenReturn(2);
         final String expectedResult = "#" + mock.getLoanId() + ": " + mock.getAmount() + " CZK";
-        final InvestmentMadeEvent evt = new InvestmentMadeEvent(mock);
+        final InvestmentMadeEvent evt = () -> mock;
         // run class under test
         new InvestmentReportingListener(isDryRun).handle(evt);
         // check existence and contents of new file

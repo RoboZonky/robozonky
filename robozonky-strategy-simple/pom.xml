@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.triceo.robozonky</groupId>
-            <artifactId>robozonky-core</artifactId>
+            <artifactId>robozonky-api</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

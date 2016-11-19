@@ -19,18 +19,23 @@ package com.github.triceo.robozonky;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
-import com.github.triceo.robozonky.remote.InvestingZonkyApi;
-import com.github.triceo.robozonky.remote.ZonkyApi;
-import com.github.triceo.robozonky.remote.ZotifyApi;
+import com.github.triceo.robozonky.api.remote.InvestingZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZotifyApi;
+import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mockito;
 
 @RunWith(Parameterized.class)
 public class ApiProviderTest {
+
+    private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(), 300);
+
 
     @Parameterized.Parameters(name = "isDryRun={0} -> {1}")
     public static Collection<Object[]> getParameters() {
@@ -51,7 +56,7 @@ public class ApiProviderTest {
         final SoftAssertions softly = new SoftAssertions();
         try (final ApiProvider provider = new ApiProvider(isDryRun)) {
             cache = provider.cache(); // make sure API was provided
-            softly.assertThat(provider.authenticated(Mockito.mock(CommonFilter.class))).isInstanceOf(type);
+            softly.assertThat(provider.authenticated(ApiProviderTest.TOKEN)).isInstanceOf(type);
             softly.assertThat(cache).isNotNull();
             softly.assertThat(cache.getLoans()).isNotEmpty();
         } finally { // make sure the client was closed

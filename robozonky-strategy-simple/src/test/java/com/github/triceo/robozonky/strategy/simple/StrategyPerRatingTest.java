@@ -19,8 +19,8 @@ package com.github.triceo.robozonky.strategy.simple;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Rating;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;

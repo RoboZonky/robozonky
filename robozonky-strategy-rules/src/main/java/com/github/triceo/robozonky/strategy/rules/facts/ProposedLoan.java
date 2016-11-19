@@ -17,8 +17,8 @@ package com.github.triceo.robozonky.strategy.rules.facts;
 
 import java.time.OffsetDateTime;
 
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Rating;
 
 public class ProposedLoan {
 

@@ -19,9 +19,9 @@ package com.github.triceo.robozonky.strategy.rules;
 import java.io.File;
 import java.util.List;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyService;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;

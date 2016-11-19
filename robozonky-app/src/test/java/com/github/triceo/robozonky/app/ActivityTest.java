@@ -23,9 +23,9 @@ import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
+import com.github.triceo.robozonky.api.remote.Api;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.remote.Api;
-import com.github.triceo.robozonky.remote.Loan;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;

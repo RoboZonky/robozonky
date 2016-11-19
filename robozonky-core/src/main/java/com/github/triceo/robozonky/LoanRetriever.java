@@ -19,8 +19,8 @@ package com.github.triceo.robozonky;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
-import com.github.triceo.robozonky.remote.Loan;
-import com.github.triceo.robozonky.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

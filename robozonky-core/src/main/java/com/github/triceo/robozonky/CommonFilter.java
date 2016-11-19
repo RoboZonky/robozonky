@@ -23,30 +23,35 @@ import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Decorates the request with User-Agent and adds some simple request logging.
  *
  * If ever a filter is needed for JAX-RS communication, this class should serve as the base class for that filter.
  */
-public abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter {
-
-    protected abstract Logger getLogger();
+abstract class CommonFilter implements ClientRequestFilter, ClientResponseFilter {
 
     private static final String VERSION = CommonFilter.class.getPackage().getImplementationVersion();
     private static final String URL = "https://triceo.github.io/robozonky/";
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    protected Logger getLogger() {
+        return this.logger;
+    }
+
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        clientRequestContext.getHeaders().putSingle("User-Agent", "RoboZonky/" + CommonFilter.VERSION +
-                " (" + CommonFilter.URL + ")");
-        this.getLogger().trace("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
+        final String userAgent = "RoboZonky/" + CommonFilter.VERSION + " (" + CommonFilter.URL + ")";
+        clientRequestContext.getHeaders().putSingle("User-Agent", userAgent);
+        this.logger.trace("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext,
                        final ClientResponseContext clientResponseContext) throws IOException {
-        this.getLogger().debug("Operation '{}' to '{}' finished with HTTP {}.", clientRequestContext.getMethod(),
+        this.logger.debug("Operation '{}' to '{}' finished with HTTP {}.", clientRequestContext.getMethod(),
                 clientRequestContext.getUri(), clientResponseContext.getStatus());
     }
 

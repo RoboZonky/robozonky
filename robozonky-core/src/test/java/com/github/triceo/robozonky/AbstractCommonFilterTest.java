@@ -24,7 +24,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public abstract class AbstractCommonFilterTest {
+abstract class AbstractCommonFilterTest {
 
     protected abstract CommonFilter getTestedFilter();
 

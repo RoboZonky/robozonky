@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.Defaults;
-import com.github.triceo.robozonky.remote.Rating;
+import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.remote.entities.Rating;
 
 enum StrategyFileProperty {
 

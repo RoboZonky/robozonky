@@ -24,8 +24,8 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.strategy.InvestmentStrategy;
-import com.github.triceo.robozonky.strategy.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import org.apache.commons.cli.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
