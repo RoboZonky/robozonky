@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,14 +63,14 @@ public class MinimumMaximumTest {
         final ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.class);
         Mockito.when(config.containsKey(propertyName)).thenReturn(true);
         Mockito.when(config.getInt(propertyName))
-                .thenReturn(Optional.of(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED - 1));
+                .thenReturn(Optional.of(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1));
         valueRetrieval.apply(config);
     }
 
     @Test
     public void proper() {
         final String propertyName = keyRetrieval.get();
-        final int result = InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED;
+        final int result = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.class);
         Mockito.when(config.containsKey(propertyName)).thenReturn(true);
         Mockito.when(config.getInt(propertyName)).thenReturn(Optional.of(result));

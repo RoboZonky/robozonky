@@ -26,7 +26,7 @@ import javax.ws.rs.core.MediaType;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 /**
- * Simple Zonky API chache from zotify.cz.
+ * Simple Zonky API cache from zotify.cz.
  */
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")

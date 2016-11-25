@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.events.EventRegistry;
 import com.github.triceo.robozonky.api.events.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.events.InvestmentRequestedEvent;
@@ -71,7 +72,7 @@ public class Investor {
      */
     private static Optional<Investment> invest(final ZonkyApi api, final int loanId, final int amount,
                                                final int balance) {
-        if (amount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
+        if (amount < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
             Investor.LOGGER.info("Not investing into loan #{}, since investment ({} CZK) less than bare minimum.",
                     loanId, amount);
             return Optional.empty();
@@ -209,7 +210,7 @@ public class Investor {
         Investor.LOGGER.debug("The following loans are available for robotic investing: {}.",
                 Investor.collectionToString(loans, l -> String.valueOf(l.getId())));
         // make sure we have enough money to invest
-        final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
+        final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK);
         BigDecimal balance = this.initialBalance;
         EventRegistry.fire(new StrategyStartedEventImpl(strategy, loans, balance));
         if (balance.compareTo(minimumInvestmentAmount) < 0) {

@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
@@ -41,9 +42,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     static int getMinimumBalance(final ImmutableConfiguration config) {
         final int minimumBalance = StrategyFileProperty.MINIMUM_BALANCE.getValue(config::getInt)
                 .orElseThrow(() -> new IllegalStateException("Minimum balance is missing."));
-        if (minimumBalance < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
-            throw new IllegalStateException("Minimum balance is less than "
-                    + InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED + " CZK.");
+        if (minimumBalance < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
+            throw new IllegalStateException("Minimum balance < " + Defaults.MINIMUM_INVESTMENT_IN_CZK + " CZK.");
         }
         return minimumBalance;
     }
@@ -51,9 +51,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     static int getMaximumInvestment(final ImmutableConfiguration config) {
         final int maximumInvestment = StrategyFileProperty.MAXIMUM_INVESTMENT.getValue(config::getInt)
                 .orElseThrow(() -> new IllegalStateException("Maximum investment is missing."));
-        if (maximumInvestment < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
-            throw new IllegalStateException("Maximum investment is less than "
-                    + InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED + " CZK.");
+        if (maximumInvestment < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
+            throw new IllegalStateException("Maximum investment < " + Defaults.MINIMUM_INVESTMENT_IN_CZK + " CZK.");
         }
         return maximumInvestment;
     }
@@ -116,7 +115,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         }
         // investment amounts
         final int minLoanAmount = StrategyFileProperty.MINIMUM_LOAN_AMOUNT.getValue(rating, config::getInt);
-        if (minLoanAmount < InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED) {
+        if (minLoanAmount < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
             throw new IllegalStateException("Minimum investment amount for rating " + rating
                     + " less than minimum investment allowed: " + minLoanAmount + " CZK.");
         }

@@ -29,9 +29,6 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
  */
 public interface InvestmentStrategy {
 
-    int MINIMAL_INVESTMENT_ALLOWED = 200;
-    int MINIMAL_INVESTMENT_INCREMENT = 200;
-
     /**
      * Load the correct strategy using Java's {@link ServiceLoader}.
      * @param file Investment strategy configuration file.

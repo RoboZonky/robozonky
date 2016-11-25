@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
@@ -113,7 +114,7 @@ public class SimpleInvestmentStategyTest {
 
         // and make sure the recommendation is 200 times X, where X is a positive integer
         final BigDecimal remainder = BigDecimal.valueOf(adjustedForBalance)
-                .remainder(BigDecimal.valueOf(InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT));
+                .remainder(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
         Assertions.assertThat(remainder.intValue()).isEqualTo(0);
     }
 

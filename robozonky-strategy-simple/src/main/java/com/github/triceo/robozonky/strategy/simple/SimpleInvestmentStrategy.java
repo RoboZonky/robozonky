@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
@@ -42,8 +43,7 @@ import org.slf4j.LoggerFactory;
 class SimpleInvestmentStrategy implements InvestmentStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategy.class);
-    private static final Comparator<Loan> BY_TERM =
-            (l1, l2) -> Integer.compare(l1.getTermInMonths(), l2.getTermInMonths());
+    private static final Comparator<Loan> BY_TERM = Comparator.comparingInt(Loan::getTermInMonths);
 
     static Map<Rating, Collection<Loan>> sortLoansByRating(final Collection<Loan> loans) {
         final Map<Rating, Collection<Loan>> result = new EnumMap<>(Rating.class);
@@ -175,7 +175,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         } else if (minimumRecommendation > loan.getRemainingInvestment()) {
             return 0;
         }
-        final int maxAllowedInvestmentIncrement = InvestmentStrategy.MINIMAL_INVESTMENT_INCREMENT;
+        final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
         final int recommendedAmount = Math.min(balance, maximumRecommendation); // to never go over balance
         final int result = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
         if (result < minimumRecommendation) {

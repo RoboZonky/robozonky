@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.events.Event;
 import com.github.triceo.robozonky.api.events.EventListener;
 import com.github.triceo.robozonky.api.events.EventRegistry;
@@ -120,7 +121,7 @@ public class InvestorTest {
         final BigDecimal balance = BigDecimal.valueOf(1000);
         final Loan overBalance = InvestorTest.getMockLoanWithIdAndAmount(1, balance.intValue() * 2);
         final Loan underMinimum =
-                InvestorTest.getMockLoanWithIdAndAmount(2, InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED);
+                InvestorTest.getMockLoanWithIdAndAmount(2, Defaults.MINIMUM_INVESTMENT_IN_CZK);
         final int amount = 500;
         final Loan overAmount = InvestorTest.getMockLoanWithIdAndAmount(3, amount);
         final Loan success = InvestorTest.getMockLoanWithIdAndAmount(5, amount);
