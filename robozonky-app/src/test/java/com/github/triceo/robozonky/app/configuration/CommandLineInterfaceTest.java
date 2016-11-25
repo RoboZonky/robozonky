@@ -40,7 +40,7 @@ public class CommandLineInterfaceTest {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "5"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
+        softly.assertThat(cli.getStrategyConfigurationLocation()).isPresent();
         softly.assertThat(cli.getKeyStoreLocation()).isPresent();
         softly.assertThat(cli.isTokenEnabled()).isTrue();
         softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isPresent();
@@ -54,7 +54,7 @@ public class CommandLineInterfaceTest {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "-t"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
+        softly.assertThat(cli.getStrategyConfigurationLocation()).isPresent();
         softly.assertThat(cli.getKeyStoreLocation()).isPresent();
         softly.assertThat(cli.isTokenEnabled()).isTrue();
         softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
@@ -69,7 +69,7 @@ public class CommandLineInterfaceTest {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-s", "somePath", "-u", "user", "-p", "password"));
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cli.getStrategyConfigurationFilePath()).isPresent();
+        softly.assertThat(cli.getStrategyConfigurationLocation()).isPresent();
         softly.assertThat(cli.getUsername()).isPresent();
         softly.assertThat(cli.getPassword()).isNotNull();
         softly.assertThat(cli.getLoanId()).isEmpty();
@@ -91,7 +91,7 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getLoanAmount()).isPresent();
         softly.assertThat(cli.getUsername()).isPresent();
         softly.assertThat(cli.getPassword()).isNotNull();
-        softly.assertThat(cli.getStrategyConfigurationFilePath()).isEmpty();
+        softly.assertThat(cli.getStrategyConfigurationLocation()).isEmpty();
         softly.assertThat(cli.isDryRun()).isFalse();
         softly.assertThat(cli.getDryRunBalance()).isEmpty();
         softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
@@ -110,7 +110,7 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getUsername()).isPresent();
         softly.assertThat(cli.getLoanAmount()).isEmpty();
         softly.assertThat(cli.getPassword()).isNotNull();
-        softly.assertThat(cli.getStrategyConfigurationFilePath()).isEmpty();
+        softly.assertThat(cli.getStrategyConfigurationLocation()).isEmpty();
         softly.assertThat(cli.isDryRun()).isFalse();
         softly.assertThat(cli.getDryRunBalance()).isEmpty();
         softly.assertThat(cli.getKeyStoreLocation()).isEmpty();

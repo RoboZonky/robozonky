@@ -43,7 +43,7 @@ public class CommandLineInterface {
     private static final int DEFAULT_SLEEP_PERIOD_MINUTES = 60;
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
-            .argName("Investment strategy").desc("Points to a file that holds the investment strategy configuration.")
+            .argName("Investment strategy").desc("Points to a resource holding the investment strategy configuration.")
             .build();
     static final Option OPTION_INVESTMENT = Option.builder("l").hasArg().longOpt("loan")
             .argName("Single loan ID").desc("Ignore strategy, invest to one specific loan and exit.")
@@ -133,7 +133,7 @@ public class CommandLineInterface {
         return new AuthenticationHandlerProvider().apply(this);
     }
 
-    Optional<String> getStrategyConfigurationFilePath() {
+    Optional<String> getStrategyConfigurationLocation() {
         return this.commandLine.getOptionValue(OperatingMode.STRATEGY_DRIVEN.getSelectingOption());
     }
 

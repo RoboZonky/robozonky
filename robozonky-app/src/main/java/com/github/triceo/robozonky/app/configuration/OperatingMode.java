@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -50,23 +49,15 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
                 cli.printHelp("Loan data makes no sense in this context.", true);
                 return Optional.empty();
             }
-            final Optional<String> strategyFilePath = cli.getStrategyConfigurationFilePath();
-            if (!strategyFilePath.isPresent()) {
+            final Optional<String> strategyLocation = cli.getStrategyConfigurationLocation();
+            if (!strategyLocation.isPresent()) {
                 cli.printHelp("Strategy file must be provided.", true);
                 return Optional.empty();
             }
-            final File strategyConfig = new File(strategyFilePath.get());
-            if (!strategyConfig.exists()) {
-                cli.printHelp("Investment strategy file does not exist: " + strategyConfig.getAbsolutePath(), true);
-                return Optional.empty();
-            } else if (!strategyConfig.canRead()) {
-                cli.printHelp("Investment strategy file can not be read: " + strategyConfig.getAbsolutePath(), true);
-                return Optional.empty();
-            } else try {
-                final Optional<InvestmentStrategy> strategy = InvestmentStrategy.load(strategyConfig);
+            try {
+                final Optional<InvestmentStrategy> strategy = InvestmentStrategy.load(strategyLocation.get());
                 if (!strategy.isPresent()) {
-                    OperatingMode.LOGGER.error("No investment strategy found to support {}.",
-                            strategyConfig.getAbsolutePath());
+                    OperatingMode.LOGGER.error("No investment strategy found to support {}.", strategyLocation);
                     return Optional.empty();
                 } else if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);

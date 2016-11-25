@@ -31,6 +31,18 @@ public interface InvestmentStrategy {
 
     /**
      * Load the correct strategy using Java's {@link ServiceLoader}.
+     * @param maybeUrl Location of the configuration file, possible remote. If invalid url, file:// will be prefixed
+     * and retried.
+     * @return Strategy to read that resource, if found.
+     * @throws InvestmentStrategyParseException When problem found when locating or parsing the strategy configuration
+     * file.
+     */
+    static Optional<InvestmentStrategy> load(final String maybeUrl) throws InvestmentStrategyParseException {
+        return InvestmentStrategyLoader.load(maybeUrl);
+    }
+
+    /**
+     * Load the correct strategy using Java's {@link ServiceLoader}.
      * @param file Investment strategy configuration file.
      * @return Strategy to read that file, if found.
      * @throws InvestmentStrategyParseException When problem found when parsing the strategy configuration file.
