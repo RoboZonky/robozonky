@@ -82,7 +82,8 @@ public enum EventRegistry {
      */
     @SuppressWarnings("unchecked")
     public static <E extends Event> void fire(final E event) {
-        EventRegistry.LOGGER.debug("Firing {}.", event);
+        final Class<E> eventClass = (Class<E>)event.getClass().getInterfaces()[0];
+        EventRegistry.LOGGER.debug("Firing {}, '{}'.", eventClass, event);
         // fire global listeners
         final Set<EventListener<Event>> globals;
         synchronized (EventRegistry.INSTANCE) {
@@ -92,7 +93,6 @@ public enum EventRegistry {
         // fire event-specific listeners
         final EventRegistry.EventSpecific<E> registry;
         synchronized (EventRegistry.INSTANCE) {
-            final Class<E> eventClass = (Class<E>)event.getClass().getInterfaces()[0];
             registry = (EventRegistry.EventSpecific<E>) EventRegistry.INSTANCE.registries.get(eventClass);
         }
         if (registry != null) {
