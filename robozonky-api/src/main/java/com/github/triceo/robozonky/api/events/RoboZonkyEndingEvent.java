@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.app;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+package com.github.triceo.robozonky.api.events;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import com.github.triceo.robozonky.api.ReturnCode;
 
-public class ReturnCodeTest {
+/**
+ * Fired before the application shuts down, provided {@link RoboZonkyInitializedEvent} was fired before.
+ */
+public interface RoboZonkyEndingEvent extends Event {
 
-    @Test
-    public void noReturnCodeTwice() {
-        final Set<Integer> codes = Stream.of(ReturnCode.values()).map(ReturnCode::getCode).collect(Collectors.toSet());
-        Assertions.assertThat(codes).hasSize(ReturnCode.values().length);
-    }
+    /**
+     *
+     * @return The error code that RoboZonky will end with.
+     */
+    ReturnCode getReturnCode();
 
 }

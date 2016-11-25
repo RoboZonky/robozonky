@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.app;
+
+package com.github.triceo.robozonky.api;
 
 /**
- * These are possible return codes for this application's {@link System#exit(int)}.
+ * These are possible return codes for RoboZonky's {@link System#exit(int)}.
  */
 public enum ReturnCode {
     /**

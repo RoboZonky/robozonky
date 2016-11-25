@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

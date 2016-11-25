@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;

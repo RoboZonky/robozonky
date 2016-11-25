@@ -25,6 +25,9 @@ import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
+import com.github.triceo.robozonky.api.ReturnCode;
+import com.github.triceo.robozonky.api.events.EventRegistry;
+import com.github.triceo.robozonky.api.events.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.configuration.Configuration;
@@ -53,6 +56,8 @@ public class App {
      */
     private static void exit(final ReturnCode returnCode) {
         App.STATE.shutdown(returnCode);
+        App.LOGGER.info("===== RoboZonky out. =====");
+        System.exit(returnCode.getCode());
     }
 
     public static void main(final String... args) {
@@ -61,6 +66,7 @@ public class App {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
+        EventRegistry.fire(new RoboZonkyStartingEvent() {});
         App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
@@ -92,6 +98,7 @@ public class App {
             }
             // start the app
             App.LOGGER.info("===== RoboZonky at your service! =====");
+            App.STATE.register(new RoboZonkyStartupNotifier());
             final Configuration ctx = optionalCtx.get();
             App.STATE.register(new InvestmentReportingListener(ctx.isDryRun()));
             final boolean loginSucceeded = new Remote(ctx, optionalAuth.get()).call().isPresent();

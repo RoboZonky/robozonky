@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Consumer;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,8 +85,6 @@ class State {
                 State.LOGGER.warn("Failed to execute state handler.", ex);
             }
         }
-        State.LOGGER.info("===== RoboZonky out. =====");
-        System.exit(returnCode.getCode());
     }
 
 }

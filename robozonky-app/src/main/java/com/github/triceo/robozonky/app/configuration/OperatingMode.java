@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
 
+import com.github.triceo.robozonky.api.events.EventRegistry;
+import com.github.triceo.robozonky.api.events.StrategyIdentifiedEvent;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import org.apache.commons.cli.Option;
@@ -59,7 +61,9 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
                 if (!strategy.isPresent()) {
                     OperatingMode.LOGGER.error("No investment strategy found to support {}.", strategyLocation);
                     return Optional.empty();
-                } else if (cli.isDryRun()) {
+                }
+                EventRegistry.fire((StrategyIdentifiedEvent) () -> strategy.get());
+                if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
                     return Optional.of(new Configuration(strategy.get(), cli.getMaximumSleepPeriodInMinutes(),
                             cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));

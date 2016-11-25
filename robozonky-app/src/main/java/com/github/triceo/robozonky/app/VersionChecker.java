@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.app.version.VersionIdentifier;
 import org.slf4j.Logger;
