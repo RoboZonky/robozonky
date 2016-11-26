@@ -38,10 +38,10 @@ public class InvestmentReportingListenerTest {
 
     private final Collection<Path> availableFilesBeforeTestStart = new LinkedHashSet<>();
 
-    private static List<Path> getFilesInWorkingDirectory() {
+    private static Collection<Path> getFilesInWorkingDirectory() {
         final File folder = new File(System.getProperty("user.dir"));
         final File[] files = folder.listFiles();
-        return Arrays.asList(files).stream()
+        return Arrays.stream(files)
                 .filter(f -> !f.isDirectory())
                 .map(File::toPath)
                 .collect(Collectors.toList());
@@ -61,15 +61,15 @@ public class InvestmentReportingListenerTest {
 
     @Test
     public void checkInvestmentReportedInStandardRun() throws IOException {
-        checkInvestmentReported(false);
+        InvestmentReportingListenerTest.checkInvestmentReported(false);
     }
 
     @Test
     public void checkInvestmentReportedInDryRun() throws IOException {
-        checkInvestmentReported(true);
+        InvestmentReportingListenerTest.checkInvestmentReported(true);
     }
 
-    private void checkInvestmentReported(final boolean isDryRun) throws IOException {
+    private static void checkInvestmentReported(final boolean isDryRun) throws IOException {
         // prepare mock event
         final Investment mock = Mockito.mock(Investment.class);
         Mockito.when(mock.getLoanId()).thenReturn(1);
@@ -77,10 +77,10 @@ public class InvestmentReportingListenerTest {
         final String expectedResult = "#" + mock.getLoanId() + ": " + mock.getAmount() + " CZK";
         final InvestmentMadeEvent evt = () -> mock;
         // run class under test
+        final Collection<Path> oldFiles = InvestmentReportingListenerTest.getFilesInWorkingDirectory();
         new InvestmentReportingListener(isDryRun).handle(evt);
+        final List<Path> newFiles = InvestmentReportingListenerTest.getNewFilesInWorkingDirectory(oldFiles);
         // check existence and contents of new file
-        final List<Path> newFiles =
-                InvestmentReportingListenerTest.getNewFilesInWorkingDirectory(this.availableFilesBeforeTestStart);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(newFiles).hasSize(1);
         final Path p = newFiles.get(0);
@@ -92,7 +92,7 @@ public class InvestmentReportingListenerTest {
     }
 
     @After
-    public void cleanWorkingDirectory() {
+    public void restoreWorkingDirectoryToOriginalState() {
         final Collection<Path> files =
                 InvestmentReportingListenerTest.getNewFilesInWorkingDirectory(this.availableFilesBeforeTestStart);
         files.forEach(p -> p.toFile().delete());
