@@ -92,7 +92,7 @@ final class Exclusivity implements State.Handler {
             } catch (final IOException ex) {
                 Exclusivity.LOGGER.debug("Failed closing lock file channel.", ex);
             } finally {
-                if (this.fileToLock.delete()) {
+                if (!this.fileToLock.delete()) {
                     Exclusivity.LOGGER.debug("Failed deleting lock file.");
                 }
             }
