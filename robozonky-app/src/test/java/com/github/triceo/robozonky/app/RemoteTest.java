@@ -93,7 +93,7 @@ public class RemoteTest extends BaseMarketplaceTest {
         final Loan loanOldEnough = Mockito.mock(Loan.class);
         Mockito.when(loanOldEnough.getRemainingInvestment()).thenReturn(1000.0);
         Mockito.when(loanOldEnough.getDatePublished())
-                .thenReturn(OffsetDateTime.now().minus(delayInSeconds + 1, ChronoUnit.SECONDS));
+                .thenReturn(OffsetDateTime.now().minus(delayInSeconds + 10, ChronoUnit.SECONDS));
         final Loan loanOldExactly = Mockito.mock(Loan.class);
         Mockito.when(loanOldExactly.getRemainingInvestment()).thenReturn(200.0);
         Mockito.when(loanOldExactly.getDatePublished())
@@ -101,7 +101,7 @@ public class RemoteTest extends BaseMarketplaceTest {
         final Loan youngLoan = Mockito.mock(Loan.class);
         Mockito.when(youngLoan.getRemainingInvestment()).thenReturn(600.0);
         Mockito.when(youngLoan.getDatePublished())
-                .thenReturn(OffsetDateTime.now().minus(delayInSeconds - 1, ChronoUnit.SECONDS));
+                .thenReturn(OffsetDateTime.now().minus(delayInSeconds - 10, ChronoUnit.SECONDS));
         final ZotifyApi apiMock = Mockito.mock(ZotifyApi.class);
         Mockito.when(apiMock.getLoans()).thenReturn(Arrays.asList(loanOldEnough, loanOldExactly, youngLoan));
         final Configuration ctx = Mockito.mock(Configuration.class);
