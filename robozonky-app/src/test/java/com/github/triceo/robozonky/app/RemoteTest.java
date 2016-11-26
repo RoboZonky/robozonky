@@ -94,22 +94,18 @@ public class RemoteTest extends BaseMarketplaceTest {
         Mockito.when(loanOldEnough.getRemainingInvestment()).thenReturn(1000.0);
         Mockito.when(loanOldEnough.getDatePublished())
                 .thenReturn(OffsetDateTime.now().minus(delayInSeconds + 10, ChronoUnit.SECONDS));
-        final Loan loanOldExactly = Mockito.mock(Loan.class);
-        Mockito.when(loanOldExactly.getRemainingInvestment()).thenReturn(200.0);
-        Mockito.when(loanOldExactly.getDatePublished())
-                .thenReturn(OffsetDateTime.now().minus(delayInSeconds, ChronoUnit.SECONDS));
         final Loan youngLoan = Mockito.mock(Loan.class);
         Mockito.when(youngLoan.getRemainingInvestment()).thenReturn(600.0);
         Mockito.when(youngLoan.getDatePublished())
                 .thenReturn(OffsetDateTime.now().minus(delayInSeconds - 10, ChronoUnit.SECONDS));
         final ZotifyApi apiMock = Mockito.mock(ZotifyApi.class);
-        Mockito.when(apiMock.getLoans()).thenReturn(Arrays.asList(loanOldEnough, loanOldExactly, youngLoan));
+        Mockito.when(apiMock.getLoans()).thenReturn(Arrays.asList(loanOldEnough, youngLoan));
         final Configuration ctx = Mockito.mock(Configuration.class);
         Mockito.when(ctx.getCaptchaDelayInSeconds()).thenReturn(delayInSeconds);
         Mockito.when(ctx.getSleepPeriodInMinutes()).thenReturn(60);
         final Activity activity = new Activity(ctx, apiMock, Remote.MARKETPLACE_TIMESTAMP);
         final Collection<Loan> result = Remote.getAvailableLoans(ctx, activity);
-        Assertions.assertThat(result).containsOnly(loanOldEnough, loanOldExactly);
+        Assertions.assertThat(result).containsOnly(loanOldEnough);
     }
 
     @Test
