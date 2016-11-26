@@ -16,36 +16,30 @@
 
 package com.github.triceo.robozonky.app;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
 
 public class ExclusivityTest {
-
-    @Before
-    public void deleteLockFile() {
-        Exclusivity.ROBOZONKY_LOCK.setWritable(true);
-        Exclusivity.ROBOZONKY_LOCK.delete();
-    }
 
     private static void assertExclusivity(final Exclusivity exclusivity, final boolean isExclusive) {
         final SoftAssertions softly = new SoftAssertions();
         if (isExclusive) {
             softly.assertThat(exclusivity.isEnsured()).isTrue();
-            softly.assertThat(Exclusivity.ROBOZONKY_LOCK).exists();
+            softly.assertThat(exclusivity.getFileToLock()).exists();
         } else {
             softly.assertThat(exclusivity.isEnsured()).isFalse();
-            softly.assertThat(Exclusivity.ROBOZONKY_LOCK).doesNotExist();
+            softly.assertThat(exclusivity.getFileToLock()).doesNotExist();
         }
         softly.assertAll();
     }
 
     @Test
     public void acquireAndReacquire() throws IOException {
-        final Exclusivity exclusivity = Exclusivity.INSTANCE;
+        final Exclusivity exclusivity = new Exclusivity();
         for (int i = 0; i < 2; i++) {
             System.out.println("Trial " + i);
             exclusivity.ensure();
@@ -57,7 +51,7 @@ public class ExclusivityTest {
 
     @Test
     public void doubleAcquireAndWaive() throws IOException {
-        final Exclusivity exclusivity = Exclusivity.INSTANCE;
+        final Exclusivity exclusivity = new Exclusivity();
         exclusivity.ensure();
         ExclusivityTest.assertExclusivity(exclusivity, true);
         exclusivity.ensure();
@@ -70,8 +64,9 @@ public class ExclusivityTest {
 
     @Test
     public void acquireAndWaiveWithPreexistingLockFile() throws IOException {
-        Assume.assumeTrue(Exclusivity.ROBOZONKY_LOCK.createNewFile());
-        final Exclusivity exclusivity = Exclusivity.INSTANCE;
+        final File tmp = File.createTempFile("robozonky-", ".lock");
+        Assume.assumeTrue(tmp.exists());
+        final Exclusivity exclusivity = new Exclusivity(tmp);
         exclusivity.ensure();
         ExclusivityTest.assertExclusivity(exclusivity, true);
         exclusivity.waive();

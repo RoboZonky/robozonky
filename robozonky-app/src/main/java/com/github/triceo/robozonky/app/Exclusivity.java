@@ -30,17 +30,32 @@ import org.slf4j.LoggerFactory;
  * Used to ensure that only one RoboZonky process may be executing at any one time. Call {@link #ensure()} at the
  * start of RoboZonky to make it happen. Will not mutually exclude RoboZonky instances running within the same JVM.
  */
-enum Exclusivity {
+final class Exclusivity {
 
-    /**
-     * Simple cheap thread-safe singleton.
-     */
-    INSTANCE;
-
-    static final File ROBOZONKY_LOCK = new File(System.getProperty("java.io.tmpdir"), "robozonky.lock");
     private static final Logger LOGGER = LoggerFactory.getLogger(Exclusivity.class);
 
+    private final File fileToLock;
     private FileLock lock = null;
+
+    /**
+     * Guarantees exclusivity based on a randomly created temp file.
+     * @throws IOException When the temp file could not be created.
+     */
+    public Exclusivity() throws IOException {
+        this(File.createTempFile("robozonky-", ".lock"));
+    }
+
+    /**
+     * Guarantees exclusivity around a provided file.
+     * @param lock File to lock on.
+     */
+    public Exclusivity(final File lock) {
+        this.fileToLock = lock;
+    }
+
+    public File getFileToLock() {
+        return this.fileToLock;
+    }
 
     /**
      * Whether or not the application has managed to acquire exclusivity.
@@ -73,7 +88,7 @@ enum Exclusivity {
             } catch (final IOException ex) {
                 Exclusivity.LOGGER.debug("Failed closing lock file channel.", ex);
             } finally {
-                if (!Exclusivity.ROBOZONKY_LOCK.delete()) {
+                if (this.fileToLock.delete()) {
                     Exclusivity.LOGGER.debug("Failed deleting lock file.");
                 }
             }
@@ -90,8 +105,8 @@ enum Exclusivity {
             return;
         }
         Exclusivity.LOGGER.info("Checking we're the only RoboZonky running.");
-        Exclusivity.LOGGER.debug("Acquiring file lock: {}.", Exclusivity.ROBOZONKY_LOCK.getAbsolutePath());
-        final FileChannel ch = new RandomAccessFile(Exclusivity.ROBOZONKY_LOCK, "rw").getChannel();
+        Exclusivity.LOGGER.debug("Acquiring file lock: {}.", this.fileToLock.getAbsolutePath());
+        final FileChannel ch = new RandomAccessFile(this.fileToLock, "rw").getChannel();
         this.lock = ch.lock();
         Exclusivity.LOGGER.debug("File lock acquired.");
     }

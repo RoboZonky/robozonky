@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -31,7 +32,8 @@ class ExclusivityGuarantee implements State.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExclusivityGuarantee.class);
 
-    private final Exclusivity exclusivity = Exclusivity.INSTANCE;
+    private static final File ROBOZONKY_LOCK = new File(System.getProperty("java.io.tmpdir"), "robozonky.lock");
+    private final Exclusivity exclusivity = new Exclusivity(ExclusivityGuarantee.ROBOZONKY_LOCK);
 
     @Override
     public Optional<Consumer<ReturnCode>> get() {
