@@ -17,5 +17,4 @@ build_script:
 test_script:
   - mvn post-integration-test --batch-mode
 cache:
-  - C:\maven\
   - C:\Users\appveyor\.m2
