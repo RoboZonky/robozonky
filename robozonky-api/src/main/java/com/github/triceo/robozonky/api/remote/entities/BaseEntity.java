@@ -16,43 +16,26 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Supplier;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * All JAX-RS entity classes in this package should implement this interface in order to be able to gracefully handle
+ * missing JSON properties. This happens occasionally when Zonky deploys a new version of the API and the app was not
+ * yet updated with the changes.
+ */
 interface BaseEntity {
-
-    static Logger getLogger(final Class<?> classToLog) {
-        return LoggerFactory.getLogger(classToLog);
-    }
-
-    default BigDecimal getOrDefault(final BigDecimal actualValue) {
-        return this.getOrDefault(actualValue, () -> BigDecimal.ZERO);
-    }
-
-    default <T> Collection<T> getOrDefault(final Collection<T> actualValue) {
-        return actualValue == null ? Collections.emptyList() : actualValue;
-    }
-
-    default <T> T getOrDefault(final T actualValue, final Supplier<T> defaultValue) {
-        return actualValue == null ? defaultValue.get() : actualValue;
-    }
 
     @JsonAnyGetter
     default void handleUnknownGetter(final String key) {
-        BaseEntity.getLogger(this.getClass()).debug("Trying to get value of unknown property '{}'."
+        LoggerFactory.getLogger(this.getClass()).debug("Trying to get value of unknown property '{}'."
                 + " Indicates an unexpected API change, RoboZonky may misbehave.", key);
     }
 
     @JsonAnySetter
     default void handleUnknownSetter(final String key, final Object value) {
-        BaseEntity.getLogger(this.getClass()).debug("Trying to set value '{}' to an unknown property '{}'."
+        LoggerFactory.getLogger(this.getClass()).debug("Trying to set value '{}' to an unknown property '{}'."
                 + " Indicates an unexpected API change, RoboZonky may misbehave.", value, key);
     }
 

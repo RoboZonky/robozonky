@@ -18,13 +18,27 @@ package com.github.triceo.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Statistics implements BaseEntity {
+
+    private static BigDecimal getOrDefault(final BigDecimal actualValue) {
+        return Statistics.getOrDefault(actualValue, () -> BigDecimal.ZERO);
+    }
+
+    private static <T> Collection<T> getOrDefault(final Collection<T> actualValue) {
+        return actualValue == null ? Collections.emptyList() : actualValue;
+    }
+
+    private static <T> T getOrDefault(final T actualValue, final Supplier<T> defaultValue) {
+        return actualValue == null ? defaultValue.get() : actualValue;
+    }
 
     private BigDecimal currentProfitability, expectedProfitability;
     private CurrentOverview currentOverview;
@@ -35,38 +49,38 @@ public class Statistics implements BaseEntity {
 
     @XmlElement
     public BigDecimal getCurrentProfitability() {
-        return this.getOrDefault(this.currentProfitability);
+        return Statistics.getOrDefault(this.currentProfitability);
     }
 
     @XmlElement
     public BigDecimal getExpectedProfitability() {
-        return this.getOrDefault(this.expectedProfitability);
+        return Statistics.getOrDefault(this.expectedProfitability);
     }
 
     @XmlElement
     public CurrentOverview getCurrentOverview() {
-        return this.getOrDefault(this.currentOverview, CurrentOverview::new);
+        return Statistics.getOrDefault(this.currentOverview, CurrentOverview::new);
     }
 
     @XmlElement
     public OverallOverview getOverallOverview() {
-        return this.getOrDefault(this.overallOverview, OverallOverview::new);
+        return Statistics.getOrDefault(this.overallOverview, OverallOverview::new);
 
     }
 
     @XmlElement
     public OverallPortfolio getOverallPortfolio() {
-        return this.getOrDefault(this.overallPortfolio, OverallPortfolio::new);
+        return Statistics.getOrDefault(this.overallPortfolio, OverallPortfolio::new);
     }
 
     @XmlElementWrapper
     public Collection<Instalment> getCashFlow() {
-        return this.getOrDefault(this.cashFlow);
+        return Statistics.getOrDefault(this.cashFlow);
     }
 
     @XmlElementWrapper
     public Collection<RiskPortfolio> getRiskPortfolio() {
-        return this.getOrDefault(this.riskPortfolio);
+        return Statistics.getOrDefault(this.riskPortfolio);
     }
 
     @Override
