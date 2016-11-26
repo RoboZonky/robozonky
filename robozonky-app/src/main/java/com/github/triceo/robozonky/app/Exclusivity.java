@@ -22,15 +22,18 @@ import java.io.RandomAccessFile;
 import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.Optional;
+import java.util.function.Consumer;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Used to ensure that only one RoboZonky process may be executing at any one time. Call {@link #ensure()} at the
- * start of RoboZonky to make it happen. Will not mutually exclude RoboZonky instances running within the same JVM.
+ * Used to ensure that only one RoboZonky process may be executing at any one time. See {@link #get()} for the
+ * contract. Will not mutually exclude RoboZonky instances running within the same JVM.
  */
-final class Exclusivity {
+final class Exclusivity implements State.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Exclusivity.class);
 
@@ -38,10 +41,11 @@ final class Exclusivity {
     private FileLock lock = null;
 
     /**
-     * Guarantees exclusivity based on a randomly created temp file.
+     * Guarantees exclusivity based on a randomly created temp file. This is only useful for testing, since in all
+     * other cases multiple JVMs need to synchronize around the same file.
      * @throws IOException When the temp file could not be created.
      */
-    public Exclusivity() throws IOException {
+    Exclusivity() throws IOException {
         this(File.createTempFile("robozonky-", ".lock"));
     }
 
@@ -53,7 +57,7 @@ final class Exclusivity {
         this.fileToLock = lock;
     }
 
-    public File getFileToLock() {
+    File getFileToLock() {
         return this.fileToLock;
     }
 
@@ -62,7 +66,7 @@ final class Exclusivity {
      * @return  True between any two successful successive calls to {@link #ensure()} and {@link #waive()} respectively.
      * Will be false before first successful {@link #ensure()} or after every {@link #waive()}.
      */
-    public synchronized boolean isEnsured() {
+    synchronized boolean isEnsured() {
         return lock != null && lock.isValid() && !lock.isShared();
     }
 
@@ -70,7 +74,7 @@ final class Exclusivity {
      * Allow other instances of RoboZonky to run, possibly acquiring exclusivity for themselves.
      * @throws IOException If releasing the lock failed. Not much to do there.
      */
-    public synchronized void waive() throws IOException {
+    synchronized void waive() throws IOException {
         if (!this.isEnsured()) {
             Exclusivity.LOGGER.debug("Already waived.");
             return;
@@ -99,7 +103,7 @@ final class Exclusivity {
      * Will return after this instance of RoboZonky has acquired exclusivity. May block for extensive periods of time.
      * @throws IOException When locking failed.
      */
-    public synchronized void ensure() throws IOException {
+    synchronized void ensure() throws IOException {
         if (this.isEnsured()) {
             Exclusivity.LOGGER.debug("Already ensured.");
             return;
@@ -111,4 +115,24 @@ final class Exclusivity {
         Exclusivity.LOGGER.debug("File lock acquired.");
     }
 
+    /**
+     * Call in order to acquire exclusivity. May block for extensive periods of time until exclusivity is acquired.
+     * @return If present, call in order to waive exclusivity. If empty, exclusivity not acquired.
+     */
+    @Override
+    public Optional<Consumer<ReturnCode>> get() {
+        try {
+            this.ensure();
+        } catch (final IOException ex) {
+            Exclusivity.LOGGER.error("Failed acquiring lock, another RoboZonky process likely running.", ex);
+            return Optional.empty();
+        }
+        return Optional.of((code) -> {
+            try { // other RoboZonky instances can now start executing
+                this.waive();
+            } catch (final IOException ex) {
+                Exclusivity.LOGGER.warn("Failed releasing lock, new RoboZonky processes may not launch.", ex);
+            }
+        });
+    }
 }

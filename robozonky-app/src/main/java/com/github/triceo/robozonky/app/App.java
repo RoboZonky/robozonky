@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -47,6 +48,7 @@ public class App {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    private static final File ROBOZONKY_LOCK = new File(System.getProperty("java.io.tmpdir"), "robozonky.lock");
     private static final State STATE = new State();
 
     /**
@@ -62,7 +64,7 @@ public class App {
 
     public static void main(final String... args) {
         // make sure other RoboZonky processes are excluded
-        if (!App.STATE.register(new ExclusivityGuarantee())) {
+        if (!App.STATE.register(new Exclusivity(App.ROBOZONKY_LOCK))) {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
