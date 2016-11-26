@@ -88,11 +88,19 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
      * @return Ratings in the order of decreasing demand.
      */
     List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
+        // find out which ratings are under-invested
         final List<Rating> ratingsUnderTarget = rankRatingsByDemand(currentShare, StrategyPerRating::getTargetShare);
-        final List<Rating> ratingsUnderMaximum = rankRatingsByDemand(currentShare, StrategyPerRating::getMaximumShare);
+        SimpleInvestmentStrategy.LOGGER.info("The portfolio is low on ratings {}.", ratingsUnderTarget);
+        // find out which other ratings are not yet maxed out
+        final Map<Rating, BigDecimal> filteredShare = currentShare.entrySet()
+                .stream()
+                .filter(e -> !ratingsUnderTarget.contains(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        final List<Rating> ratingsUnderMaximum = rankRatingsByDemand(filteredShare, StrategyPerRating::getMaximumShare);
         Collections.reverse(ratingsUnderMaximum); // the closer we get to maximum share, the less desirable
+        SimpleInvestmentStrategy.LOGGER.info("Ratings not yet over-invested: {}.", ratingsUnderMaximum);
+        // merge both and produce result
         final List<Rating> result = Stream.concat(ratingsUnderTarget.stream(), ratingsUnderMaximum.stream())
-                .distinct()
                 .collect(Collectors.toList());
         return Collections.unmodifiableList(result);
     }
@@ -135,8 +143,6 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
             return Collections.emptyList();
         }
         final List<Rating> mostWantedRatings = this.rankRatingsByDemand(portfolio.getSharesOnInvestment());
-        SimpleInvestmentStrategy.LOGGER.info("According to the investment strategy, the portfolio is low on following" +
-                " ratings: {}. The most under-invested come first.", mostWantedRatings);
         final Map<Rating, Collection<Loan>> splitByRating = SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
         final List<Loan> acceptableLoans = new ArrayList<>(availableLoans.size());
         mostWantedRatings.forEach(rating -> {
