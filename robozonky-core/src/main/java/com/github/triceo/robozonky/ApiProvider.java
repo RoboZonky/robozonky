@@ -70,7 +70,6 @@ public class ApiProvider implements AutoCloseable {
         final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder().httpEngine(engine);
         clientBuilder.providerFactory(ApiProvider.RESTEASY);
         return clientBuilder;
-
     }
 
     private final boolean isDryRun;

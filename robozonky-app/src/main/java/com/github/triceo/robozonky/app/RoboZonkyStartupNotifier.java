@@ -23,6 +23,8 @@ import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.events.EventRegistry;
 import com.github.triceo.robozonky.api.events.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.events.RoboZonkyInitializedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Will send {@link RoboZonkyInitializedEvent} immediately and {@link RoboZonkyEndingEvent} when it's time to shut down
@@ -30,9 +32,15 @@ import com.github.triceo.robozonky.api.events.RoboZonkyInitializedEvent;
  */
 class RoboZonkyStartupNotifier implements State.Handler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoboZonkyStartupNotifier.class);
+
     @Override
     public Optional<Consumer<ReturnCode>> get() {
+        RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky at your service! =====");
         EventRegistry.fire(new RoboZonkyInitializedEvent() {});
-        return Optional.of((code) -> EventRegistry.fire((RoboZonkyEndingEvent) () -> code));
+        return Optional.of((code) -> {
+            EventRegistry.fire((RoboZonkyEndingEvent) () -> code);
+            RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky out. =====");
+        });
     }
 }

@@ -370,7 +370,7 @@
                     <githubAPIPort>443</githubAPIPort>
                     <includeOpenIssues>false</includeOpenIssues>
                     <onlyMilestoneIssues>true</onlyMilestoneIssues>
-                    <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+                  <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
                 </configuration>
                 <reportSets>
                     <reportSet>

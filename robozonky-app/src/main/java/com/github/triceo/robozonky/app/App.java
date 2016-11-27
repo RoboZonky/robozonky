@@ -58,7 +58,6 @@ public class App {
      */
     private static void exit(final ReturnCode returnCode) {
         App.STATE.shutdown(returnCode);
-        App.LOGGER.info("===== RoboZonky out. =====");
         System.exit(returnCode.getCode());
     }
 
@@ -99,7 +98,6 @@ public class App {
                 App.exit(ReturnCode.ERROR_SETUP);
             }
             // start the app
-            App.LOGGER.info("===== RoboZonky at your service! =====");
             App.STATE.register(new RoboZonkyStartupNotifier());
             final Configuration ctx = optionalCtx.get();
             App.STATE.register(new InvestmentReportingListener(ctx.isDryRun()));
