@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,13 +45,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     private static final Comparator<Loan> BY_TERM = Comparator.comparingInt(Loan::getTermInMonths);
 
     static Map<Rating, Collection<Loan>> sortLoansByRating(final Collection<Loan> loans) {
-        final Map<Rating, Collection<Loan>> result = new EnumMap<>(Rating.class);
-        loans.forEach(l -> result.compute(l.getRating(), (k, v) -> {
-            final Collection<Loan> values = (v == null) ? new LinkedHashSet<>(loans.size() / 2) : v;
-            values.add(l);
-            return values;
-        }));
-        return Collections.unmodifiableMap(result);
+        return Collections.unmodifiableMap(loans.stream().distinct().collect(Collectors.groupingBy(Loan::getRating)));
     }
 
     private List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare,
@@ -71,12 +64,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
                 return target;
             });
         });
-        return mostWantedRatings.entrySet().stream()
-                .map(Map.Entry::getValue)
-                .reduce(new ArrayList<>(Rating.values().length), (a, b) -> {
-                    a.addAll(b);
-                    return a;
-                });
+        return mostWantedRatings.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     /**
@@ -142,21 +130,17 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         if (!this.isAcceptable(portfolio)) {
             return Collections.emptyList();
         }
-        final List<Rating> mostWantedRatings = this.rankRatingsByDemand(portfolio.getSharesOnInvestment());
         final Map<Rating, Collection<Loan>> splitByRating = SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
-        final List<Loan> acceptableLoans = new ArrayList<>(availableLoans.size());
-        mostWantedRatings.forEach(rating -> {
-            final Collection<Loan> loans = splitByRating.get(rating);
-            if (loans == null || loans.isEmpty()) { // no loans of this rating
-                return;
-            }
-            final Comparator<Loan> properOrder = this.individualStrategies.get(rating).isPreferLongerTerms() ?
-                    SimpleInvestmentStrategy.BY_TERM.reversed() : SimpleInvestmentStrategy.BY_TERM;
-            final Collection<Loan> acceptable = loans.stream().sorted(properOrder)
-                    .filter(l -> this.individualStrategies.get(rating).isAcceptable(l))
-                    .collect(Collectors.toList());
-            acceptableLoans.addAll(acceptable);
-        });
+        final List<Loan> acceptableLoans = this.rankRatingsByDemand(portfolio.getSharesOnInvestment()).stream()
+                .filter(splitByRating::containsKey)
+                .map(this.individualStrategies::get)
+                .flatMap(strategy -> {
+                    final Comparator<Loan> properOrder = strategy.isPreferLongerTerms() ?
+                            SimpleInvestmentStrategy.BY_TERM.reversed() : SimpleInvestmentStrategy.BY_TERM;
+                    return splitByRating.get(strategy.getRating()).stream()
+                            .filter(strategy::isAcceptable)
+                            .sorted(properOrder);
+                }).collect(Collectors.toList());
         SimpleInvestmentStrategy.LOGGER.debug("Strategy recommends the following unseen loans: {}.", acceptableLoans);
         return Collections.unmodifiableList(acceptableLoans);
     }
