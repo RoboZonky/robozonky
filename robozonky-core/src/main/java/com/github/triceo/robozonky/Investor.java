@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,7 +58,7 @@ public class Investor {
      * @return True if present.
      */
     private static boolean isLoanPresent(final Loan loan, final Collection<Investment> investments) {
-        return investments.stream().filter(i -> loan.getId() == i.getLoanId()).findFirst().isPresent();
+        return investments.stream().anyMatch(i -> loan.getId() == i.getLoanId());
     }
 
     /**
@@ -136,13 +137,10 @@ public class Investor {
                         Collectors.summingInt(BlockedAmount::getAmount)));
         // and then fetch all the loans in parallel, converting them into investments
         return Collections.unmodifiableList(amountsBlockedByLoans.entrySet().parallelStream()
-                .map(entry -> {
-                    final Loan l = LoanRetriever.getLoan(api, entry.getKey()).orElseThrow(
-                            () -> new RuntimeException("Loan retrieval failed.")
-                    );
-                    return new Investment(l, entry.getValue());
-                })
-                .collect(Collectors.toList()));
+                .map(entry -> LoanRetriever.getLoan(api, entry.getKey())
+                        .map(l -> new Investment(l, entry.getValue()))
+                        .orElseThrow(() -> new RuntimeException("Loan retrieval failed.")
+                )).collect(Collectors.toList()));
     }
 
     /**
@@ -194,8 +192,12 @@ public class Investor {
                 .findFirst();
     }
 
-    private static <T> String collectionToString(final Collection<T> collection, final Function<T, String> reduction) {
-        return collection.stream().map(reduction).collect(Collectors.joining(", ", "[", "]"));
+    private static <T> String collectionToString(final Collection<T> collection, final Comparator<T> comparator,
+                                                 final Function<T, String> reduction) {
+        return collection.stream()
+                .sorted(comparator)
+                .map(reduction)
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 
     /**
@@ -208,7 +210,7 @@ public class Investor {
      */
     public Collection<Investment> invest(final InvestmentStrategy strategy, final List<Loan> loans) {
         Investor.LOGGER.debug("The following loans are available for robotic investing: {}.",
-                Investor.collectionToString(loans, l -> String.valueOf(l.getId())));
+                Investor.collectionToString(loans, Comparator.comparing(Loan::getId), l -> String.valueOf(l.getId())));
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK);
         BigDecimal balance = this.initialBalance;
@@ -228,7 +230,8 @@ public class Investor {
                 .filter(l -> !Investor.isLoanPresent(l, preexistingInvestments))
                 .collect(Collectors.toList());
         Investor.LOGGER.info("The following available loans have not yet been invested into: {}.",
-                Investor.collectionToString(uninvestedLoans, l -> String.valueOf(l.getId())));
+                Investor.collectionToString(uninvestedLoans, Comparator.comparing(Loan::getId),
+                        l -> String.valueOf(l.getId())));
         // and start investing
         final Collection<Investment> allInvestments = new ArrayList<>(preexistingInvestments);
         do {
@@ -242,7 +245,7 @@ public class Investor {
             uninvestedLoans.remove(uninvestedLoans.stream()
                     .filter(l -> i.getLoanId() == l.getId())
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Impossible.")));
+                    .orElseThrow(IllegalStateException::new));
             // make sure internal counters are updated
             allInvestments.add(i);
             balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
