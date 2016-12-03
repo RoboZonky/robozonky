@@ -16,6 +16,7 @@
 package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import com.github.triceo.robozonky.api.events.LoanEvaluationEvent;
 import com.github.triceo.robozonky.api.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
+import com.github.triceo.robozonky.api.remote.entities.Instalment;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
@@ -68,16 +70,14 @@ public class Investor {
      * @param api Authenticated Zonky API, ready for investing.
      * @param loanId Loan to invest into. Will be fetched fresh to make sure it is really available.
      * @param amount Amount to invest into the loan.
-     * @param balance How much usable cash the user has in the wallet.
      * @return Present if input valid and operation succeeded, empty otherwise.
      */
-    private static Optional<Investment> invest(final ZonkyApi api, final int loanId, final int amount,
-                                               final int balance) {
+    private Optional<Investment> invest(final ZonkyApi api, final int loanId, final int amount) {
         if (amount < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
             Investor.LOGGER.info("Not investing into loan #{}, since investment ({} CZK) less than bare minimum.",
                     loanId, amount);
             return Optional.empty();
-        } else if (amount > balance) { // strategy should not allow this
+        } else if (balance.compareTo(BigDecimal.valueOf(amount)) < 0) { // strategy should not allow this
             Investor.LOGGER.info("Not investing into loan #{}, {} CZK to invest is more than {} CZK balance.", loanId,
                     amount, balance);
             return Optional.empty();
@@ -108,6 +108,7 @@ public class Investor {
             Investor.LOGGER.info("Dry run. Otherwise would have invested {} CZK into loan {}.", investment.getAmount(),
                     investment.getLoanId());
         }
+        balance = balance.subtract(BigDecimal.valueOf(amount));
         EventRegistry.fire((InvestmentMadeEvent) () -> investment);
         return Optional.of(investment);
     }
@@ -155,7 +156,7 @@ public class Investor {
     }
 
     private final ZonkyApi zonkyApi;
-    private final BigDecimal initialBalance;
+    private BigDecimal balance;
 
     /**
      * Standard constructor.
@@ -164,8 +165,8 @@ public class Investor {
      */
     public Investor(final ZonkyApi zonky, final BigDecimal initialBalance) {
         this.zonkyApi = zonky;
-        this.initialBalance = initialBalance;
-        Investor.LOGGER.info("RoboZonky starting account balance is {} CZK.", this.initialBalance);
+        this.balance = initialBalance;
+        Investor.LOGGER.info("Starting account balance: {} CZK.", this.balance);
     }
 
     /**
@@ -176,17 +177,16 @@ public class Investor {
      * @param strategy The investment strategy to pick loans from the list.
      * @param availableLoans Loans available to be chosen from.
      * @param portfolio User's investment portfolio overview.
-     * @return The first {@link #invest(ZonkyApi, int, int, int)} which succeeds, or empty if none have.
+     * @return The first {@link #invest(ZonkyApi, int, int)} which succeeds, or empty if none have.
      */
     Optional<Investment> investOnce(final InvestmentStrategy strategy, final List<Loan> availableLoans,
                                     final PortfolioOverview portfolio) {
-        Investor.LOGGER.debug("Current share of unpaid loans with a given rating is: {}.",
+        Investor.LOGGER.debug("Current share of unpaid loans with a given rating: {}.",
                 portfolio.getSharesOnInvestment());
         return strategy.getMatchingLoans(availableLoans, portfolio).stream()
                 .map(l -> {
                     EventRegistry.fire((LoanEvaluationEvent) () -> l);
-                    return Investor.invest(this.zonkyApi, l.getId(), strategy.recommendInvestmentAmount(l, portfolio),
-                            portfolio.getCzkAvailable());
+                    return this.invest(this.zonkyApi, l.getId(), strategy.recommendInvestmentAmount(l, portfolio));
                 })
                 .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
                 .findFirst();
@@ -213,7 +213,6 @@ public class Investor {
                 Investor.collectionToString(loans, Comparator.comparing(Loan::getId), l -> String.valueOf(l.getId())));
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-        BigDecimal balance = this.initialBalance;
         EventRegistry.fire(new StrategyStartedEventImpl(strategy, loans, balance));
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
             EventRegistry.fire(new StrategyCompleteEventImpl(strategy, Collections.emptyList(), balance));
@@ -221,7 +220,7 @@ public class Investor {
         }
         // read our investment statistics
         final Statistics stats = Investor.retrieveStatistics(this.zonkyApi);
-        Investor.LOGGER.debug("The sum total of principal remaining on active loans is {} CZK.",
+        Investor.LOGGER.debug("The sum total of principal remaining on active loans: {} CZK.",
                 stats.getCurrentOverview().getPrincipalLeft());
         // figure out which loans we can still put money into
         final Collection<Investment> preexistingInvestments =
@@ -229,7 +228,7 @@ public class Investor {
         final List<Loan> uninvestedLoans = loans.stream()
                 .filter(l -> !Investor.isLoanPresent(l, preexistingInvestments))
                 .collect(Collectors.toList());
-        Investor.LOGGER.info("The following available loans have not yet been invested into: {}.",
+        Investor.LOGGER.debug("The following available loans have not yet been invested into: {}.",
                 Investor.collectionToString(uninvestedLoans, Comparator.comparing(Loan::getId),
                         l -> String.valueOf(l.getId())));
         // and start investing
@@ -248,13 +247,25 @@ public class Investor {
                     .orElseThrow(IllegalStateException::new));
             // make sure internal counters are updated
             allInvestments.add(i);
-            balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
-            Investor.LOGGER.info("New account balance is {} CZK.", balance);
         } while (balance.compareTo(minimumInvestmentAmount) >= 0);
+        // finish the investing algorithm
         final Collection<Investment> result = allInvestments.stream()
                 .filter(i -> !preexistingInvestments.contains(i))
                 .collect(Collectors.toList());
         EventRegistry.fire(new StrategyCompleteEventImpl(strategy, result, balance));
+        // report on portfolio structure
+        final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, allInvestments);
+        Investor.LOGGER.info("Expected annual yield of portfolio: {} % ({} CZK).",
+                portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
+                portfolio.getCzkExpectedYield());
+        final List<Instalment> instalments = stats.getCashFlow();
+        final int currentMonthInstalmentId = instalments.size() - 1 - 3; // contains 3 future months
+        if (currentMonthInstalmentId >= 0) { // maybe the history has not been built yet
+            Investor.LOGGER.info("Expected instalments: {} CZK this month, {} CZK the next.",
+                    instalments.get(currentMonthInstalmentId).getInstalmentAmount(),
+                    instalments.get(currentMonthInstalmentId + 1).getInstalmentAmount());
+        }
+
         return Collections.unmodifiableCollection(result);
     }
 
@@ -266,7 +277,7 @@ public class Investor {
      * @return Present if investment succeeded, empty otherwise.
      */
     public Optional<Investment> invest(final int loanId, final int loanAmount) {
-        return Investor.invest(this.zonkyApi, loanId, loanAmount, this.initialBalance.intValue());
+        return this.invest(this.zonkyApi, loanId, loanAmount);
     }
 
 }

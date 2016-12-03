@@ -16,26 +16,34 @@
 
 package com.github.triceo.robozonky.api.remote.enums;
 
+import java.math.BigDecimal;
+
 public enum Rating {
 
-    AAAAA("A**"),
-    AAAA("A*"),
-    AAA("A++"),
-    AA("A+"),
-    A("A"),
-    B("B"),
-    C("C"),
-    D("D");
+    AAAAA("A**", new BigDecimal("0.025")),
+     AAAA("A*",  new BigDecimal("0.034")),
+      AAA("A++", new BigDecimal("0.042")),
+       AA("A+",  new BigDecimal("0.058")),
+        A("A",   new BigDecimal("0.074")),
+        B("B",   new BigDecimal("0.089")),
+        C("C",   new BigDecimal("0.099")),
+        D("D",   new BigDecimal("0.119"));
 
 
     private final String code;
+    private final BigDecimal expectedYield;
 
-    Rating(final String code) {
+    Rating(final String code, final BigDecimal expectedYield) {
         this.code = code;
+        this.expectedYield = expectedYield;
     }
 
     public String getCode() {
         return code;
+    }
+
+    public BigDecimal getExpectedYield() {
+        return expectedYield;
     }
 
 }

@@ -32,7 +32,7 @@ public class Statistics implements BaseEntity {
         return Statistics.getOrDefault(actualValue, () -> BigDecimal.ZERO);
     }
 
-    private static <T> Collection<T> getOrDefault(final Collection<T> actualValue) {
+    private static <T> List<T> getOrDefault(final List<T> actualValue) {
         return actualValue == null ? Collections.emptyList() : actualValue;
     }
 
@@ -44,7 +44,7 @@ public class Statistics implements BaseEntity {
     private CurrentOverview currentOverview;
     private OverallOverview overallOverview;
     private OverallPortfolio overallPortfolio;
-    private Collection<Instalment> cashFlow;
+    private List<Instalment> cashFlow;
     private List<RiskPortfolio> riskPortfolio;
 
     @XmlElement
@@ -73,8 +73,13 @@ public class Statistics implements BaseEntity {
         return Statistics.getOrDefault(this.overallPortfolio, OverallPortfolio::new);
     }
 
+    /**
+     *
+     * @return Expected cashflows for 8 previous months, the current month, and three future months. Current month is
+     * on index 8, the next month after that is on index 9.
+     */
     @XmlElementWrapper
-    public Collection<Instalment> getCashFlow() {
+    public List<Instalment> getCashFlow() {
         return Statistics.getOrDefault(this.cashFlow);
     }
 

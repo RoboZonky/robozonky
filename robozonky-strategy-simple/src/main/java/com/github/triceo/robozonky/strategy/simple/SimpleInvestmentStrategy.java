@@ -78,7 +78,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
     List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
         // find out which ratings are under-invested
         final List<Rating> ratingsUnderTarget = rankRatingsByDemand(currentShare, StrategyPerRating::getTargetShare);
-        SimpleInvestmentStrategy.LOGGER.info("The portfolio is low on ratings {}.", ratingsUnderTarget);
+        SimpleInvestmentStrategy.LOGGER.info("Ratings under-invested: {}.", ratingsUnderTarget);
         // find out which other ratings are not yet maxed out
         final Map<Rating, BigDecimal> filteredShare = currentShare.entrySet()
                 .stream()

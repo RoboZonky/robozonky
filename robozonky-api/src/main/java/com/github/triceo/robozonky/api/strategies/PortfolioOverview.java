@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.RiskPortfolio;
@@ -62,9 +63,10 @@ public class PortfolioOverview {
         return new PortfolioOverview(balance, amounts);
     }
 
-    private final int czkAvailable, czkInvested;
+    private final int czkAvailable, czkInvested, czkExpectedYield;
     private final Map<Rating, Integer> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> sharesOnInvestment;
+    private final BigDecimal relativeExpectedYield;
 
     private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
         this.czkAvailable = czkAvailable.intValue();
@@ -82,6 +84,11 @@ public class PortfolioOverview {
                     })
             );
         }
+        this.relativeExpectedYield = Stream.of(Rating.values())
+                .map(r -> r.getExpectedYield().multiply(this.getShareOnInvestment(r)))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.czkExpectedYield =
+                this.relativeExpectedYield.multiply(BigDecimal.valueOf(this.czkInvested)).intValue();
     }
 
     /**
@@ -124,5 +131,21 @@ public class PortfolioOverview {
      */
     public Map<Rating, BigDecimal> getSharesOnInvestment() {
         return this.sharesOnInvestment;
+    }
+
+    /**
+     *
+     * @return Amount in CZK of the expected yield in the next 12 months.
+     */
+    public int getCzkExpectedYield() {
+        return czkExpectedYield;
+    }
+
+    /**
+     *
+     * @return Expected yield in the next 12 months, as a percentage.
+     */
+    public BigDecimal getRelativeExpectedYield() {
+        return relativeExpectedYield;
     }
 }
