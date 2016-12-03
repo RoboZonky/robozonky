@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.entities.Rating;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

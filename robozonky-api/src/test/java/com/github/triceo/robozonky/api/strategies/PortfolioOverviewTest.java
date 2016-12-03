@@ -23,9 +23,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Rating;
 import com.github.triceo.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;

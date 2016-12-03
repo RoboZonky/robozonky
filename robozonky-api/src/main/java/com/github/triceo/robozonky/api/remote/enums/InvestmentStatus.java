@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.remote.entities;
+package com.github.triceo.robozonky.api.remote.enums;
 
-public enum Rating {
+public enum InvestmentStatus {
 
-    AAAAA("A**"),
-    AAAA("A*"),
-    AAA("A++"),
-    AA("A+"),
-    A("A"),
-    B("B"),
-    C("C"),
-    D("D");
-
-
-    private final String code;
-
-    Rating(final String code) {
-        this.code = code;
-    }
-
-    public String getCode() {
-        return code;
-    }
+    SIGNED,
+    COVERED,
+    ACTIVE,
+    PAID,
+    PAID_OFF,
+    STOPPED
 
 }

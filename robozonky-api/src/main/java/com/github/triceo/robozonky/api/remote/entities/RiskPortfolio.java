@@ -18,6 +18,8 @@ package com.github.triceo.robozonky.api.remote.entities;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.triceo.robozonky.api.remote.enums.Rating;
+
 public class RiskPortfolio extends OverallPortfolio {
 
     private int totalAmount;

@@ -14,14 +14,28 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.remote.entities;
+package com.github.triceo.robozonky.api.remote.enums;
 
-/**
- * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
- * its integer ID after all other values already got one.
- */
-public enum Region {
+public enum Rating {
 
-    PRAHA, STREDOCESKY, JIHOCESKY, PLZENSKY, KARLOVARSKY, USTECKY, LIBERECKY, KRALOVEHRADECKY, PARDUBICKY, VYSOCINA,
-    JIHOMORAVSKY, OLOMOUCKY, MORAVSKOSLEZSKY, ZLINSKY, UNKNOWN;
+    AAAAA("A**"),
+    AAAA("A*"),
+    AAA("A++"),
+    AA("A+"),
+    A("A"),
+    B("B"),
+    C("C"),
+    D("D");
+
+
+    private final String code;
+
+    Rating(final String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
 }

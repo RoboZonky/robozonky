@@ -29,6 +29,8 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
+import com.github.triceo.robozonky.api.remote.enums.InvestmentStatuses;
+import com.github.triceo.robozonky.api.remote.enums.Ratings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

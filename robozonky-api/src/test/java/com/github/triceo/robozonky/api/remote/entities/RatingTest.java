@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

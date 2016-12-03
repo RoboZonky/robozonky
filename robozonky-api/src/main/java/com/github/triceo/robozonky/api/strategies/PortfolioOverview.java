@@ -26,9 +26,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Rating;
 import com.github.triceo.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 
 /**
  * Class with some aggregate statistics about user's portfolio. Used primarily as the main input into

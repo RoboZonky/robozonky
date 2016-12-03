@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.strategy.rules.facts;
 
 import java.math.BigDecimal;
 
-import com.github.triceo.robozonky.api.remote.entities.Rating;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 
 public class RatingShare {
 

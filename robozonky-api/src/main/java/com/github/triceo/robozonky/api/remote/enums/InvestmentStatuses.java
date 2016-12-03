@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.triceo.robozonky.api.remote;
+
+package com.github.triceo.robozonky.api.remote.enums;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,8 +23,6 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.github.triceo.robozonky.api.remote.entities.InvestmentStatus;
 
 public class InvestmentStatuses {
 

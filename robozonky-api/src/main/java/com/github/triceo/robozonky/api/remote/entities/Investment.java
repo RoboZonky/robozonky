@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.triceo.robozonky.api.remote.enums.Rating;
+
 public class Investment extends BaseInvestment {
 
     private int dpd, loanTermInMonth, currentTerm;

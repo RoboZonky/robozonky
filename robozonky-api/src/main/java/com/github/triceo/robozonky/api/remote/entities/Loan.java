@@ -16,16 +16,15 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import javax.xml.bind.annotation.XmlElement;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
+import com.github.triceo.robozonky.api.remote.enums.Purpose;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.remote.enums.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,57 +38,6 @@ import org.slf4j.LoggerFactory;
 public class Loan implements BaseEntity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Loan.class);
-
-    private static class RegionDeserializer extends JsonDeserializer<Region> {
-
-        @Override
-        public Region deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            try {
-                final int actualId = Integer.parseInt(id) - 1; // regions in Zonky API are indexed from 1
-                return Region.values()[actualId];
-            } catch (final RuntimeException ex) { // whatever went wrong, don't fail on this unimportant enum
-                Loan.LOGGER.warn("Unknown value '{}' for {}, API may be incomplete.", id, Region.class);
-                return Region.UNKNOWN;
-            }
-        }
-
-    }
-
-    private static class PurposeDeserializer extends JsonDeserializer<Purpose> {
-
-        @Override
-        public Purpose deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            try {
-                final int actualId = Integer.parseInt(id) - 1; // purposes in Zonky API are indexed from 1
-                return Purpose.values()[actualId];
-            } catch (final RuntimeException ex) { // whatever went wrong, don't fail on this unimportant enum
-                Loan.LOGGER.warn("Unknown value '{}' for {}, API may be incomplete.", id, Purpose.class);
-                return Purpose.JINE;
-            }
-        }
-
-    }
-
-    private static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
-
-        @Override
-        public MainIncomeType deserialize(final JsonParser jsonParser,
-                                          final DeserializationContext deserializationContext)
-                throws IOException {
-            final String id = jsonParser.getText();
-            try {
-                return MainIncomeType.valueOf(id);
-            } catch (final IllegalArgumentException ex) { // whatever went wrong, don't fail on this unimportant enum
-                Loan.LOGGER.warn("Unknown value '{}' for {}, API may be incomplete.", id, MainIncomeType.class);
-                return MainIncomeType.OTHERS_MAIN;
-            }
-        }
-
-    }
 
     private boolean topped, covered, published;
     private int id, termInMonths, investmentsCount, questionsCount, userId;
@@ -111,7 +59,6 @@ public class Loan implements BaseEntity {
     }
 
     @XmlElement
-    @JsonDeserialize(using = Loan.MainIncomeTypeDeserializer.class)
     public MainIncomeType getMainIncomeType() {
         return mainIncomeType;
     }
@@ -122,13 +69,11 @@ public class Loan implements BaseEntity {
     }
 
     @XmlElement
-    @JsonDeserialize(using = Loan.RegionDeserializer.class)
     public Region getRegion() {
         return region;
     }
 
     @XmlElement
-    @JsonDeserialize(using = Loan.PurposeDeserializer.class)
     public Purpose getPurpose() {
         return purpose;
     }

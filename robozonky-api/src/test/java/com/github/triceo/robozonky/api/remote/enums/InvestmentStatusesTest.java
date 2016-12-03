@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.remote;
+package com.github.triceo.robozonky.api.remote.enums;
 
-import com.github.triceo.robozonky.api.remote.entities.InvestmentStatus;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
