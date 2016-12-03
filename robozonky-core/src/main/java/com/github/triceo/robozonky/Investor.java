@@ -213,9 +213,7 @@ public class Investor {
                 Investor.collectionToString(loans, Comparator.comparing(Loan::getId), l -> String.valueOf(l.getId())));
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-        EventRegistry.fire(new StrategyStartedEventImpl(strategy, loans, balance));
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
-            EventRegistry.fire(new StrategyCompleteEventImpl(strategy, Collections.emptyList(), balance));
             return Collections.emptyList(); // no need to do anything else
         }
         // read our investment statistics
@@ -232,6 +230,7 @@ public class Investor {
                 Investor.collectionToString(uninvestedLoans, Comparator.comparing(Loan::getId),
                         l -> String.valueOf(l.getId())));
         // and start investing
+        EventRegistry.fire(new StrategyStartedEventImpl(strategy, loans, balance));
         final Collection<Investment> allInvestments = new ArrayList<>(preexistingInvestments);
         do {
             final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, allInvestments);
@@ -265,7 +264,6 @@ public class Investor {
                     instalments.get(currentMonthInstalmentId).getInstalmentAmount(),
                     instalments.get(currentMonthInstalmentId + 1).getInstalmentAmount());
         }
-
         return Collections.unmodifiableCollection(result);
     }
 
