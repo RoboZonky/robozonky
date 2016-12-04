@@ -17,7 +17,6 @@ package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,17 +50,6 @@ import org.slf4j.LoggerFactory;
 public class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
-
-    /**
-     * Determine whether or not a given loan is present among existing investments.
-     *
-     * @param loan Loan in question.
-     * @param investments Known investments.
-     * @return True if present.
-     */
-    private static boolean isLoanPresent(final Loan loan, final Collection<Investment> investments) {
-        return investments.stream().anyMatch(i -> loan.getId() == i.getLoanId());
-    }
 
     /**
      * The core investing call. Receives a particular loan, checks if the user has enough money to invest, and sends the
@@ -209,50 +197,47 @@ public class Investor {
      * @return Investments made in the session.
      */
     public Collection<Investment> invest(final InvestmentStrategy strategy, final List<Loan> loans) {
-        Investor.LOGGER.debug("The following loans are available for robotic investing: {}.",
-                Investor.collectionToString(loans, Comparator.comparing(Loan::getId), l -> String.valueOf(l.getId())));
         // make sure we have enough money to invest
         final BigDecimal minimumInvestmentAmount = BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK);
         if (balance.compareTo(minimumInvestmentAmount) < 0) {
             return Collections.emptyList(); // no need to do anything else
         }
         // read our investment statistics
+        Investor.LOGGER.debug("The following loans are available for robotic investing: {}.",
+                Investor.collectionToString(loans, Comparator.comparing(Loan::getId), l -> String.valueOf(l.getId())));
         final Statistics stats = Investor.retrieveStatistics(this.zonkyApi);
         Investor.LOGGER.debug("The sum total of principal remaining on active loans: {} CZK.",
                 stats.getCurrentOverview().getPrincipalLeft());
         // figure out which loans we can still put money into
-        final Collection<Investment> preexistingInvestments =
-                Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi);
-        final List<Loan> uninvestedLoans = loans.stream()
-                .filter(l -> !Investor.isLoanPresent(l, preexistingInvestments))
-                .collect(Collectors.toList());
+        final InvestmentTracker tracker = new InvestmentTracker(loans);
+        tracker.registerExistingInvestments(Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.zonkyApi));
+        // invest the money
+        this.runInvestmentLoop(strategy, tracker, stats, minimumInvestmentAmount);
+        // report
+        this.reportOnPortfolioStructure(stats, tracker.getAllInvestments());
+        return tracker.getInvestmentsMade();
+    }
+
+    private void runInvestmentLoop(final InvestmentStrategy strategy, final InvestmentTracker tracker,
+                                   final Statistics stats, final BigDecimal minimumInvestmentAmount) {
         Investor.LOGGER.debug("The following available loans have not yet been invested into: {}.",
-                Investor.collectionToString(uninvestedLoans, Comparator.comparing(Loan::getId),
+                Investor.collectionToString(tracker.getAvailableLoans(), Comparator.comparing(Loan::getId),
                         l -> String.valueOf(l.getId())));
-        // and start investing
-        EventRegistry.fire(new StrategyStartedEventImpl(strategy, loans, balance));
-        final Collection<Investment> allInvestments = new ArrayList<>(preexistingInvestments);
+        EventRegistry.fire(new StrategyStartedEventImpl(strategy, tracker.getAvailableLoans(), balance));
         do {
-            final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, allInvestments);
-            final Optional<Investment> investment = this.investOnce(strategy, uninvestedLoans, portfolio);
+            final PortfolioOverview portfolio =
+                    PortfolioOverview.calculate(balance, stats, tracker.getAllInvestments());
+            final Optional<Investment> investment = this.investOnce(strategy, tracker.getAvailableLoans(), portfolio);
             if (!investment.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }
             final Investment i = investment.get();
-            // make sure the loan is removed from the uninvested loans
-            uninvestedLoans.remove(uninvestedLoans.stream()
-                    .filter(l -> i.getLoanId() == l.getId())
-                    .findFirst()
-                    .orElseThrow(IllegalStateException::new));
-            // make sure internal counters are updated
-            allInvestments.add(i);
+            tracker.makeInvestment(i);
         } while (balance.compareTo(minimumInvestmentAmount) >= 0);
-        // finish the investing algorithm
-        final Collection<Investment> result = allInvestments.stream()
-                .filter(i -> !preexistingInvestments.contains(i))
-                .collect(Collectors.toList());
-        EventRegistry.fire(new StrategyCompleteEventImpl(strategy, result, balance));
-        // report on portfolio structure
+        EventRegistry.fire(new StrategyCompleteEventImpl(strategy, tracker.getInvestmentsMade(), balance));
+    }
+
+    private void reportOnPortfolioStructure(final Statistics stats, final Collection<Investment> allInvestments) {
         final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, allInvestments);
         Investor.LOGGER.info("Expected annual yield of portfolio: {} % ({} CZK).",
                 portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
@@ -264,7 +249,6 @@ public class Investor {
                     instalments.get(currentMonthInstalmentId).getInstalmentAmount(),
                     instalments.get(currentMonthInstalmentId + 1).getInstalmentAmount());
         }
-        return Collections.unmodifiableCollection(result);
     }
 
     /**
