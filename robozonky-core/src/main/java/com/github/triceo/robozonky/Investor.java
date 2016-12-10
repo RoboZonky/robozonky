@@ -120,7 +120,7 @@ public class Investor {
      */
     static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyApi api) {
         // first group all blocked amounts by the loan ID and sum them
-        final Map<Integer, Integer> amountsBlockedByLoans = api.getBlockedAmounts(99, 0).stream()
+        final Map<Integer, Integer> amountsBlockedByLoans = api.getBlockedAmounts(Integer.MAX_VALUE, 0).stream()
                 .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
                 .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
                         Collectors.summingInt(BlockedAmount::getAmount)));
