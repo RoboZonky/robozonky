@@ -18,11 +18,10 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
@@ -67,13 +66,11 @@ public class AuthenticationHandler {
      * expiration, where X comes from the arguments of this method.
      *
      * @param data Provider for the sensitive information, such as passwords and tokens.
-     * @param time Access token will be refreshed after expiration minus this.
-     * @param unit Unit of time applied to the previous argument.
+     * @param refreshAfter Access token will be refreshed after expiration minus this.
      * @return This.
      */
-    public static AuthenticationHandler tokenBased(final SecretProvider data, final long time,
-                                                   final TemporalUnit unit) {
-        return new AuthenticationHandler(data, true, Duration.of(time, unit).getSeconds());
+    public static AuthenticationHandler tokenBased(final SecretProvider data, final TemporalAmount refreshAfter) {
+        return new AuthenticationHandler(data, true, refreshAfter.get(ChronoUnit.SECONDS));
     }
 
     /**

@@ -25,21 +25,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 final class InvestmentTracker {
 
-    private final List<Loan> loansStillAvailable;
+    private final List<LoanDescriptor> loansStillAvailable;
     private final Collection<Investment> investmentsMade = new LinkedHashSet<>();
     private final Collection<Investment> investmentsPreviouslyMade = new HashSet<>();
 
-    public InvestmentTracker(final Collection<Loan> availableLoans) {
+    public InvestmentTracker(final Collection<LoanDescriptor> availableLoans) {
         this.loansStillAvailable = new ArrayList<>(availableLoans); // defensive copy
     }
 
     public void makeInvestment(final Investment investment) {
-        this.loansStillAvailable.removeIf(l -> investment.getLoanId() == l.getId());
+        this.ignoreLoan(investment.getLoanId());
         this.investmentsMade.add(investment);
+    }
+
+    public void ignoreLoan(final int loanId) {
+        this.loansStillAvailable.removeIf(l -> loanId == l.getLoan().getId());
     }
 
     public void registerExistingInvestments(final Collection<Investment> investments) {
@@ -57,7 +61,7 @@ final class InvestmentTracker {
         return Collections.unmodifiableCollection(this.investmentsMade);
     }
 
-    public List<Loan> getAvailableLoans() {
+    public List<LoanDescriptor> getAvailableLoans() {
         return Collections.unmodifiableList(this.loansStillAvailable);
     }
 

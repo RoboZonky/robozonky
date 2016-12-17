@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -132,6 +133,7 @@ public class OperatingModeTest {
         final CommandLineInterface cli = OperatingModeTest.mockCli();
         Mockito.when(cli.getLoanId()).thenReturn(OptionalInt.empty());
         Mockito.when(cli.getLoanAmount()).thenReturn(OptionalInt.empty());
+        Mockito.when(cli.getSecretProvider()).thenReturn(Optional.of(Mockito.mock(SecretProvider.class)));
         Mockito.when(cli.getStrategyConfigurationLocation())
                 .thenReturn(Optional.of(IoTestUtil.findMainSource("assembly", "resources", "robozonky-dynamic.cfg")));
         final Optional<Configuration> optionalResult = OperatingMode.STRATEGY_DRIVEN.apply(cli);

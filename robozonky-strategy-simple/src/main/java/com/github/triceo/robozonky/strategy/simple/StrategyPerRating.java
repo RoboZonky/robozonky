@@ -28,7 +28,7 @@ class StrategyPerRating {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyPerRating.class);
 
-    private final boolean preferLongerTerms;
+    private final boolean longerTermPreferred, confirmationRequired;
     private final Rating rating;
     private final BigDecimal targetShare, maximumShare, minimumInvestmentShare, maximumInvestmentShare;
     private final int minimumAcceptableTerm, maximumAcceptableTerm, minimumInvestmentAmount, maximumInvestmentAmount,
@@ -37,7 +37,7 @@ class StrategyPerRating {
     StrategyPerRating(final Rating rating, final BigDecimal targetShare, final BigDecimal maxShare, final int minTerm,
                       final int maxTerm, final int minLoanAmount, final int maxLoanAmount,
                       final BigDecimal minLoanShare, final BigDecimal maxLoanShare, final int minAskAmount,
-                      final int maxAskAmount, final boolean preferLongerTerms) {
+                      final int maxAskAmount, final boolean preferLongerTerms, final boolean requireConfirmation) {
         this.rating = rating;
         this.minimumAcceptableTerm = Math.max(minTerm, 0);
         this.maximumAcceptableTerm = maxTerm < 0 ? Integer.MAX_VALUE : maxTerm;
@@ -49,11 +49,16 @@ class StrategyPerRating {
         this.maximumAskAmount = maxAskAmount < 0 ? Integer.MAX_VALUE : maxAskAmount;
         this.minimumInvestmentShare = minLoanShare;
         this.maximumInvestmentShare = maxLoanShare;
-        this.preferLongerTerms = preferLongerTerms;
+        this.longerTermPreferred = preferLongerTerms;
+        this.confirmationRequired = requireConfirmation;
     }
 
-    public boolean isPreferLongerTerms() {
-        return this.preferLongerTerms;
+    public boolean isLongerTermPreferred() {
+        return this.longerTermPreferred;
+    }
+
+    public boolean isConfirmationRequired() {
+        return confirmationRequired;
     }
 
     public BigDecimal getTargetShare() {

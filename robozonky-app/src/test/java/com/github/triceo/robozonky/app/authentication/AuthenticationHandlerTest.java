@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.security.KeyStoreException;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -112,7 +113,7 @@ public class AuthenticationHandlerTest {
         final OffsetDateTime expiring =
                 OffsetDateTime.now().minus(AuthenticationHandlerTest.TOKEN.getExpiresIn() - 1, ChronoUnit.SECONDS);
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(
-                AuthenticationHandlerTest.mockExistingProvider(expiring, true, true), 10, ChronoUnit.SECONDS);
+                AuthenticationHandlerTest.mockExistingProvider(expiring, true, true), Duration.ofSeconds(10));
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isTrue();
     }
@@ -121,8 +122,7 @@ public class AuthenticationHandlerTest {
     public void tokenBasedWithFailingToken() throws JAXBException {
         final SecretProvider provider =
                 AuthenticationHandlerTest.mockExistingProvider("", OffsetDateTime.now(), true, true);
-        final AuthenticationHandler h = AuthenticationHandler.tokenBased(provider, 10,
-                ChronoUnit.SECONDS);
+        final AuthenticationHandler h = AuthenticationHandler.tokenBased(provider, Duration.ofSeconds(10));
         final Authenticator a = h.build();
         Assertions.assertThat(a.isTokenBased()).isFalse();
     }

@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.app.App;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -39,8 +41,8 @@ import org.apache.commons.cli.ParseException;
  */
 public class CommandLineInterface {
 
-    private static final int DEFAULT_CAPTCHA_DELAY_SECONDS = 2 * 60;
-    private static final int DEFAULT_SLEEP_PERIOD_MINUTES = 60;
+    static final int DEFAULT_CAPTCHA_DELAY_SECONDS = 2 * 60;
+    static final int DEFAULT_SLEEP_PERIOD_MINUTES = 60;
 
     static final Option OPTION_STRATEGY = Option.builder("s").hasArg().longOpt("strategy")
             .argName("Investment strategy").desc("Points to a resource holding the investment strategy configuration.")
@@ -72,6 +74,9 @@ public class CommandLineInterface {
     static final Option OPTION_ZONK = Option.builder("z").hasArg()
             .argName("The longest amount of time in minutes for which Zonky is allowed to sleep.").longOpt("zonk")
             .desc("Allows to override the default length of sleep period.").build();
+    static final Option OPTION_CONFIRMATION = Option.builder("x").hasArg().optionalArg(false)
+            .argName("'tool:username:token'").longOpt("external")
+            .desc("Use external tool to confirm investments.").build();
 
     /**
      * Parse the command line.
@@ -95,15 +100,13 @@ public class CommandLineInterface {
         ops.add(CommandLineInterface.OPTION_PASSWORD);
         ops.add(CommandLineInterface.OPTION_USE_TOKEN);
         ops.add(CommandLineInterface.OPTION_FAULT_TOLERANT);
-        ops.add(CommandLineInterface.OPTION_CLOSED_SEASON);
-        ops.add(CommandLineInterface.OPTION_ZONK);
         // join all in a single config
         final Options options = new Options();
         options.addOptionGroup(operatingModes);
         options.addOptionGroup(authenticationModes);
         ops.forEach(options::addOption);
         final CommandLineParser parser = new DefaultParser();
-        // and parse
+        // and initialize
         try {
             final CommandLine cli = parser.parse(options, args);
             return Optional.of(new CommandLineInterface(options, cli));
@@ -115,10 +118,21 @@ public class CommandLineInterface {
 
     private final CommandLineWrapper commandLine;
     private final Options options;
+    private SecretProvider secretProvider;
 
     private CommandLineInterface(final Options options, final CommandLine cli) {
         this.options = options;
         this.commandLine = new CommandLineWrapper(cli);
+    }
+
+    synchronized Optional<SecretProvider> getSecretProvider() {
+        if (this.secretProvider == null) {
+            final Optional<SecretProvider> result = SecretProviderFactory.getSecretProvider(this);
+            result.ifPresent(secretProvider -> this.secretProvider = secretProvider);
+            return result;
+        } else {
+            return Optional.of(this.secretProvider);
+        }
     }
 
     public Optional<Configuration> newApplicationConfiguration() {
@@ -130,7 +144,20 @@ public class CommandLineInterface {
     }
 
     public Optional<AuthenticationHandler> newAuthenticationHandler() {
-        return new AuthenticationHandlerProvider().apply(this);
+        final Optional<SecretProvider> optionalSecretProvider = this.getSecretProvider();
+        if (!optionalSecretProvider.isPresent()) {
+            return Optional.empty();
+        }
+        final SecretProvider secretProvider = optionalSecretProvider.get();
+        if (this.isTokenEnabled()) {
+            final OptionalInt secs = this.getTokenRefreshBeforeExpirationInSeconds();
+            final AuthenticationHandler auth = secs.isPresent() ?
+                    AuthenticationHandler.tokenBased(secretProvider, Duration.ofSeconds(secs.getAsInt())) :
+                    AuthenticationHandler.tokenBased(secretProvider);
+            return Optional.of(auth);
+        } else {
+            return Optional.of(AuthenticationHandler.passwordBased(secretProvider));
+        }
     }
 
     Optional<String> getStrategyConfigurationLocation() {
@@ -194,6 +221,18 @@ public class CommandLineInterface {
 
     OptionalInt getDryRunBalance() {
         return this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_DRY_RUN);
+    }
+
+    Optional<ConfirmationCredentials> getConfirmationCredentials() {
+        if (!this.commandLine.hasOption(CommandLineInterface.OPTION_CONFIRMATION)) {
+            return Optional.empty();
+        }
+        final Optional<String> value = this.commandLine.getOptionValue(CommandLineInterface.OPTION_CONFIRMATION);
+        if (!value.isPresent()) {
+            throw new IllegalStateException("Missing mandatory argument value.");
+        } else {
+            return Optional.of(new ConfirmationCredentials(value.get()));
+        }
     }
 
     static String getScriptIdentifier() {

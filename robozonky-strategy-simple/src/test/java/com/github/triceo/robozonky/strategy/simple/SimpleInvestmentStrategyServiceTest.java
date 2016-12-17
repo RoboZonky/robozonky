@@ -96,6 +96,7 @@ public class SimpleInvestmentStrategyServiceTest {
                 "minimumLoanAmount.default     = 200", "maximumLoanAmount.default     = 400",
                 "minimumLoanShare.default      = 0", "maximumLoanShare.default      = 0.01",
                 "preferLongerTerms.default     = false   ",
+                "requireConfirmation.default = true"
         };
         final File f = File.createTempFile("robozonky-", ".cfg");
         Files.write(f.toPath(), Arrays.asList(lines));

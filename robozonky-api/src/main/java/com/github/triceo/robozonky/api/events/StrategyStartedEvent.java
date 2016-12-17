@@ -19,12 +19,12 @@ package com.github.triceo.robozonky.api.events;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 /**
  * Fired before any loans are submitted for evaluation by the strategy and subsequent investment operations. May be
- * followed by {@link LoanEvaluationEvent} and will eventually be followed by {@link StrategyCompleteEvent}.
+ * followed by {@link LoanRecommendedEvent} and will eventually be followed by {@link StrategyCompleteEvent}.
  */
 public interface StrategyStartedEvent extends Event {
 
@@ -36,7 +36,7 @@ public interface StrategyStartedEvent extends Event {
     /**
      * @return Loans that will be evaluated.
      */
-    Collection<Loan> getLoans();
+    Collection<LoanDescriptor> getLoanDesciptors();
 
     /**
      * @return Current balance reported by Zonky API.

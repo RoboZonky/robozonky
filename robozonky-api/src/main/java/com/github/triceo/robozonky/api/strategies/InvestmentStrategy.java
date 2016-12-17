@@ -16,12 +16,8 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
-import java.io.File;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.ServiceLoader;
-
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 /**
  * Determines which loans will be invested into, and how much. What the strategy does or does not allow depends on the
@@ -30,46 +26,15 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 public interface InvestmentStrategy {
 
     /**
-     * Load the correct strategy using Java's {@link ServiceLoader}.
-     * @param maybeUrl Location of the configuration file, possible remote. If invalid url, file:// will be prefixed
-     * and retried.
-     * @return Strategy to read that resource, if found.
-     * @throws InvestmentStrategyParseException When problem found when locating or parsing the strategy configuration
-     * file.
-     */
-    static Optional<InvestmentStrategy> load(final String maybeUrl) throws InvestmentStrategyParseException {
-        return InvestmentStrategyLoader.load(maybeUrl);
-    }
-
-    /**
-     * Load the correct strategy using Java's {@link ServiceLoader}.
-     * @param file Investment strategy configuration file.
-     * @return Strategy to read that file, if found.
-     * @throws InvestmentStrategyParseException When problem found when parsing the strategy configuration file.
-     */
-    static Optional<InvestmentStrategy> load(final File file) throws InvestmentStrategyParseException {
-        return InvestmentStrategyLoader.load(file);
-    }
-
-    /**
      * Retrieve a list of loans that are acceptable by the strategy, in the order in which they are to be evaluated.
      * After an investment has been made into any single one of these loans, the strategy should be called again to
      * re-evaluate the resulting situation.
      *
      * @param availableLoans Loans to be evaluated for acceptability.
      * @param portfolio Aggregation of information as to the user's current portfolio.
-     * @return List of acceptable loans, ordered by their priority.
+     * @return Acceptable loans, in the iteration order of their decreasing priority, mapped to the recommended
+     * investment amounts.
      */
-    List<Loan> getMatchingLoans(List<Loan> availableLoans, PortfolioOverview portfolio);
-
-    /**
-     * Recommend the size of an investment based on loan parameters. Must not be larger than available balance as
-     * reported by {@link PortfolioOverview}.
-     *
-     * @param loan Loan in question.
-     * @param portfolio Aggregation of information as to the user's current portfolio.
-     * @return Amount in CZK, recommended to invest.
-     */
-    int recommendInvestmentAmount(Loan loan, PortfolioOverview portfolio);
+    List<Recommendation> recommend(Collection<LoanDescriptor> availableLoans, PortfolioOverview portfolio);
 
 }

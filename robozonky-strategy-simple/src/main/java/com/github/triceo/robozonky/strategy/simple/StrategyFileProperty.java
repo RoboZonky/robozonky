@@ -29,6 +29,7 @@ enum StrategyFileProperty {
     MAXIMUM_INVESTMENT(StrategyFileProperty.getMaximum("investment")),
     PREFER_LONGER_TERMS("preferLongerTerms"),
     TARGET_SHARE("targetShare"),
+    REQUIRE_CONFIRMATION("requireConfirmation"),
     MAXIMUM_SHARE(StrategyFileProperty.getMaximum("share")),
     MINIMUM_TERM(StrategyFileProperty.getMinimum(StrategyFileProperty.PART_TERM)),
     MAXIMUM_TERM(StrategyFileProperty.getMaximum(StrategyFileProperty.PART_TERM)),

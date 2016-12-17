@@ -19,10 +19,12 @@ import java.time.OffsetDateTime;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 public class ProposedLoan {
 
-    public ProposedLoan(final Loan loan) {
+    public ProposedLoan(final LoanDescriptor loanDescriptor) {
+        final Loan loan = loanDescriptor.getLoan();
         this.id = loan.getId();
         this.termInMonths = loan.getTermInMonths();
         this.amount = (int)loan.getAmount();

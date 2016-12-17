@@ -20,14 +20,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -48,24 +58,36 @@ public class RuleBasedInvestmentStrategyServiceTest {
         // let's make up some loans; B will not be accepted, D will be prioritized over A
         final Loan aaaaa = Mockito.mock(Loan.class); // will not be accepted since AAAAA are ignored
         Mockito.when(aaaaa.getId()).thenReturn(1);
+        Mockito.when(aaaaa.getRemainingInvestment()).thenReturn(100000.0);
+        Mockito.when(aaaaa.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(aaaaa.getRating()).thenReturn(Rating.AAAAA);
         final Loan b = Mockito.mock(Loan.class); // will not be accepted, asking for too much money
         Mockito.when(b.getId()).thenReturn(2);
+        Mockito.when(b.getRemainingInvestment()).thenReturn(100000.0);
+        Mockito.when(b.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(b.getRating()).thenReturn(Rating.B);
         Mockito.when(b.getAmount()).thenReturn(300000.0);
         final Loan aa = Mockito.mock(Loan.class); // will not be accepted, asking for too long a term
         Mockito.when(aa.getId()).thenReturn(3);
+        Mockito.when(aa.getRemainingInvestment()).thenReturn(100000.0);
+        Mockito.when(aa.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(aa.getRating()).thenReturn(Rating.AA);
         Mockito.when(aa.getTermInMonths()).thenReturn(50);
         final Loan aaa = Mockito.mock(Loan.class); // will not be accepted, we have too many
         Mockito.when(aaa.getId()).thenReturn(4);
+        Mockito.when(aaa.getRemainingInvestment()).thenReturn(100000.0);
+        Mockito.when(aaa.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(aaa.getRating()).thenReturn(Rating.AAA);
         final Loan aaaa = Mockito.mock(Loan.class); // will be accepted
         Mockito.when(aaaa.getId()).thenReturn(5);
+        Mockito.when(aaaa.getRemainingInvestment()).thenReturn(100000.0);
         Mockito.when(aaaa.getRating()).thenReturn(Rating.AAAA);
+        Mockito.when(aaaa.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(aaaa.getTermInMonths()).thenReturn(30);
         final Loan d = Mockito.mock(Loan.class); // will be accepted and prioritized over AAAA
         Mockito.when(d.getId()).thenReturn(6);
+        Mockito.when(d.getRemainingInvestment()).thenReturn(100000.0);
+        Mockito.when(d.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(d.getAmount()).thenReturn(50000.0);
         Mockito.when(d.getRating()).thenReturn(Rating.D);
         // prepare portfolio
@@ -76,12 +98,11 @@ public class RuleBasedInvestmentStrategyServiceTest {
                 .forEach(r -> Mockito.when(portfolio.getShareOnInvestment(r)).thenReturn(BigDecimal.ZERO));
         Mockito.when(portfolio.getShareOnInvestment(Rating.AAA)).thenReturn(BigDecimal.ONE);
         // check investing logic
-        final List<Loan> loans = Arrays.asList(aaaaa, aaaa, aaa, aa, b, d);
-        final List<Loan> result = is.getMatchingLoans(loans, portfolio);
-        Assertions.assertThat(result).containsExactly(d, aaaa);
-        Assertions.assertThat(is.recommendInvestmentAmount(d, portfolio)).isEqualTo(200);
-        Assertions.assertThat(is.recommendInvestmentAmount(aaaa, portfolio)).isEqualTo(400);
-        Assertions.assertThat(is.recommendInvestmentAmount(aa, portfolio)).isZero();
+        final Map<Loan, LoanDescriptor> loans = Stream.of(aaaaa, aaaa, aaa, aa, b, d)
+                .collect(Collectors.toMap(Function.identity(), l -> new LoanDescriptor(l, Duration.ofSeconds(100))));
+        final List<Recommendation> result = is.recommend(loans.values(), portfolio);
+        Assertions.assertThat(result).containsOnly(loans.get(d).recommend(200).get(),
+                loans.get(aaaa).recommend(400).get());
     }
 
 }

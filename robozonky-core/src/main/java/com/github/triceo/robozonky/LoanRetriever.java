@@ -19,14 +19,13 @@ package com.github.triceo.robozonky;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Implements a {@link ForkJoinPool.ManagedBlocker} in order to use massively parallel API loan retrieval inside a
- * parallel stream. Use {@link #getLoan(ZonkyApi, int)} as the entry point.
+ * parallel stream. Use {@link #getLoan(ZonkyProxy, int)} as the entry point.
  */
 class LoanRetriever implements ForkJoinPool.ManagedBlocker {
 
@@ -39,7 +38,7 @@ class LoanRetriever implements ForkJoinPool.ManagedBlocker {
      * @param loanId ID of the loan to retrieve.
      * @return Missing if something went wrong during retrieval.
      */
-    public static Optional<Loan> getLoan(final ZonkyApi api, final int loanId) {
+    public static Optional<Loan> getLoan(final ZonkyProxy api, final int loanId) {
         final LoanRetriever lr = new LoanRetriever(api, loanId);
         try {
             ForkJoinPool.managedBlock(lr);
@@ -51,10 +50,10 @@ class LoanRetriever implements ForkJoinPool.ManagedBlocker {
     }
 
     private final int loanId;
-    private final ZonkyApi api;
+    private final ZonkyProxy api;
     private volatile Loan loan = null;
 
-    private LoanRetriever(final ZonkyApi api, final int loanId) {
+    private LoanRetriever(final ZonkyProxy api, final int loanId) {
         this.loanId = loanId;
         this.api = api;
     }
@@ -62,7 +61,7 @@ class LoanRetriever implements ForkJoinPool.ManagedBlocker {
     @Override
     public boolean block() throws InterruptedException {
         if (this.loan == null) {
-            this.loan = api.getLoan(this.loanId);
+            this.loan = api.execute(zonky -> zonky.getLoan(loanId));
         }
         return true;
     }

@@ -26,13 +26,13 @@ import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.events.EventRegistry;
 import com.github.triceo.robozonky.api.events.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.app.version.VersionCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -68,7 +68,7 @@ public class App {
         }
         // and actually start running
         EventRegistry.fire(new RoboZonkyStartingEvent() {});
-        App.LOGGER.info("RoboZonky v{} loading.", VersionCheck.retrieveCurrentVersion());
+        App.LOGGER.info("RoboZonky v{} loading.", Defaults.ROBOZONKY_VERSION);
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
@@ -88,20 +88,19 @@ public class App {
             if (faultTolerant) {
                 App.LOGGER.info("RoboZonky is in fault-tolerant mode. Certain errors may not be reported as such.");
             }
+            final Optional<AuthenticationHandler> auth = cli.newAuthenticationHandler();
+            if (!auth.isPresent()) {
+                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+            }
             final Optional<Configuration> optionalCtx = cli.newApplicationConfiguration();
             if (!optionalCtx.isPresent()) {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
-
             }
-            final Optional<AuthenticationHandler> optionalAuth = cli.newAuthenticationHandler();
-            if (!optionalAuth.isPresent()) {
-                App.exit(ReturnCode.ERROR_SETUP);
-            }
+            final Configuration ctx = optionalCtx.get();
             // start the app
             App.STATE.register(new RoboZonkyStartupNotifier());
-            final Configuration ctx = optionalCtx.get();
             App.STATE.register(new InvestmentReportingListener(ctx.isDryRun()));
-            final boolean loginSucceeded = new Remote(ctx, optionalAuth.get()).call().isPresent();
+            final boolean loginSucceeded = new Remote(ctx, auth.get()).call().isPresent();
             // shut down the app
             if (!loginSucceeded) {
                 App.exit(ReturnCode.ERROR_SETUP);

@@ -36,6 +36,11 @@ public class FallbackSecretProviderTest {
         // make sure original values were set
         Assertions.assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
         Assertions.assertThat(p.getPassword()).isEqualTo(FallbackSecretProviderTest.PWD.toCharArray());
+        // set some secrets
+        final String key = "key", value = "value";
+        Assertions.assertThat(p.getSecret(key)).isEmpty();
+        Assertions.assertThat(p.setSecret(key, value.toCharArray())).isTrue();
+        Assertions.assertThat(p.getSecret(key)).contains(value.toCharArray());
     }
 
     @Test
@@ -49,6 +54,7 @@ public class FallbackSecretProviderTest {
         softly.assertThat(FallbackSecretProvider.TOKEN).exists();
         softly.assertThat(p.getTokenSetDate()).isPresent();
         softly.assertThat(p.getTokenSetDate().get()).isBefore(OffsetDateTime.now());
+        softly.assertThat(p.getToken()).isPresent();
         softly.assertAll();
         // delete created token
         softly = new SoftAssertions();

@@ -63,7 +63,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                                                               final int maxAskAmount, final int minLoanAmount,
                                                               final int maxLoanAmount, final BigDecimal minLoanShare,
                                                               final BigDecimal maxLoanShare,
-                                                              final boolean preferLongerTerms) {
+                                                              final boolean preferLongerTerms,
+                                                              final boolean requireConfirmation) {
         SimpleInvestmentStrategyService.LOGGER.debug("Acceptable shares of rating '{}' on total investments is " +
                 "between {} and {}.", r.getCode(), targetShare, maxShare);
         SimpleInvestmentStrategyService.LOGGER.debug("Acceptable loans for rating '{}' are between {} and {} CZK on " +
@@ -73,12 +74,16 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         SimpleInvestmentStrategyService.LOGGER.debug("Acceptable investment for a loan of rating '{}' is between {} " +
                         "and {} CZK with investment share between {} and {}.", r.getCode(), minLoanAmount,
                 maxLoanAmount < 0 ? "+inf" : maxLoanAmount, minLoanShare, maxLoanShare);
+        if (requireConfirmation) {
+            SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' requires confirmation.", r.getCode());
+        }
         return new StrategyPerRating(r, targetShare, maxShare, minTerm, maxTerm, minLoanAmount, maxLoanAmount,
-                minLoanShare, maxLoanShare, minAskAmount, maxAskAmount, preferLongerTerms);
+                minLoanShare, maxLoanShare, minAskAmount, maxAskAmount, preferLongerTerms, requireConfirmation);
     }
 
     private static StrategyPerRating parseRating(final Rating rating, final ImmutableConfiguration config) {
         SimpleInvestmentStrategyService.LOGGER.debug("- Adding strategy for rating '{}'.", rating.getCode());
+        final boolean requireApproval = StrategyFileProperty.REQUIRE_CONFIRMATION.getValue(rating, config::getBoolean);
         final boolean preferLongerTerms = StrategyFileProperty.PREFER_LONGER_TERMS.getValue(rating, config::getBoolean);
         // shares of a rating on the total pie
         final BigDecimal targetShare = StrategyFileProperty.TARGET_SHARE.getValue(rating, config::getBigDecimal);
@@ -136,7 +141,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         }
         return SimpleInvestmentStrategyService.createIndividualStrategy(rating, targetShare, maximumShare,
                 minTerm, maxTerm, minAskAmount, maxAskAmount, minLoanAmount, maxLoanAmount, minLoanShare,
-                maxLoanShare, preferLongerTerms);
+                maxLoanShare, preferLongerTerms, requireApproval);
     }
 
     private static void checkIndividualStrategies(final Map<Rating, StrategyPerRating> strategies) {

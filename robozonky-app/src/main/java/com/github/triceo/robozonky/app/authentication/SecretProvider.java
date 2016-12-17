@@ -99,6 +99,21 @@ public abstract class SecretProvider {
     abstract public boolean setToken(final Reader token);
 
     /**
+     * Retrieve a secret stored through {@link #setSecret(String, char[])}.
+     * @param secretId ID of the secret to retrieve.
+     * @return The secret, if found.
+     */
+    abstract public Optional<char[]> getSecret(final String secretId);
+
+    /**
+     * Store a secret.
+     * @param secretId ID of the secret.
+     * @param secret The secret to store.
+     * @return True if successful.
+     */
+    abstract public boolean setSecret(final String secretId, final char... secret);
+
+    /**
      * Delete the stored token, if any.
      *
      * @return True if no token stored anymore.

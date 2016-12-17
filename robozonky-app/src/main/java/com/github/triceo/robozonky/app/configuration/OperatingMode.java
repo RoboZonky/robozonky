@@ -23,10 +23,11 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.events.EventRegistry;
-import com.github.triceo.robozonky.api.events.StrategyIdentifiedEvent;
+import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import org.apache.commons.cli.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,9 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
     /**
      * Requires a strategy and performs 0 or more investments based on the strategy.
      */
-    STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN) {
+    STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN,
+            CommandLineInterface.OPTION_CONFIRMATION, CommandLineInterface.OPTION_ZONK,
+            CommandLineInterface.OPTION_CLOSED_SEASON) {
         /**
          *
          * @param cli Parsed command line.
@@ -57,19 +60,32 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
                 return Optional.empty();
             }
             try {
-                final Optional<InvestmentStrategy> strategy = InvestmentStrategy.load(strategyLocation.get());
+                // find investment strategy
+                final Optional<InvestmentStrategy> strategy = InvestmentStrategyLoader.load(strategyLocation.get());
                 if (!strategy.isPresent()) {
                     OperatingMode.LOGGER.error("No investment strategy found to support {}.", strategyLocation);
                     return Optional.empty();
                 }
-                EventRegistry.fire((StrategyIdentifiedEvent) () -> strategy.get());
+                // find confirmation provider
+                final Optional<SecretProvider> secretProvider = cli.getSecretProvider();
+                if (!secretProvider.isPresent()) {
+                    OperatingMode.LOGGER.error("No secret provider found.");
+                    return Optional.empty();
+                }
+                final Optional<ZonkyProxy.Builder> builder =
+                        OperatingMode.getZonkyProxyBuilder(cli.getSecretProvider().get(), cli);
+                if (!builder.isPresent()) {
+                    return Optional.empty();
+                }
+                // create configuration
                 if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new Configuration(strategy.get(), cli.getMaximumSleepPeriodInMinutes(),
-                            cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
+                    return Optional.of(new Configuration(strategy.get(), builder.get(),
+                            cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds(),
+                            balance));
                 } else {
-                    return Optional.of(new Configuration(strategy.get(), cli.getMaximumSleepPeriodInMinutes(),
-                            cli.getCaptchaPreventingInvestingDelayInSeconds()));
+                    return Optional.of(new Configuration(strategy.get(), builder.get(),
+                            cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds()));
                 }
             } catch (final InvestmentStrategyParseException ex) {
                 OperatingMode.LOGGER.error("Failed parsing strategy.", ex);
@@ -97,6 +113,9 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
             } else if (!loanAmount.isPresent() || loanAmount.getAsInt() < 1) {
                 cli.printHelp("Loan amount must be provided and greater than 0.", true);
                 return Optional.empty();
+            } else if (cli.getConfirmationCredentials().isPresent()) {
+                cli.printHelp("External credentials make no sense in manual mode.", true);
+                return Optional.empty();
             } else if (cli.isDryRun()) {
                 final int balance = cli.getDryRunBalance().orElse(-1);
                 return Optional.of(new Configuration(loanId.getAsInt(), loanAmount.getAsInt(),
@@ -110,6 +129,34 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
     };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperatingMode.class);
+
+    private static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final SecretProvider secret,
+                                                                     final CommandLineInterface cli) {
+        final Optional<ConfirmationCredentials> optionalCred = cli.getConfirmationCredentials();
+        final ZonkyProxy.Builder ihb = new ZonkyProxy.Builder();
+        if (optionalCred.isPresent()) {
+            final ConfirmationCredentials cred = optionalCred.get();
+            final String serviceId = cred.getToolId();
+            final Optional<ConfirmationProvider> provider = ConfirmationProviderLoader.load(serviceId);
+            if (!provider.isPresent()) {
+                OperatingMode.LOGGER.error("Confirmation provider '{}' not found, yet it is required.", serviceId);
+                return Optional.empty();
+            }
+            final Optional<char[]> token = cred.getToken();
+            if (token.isPresent()) {
+                secret.setSecret(serviceId, token.get());
+                ihb.usingConfirmation(provider.get(), secret.getUsername(), token.get());
+            } else {
+                final Optional<char[]> oldToken = secret.getSecret(serviceId);
+                if (!oldToken.isPresent()) {
+                    OperatingMode.LOGGER.error("Password not provided for confirmation service '{}'.", serviceId);
+                    return Optional.empty();
+                }
+                ihb.usingConfirmation(provider.get(), secret.getUsername(), oldToken.get());
+            }
+        }
+        return Optional.of(ihb);
+    }
 
     private final Option selectingOption;
     private final Collection<Option> otherOptions;

@@ -41,6 +41,10 @@ final class KeyStoreSecretProvider extends SecretProvider {
     private static final String ALIAS_TOKEN = "tkn";
     private static final String ALIAS_TOKEN_DATE = "tknd";
 
+    private static String getSecretIdentifier(final String secretId) {
+        return "sct-" + secretId;
+    }
+
     private final KeyStoreHandler ksh;
 
     public KeyStoreSecretProvider(final KeyStoreHandler ksh) {
@@ -126,6 +130,16 @@ final class KeyStoreSecretProvider extends SecretProvider {
         final boolean secondSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN_DATE,
                 OffsetDateTime.now().toString());
         return firstSuccessful && secondSuccessful;
+    }
+
+    @Override
+    public Optional<char[]> getSecret(final String secretId) {
+        return this.ksh.get(KeyStoreSecretProvider.getSecretIdentifier(secretId));
+    }
+
+    @Override
+    public boolean setSecret(final String secretId, final char... secret) {
+        return this.set(KeyStoreSecretProvider.getSecretIdentifier(secretId), secret);
     }
 
     @Override

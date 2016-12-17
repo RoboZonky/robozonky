@@ -20,6 +20,7 @@ import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
+import com.github.triceo.robozonky.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -34,7 +35,7 @@ abstract class AbstractCommonFilterTest {
         Mockito.when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
 
         this.getTestedFilter().filter(crc);
-        Assertions.assertThat(crc.getHeaders().getFirst("User-Agent")).matches(o -> ((String)o).contains("RoboZonky"));
+        Assertions.assertThat(crc.getHeaders().getFirst("User-Agent")).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
     }
 
 }

@@ -16,24 +16,15 @@
 
 package com.github.triceo.robozonky.api.events;
 
-import com.github.triceo.robozonky.api.remote.InvestingZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.strategies.Recommendation;
 
 /**
- * Fired immediately before {@link InvestingZonkyApi#invest(Investment)} call is made or, in case of dry run,
+ * Fired immediately before {@link ZonkyApi#invest(Investment)} call is made or, in case of dry run,
  * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentMadeEvent}.
  */
 public interface InvestmentRequestedEvent extends Event {
 
-    /**
-     * @return The loan to invest into through the Zonky API.
-     */
-    Loan getLoan();
-
-    /**
-     *
-     * @return The amount of money to invest into the loan.
-     */
-    int getAmount();
+    Recommendation getRecommendation();
 }

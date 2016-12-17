@@ -19,6 +19,8 @@ package com.github.triceo.robozonky.app.version;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import com.github.triceo.robozonky.api.Defaults;
+
 /**
  * Class to perform version checks of the current version against the latest released version.
  */
@@ -34,20 +36,12 @@ public class VersionCheck {
     }
 
     /**
-     * Retrieve the version of RoboZonky that is currently running.
-     * @return Null if running without proper packaging such as in tests.
-     */
-    public static String retrieveCurrentVersion() {
-        return VersionCheck.class.getPackage().getImplementationVersion();
-    }
-
-    /**
      * Check the current version of RoboZonky against a given other version string.
      * @param latestVersion Version string to compare to.
-     * @return True if the {@link #retrieveCurrentVersion()} is older than the version in question.
+     * @return True if current version is older than the version in question.
      */
     public static boolean isCurrentVersionOlderThan(final String latestVersion) {
-        return VersionCheck.isSmallerThan(VersionCheck.retrieveCurrentVersion(), latestVersion);
+        return VersionCheck.isSmallerThan(Defaults.ROBOZONKY_VERSION, latestVersion);
     }
 
     static boolean isSmallerThan(final String first, final String second) {

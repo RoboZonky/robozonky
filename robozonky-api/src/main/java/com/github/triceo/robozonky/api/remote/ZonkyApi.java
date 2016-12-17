@@ -17,12 +17,16 @@ package com.github.triceo.robozonky.api.remote;
 
 import java.util.Collection;
 import java.util.List;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -34,6 +38,9 @@ import com.github.triceo.robozonky.api.remote.enums.Ratings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Path("/")
+@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+@Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
 public interface ZonkyApi extends Api {
 
     Logger LOGGER = LoggerFactory.getLogger(ZonkyApi.class);
@@ -42,6 +49,7 @@ public interface ZonkyApi extends Api {
     String MARKETPLACE = LOANS + "/marketplace";
     String ME = "/users/me";
     String WALLET = ME + "/wallet";
+    String INVESTMENT = ME + "/investment";
     String INVESTMENTS = ME + "/investments";
 
     @GET
@@ -113,5 +121,8 @@ public interface ZonkyApi extends Api {
     @Path(ZonkyApi.INVESTMENTS)
     Collection<Investment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
 
+    @POST
+    @Path(ZonkyApi.INVESTMENT)
+    void invest(Investment investment);
 }
 

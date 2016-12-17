@@ -16,14 +16,18 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.github.triceo.robozonky.ZonkyProxy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 
 public class Configuration {
 
     private InvestmentStrategy investmentStrategy = null;
+    private final ZonkyProxy.Builder zonkyProxyBuilder;
     private final boolean isDryRun;
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
     private final int captchaDelayInSeconds, sleepPeriodInMinutes;
@@ -35,6 +39,7 @@ public class Configuration {
         this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.isDryRun = false;
+        this.zonkyProxyBuilder = new ZonkyProxy.Builder();
     }
 
     public Configuration(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
@@ -45,18 +50,21 @@ public class Configuration {
         this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.dryRunBalance = dryRunBalance;
         this.isDryRun = true;
+        this.zonkyProxyBuilder = new ZonkyProxy.Builder();
     }
 
-    public Configuration(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
-                         final int captchaDelayInSeconds) {
+    public Configuration(final InvestmentStrategy investmentStrategy, final ZonkyProxy.Builder builder,
+                         final int sleepPeriodInMinutes, final int captchaDelayInSeconds) {
+        this.zonkyProxyBuilder = builder;
         this.investmentStrategy = investmentStrategy;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.sleepPeriodInMinutes = sleepPeriodInMinutes;
         this.isDryRun = false;
     }
 
-    public Configuration(final InvestmentStrategy investmentStrategy, final int sleepPeriodInMinutes,
-                         final int captchaDelayInSeconds, final int dryRunBalance) {
+    public Configuration(final InvestmentStrategy investmentStrategy, final ZonkyProxy.Builder builder,
+                         final int sleepPeriodInMinutes, final int captchaDelayInSeconds, final int dryRunBalance) {
+        this.zonkyProxyBuilder = builder;
         this.investmentStrategy = investmentStrategy;
         this.captchaDelayInSeconds = captchaDelayInSeconds;
         this.dryRunBalance = dryRunBalance;
@@ -64,12 +72,12 @@ public class Configuration {
         this.isDryRun = true;
     }
 
-    public int getCaptchaDelayInSeconds() {
-        return captchaDelayInSeconds;
+    public TemporalAmount getCaptchaDelay() {
+        return Duration.ofSeconds(captchaDelayInSeconds);
     }
 
-    public int getSleepPeriodInMinutes() {
-        return sleepPeriodInMinutes;
+    public TemporalAmount getSleepPeriod() {
+        return Duration.ofMinutes(sleepPeriodInMinutes);
     }
 
     public OptionalInt getLoanId() {
@@ -88,7 +96,11 @@ public class Configuration {
         return dryRunBalance < 0 ? OptionalInt.empty() : OptionalInt.of(dryRunBalance);
     }
 
+    public ZonkyProxy.Builder getZonkyProxyBuilder() {
+        return zonkyProxyBuilder;
+    }
+
     public Optional<InvestmentStrategy> getInvestmentStrategy() {
-        return investmentStrategy == null ? Optional.empty() : Optional.of(investmentStrategy);
+        return Optional.ofNullable(investmentStrategy);
     }
 }

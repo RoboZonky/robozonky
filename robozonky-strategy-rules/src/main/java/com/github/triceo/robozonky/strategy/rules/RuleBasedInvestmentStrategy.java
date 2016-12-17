@@ -18,16 +18,19 @@ package com.github.triceo.robozonky.strategy.rules;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.strategy.rules.facts.AcceptedLoan;
 import com.github.triceo.robozonky.strategy.rules.facts.ProposedLoan;
 import com.github.triceo.robozonky.strategy.rules.facts.RatingShare;
@@ -39,25 +42,19 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This strategy implements evaluation using a Drools decision table. See http://www.drools.org/
- *
- * Before {@link #recommendInvestmentAmount(Loan, PortfolioOverview)}, you must call
- * {@link #getMatchingLoans(List, PortfolioOverview)}. Otherwise the strategy does not have the decision data.
  */
 class RuleBasedInvestmentStrategy implements InvestmentStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleBasedInvestmentStrategy.class);
 
-    private static Loan matchLoan(final AcceptedLoan l, final List<Loan> loans) {
-        for (final Loan loan: loans) {
-            if (loan.getId() == l.getId()) {
-                return loan;
-            }
-        }
-        throw new IllegalStateException("Could not find matching loan. Should not have happened.");
+    private static LoanDescriptor matchLoan(final AcceptedLoan l, final Collection<LoanDescriptor> loans) {
+        return loans.stream()
+                .filter(ld -> ld.getLoan().getId() == l.getId())
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Could not find matching loan. Technically impossible."));
     }
 
     private final KieContainer kieContainer;
-    private final Map<Loan, Integer> recommendedAmounts = new HashMap<>();
 
     RuleBasedInvestmentStrategy(final KieContainer kieContainer) {
         this.kieContainer = kieContainer;
@@ -65,9 +62,8 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
 
     @Override
     @SuppressWarnings("unchecked")
-    public synchronized List<Loan> getMatchingLoans(final List<Loan> availableLoans,
-                                                    final PortfolioOverview portfolio) {
-        this.recommendedAmounts.clear();
+    public List<Recommendation> recommend(final Collection<LoanDescriptor> availableLoans,
+                                          final PortfolioOverview portfolio) {
         RuleBasedInvestmentStrategy.LOGGER.trace("Started matching loans.");
         final KieSession session = this.kieContainer.newKieSession();
         // insert facts into session
@@ -84,32 +80,17 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
                 (Collection<AcceptedLoan>)session.getObjects(o -> o instanceof AcceptedLoan);
         session.dispose();
         RuleBasedInvestmentStrategy.LOGGER.trace("Session disposed.");
-        final Map<AcceptedLoan, Loan> map = result.stream()
+        final Map<AcceptedLoan, LoanDescriptor> map = result.stream()
                 .collect(Collectors.toMap(Function.identity(),
                         l -> RuleBasedInvestmentStrategy.matchLoan(l, availableLoans)));
-        map.forEach((fake, actual) -> this.recommendedAmounts.put(actual, fake.getAmount()));
-        RuleBasedInvestmentStrategy.LOGGER.trace("Found recommended amounts.");
-        // return results in the order of decreasing priority
-        final List<Loan> finalResult = result.stream()
-                .sorted((a, b) -> Integer.compare(b.getPriority(), a.getPriority()))
-                .map(map::get)
+        final List<Recommendation> recommendations = map.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .map(e -> e.getValue().recommend(e.getKey().getAmount(), e.getKey().isConfirmationRequired()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
         RuleBasedInvestmentStrategy.LOGGER.trace("Loans matched.");
-        return finalResult;
-    }
-
-    /**
-     * Does not actually do anything. Only returns a result that had previously been calculated when
-     * {@link #getMatchingLoans(List, PortfolioOverview)} was called.
-     *
-     * @param loan Loan in question.
-     * @param portfolio Aggregation of information as to the user's current portfolio.
-     * @return How much should be invested into the loan.
-     */
-    @Override
-    public synchronized int recommendInvestmentAmount(final Loan loan, final PortfolioOverview portfolio) {
-        final Integer result = this.recommendedAmounts.get(loan);
-        return (result == null) ? 0 : result;
+        return Collections.unmodifiableList(recommendations);
     }
 
 }

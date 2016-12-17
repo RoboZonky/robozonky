@@ -32,5 +32,10 @@ public class Defaults {
     public static final int MINIMUM_INVESTMENT_IN_CZK = 200;
     public static final int MINIMUM_INVESTMENT_INCREMENT_IN_CZK = 200;
 
+    public static final String ROBOZONKY_VERSION = Defaults.class.getPackage().getImplementationVersion();
+    public static final String ROBOZONKY_URL = "https://triceo.github.io/robozonky/";
+    public static final String ROBOZONKY_USER_AGENT = "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" +
+            Defaults.ROBOZONKY_URL + ")";
+
 
 }

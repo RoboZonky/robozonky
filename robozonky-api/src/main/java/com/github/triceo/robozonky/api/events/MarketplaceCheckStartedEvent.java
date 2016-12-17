@@ -18,8 +18,7 @@ package com.github.triceo.robozonky.api.events;
 
 /**
  * Fired immediately before the marketplace is checked for new loans. Will eventually be followed by
- * {@link MarketplaceCheckCompleteEvent}, may be followed by one or more @{@link CaptchaProtectedLoanArrivalEvent} or
- * {@link UnprotectedLoanArrivalEvent}s.
+ * {@link MarketplaceCheckCompleteEvent}, may be followed by one or more {@link LoanArrivedEvent}s.
  */
 public interface MarketplaceCheckStartedEvent extends Event {
 

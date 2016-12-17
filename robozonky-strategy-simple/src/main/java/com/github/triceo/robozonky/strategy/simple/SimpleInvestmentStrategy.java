@@ -35,17 +35,21 @@ import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.api.strategies.Recommendation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class SimpleInvestmentStrategy implements InvestmentStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategy.class);
-    private static final Comparator<Loan> BY_TERM = Comparator.comparingInt(Loan::getTermInMonths);
+    private static final Comparator<LoanDescriptor> BY_TERM =
+            Comparator.comparingInt(l -> l.getLoan().getTermInMonths());
 
-    static Map<Rating, Collection<Loan>> sortLoansByRating(final Collection<Loan> loans) {
-        return Collections.unmodifiableMap(loans.stream().distinct().collect(Collectors.groupingBy(Loan::getRating)));
+    static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Collection<LoanDescriptor> loans) {
+        return Collections.unmodifiableMap(loans.stream().distinct()
+                .collect(Collectors.groupingBy(l -> l.getLoan().getRating())));
     }
 
     private List<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare,
@@ -125,28 +129,39 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         return true;
     }
 
-    @Override
-    public List<Loan> getMatchingLoans(final List<Loan> availableLoans, final PortfolioOverview portfolio) {
-        if (!this.isAcceptable(portfolio)) {
-            return Collections.emptyList();
-        }
-        final Map<Rating, Collection<Loan>> splitByRating = SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
-        final List<Loan> acceptableLoans = this.rankRatingsByDemand(portfolio.getSharesOnInvestment()).stream()
-                .filter(splitByRating::containsKey)
-                .map(this.individualStrategies::get)
-                .flatMap(strategy -> {
-                    final Comparator<Loan> properOrder = strategy.isPreferLongerTerms() ?
-                            SimpleInvestmentStrategy.BY_TERM.reversed() : SimpleInvestmentStrategy.BY_TERM;
-                    return splitByRating.get(strategy.getRating()).stream()
-                            .filter(strategy::isAcceptable)
-                            .sorted(properOrder);
-                }).collect(Collectors.toList());
-        SimpleInvestmentStrategy.LOGGER.debug("Strategy recommends the following unseen loans: {}.", acceptableLoans);
-        return Collections.unmodifiableList(acceptableLoans);
+    private boolean needsConfirm(final LoanDescriptor loanDescriptor) {
+        final Rating r = loanDescriptor.getLoan().getRating();
+        return this.individualStrategies.get(r).isConfirmationRequired();
     }
 
     @Override
-    public int recommendInvestmentAmount(final Loan loan, final PortfolioOverview portfolio) {
+    public List<Recommendation> recommend(final Collection<LoanDescriptor> availableLoans,
+                                          final PortfolioOverview portfolio) {
+        if (!this.isAcceptable(portfolio)) {
+            return Collections.emptyList();
+        }
+        final Map<Rating, Collection<LoanDescriptor>> splitByRating =
+                SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
+        final List<LoanDescriptor> acceptableLoans =
+                this.rankRatingsByDemand(portfolio.getSharesOnInvestment()).stream()
+                        .filter(splitByRating::containsKey)
+                        .map(this.individualStrategies::get)
+                        .flatMap(strategy -> {
+                            final Comparator<LoanDescriptor> properOrder = strategy.isLongerTermPreferred() ?
+                                    SimpleInvestmentStrategy.BY_TERM.reversed() : SimpleInvestmentStrategy.BY_TERM;
+                            return splitByRating.get(strategy.getRating()).stream()
+                                    .filter(l -> strategy.isAcceptable(l.getLoan()))
+                                    .sorted(properOrder);
+                        }).collect(Collectors.toList());
+        SimpleInvestmentStrategy.LOGGER.debug("Strategy recommends the following unseen loans: {}.", acceptableLoans);
+        return Collections.unmodifiableList(acceptableLoans.stream()
+                .map(l -> l.recommend(this.recommendInvestmentAmount(l.getLoan(), portfolio), this.needsConfirm(l)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList()));
+    }
+
+    int recommendInvestmentAmount(final Loan loan, final PortfolioOverview portfolio) {
         if (!this.isAcceptable(portfolio)) {
             return 0;
         }
@@ -156,21 +171,23 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         }
         final int minimumRecommendation = recommend.get()[0];
         final int maximumRecommendation = recommend.get()[1];
-        SimpleInvestmentStrategy.LOGGER.debug("Recommended investment range of <{}; {}> CZK.", minimumRecommendation,
-                maximumRecommendation);
+        SimpleInvestmentStrategy.LOGGER.trace("Recommended investment for loan #{} in range of <{}; {}> CZK.",
+                loan.getId(), minimumRecommendation, maximumRecommendation);
         // round to nearest lower increment
         final int balance = portfolio.getCzkAvailable();
+        final int loanRemaining = (int)loan.getRemainingInvestment();
         if (minimumRecommendation > balance) {
             return 0;
-        } else if (minimumRecommendation > loan.getRemainingInvestment()) {
+        } else if (minimumRecommendation > loanRemaining) {
             return 0;
         }
         final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
-        final int recommendedAmount = Math.min(balance, maximumRecommendation); // to never go over balance
+        final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
         final int result = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
         if (result < minimumRecommendation) {
             return 0;
         } else {
+            SimpleInvestmentStrategy.LOGGER.debug("Final recommendation for loan #{} is {} CZK.", loan.getId(), result);
             return result;
         }
     }

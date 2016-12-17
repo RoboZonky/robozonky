@@ -25,11 +25,6 @@ import org.junit.Test;
 public class VersionCheckTest {
 
     @Test
-    public void noCurrentVersionInTests() {
-        Assertions.assertThat(VersionCheck.retrieveCurrentVersion()).isNull(); // just in tests
-    }
-
-    @Test
     public void retrieveLatestVersion() throws Exception {
         final Future<VersionIdentifier> version = VersionCheck.retrieveLatestVersion(Executors.newWorkStealingPool());
         Assertions.assertThat(version).isNotNull();

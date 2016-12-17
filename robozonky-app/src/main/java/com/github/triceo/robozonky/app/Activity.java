@@ -21,10 +21,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -77,13 +78,12 @@ class Activity {
         /**
          * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published at
          * least a certain time ago.
-         * @param delayInSeconds How long ago at the very least should the loans have been published.
+         * @param delay How long ago at the very least should the loans have been published.
          * @return Ordered by publishing time descending.
          */
-        public List<Loan> getLoansOlderThan(final int delayInSeconds) {
+        public List<Loan> getLoansOlderThan(final TemporalAmount delay) {
             return this.recentLoansDescending.stream()
-                    .filter(l -> OffsetDateTime.now()
-                            .isAfter(l.getDatePublished().plus(delayInSeconds, ChronoUnit.SECONDS)))
+                    .filter(l -> OffsetDateTime.now().isAfter(l.getDatePublished().plus(delay)))
                     .collect(Collectors.toList());
         }
 
@@ -104,15 +104,14 @@ class Activity {
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
     private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
 
-    private final int closedSeasonInSeconds;
-    private final int sleepIntervalInMinutes;
+    private final TemporalAmount closedSeason, sleepInterval;
     private final Path state;
     private final Activity.Marketplace marketplace;
     private Runnable settler = null;
 
     Activity(final Configuration ctx, final Api api, final Path state) {
-        this.closedSeasonInSeconds = ctx.getCaptchaDelayInSeconds();
-        this.sleepIntervalInMinutes = ctx.getSleepPeriodInMinutes();
+        this.closedSeason = ctx.getCaptchaDelay();
+        this.sleepInterval = ctx.getSleepPeriod();
         this.marketplace = Activity.Marketplace.from(api);
         this.state = state;
     }
@@ -136,7 +135,7 @@ class Activity {
 
     public List<Loan> getUnactionableLoans() {
         return this.marketplace.getLoansNewerThan(
-                OffsetDateTime.now().minus(this.closedSeasonInSeconds, ChronoUnit.SECONDS)
+                OffsetDateTime.now().minus(this.closedSeason)
         );
     }
 
@@ -146,7 +145,7 @@ class Activity {
      * @return Loans ordered by their time of publishing, descending.
      */
     public List<Loan> getAvailableLoans() {
-        return this.marketplace.getLoansOlderThan(closedSeasonInSeconds);
+        return this.marketplace.getLoansOlderThan(this.closedSeason);
     }
 
     /**
@@ -157,14 +156,14 @@ class Activity {
     public boolean shouldSleep() {
         final OffsetDateTime lastKnownAction = this.getLatestMarketplaceAction();
         final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
-        Activity.LOGGER.debug("Marketplace last checked on {}, has un-actionable loans: {}.",
-                lastKnownAction, hasUnactionableLoans);
+        Activity.LOGGER.debug("Marketplace last checked on {}, has un-actionable loans: {}.", lastKnownAction,
+                hasUnactionableLoans);
         boolean shouldSleep = true;
         if (!this.marketplace.getLoansNewerThan(lastKnownAction).isEmpty()) {
             // try investing since there are loans we haven't seen yet
             Activity.LOGGER.debug("Will not sleep due to new loans.");
             shouldSleep = false;
-        } else if (lastKnownAction.plus(sleepIntervalInMinutes, ChronoUnit.MINUTES).isBefore(OffsetDateTime.now())) {
+        } else if (lastKnownAction.plus(this.sleepInterval).isBefore(OffsetDateTime.now())) {
             // try investing since we haven't tried in a while; maybe we have some more funds now
             Activity.LOGGER.debug("Will not sleep due to already sleeping too much.");
             shouldSleep = false;
@@ -202,7 +201,7 @@ class Activity {
         try (final BufferedWriter writer = Files.newBufferedWriter(this.state, Defaults.CHARSET)) {
             // make sure the unactionable loans are never included in the time the marketplace was last checked
             final OffsetDateTime result = hasUnactionableLoans ?
-                    OffsetDateTime.now().minus(this.closedSeasonInSeconds + 30, ChronoUnit.SECONDS)
+                    OffsetDateTime.now().minus(Duration.from(this.closedSeason).plus(Duration.ofSeconds(30)))
                     : OffsetDateTime.now();
             if (hasUnactionableLoans) {
                 Activity.LOGGER.debug("New marketplace last checked time placed before beginning of closed season: {}.",

@@ -16,25 +16,36 @@
 
 package com.github.triceo.robozonky.strategy.rules.facts;
 
-public class AcceptedLoan {
+import com.github.triceo.robozonky.strategy.rules.AcceptedLoanComparator;
+
+public class AcceptedLoan implements Comparable<AcceptedLoan> {
 
     private int id;
     private int priority;
     private int amount;
+    private boolean confirmationRequired;
 
     public int getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(final int amount) {
         this.amount = amount;
+    }
+
+    public boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -42,8 +53,12 @@ public class AcceptedLoan {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(final int priority) {
         this.priority = priority;
     }
 
+    @Override
+    public int compareTo(final AcceptedLoan acceptedLoan) {
+        return new AcceptedLoanComparator().compare(this, acceptedLoan);
+    }
 }

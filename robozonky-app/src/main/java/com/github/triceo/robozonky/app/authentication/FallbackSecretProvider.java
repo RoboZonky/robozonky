@@ -27,6 +27,8 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.Defaults;
@@ -44,6 +46,7 @@ final class FallbackSecretProvider extends SecretProvider {
 
     private final String username;
     private final char[] password;
+    private final Map<String, char[]> secrets = new HashMap<>();
 
     public FallbackSecretProvider(final String username, final char[] password) {
         this.username = username;
@@ -84,6 +87,17 @@ final class FallbackSecretProvider extends SecretProvider {
             FallbackSecretProvider.LOGGER.warn("Failed setting token.", ex);
             return false;
         }
+    }
+
+    @Override
+    public Optional<char[]> getSecret(final String secretId) {
+        return Optional.ofNullable(this.secrets.get(secretId));
+    }
+
+    @Override
+    public boolean setSecret(final String secretId, final char... secret) {
+        this.secrets.put(secretId, secret);
+        return true;
     }
 
     @Override

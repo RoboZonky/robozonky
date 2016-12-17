@@ -35,12 +35,12 @@ public class AppTest {
     @Test
     public void wrongStrategyOnCli() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
-        App.main("-s", "some.random.file", "-u", "user", "-p", "password");
+        App.main("-s", "some.random.file", "-u", "user", "-p", "password", "-t");
     }
 
     @Test
     public void wrongKeyStore() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_SETUP.getCode());
+        exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
         App.main("-l", "1", "-a", "1000", "-g", "some.random.file", "-p", "password");
     }
 

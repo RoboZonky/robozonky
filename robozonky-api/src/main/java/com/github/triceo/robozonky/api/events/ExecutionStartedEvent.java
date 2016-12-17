@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.api.events;
 
 import java.util.Collection;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 /**
  * Fired immediately before the loans are submitted for evaluation by strategy. May be followed by
@@ -29,5 +29,5 @@ public interface ExecutionStartedEvent extends Event {
     /**
      * @return Loans found on the marketplace that are available for robotic investment, not protected by CAPTCHA.
      */
-    Collection<Loan> getLoans();
+    Collection<LoanDescriptor> getLoanDescriptors();
 }

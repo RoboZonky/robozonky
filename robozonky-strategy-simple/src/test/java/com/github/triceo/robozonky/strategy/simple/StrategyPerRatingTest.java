@@ -39,7 +39,7 @@ public class StrategyPerRatingTest {
             BigDecimal.ONE, StrategyPerRatingTest.TESTED_TERM_LENGTH - 1, -1,
             StrategyPerRatingTest.MINIMUM_LOAN_INVESTMENT, StrategyPerRatingTest.MAXIMUM_LOAN_INVESTMENT,
             StrategyPerRatingTest.MINIMUM_LOAN_SHARE, StrategyPerRatingTest.MAXIMUM_LOAN_SHARE,
-            StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true
+            StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true, false
     );
 
     @Test(expected = IllegalArgumentException.class)
@@ -66,7 +66,7 @@ public class StrategyPerRatingTest {
 
         // term length within limits
         Mockito.when(mockLoan.getTermInMonths()).thenReturn(StrategyPerRatingTest.TESTED_TERM_LENGTH);
-        Assertions.assertThat(StrategyPerRatingTest.STRATEGY.isPreferLongerTerms()).isTrue();
+        Assertions.assertThat(StrategyPerRatingTest.STRATEGY.isLongerTermPreferred()).isTrue();
         Assertions.assertThat(StrategyPerRatingTest.STRATEGY.isAcceptable(mockLoan)).isTrue();
 
         // less than minimal term length

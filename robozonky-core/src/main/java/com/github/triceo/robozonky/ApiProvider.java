@@ -23,7 +23,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.xml.ws.WebServiceClient;
 
-import com.github.triceo.robozonky.api.remote.InvestingZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.ZotifyApi;
@@ -72,7 +71,6 @@ public class ApiProvider implements AutoCloseable {
         return clientBuilder;
     }
 
-    private final boolean isDryRun;
     private final ClientBuilder clientBuilder;
     private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
     private final Collection<Client> clients = new ArrayList<>();
@@ -84,17 +82,16 @@ public class ApiProvider implements AutoCloseable {
      *
      * @param clientBuilder Client builder to use to instantiate all the APIs.
      */
-    public ApiProvider(final boolean isDryRun, final ResteasyClientBuilder clientBuilder) {
+    public ApiProvider(final ResteasyClientBuilder clientBuilder) {
         this.clientBuilder = clientBuilder;
-        this.isDryRun = isDryRun;
     }
 
     /**
      * Create a new instance of the API provider that will use a fresh instance of {@link ResteasyClientBuilder}. This
      * client will be thread-safe.
      */
-    public ApiProvider(final boolean isDryRun) {
-        this(isDryRun, ApiProvider.newResteasyClientBuilder());
+    public ApiProvider() {
+        this(ApiProvider.newResteasyClientBuilder());
     }
 
     private synchronized Client newClient() {
@@ -141,20 +138,12 @@ public class ApiProvider implements AutoCloseable {
      * Retrieve user-specific Zonky API which requires authentication.
      *
      * @param token The Zonky API token, representing an authenticated user.
-     * @return New API instance. If {@link #isDryRun()} is false, returns instance of {@link InvestingZonkyApi}.
+     * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
     public ZonkyApi authenticated(final ZonkyApiToken token) {
         final AuthenticatedFilter filter = new AuthenticatedFilter(token);
-        if (this.isDryRun) {
-            return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, filter);
-        } else {
-            return this.obtain(InvestingZonkyApi.class, ApiProvider.ZONKY_URL, filter);
-        }
-    }
-
-    public boolean isDryRun() {
-        return isDryRun;
+        return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, filter);
     }
 
     @Override

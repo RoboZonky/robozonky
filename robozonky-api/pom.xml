@@ -15,8 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>robozonky</artifactId>
@@ -26,16 +26,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>robozonky-api</artifactId>
-  <description>RoboZonky: Public APIs</description>
+  <name>RoboZonky: Public, stable APIs</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-jaxrs</artifactId>
+      <groupId>org.jboss.spec.javax.ws.rs</groupId>
+      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-jackson2-provider</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -78,7 +82,9 @@
         </dependencies>
         <executions>
           <execution>
-            <goals><goal>check</goal></goals>
+            <goals>
+              <goal>check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

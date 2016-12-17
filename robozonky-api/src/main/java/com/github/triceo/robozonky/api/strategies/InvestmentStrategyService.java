@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.ServiceLoader;
 
 /**
- * Use Java's {@link ServiceLoader} to load strategy different strategy implementations.
+ * Use Java's {@link ServiceLoader} to load different strategy implementations.
  */
 public interface InvestmentStrategyService {
 
@@ -38,7 +38,7 @@ public interface InvestmentStrategyService {
      *
      * @param strategyFile Investment strategy in question.
      * @return Processed instance of the investment strategy provided by the user.
-     * @throws InvestmentStrategyParseException If the strategy file failed to parse.
+     * @throws InvestmentStrategyParseException If the strategy file failed to initialize.
      */
     InvestmentStrategy parse(File strategyFile) throws InvestmentStrategyParseException;
 

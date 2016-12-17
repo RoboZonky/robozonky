@@ -43,9 +43,15 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getStrategyConfigurationLocation()).isPresent();
         softly.assertThat(cli.getKeyStoreLocation()).isPresent();
         softly.assertThat(cli.isTokenEnabled()).isTrue();
-        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isPresent();
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isPresent()
+                .hasValue(5);
         softly.assertThat(cli.getPassword()).isNotNull();
         softly.assertThat(cli.getUsername()).isEmpty();
+        softly.assertThat(cli.getCaptchaPreventingInvestingDelayInSeconds())
+                .isEqualTo(CommandLineInterface.DEFAULT_CAPTCHA_DELAY_SECONDS);
+        softly.assertThat(cli.getMaximumSleepPeriodInMinutes())
+                .isEqualTo(CommandLineInterface.DEFAULT_SLEEP_PERIOD_MINUTES);
+        softly.assertThat(cli.getConfirmationCredentials()).isEmpty();
         softly.assertAll();
     }
 
@@ -61,6 +67,7 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getPassword()).isNotNull();
         softly.assertThat(cli.getUsername()).isEmpty();
         softly.assertThat(cli.isFaultTolerant()).isTrue();
+        softly.assertThat(cli.newAuthenticationHandler()).isEmpty();
         softly.assertAll();
     }
 

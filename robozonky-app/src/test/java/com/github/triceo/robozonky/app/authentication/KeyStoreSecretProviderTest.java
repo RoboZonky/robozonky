@@ -93,6 +93,10 @@ public class KeyStoreSecretProviderTest {
         final String pwd = "somethingElse";
         Assertions.assertThat(p.setPassword(pwd.toCharArray())).isTrue();
         Assertions.assertThat(p.getPassword()).isEqualTo(pwd.toCharArray());
+        // set some secrets
+        final String key = "key", value = "value";
+        Assertions.assertThat(p.setSecret(key, value.toCharArray())).isTrue();
+        Assertions.assertThat(p.getSecret(key)).contains(value.toCharArray());
     }
 
     @Test

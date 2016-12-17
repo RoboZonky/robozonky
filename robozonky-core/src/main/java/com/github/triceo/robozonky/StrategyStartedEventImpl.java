@@ -22,19 +22,19 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.triceo.robozonky.api.events.StrategyStartedEvent;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 class StrategyStartedEventImpl implements StrategyStartedEvent {
 
     private final InvestmentStrategy strategy;
-    private final List<Loan> loans;
+    private final List<LoanDescriptor> loanDesciptors;
     private final BigDecimal balance;
 
-    public StrategyStartedEventImpl(final InvestmentStrategy strategy, final List<Loan> loans,
+    public StrategyStartedEventImpl(final InvestmentStrategy strategy, final List<LoanDescriptor> loans,
                                     final BigDecimal balance) {
         this.strategy = strategy;
-        this.loans = Collections.unmodifiableList(loans);
+        this.loanDesciptors = Collections.unmodifiableList(loans);
         this.balance = balance;
     }
 
@@ -44,8 +44,8 @@ class StrategyStartedEventImpl implements StrategyStartedEvent {
     }
 
     @Override
-    public Collection<Loan> getLoans() {
-        return loans;
+    public Collection<LoanDescriptor> getLoanDesciptors() {
+        return loanDesciptors;
     }
 
     @Override

@@ -17,6 +17,9 @@
 package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,11 +33,13 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.api.strategies.Recommendation;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class SimpleInvestmentStategyTest {
@@ -52,7 +57,7 @@ public class SimpleInvestmentStategyTest {
             SimpleInvestmentStategyTest.TESTED_TERM_LENGTH - 1, -1, 200,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.ZERO,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A, SimpleInvestmentStategyTest.MINIMUM_ASK,
-            SimpleInvestmentStategyTest.MAXIMUM_ASK, true
+            SimpleInvestmentStategyTest.MAXIMUM_ASK, true, false
     );
 
     private static final BigDecimal MAXIMUM_LOAN_SHARE_B = BigDecimal.valueOf(0.001);
@@ -63,10 +68,10 @@ public class SimpleInvestmentStategyTest {
             SimpleInvestmentStategyTest.TESTED_TERM_LENGTH + 1, 200,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT, BigDecimal.ZERO,
             SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_B, SimpleInvestmentStategyTest.MINIMUM_ASK,
-            SimpleInvestmentStategyTest.MAXIMUM_ASK, false
+            SimpleInvestmentStategyTest.MAXIMUM_ASK, false, false
     );
 
-    private final InvestmentStrategy overallStrategy;
+    private final SimpleInvestmentStrategy overallStrategy;
 
     public SimpleInvestmentStategyTest() {
         final Map<Rating, StrategyPerRating> strategies = new EnumMap<>(Rating.class);
@@ -149,17 +154,26 @@ public class SimpleInvestmentStategyTest {
         Mockito.when(loan.getId()).thenReturn(id);
         Mockito.when(loan.getTermInMonths()).thenReturn(term);
         Mockito.when(loan.getRating()).thenReturn(rating);
+        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         return loan;
+    }
+
+    private static LoanDescriptor getLoanDescriptor(final Loan l) {
+        return new LoanDescriptor(l, Duration.ofSeconds(100));
     }
 
     @Test
     public void testProperSorting() {
-        final Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A);
-        final Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B);
-        final Loan c1 = SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C);
-        final Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A);
-        final Collection<Loan> loans = Arrays.asList(a1, b1, c1, a2, b1, c1);
-        final Map<Rating, Collection<Loan>> result = SimpleInvestmentStrategy.sortLoansByRating(loans);
+        final LoanDescriptor a1 =
+                SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A));
+        final LoanDescriptor b1 =
+                SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B));
+        final LoanDescriptor c1 =
+                SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C));
+        final LoanDescriptor a2 =
+                SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A));
+        final Collection<LoanDescriptor> loans = Arrays.asList(a1, b1, c1, a2, b1, c1);
+        final Map<Rating, Collection<LoanDescriptor>> result = SimpleInvestmentStrategy.sortLoansByRating(loans);
         Assertions.assertThat(result).containsOnlyKeys(Rating.A, Rating.B, Rating.C);
         Assertions.assertThat(result.get(Rating.A)).containsExactly(a1, a2);
         Assertions.assertThat(result.get(Rating.B)).containsExactly(b1);
@@ -175,11 +189,11 @@ public class SimpleInvestmentStategyTest {
         final Map<Rating, StrategyPerRating> strategies =
                 SimpleInvestmentStategyTest.mockStrategies(BigDecimal.ZERO);
         strategies.put(Rating.A, new StrategyPerRating(Rating.A, targetShareA, BigDecimal.ONE, 1, 1, 1, 1,
-                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true));
+                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true, false));
         strategies.put(Rating.B, new StrategyPerRating(Rating.B, targetShareB, BigDecimal.ONE, 1, 1, 1, 1,
-                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true));
+                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true, false));
         strategies.put(Rating.C, new StrategyPerRating(Rating.C, targetShareC, BigDecimal.ONE, 1, 1, 1, 1,
-                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true));
+                BigDecimal.ZERO, BigDecimal.ONE, 1, 1, true, false));
         final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
 
         // all ratings have zero share; C > B > A
@@ -205,42 +219,15 @@ public class SimpleInvestmentStategyTest {
         return Arrays.stream(Rating.values())
                 .collect(Collectors.toMap(Function.identity(), r -> {
                     final StrategyPerRating s = Mockito.mock(StrategyPerRating.class);
-                    Mockito.when(s.isPreferLongerTerms()).thenReturn(r.ordinal() % 2 == 0); // exercise both branches
+                    Mockito.when(s.isLongerTermPreferred()).thenReturn(r.ordinal() % 2 == 0); // exercise both branches
                     Mockito.when(s.getRating()).thenReturn(r);
                     Mockito.when(s.getTargetShare()).thenReturn(defaultTargetShare);
                     Mockito.when(s.getMaximumShare()).thenReturn(BigDecimal.ONE);
-                    Mockito.when(s.isAcceptable(Mockito.any())).thenReturn(true);
+                    Mockito.when(s.isAcceptable(ArgumentMatchers.any())).thenReturn(true);
+                    Mockito.when(s.recommendInvestmentAmount(ArgumentMatchers.any()))
+                            .thenReturn(Optional.of(new int[] {0, 100000}));
                     return s;
                 }));
-    }
-
-    @Test
-    public void doesNotAllowUnderinvesting() {
-        final int balance = 100;
-        final SimpleInvestmentStrategy sis =
-                new SimpleInvestmentStrategy(balance, 100000, SimpleInvestmentStategyTest.mockStrategies());
-
-        // all ratings have zero share; C > B > A
-        final Map<Rating, BigDecimal> tmp =
-                SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-
-        // prepare some loans
-        final Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A);
-        final Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B);
-        final Loan c1 = SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C);
-        final Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A);
-        final List<Loan> loans = Arrays.asList(a1, b1, c1, a2);
-
-        // make sure we never go below the minimum balance
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance + 1);
-        Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance);
-        Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance - 1);
-        Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isEmpty();
     }
 
     @Test
@@ -255,24 +242,27 @@ public class SimpleInvestmentStategyTest {
                 SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
 
         // prepare some loans
-        final Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 2, 3, Rating.A);
-        final Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 5, 6, Rating.B);
-        final Loan c1 = SimpleInvestmentStategyTest.mockLoan(7, 8, 9, Rating.C);
-        final Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 11, 12, Rating.A);
-        final List<Loan> loans = Arrays.asList(a1, b1, c1, a2);
+        final LoanDescriptor a1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (1, 200, 3, Rating.A));
+        final LoanDescriptor b1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (4, 500, 6, Rating.B));
+        final LoanDescriptor c1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (7, 800, 9, Rating.C));
+        final LoanDescriptor a2 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (10, 1100, 12, Rating.A));
+        final List<LoanDescriptor> loans = Arrays.asList(a1, b1, c1, a2);
 
         // make sure we never go below the minimum balance
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling + 1);
-        Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isEmpty();
+        Assertions.assertThat(sis.recommend(loans, portfolio)).isEmpty();
         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling);
-        Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
+        Assertions.assertThat(sis.recommend(loans, portfolio)).isNotEmpty();
         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling - 1);
-        Assertions.assertThat(sis.getMatchingLoans(loans, portfolio)).isNotEmpty();
+        Assertions.assertThat(sis.recommend(loans, portfolio)).isNotEmpty();
     }
-
 
     @Test
     public void properlySortsMatchesOnTerms() {
@@ -287,11 +277,15 @@ public class SimpleInvestmentStategyTest {
 
         // prepare some loans
         final int aTerm = 3, bTerm = 4;
-        final Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 200, aTerm, Rating.A);
-        final Loan b1 = SimpleInvestmentStategyTest.mockLoan(4, 500, bTerm, Rating.B);
-        final Loan b2 = SimpleInvestmentStategyTest.mockLoan(7, 800, bTerm + 1, Rating.B);
-        final Loan a2 = SimpleInvestmentStategyTest.mockLoan(10, 1100, aTerm + 1, Rating.A);
-        final List<Loan> loans = Arrays.asList(a1, b1, a2, b2);
+        final LoanDescriptor a1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (1, 200, aTerm, Rating.A));
+        final LoanDescriptor b1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (4, 500, bTerm, Rating.B));
+        final LoanDescriptor b2 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (7, 800, bTerm + 1, Rating.B));
+        final LoanDescriptor a2 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
+                (10, 1100, aTerm + 1, Rating.A));
+        final List<LoanDescriptor> loans = Arrays.asList(a1, b1, a2, b2);
 
         // prepare portfolio
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
@@ -300,9 +294,12 @@ public class SimpleInvestmentStategyTest {
         Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
 
         // make sure the loans are properly sorted according to their terms
-        final List<Loan> result = sis.getMatchingLoans(loans, portfolio);
-        Assertions.assertThat(result).isNotEmpty();
-        Assertions.assertThat(result).containsExactly(a2, a1, b1, b2);
+        final List<Recommendation> result = sis.recommend(loans, portfolio);
+        Assertions.assertThat(result).hasSameSizeAs(loans);
+        Assertions.assertThat(result.get(0).getLoanDescriptor()).isSameAs(a2);
+        Assertions.assertThat(result.get(1).getLoanDescriptor()).isSameAs(a1);
+        Assertions.assertThat(result.get(2).getLoanDescriptor()).isSameAs(b1);
+        Assertions.assertThat(result.get(3).getLoanDescriptor()).isSameAs(b2);
     }
 
     @Test
@@ -315,7 +312,7 @@ public class SimpleInvestmentStategyTest {
         // mock core strategies
         final Map<Rating, StrategyPerRating> s = SimpleInvestmentStategyTest.mockStrategies();
         final StrategyPerRating strategyMock = s.get(rating);
-        Mockito.when(strategyMock.recommendInvestmentAmount(Mockito.eq(a1)))
+        Mockito.when(strategyMock.recommendInvestmentAmount(ArgumentMatchers.eq(a1)))
                 .thenReturn(Optional.of(new int[] {200, 600}));
         final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(balance, ceiling, s);
         // all ratings have zero share
