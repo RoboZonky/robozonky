@@ -1,5 +1,5 @@
 install: true
-script: "mvn clean post-integration-test"
+script: "mvn clean post-integration-test --batch-mode"
 language: java
 os:
   - linux
