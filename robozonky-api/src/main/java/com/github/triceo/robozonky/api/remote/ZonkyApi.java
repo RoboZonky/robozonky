@@ -122,7 +122,7 @@ public interface ZonkyApi extends Api {
     Collection<Investment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
 
     @POST
-    @Path(ZonkyApi.INVESTMENT)
+    @Path("/marketplace/investment")
     void invest(Investment investment);
 }
 
