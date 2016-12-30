@@ -72,11 +72,10 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     public void handle(final T event) {
         if (!this.shouldSendEmail(event)) {
             return;
-        }
-        try {
+        } else try {
             final Email email = AbstractEmailingListener.createNewEmail(properties);
-            AbstractEmailingListener.LOGGER.debug("Will send e-mail to {} through {}:{} as {}.", email.getToAddresses(),
-                    email.getHostName(), email.getSmtpPort(), properties.getSmtpUsername());
+            AbstractEmailingListener.LOGGER.debug("Will send '{}' to {} through {}:{} as {}.", email.getSubject(),
+                    email.getToAddresses(), email.getHostName(), email.getSmtpPort(), properties.getSmtpUsername());
             email.setSubject(this.getSubject(event));
             email.setMsg(this.templates.process(this.getTemplateFileName(), this.getData(event)));
             email.send();
