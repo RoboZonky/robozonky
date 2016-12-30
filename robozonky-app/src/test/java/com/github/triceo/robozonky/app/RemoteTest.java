@@ -19,27 +19,14 @@ package com.github.triceo.robozonky.app;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.ZonkyProxy;
-import com.github.triceo.robozonky.api.events.Event;
-import com.github.triceo.robozonky.api.events.EventListener;
-import com.github.triceo.robozonky.api.events.EventRegistry;
-import com.github.triceo.robozonky.api.events.ExecutionCompleteEvent;
-import com.github.triceo.robozonky.api.events.ExecutionStartedEvent;
-import com.github.triceo.robozonky.api.events.LoanArrivedEvent;
-import com.github.triceo.robozonky.api.events.MarketplaceCheckCompleteEvent;
-import com.github.triceo.robozonky.api.events.MarketplaceCheckStartedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
-import com.github.triceo.robozonky.api.remote.ZotifyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
@@ -76,15 +63,6 @@ public class RemoteTest extends BaseMarketplaceTest {
         final Activity activity = Mockito.mock(Activity.class);
         Mockito.when(activity.shouldSleep()).thenReturn(true);
         Assertions.assertThat(Remote.getAvailableLoans(activity)).isEmpty();
-    }
-
-    @Test
-    public void availableLoansRetrievalWhileAwake() {
-        final Activity activity = Mockito.mock(Activity.class);
-        Mockito.when(activity.shouldSleep()).thenReturn(false);
-        Mockito.when(activity.getAvailableLoans()).thenReturn(Collections.singletonList(Mockito.mock(Loan.class)));
-        Mockito.when(activity.getUnactionableLoans()).thenReturn(Collections.singletonList(Mockito.mock(Loan.class)));
-        Assertions.assertThat(Remote.getAvailableLoans(activity)).hasSize(2);
     }
 
     @Test
@@ -159,7 +137,7 @@ public class RemoteTest extends BaseMarketplaceTest {
         Mockito.when(c.getLoanId()).thenReturn(OptionalInt.of(loanId));
         Mockito.when(c.getLoanAmount()).thenReturn(OptionalInt.of(1000));
         Mockito.when(c.getCaptchaDelay()).thenReturn(Duration.ofMinutes(2));
-        final Collection<Investment> result = Remote.invest(c, api, null);
+        final Collection<Investment> result = Remote.invest(c, api, Collections.emptyList());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -194,45 +172,6 @@ public class RemoteTest extends BaseMarketplaceTest {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
         new Remote(RemoteTest.mockConfiguration(), auth).call();
-    }
-
-    @Test
-    public void eventsFiringProperly() {
-        final TemporalAmount captchaDelayInSeconds = Duration.ofSeconds(120);
-        // prepare the context so that we have a fixed CAPTCHA delay
-        final Configuration ctx = Mockito.mock(Configuration.class);
-        Mockito.when(ctx.getCaptchaDelay()).thenReturn(captchaDelayInSeconds);
-        // prepare two different loans - one protected, one not
-        final Loan protectedLoan = Mockito.mock(Loan.class);
-        Mockito.when(protectedLoan.getRemainingInvestment()).thenReturn(1000.0);
-        Mockito.when(protectedLoan.getDatePublished()).thenReturn(OffsetDateTime.now().minus(1, ChronoUnit.SECONDS));
-        final Loan unprotectedLoan = Mockito.mock(Loan.class);
-        Mockito.when(unprotectedLoan.getRemainingInvestment()).thenReturn(2000.0);
-        Mockito.when(unprotectedLoan.getDatePublished()).thenReturn(OffsetDateTime.now()
-                .minus(Duration.from(captchaDelayInSeconds).plus(1, ChronoUnit.SECONDS)));
-        // prepare the APIs to return those two loans
-        final ZotifyApi api = Mockito.mock(ZotifyApi.class);
-        Mockito.when(api.getLoans()).thenReturn(Arrays.asList(protectedLoan, unprotectedLoan));
-        final ApiProvider apis = Mockito.mock(ApiProvider.class);
-        Mockito.when(apis.cache()).thenReturn(api);
-        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        // execute the actual test
-        final EventListener<Event> globalListener = Mockito.mock(EventListener.class);
-        EventRegistry.INSTANCE.addListener(globalListener);
-        final Remote r = new Remote(ctx, auth);
-        r.execute(apis);
-        // and check for the proper invocations
-        Mockito.verify(globalListener, Mockito.times(6)).handle(ArgumentMatchers.any());
-        Mockito.verify(globalListener, Mockito.times(1))
-                .handle(ArgumentMatchers.any(MarketplaceCheckStartedEvent.class));
-        Mockito.verify(globalListener, Mockito.times(2))
-                .handle(ArgumentMatchers.any(LoanArrivedEvent.class));
-        Mockito.verify(globalListener, Mockito.times(1))
-                .handle(ArgumentMatchers.any(MarketplaceCheckCompleteEvent.class));
-        Mockito.verify(globalListener, Mockito.times(1))
-                .handle(ArgumentMatchers.any(ExecutionStartedEvent.class));
-        Mockito.verify(globalListener, Mockito.times(1))
-                .handle(ArgumentMatchers.any(ExecutionCompleteEvent.class));
     }
 
 }

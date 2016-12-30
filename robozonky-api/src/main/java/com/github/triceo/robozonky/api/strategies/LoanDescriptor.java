@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
@@ -40,6 +41,10 @@ public final class LoanDescriptor {
     public LoanDescriptor(final Loan loan, final TemporalAmount captchaProtectionDuration) {
         this.loan = loan;
         this.captchaExpirationDateTime = loan.getDatePublished().plus(captchaProtectionDuration);
+    }
+
+    public LoanDescriptor(final Loan loan) {
+        this(loan, Duration.ZERO);
     }
 
     public Loan getLoan() {

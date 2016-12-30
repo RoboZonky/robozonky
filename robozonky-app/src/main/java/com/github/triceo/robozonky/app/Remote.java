@@ -31,18 +31,18 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Investor;
 import com.github.triceo.robozonky.ZonkyProxy;
-import com.github.triceo.robozonky.api.events.EventRegistry;
-import com.github.triceo.robozonky.api.events.ExecutionCompleteEvent;
-import com.github.triceo.robozonky.api.events.ExecutionStartedEvent;
-import com.github.triceo.robozonky.api.events.LoanArrivedEvent;
-import com.github.triceo.robozonky.api.events.MarketplaceCheckCompleteEvent;
-import com.github.triceo.robozonky.api.events.MarketplaceCheckStartedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
+import com.github.triceo.robozonky.api.notifications.MarketplaceCheckCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.MarketplaceCheckStartedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.Configuration;
+import com.github.triceo.robozonky.notifications.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,15 +56,16 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     static final Path MARKETPLACE_TIMESTAMP =
             Paths.get(System.getProperty("user.dir"), "robozonky.lastMarketplaceCheck.timestamp");
 
-    static Collection<Loan> getAvailableLoans(final Activity activity) {
+    static Optional<Collection<Loan>> getAvailableLoans(final Activity activity) {
         final boolean shouldSleep = activity.shouldSleep();
         if (shouldSleep) {
             Remote.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
-            return Collections.emptyList();
+            return Optional.empty();
         } else {
-            return Stream.concat(activity.getUnactionableLoans().stream(), activity.getAvailableLoans().stream())
+            return Optional.of(Stream.concat(activity.getUnactionableLoans().stream(), activity.getAvailableLoans()
+                    .stream())
                     .distinct()
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()));
         }
     }
 
@@ -90,7 +91,9 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         final ZonkyProxy proxy = ctx.getZonkyProxyBuilder().build(api);
         final BigDecimal balance = Remote.getAvailableBalance(ctx, proxy);
         final Investor i = new Investor(proxy, balance);
+        Events.fire(new ExecutionStartedEvent(availableLoans, i.getBalance().intValue()));
         final Collection<Investment> result = Remote.getInvestingFunction(ctx, availableLoans).apply(i);
+        Events.fire(new ExecutionCompletedEvent(result, i.getBalance().intValue()));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -105,29 +108,27 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
 
     Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
         // check marketplace for loans
-        EventRegistry.fire(new MarketplaceCheckStartedEvent() {});
+        Events.fire(new MarketplaceCheckStartedEvent());
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
-        final List<LoanDescriptor> loans = Remote.getAvailableLoans(activity).stream()
-                .map(l -> new LoanDescriptor(l, this.ctx.getCaptchaDelay()))
-                .peek(l -> EventRegistry.fire((LoanArrivedEvent) () -> l))
-                .collect(Collectors.toList());
-        EventRegistry.fire(new MarketplaceCheckCompleteEvent() {});
-        if (loans.isEmpty()) { // sleep
+        final Optional<Collection<Loan>> availableLoans = Remote.getAvailableLoans(activity);
+        Events.fire(new MarketplaceCheckCompletedEvent());
+        if (!availableLoans.isPresent()) { // sleep
             return Optional.of(Collections.emptyList());
         }
+        final List<LoanDescriptor> loans = availableLoans.get().stream()
+                .map(l -> new LoanDescriptor(l, this.ctx.getCaptchaDelay()))
+                .peek(l -> Events.fire(new LoanArrivedEvent(l)))
+                .collect(Collectors.toList());
         // start the core investing algorithm
-        EventRegistry.fire((ExecutionStartedEvent) () -> loans);
         final Optional<Collection<Investment>> optionalResult =
                 this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, loans));
         activity.settle(); // only settle the marketplace activity when we're sure the app is no longer likely to fail
         if (optionalResult.isPresent()) {
             final Collection<Investment> result = optionalResult.get();
-            EventRegistry.fire((ExecutionCompleteEvent) () -> result);
             Remote.LOGGER.info("RoboZonky {}invested into {} loans.", this.ctx.isDryRun() ? "would have " : "",
                     result.size());
             return Optional.of(result);
         } else {
-            EventRegistry.fire((ExecutionCompleteEvent) Collections::emptyList);
             return Optional.empty();
         }
     }

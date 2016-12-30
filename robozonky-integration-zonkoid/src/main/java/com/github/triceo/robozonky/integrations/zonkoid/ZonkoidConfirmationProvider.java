@@ -122,4 +122,9 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         return requestConfirmation(requestId, loanId, amount, "https://urbancoders.eu");
     }
 
+    @Override
+    public String getId() {
+        return "Zonkoid / Zonkios";
+    }
+
 }

@@ -29,12 +29,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Defaults;
-import com.github.triceo.robozonky.api.events.EventRegistry;
-import com.github.triceo.robozonky.api.events.InvestmentDelegatedEvent;
-import com.github.triceo.robozonky.api.events.InvestmentMadeEvent;
-import com.github.triceo.robozonky.api.events.InvestmentRejectedEvent;
-import com.github.triceo.robozonky.api.events.InvestmentRequestedEvent;
-import com.github.triceo.robozonky.api.events.LoanRecommendedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
+import com.github.triceo.robozonky.api.notifications.LoanRecommendedEvent;
+import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Instalment;
@@ -45,6 +46,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.notifications.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,21 +78,23 @@ public class Investor {
                     amount, balance);
             return Optional.empty();
         }
-        EventRegistry.fire((InvestmentRequestedEvent) () -> recommendation);
+        Events.fire(new InvestmentRequestedEvent(recommendation));
         final ZonkyResponse response = api.invest(recommendation);
         switch (response.getType()) {
             case FAILED:
                 throw new IllegalStateException("Investment operation failed remotely.");
             case REJECTED:
-                EventRegistry.fire((InvestmentRejectedEvent) () -> recommendation);
+                Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(),
+                        api.getConfirmationProvider().getId()));
                 return Optional.empty();
             case DELEGATED:
-                EventRegistry.fire((InvestmentDelegatedEvent) () -> recommendation);
+                Events.fire(new InvestmentDelegatedEvent(recommendation, balance.intValue(),
+                        api.getConfirmationProvider().getId()));
                 return Optional.empty();
             case INVESTED:
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
                 final Investment i = new Investment(recommendation.getLoanDescriptor().getLoan(), confirmedAmount);
-                EventRegistry.fire((InvestmentMadeEvent) () -> i);
+                Events.fire(new InvestmentMadeEvent(i, balance.intValue() - confirmedAmount));
                 return Optional.of(i);
             default:
                 throw new IllegalStateException("Impossible.");
@@ -180,7 +184,7 @@ public class Investor {
         Investor.LOGGER.debug("Current share of unpaid loans with a given rating: {}.",
                 portfolio.getSharesOnInvestment());
         final Optional<Investment> investment = strategy.recommend(tracker.getAvailableLoans(), portfolio).stream()
-                .peek(r -> EventRegistry.fire((LoanRecommendedEvent) () -> r))
+                .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
                 .map(r -> Investor.actuallyInvest(r, this.api, this.balance))
                 .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
                 .findFirst();
@@ -223,7 +227,7 @@ public class Investor {
         Investor.LOGGER.debug("The following available loans have not yet been invested into: {}.",
                 Investor.collectionToString(tracker.getAvailableLoans(), Investor.LOAN_DESCRIPTOR_COMPARATOR,
                         Investor.LOAN_ID_RETRIEVER));
-        EventRegistry.fire(new StrategyStartedEventImpl(strategy, tracker.getAvailableLoans(), balance));
+        Events.fire(new StrategyStartedEvent(strategy, tracker.getAvailableLoans(), balance.intValue()));
         do {
             final PortfolioOverview portfolio =
                     PortfolioOverview.calculate(balance, stats, tracker.getAllInvestments());
@@ -234,7 +238,7 @@ public class Investor {
             final Investment i = investment.get();
             tracker.makeInvestment(i);
         } while (balance.compareTo(minimumInvestmentAmount) >= 0);
-        EventRegistry.fire(new StrategyCompleteEventImpl(strategy, tracker.getInvestmentsMade(), balance));
+        Events.fire(new StrategyCompletedEvent(strategy, tracker.getInvestmentsMade(), balance.intValue()));
     }
 
     private void reportOnPortfolioStructure(final Statistics stats, final Collection<Investment> allInvestments) {

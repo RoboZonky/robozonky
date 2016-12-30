@@ -44,4 +44,21 @@ public class AppTest {
         App.main("-l", "1", "-a", "1000", "-g", "some.random.file", "-p", "password");
     }
 
+    @Test
+    public void handleUnexpectedError() {
+        exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
+        App.handleUnexpectedError(null);
+    }
+
+    @Test
+    public void handleMaintenanceError() {
+        exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
+        App.handleZonkyMaintenanceError(null, false);
+    }
+
+    @Test
+    public void handleMaintenanceErrorFaultTolerant() {
+        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
+        App.handleZonkyMaintenanceError(null, true);
+    }
 }

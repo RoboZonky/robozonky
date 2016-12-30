@@ -20,13 +20,8 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Random;
 
-import com.github.triceo.robozonky.api.events.Event;
-import com.github.triceo.robozonky.api.events.EventListener;
-import com.github.triceo.robozonky.api.events.EventRegistry;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import org.junit.After;
-import org.junit.Before;
 import org.mockito.Mockito;
 
 public class AbstractInvestingTest {
@@ -48,24 +43,6 @@ public class AbstractInvestingTest {
     protected static LoanDescriptor mockLoanDescriptor() {
         final Loan loan = AbstractInvestingTest.mockLoan();
         return new LoanDescriptor(loan, Duration.ofSeconds(30));
-    }
-
-    private EventListener<Event> listener;
-
-    @Before
-    public void registerEventListener() {
-        this.listener = Mockito.mock(EventListener.class);
-        EventRegistry.INSTANCE.addListener(this.listener);
-    }
-
-    protected EventListener<Event> getListener() {
-        return listener;
-    }
-
-    @After
-    public void unregisterEventListener() {
-        EventRegistry.INSTANCE.removeListener(this.listener);
-        this.listener = null;
     }
 
 }

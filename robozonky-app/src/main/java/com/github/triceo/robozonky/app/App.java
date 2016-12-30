@@ -28,11 +28,12 @@ import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.ReturnCode;
-import com.github.triceo.robozonky.api.events.EventRegistry;
-import com.github.triceo.robozonky.api.events.RoboZonkyStartingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.configuration.Configuration;
+import com.github.triceo.robozonky.notifications.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -51,12 +52,20 @@ public class App {
     private static final File ROBOZONKY_LOCK = new File(System.getProperty("java.io.tmpdir"), "robozonky.lock");
     private static final State STATE = new State();
 
+    private static void exit(final ReturnCode returnCode) {
+        App.exit(returnCode, null);
+    }
+
     /**
      * Will terminate the application. Call this on every exit of the app to ensure proper termination. Failure to do
      * so may result in unpredictable behavior of this instance of RoboZonky or future ones.
      * @param returnCode Will be passed to {@link System#exit(int)}.
+     * @param cause Exception that caused the application to exit, if any.
      */
-    private static void exit(final ReturnCode returnCode) {
+    private static void exit(final ReturnCode returnCode, final Exception cause) {
+        if (returnCode != ReturnCode.OK) {
+            Events.fire(new RoboZonkyCrashedEvent(returnCode, cause));
+        }
         App.STATE.shutdown(returnCode);
         System.exit(returnCode.getCode());
     }
@@ -67,7 +76,7 @@ public class App {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
-        EventRegistry.fire(new RoboZonkyStartingEvent() {});
+        Events.fire(new RoboZonkyStartingEvent());
         App.LOGGER.info("RoboZonky v{} loading.", Defaults.ROBOZONKY_VERSION);
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
@@ -99,7 +108,6 @@ public class App {
             final Configuration ctx = optionalCtx.get();
             // start the app
             App.STATE.register(new RoboZonkyStartupNotifier());
-            App.STATE.register(new InvestmentReportingListener(ctx.isDryRun()));
             final boolean loginSucceeded = new Remote(ctx, auth.get()).call().isPresent();
             // shut down the app
             if (!loginSucceeded) {
@@ -118,20 +126,20 @@ public class App {
             App.handleZonkyMaintenanceError(ex, faultTolerant);
         } catch (final WebApplicationException ex) {
             App.LOGGER.error("Application encountered remote API error.", ex);
-            App.exit(ReturnCode.ERROR_REMOTE);
+            App.exit(ReturnCode.ERROR_REMOTE, ex);
         } catch (final RuntimeException ex) {
             App.handleUnexpectedError(ex);
         }
     }
 
-    private static void handleUnexpectedError(final RuntimeException ex) {
+    static void handleUnexpectedError(final RuntimeException ex) {
         App.LOGGER.error("Unexpected error, likely RoboZonky bug." , ex);
-        App.exit(ReturnCode.ERROR_UNEXPECTED);
+        App.exit(ReturnCode.ERROR_UNEXPECTED, ex);
     }
 
-    private static void handleZonkyMaintenanceError(final RuntimeException ex, final boolean faultTolerant) {
+    static void handleZonkyMaintenanceError(final RuntimeException ex, final boolean faultTolerant) {
         App.LOGGER.warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
-        App.exit(faultTolerant ? ReturnCode.OK : ReturnCode.ERROR_DOWN);
+        App.exit(faultTolerant ? ReturnCode.OK : ReturnCode.ERROR_DOWN, ex);
     }
 
 }

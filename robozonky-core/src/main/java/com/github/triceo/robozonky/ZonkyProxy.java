@@ -88,6 +88,10 @@ public class ZonkyProxy {
         return operation.apply(this.zonky);
     }
 
+    ConfirmationProvider getConfirmationProvider() {
+        return this.provider;
+    }
+
     public ZonkyResponse invest(final Recommendation recommendation) {
         if (this.isDryRun) {
             ZonkyProxy.LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", recommendation);

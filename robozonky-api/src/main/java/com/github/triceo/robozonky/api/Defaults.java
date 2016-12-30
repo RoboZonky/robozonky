@@ -16,15 +16,31 @@
 
 package com.github.triceo.robozonky.api;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Carries default values for some basic application properties, such as charset or locale.
  */
-public class Defaults {
+public final class Defaults {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Defaults.class);
+
+    private static String getHostAddress() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (final UnknownHostException ex) {
+            Defaults.LOGGER.debug("Failed retrievieng local host adddress.", ex);
+            return "localhost";
+        }
+    }
 
     public static final Locale LOCALE = Locale.forLanguageTag("cs_CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;
@@ -33,9 +49,9 @@ public class Defaults {
     public static final int MINIMUM_INVESTMENT_INCREMENT_IN_CZK = 200;
 
     public static final String ROBOZONKY_VERSION = Defaults.class.getPackage().getImplementationVersion();
-    public static final String ROBOZONKY_URL = "https://triceo.github.io/robozonky/";
+    public static final String ROBOZONKY_URL = "http://www.robozonky.cz";
     public static final String ROBOZONKY_USER_AGENT = "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" +
             Defaults.ROBOZONKY_URL + ")";
-
+    public static final String ROBOZONKY_HOST_ADDRESS = Defaults.getHostAddress();
 
 }

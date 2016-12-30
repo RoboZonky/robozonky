@@ -29,6 +29,10 @@
     </dependency>
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
+      <artifactId>robozonky-notifications</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.triceo.robozonky</groupId>
       <artifactId>robozonky-strategy-rules</artifactId>
     </dependency>
     <dependency>

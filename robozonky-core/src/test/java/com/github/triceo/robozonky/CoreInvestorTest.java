@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.api.events.InvestmentMadeEvent;
-import com.github.triceo.robozonky.api.events.InvestmentRequestedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -54,10 +52,6 @@ public class CoreInvestorTest extends AbstractInvestingTest {
         Assertions.assertThat(investment.getLoanId()).isEqualTo(loanId);
         Assertions.assertThat(investment.getAmount()).isEqualTo(loanAmount);
         Assertions.assertThat(i.getBalance()).isEqualTo(BigDecimal.valueOf(originalBalance - loanAmount));
-        Mockito.verify(this.getListener(), Mockito.times(1))
-                .handle(ArgumentMatchers.any(InvestmentRequestedEvent.class));
-        Mockito.verify(this.getListener(), Mockito.times(1))
-                .handle(ArgumentMatchers.any(InvestmentMadeEvent.class));
     }
 
     @Test

@@ -20,9 +20,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.ReturnCode;
-import com.github.triceo.robozonky.api.events.EventRegistry;
-import com.github.triceo.robozonky.api.events.RoboZonkyEndingEvent;
-import com.github.triceo.robozonky.api.events.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.notifications.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +37,9 @@ class RoboZonkyStartupNotifier implements State.Handler {
     @Override
     public Optional<Consumer<ReturnCode>> get() {
         RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky at your service! =====");
-        EventRegistry.fire(new RoboZonkyInitializedEvent() {});
+        Events.fire(new RoboZonkyInitializedEvent());
         return Optional.of((code) -> {
-            EventRegistry.fire((RoboZonkyEndingEvent) () -> code);
+            Events.fire(new RoboZonkyEndingEvent(code));
             RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky out. =====");
         });
     }

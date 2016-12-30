@@ -33,4 +33,10 @@ public interface ConfirmationProvider {
      */
     Optional<Confirmation> requestConfirmation(RequestId auth, final int loanId, final int amount);
 
+    /**
+     * Unique provider identification. When seen by users, they will understand which service this is.
+     * @return Unique string identifying the service.
+     */
+    String getId();
+
 }

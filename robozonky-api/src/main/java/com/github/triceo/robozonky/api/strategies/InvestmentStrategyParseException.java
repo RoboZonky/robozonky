@@ -16,10 +16,9 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
-public class InvestmentStrategyParseException extends Exception {
+public final class InvestmentStrategyParseException extends Exception {
 
     public InvestmentStrategyParseException() {
-        super();
     }
 
     public InvestmentStrategyParseException(final String message) {
