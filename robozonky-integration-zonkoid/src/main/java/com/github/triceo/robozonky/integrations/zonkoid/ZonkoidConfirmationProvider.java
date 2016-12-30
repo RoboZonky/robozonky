@@ -96,10 +96,10 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
             ZonkoidConfirmationProvider.LOGGER.trace("Opening Zonkoid request.");
             try (final CloseableHttpResponse response = httpclient.execute(httpPost)) {
                 final int statusCode = response.getStatusLine().getStatusCode();
-                if (statusCode == 200) {
+                if (statusCode >= 200 && statusCode < 300) {
                     ZonkoidConfirmationProvider.LOGGER.debug("Zonkoid response: {}", response.getStatusLine());
                     return Optional.of(new Confirmation(ConfirmationType.DELEGATED));
-                } else if (statusCode == 400 || statusCode == 403){
+                } else if (statusCode >= 400 && statusCode < 500){
                     ZonkoidConfirmationProvider.LOGGER.warn("Zonkoid response: {}", response.getStatusLine());
                     return Optional.of(new Confirmation(ConfirmationType.REJECTED));
                 } else {
