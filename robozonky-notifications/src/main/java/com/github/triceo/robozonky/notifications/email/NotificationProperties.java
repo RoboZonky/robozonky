@@ -37,11 +37,11 @@ class NotificationProperties {
     static Optional<NotificationProperties> getProperties() {
         final String propValue = System.getProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         if (propValue != null) { // attempt to read from the URL specified by the property
+            NotificationProperties.LOGGER.debug("Reading e-mail notification configuration from {}.", propValue);
             try {
                 final URL propsUrl = new URL(propValue);
                 final Properties props = new Properties();
                 props.load(propsUrl.openStream());
-                NotificationProperties.LOGGER.debug("Read configuration from {}.", propValue);
                 return Optional.of(new NotificationProperties(props));
             } catch (final IOException ex) {
                 // fall back to the property file
