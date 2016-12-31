@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app.configuration;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
+import com.github.triceo.robozonky.ExtensionsManager;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProviderService;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ class ConfirmationProviderLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmationProviderLoader.class);
     private static final ServiceLoader<ConfirmationProviderService> LOADER =
-            ServiceLoader.load(ConfirmationProviderService.class);
+            ExtensionsManager.INSTANCE.getServiceLoader(ConfirmationProviderService.class);
 
     static Optional<ConfirmationProvider> load(final String providerId) {
         ConfirmationProviderLoader.LOGGER.trace("Looking up confirmation provider '{}'.", providerId);

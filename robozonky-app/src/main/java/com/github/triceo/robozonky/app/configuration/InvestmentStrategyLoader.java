@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.ExtensionsManager;
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
@@ -41,7 +42,7 @@ class InvestmentStrategyLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentStrategyLoader.class);
     private static final ServiceLoader<InvestmentStrategyService> STRATEGY_LOADER =
-            ServiceLoader.load(InvestmentStrategyService.class);
+            ExtensionsManager.INSTANCE.getServiceLoader(InvestmentStrategyService.class);
 
     private static Optional<URL> convertToUrl(final String maybeUrl) {
         try {

@@ -8,10 +8,10 @@
     <module>robozonky-api</module>
     <module>robozonky-core</module>
     <module>robozonky-strategy-simple</module>
-    <module>robozonky-strategy-rules</module>
     <module>robozonky-app</module>
     <module>robozonky-integration-zonkoid</module>
     <module>robozonky-notifications</module>
+    <module>robozonky-extensions</module>
   </modules>
   <packaging>pom</packaging>
   <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -33,6 +33,11 @@
       <dependency>
         <groupId>com.github.triceo.robozonky</groupId>
         <artifactId>robozonky-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky</groupId>
+        <artifactId>robozonky-extensions</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

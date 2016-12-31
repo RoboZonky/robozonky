@@ -29,7 +29,7 @@
   <dependencies>
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
-      <artifactId>robozonky-core</artifactId>
+      <artifactId>robozonky-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

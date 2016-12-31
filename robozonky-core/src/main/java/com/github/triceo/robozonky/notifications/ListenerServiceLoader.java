@@ -23,13 +23,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.github.triceo.robozonky.ExtensionsManager;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 
 class ListenerServiceLoader {
 
-    private static final ServiceLoader<ListenerService> LOADER = ServiceLoader.load(ListenerService.class);
+    private static final ServiceLoader<ListenerService> LOADER =
+            ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
 
     private static <T> Stream<T> iteratorToStream(final Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false);

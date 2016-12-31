@@ -1,0 +1,6 @@
+Do tohoto adresáře umístěte všechna rozšíření RoboZonky, které si přejete používat. Každé rozšíření musí být jeden
+(a pouze jeden) soubor s koncovkou ".jar", který si nese všechny svoje závislosti. RoboZonky při spuštění prozkoumá
+tento adresář a všechny soubory, které odpovídají popisu, načte.
+
+Příklad takového rozšíření naleznete v modulu com.github.triceo.robozonky.extensions:robozonky-strategy-rules,
+konkrétně artefakt klasifikovaný jako "jar-with-dependencies".
