@@ -75,38 +75,22 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
                 api.execute(zonky -> zonky.getWallet().getAvailableBalance());
     }
 
-    static Function<Investor, Collection<Investment>> getInvestingFunction(final Configuration ctx,
-                                                                           final Collection<LoanDescriptor> availableLoans) {
-        final boolean useStrategy = ctx.getInvestmentStrategy().isPresent();
-        // figure out what to execute
-        return useStrategy ? i -> i.invest(ctx.getInvestmentStrategy().get(), availableLoans) : i -> {
-            final Optional<Investment> optional =
-                    i.invest(ctx.getLoanId().getAsInt(), ctx.getLoanAmount().getAsInt(), ctx.getCaptchaDelay());
-            return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
-        };
-    }
-
     static Collection<Investment> invest(final Configuration ctx, final ZonkyApi api,
-                                         final Collection<LoanDescriptor> availableLoans) {
+                                         final Function<Investor, Collection<Investment>> investingFunction) {
         final ZonkyProxy proxy = ctx.getZonkyProxyBuilder().build(api);
         final BigDecimal balance = Remote.getAvailableBalance(ctx, proxy);
-        final Investor i = new Investor(proxy, balance);
-        Events.fire(new ExecutionStartedEvent(availableLoans, i.getBalance().intValue()));
-        final Collection<Investment> result = Remote.getInvestingFunction(ctx, availableLoans).apply(i);
-        Events.fire(new ExecutionCompletedEvent(result, i.getBalance().intValue()));
-        return Collections.unmodifiableCollection(result);
+        return Collections.unmodifiableCollection(investingFunction.apply(new Investor(proxy, balance)));
     }
 
     private final AuthenticationHandler auth;
     private final Configuration ctx;
 
-    public Remote(final Configuration ctx,
-                  final AuthenticationHandler authenticationHandler) {
+    public Remote(final Configuration ctx, final AuthenticationHandler authenticationHandler) {
         this.ctx = ctx;
         this.auth = authenticationHandler;
     }
 
-    Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
+    Optional<Collection<Investment>> executeStrategy(final ApiProvider apiProvider) {
         // check marketplace for loans
         Events.fire(new MarketplaceCheckStartedEvent());
         final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
@@ -120,17 +104,25 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
                 .peek(l -> Events.fire(new LoanArrivedEvent(l)))
                 .collect(Collectors.toList());
         // start the core investing algorithm
+        final Function<Investor, Collection<Investment>> investor = i -> {
+            Events.fire(new ExecutionStartedEvent(loans, i.getBalance().intValue()));
+            final Collection<Investment> result = i.invest(this.ctx.getInvestmentStrategy().get(), loans);
+            Events.fire(new ExecutionCompletedEvent(result, i.getBalance().intValue()));
+            return result;
+        };
         final Optional<Collection<Investment>> optionalResult =
-                this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, loans));
+                this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, investor));
         activity.settle(); // only settle the marketplace activity when we're sure the app is no longer likely to fail
-        if (optionalResult.isPresent()) {
-            final Collection<Investment> result = optionalResult.get();
-            Remote.LOGGER.info("RoboZonky {}invested into {} loans.", this.ctx.isDryRun() ? "would have " : "",
-                    result.size());
-            return Optional.of(result);
-        } else {
-            return Optional.empty();
-        }
+        return optionalResult;
+    }
+
+    Optional<Collection<Investment>> executeSingleInvestment(final ApiProvider apiProvider) {
+        final Function<Investor, Collection<Investment>> investor = i -> {
+            final Optional<Investment> optional = i.invest(this.ctx.getLoanId().getAsInt(),
+                    this.ctx.getLoanAmount().getAsInt(), this.ctx.getCaptchaDelay());
+            return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
+        };
+        return this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, investor));
     }
 
     @Override
@@ -140,7 +132,12 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
             Remote.LOGGER.info("RoboZonky is doing a dry run. It will simulate investing, but not invest any real money.");
         }
         try (final ApiProvider apiProvider = new ApiProvider()) { // auto-close the API clients
-            return this.execute(apiProvider);
+            final Optional<Collection<Investment>> optionalResult = this.ctx.getInvestmentStrategy().isPresent() ?
+                    this.executeStrategy(apiProvider) :
+                    this.executeSingleInvestment(apiProvider);
+            optionalResult.ifPresent(r -> Remote.LOGGER.info("RoboZonky {}invested into {} loans.",
+                    this.ctx.isDryRun() ? "would have " : "", r.size()));
+            return optionalResult;
         }
     }
 

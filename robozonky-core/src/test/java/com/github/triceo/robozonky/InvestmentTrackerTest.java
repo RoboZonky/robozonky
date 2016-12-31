@@ -16,42 +16,24 @@
 
 package com.github.triceo.robozonky;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Random;
 
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-public class InvestmentTrackerTest {
-
-    private static final Random RANDOM = new Random(0);
-
-    private static Loan mockLoan() {
-        final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getId()).thenReturn(InvestmentTrackerTest.RANDOM.nextInt());
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        return loan;
-    }
-
-    private static LoanDescriptor mockLoanDescriptor() {
-        final Loan loan = InvestmentTrackerTest.mockLoan();
-        return new LoanDescriptor(loan, Duration.ofSeconds(30));
-    }
+public class InvestmentTrackerTest extends AbstractInvestingTest {
 
     @Test
     public void constructor() {
         final LoanDescriptor ld = InvestmentTrackerTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
-        final InvestmentTracker it = new InvestmentTracker(lds);
+        final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(it.getAvailableLoans())
                 .isNotSameAs(lds)
@@ -65,7 +47,7 @@ public class InvestmentTrackerTest {
     public void registeringPreexistingInvestments() {
         final LoanDescriptor ld = InvestmentTrackerTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, InvestmentTrackerTest.mockLoanDescriptor());
-        final InvestmentTracker it = new InvestmentTracker(lds);
+        final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
         it.registerExistingInvestments(Collections.singletonList(new Investment(ld.getLoan(),
                 Defaults.MINIMUM_INVESTMENT_IN_CZK)));
         final SoftAssertions softly = new SoftAssertions();

@@ -66,13 +66,14 @@ public class Investor {
      *
      * @param recommendation Recommendation to invest.
      * @param api API to invest through.
-     * @param balance The current balance.
+     * @param tracker Status of the investing session.
      * @return Present if input valid and operation succeeded, empty otherwise.
      */
     static Optional<Investment> actuallyInvest(final Recommendation recommendation, final ZonkyProxy api,
-                                               final BigDecimal balance) {
+                                               final InvestmentTracker tracker) {
         final int amount = recommendation.getRecommendedInvestmentAmount();
         final int loanId = recommendation.getLoanDescriptor().getLoan().getId();
+        final BigDecimal balance = tracker.getCurrentBalance();
         if (balance.compareTo(BigDecimal.valueOf(amount)) < 0) { // strategy should not allow this
             Investor.LOGGER.info("Not investing into loan #{}, {} CZK to invest is more than {} CZK balance.", loanId,
                     amount, balance);
@@ -81,23 +82,30 @@ public class Investor {
         Events.fire(new InvestmentRequestedEvent(recommendation));
         final ZonkyResponse response = api.invest(recommendation);
         switch (response.getType()) {
-            case FAILED:
-                throw new IllegalStateException("Investment operation failed remotely.");
             case REJECTED:
                 Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(),
                         api.getConfirmationProvider().getId()));
+                tracker.ignoreLoanForever(loanId);
                 return Optional.empty();
             case DELEGATED:
                 Events.fire(new InvestmentDelegatedEvent(recommendation, balance.intValue(),
                         api.getConfirmationProvider().getId()));
+                if (recommendation.isConfirmationRequired()) {
+                    // confirmation required, delegation successful => forget
+                    tracker.ignoreLoanForever(loanId);
+                } else {
+                    // confirmation not required, delegation successful => maybe try again in next session
+                    tracker.ignoreLoanForNow(loanId);
+                }
                 return Optional.empty();
             case INVESTED:
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
                 final Investment i = new Investment(recommendation.getLoanDescriptor().getLoan(), confirmedAmount);
                 Events.fire(new InvestmentMadeEvent(i, balance.intValue() - confirmedAmount));
+                tracker.makeInvestment(i);
                 return Optional.of(i);
             default:
-                throw new IllegalStateException("Impossible.");
+                throw new IllegalStateException("Investment operation failed remotely.");
         }
     }
 
@@ -169,30 +177,6 @@ public class Investor {
     }
 
     /**
-     * Prepares a list of loans that are suitable for investment by asking the strategy. Then goes over that list one
-     * by one, in the order prescribed by the strategy, and attempts to invest into these loans. The first such
-     * investment operation that succeeds will return.
-     *
-     * @param strategy The investment strategy to pick loans from the list.
-     * @param tracker Current status of the investment algorithm.
-     * @param portfolio User's investment portfolio overview.
-     * @return The first {@link #actuallyInvest(Recommendation, ZonkyProxy, BigDecimal)} which succeeds, or empty if
-     * none have.
-     */
-    Optional<Investment> investOnce(final InvestmentStrategy strategy, final InvestmentTracker tracker,
-                                    final PortfolioOverview portfolio) {
-        Investor.LOGGER.debug("Current share of unpaid loans with a given rating: {}.",
-                portfolio.getSharesOnInvestment());
-        final Optional<Investment> investment = strategy.recommend(tracker.getAvailableLoans(), portfolio).stream()
-                .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
-                .map(r -> Investor.actuallyInvest(r, this.api, this.balance))
-                .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
-                .findFirst();
-        investment.ifPresent(i -> this.balance = this.balance.subtract(BigDecimal.valueOf(i.getAmount())));
-        return investment;
-    }
-
-    /**
      * One of the two entry points to the investment API. This takes the strategy, determines suitable loans, and tries
      * to invest in as many of them as the balance allows.
      *
@@ -213,10 +197,11 @@ public class Investor {
         Investor.LOGGER.debug("The sum total of principal remaining on active loans: {} CZK.",
                 stats.getCurrentOverview().getPrincipalLeft());
         // figure out which loans we can still put money into
-        final InvestmentTracker tracker = new InvestmentTracker(loans);
+        final InvestmentTracker tracker = new InvestmentTracker(loans, this.balance);
         tracker.registerExistingInvestments(Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.api));
         // invest the money
         this.runInvestmentLoop(strategy, tracker, stats, minimumInvestmentAmount);
+        this.balance = tracker.getCurrentBalance();
         // report
         this.reportOnPortfolioStructure(stats, tracker.getAllInvestments());
         return tracker.getInvestmentsMade();
@@ -230,14 +215,18 @@ public class Investor {
         Events.fire(new StrategyStartedEvent(strategy, tracker.getAvailableLoans(), balance.intValue()));
         do {
             final PortfolioOverview portfolio =
-                    PortfolioOverview.calculate(balance, stats, tracker.getAllInvestments());
-            final Optional<Investment> investment = this.investOnce(strategy, tracker, portfolio);
-            if (!investment.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
+                    PortfolioOverview.calculate(tracker.getCurrentBalance(), stats, tracker.getAllInvestments());
+            Investor.LOGGER.debug("Current share of unpaid loans with a given rating: {}.",
+                    portfolio.getSharesOnInvestment());
+            final boolean investmentWasMade = strategy.recommend(tracker.getAvailableLoans(), portfolio).stream()
+                    .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
+                    .map(r -> Investor.actuallyInvest(r, this.api, tracker))
+                    .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
+                    .findFirst().isPresent();
+            if (!investmentWasMade) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }
-            final Investment i = investment.get();
-            tracker.makeInvestment(i);
-        } while (balance.compareTo(minimumInvestmentAmount) >= 0);
+        } while (tracker.getCurrentBalance().compareTo(minimumInvestmentAmount) >= 0);
         Events.fire(new StrategyCompletedEvent(strategy, tracker.getInvestmentsMade(), balance.intValue()));
     }
 
@@ -264,10 +253,11 @@ public class Investor {
      */
     public Optional<Investment> invest(final int loanId, final int loanAmount, final TemporalAmount captchaDuration) {
         final Loan l = api.execute(zonky -> zonky.getLoan(loanId));
-        final Optional<Recommendation> r = new LoanDescriptor(l, captchaDuration).recommend(loanAmount);
-        final Optional<Investment> result = r.map(r2 -> Investor.actuallyInvest(r2, this.api, this.balance))
+        final Optional<Recommendation> r = new LoanDescriptor(l, captchaDuration).recommend(loanAmount, false);
+        final InvestmentTracker t = new InvestmentTracker(Collections.emptyList(), this.balance);
+        final Optional<Investment> result = r.map(r2 -> Investor.actuallyInvest(r2, this.api, t))
                 .orElse(Optional.empty());
-        result.ifPresent(i -> this.balance = balance.subtract(BigDecimal.valueOf(i.getAmount())));
+        this.balance = t.getCurrentBalance();
         return result;
     }
 

@@ -24,14 +24,17 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import com.github.triceo.robozonky.Investor;
+import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.ZonkyProxy;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
+import com.github.triceo.robozonky.api.remote.ZotifyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.configuration.Configuration;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -42,6 +45,7 @@ public class RemoteTest extends BaseMarketplaceTest {
 
     private static Configuration mockConfiguration(final boolean usesStrategy) {
         final Configuration ctx = Mockito.mock(Configuration.class);
+        Mockito.when(ctx.getSleepPeriod()).thenReturn(Duration.ofMinutes(60));
         Mockito.when(ctx.getCaptchaDelay()).thenReturn(Duration.ofSeconds(120));
         Mockito.when(ctx.getLoanId()).thenReturn(OptionalInt.of(1));
         Mockito.when(ctx.getLoanAmount()).thenReturn(OptionalInt.of(1000));
@@ -110,57 +114,6 @@ public class RemoteTest extends BaseMarketplaceTest {
     }
 
     @Test
-    public void strategyDrivenInvestingFunction() {
-        final Configuration ctx = RemoteTest.mockConfiguration(true);
-        final Investor i = Mockito.mock(Investor.class);
-        final Investment investment = Mockito.mock(Investment.class);
-        Mockito.when(i.invest(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Collections.singletonList(investment));
-        final Collection<Investment> result = Remote.getInvestingFunction(ctx, null).apply(i);
-        Mockito.verify(i, Mockito.times(1)).invest(ArgumentMatchers.any(), ArgumentMatchers.any());
-        Assertions.assertThat(result).containsExactly(investment);
-    }
-
-    @Test
-    public void simpleInvestment() {
-        final int loanId = 1;
-        final int loanAmount = 1000;
-        final Loan mockLoan = Mockito.mock(Loan.class);
-        Mockito.when(mockLoan.getId()).thenReturn(1);
-        Mockito.when(mockLoan.getAmount()).thenReturn(loanAmount * 3.0);
-        Mockito.when(mockLoan.getRemainingInvestment()).thenReturn(loanAmount * 2.0);
-        Mockito.when(mockLoan.getDatePublished()).thenReturn(OffsetDateTime.now().minus(Duration.ofSeconds(30)));
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
-        Mockito.when(api.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(mockLoan);
-        Mockito.when(api.getWallet()).thenReturn(new Wallet(0, 0, BigDecimal.ZERO, BigDecimal.ZERO));
-        final Configuration c = Mockito.mock(Configuration.class);
-        Mockito.when(c.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
-        Mockito.when(c.getLoanId()).thenReturn(OptionalInt.of(loanId));
-        Mockito.when(c.getLoanAmount()).thenReturn(OptionalInt.of(1000));
-        Mockito.when(c.getCaptchaDelay()).thenReturn(Duration.ofMinutes(2));
-        final Collection<Investment> result = Remote.invest(c, api, Collections.emptyList());
-        Assertions.assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void userDrivenInvestingFunction() {
-        final Configuration ctx = RemoteTest.mockConfiguration(false);
-        final Investor i = Mockito.mock(Investor.class);
-        // check what happens when nothing is invested)
-        Mockito.when(i.invest(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.any()))
-                .thenReturn(Optional.empty());
-        final Collection<Investment> result = Remote.getInvestingFunction(ctx, null).apply(i);
-        Mockito.verify(i, Mockito.times(1))
-                .invest(ctx.getLoanId().getAsInt(), ctx.getLoanAmount().getAsInt(), Duration.ofSeconds(120));
-        Assertions.assertThat(result).isEmpty();
-        // check what happens when something is invested
-        final Investment investment = Mockito.mock(Investment.class);
-        Mockito.when(i.invest(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.any()))
-                .thenReturn(Optional.of(investment));
-        final Collection<Investment> result2 = Remote.getInvestingFunction(ctx, null).apply(i);
-        Assertions.assertThat(result2).containsExactly(investment);
-    }
-
-    @Test
     public void loginFailOnCredentials() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Optional.empty());
@@ -172,6 +125,57 @@ public class RemoteTest extends BaseMarketplaceTest {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
         new Remote(RemoteTest.mockConfiguration(), auth).call();
+    }
+
+    @Test
+    public void singleInvestmentExecutionInvestingNothing() {
+        // a lot of mocking to exercise the basic path all the way through to the core
+        final Configuration ctx = RemoteTest.mockConfiguration(false);
+        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
+        final SecretProvider secret = Mockito.mock(SecretProvider.class);
+        Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
+        final AuthenticationHandler auth = AuthenticationHandler.passwordBased(secret);
+        final ApiProvider api = Mockito.mock(ApiProvider.class);
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
+        final Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
+        final ZonkyApi zonky = Mockito.mock(ZonkyApi.class);
+        Mockito.when(zonky.getLoan(ArgumentMatchers.anyInt())).thenReturn(loan);
+        Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
+        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
+        // and now test
+        final Remote r = new Remote(ctx, auth);
+        final Optional<Collection<Investment>> result = r.executeSingleInvestment(api);
+        Assertions.assertThat(result).isPresent();
+        Assertions.assertThat(result.get()).isEmpty();
+    }
+
+    @Test
+    public void strategyExecutionInvestingNothing() {
+        // a lot of mocking to exercise the basic path all the way through to the core
+        final Configuration ctx = RemoteTest.mockConfiguration(true);
+        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
+        final SecretProvider secret = Mockito.mock(SecretProvider.class);
+        Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
+        final AuthenticationHandler auth = AuthenticationHandler.passwordBased(secret);
+        final ZotifyApi cache = Mockito.mock(ZotifyApi.class);
+        Mockito.when(cache.getLoans()).thenReturn(Collections.emptyList());
+        final ApiProvider api = Mockito.mock(ApiProvider.class);
+        Mockito.when(api.cache()).thenReturn(cache);
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
+        final Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
+        final ZonkyApi zonky = Mockito.mock(ZonkyApi.class);
+        Mockito.when(zonky.getLoan(ArgumentMatchers.anyInt())).thenReturn(loan);
+        final Wallet wallet = Mockito.mock(Wallet.class);
+        Mockito.when(wallet.getAvailableBalance()).thenReturn(BigDecimal.TEN);
+        Mockito.when(zonky.getWallet()).thenReturn(wallet);
+        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
+        // and now test
+        final Remote r = new Remote(ctx, auth);
+        final Optional<Collection<Investment>> result = r.executeStrategy(api);
+        Assertions.assertThat(result).isPresent();
+        Assertions.assertThat(result.get()).isEmpty();
     }
 
 }

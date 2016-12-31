@@ -69,13 +69,13 @@ public class CommandLineInterface {
             argName("Dry run balance").longOpt("dry").desc("Simulate the investments, but never actually spend money.")
             .build();
     static final Option OPTION_CLOSED_SEASON = Option.builder("c").hasArg()
-            .argName("Delay in seconds before new loans are made available for investing.").longOpt("closed-season")
+            .argName("Delay in seconds before new loans lose CAPTCHA protection.").longOpt("closed-season")
             .desc("Allows to override the default CAPTCHA loan delay.").build();
     static final Option OPTION_ZONK = Option.builder("z").hasArg()
             .argName("The longest amount of time in minutes for which Zonky is allowed to sleep.").longOpt("zonk")
             .desc("Allows to override the default length of sleep period.").build();
     static final Option OPTION_CONFIRMATION = Option.builder("x").hasArg().optionalArg(false)
-            .argName("'tool:username:token'").longOpt("external")
+            .argName("'tool:token'").longOpt("external")
             .desc("Use external tool to confirm investments.").build();
 
     /**

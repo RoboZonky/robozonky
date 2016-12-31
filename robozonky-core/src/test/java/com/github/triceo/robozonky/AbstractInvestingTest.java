@@ -22,6 +22,7 @@ import java.util.Random;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import org.junit.After;
 import org.mockito.Mockito;
 
 public class AbstractInvestingTest {
@@ -43,6 +44,11 @@ public class AbstractInvestingTest {
     protected static LoanDescriptor mockLoanDescriptor() {
         final Loan loan = AbstractInvestingTest.mockLoan();
         return new LoanDescriptor(loan, Duration.ofSeconds(30));
+    }
+
+    @After
+    public void removeTemporaryFiles() {
+        InvestmentTracker.UNTOUCHABLE_INVESTMENTS.delete();
     }
 
 }
