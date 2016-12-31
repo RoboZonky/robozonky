@@ -59,19 +59,8 @@ public enum ExtensionsManager {
         }
     }
 
-    private ClassLoader retrieveExtensionClassLoader() {
-        this.LOGGER.info("Looking up extensions.");
-        final Optional<File> extensionsFolder = this.findExtensionsFolder();
-        if (!extensionsFolder.isPresent()) {
-            this.LOGGER.debug("Extensions folder not found.");
-            return ExtensionsManager.class.getClassLoader();
-        }
-        this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.get().getAbsolutePath());
-        final File[] jars = extensionsFolder.get().listFiles(file -> file.getPath().toLowerCase().endsWith(".jar"));
-        if (jars == null || jars.length == 0) {
-            return ExtensionsManager.class.getClassLoader();
-        }
-        final Collection<URL> urls = Stream.of(jars).map(f -> {
+    Collection<URL> retrieveExtensionJars(final File... jars) {
+        return Stream.of(jars).map(f -> {
             try {
                 return Optional.of(f.toURI().toURL());
             } catch (final MalformedURLException e) {
@@ -81,7 +70,26 @@ public enum ExtensionsManager {
                 .map(o -> (URL)o.get())
                 .peek(u -> this.LOGGER.debug("Loading extension: '{}'.", u))
                 .collect(Collectors.toSet());
+    }
+
+    ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
+        this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
+        final File[] jars = extensionsFolder.listFiles(file -> file.getPath().toLowerCase().endsWith(".jar"));
+        if (jars == null || jars.length == 0) {
+            return ExtensionsManager.class.getClassLoader();
+        }
+        final Collection<URL> urls = this.retrieveExtensionJars(jars);
         return new URLClassLoader(urls.toArray(new URL[urls.size()]));
+    }
+
+    private ClassLoader retrieveExtensionClassLoader() {
+        this.LOGGER.info("Looking up extensions.");
+        final Optional<File> extensionsFolder = this.findExtensionsFolder();
+        if (!extensionsFolder.isPresent()) {
+            this.LOGGER.debug("Extensions folder not found.");
+            return ExtensionsManager.class.getClassLoader();
+        }
+        return this.retrieveExtensionClassLoader(extensionsFolder.get());
     }
 
     private final Logger LOGGER = LoggerFactory.getLogger(ExtensionsManager.class);

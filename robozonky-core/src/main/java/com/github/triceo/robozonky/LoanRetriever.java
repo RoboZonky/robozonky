@@ -61,7 +61,12 @@ class LoanRetriever implements ForkJoinPool.ManagedBlocker {
     @Override
     public boolean block() throws InterruptedException {
         if (this.loan == null) {
-            this.loan = api.execute(zonky -> zonky.getLoan(loanId));
+            try {
+                this.loan = api.execute(zonky -> zonky.getLoan(loanId));
+            } catch (final Exception ex) {
+                LoanRetriever.LOGGER.error("Loan retrieval failed.", ex);
+                throw new InterruptedException("Thread interrupted: " + ex.getMessage());
+            }
         }
         return true;
     }
