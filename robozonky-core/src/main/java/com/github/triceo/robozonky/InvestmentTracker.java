@@ -16,20 +16,18 @@
 
 package com.github.triceo.robozonky;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.State;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.slf4j.Logger;
@@ -41,32 +39,23 @@ import org.slf4j.LoggerFactory;
  */
 final class InvestmentTracker {
 
-    static final File UNTOUCHABLE_INVESTMENTS = new File("robozonky.untouchableInvestments");
+    static final State.ClassSpecificState STATE = State.INSTANCE.forClass(InvestmentTracker.class);
+    private static final String UNTOUCHABLE_INVESTMENTS_ID = "untouchableInvestments";
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentTracker.class);
 
-    private static Collection<Integer> readUntouchableInvestments(final File target) {
-        if (!target.exists()) {
-            return new ArrayList<>();
-        } else try {
-            return Files.lines(target.toPath())
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
-        } catch (final IOException ex) {
-            InvestmentTracker.LOGGER.warn("Failed reading untouchable investments.", ex);
-            return new ArrayList<>();
-        }
+    private static Collection<Integer> readUntouchableInvestments() {
+        final Optional<String> result = InvestmentTracker.STATE.getValue(InvestmentTracker.UNTOUCHABLE_INVESTMENTS_ID);
+        return result.map(s -> Stream.of(s.split(","))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList()))
+                .orElse(new ArrayList<>());
     }
 
-    private static void writeUntouchableInvestments(final File target,
-                                                    final Collection<Integer> rejectedInvestments) {
+    private static void writeUntouchableInvestments(final Collection<Integer> rejectedInvestments) {
         final String result = rejectedInvestments.stream()
                 .map(String::valueOf)
-                .collect(Collectors.joining(System.lineSeparator()));
-        try {
-            Files.write(target.toPath(), result.getBytes(Defaults.CHARSET));
-        } catch (final IOException ex) {
-            InvestmentTracker.LOGGER.warn("Failed writing untouchable investments.", ex);
-        }
+                .collect(Collectors.joining(","));
+        InvestmentTracker.STATE.setValue(InvestmentTracker.UNTOUCHABLE_INVESTMENTS_ID, result);
     }
 
     private final Collection<Integer> rejectedLoanIds;
@@ -77,7 +66,7 @@ final class InvestmentTracker {
 
     public InvestmentTracker(final Collection<LoanDescriptor> availableLoans, final BigDecimal currentBalance) {
         this.currentBalance = currentBalance;
-        this.rejectedLoanIds = InvestmentTracker.readUntouchableInvestments(InvestmentTracker.UNTOUCHABLE_INVESTMENTS);
+        this.rejectedLoanIds = InvestmentTracker.readUntouchableInvestments();
         InvestmentTracker.LOGGER.info("Loans previously rejected: {}", rejectedLoanIds);
         this.loansStillAvailable = availableLoans.stream()
                 .filter(l -> !this.rejectedLoanIds.contains(l.getLoan().getId()))
@@ -121,7 +110,7 @@ final class InvestmentTracker {
     public synchronized void ignoreLoanForever(final int loanId) {
         this.ignoreLoanForNow(loanId);
         this.rejectedLoanIds.add(loanId);
-        InvestmentTracker.writeUntouchableInvestments(InvestmentTracker.UNTOUCHABLE_INVESTMENTS, this.rejectedLoanIds);
+        InvestmentTracker.writeUntouchableInvestments(this.rejectedLoanIds);
     }
 
     /**

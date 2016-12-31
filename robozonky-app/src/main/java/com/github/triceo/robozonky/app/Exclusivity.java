@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Used to ensure that only one RoboZonky process may be executing at any one time. See {@link #get()} for the
  * contract. Will not mutually exclude RoboZonky instances running within the same JVM.
  */
-final class Exclusivity implements State.Handler {
+final class Exclusivity implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Exclusivity.class);
 

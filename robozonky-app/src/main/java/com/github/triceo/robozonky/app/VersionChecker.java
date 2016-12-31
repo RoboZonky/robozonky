@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Executes a version check on the background.
  */
-class VersionChecker implements State.Handler {
+class VersionChecker implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionChecker.class);
     private final ExecutorService executor = Executors.newFixedThreadPool(1);

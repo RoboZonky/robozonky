@@ -23,16 +23,16 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class StateTest {
+public class ShutdownHookTest {
 
     @Test
     public void noShutdownHandler() {
-        final State.Handler h = Mockito.mock(State.Handler.class);
+        final ShutdownHook.Handler h = Mockito.mock(ShutdownHook.Handler.class);
         Mockito.when(h.get()).thenReturn(Optional.empty());
-        final State s = new State();
+        final ShutdownHook s = new ShutdownHook();
         Assertions.assertThat(s.register(h)).isFalse();
         try {
-            s.shutdown(ReturnCode.OK);
+            s.execute(ReturnCode.OK);
         } catch (final RuntimeException ex) {
             Assertions.fail("Should not have been thrown.", ex);
         }
@@ -40,21 +40,21 @@ public class StateTest {
 
     @Test
     public void exceptionHandlingOnRegistration() {
-        final State.Handler h = Mockito.mock(State.Handler.class);
+        final ShutdownHook.Handler h = Mockito.mock(ShutdownHook.Handler.class);
         Mockito.doThrow(new IllegalStateException("Testing exception")).when(h).get();
-        Assertions.assertThat(new State().register(h)).isFalse();
+        Assertions.assertThat(new ShutdownHook().register(h)).isFalse();
     }
 
     @Test
     public void exceptionHandlingOnShutdown() {
-        final State.Handler h = Mockito.mock(State.Handler.class);
+        final ShutdownHook.Handler h = Mockito.mock(ShutdownHook.Handler.class);
         Mockito.when(h.get()).thenReturn(Optional.of(code -> {
             throw new IllegalStateException("Testing exception.");
         }));
-        final State s = new State();
+        final ShutdownHook s = new ShutdownHook();
         Assertions.assertThat(s.register(h)).isTrue();
         try {
-            s.shutdown(ReturnCode.OK);
+            s.execute(ReturnCode.OK);
         } catch (final RuntimeException ex) {
             Assertions.fail("Should not have been thrown.", ex);
         }

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * Will send {@link RoboZonkyInitializedEvent} immediately and {@link RoboZonkyEndingEvent} when it's time to shut down
  * the app.
  */
-class RoboZonkyStartupNotifier implements State.Handler {
+class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RoboZonkyStartupNotifier.class);
 

@@ -48,7 +48,7 @@ public class AbstractInvestingTest {
 
     @After
     public void removeTemporaryFiles() {
-        InvestmentTracker.UNTOUCHABLE_INVESTMENTS.delete();
+        InvestmentTracker.STATE.reset();
     }
 
 }

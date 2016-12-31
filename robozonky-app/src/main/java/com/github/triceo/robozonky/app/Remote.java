@@ -93,7 +93,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     Optional<Collection<Investment>> executeStrategy(final ApiProvider apiProvider) {
         // check marketplace for loans
         Events.fire(new MarketplaceCheckStartedEvent());
-        final Activity activity = new Activity(this.ctx, apiProvider.cache(), Remote.MARKETPLACE_TIMESTAMP);
+        final Activity activity = new Activity(this.ctx, apiProvider.cache());
         final Optional<Collection<Loan>> availableLoans = Remote.getAvailableLoans(activity);
         Events.fire(new MarketplaceCheckCompletedEvent());
         if (!availableLoans.isPresent()) { // sleep

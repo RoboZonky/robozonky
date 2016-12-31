@@ -25,10 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Used for things that need to be executed at app start and shutdown. Use {@link #register(State.Handler)} to specify
- * such actions and {@link #shutdown(ReturnCode)} when it's time to shut the app down.
+ * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to specify
+ * such actions and {@link #execute(ReturnCode)} when it's time to shut the app down.
  */
-class State {
+class ShutdownHook {
 
     /**
      * Represents a unit of state in the application.
@@ -37,7 +37,7 @@ class State {
 
         /**
          * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
-         * {@link State#shutdown(ReturnCode)}.
+         * {@link ShutdownHook#execute(ReturnCode)}.
          *
          * @return Will be called during app shutdown, if present.
          */
@@ -45,17 +45,17 @@ class State {
 
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(State.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownHook.class);
 
     private final Stack<Consumer<ReturnCode>> stack = new Stack<>();
 
     /**
-     * Register a handler to call arbitrary code during shutdown.
+     * Register a handler to call arbitrary code during execute.
      *
-     * @param handler Needs to return the shutdown handler and optionally perform other things.
-     * @return True if the handler was registered and will be executed during shutdown.
+     * @param handler Needs to return the execute handler and optionally perform other things.
+     * @return True if the handler was registered and will be executed during execute.
      */
-    public boolean register(final State.Handler handler) {
+    public boolean register(final ShutdownHook.Handler handler) {
         try {
             final Optional<Consumer<ReturnCode>> end = handler.get();
             if (end.isPresent()) {
@@ -65,24 +65,24 @@ class State {
                 return false;
             }
         } catch (final RuntimeException ex) {
-            State.LOGGER.warn("Failed to register state handler.", ex);
+            ShutdownHook.LOGGER.warn("Failed to register state handler.", ex);
             return false;
         }
     }
 
     /**
-     * Execute and remove all handlers that were previously {@link #register(State.Handler)}ed, in the reverse order of
+     * Execute and remove all handlers that were previously {@link #register(ShutdownHook.Handler)}ed, in the reverse order of
      * their registration. If any handler throws an exception, it will be ignored.
      *
      * @param returnCode The application's return code to pass to the handlers.
      */
-    public void shutdown(final ReturnCode returnCode) {
-        State.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
+    public void execute(final ReturnCode returnCode) {
+        ShutdownHook.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         while (!stack.isEmpty()) {
             try {
                 stack.pop().accept(returnCode);
             } catch (final RuntimeException ex) {
-                State.LOGGER.warn("Failed to execute state handler.", ex);
+                ShutdownHook.LOGGER.warn("Failed to execute state handler.", ex);
             }
         }
     }

@@ -16,9 +16,13 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
+import java.util.UUID;
+
+import com.github.triceo.robozonky.api.State;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 
 public class BalanceTrackerTest {
@@ -28,14 +32,30 @@ public class BalanceTrackerTest {
         BalanceTracker.INSTANCE.reset();
     }
 
+    @Before
+    public void makeSureNoState() {
+        final State.ClassSpecificState state = State.INSTANCE.forClass(BalanceTracker.class);
+        Assume.assumeFalse(state.getValue(BalanceTracker.BALANCE_KEY).isPresent());
+    }
+
     @Test
-    public void initialToSet() {
-        Assume.assumeFalse(BalanceTracker.BALANCE_STORE.exists());
+    public void lifecycle() {
+        final State.ClassSpecificState state = State.INSTANCE.forClass(BalanceTracker.class);
+        Assume.assumeFalse(state.getValue(BalanceTracker.BALANCE_KEY).isPresent());
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
         final int newBalance = 200;
         BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
-        Assertions.assertThat(BalanceTracker.BALANCE_STORE).exists();
+        Assertions.assertThat(state.getValue(BalanceTracker.BALANCE_KEY)).isPresent();
+        BalanceTracker.INSTANCE.reset();
+        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+    }
+
+    @Test
+    public void wrongData() {
+        final State.ClassSpecificState state = State.INSTANCE.forClass(BalanceTracker.class);
+        state.setValue(BalanceTracker.BALANCE_KEY, UUID.randomUUID().toString());
+        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
     }
 
 }

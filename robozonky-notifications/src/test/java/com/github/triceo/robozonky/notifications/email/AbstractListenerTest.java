@@ -69,7 +69,7 @@ public abstract class AbstractListenerTest {
         events.put(InvestmentMadeEvent.class, new InvestmentMadeEvent(i, 200));
         events.put(InvestmentRejectedEvent.class, new InvestmentRejectedEvent(recommendation, 200, "random"));
         events.put(ExecutionStartedEvent.class, new ExecutionStartedEvent(Collections.emptyList(), 200));
-        events.put(RoboZonkyCrashedEvent.class, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, null));
+        events.put(RoboZonkyCrashedEvent.class, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[] {s.getEventType(), s.getListener(properties), events.get(s.getEventType())})

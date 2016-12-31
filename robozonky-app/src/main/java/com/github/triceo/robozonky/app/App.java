@@ -50,7 +50,7 @@ public class App {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final File ROBOZONKY_LOCK = new File(System.getProperty("java.io.tmpdir"), "robozonky.lock");
-    private static final State STATE = new State();
+    private static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
 
     private static void exit(final ReturnCode returnCode) {
         App.exit(returnCode, null);
@@ -66,13 +66,13 @@ public class App {
         if (returnCode != ReturnCode.OK) {
             Events.fire(new RoboZonkyCrashedEvent(returnCode, cause));
         }
-        App.STATE.shutdown(returnCode);
+        App.SHUTDOWN_HOOKS.execute(returnCode);
         System.exit(returnCode.getCode());
     }
 
     public static void main(final String... args) {
         // make sure other RoboZonky processes are excluded
-        if (!App.STATE.register(new Exclusivity(App.ROBOZONKY_LOCK))) {
+        if (!App.SHUTDOWN_HOOKS.register(new Exclusivity(App.ROBOZONKY_LOCK))) {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
@@ -81,8 +81,8 @@ public class App {
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
-        // start the check for new version, making sure it is properly handled during shutdown
-        App.STATE.register(new VersionChecker());
+        // start the check for new version, making sure it is properly handled during execute
+        App.SHUTDOWN_HOOKS.register(new VersionChecker());
         // read the command line and execute the runtime
         boolean faultTolerant = false;
         try {
@@ -107,7 +107,7 @@ public class App {
             }
             final Configuration ctx = optionalCtx.get();
             // start the app
-            App.STATE.register(new RoboZonkyStartupNotifier());
+            App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
             final boolean loginSucceeded = new Remote(ctx, auth.get()).call().isPresent();
             // shut down the app
             if (!loginSucceeded) {

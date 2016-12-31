@@ -16,13 +16,11 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,19 +29,20 @@ enum BalanceTracker {
     INSTANCE; // fast thread-safe singleton
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BalanceTracker.class);
-    final static File BALANCE_STORE = new File("robozonky.lastKnownBalance");
+    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(BalanceTracker.class);
+    private static final int INITIAL_VALUE = -1;
+    static final String BALANCE_KEY = "lastKnownBalance";
 
-    private final AtomicInteger knownBalance = new AtomicInteger(-1);
+    private final AtomicInteger knownBalance = new AtomicInteger(BalanceTracker.INITIAL_VALUE);
 
     public OptionalInt getLastKnownBalance() {
-        if (knownBalance.get() < 0) {
-            if (!BalanceTracker.BALANCE_STORE.exists()) {
+        if (knownBalance.get() == BalanceTracker.INITIAL_VALUE) {
+            final Optional<String> lastKnownBalance = BalanceTracker.STATE.getValue(BalanceTracker.BALANCE_KEY);
+            if (!lastKnownBalance.isPresent()) {
                 BalanceTracker.LOGGER.debug("No last known balance.");
                 return OptionalInt.empty();
             } else try {
-                final byte[] contents = Files.readAllBytes(BalanceTracker.BALANCE_STORE.toPath());
-                final String stringContents = new String(contents, Defaults.CHARSET).trim();
-                final int result = Integer.parseInt(stringContents);
+                final int result = Integer.parseInt(lastKnownBalance.get());
                 this.knownBalance.set(result);
             } catch (final Exception ex) {
                 BalanceTracker.LOGGER.debug("Failed initializing balance.", ex);
@@ -55,18 +54,13 @@ enum BalanceTracker {
     }
 
     public void setLastKnownBalance(final int newBalance) {
-        try {
-            Files.write(BalanceTracker.BALANCE_STORE.toPath(), String.valueOf(newBalance).getBytes(Defaults.CHARSET));
-            this.knownBalance.set(newBalance);
-        } catch (final IOException ex) {
-            BalanceTracker.LOGGER.debug("Balance {},- CZK not stored, using {},- CZK.", newBalance,
-                    this.knownBalance.get(), ex);
-            this.reset();
-        }
+        BalanceTracker.STATE.setValue(BalanceTracker.BALANCE_KEY, String.valueOf(newBalance));
+        this.knownBalance.set(newBalance);
     }
 
     boolean reset() {
-        return BalanceTracker.BALANCE_STORE.delete();
+        this.knownBalance.set(BalanceTracker.INITIAL_VALUE);
+        return BalanceTracker.STATE.reset();
     }
 
 }

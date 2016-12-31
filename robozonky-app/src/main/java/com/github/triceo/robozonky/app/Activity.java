@@ -16,11 +16,6 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -30,9 +25,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.State;
 import com.github.triceo.robozonky.api.remote.Api;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.configuration.Configuration;
@@ -103,34 +100,29 @@ class Activity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
     private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+    static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Activity.class);
+    static final String LAST_MARKETPLACE_CHECK_STATE_ID = "lastMarketplaceCheck";
 
     private final TemporalAmount closedSeason, sleepInterval;
-    private final Path state;
     private final Activity.Marketplace marketplace;
     private Runnable settler = null;
 
-    Activity(final Configuration ctx, final Api api, final Path state) {
+    Activity(final Configuration ctx, final Api api) {
         this.closedSeason = ctx.getCaptchaDelay();
         this.sleepInterval = ctx.getSleepPeriod();
         this.marketplace = Activity.Marketplace.from(api);
-        this.state = state;
-    }
-
-    private boolean wasMarketplaceCheckedBefore() {
-        return this.state.toFile().exists();
     }
 
     private OffsetDateTime getLatestMarketplaceAction() {
-        if (!this.wasMarketplaceCheckedBefore()) {
-            return Activity.EPOCH;
-        }
-        try (final BufferedReader reader = Files.newBufferedReader(this.state, Defaults.CHARSET)) {
-            final String instantString = reader.readLine();
-            return OffsetDateTime.parse(instantString);
-        } catch (final IOException | DateTimeParseException ex) {
-            Activity.LOGGER.debug("Failed read marketplace timestamp.", ex);
-            return Activity.EPOCH;
-        }
+        final Optional<String> timestamp = Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID);
+        return timestamp.map(s -> {
+            try {
+                return OffsetDateTime.parse(s);
+            } catch (final DateTimeParseException ex) {
+                Activity.LOGGER.debug("Failed read marketplace timestamp.", ex);
+                return Activity.EPOCH;
+            }
+        }).orElse(Activity.EPOCH);
     }
 
     public List<Loan> getUnactionableLoans() {
@@ -198,25 +190,16 @@ class Activity {
     }
 
     private void persist(final boolean hasUnactionableLoans) {
-        try (final BufferedWriter writer = Files.newBufferedWriter(this.state, Defaults.CHARSET)) {
-            // make sure the unactionable loans are never included in the time the marketplace was last checked
-            final OffsetDateTime result = hasUnactionableLoans ?
-                    OffsetDateTime.now().minus(Duration.from(this.closedSeason).plus(Duration.ofSeconds(30)))
-                    : OffsetDateTime.now();
-            if (hasUnactionableLoans) {
-                Activity.LOGGER.debug("New marketplace last checked time placed before beginning of closed season: {}.",
-                        result);
-            } else {
-                Activity.LOGGER.debug("New marketplace last checked time is {}.", result);
-            }
-            writer.write(result.toString());
-        } catch (final IOException ex) {
-            Activity.LOGGER.info("Failed write marketplace timestamp, sleep feature will be disabled.", ex);
-            try { // failed to write new data, try to delete stale data
-                Files.delete(this.state);
-            } catch (final IOException ex2) {
-                Activity.LOGGER.warn("Failed delete marketplace timestamp, sleep feature may malfunction.", ex2);
-            }
+        // make sure the unactionable loans are never included in the time the marketplace was last checked
+        final OffsetDateTime result = hasUnactionableLoans ?
+                OffsetDateTime.now().minus(Duration.from(this.closedSeason).plus(Duration.ofSeconds(30)))
+                : OffsetDateTime.now();
+        if (hasUnactionableLoans) {
+            Activity.LOGGER.debug("New marketplace last checked time placed before beginning of closed season: {}.",
+                    result);
+        } else {
+            Activity.LOGGER.debug("New marketplace last checked time is {}.", result);
         }
+        Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, result.toString());
     }
 }
