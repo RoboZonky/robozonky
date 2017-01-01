@@ -20,6 +20,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,17 +66,21 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                                                               final BigDecimal maxLoanShare,
                                                               final boolean preferLongerTerms,
                                                               final boolean requireConfirmation) {
-        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable shares of rating '{}' on total investments is " +
-                "between {} and {}.", r.getCode(), targetShare, maxShare);
-        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable loans for rating '{}' are between {} and {} CZK on " +
-                        "terms between {} and {} months, {} preferred.", r.getCode(), minAskAmount,
-                maxAskAmount < 0 ? "+inf" : maxAskAmount, minTerm == -1 ? 0 : minTerm,
-                maxTerm < 0 ? "+inf" : maxTerm + 1, preferLongerTerms ? "longer" : "shorter");
-        SimpleInvestmentStrategyService.LOGGER.debug("Acceptable investment for a loan of rating '{}' is between {} " +
-                        "and {} CZK with investment share between {} and {}.", r.getCode(), minLoanAmount,
-                maxLoanAmount < 0 ? "+inf" : maxLoanAmount, minLoanShare, maxLoanShare);
-        if (requireConfirmation) {
-            SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' requires confirmation.", r.getCode());
+        if (Objects.equals(targetShare, BigDecimal.ZERO) && Objects.equals(maxShare, BigDecimal.ZERO)) {
+            SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' will never be invested into.", r.getCode());
+        } else {
+            SimpleInvestmentStrategyService.LOGGER.debug("Acceptable shares of rating '{}' on total investments is " +
+                    "between {} and {}.", r.getCode(), targetShare, maxShare);
+            SimpleInvestmentStrategyService.LOGGER.debug("Acceptable loans for rating '{}' are between {} and {} CZK on " +
+                            "terms between {} and {} months, {} preferred.", r.getCode(), minAskAmount,
+                    maxAskAmount < 0 ? "+inf" : maxAskAmount, minTerm == -1 ? 0 : minTerm,
+                    maxTerm < 0 ? "+inf" : maxTerm + 1, preferLongerTerms ? "longer" : "shorter");
+            SimpleInvestmentStrategyService.LOGGER.debug("Acceptable investment for a loan of rating '{}' is between {} " +
+                            "and {} CZK with investment share between {} and {}.", r.getCode(), minLoanAmount,
+                    maxLoanAmount < 0 ? "+inf" : maxLoanAmount, minLoanShare, maxLoanShare);
+            if (requireConfirmation) {
+                SimpleInvestmentStrategyService.LOGGER.debug("Rating '{}' requires confirmation.", r.getCode());
+            }
         }
         return new StrategyPerRating(r, targetShare, maxShare, minTerm, maxTerm, minLoanAmount, maxLoanAmount,
                 minLoanShare, maxLoanShare, minAskAmount, maxAskAmount, preferLongerTerms, requireConfirmation);
@@ -148,8 +153,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         final BigDecimal ratingShareSum = strategies.values().stream()
                 .map(StrategyPerRating::getTargetShare)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (ratingShareSum.compareTo(BigDecimal.ONE) != 0) {
-            throw new IllegalStateException("Sum total of target shares is not 1. It is: " + ratingShareSum + ".");
+        if (ratingShareSum.compareTo(BigDecimal.ONE) > 0) {
+            throw new IllegalStateException("Sum total of target shares is larger than 1.00: " + ratingShareSum + ".");
         }
     }
 

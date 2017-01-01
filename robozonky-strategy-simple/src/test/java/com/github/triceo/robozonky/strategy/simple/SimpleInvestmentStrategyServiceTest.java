@@ -31,6 +31,8 @@ public class SimpleInvestmentStrategyServiceTest {
 
     private static final InputStream PROPER =
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-sample.cfg");
+    private static final InputStream PARTIAL =
+            SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-partial.cfg");
     private static final InputStream IMPROPER =
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-sample.badext");
     private static final InputStream WRONG_SHARES =
@@ -40,6 +42,14 @@ public class SimpleInvestmentStrategyServiceTest {
     private static final InputStream WRONG_ASKS =
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-wrongasks.cfg");
     private static final File NONEXISTENT = new File("strategy-nonexistent.cfg");
+
+    @Test
+    public void shareSumsUnder100Percent() throws InvestmentStrategyParseException, IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.PARTIAL, ".cfg");
+        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
+        Assertions.assertThat(s.isSupported(f)).isTrue();
+        Assertions.assertThat(s.parse(f)).isNotNull();
+    }
 
     @Test
     public void proper() throws InvestmentStrategyParseException, IOException {
