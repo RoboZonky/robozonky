@@ -47,11 +47,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ZonkoidConfirmationProvider implements ConfirmationProvider {
 
-    private static final String CLIENT_APP = "ROBOZONKY";
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkoidConfirmationProvider.class);
+    private static final String PROTOCOL_MAIN = "https", PROTOCOL_FALLBACK = "http", CLIENT_APP = "ROBOZONKY";
     static final String PATH = "/zonkycommander/rest/notifications";
 
-    private static String md5(final String secret) throws NoSuchAlgorithmException {
+    static String md5(final String secret) throws NoSuchAlgorithmException {
         final MessageDigest mdEnc = MessageDigest.getInstance("MD5");
         mdEnc.update(secret.getBytes(Defaults.CHARSET), 0, secret.length());
         return new BigInteger(1, mdEnc.digest()).toString(16);
@@ -82,19 +82,41 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         return new UrlEncodedFormEntity(nvps);
     }
 
-    static Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId, final int amount,
-                                                      final String domain) {
+    static HttpPost getRequest(final RequestId requestId, final int loanId, final int amount, final String domain,
+                               final String protocol) throws UnsupportedEncodingException {
         final String auth = ZonkoidConfirmationProvider.getAuthenticationString(requestId, loanId);
+        final HttpPost httpPost = new HttpPost(protocol + "://" + domain + ZonkoidConfirmationProvider.PATH);
+        httpPost.addHeader("Accept", "text/plain");
+        httpPost.addHeader("Authorization", auth);
+        httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.addHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT);
+        httpPost.setEntity(ZonkoidConfirmationProvider.getFormData(requestId, loanId, amount));
+        return httpPost;
+    }
+
+    static Optional<Confirmation> handleError(final RequestId requestId, final int loanId, final int amount,
+                                              final String domain, final String protocol, final Exception ex) {
+        switch (protocol) {
+            case ZonkoidConfirmationProvider.PROTOCOL_MAIN:
+                ZonkoidConfirmationProvider.LOGGER.warn("HTTPS communication with Zonkoid failed, trying HTTP.");
+                return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, domain,
+                        ZonkoidConfirmationProvider.PROTOCOL_FALLBACK);
+            case ZonkoidConfirmationProvider.PROTOCOL_FALLBACK:
+                ZonkoidConfirmationProvider.LOGGER.error("Communication with Zonkoid failed.", ex);
+                return Optional.empty();
+            default:
+                throw new IllegalStateException("Can not happen.");
+        }
+    }
+
+    private static Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId,
+                                                              final int amount, final String domain,
+                                                              final String protocol) {
         ZonkoidConfirmationProvider.LOGGER.trace("Opening Zonkoid connection.");
         try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(domain + ZonkoidConfirmationProvider.PATH);
-            httpPost.addHeader("Accept", "text/plain");
-            httpPost.addHeader("Authorization", auth);
-            httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
-            httpPost.addHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT);
-            httpPost.setEntity(ZonkoidConfirmationProvider.getFormData(requestId, loanId, amount));
             ZonkoidConfirmationProvider.LOGGER.trace("Opening Zonkoid request.");
-            try (final CloseableHttpResponse response = httpclient.execute(httpPost)) {
+            final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, domain, protocol);
+            try (final CloseableHttpResponse response = httpclient.execute(post)) {
                 final int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode >= 200 && statusCode < 300) {
                     ZonkoidConfirmationProvider.LOGGER.debug("Zonkoid response: {}", response.getStatusLine());
@@ -110,16 +132,20 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
                 ZonkoidConfirmationProvider.LOGGER.trace("Closing Zonkoid request.");
             }
         } catch (final Exception ex) {
-            ZonkoidConfirmationProvider.LOGGER.warn("Communication with Zonkoid failed.", ex);
-            return Optional.empty();
+            return ZonkoidConfirmationProvider.handleError(requestId, loanId, amount, domain, protocol, ex);
         } finally {
             ZonkoidConfirmationProvider.LOGGER.trace("Closing Zonkoid connection.");
         }
     }
 
+    static Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId, final int amount,
+                                                      final String domain) {
+        return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, domain,
+                ZonkoidConfirmationProvider.PROTOCOL_MAIN);
+    }
     @Override
     public Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId, final int amount) {
-        return requestConfirmation(requestId, loanId, amount, "https://urbancoders.eu");
+        return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, "urbancoders.eu");
     }
 
     @Override

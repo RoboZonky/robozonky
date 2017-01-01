@@ -16,7 +16,9 @@
 
 package com.github.triceo.robozonky.integrations.zonkoid;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
@@ -41,7 +43,7 @@ public class ZonkoidConfirmationProviderTest {
     @Before
     public void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
-        serverUrl = "http://127.0.0.1:" + server.getPort();
+        serverUrl = "127.0.0.1:" + server.getPort();
     }
 
     @After
@@ -97,6 +99,27 @@ public class ZonkoidConfirmationProviderTest {
         final Optional<Confirmation> result = this.execute(403);
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(result.get().getType()).isEqualTo(ConfirmationType.REJECTED);
+    }
+
+    @Test
+    public void md5() throws NoSuchAlgorithmException {
+        final String in = "654321|ROBOZONKY|name@surname.cz|12345";
+        final String out = "cd15efe487e98e83a215091221568eda";
+        Assertions.assertThat(ZonkoidConfirmationProvider.md5(in)).isEqualTo(out);
+    }
+
+    @Test
+    public void errorOverHttp() throws NoSuchAlgorithmException {
+        final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
+                "http", new RuntimeException());
+        Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void errorOverUnknown() {
+        final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
+                UUID.randomUUID().toString(), new RuntimeException());
+        Assertions.assertThat(result).isEmpty();
     }
 
 }
