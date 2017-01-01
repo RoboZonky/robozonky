@@ -22,7 +22,6 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.icegreen.greenmail.junit.GreenMailRule;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import org.assertj.core.api.Assertions;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -35,10 +34,10 @@ public class EmailingListenerTest extends AbstractEmailingListenerTest {
     public void testMailSent() throws Exception {
         final AbstractEmailingListener<Event> l = this.getEmailingListener();
         l.handle(this.event);
-        Assume.assumeTrue(l.shouldSendEmail(this.event)); // otherwise makes no sense
+        Assertions.assertThat(l.shouldSendEmail(this.event)).isTrue();
         Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(1);
         final MimeMessage m = greenMail.getReceivedMessages()[0];
-        Assertions.assertThat(m.getSubject()).isEqualTo(l.getSubject(this.event));
+        Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(l.getSubject(this.event));
         Assertions.assertThat(m.getFrom()[0].toString()).contains("noreply@robozonky.cz");
     }
 
