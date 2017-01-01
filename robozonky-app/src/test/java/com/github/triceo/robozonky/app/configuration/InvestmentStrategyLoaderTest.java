@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.AfterClass;
@@ -59,32 +58,32 @@ public class InvestmentStrategyLoaderTest {
         InvestmentStrategyLoaderTest.mockServer.stop();
     }
 
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void nullStrategyAsFile() throws InvestmentStrategyParseException {
-        InvestmentStrategyLoader.load((String)null);
-    }
-
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void nullStrategyAsString() throws InvestmentStrategyParseException {
-        InvestmentStrategyLoader.load((File)null);
-    }
-
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void nonExistentStrategyAsFile() throws InvestmentStrategyParseException, IOException {
-        final File strategy = File.createTempFile("robozonky-", ".cfg");
-        Assume.assumeTrue(strategy.delete());
-        InvestmentStrategyLoader.load(strategy);
-    }
-
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void nonExistentStrategyAsUrl() throws InvestmentStrategyParseException, IOException {
-        final File strategy = File.createTempFile("robozonky-", ".cfg");
-        Assume.assumeTrue(strategy.delete());
-        InvestmentStrategyLoader.load("file://" + strategy.toPath());
+    @Test
+    public void nullStrategyAsFile() {
+        Assertions.assertThat(InvestmentStrategyLoader.load((String)null)).isEmpty();
     }
 
     @Test
-    public void strategyAsUrl() throws InvestmentStrategyParseException {
+    public void nullStrategyAsString() {
+        Assertions.assertThat(InvestmentStrategyLoader.load((File)null)).isEmpty();
+    }
+
+    @Test
+    public void nonExistentStrategyAsFile() throws IOException {
+        final File strategy = File.createTempFile("robozonky-", ".cfg");
+        Assume.assumeTrue(strategy.delete());
+        Assertions.assertThat(InvestmentStrategyLoader.load(strategy)).isEmpty();
+    }
+
+    @Test
+    public void nonExistentStrategyAsUrl() throws IOException {
+        final File strategy = File.createTempFile("robozonky-", ".cfg");
+        Assume.assumeTrue(strategy.delete());
+        Assertions.assertThat(InvestmentStrategyLoader.load("file://" + strategy.toPath())).isEmpty();
+    }
+
+    @Test
+    public void strategyAsUrl() {
         final String url = "http://127.0.0.1:" + InvestmentStrategyLoaderTest.mockServer.getPort() +
                 InvestmentStrategyLoaderTest.URL;
         final Optional<InvestmentStrategy> result = InvestmentStrategyLoader.load(url);

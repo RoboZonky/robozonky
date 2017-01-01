@@ -26,6 +26,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.ExtensionsManager;
 import com.github.triceo.robozonky.api.Defaults;
@@ -56,29 +58,29 @@ class InvestmentStrategyLoader {
         }
     }
 
-    private static Optional<InvestmentStrategy> loadWithFilename(final URL url, final String filename) throws
-            InvestmentStrategyParseException {
+    private static Optional<InvestmentStrategy> loadWithFilename(final URL url, final String filename) {
         // FIXME the resource identified by the URL may specify a different encoding
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
             final File tmp = File.createTempFile("robozonky-", "-" + filename);
             InvestmentStrategyLoader.LOGGER.info("Downloading strategy URL {} to {}.", url, tmp.toPath());
             Files.write(tmp.toPath(), r.lines().collect(Collectors.toList()));
             return InvestmentStrategyLoader.load(tmp);
-        } catch (final Exception e) {
-            throw new InvestmentStrategyParseException("Failed reading strategy.", e);
+        } catch (final Exception ex) {
+            InvestmentStrategyLoader.LOGGER.error("Failed parsing strategy.", ex);
+            return Optional.empty();
         }
-
     }
 
-    private static Optional<InvestmentStrategy> loadWithFilename(final URL url) throws
-            InvestmentStrategyParseException {
+    private static Optional<InvestmentStrategy> loadWithFilename(final URL url) {
         return InvestmentStrategyLoader.loadWithFilename(url, "index.html");
     }
 
-    static Optional<InvestmentStrategy> load(final String maybeUrl) throws InvestmentStrategyParseException {
+    static Optional<InvestmentStrategy> load(final String maybeUrl) {
         final Optional<URL> url = InvestmentStrategyLoader.convertToUrl(maybeUrl);
-        final URL actualUrl =
-                url.orElseThrow(() -> new InvestmentStrategyParseException("Unknown strategy location: " + maybeUrl));
+        if (!url.isPresent()) {
+            InvestmentStrategyLoader.LOGGER.error("Unknown strategy location: {}.", maybeUrl);
+        }
+        final URL actualUrl = url.get();
         if (Objects.equals(actualUrl.getProtocol(), "file")) { // load the file directly
             return InvestmentStrategyLoader.load(new File(actualUrl.getPath()));
         } else { // download the resource identified by URL and store it to a file
@@ -96,29 +98,24 @@ class InvestmentStrategyLoader {
         }
     }
 
-    static Optional<InvestmentStrategy> load(final File file) throws InvestmentStrategyParseException {
-        if (file == null) {
-            throw new InvestmentStrategyParseException("Strategy file null.");
-        } else if (!file.canRead()) {
-            throw new InvestmentStrategyParseException("Strategy file not accessible: " + file.getAbsolutePath());
+    static Optional<InvestmentStrategy> load(final File file) {
+        if (file == null || !file.canRead()) {
+            InvestmentStrategyLoader.LOGGER.error("Strategy file not accessible: {}.", file);
+            return Optional.empty();
         }
         InvestmentStrategyLoader.LOGGER.trace("Loading strategies.");
-        try {
-            for (final InvestmentStrategyService s : InvestmentStrategyLoader.STRATEGY_LOADER) {
-                if (s.isSupported(file)) {
-                    InvestmentStrategyLoader.LOGGER.debug("Strategy '{}' will be processed using '{}'.", file.getAbsolutePath(),
-                            s.getClass());
-                    return Optional.of(s.parse(file));
-                } else {
-                    InvestmentStrategyLoader.LOGGER.trace("Strategy '{}' will not be processed using '{}'.",
-                            file.getAbsolutePath(), s.getClass());
-                }
-            }
-            InvestmentStrategyLoader.LOGGER.warn("No strategy implementation found for '{}'.", file.getAbsolutePath());
-            return Optional.empty();
-        } finally {
-            InvestmentStrategyLoader.LOGGER.trace("Finished loading strategies.");
-        }
+        return StreamSupport.stream(InvestmentStrategyLoader.STRATEGY_LOADER.spliterator(), true)
+                .peek(iss -> InvestmentStrategyLoader.LOGGER.debug("Evaluating strategy '{}' with '{}'.",
+                        file.getAbsolutePath(), iss.getClass()))
+                .map(iss -> {
+                    try {
+                        return iss.parse(file);
+                    } catch (final InvestmentStrategyParseException ex) {
+                        InvestmentStrategyLoader.LOGGER.error("Failed parsing strategy.", ex);
+                        return Optional.empty();
+                    }
+                }).flatMap(o -> o.isPresent() ? Stream.of((InvestmentStrategy)o.get()) : Stream.empty())
+                .findFirst();
     }
 
 

@@ -16,18 +16,13 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.io.File;
-
 import org.junit.After;
 
 abstract class BaseMarketplaceTest {
 
     @After
-    public void deleteTimestamp() {
-        final File f = Remote.MARKETPLACE_TIMESTAMP.toFile();
-        if (f.exists()) {
-            f.delete();
-        }
+    public void resetState() {
+        Activity.STATE.reset();
     }
 
 }

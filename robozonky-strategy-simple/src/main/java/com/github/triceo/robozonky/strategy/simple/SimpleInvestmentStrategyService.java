@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -159,8 +160,10 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     }
 
     @Override
-    public InvestmentStrategy parse(final File strategyFile) throws InvestmentStrategyParseException {
-        try {
+    public Optional<InvestmentStrategy> parse(final File strategyFile) throws InvestmentStrategyParseException {
+        if (!SimpleInvestmentStrategyService.isSupported(strategyFile)) {
+            return Optional.empty();
+        } else try {
             SimpleInvestmentStrategyService.LOGGER.info("Using strategy: '{}'", strategyFile.getAbsolutePath());
             final ImmutableConfiguration c = SimpleInvestmentStrategyService.getConfig(strategyFile);
             final int minimumBalance = SimpleInvestmentStrategyService.getMinimumBalance(c);
@@ -170,14 +173,13 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             final Map<Rating, StrategyPerRating> individualStrategies = Arrays.stream(Rating.values())
                     .collect(Collectors.toMap(Function.identity(), r -> SimpleInvestmentStrategyService.parseRating(r, c)));
             SimpleInvestmentStrategyService.checkIndividualStrategies(individualStrategies);
-            return new SimpleInvestmentStrategy(minimumBalance, maximumInvestment, individualStrategies);
+            return Optional.of(new SimpleInvestmentStrategy(minimumBalance, maximumInvestment, individualStrategies));
         } catch (final IllegalStateException ex) {
             throw new InvestmentStrategyParseException(ex);
         }
     }
 
-    @Override
-    public boolean isSupported(final File strategyFile) {
+    private static boolean isSupported(final File strategyFile) {
         return strategyFile.getAbsolutePath().endsWith(".cfg");
     }
 

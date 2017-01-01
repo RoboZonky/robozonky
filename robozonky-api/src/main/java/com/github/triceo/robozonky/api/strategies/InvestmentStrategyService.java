@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.api.strategies;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
@@ -25,21 +26,12 @@ import java.util.ServiceLoader;
 public interface InvestmentStrategyService {
 
     /**
-     * Whether or not this particular file type is supported.
+     * Prepare the investment strategy for being used by the app.
      *
      * @param strategyFile Investment strategy in question.
-     * @return True if the strategy service knows of a provider for this particular file type.
-     */
-    boolean isSupported(File strategyFile);
-
-    /**
-     * Prepare the investment strategy for being used by the app. Will only be called if {@link #isSupported(File)}
-     * returned true.
-     *
-     * @param strategyFile Investment strategy in question.
-     * @return Processed instance of the investment strategy provided by the user.
+     * @return Processed instance of the investment strategy provided by the user, if the file format is supported.
      * @throws InvestmentStrategyParseException If the strategy file failed to initialize.
      */
-    InvestmentStrategy parse(File strategyFile) throws InvestmentStrategyParseException;
+    Optional<InvestmentStrategy> parse(File strategyFile) throws InvestmentStrategyParseException;
 
 }

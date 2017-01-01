@@ -123,9 +123,19 @@ public enum State {
         }
     }
 
+    private synchronized boolean store() {
+        try {
+            this.stateFile.store();
+            return true;
+        } catch (final IOException ex) {
+            State.LOGGER.warn("Failed storing state.", ex);
+            return false;
+        }
+    }
+
     synchronized boolean unsetValue(final String section, final String key) {
         if (this.containskey(section, key)) {
-            return this.stateFile.get(section).remove(key) != null;
+            return (this.stateFile.get(section).remove(key) != null) && this.store();
         } else {
             return false;
         }
@@ -133,15 +143,11 @@ public enum State {
 
     synchronized void setValue(final String section, final String key, final String value) {
         this.stateFile.put(section, key, value);
-        try {
-            this.stateFile.store();
-        } catch (final IOException ex) {
-            State.LOGGER.warn("Failed storing state.", ex);
-        }
+        this.store();
     }
 
     synchronized boolean unsetValues(final String section) {
-        return this.stateFile.remove(section) != null;
+        return this.stateFile.remove(section) != null && this.store();
     }
 
 }

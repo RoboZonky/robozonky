@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.strategy.rules;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
@@ -42,7 +43,10 @@ public class RuleBasedInvestmentStrategyService implements InvestmentStrategySer
     private static final ReleaseId RELEASE_ID = KieServices.Factory.get().getRepository().getDefaultReleaseId();
 
     @Override
-    public InvestmentStrategy parse(final File strategyFile) throws InvestmentStrategyParseException {
+    public Optional<InvestmentStrategy> parse(final File strategyFile) throws InvestmentStrategyParseException {
+        if (!RuleBasedInvestmentStrategyService.isSupported(strategyFile)) {
+            return Optional.empty();
+        }
         RuleBasedInvestmentStrategyService.LOGGER.trace("Parsing '{}' started.", strategyFile);
         final KieServices kieServices = KieServices.Factory.get();
         final KieModuleModel kieModuleModel = kieServices.newKieModuleModel();
@@ -58,11 +62,10 @@ public class RuleBasedInvestmentStrategyService implements InvestmentStrategySer
             throw new InvestmentStrategyParseException("Failed parsing decision table. Reason: " + messages);
         }
         final KieContainer container = kieServices.newKieContainer(RuleBasedInvestmentStrategyService.RELEASE_ID);
-        return new RuleBasedInvestmentStrategy(container);
+        return Optional.of(new RuleBasedInvestmentStrategy(container));
     }
 
-    @Override
-    public boolean isSupported(final File strategyFile) {
+    private static boolean isSupported(final File strategyFile) {
         return strategyFile.getAbsolutePath().endsWith(".xls") || strategyFile.getAbsolutePath().endsWith(".xlsx");
     }
 

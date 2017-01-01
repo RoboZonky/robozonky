@@ -26,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,9 +53,9 @@ public class RuleBasedInvestmentStrategyServiceTest {
     public void simple() throws InvestmentStrategyParseException, IOException {
         final RuleBasedInvestmentStrategyService s = new RuleBasedInvestmentStrategyService();
         final File f = IoTestUtil.streamToFile(RuleBasedInvestmentStrategyServiceTest.FILE, ".xlsx");
-        Assertions.assertThat(s.isSupported(f)).isTrue();
-        final InvestmentStrategy is = s.parse(f);
-        Assertions.assertThat(is).isNotNull();
+        final Optional<InvestmentStrategy> ois = s.parse(f);
+        Assertions.assertThat(ois).isPresent();
+        final InvestmentStrategy is = ois.get();
         // let's make up some loans; B will not be accepted, D will be prioritized over A
         final Loan aaaaa = Mockito.mock(Loan.class); // will not be accepted since AAAAA are ignored
         Mockito.when(aaaaa.getId()).thenReturn(1);

@@ -16,8 +16,6 @@
 package com.github.triceo.robozonky.app;
 
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -52,9 +50,6 @@ import org.slf4j.LoggerFactory;
 public class Remote implements Callable<Optional<Collection<Investment>>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Remote.class);
-
-    static final Path MARKETPLACE_TIMESTAMP =
-            Paths.get(System.getProperty("user.dir"), "robozonky.lastMarketplaceCheck.timestamp");
 
     static Optional<Collection<Loan>> getAvailableLoans(final Activity activity) {
         final boolean shouldSleep = activity.shouldSleep();

@@ -26,7 +26,6 @@ import java.util.function.Function;
 import com.github.triceo.robozonky.ZonkyProxy;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import org.apache.commons.cli.Option;
 import org.slf4j.Logger;
@@ -59,37 +58,34 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
                 cli.printHelp("Strategy file must be provided.", true);
                 return Optional.empty();
             }
-            try {
-                // find investment strategy
-                final Optional<InvestmentStrategy> strategy = InvestmentStrategyLoader.load(strategyLocation.get());
-                if (!strategy.isPresent()) {
-                    OperatingMode.LOGGER.error("No investment strategy found to support {}.", strategyLocation);
-                    return Optional.empty();
-                }
-                // find confirmation provider
-                final Optional<SecretProvider> secretProvider = cli.getSecretProvider();
-                if (!secretProvider.isPresent()) {
-                    OperatingMode.LOGGER.error("No secret provider found.");
-                    return Optional.empty();
-                }
-                final Optional<ZonkyProxy.Builder> builder =
-                        OperatingMode.getZonkyProxyBuilder(cli.getSecretProvider().get(), cli);
-                if (!builder.isPresent()) {
-                    return Optional.empty();
-                }
-                // create configuration
-                if (cli.isDryRun()) {
-                    final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new Configuration(strategy.get(), builder.get(),
-                            cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds(),
-                            balance));
-                } else {
-                    return Optional.of(new Configuration(strategy.get(), builder.get(),
-                            cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds()));
-                }
-            } catch (final InvestmentStrategyParseException ex) {
-                OperatingMode.LOGGER.error("Failed parsing strategy.", ex);
+            // find investment strategy
+            final Optional<InvestmentStrategy> strategy = InvestmentStrategyLoader.load(strategyLocation.get());
+            if (!strategy.isPresent()) {
+                OperatingMode.LOGGER.error("No investment strategy found to support {}.", strategyLocation);
                 return Optional.empty();
+            }
+            OperatingMode.LOGGER.debug("Strategy '{}' will be processed using '{}'.", strategyLocation.get(),
+                    strategy.get().getClass());
+            // find confirmation provider
+            final Optional<SecretProvider> secretProvider = cli.getSecretProvider();
+            if (!secretProvider.isPresent()) {
+                OperatingMode.LOGGER.error("No secret provider found.");
+                return Optional.empty();
+            }
+            final Optional<ZonkyProxy.Builder> builder =
+                    OperatingMode.getZonkyProxyBuilder(cli.getSecretProvider().get(), cli);
+            if (!builder.isPresent()) {
+                return Optional.empty();
+            }
+            // create configuration
+            if (cli.isDryRun()) {
+                final int balance = cli.getDryRunBalance().orElse(-1);
+                return Optional.of(new Configuration(strategy.get(), builder.get(),
+                        cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds(),
+                        balance));
+            } else {
+                return Optional.of(new Configuration(strategy.get(), builder.get(),
+                        cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds()));
             }
         }
     },
@@ -142,6 +138,8 @@ enum OperatingMode implements Function<CommandLineInterface, Optional<Configurat
                 OperatingMode.LOGGER.error("Confirmation provider '{}' not found, yet it is required.", serviceId);
                 return Optional.empty();
             }
+            OperatingMode.LOGGER.debug("Confirmation provider '{}' will be using '{}'.", serviceId,
+                    provider.get().getClass());
             final Optional<char[]> token = cred.getToken();
             if (token.isPresent()) {
                 secret.setSecret(serviceId, token.get());

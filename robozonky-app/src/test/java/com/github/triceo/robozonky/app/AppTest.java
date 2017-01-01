@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
-public class AppTest {
+public class AppTest extends BaseMarketplaceTest {
 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();

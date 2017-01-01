@@ -18,6 +18,8 @@ package com.github.triceo.robozonky.app.configuration;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.ExtensionsManager;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
@@ -33,19 +35,13 @@ class ConfirmationProviderLoader {
 
     static Optional<ConfirmationProvider> load(final String providerId) {
         ConfirmationProviderLoader.LOGGER.trace("Looking up confirmation provider '{}'.", providerId);
-        for (final ConfirmationProviderService s : ConfirmationProviderLoader.LOADER) {
-            final Optional<ConfirmationProvider> c = s.find(providerId);
-            if (c.isPresent()) {
-                ConfirmationProviderLoader.LOGGER.debug("Confirmation provider '{}' using {}.", providerId,
-                        c.get().getClass());
-                return c;
-            } else {
-                ConfirmationProviderLoader.LOGGER.trace("Confirmation provider '{}' not using {}.", providerId,
-                        c.getClass());
-            }
-        }
-        ConfirmationProviderLoader.LOGGER.trace("Finished looking up confirmation provider '{}'.", providerId);
-        return Optional.empty();
+        return StreamSupport.stream(ConfirmationProviderLoader.LOADER.spliterator(), false)
+                .peek(cp ->
+                        ConfirmationProviderLoader.LOGGER.debug("Evaluating confirmation provider '{}' with '{}'.",
+                                providerId, cp.getClass()))
+                .map(cp -> cp.find(providerId))
+                .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
+                .findFirst();
     }
 
 }

@@ -20,15 +20,16 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
- * Use Java's {@link ServiceLoader} to load strategy different strategy implementations.
+ * Use Java's {@link ServiceLoader} to load different confirmation providers.
  */
 public interface ConfirmationProviderService {
 
     /**
      * Prepare the confirmation for being used by the app.
      *
-     * @param providerId ID of the confirmation app/service provider.
-     * @return Instance of the confirmation provider, ready for accepting confirmation requests.
+     * @param providerId ID of the confirmation provider.
+     * @return Instance of the confirmation provider, ready for accepting confirmation requests, if the service
+     * supports it.
      */
     Optional<ConfirmationProvider> find(String providerId);
 

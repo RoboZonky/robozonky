@@ -47,22 +47,19 @@ public class SimpleInvestmentStrategyServiceTest {
     public void shareSumsUnder100Percent() throws InvestmentStrategyParseException, IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.PARTIAL, ".cfg");
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(f)).isTrue();
-        Assertions.assertThat(s.parse(f)).isNotNull();
+        Assertions.assertThat(s.parse(f)).isPresent();
     }
 
     @Test
     public void proper() throws InvestmentStrategyParseException, IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.PROPER, ".cfg");
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(f)).isTrue();
-        Assertions.assertThat(s.parse(f)).isNotNull();
+        Assertions.assertThat(s.parse(f)).isPresent();
     }
 
     @Test(expected = InvestmentStrategyParseException.class)
     public void nonexistent() throws InvestmentStrategyParseException {
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(SimpleInvestmentStrategyServiceTest.NONEXISTENT)).isTrue();
         s.parse(SimpleInvestmentStrategyServiceTest.NONEXISTENT);
     }
 
@@ -70,14 +67,14 @@ public class SimpleInvestmentStrategyServiceTest {
     public void improper() throws InvestmentStrategyParseException, IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.IMPROPER);
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(f)).isFalse();
+        Assertions.assertThat(s.parse(f)).isEmpty();
     }
 
     @Test
     public void wrongShares() throws InvestmentStrategyParseException, IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_SHARES);
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.isSupported(f)).isFalse();
+        Assertions.assertThat(s.parse(f)).isEmpty();
     }
 
     @Test(expected = InvestmentStrategyParseException.class)

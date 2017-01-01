@@ -25,20 +25,14 @@ import com.github.triceo.robozonky.api.remote.Api;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.configuration.Configuration;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class ActivityTest {
+public class ActivityTest extends BaseMarketplaceTest {
 
     private static final int CHECK_TIMEOUT_MINUTES = 60;
 
     private final Configuration ctx = new Configuration(1, 200, ActivityTest.CHECK_TIMEOUT_MINUTES, 120);
-
-    @After
-    public void deleteActivityFile() {
-        Activity.STATE.reset();
-    }
 
     @Test
     public void doesNotSleepWhenFirstRunButSleepsOnSecondAttempt() {
