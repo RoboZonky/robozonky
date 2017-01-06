@@ -46,7 +46,7 @@ public class IoTestUtil {
     private static final String ROOT = new StringJoiner(File.separator).add("src").add("main").toString();
 
     public static String findMainSource() {
-        final File current = new File(System.getProperty("user.dir"));
+        final File current = new File(System.getProperty("user.dir")).getAbsoluteFile();
         final File f = new File(current, IoTestUtil.ROOT);
         if (f.exists()) {
             return f.getAbsolutePath();

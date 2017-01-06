@@ -62,11 +62,6 @@ public class InvestmentStrategyLoaderTest {
     }
 
     @Test
-    public void nullStrategyAsString() {
-        Assertions.assertThat(InvestmentStrategyLoader.load(null)).isEmpty();
-    }
-
-    @Test
     public void nonExistentStrategyAsUrl() throws IOException {
         final File strategy = File.createTempFile("robozonky-", ".cfg");
         Assume.assumeTrue(strategy.delete());
