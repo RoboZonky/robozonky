@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -44,8 +45,11 @@ class InvestmentStrategyLoader {
         try {
             return new URL(maybeUrl);
         } catch (final MalformedURLException e) {
-            // process the string as file reference
-            return InvestmentStrategyLoader.convertToUrl("file://" + maybeUrl);
+            try {
+                return new File(maybeUrl).toURI().toURL();
+            } catch (final MalformedURLException e1) {
+                throw new IllegalStateException("Cannot load " + maybeUrl, e1);
+            }
         }
     }
 
