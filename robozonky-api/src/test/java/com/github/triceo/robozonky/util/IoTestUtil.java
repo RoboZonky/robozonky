@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,21 +43,22 @@ public class IoTestUtil {
         return f;
     }
 
-    private static final String ROOT = "src/main/";
+    private static final String ROOT = new StringJoiner(File.separator).add("src").add("main").toString();
 
-    public static final String findMainSource() {
-        final File f = new File(IoTestUtil.ROOT);
+    public static String findMainSource() {
+        final File current = new File(System.getProperty("user.dir"));
+        final File f = new File(current, IoTestUtil.ROOT);
         if (f.exists()) {
             return f.getAbsolutePath();
         }
-        final File f2 = new File("../", IoTestUtil.ROOT); // in case we're running from /target
+        final File f2 = new File(current.getParent(), IoTestUtil.ROOT); // in case we're running from /target
         if (f2.exists()) {
             return f2.getAbsolutePath();
         }
         throw new IllegalStateException("Oops.");
     }
 
-    public static final String findMainSource(String... subfolders) {
+    public static String findMainSource(String... subfolders) {
         final StringJoiner sj = new StringJoiner(File.separator);
         sj.add(IoTestUtil.findMainSource());
         Arrays.stream(subfolders).forEach(sj::add);

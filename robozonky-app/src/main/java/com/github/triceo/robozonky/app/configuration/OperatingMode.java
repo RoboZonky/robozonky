@@ -66,17 +66,17 @@ enum OperatingMode {
                     .map(credentials -> OperatingMode.getZonkyProxyBuilder(credentials, secrets))
                     .orElse(Optional.of(new ZonkyProxy.Builder()));
             return optionalBuilder.map(builder -> {
-                        if (cli.isDryRun()) {
-                            final int balance = cli.getDryRunBalance().orElse(-1);
-                            return Optional.of(new Configuration(strategy.get(), builder,
-                                    cli.getMaximumSleepPeriodInMinutes(),
-                                    cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
-                        } else {
-                            return Optional.of(new Configuration(strategy.get(), builder,
-                                    cli.getMaximumSleepPeriodInMinutes(),
-                                    cli.getCaptchaPreventingInvestingDelayInSeconds()));
-                        }
-                    }).orElse(Optional.empty());
+                if (cli.isDryRun()) {
+                    final int balance = cli.getDryRunBalance().orElse(-1);
+                    return Optional.of(new Configuration(strategy.get(), builder,
+                            cli.getMaximumSleepPeriodInMinutes(),
+                            cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
+                } else {
+                    return Optional.of(new Configuration(strategy.get(), builder,
+                            cli.getMaximumSleepPeriodInMinutes(),
+                            cli.getCaptchaPreventingInvestingDelayInSeconds()));
+                    }
+                }).orElse(Optional.empty());
         }
     },
     /**
