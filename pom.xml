@@ -419,7 +419,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.version}</version>
           <configuration>
-            <redirectTestOutputToFile>false</redirectTestOutputToFile>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <reuseForks>false</reuseForks>
             <runOrder>hourly</runOrder>
             <workingDirectory>${basedir}/target</workingDirectory>
@@ -451,7 +451,7 @@
           <artifactId>pitest-maven</artifactId>
           <version>1.1.11</version>
           <configuration>
-            <skip>true</skip>
+            <skip>${skipTests}</skip>
             <timestampedReports>false</timestampedReports>
             <detectInlinedCode>true</detectInlinedCode>
             <mutationThreshold>85</mutationThreshold>
