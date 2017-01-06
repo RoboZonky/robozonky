@@ -419,7 +419,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.version}</version>
           <configuration>
-            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <redirectTestOutputToFile>false</redirectTestOutputToFile>
             <reuseForks>false</reuseForks>
             <runOrder>hourly</runOrder>
             <workingDirectory>${basedir}/target</workingDirectory>
