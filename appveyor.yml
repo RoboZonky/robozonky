@@ -18,3 +18,5 @@ test_script:
   - mvn post-integration-test --batch-mode
 cache:
   - C:\Users\appveyor\.m2
+artifacts:
+  - path: '**\surefire-reports\*'
