@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,11 @@ import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 
 /**
- * Immutable object representing the result of a successful authentication.
+ * Result of a successful authentication.
  */
-public class Authentication {
+public interface Authentication {
 
-    private final ZonkyApi api;
-    private final ZonkyApiToken apiToken;
+    ZonkyApi getZonkyApi();
 
-    Authentication(final ZonkyApi api, final ZonkyApiToken apiToken) {
-        this.api = api;
-        this.apiToken = apiToken;
-    }
-
-    public ZonkyApi getZonkyApi() {
-        return api;
-    }
-
-    public ZonkyApiToken getZonkyApiToken() {
-        return apiToken;
-    }
+    ZonkyApiToken getZonkyApiToken();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package com.github.triceo.robozonky.strategy.rules;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
@@ -43,30 +42,23 @@ public class RuleBasedInvestmentStrategyService implements InvestmentStrategySer
     private static final ReleaseId RELEASE_ID = KieServices.Factory.get().getRepository().getDefaultReleaseId();
 
     @Override
-    public Optional<InvestmentStrategy> parse(final File strategyFile) throws InvestmentStrategyParseException {
-        if (!RuleBasedInvestmentStrategyService.isSupported(strategyFile)) {
-            return Optional.empty();
-        }
-        RuleBasedInvestmentStrategyService.LOGGER.trace("Parsing '{}' started.", strategyFile);
+    public Optional<InvestmentStrategy> parse(final InputStream strategy) {
+        RuleBasedInvestmentStrategyService.LOGGER.trace("Parsing '{}' started.", strategy);
         final KieServices kieServices = KieServices.Factory.get();
         final KieModuleModel kieModuleModel = kieServices.newKieModuleModel();
         final KieResources resources = kieServices.getResources();
         final KieFileSystem kfs = kieServices.newKieFileSystem();
-        kfs.write(resources.newFileSystemResource(strategyFile));
+        kfs.write("src/main/resources/robozonky.dtable.xls", resources.newInputStreamResource(strategy));
         kfs.writeKModuleXML(kieModuleModel.toXML());
         kfs.generateAndWritePomXML(RuleBasedInvestmentStrategyService.RELEASE_ID);
         final KieBuilder builder = kieServices.newKieBuilder(kfs).buildAll();
         final List<Message> messages = builder.getResults().getMessages(Message.Level.ERROR);
         RuleBasedInvestmentStrategyService.LOGGER.trace("Parsing finished.");
         if (!messages.isEmpty()) {
-            throw new InvestmentStrategyParseException("Failed parsing decision table. Reason: " + messages);
+            throw new IllegalStateException("Failed parsing decision table. Reason: " + messages);
         }
         final KieContainer container = kieServices.newKieContainer(RuleBasedInvestmentStrategyService.RELEASE_ID);
         return Optional.of(new RuleBasedInvestmentStrategy(container));
-    }
-
-    private static boolean isSupported(final File strategyFile) {
-        return strategyFile.getAbsolutePath().endsWith(".xls") || strategyFile.getAbsolutePath().endsWith(".xlsx");
     }
 
 }

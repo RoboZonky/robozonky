@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,18 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -49,19 +54,37 @@ public class CoreInvestorTest extends AbstractInvestingTest {
         final Optional<Investment> result = i.invest(loanId, loanAmount, Duration.ofSeconds(0));
         Assertions.assertThat(result).isPresent();
         final Investment investment = result.get();
-        Assertions.assertThat(investment.getLoanId()).isEqualTo(loanId);
-        Assertions.assertThat(investment.getAmount()).isEqualTo(loanAmount);
-        Assertions.assertThat(i.getBalance()).isEqualTo(BigDecimal.valueOf(originalBalance - loanAmount));
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(investment.getLoanId()).isEqualTo(loanId);
+        softly.assertThat(investment.getAmount()).isEqualTo(loanAmount);
+        softly.assertAll();
+        final BigDecimal newBalance = BigDecimal.valueOf(originalBalance - loanAmount);
+        Assertions.assertThat(i.getBalance()).isEqualTo(newBalance);
     }
 
     @Test
     public void emptyInvestmentLoop() {
         // prepare API
-        final int originalBalance = 10000;
+        final int originalBalance = 200;
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         // make sure no actual investing is being done
         final ZonkyProxy proxy = new ZonkyProxy.Builder().asDryRun().build(api);
         final Investor i = new Investor(proxy, BigDecimal.valueOf(originalBalance));
+        final Collection<Investment> result = i.invest(Mockito.mock(InvestmentStrategy.class), Collections.emptyList());
+        Assertions.assertThat(result).isEmpty();
+        // validate events
+        final List<Event> newEvents = this.getNewEvents();
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(newEvents).hasSize(2);
+        softly.assertThat(newEvents.get(0)).isInstanceOf(StrategyStartedEvent.class);
+        softly.assertThat(newEvents.get(1)).isInstanceOf(StrategyCompletedEvent.class);
+        softly.assertAll();
+    }
+
+    @Test
+    public void underBalance() {
+        final ZonkyProxy proxy = new ZonkyProxy.Builder().asDryRun().build(Mockito.mock(ZonkyApi.class));
+        final Investor i = new Investor(proxy, BigDecimal.ZERO);
         final Collection<Investment> result = i.invest(Mockito.mock(InvestmentStrategy.class), Collections.emptyList());
         Assertions.assertThat(result).isEmpty();
     }

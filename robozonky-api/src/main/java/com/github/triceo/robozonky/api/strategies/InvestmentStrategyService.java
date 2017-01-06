@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
@@ -28,10 +28,9 @@ public interface InvestmentStrategyService {
     /**
      * Prepare the investment strategy for being used by the app.
      *
-     * @param strategyFile Investment strategy in question.
+     * @param strategy Investment strategy in question.
      * @return Processed instance of the investment strategy provided by the user, if the file format is supported.
-     * @throws InvestmentStrategyParseException If the strategy file failed to initialize.
      */
-    Optional<InvestmentStrategy> parse(File strategyFile) throws InvestmentStrategyParseException;
+    Optional<InvestmentStrategy> parse(InputStream strategy);
 
 }

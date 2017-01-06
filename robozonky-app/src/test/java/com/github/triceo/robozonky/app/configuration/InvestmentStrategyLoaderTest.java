@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.mockserver.model.HttpResponse.*;
 
 public class InvestmentStrategyLoaderTest {
 
-    private static final String URL = "/robozonky-strategy.cfg";
+    private static final String URL_STRING = "/robozonky-strategy.cfg";
     private static ClientAndServer mockServer;
 
     @BeforeClass
@@ -48,7 +48,10 @@ public class InvestmentStrategyLoaderTest {
         final String fileContents = Files.readAllLines(strategyFile.toPath()).stream()
                 .collect(Collectors.joining(System.lineSeparator()));
         InvestmentStrategyLoaderTest.mockServer
-                .when(request().withPath(InvestmentStrategyLoaderTest.URL))
+                .when(request().withPath(InvestmentStrategyLoaderTest.URL_STRING))
+                .respond(response().withBody(fileContents));
+        InvestmentStrategyLoaderTest.mockServer
+                .when(request().withPath("/"))
                 .respond(response().withBody(fileContents));
     }
 
@@ -59,20 +62,8 @@ public class InvestmentStrategyLoaderTest {
     }
 
     @Test
-    public void nullStrategyAsFile() {
-        Assertions.assertThat(InvestmentStrategyLoader.load((String)null)).isEmpty();
-    }
-
-    @Test
     public void nullStrategyAsString() {
-        Assertions.assertThat(InvestmentStrategyLoader.load((File)null)).isEmpty();
-    }
-
-    @Test
-    public void nonExistentStrategyAsFile() throws IOException {
-        final File strategy = File.createTempFile("robozonky-", ".cfg");
-        Assume.assumeTrue(strategy.delete());
-        Assertions.assertThat(InvestmentStrategyLoader.load(strategy)).isEmpty();
+        Assertions.assertThat(InvestmentStrategyLoader.load(null)).isEmpty();
     }
 
     @Test
@@ -83,10 +74,25 @@ public class InvestmentStrategyLoaderTest {
     }
 
     @Test
-    public void strategyAsUrl() {
+    public void strategyAsMaybeUrl() {
         final String url = "http://127.0.0.1:" + InvestmentStrategyLoaderTest.mockServer.getPort() +
-                InvestmentStrategyLoaderTest.URL;
+                InvestmentStrategyLoaderTest.URL_STRING;
         final Optional<InvestmentStrategy> result = InvestmentStrategyLoader.load(url);
         Assertions.assertThat(result).isPresent();
     }
+
+    @Test
+    public void strategyAsMaybeUrlRoot() {
+        final String url = "http://127.0.0.1:" + InvestmentStrategyLoaderTest.mockServer.getPort() + "/";
+        final Optional<InvestmentStrategy> result = InvestmentStrategyLoader.load(url);
+        Assertions.assertThat(result).isPresent();
+    }
+
+    @Test
+    public void strategyAsWrongUrl() {
+        final String url = "noprotocol://somewhere";
+        final Optional<InvestmentStrategy> result = InvestmentStrategyLoader.load(url);
+        Assertions.assertThat(result).isEmpty();
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.api;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class StateTest {
 
     @After
     public void deleteState() {
-        State.STATE_LOCATION.delete();
+        State.getStateLocation().delete();
     }
 
     @Test
@@ -42,9 +43,11 @@ public class StateTest {
         final State.ClassSpecificState current = State.INSTANCE.forClass(StateTest.class);
         Assertions.assertThat(current.getValue(key)).isPresent().contains(value);
         // reset and check if both empty, since backed by the same storage
-        current.reset();
-        Assertions.assertThat(old.getValue(key)).isEmpty();
-        Assertions.assertThat(current.getValue(key)).isEmpty();
+        Assertions.assertThat(current.reset()).isTrue();
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(old.getValue(key)).isEmpty();
+        softly.assertThat(current.getValue(key)).isEmpty();
+        softly.assertAll();
     }
 
     @Test

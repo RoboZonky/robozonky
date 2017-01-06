@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package com.github.triceo.robozonky.notifications;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.notifications.Event;
@@ -50,14 +49,14 @@ public enum Events {
 
     private static class EventSpecific<E extends Event> {
 
-        private final Set<EventListener<E>> listeners = new CopyOnWriteArraySet<>();
+        private final Set<EventListener<E>> listeners = new HashSet<>();
 
-        public boolean addListener(final EventListener<E> eventListener) {
-            return listeners.add(eventListener);
+        public void addListener(final EventListener<E> eventListener) {
+            listeners.add(eventListener);
         }
 
         public Collection<EventListener<E>> getListeners() {
-            return Collections.unmodifiableSet(new LinkedHashSet<>(this.listeners));
+            return Collections.unmodifiableSet(new HashSet<>(this.listeners)); // defensive copy
         }
 
     }
@@ -70,35 +69,32 @@ public enum Events {
         }
     }
 
-    private final Map<Class<? extends Event>, Events.EventSpecific<? extends Event>> registries = new LinkedHashMap<>();
-
-    private <T extends Event> void addListeners(final Class<T> eventType) {
-        ListenerServiceLoader.load(eventType).forEach(l -> this.addListener(eventType, l));
-    }
+    private final Map<Class<? extends Event>, Events.EventSpecific<? extends Event>> registries = new HashMap<>();
 
     /**
      * Registers a local listener that will listen for a particular type of event.
-     * @param eventType Type of event to listen to.
+     * @param eventClass Type of event to listen to.
      * @param eventListener Listener to register.
      * @param <E> Generic type of event to listen to.
      * @return True if added, false if already registered.
      */
     @SuppressWarnings("unchecked")
-    private <E extends Event> boolean addListener(final Class<E> eventType, final EventListener<E>
-            eventListener) {
-        final Events.EventSpecific<E> registry = (Events.EventSpecific<E>) registries.get(eventType);
-        return registry.addListener(eventListener);
+    synchronized <E extends Event> void addListener(final Class<E> eventClass, final EventListener<E> eventListener) {
+        if (!this.registries.containsKey(eventClass)) {
+            // just in case this method is called stand-alone, load all listeners from the provider
+            this.getListeners(eventClass);
+        }
+        ((Events.EventSpecific<E>) this.registries.get(eventClass)).addListener(eventListener);
     }
 
     @SuppressWarnings("unchecked")
     private synchronized <E extends Event> Stream<EventListener<E>> getListeners(final Class<E> eventClass) {
         if (!this.registries.containsKey(eventClass)) {
             Events.LOGGER.trace("Registering event listeners for {}.", eventClass);
-            this.registries.put(eventClass, new Events.EventSpecific<>());
-            this.addListeners(eventClass);
+            this.registries.put(eventClass, new Events.EventSpecific<E>());
+            ListenerServiceLoader.load(eventClass).forEach(l -> this.addListener(eventClass, l));
         }
-        final Events.EventSpecific<E> reg = (Events.EventSpecific<E>) this.registries.get(eventClass);
-        return reg.getListeners().stream();
+        return ((Events.EventSpecific<E>) this.registries.get(eventClass)).getListeners().stream();
     }
 
     /**

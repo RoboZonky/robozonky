@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.Optional;
@@ -72,47 +71,40 @@ final class Exclusivity implements ShutdownHook.Handler {
 
     /**
      * Allow other instances of RoboZonky to run, possibly acquiring exclusivity for themselves.
-     * @throws IOException If releasing the lock failed. Not much to do there.
      */
-    synchronized void waive() throws IOException {
+    synchronized void waive() {
         if (!this.isEnsured()) {
             Exclusivity.LOGGER.debug("Already waived.");
             return;
         }
-        final FileLock currentLock = this.lock;
         try {
-            currentLock.release();
-            this.lock = null;
+            this.lock.release();
             Exclusivity.LOGGER.debug("File lock released.");
+        } catch (final IOException ex) {
+            Exclusivity.LOGGER.warn("Failed releasing lock, new RoboZonky processes may not launch.", ex);
         } finally {
-            try (final Channel channel = currentLock.acquiredBy()) {
-                if (channel.isOpen()) {
-                    channel.close();
-                }
-            } catch (final IOException ex) {
-                Exclusivity.LOGGER.debug("Failed closing lock file channel.", ex);
-            } finally {
-                if (!this.fileToLock.delete()) {
-                    Exclusivity.LOGGER.debug("Failed deleting lock file.");
-                }
-            }
+            Exclusivity.LOGGER.debug("Lock file deleted successfully: {}.", this.fileToLock.delete());
         }
     }
 
     /**
-     * Will return after this instance of RoboZonky has acquired exclusivity. May block for extensive periods of time.
-     * @throws IOException When locking failed.
+     * Will return after this instance of RoboZonky has acquired exclusivity, or failed. May block for extensive periods
+     * of time. Make sure to call {@link #isEnsured()} afterwards to see if exclusivity is ensured.
      */
-    synchronized void ensure() throws IOException {
+    synchronized void ensure() {
         if (this.isEnsured()) {
             Exclusivity.LOGGER.debug("Already ensured.");
             return;
         }
         Exclusivity.LOGGER.info("Checking we're the only RoboZonky running.");
         Exclusivity.LOGGER.debug("Acquiring file lock: {}.", this.fileToLock.getAbsolutePath());
-        final FileChannel ch = new RandomAccessFile(this.fileToLock, "rw").getChannel();
-        this.lock = ch.lock();
-        Exclusivity.LOGGER.debug("File lock acquired.");
+        try {
+            final FileChannel ch = new RandomAccessFile(this.fileToLock, "rw").getChannel();
+            this.lock = ch.lock();
+            Exclusivity.LOGGER.debug("File lock acquired.");
+        } catch (final IOException ex) {
+            Exclusivity.LOGGER.error("Failed acquiring lock, another RoboZonky process likely running.", ex);
+        }
     }
 
     /**
@@ -121,18 +113,11 @@ final class Exclusivity implements ShutdownHook.Handler {
      */
     @Override
     public Optional<Consumer<ReturnCode>> get() {
-        try {
-            this.ensure();
-        } catch (final IOException ex) {
-            Exclusivity.LOGGER.error("Failed acquiring lock, another RoboZonky process likely running.", ex);
+        this.ensure();
+        if (!this.isEnsured()) {
             return Optional.empty();
+        } else { // other RoboZonky instances can now start executing
+            return Optional.of((code) -> this.waive());
         }
-        return Optional.of((code) -> {
-            try { // other RoboZonky instances can now start executing
-                this.waive();
-            } catch (final IOException ex) {
-                Exclusivity.LOGGER.warn("Failed releasing lock, new RoboZonky processes may not launch.", ex);
-            }
-        });
     }
 }

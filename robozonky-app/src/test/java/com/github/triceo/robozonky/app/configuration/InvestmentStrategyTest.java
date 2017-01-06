@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -47,8 +47,8 @@ public class InvestmentStrategyTest {
     public File strategy;
 
     @Test
-    public void loadStrategy() throws InvestmentStrategyParseException {
-        final Optional<InvestmentStrategy> inv = InvestmentStrategyLoader.load(this.strategy);
+    public void loadStrategy() throws IOException {
+        final Optional<InvestmentStrategy> inv = InvestmentStrategyLoader.load(this.strategy.toURI().toURL().toString());
         Assertions.assertThat(inv).isPresent();
     }
 

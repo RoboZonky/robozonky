@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package com.github.triceo.robozonky.strategy.simple;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -28,7 +29,6 @@ import java.util.Optional;
 import java.util.Properties;
 
 import com.github.triceo.robozonky.api.Defaults;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 
 /**
  * Simple wrapper around a property file that replaces the unnecessarily complex commons-configuration2 which was being
@@ -51,15 +51,14 @@ class ImmutableConfiguration {
      * Load the strategy from a file, representing a {@link Properties} file.
      * @param properties The file in question.
      * @return The strategy available for reading.
-     * @throws InvestmentStrategyParseException When there was a problem reading the file.
      */
-    public static ImmutableConfiguration from(final File properties) throws InvestmentStrategyParseException {
-        try (final Reader reader = Files.newBufferedReader(properties.toPath(), Defaults.CHARSET)) {
+    public static ImmutableConfiguration from(final InputStream properties) {
+        try (final Reader reader = new BufferedReader(new InputStreamReader(properties, Defaults.CHARSET))) {
             final Properties props = new Properties();
             props.load(reader);
             return ImmutableConfiguration.from(props);
         } catch (final IOException ex) {
-            throw new InvestmentStrategyParseException("Failed reading strategy file.", ex);
+            throw new IllegalStateException("Failed reading strategy.", ex);
         }
     }
 

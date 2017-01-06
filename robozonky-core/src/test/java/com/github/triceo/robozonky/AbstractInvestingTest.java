@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,18 @@ package com.github.triceo.robozonky;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.notifications.Events;
 import org.junit.After;
+import org.junit.Before;
 import org.mockito.Mockito;
 
 public class AbstractInvestingTest {
@@ -44,6 +51,19 @@ public class AbstractInvestingTest {
     protected static LoanDescriptor mockLoanDescriptor() {
         final Loan loan = AbstractInvestingTest.mockLoan();
         return new LoanDescriptor(loan, Duration.ofSeconds(30));
+    }
+
+    protected List<Event> getNewEvents() {
+        return Events.getFired().stream()
+                .filter(e -> !previouslyExistingEvents.contains(e))
+                .collect(Collectors.toList());
+    }
+
+    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
+
+    @Before
+    public void readPreexistingEvents() {
+        previouslyExistingEvents.addAll(Events.getFired());
     }
 
     @After

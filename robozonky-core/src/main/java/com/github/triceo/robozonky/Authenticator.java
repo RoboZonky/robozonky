@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,10 +105,29 @@ public class Authenticator {
      * @return Information about the authentication.
      */
     public Authentication authenticate(final ApiProvider provider) {
-        final ZonkyOAuthApi api = provider.oauth();
-        final ZonkyApiToken token = authenticationMethod.apply(api);
-        final ZonkyApi result = provider.authenticated(token);
-        return new Authentication(result, token);
+        final ZonkyApiToken token = authenticationMethod.apply(provider.oauth());
+        return new Authenticator.AuthenticationImpl(provider, token);
     }
 
+    private static class AuthenticationImpl implements Authentication {
+
+        private final ApiProvider provider;
+        private final ZonkyApiToken token;
+
+        public AuthenticationImpl(final ApiProvider provider, final ZonkyApiToken token) {
+            this.provider = provider;
+            this.token = token;
+        }
+
+        @Override
+        public ZonkyApi getZonkyApi() {
+            return provider.authenticated(token);
+        }
+
+        @Override
+        public ZonkyApiToken getZonkyApiToken() {
+            return token;
+        }
+
+    }
 }

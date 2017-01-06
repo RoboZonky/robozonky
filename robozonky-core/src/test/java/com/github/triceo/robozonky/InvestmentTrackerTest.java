@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Collections;
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class InvestmentTrackerTest extends AbstractInvestingTest {
 
     @Test
     public void constructor() {
-        final LoanDescriptor ld = InvestmentTrackerTest.mockLoanDescriptor();
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
         final SoftAssertions softly = new SoftAssertions();
@@ -45,8 +46,8 @@ public class InvestmentTrackerTest extends AbstractInvestingTest {
 
     @Test
     public void registeringPreexistingInvestments() {
-        final LoanDescriptor ld = InvestmentTrackerTest.mockLoanDescriptor();
-        final Collection<LoanDescriptor> lds = Arrays.asList(ld, InvestmentTrackerTest.mockLoanDescriptor());
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
         final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
         it.registerExistingInvestments(Collections.singletonList(new Investment(ld.getLoan(),
                 Defaults.MINIMUM_INVESTMENT_IN_CZK)));
@@ -56,6 +57,32 @@ public class InvestmentTrackerTest extends AbstractInvestingTest {
                 .doesNotContain(ld);
         softly.assertThat(it.getInvestmentsMade()).isEmpty();
         softly.assertAll();
+    }
+
+    @Test
+    public void makeInvestment() {
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
+        final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
+        final Investment i = new Investment(ld.getLoan(), 200);
+        it.makeInvestment(i);
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(it.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
+        softly.assertThat(it.getInvestmentsMade()).containsExactly(i);
+        softly.assertAll();
+    }
+
+    @Test
+    public void untouchablesPersistence() {
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
+        // ignore the loan and persist
+        final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
+        it.ignoreLoanForever(ld.getLoan().getId());
+        Assertions.assertThat(it.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
+        // load it all over again
+        final InvestmentTracker it2 = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
+        Assertions.assertThat(it2.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
     }
 
 }

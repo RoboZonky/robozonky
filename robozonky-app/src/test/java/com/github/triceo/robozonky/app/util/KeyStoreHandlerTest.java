@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ public class KeyStoreHandlerTest {
         // delete
         final boolean isDeleted = ksh2.delete(key);
         Assertions.assertThat(isDeleted).isTrue();
+        Assertions.assertThat(ksh2.isDirty()).isTrue();
         Assertions.assertThat(ksh2.get(key)).isEmpty();
     }
 

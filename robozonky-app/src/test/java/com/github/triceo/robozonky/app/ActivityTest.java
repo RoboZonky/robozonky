@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.Api;
@@ -28,11 +29,17 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class ActivityTest extends BaseMarketplaceTest {
+public class ActivityTest extends AbstractStateLeveragingTest {
 
     private static final int CHECK_TIMEOUT_MINUTES = 60;
 
     private final Configuration ctx = new Configuration(1, 200, ActivityTest.CHECK_TIMEOUT_MINUTES, 120);
+
+    @Test
+    public void timestampFailover() {
+        Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, "definitelyNotADate");
+        Assertions.assertThat(Activity.getLatestMarketplaceAction()).isNotNull();
+    }
 
     @Test
     public void doesNotSleepWhenFirstRunButSleepsOnSecondAttempt() {
@@ -73,11 +80,14 @@ public class ActivityTest extends BaseMarketplaceTest {
         final OffsetDateTime timestamp = OffsetDateTime.now();
         Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString());
         // load API that has loans within the closed period
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
-        Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
+        final Loan activeLoan = Mockito.mock(Loan.class);
+        Mockito.when(activeLoan.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
+        Mockito.when(activeLoan.getRemainingInvestment()).thenReturn(1000.0);
+        final Loan ignoredLoan = Mockito.mock(Loan.class);
+        Mockito.when(ignoredLoan.getDatePublished()).thenReturn(timestamp.plus(1, ChronoUnit.SECONDS));
+        Mockito.when(ignoredLoan.getRemainingInvestment()).thenReturn(100.0); // not enough => ignored
         final Api zonkyApi = Mockito.mock(Api.class);
-        Mockito.when(zonkyApi.getLoans()).thenReturn(Collections.singletonList(l));
+        Mockito.when(zonkyApi.getLoans()).thenReturn(Arrays.asList(activeLoan, ignoredLoan));
         // there is nothing to do, so the app should fall asleep...
         final Activity activity = new Activity(ctx, zonkyApi);
         Assertions.assertThat(activity.shouldSleep()).isTrue();
@@ -85,7 +95,7 @@ public class ActivityTest extends BaseMarketplaceTest {
         // ... but reconfigure the timestamp so that we treat the closed-season loans as new loans
         final OffsetDateTime newTimestamp =
                 OffsetDateTime.parse(Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID).get());
-        Assertions.assertThat(newTimestamp).isBefore(l.getDatePublished());
+        Assertions.assertThat(newTimestamp).isBefore(activeLoan.getDatePublished());
     }
 
 }

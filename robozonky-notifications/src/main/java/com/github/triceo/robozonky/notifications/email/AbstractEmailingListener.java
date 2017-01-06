@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
-import java.io.IOException;
 import java.util.Map;
 
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
-import freemarker.template.TemplateException;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -56,10 +54,6 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         this.properties = properties;
     }
 
-    ListenerSpecificNotificationProperties getProperties() {
-        return this.properties;
-    }
-
     abstract boolean shouldSendEmail(final T event);
 
     abstract String getSubject(final T event);
@@ -79,10 +73,8 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
             email.setSubject(this.getSubject(event));
             email.setMsg(this.templates.process(this.getTemplateFileName(), this.getData(event)));
             email.send();
-        } catch (final TemplateException | IOException ex) {
-            throw new RuntimeException("Failed parsing template.", ex);
-        } catch (final EmailException ex) {
-            throw new RuntimeException("Failed sending e-mail.", ex);
+        } catch (final Exception ex) {
+            throw new RuntimeException("Failed processing event.", ex);
         }
 
     }

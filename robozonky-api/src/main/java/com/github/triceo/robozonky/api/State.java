@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,9 +87,24 @@ public enum State {
 
     }
 
+    static File getStateLocation() {
+        return new File(System.getProperty("user.dir"), "robozonky.state");
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(State.class);
-    static final File STATE_LOCATION = new File(System.getProperty("user.dir"), "robozonky.state");
-    private Ini stateFile;
+    private final Ini stateFile;
+
+    State() {
+        try {
+            final File stateLocation = State.getStateLocation();
+            if (!stateLocation.exists()) {
+                stateLocation.createNewFile();
+            }
+            this.stateFile = new Ini(stateLocation);
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Failed initializing state.", ex);
+        }
+    }
 
     /**
      * Get state storage for a particular class.
@@ -97,16 +112,6 @@ public enum State {
      * @return State storage unique for the namespace.
      */
     public synchronized State.ClassSpecificState forClass(final Class<?> clz) {
-        try {
-            if (stateFile == null) {
-                if (!State.STATE_LOCATION.exists()) {
-                    State.STATE_LOCATION.createNewFile();
-                }
-                this.stateFile = new Ini(State.STATE_LOCATION);
-            }
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed initializing state.", ex);
-        }
         return new State.ClassSpecificState(clz);
     }
 

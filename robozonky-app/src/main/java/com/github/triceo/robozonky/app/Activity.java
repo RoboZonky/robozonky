@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Defaults;
@@ -67,7 +66,7 @@ class Activity {
         private Marketplace(final Collection<Loan> loans) { // Zotify occasionally returns null loans for unknown reason
             this.recentLoansDescending = loans == null ? Collections.emptyList() :
                     Collections.unmodifiableList(loans.stream()
-                            .filter(l -> l.getRemainingInvestment() > 0)
+                            .filter(l -> l.getRemainingInvestment() >= Defaults.MINIMUM_INVESTMENT_IN_CZK)
                             .sorted(Comparator.comparing(Loan::getDatePublished).reversed())
                             .collect(Collectors.toList()));
         }
@@ -113,9 +112,8 @@ class Activity {
         this.marketplace = Activity.Marketplace.from(api);
     }
 
-    private OffsetDateTime getLatestMarketplaceAction() {
-        final Optional<String> timestamp = Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID);
-        return timestamp.map(s -> {
+    static OffsetDateTime getLatestMarketplaceAction() {
+        return Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID).map(s -> {
             try {
                 return OffsetDateTime.parse(s);
             } catch (final DateTimeParseException ex) {
@@ -126,9 +124,7 @@ class Activity {
     }
 
     public List<Loan> getUnactionableLoans() {
-        return this.marketplace.getLoansNewerThan(
-                OffsetDateTime.now().minus(this.closedSeason)
-        );
+        return this.marketplace.getLoansNewerThan(OffsetDateTime.now().minus(this.closedSeason));
     }
 
     /**
@@ -146,7 +142,7 @@ class Activity {
      * @return True if no further contact should be made during this run of the app.
      */
     public boolean shouldSleep() {
-        final OffsetDateTime lastKnownAction = this.getLatestMarketplaceAction();
+        final OffsetDateTime lastKnownAction = Activity.getLatestMarketplaceAction();
         final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
         Activity.LOGGER.debug("Marketplace last checked on {}, has un-actionable loans: {}.", lastKnownAction,
                 hasUnactionableLoans);
@@ -161,9 +157,6 @@ class Activity {
             shouldSleep = false;
         }
         synchronized (this) { // do not allow concurrent modification of the settler variable
-            if (this.settler != null) {
-                Activity.LOGGER.warn("Scrapping unsettled activity.");
-            }
             if (!shouldSleep || hasUnactionableLoans) {
                 /*
                  * only persist (= change marketplace check timestamp) when we're intending to execute some actual
@@ -182,11 +175,10 @@ class Activity {
      */
     public synchronized void settle() {
         if (this.settler == null) {
-            Activity.LOGGER.debug("No activity to settle.");
-        } else {
-            this.settler.run();
-            this.settler = null;
+            return;
         }
+        this.settler.run();
+        this.settler = null;
     }
 
     private void persist(final boolean hasUnactionableLoans) {

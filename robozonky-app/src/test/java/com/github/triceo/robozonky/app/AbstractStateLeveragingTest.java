@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.strategies;
+package com.github.triceo.robozonky.app;
 
-public final class InvestmentStrategyParseException extends Exception {
+import org.junit.After;
 
-    public InvestmentStrategyParseException() {
+public abstract class AbstractStateLeveragingTest {
+
+    @After
+    public void resetState() {
+        Activity.STATE.reset();
     }
-
-    public InvestmentStrategyParseException(final String message) {
-        super(message);
-    }
-
-    public InvestmentStrategyParseException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvestmentStrategyParseException(final Throwable cause) {
-        super(cause);
-    }
-
 
 }

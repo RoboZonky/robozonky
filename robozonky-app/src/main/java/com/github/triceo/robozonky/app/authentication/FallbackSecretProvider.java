@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,15 @@
 package com.github.triceo.robozonky.app.authentication;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +36,8 @@ import org.slf4j.LoggerFactory;
 final class FallbackSecretProvider extends SecretProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FallbackSecretProvider.class);
-    static final File TOKEN = new File("robozonky.token");
+    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(FallbackSecretProvider.class);
+    static final String TOKEN_STATE_ID = "token", TOKEN_DATE_STATE_ID = "tokenSetDate";
 
     private final String username;
     private final char[] password;
@@ -65,23 +60,17 @@ final class FallbackSecretProvider extends SecretProvider {
 
     @Override
     public Optional<Reader> getToken() {
-        try (final BufferedReader br =
-                     Files.newBufferedReader(FallbackSecretProvider.TOKEN.toPath(), Defaults.CHARSET)){
-            final String result = br.readLine();
-            return (result == null) ? Optional.empty() : Optional.of(new StringReader(result));
-        } catch (final IOException ex) {
-            FallbackSecretProvider.LOGGER.warn("Failed obtaining token.", ex);
-            return Optional.empty();
-        }
+        return FallbackSecretProvider.STATE.getValue(FallbackSecretProvider.TOKEN_STATE_ID)
+                .map(o -> Optional.of((Reader)new StringReader(o)))
+                .orElse(Optional.empty());
     }
 
     @Override
     public boolean setToken(final Reader token) {
-        try (final BufferedReader r = new BufferedReader(token); final BufferedWriter bw =
-                Files.newBufferedWriter(FallbackSecretProvider.TOKEN.toPath(), Defaults.CHARSET,
-                        StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            bw.write(r.readLine());
-            bw.newLine();
+        try (final BufferedReader r = new BufferedReader(token)) {
+            FallbackSecretProvider.STATE.setValue(FallbackSecretProvider.TOKEN_STATE_ID, r.readLine());
+            FallbackSecretProvider.STATE.setValue(FallbackSecretProvider.TOKEN_DATE_STATE_ID,
+                    OffsetDateTime.now().toString());
             return true;
         } catch (final IOException ex) {
             FallbackSecretProvider.LOGGER.warn("Failed setting token.", ex);
@@ -102,17 +91,21 @@ final class FallbackSecretProvider extends SecretProvider {
 
     @Override
     public boolean deleteToken() {
-        return FallbackSecretProvider.TOKEN.delete();
+        return FallbackSecretProvider.STATE.reset();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<OffsetDateTime> getTokenSetDate() {
-        if (FallbackSecretProvider.TOKEN.exists()) {
-            final long millisSinceEpoch = FallbackSecretProvider.TOKEN.lastModified();
-            final Instant then = Instant.EPOCH.plus(millisSinceEpoch, ChronoUnit.MILLIS);
-            return Optional.of(OffsetDateTime.ofInstant(then, Defaults.ZONE_ID));
-        } else {
-            return Optional.empty();
-        }
+        return (Optional<OffsetDateTime>)
+                FallbackSecretProvider.STATE.getValue(FallbackSecretProvider.TOKEN_DATE_STATE_ID)
+                        .map(d -> {
+                            try {
+                                return Optional.of(OffsetDateTime.parse(d));
+                            } catch (final Exception ex) {
+                                FallbackSecretProvider.LOGGER.warn("Failed getting token set date.", ex);
+                                return Optional.empty();
+                            }
+                        }).orElse(Optional.empty());
     }
 }

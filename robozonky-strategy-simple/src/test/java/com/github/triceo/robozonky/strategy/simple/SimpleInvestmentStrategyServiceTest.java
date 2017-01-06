@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Optional;
 
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -41,59 +42,53 @@ public class SimpleInvestmentStrategyServiceTest {
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-wrongterms.cfg");
     private static final InputStream WRONG_ASKS =
             SimpleInvestmentStrategyServiceTest.class.getResourceAsStream("strategy-wrongasks.cfg");
-    private static final File NONEXISTENT = new File("strategy-nonexistent.cfg");
 
     @Test
-    public void shareSumsUnder100Percent() throws InvestmentStrategyParseException, IOException {
+    public void shareSumsUnder100Percent() throws IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.PARTIAL, ".cfg");
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.parse(f)).isPresent();
+        Assertions.assertThat(s.parse(f.toURI().toURL().openStream())).isPresent();
     }
 
     @Test
-    public void proper() throws InvestmentStrategyParseException, IOException {
+    public void proper() throws IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.PROPER, ".cfg");
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.parse(f)).isPresent();
-    }
-
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void nonexistent() throws InvestmentStrategyParseException {
-        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        s.parse(SimpleInvestmentStrategyServiceTest.NONEXISTENT);
+        Assertions.assertThat(s.parse(f.toURI().toURL().openStream())).isPresent();
     }
 
     @Test
-    public void improper() throws InvestmentStrategyParseException, IOException {
+    public void improper() throws IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.IMPROPER);
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.parse(f)).isEmpty();
+        Assertions.assertThat(s.parse(f.toURI().toURL().openStream())).isEmpty();
     }
 
     @Test
-    public void wrongShares() throws InvestmentStrategyParseException, IOException {
+    public void wrongShares() throws IOException {
         final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_SHARES);
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        Assertions.assertThat(s.parse(f)).isEmpty();
+        Assertions.assertThat(s.parse(f.toURI().toURL().openStream())).isEmpty();
     }
-
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void wrongTerms() throws InvestmentStrategyParseException, IOException {
-        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_TERMS, ".cfg");
-        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        s.parse(f);
-    }
-
-    @Test(expected = InvestmentStrategyParseException.class)
-    public void wrongAsks() throws InvestmentStrategyParseException, IOException {
-        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_ASKS, ".cfg");
-        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        s.parse(f);
-    }
-
 
     @Test
-    public void whitespace() throws InvestmentStrategyParseException, IOException {
+    public void wrongTerms() throws IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_TERMS, ".cfg");
+        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
+        final Optional<InvestmentStrategy> result = s.parse(f.toURI().toURL().openStream());
+        Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void wrongAsks() throws IOException {
+        final File f = IoTestUtil.streamToFile(SimpleInvestmentStrategyServiceTest.WRONG_ASKS, ".cfg");
+        final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
+        final Optional<InvestmentStrategy> result = s.parse(f.toURI().toURL().openStream());
+        Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void whitespace() throws IOException {
         // my IDE keeps removing whitespace at the end of lines in files, so let's generate a file on the run
         final String[] lines = new String[] {
             "minimumBalance                = 200 ", "maximumInvestment             = 20000\t",
@@ -109,6 +104,6 @@ public class SimpleInvestmentStrategyServiceTest {
         Files.write(f.toPath(), Arrays.asList(lines));
         // make sure that the file reads properly
         final SimpleInvestmentStrategyService s = new SimpleInvestmentStrategyService();
-        s.parse(f);
+        s.parse(f.toURI().toURL().openStream());
     }
 }

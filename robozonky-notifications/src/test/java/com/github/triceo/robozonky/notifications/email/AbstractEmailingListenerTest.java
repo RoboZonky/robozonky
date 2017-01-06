@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,8 @@ package com.github.triceo.robozonky.notifications.email;
 
 import com.github.triceo.robozonky.api.notifications.Event;
 import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
 
 public abstract class AbstractEmailingListenerTest extends AbstractListenerTest {
-
-    @Before
-    public void expectEmailingListener() { // otherwise all tests here make no sense
-        Assume.assumeTrue(AbstractEmailingListener.class.isAssignableFrom(this.listener.getClass()));
-    }
 
     @After
     public void resetBalanceTracker() { // to make sure the tests always return consistent results

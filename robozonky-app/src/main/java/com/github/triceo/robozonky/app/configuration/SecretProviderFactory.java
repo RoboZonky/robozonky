@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,19 +89,23 @@ public class SecretProviderFactory {
         }
     }
 
+    static Optional<SecretProvider> getFallbackSecretProvider(final CommandLineInterface cli) {
+        SecretProviderFactory.LOGGER.info("You should get a better Java runtime.");
+        final Optional<File> optionalKeyStore = cli.getKeyStoreLocation();
+        if (optionalKeyStore.isPresent()) { // keystore is demanded but apparently unsupported, fail
+            SecretProviderFactory.LOGGER.error("No KeyStore support detected, yet it is demanded.");
+            return Optional.empty();
+        } else { // keystore is optional, fall back to other means
+            SecretProviderFactory.LOGGER.warn("No KeyStore support detected, storing password insecurely.");
+            return Optional.of(SecretProvider.fallback(cli.getUsername().get(), cli.getPassword()));
+        }
+    }
+
     public static Optional<SecretProvider> getSecretProvider(final CommandLineInterface cli) {
         try {
             return SecretProviderFactory.newSecretProvider(cli, SecretProviderFactory.DEFAULT_KEYSTORE);
         } catch (final KeyStoreException ex) {
-            SecretProviderFactory.LOGGER.info("You should get a better Java runtime.");
-            final Optional<File> optionalKeyStore = cli.getKeyStoreLocation();
-            if (optionalKeyStore.isPresent()) { // keystore is demanded but apparently unsupported, fail
-                SecretProviderFactory.LOGGER.error("No KeyStore support detected, yet it is demanded.");
-                return Optional.empty();
-            } else { // keystore is optional, fall back to other means
-                SecretProviderFactory.LOGGER.warn("No KeyStore support detected, storing password insecurely.");
-                return Optional.of(SecretProvider.fallback(cli.getUsername().get(), cli.getPassword()));
-            }
+            return SecretProviderFactory.getFallbackSecretProvider(cli);
         }
 
     }

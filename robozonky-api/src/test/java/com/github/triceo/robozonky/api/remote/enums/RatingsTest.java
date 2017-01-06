@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.api.remote.enums;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 public class RatingsTest {
@@ -69,5 +70,16 @@ public class RatingsTest {
     @Test(expected = IllegalArgumentException.class)
     public void unknownValueOf() {
         Ratings.valueOf("[\"SOME_UNKNOWN_VALUE\"]");
+    }
+
+    @Test
+    public void equality() {
+        final Ratings r1 = Ratings.of(Rating.A, Rating.B);
+        Assertions.assertThat(r1).isEqualTo(r1);
+        final Ratings r2 = Ratings.of(Rating.A, Rating.B);
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(r1).isNotSameAs(r2).isEqualTo(r2);
+        softly.assertThat(r2).isEqualTo(r1);
+        softly.assertAll();
     }
 }

@@ -16,24 +16,29 @@
 
 package com.github.triceo.robozonky.notifications;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import com.github.triceo.robozonky.api.notifications.EventListener;
+import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class EventsTest {
+public class ListenerServiceLoaderTest {
 
     @Test
-    public void firingAndFailing() {
-        final EventListener<RoboZonkyStartingEvent> listener = Mockito.mock(EventListener.class);
-        Mockito.doThrow(RuntimeException.class).when(listener).handle(ArgumentMatchers.any());
-        Events.INSTANCE.addListener(RoboZonkyStartingEvent.class, listener);
+    public void correctLoading() {
         final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
-        Events.fire(e);
-        Assertions.assertThat(Events.getFired()).contains(e);
-        Mockito.verify(listener).handle(ArgumentMatchers.eq(e));
+        final EventListener l = Mockito.mock(EventListener.class);
+        final ListenerService s1 = Mockito.mock(ListenerService.class);
+        Mockito.doReturn(Optional.of(l)).when(s1).findListener(ArgumentMatchers.eq(e.getClass()));
+        final ListenerService s2 = Mockito.mock(ListenerService.class);
+        Mockito.doReturn(Optional.empty()).when(s2).findListener(ArgumentMatchers.eq(e.getClass()));
+        final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2).iterator();
+        Assertions.assertThat(ListenerServiceLoader.load(e.getClass(), s)).containsExactly(l);
     }
 
 }

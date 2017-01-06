@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package com.github.triceo.robozonky;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URLClassLoader;
 import java.util.ServiceLoader;
 
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class ExtensionsManagerTest {
 
@@ -34,16 +33,23 @@ public class ExtensionsManagerTest {
     }
 
     @Test
-    public void processFaultyJars() {
-        final File f = Mockito.mock(File.class);
-        Mockito.doThrow(MalformedURLException.class).when(f).toURI();
-        Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionJars(f)).isEmpty();
+    public void loadJarsFromFolderWithJars() {
+        final File f = new File("target");
+        Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
+                .isInstanceOf(URLClassLoader.class);
     }
 
     @Test
-    public void loadJarsFromFolder() {
-        final File f = new File("target");
-        Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f)).isNotNull();
+    public void loadJarsFromFolderWithNoJars() {
+        final File f = new File("src");
+        Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
+                .isInstanceOf(URLClassLoader.class);
+    }
+
+    @Test
+    public void loadJarsFromNonExistentFolder() {
+        Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader())
+                .isSameAs(ExtensionsManager.class.getClassLoader());
     }
 
 }

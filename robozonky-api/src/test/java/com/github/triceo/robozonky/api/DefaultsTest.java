@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.api;
 
-import org.junit.After;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
 
-abstract class BaseMarketplaceTest {
+public class DefaultsTest {
 
-    @After
-    public void resetState() {
-        Activity.STATE.reset();
+    @Test
+    public void userAgent() {
+        Assertions.assertThat(Defaults.ROBOZONKY_USER_AGENT)
+                .contains(Defaults.ROBOZONKY_URL);
+    }
+
+    @Test
+    public void hostname() {
+        Assertions.assertThat(Defaults.ROBOZONKY_HOST_ADDRESS).isEqualTo(Defaults.getHostAddress());
     }
 
 }

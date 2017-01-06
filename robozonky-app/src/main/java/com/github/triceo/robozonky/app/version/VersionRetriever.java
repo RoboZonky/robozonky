@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
@@ -90,7 +91,7 @@ class VersionRetriever implements Callable<VersionIdentifier> {
         return matcher.find();
     }
 
-    private static String findLastStable(final SortedSet<String> versions) {
+    static String findLastStable(final Set<String> versions) {
         return versions.stream()
                 .sorted(new VersionComparator().reversed())
                 .filter(VersionRetriever::isStable)
@@ -137,11 +138,11 @@ class VersionRetriever implements Callable<VersionIdentifier> {
     @Override
     public VersionIdentifier call() throws Exception {
         final URL url = VersionRetriever.getMavenCentralUrl(this.groupId, this.artifactId);
-        VersionRetriever.LOGGER.trace("RoboZonky version check starting from {}.", url);
+        VersionRetriever.LOGGER.trace("Version check starting from {}.", url);
         try (final InputStream urlStream = url.openStream()) {
             return VersionRetriever.parseVersionString(urlStream);
         } finally {
-            VersionRetriever.LOGGER.trace("RoboZonky update check finished.");
+            VersionRetriever.LOGGER.trace("Update check finished.");
         }
     }
 }

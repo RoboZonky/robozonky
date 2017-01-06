@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.strategy.rules;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -35,11 +34,9 @@ import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -50,10 +47,9 @@ public class RuleBasedInvestmentStrategyServiceTest {
             RuleBasedInvestmentStrategyServiceTest.class.getResourceAsStream("ExampleStrategy.xlsx");
 
     @Test
-    public void simple() throws InvestmentStrategyParseException, IOException {
+    public void simple() throws IOException {
         final RuleBasedInvestmentStrategyService s = new RuleBasedInvestmentStrategyService();
-        final File f = IoTestUtil.streamToFile(RuleBasedInvestmentStrategyServiceTest.FILE, ".xlsx");
-        final Optional<InvestmentStrategy> ois = s.parse(f);
+        final Optional<InvestmentStrategy> ois = s.parse(RuleBasedInvestmentStrategyServiceTest.FILE);
         Assertions.assertThat(ois).isPresent();
         final InvestmentStrategy is = ois.get();
         // let's make up some loans; B will not be accepted, D will be prioritized over A

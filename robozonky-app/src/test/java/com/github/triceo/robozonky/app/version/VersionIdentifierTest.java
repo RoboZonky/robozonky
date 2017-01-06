@@ -16,28 +16,26 @@
 
 package com.github.triceo.robozonky.app.version;
 
-import java.io.FileNotFoundException;
-import java.util.Collections;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class VersionRetrieverTest {
+public class VersionIdentifierTest {
 
     @Test
-    public void checkRetrieval() throws Exception {
-        final VersionRetriever v = new VersionRetriever("com.github.triceo.robozonky", "robozonky-app");
-        Assertions.assertThat(v.call()).isNotNull();
+    public void stable() {
+        final String version = "1.2.3";
+        final VersionIdentifier v = new VersionIdentifier(version);
+        Assertions.assertThat(v.getLatestStable()).isEqualTo(version);
+        Assertions.assertThat(v.getLatestUnstable()).isEmpty();
     }
 
-    @Test(expected = FileNotFoundException.class)
-    public void checkNonExistentUrl() throws Exception {
-        new VersionRetriever("com.github.triceo.robozonky", "robozonky-nonexistent").call();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void checkNoStable() {
-        VersionRetriever.findLastStable(Collections.singleton("1.2.0-beta-1"));
+    @Test
+    public void unstable() {
+        final String version = "1.2.3";
+        final String version2 = "1.3.0-beta-1";
+        final VersionIdentifier v = new VersionIdentifier(version, version2);
+        Assertions.assertThat(v.getLatestStable()).isEqualTo(version);
+        Assertions.assertThat(v.getLatestUnstable()).isPresent().contains(version2);
     }
 
 }

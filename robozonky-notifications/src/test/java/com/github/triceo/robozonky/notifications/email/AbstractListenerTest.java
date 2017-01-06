@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,14 +65,18 @@ public abstract class AbstractListenerTest {
         final NotificationProperties properties = AbstractListenerTest.getNotificationProperties();
         // create events for listeners
         final Map<Class<? extends Event>, Event> events = new HashMap<>(SupportedListener.values().length);
-        events.put(InvestmentDelegatedEvent.class, new InvestmentDelegatedEvent(recommendation, 200, "random"));
-        events.put(InvestmentMadeEvent.class, new InvestmentMadeEvent(i, 200));
-        events.put(InvestmentRejectedEvent.class, new InvestmentRejectedEvent(recommendation, 200, "random"));
-        events.put(ExecutionStartedEvent.class, new ExecutionStartedEvent(Collections.emptyList(), 200));
-        events.put(RoboZonkyCrashedEvent.class, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
+        events.put(SupportedListener.INVESTMENT_DELEGATED.getEventType(),
+                new InvestmentDelegatedEvent(recommendation, 200, "random"));
+        events.put(SupportedListener.INVESTMENT_MADE.getEventType(), new InvestmentMadeEvent(i, 200));
+        events.put(SupportedListener.INVESTMENT_REJECTED.getEventType(),
+                new InvestmentRejectedEvent(recommendation, 200, "random"));
+        events.put(SupportedListener.EXECUTION_STARTED.getEventType(),
+                new ExecutionStartedEvent(Collections.emptyList(), 200));
+        events.put(SupportedListener.CRASHED.getEventType(),
+                new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
         // create the listeners
         return Stream.of(SupportedListener.values())
-                .map(s -> new Object[] {s.getEventType(), s.getListener(properties), events.get(s.getEventType())})
+                .map(s -> new Object[] {s, s.getListener(properties), events.get(s.getEventType())})
                 .collect(Collectors.toList());
     }
 
@@ -82,6 +86,6 @@ public abstract class AbstractListenerTest {
     public Event event;
     // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
     @Parameterized.Parameter
-    public Class<? extends Event> eventType;
+    public SupportedListener listenerType;
 
 }

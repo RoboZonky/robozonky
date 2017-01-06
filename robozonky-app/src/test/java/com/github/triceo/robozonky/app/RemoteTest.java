@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,18 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
+import com.github.triceo.robozonky.api.notifications.MarketplaceCheckCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.MarketplaceCheckStartedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.ZotifyApi;
@@ -36,12 +43,14 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.configuration.Configuration;
+import com.github.triceo.robozonky.notifications.Events;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class RemoteTest extends BaseMarketplaceTest {
+public class RemoteTest extends AbstractStateLeveragingTest {
 
     private static Configuration mockConfiguration(final boolean usesStrategy) {
         final Configuration ctx = Mockito.mock(Configuration.class);
@@ -151,15 +160,18 @@ public class RemoteTest extends BaseMarketplaceTest {
     }
 
     @Test
-    public void strategyExecutionInvestingNothing() {
+    public void strategyExecutionUnderBalance() {
         // a lot of mocking to exercise the basic path all the way through to the core
+        final Loan l = Mockito.mock(Loan.class);
+        Mockito.when(l.getDatePublished()).thenReturn(OffsetDateTime.now());
+        Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
         final Configuration ctx = RemoteTest.mockConfiguration(true);
         Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = AuthenticationHandler.passwordBased(secret);
         final ZotifyApi cache = Mockito.mock(ZotifyApi.class);
-        Mockito.when(cache.getLoans()).thenReturn(Collections.emptyList());
+        Mockito.when(cache.getLoans()).thenReturn(Collections.singletonList(l));
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.cache()).thenReturn(cache);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
@@ -172,10 +184,19 @@ public class RemoteTest extends BaseMarketplaceTest {
         Mockito.when(zonky.getWallet()).thenReturn(wallet);
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final Remote r = new Remote(ctx, auth);
-        final Optional<Collection<Investment>> result = r.executeStrategy(api);
+        final Optional<Collection<Investment>> result = new Remote(ctx, auth).executeStrategy(api);
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(result.get()).isEmpty();
+        // check events
+        final List<Event> fired = Events.getFired();
+        final List<Event> lastFired = fired.subList(fired.size() - 5, fired.size());
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(lastFired.get(0)).isInstanceOf(MarketplaceCheckStartedEvent.class);
+        softly.assertThat(lastFired.get(1)).isInstanceOf(LoanArrivedEvent.class);
+        softly.assertThat(lastFired.get(2)).isInstanceOf(MarketplaceCheckCompletedEvent.class);
+        softly.assertThat(lastFired.get(3)).isInstanceOf(ExecutionStartedEvent.class);
+        softly.assertThat(lastFired.get(4)).isInstanceOf(ExecutionCompletedEvent.class);
+        softly.assertAll();
     }
 
 }

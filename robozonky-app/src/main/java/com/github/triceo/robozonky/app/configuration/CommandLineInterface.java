@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
@@ -28,18 +27,21 @@ import com.github.triceo.robozonky.app.App;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processes command line arguments and provides access to their values.
  */
 public class CommandLineInterface {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
 
     static final int DEFAULT_CAPTCHA_DELAY_SECONDS = 2 * 60;
     static final int DEFAULT_SLEEP_PERIOD_MINUTES = 60;
@@ -87,28 +89,30 @@ public class CommandLineInterface {
     public static Optional<CommandLineInterface> parse(final String... args) {
         // create the mode of operation
         final OptionGroup operatingModes = new OptionGroup();
+        Stream.of(OperatingMode.values())
+                .map(OperatingMode::getSelectingOption)
+                .forEach(operatingModes::addOption);
         operatingModes.setRequired(true);
-        Stream.of(OperatingMode.values()).forEach(mode -> operatingModes.addOption(mode.getSelectingOption()));
         // include authentication options
-        final OptionGroup authenticationModes = new OptionGroup();
+        final OptionGroup authenticationModes = new OptionGroup()
+                .addOption(CommandLineInterface.OPTION_USERNAME)
+                .addOption(CommandLineInterface.OPTION_KEYSTORE);
         authenticationModes.setRequired(true);
-        authenticationModes.addOption(CommandLineInterface.OPTION_USERNAME);
-        authenticationModes.addOption(CommandLineInterface.OPTION_KEYSTORE);
-        // find all options from all modes of operation
-        final Collection<Option> ops = Stream.of(OperatingMode.values()).map(OperatingMode::getOtherOptions)
-                .collect(LinkedHashSet::new, LinkedHashSet::addAll, LinkedHashSet::addAll);
-        ops.add(CommandLineInterface.OPTION_PASSWORD);
-        ops.add(CommandLineInterface.OPTION_USE_TOKEN);
-        ops.add(CommandLineInterface.OPTION_FAULT_TOLERANT);
         // join all in a single config
-        final Options options = new Options();
-        options.addOptionGroup(operatingModes);
-        options.addOptionGroup(authenticationModes);
-        ops.forEach(options::addOption);
-        final CommandLineParser parser = new DefaultParser();
+        final Options options = new Options()
+                .addOptionGroup(operatingModes)
+                .addOptionGroup(authenticationModes);
+        final Stream<Option> optionsFromOpModes = Stream.of(OperatingMode.values())
+                .flatMap(o -> o.getOtherOptions().stream());
+        final Stream<Option> otherOptions = Stream.of(
+                CommandLineInterface.OPTION_PASSWORD,
+                CommandLineInterface.OPTION_USE_TOKEN,
+                CommandLineInterface.OPTION_FAULT_TOLERANT
+        );
+        Stream.concat(optionsFromOpModes, otherOptions).forEach(options::addOption);
         // and initialize
         try {
-            final CommandLine cli = parser.parse(options, args);
+            final CommandLine cli = new DefaultParser().parse(options, args);
             return Optional.of(new CommandLineInterface(options, cli));
         } catch (final ParseException ex) {
             CommandLineInterface.printHelp(options, ex.getMessage(), true);
@@ -118,46 +122,35 @@ public class CommandLineInterface {
 
     private final CommandLineWrapper commandLine;
     private final Options options;
-    private SecretProvider secretProvider;
 
     private CommandLineInterface(final Options options, final CommandLine cli) {
         this.options = options;
         this.commandLine = new CommandLineWrapper(cli);
+        CommandLineInterface.LOGGER.debug("Received arguments: {}.", this.commandLine);
     }
 
-    synchronized Optional<SecretProvider> getSecretProvider() {
-        if (this.secretProvider == null) {
-            final Optional<SecretProvider> result = SecretProviderFactory.getSecretProvider(this);
-            result.ifPresent(secretProvider -> this.secretProvider = secretProvider);
-            return result;
-        } else {
-            return Optional.of(this.secretProvider);
-        }
-    }
-
-    public Optional<Configuration> newApplicationConfiguration() {
-        final OperatingMode om = Stream.of(OperatingMode.values())
+    public Optional<Configuration> newApplicationConfiguration(final SecretProvider secretProvider) {
+        return Stream.of(OperatingMode.values())
                 .filter(mode -> this.commandLine.hasOption(mode.getSelectingOption()))
+                .map(mode -> mode.configure(this, secretProvider))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("This situation is impossible."));
-        return om.apply(this);
+                .orElse(Optional.empty());
+    }
+
+    private AuthenticationHandler createAuthenticationHandler(final SecretProvider secrets) {
+        if (this.isTokenEnabled()) {
+            final int secs = this.getTokenRefreshBeforeExpirationInSeconds().orElse(60);
+            final TemporalAmount duration = Duration.ofSeconds(secs);
+            return AuthenticationHandler.tokenBased(secrets, duration);
+        } else {
+            return AuthenticationHandler.passwordBased(secrets);
+        }
     }
 
     public Optional<AuthenticationHandler> newAuthenticationHandler() {
-        final Optional<SecretProvider> optionalSecretProvider = this.getSecretProvider();
-        if (!optionalSecretProvider.isPresent()) {
-            return Optional.empty();
-        }
-        final SecretProvider secretProvider = optionalSecretProvider.get();
-        if (this.isTokenEnabled()) {
-            final OptionalInt secs = this.getTokenRefreshBeforeExpirationInSeconds();
-            final AuthenticationHandler auth = secs.isPresent() ?
-                    AuthenticationHandler.tokenBased(secretProvider, Duration.ofSeconds(secs.getAsInt())) :
-                    AuthenticationHandler.tokenBased(secretProvider);
-            return Optional.of(auth);
-        } else {
-            return Optional.of(AuthenticationHandler.passwordBased(secretProvider));
-        }
+        return SecretProviderFactory.getSecretProvider(this)
+                .map(secrets -> Optional.of(this.createAuthenticationHandler(secrets)))
+                .orElse(Optional.empty());
     }
 
     Optional<String> getStrategyConfigurationLocation() {
@@ -193,17 +186,13 @@ public class CommandLineInterface {
     }
 
     int getCaptchaPreventingInvestingDelayInSeconds() { // FIXME do not allow negative values
-        return this.commandLine.hasOption(CommandLineInterface.OPTION_CLOSED_SEASON) ?
-                this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_CLOSED_SEASON)
-                        .orElseThrow(() -> new IllegalStateException("Missing mandatory argument value.")) :
-                CommandLineInterface.DEFAULT_CAPTCHA_DELAY_SECONDS;
+        return this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_CLOSED_SEASON,
+                CommandLineInterface.DEFAULT_CAPTCHA_DELAY_SECONDS);
     }
 
     int getMaximumSleepPeriodInMinutes() { // FIXME do not allow negative values
-        return this.commandLine.hasOption(CommandLineInterface.OPTION_ZONK) ?
-                this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_ZONK)
-                        .orElseThrow(() -> new IllegalStateException("Missing mandatory argument value.")) :
-                CommandLineInterface.DEFAULT_SLEEP_PERIOD_MINUTES;
+        return this.commandLine.getIntegerOptionValue(CommandLineInterface.OPTION_ZONK,
+                CommandLineInterface.DEFAULT_SLEEP_PERIOD_MINUTES);
     }
 
     OptionalInt getTokenRefreshBeforeExpirationInSeconds() {
@@ -211,12 +200,9 @@ public class CommandLineInterface {
     }
 
     Optional<File> getKeyStoreLocation() {
-        final Optional<String> value = this.commandLine.getOptionValue(CommandLineInterface.OPTION_KEYSTORE);
-        if (value.isPresent()) {
-            return Optional.of(new File(value.get()));
-        } else {
-            return Optional.empty();
-        }
+        return this.commandLine.getOptionValue(CommandLineInterface.OPTION_KEYSTORE)
+                .map(value -> Optional.of(new File(value)))
+                .orElse(Optional.empty());
     }
 
     OptionalInt getDryRunBalance() {
@@ -224,15 +210,9 @@ public class CommandLineInterface {
     }
 
     Optional<ConfirmationCredentials> getConfirmationCredentials() {
-        if (!this.commandLine.hasOption(CommandLineInterface.OPTION_CONFIRMATION)) {
-            return Optional.empty();
-        }
-        final Optional<String> value = this.commandLine.getOptionValue(CommandLineInterface.OPTION_CONFIRMATION);
-        if (!value.isPresent()) {
-            throw new IllegalStateException("Missing mandatory argument value.");
-        } else {
-            return Optional.of(new ConfirmationCredentials(value.get()));
-        }
+        return this.commandLine.getOptionValue(CommandLineInterface.OPTION_CONFIRMATION)
+                .map(value -> Optional.of(new ConfirmationCredentials(value)))
+                .orElse(Optional.empty());
     }
 
     static String getScriptIdentifier() {
@@ -240,8 +220,8 @@ public class CommandLineInterface {
     }
 
     private static void printHelp(final Options options, final String message, final boolean isError) {
-        new HelpFormatter().printHelp(CommandLineInterface.getScriptIdentifier(), null, options,
-                isError ? "Error: " + message : message, true);
+        final String actualMessage = isError ? "Error: " + message : message;
+        new HelpFormatter().printHelp(CommandLineInterface.getScriptIdentifier(), null, options, actualMessage, true);
     }
 
     void printHelp(final String message, final boolean isError) {

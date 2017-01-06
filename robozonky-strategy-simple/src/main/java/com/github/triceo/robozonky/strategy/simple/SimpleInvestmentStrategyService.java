@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.simple;
 
-import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategyService.class);
 
-    private static ImmutableConfiguration getConfig(final File strategyFile) throws InvestmentStrategyParseException {
-        return ImmutableConfiguration.from(strategyFile);
+    private static ImmutableConfiguration getConfig(final InputStream strategy) {
+        return ImmutableConfiguration.from(strategy);
     }
 
     static int getMinimumBalance(final ImmutableConfiguration config) {
@@ -160,12 +159,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     }
 
     @Override
-    public Optional<InvestmentStrategy> parse(final File strategyFile) throws InvestmentStrategyParseException {
-        if (!SimpleInvestmentStrategyService.isSupported(strategyFile)) {
-            return Optional.empty();
-        } else try {
-            SimpleInvestmentStrategyService.LOGGER.info("Using strategy: '{}'", strategyFile.getAbsolutePath());
-            final ImmutableConfiguration c = SimpleInvestmentStrategyService.getConfig(strategyFile);
+    public Optional<InvestmentStrategy> parse(final InputStream strategy)  {
+        try {
+            final ImmutableConfiguration c = SimpleInvestmentStrategyService.getConfig(strategy);
             final int minimumBalance = SimpleInvestmentStrategyService.getMinimumBalance(c);
             SimpleInvestmentStrategyService.LOGGER.debug("Minimum balance to invest must be {} CZK.", minimumBalance);
             final int maximumInvestment = SimpleInvestmentStrategyService.getMaximumInvestment(c);
@@ -174,13 +170,10 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                     .collect(Collectors.toMap(Function.identity(), r -> SimpleInvestmentStrategyService.parseRating(r, c)));
             SimpleInvestmentStrategyService.checkIndividualStrategies(individualStrategies);
             return Optional.of(new SimpleInvestmentStrategy(minimumBalance, maximumInvestment, individualStrategies));
-        } catch (final IllegalStateException ex) {
-            throw new InvestmentStrategyParseException(ex);
+        } catch (final RuntimeException ex) {
+            SimpleInvestmentStrategyService.LOGGER.info("Failed parsing strategy.", ex);
+            return Optional.empty();
         }
-    }
-
-    private static boolean isSupported(final File strategyFile) {
-        return strategyFile.getAbsolutePath().endsWith(".cfg");
     }
 
 }

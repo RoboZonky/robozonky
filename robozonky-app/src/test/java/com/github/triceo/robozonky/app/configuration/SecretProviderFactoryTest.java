@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,22 @@ public class SecretProviderFactoryTest {
         final File f = Mockito.mock(File.class);
         Mockito.when(f.canRead()).thenReturn(false);
         Assertions.assertThat(SecretProviderFactory.newSecretProvider(cli, f)).isEmpty();
+    }
+
+    @Test
+    public void fallbackDemandingKeystore() {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.of(new File("")));
+        Assertions.assertThat(SecretProviderFactory.getFallbackSecretProvider(cli)).isEmpty();
+    }
+
+    @Test
+    public void fallbackSuccess() {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getKeyStoreLocation()).thenReturn(Optional.empty());
+        Mockito.when(cli.getUsername()).thenReturn(Optional.of("user"));
+        Mockito.when(cli.getPassword()).thenReturn("pass".toCharArray());
+        Assertions.assertThat(SecretProviderFactory.getFallbackSecretProvider(cli)).isNotEmpty();
     }
 
 }

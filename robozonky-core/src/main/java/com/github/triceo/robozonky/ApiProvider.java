@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class ApiProvider implements AutoCloseable {
     }
 
     private final ClientBuilder clientBuilder;
-    private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final Collection<Client> clients = new ArrayList<>();
 
     /**
@@ -101,14 +101,10 @@ public class ApiProvider implements AutoCloseable {
         return client;
     }
 
-    private synchronized void ensureNotDestroyed() {
-        if (this.isDestroyed.get()) {
+    private <T> T obtain(final Class<T> api, final String apiUrl, final CommonFilter filter) {
+        if (this.isClosed.get()) {
             throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
         }
-    }
-
-    private <T> T obtain(final Class<T> api, final String apiUrl, final CommonFilter filter) {
-        this.ensureNotDestroyed();
         final ResteasyWebTarget target = (ResteasyWebTarget)this.newClient().register(filter).target(apiUrl);
         target.register(new BrowserCacheFeature()); // honor server-sent cache-related headers
         return target.proxy(api);
@@ -148,13 +144,14 @@ public class ApiProvider implements AutoCloseable {
 
     @Override
     public synchronized void close() {
-        this.ensureNotDestroyed();
+        if (this.isClosed.get()) {
+            return;
+        }
         this.clients.forEach(c -> {
             ApiProvider.LOGGER.trace("Destroying RESTEasy client: {}.", c);
             c.close();
         });
-        this.clients.clear();
-        this.isDestroyed.set(true);
+        this.isClosed.set(true);
     }
 
     private static class ZotifyFilter extends CommonFilter {

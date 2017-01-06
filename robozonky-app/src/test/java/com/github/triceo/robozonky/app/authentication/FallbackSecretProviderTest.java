@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ import java.io.StringReader;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.github.triceo.robozonky.app.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
-public class FallbackSecretProviderTest {
+public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
 
     private static final String USR = "username";
     private static final String PWD = "password";
@@ -51,7 +52,6 @@ public class FallbackSecretProviderTest {
         // create token
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(p.setToken(new StringReader(token))).isTrue();
-        softly.assertThat(FallbackSecretProvider.TOKEN).exists();
         softly.assertThat(p.getTokenSetDate()).isPresent();
         softly.assertThat(p.getTokenSetDate().get()).isBefore(OffsetDateTime.now());
         softly.assertThat(p.getToken()).isPresent();
@@ -59,7 +59,6 @@ public class FallbackSecretProviderTest {
         // delete created token
         softly = new SoftAssertions();
         softly.assertThat(p.deleteToken()).isTrue();
-        softly.assertThat(FallbackSecretProvider.TOKEN).doesNotExist();
         softly.assertThat(p.getTokenSetDate()).isEmpty();
         softly.assertAll();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,7 +81,7 @@ import org.mockito.Mockito;
  * This test aims to test all of these various states.
  */
 @RunWith(Parameterized.class)
-public class ZonkyProxyTest {
+public class ZonkyProxyTest extends AbstractInvestingTest {
 
     private enum ProxyType {
 
@@ -147,17 +146,8 @@ public class ZonkyProxyTest {
     private static final double LOAN_AMOUNT = 2000.0;
     private static final int CONFIRMED_AMOUNT = (int) (LOAN_AMOUNT / 2);
 
-
-    private static Loan mockLoan() {
-        final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getAmount()).thenReturn(2 * ZonkyProxyTest.LOAN_AMOUNT);
-        Mockito.when(loan.getRemainingInvestment()).thenReturn(ZonkyProxyTest.LOAN_AMOUNT);
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        return loan;
-    }
-
     private static LoanDescriptor mockLoanDescriptor(final boolean protectByCaptcha) {
-        final Loan loan = ZonkyProxyTest.mockLoan();
+        final Loan loan = AbstractInvestingTest.mockLoan();
         return new LoanDescriptor(loan, protectByCaptcha ? Duration.ofHours(1) : Duration.ZERO);
     }
 
@@ -173,9 +163,10 @@ public class ZonkyProxyTest {
     public ZonkyResponseType responseType;
 
     private Recommendation getRecommendation() {
-        final LoanDescriptor ld = ZonkyProxyTest.mockLoanDescriptor(captcha == ZonkyProxyTest.Captcha.PROTECTED);
-        final int amount = ZonkyProxyTest.CONFIRMED_AMOUNT;
-        return ld.recommend(amount, confirmation == ZonkyProxyTest.Remote.CONFIRMED).get();
+        final LoanDescriptor ld =
+                ZonkyProxyTest.mockLoanDescriptor(captcha == ZonkyProxyTest.Captcha.PROTECTED);
+        return ld.recommend(ZonkyProxyTest.CONFIRMED_AMOUNT,
+                confirmation == ZonkyProxyTest.Remote.CONFIRMED).get();
     }
 
     private ZonkyProxy getZonkyProxy() {
@@ -213,6 +204,11 @@ public class ZonkyProxyTest {
         final Recommendation r = this.getRecommendation();
         final ZonkyProxy p = this.getZonkyProxy();
         final ZonkyResponse result = p.invest(r);
+        if (this.proxyType == ZonkyProxyTest.ProxyType.CONFIRMING) {
+            Assertions.assertThat(p.getConfirmationProvider()).isNotNull();
+        } else {
+            Assertions.assertThat(p.getConfirmationProvider()).isNull();
+        }
         Assertions.assertThat(result.getType()).isEqualTo(responseType);
         if (result.getType() == ZonkyResponseType.INVESTED) {
             Assertions.assertThat(result.getConfirmedAmount()).hasValue(ZonkyProxyTest.CONFIRMED_AMOUNT);

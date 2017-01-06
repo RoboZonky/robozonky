@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public final class Defaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Defaults.class);
 
-    private static String getHostAddress() {
+    static String getHostAddress() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (final UnknownHostException ex) {

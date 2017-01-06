@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,10 @@ public class ZonkyProxy {
 
     }
 
-    private static Investment convertToInvestment(final Recommendation r, final Confirmation confirmation) {
-        final int amount = confirmation == null || !confirmation.getAmount().isPresent() ?
-                    r.getRecommendedInvestmentAmount() : confirmation.getAmount().getAsInt();
+    static Investment convertToInvestment(final Recommendation r, final Confirmation confirmation) {
+        final int amount = (confirmation == null || !confirmation.getAmount().isPresent()) ?
+                r.getRecommendedInvestmentAmount() :
+                confirmation.getAmount().getAsInt();
         return new Investment(r.getLoanDescriptor().getLoan(), amount);
     }
 

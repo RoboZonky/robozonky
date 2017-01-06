@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,6 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         Events.fire(new MarketplaceCheckStartedEvent());
         final Activity activity = new Activity(this.ctx, apiProvider.cache());
         final Optional<Collection<Loan>> availableLoans = Remote.getAvailableLoans(activity);
-        Events.fire(new MarketplaceCheckCompletedEvent());
         if (!availableLoans.isPresent()) { // sleep
             return Optional.of(Collections.emptyList());
         }
@@ -98,6 +97,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
                 .map(l -> new LoanDescriptor(l, this.ctx.getCaptchaDelay()))
                 .peek(l -> Events.fire(new LoanArrivedEvent(l)))
                 .collect(Collectors.toList());
+        Events.fire(new MarketplaceCheckCompletedEvent());
         // start the core investing algorithm
         final Function<Investor, Collection<Investment>> investor = i -> {
             Events.fire(new ExecutionStartedEvent(loans, i.getBalance().intValue()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
-import java.util.Optional;
 import java.util.OptionalInt;
 
 class ListenerSpecificNotificationProperties extends NotificationProperties {
@@ -29,22 +28,8 @@ class ListenerSpecificNotificationProperties extends NotificationProperties {
         this.listener = listener;
     }
 
-    public String getListenerSpecificStringProperty(final String property, final String defaultValue) {
-        return this.getStringValue(NotificationProperties.getCompositePropertyName(this.listener, property))
-                .orElse(defaultValue);
-    }
-
-    public boolean getListenerSpecificBooleanProperty(final String property, final boolean defaultValue) {
-        return this.getBooleanValue(NotificationProperties.getCompositePropertyName(this.listener, property),
-                defaultValue);
-    }
-
     public int getListenerSpecificIntProperty(final String property, final int defaultValue) {
         return this.getListenerSpecificIntProperty(property).orElse(defaultValue);
-    }
-
-    public Optional<String> getListenerSpecificStringProperty(final String property) {
-        return this.getStringValue(NotificationProperties.getCompositePropertyName(this.listener, property));
     }
 
     public OptionalInt getListenerSpecificIntProperty(final String property) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,9 @@ import java.math.RoundingMode;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +36,6 @@ import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
-import com.github.triceo.robozonky.api.remote.entities.Instalment;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
@@ -56,9 +53,6 @@ import org.slf4j.LoggerFactory;
 public class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
-    private static final Comparator<LoanDescriptor> LOAN_DESCRIPTOR_COMPARATOR =
-            Comparator.comparing((LoanDescriptor l) -> l.getLoan().getId());
-    private static final Function<LoanDescriptor, String> LOAN_ID_RETRIEVER = l -> String.valueOf(l.getLoan().getId());
 
     /**
      * The core investing call. Receives a particular loan, checks if the user has enough money to invest, and sends the
@@ -139,8 +133,7 @@ public class Investor {
                 .map(entry -> LoanRetriever.getLoan(api, entry.getKey())
                         .map(l -> new Investment(l, entry.getValue()))
                         .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
-                ).sorted(Comparator.comparingInt(l -> l.getId()))
-                .collect(Collectors.toList()));
+                ).collect(Collectors.toList()));
     }
 
     /**
@@ -152,14 +145,6 @@ public class Investor {
     private static Statistics retrieveStatistics(final ZonkyProxy api) {
         final Statistics returned = api.execute(ZonkyApi::getStatistics);
         return returned == null ? new Statistics() : returned;
-    }
-
-    private static <T> String collectionToString(final Collection<T> collection, final Comparator<T> comparator,
-                                                 final Function<T, String> reduction) {
-        return collection.stream()
-                .sorted(comparator)
-                .map(reduction)
-                .collect(Collectors.joining(", ", "[", "]"));
     }
 
     private final ZonkyProxy api;
@@ -191,8 +176,6 @@ public class Investor {
             return Collections.emptyList(); // no need to do anything else
         }
         // read our investment statistics
-        Investor.LOGGER.debug("The following loans are available for robotic investing: {}.",
-                Investor.collectionToString(loans, Investor.LOAN_DESCRIPTOR_COMPARATOR, Investor.LOAN_ID_RETRIEVER));
         final Statistics stats = Investor.retrieveStatistics(this.api);
         Investor.LOGGER.debug("The sum total of principal remaining on active loans: {} CZK.",
                 stats.getCurrentOverview().getPrincipalLeft());
@@ -203,15 +186,21 @@ public class Investor {
         this.runInvestmentLoop(strategy, tracker, stats, minimumInvestmentAmount);
         this.balance = tracker.getCurrentBalance();
         // report
-        this.reportOnPortfolioStructure(stats, tracker.getAllInvestments());
+        final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, tracker.getAllInvestments());
+        Investor.LOGGER.info("Expected annual yield of portfolio: {} % ({} CZK).",
+                portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
+                portfolio.getCzkExpectedYield());
         return tracker.getInvestmentsMade();
     }
 
     private void runInvestmentLoop(final InvestmentStrategy strategy, final InvestmentTracker tracker,
                                    final Statistics stats, final BigDecimal minimumInvestmentAmount) {
         Investor.LOGGER.debug("The following available loans have not yet been invested into: {}.",
-                Investor.collectionToString(tracker.getAvailableLoans(), Investor.LOAN_DESCRIPTOR_COMPARATOR,
-                        Investor.LOAN_ID_RETRIEVER));
+                tracker.getAvailableLoans().stream()
+                        .map(l -> l.getLoan().getId())
+                        .sorted()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(", ", "[", "]")));
         Events.fire(new StrategyStartedEvent(strategy, tracker.getAvailableLoans(), balance.intValue()));
         do {
             final PortfolioOverview portfolio =
@@ -228,20 +217,6 @@ public class Investor {
             }
         } while (tracker.getCurrentBalance().compareTo(minimumInvestmentAmount) >= 0);
         Events.fire(new StrategyCompletedEvent(strategy, tracker.getInvestmentsMade(), balance.intValue()));
-    }
-
-    private void reportOnPortfolioStructure(final Statistics stats, final Collection<Investment> allInvestments) {
-        final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, allInvestments);
-        Investor.LOGGER.info("Expected annual yield of portfolio: {} % ({} CZK).",
-                portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
-                portfolio.getCzkExpectedYield());
-        final List<Instalment> instalments = stats.getCashFlow();
-        final int currentMonthInstalmentId = instalments.size() - 1 - 3; // contains 3 future months
-        if (currentMonthInstalmentId >= 0) { // maybe the history has not been built yet
-            Investor.LOGGER.info("Expected instalments: {} CZK this month, {} CZK the next.",
-                    instalments.get(currentMonthInstalmentId).getInstalmentAmount(),
-                    instalments.get(currentMonthInstalmentId + 1).getInstalmentAmount());
-        }
     }
 
     /**

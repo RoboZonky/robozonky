@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class BalanceTrackerTest {
         BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
         Assertions.assertThat(state.getValue(BalanceTracker.BALANCE_KEY)).isPresent();
-        BalanceTracker.INSTANCE.reset();
+        Assertions.assertThat(BalanceTracker.INSTANCE.reset()).isTrue();
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
     }
 

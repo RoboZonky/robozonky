@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.integrations.zonkoid;
 
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +25,10 @@ import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,15 +64,14 @@ public class ZonkoidConfirmationProviderTest {
                 .withPath(ZonkoidConfirmationProvider.PATH)
                 .withHeader("Accept", "text/plain")
                 .withHeader("Authorization")
-                .withHeader("Content-Type", "application/x-www-form-urlencoded")
                 .withHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT),
                 once());
     }
 
     private Optional<Confirmation> execute(final int code) {
         this.mockServerResponse(code);
-        final ZonkoidConfirmationProvider provider = new ZonkoidConfirmationProvider();
-        final Optional<Confirmation> result = provider.requestConfirmation(new RequestId("user@somewhere.cz",
+        final Optional<Confirmation> result =
+                ZonkoidConfirmationProvider.requestConfirmation(new RequestId("user@somewhere.cz",
                         "apitest".toCharArray()), 1, 200, serverUrl);
         this.verifyClientRequest();
         return result;
@@ -109,6 +112,13 @@ public class ZonkoidConfirmationProviderTest {
     }
 
     @Test
+    public void errorOverHttps() throws NoSuchAlgorithmException {
+        final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
+                "https", new RuntimeException());
+        Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
     public void errorOverHttp() throws NoSuchAlgorithmException {
         final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
                 "http", new RuntimeException());
@@ -120,6 +130,25 @@ public class ZonkoidConfirmationProviderTest {
         final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
                 UUID.randomUUID().toString(), new RuntimeException());
         Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void properHttpPost() throws UnsupportedEncodingException {
+        final int loanId = 1;
+        final RequestId r = new RequestId("user@somewhere.cz", "apitest".toCharArray());
+        final HttpPost post = ZonkoidConfirmationProvider.getRequest(r, loanId, 200, "https", "somewhere");
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(post.getFirstHeader("Content-Type").getValue()).isEqualTo("application/x-www-form-urlencoded");
+        softly.assertThat(post.getFirstHeader("Authorization").getValue())
+                .isEqualTo(ZonkoidConfirmationProvider.getAuthenticationString(r, loanId));
+        softly.assertThat(post.getEntity()).isInstanceOf(UrlEncodedFormEntity.class);
+        softly.assertAll();
+    }
+
+    @Test
+    public void properId() {
+        final ZonkoidConfirmationProvider p = new ZonkoidConfirmationProvider();
+        Assertions.assertThat(p.getId()).contains("Zonkoid").contains("Zonkios");
     }
 
 }

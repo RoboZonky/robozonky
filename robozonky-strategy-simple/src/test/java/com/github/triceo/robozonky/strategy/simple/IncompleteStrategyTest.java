@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,10 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyParseException;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -59,13 +60,10 @@ public class IncompleteStrategyTest {
     public File strategyFile;
 
     @Test
-    public void propertyIsMissing() {
-        try {
-            new SimpleInvestmentStrategyService().parse(this.strategyFile);
-            Assertions.fail("Should have thrown an exception.");
-        } catch (final InvestmentStrategyParseException ex) {
-            Assertions.assertThat(ex).hasCauseInstanceOf(IllegalStateException.class);
-        }
+    public void propertyIsMissing() throws IOException {
+        final Optional<InvestmentStrategy> result =
+                new SimpleInvestmentStrategyService().parse(this.strategyFile.toURI().toURL().openStream());
+        Assertions.assertThat(result).isEmpty();
     }
 
 }

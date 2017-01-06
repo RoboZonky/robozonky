@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,12 @@ public class App {
         System.exit(returnCode.getCode());
     }
 
+    static ReturnCode execute(final Configuration configuration, final AuthenticationHandler auth) {
+        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
+        final boolean loginSucceeded = new Remote(configuration, auth).call().isPresent();
+        return loginSucceeded ? ReturnCode.OK : ReturnCode.ERROR_SETUP;
+    }
+
     public static void main(final String... args) {
         // make sure other RoboZonky processes are excluded
         if (!App.SHUTDOWN_HOOKS.register(new Exclusivity(App.ROBOZONKY_LOCK))) {
@@ -94,52 +100,51 @@ public class App {
             final CommandLineInterface cli = optionalCli.get();
             // configure application
             faultTolerant = cli.isFaultTolerant();
-            if (faultTolerant) {
-                App.LOGGER.info("RoboZonky is in fault-tolerant mode. Certain errors may not be reported as such.");
-            }
-            final Optional<AuthenticationHandler> auth = cli.newAuthenticationHandler();
-            if (!auth.isPresent()) {
+            final Optional<AuthenticationHandler> optionalAuth = cli.newAuthenticationHandler();
+            if (!optionalAuth.isPresent()) {
                 App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
             }
-            final Optional<Configuration> optionalCtx = cli.newApplicationConfiguration();
-            if (!optionalCtx.isPresent()) {
-                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
-            }
-            final Configuration ctx = optionalCtx.get();
-            // start the app
-            App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
-            final boolean loginSucceeded = new Remote(ctx, auth.get()).call().isPresent();
-            // shut down the app
-            if (!loginSucceeded) {
-                App.exit(ReturnCode.ERROR_SETUP);
-            } else {
-                App.exit(ReturnCode.OK);
-            }
-        } catch (final ProcessingException ex) {
-            final Throwable cause = ex.getCause();
-            if (cause instanceof SocketException || cause instanceof UnknownHostException) {
-                App.handleZonkyMaintenanceError(ex, faultTolerant);
-            } else {
-                App.handleUnexpectedError(ex);
-            }
-        } catch (final NotAllowedException ex) {
-            App.handleZonkyMaintenanceError(ex, faultTolerant);
+            final AuthenticationHandler auth = optionalAuth.get();
+            final Optional<Configuration> optionalCtx = cli.newApplicationConfiguration(auth.getSecretProvider());
+            optionalCtx.ifPresent(ctx -> App.exit(App.execute(ctx, auth))); // core investing algorithm
+            App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+        } catch (final ProcessingException | NotAllowedException ex) {
+            App.handleException(ex, faultTolerant);
         } catch (final WebApplicationException ex) {
-            App.LOGGER.error("Application encountered remote API error.", ex);
-            App.exit(ReturnCode.ERROR_REMOTE, ex);
+            App.handleException(ex);
         } catch (final RuntimeException ex) {
-            App.handleUnexpectedError(ex);
+            App.handleUnexpectedException(ex);
         }
     }
 
-    static void handleUnexpectedError(final RuntimeException ex) {
-        App.LOGGER.error("Unexpected error, likely RoboZonky bug." , ex);
+    static void handleException(final Exception ex, final boolean faultTolerant) {
+        final Throwable cause = ex.getCause();
+        if (ex instanceof NotAllowedException || cause instanceof SocketException ||
+                cause instanceof UnknownHostException) {
+            App.handleZonkyMaintenanceError(ex, faultTolerant);
+        } else {
+            App.handleUnexpectedException(ex);
+        }
+    }
+
+    static void handleException(final WebApplicationException ex) {
+        App.LOGGER.error("Application encountered remote API error.", ex);
+        App.exit(ReturnCode.ERROR_REMOTE, ex);
+    }
+
+    static void handleUnexpectedException(final Exception ex) {
+        App.LOGGER.error("Unexpected error, likely RoboZonky bug.", ex);
         App.exit(ReturnCode.ERROR_UNEXPECTED, ex);
     }
 
-    static void handleZonkyMaintenanceError(final RuntimeException ex, final boolean faultTolerant) {
+    static void handleZonkyMaintenanceError(final Exception ex, final boolean faultTolerant) {
         App.LOGGER.warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
-        App.exit(faultTolerant ? ReturnCode.OK : ReturnCode.ERROR_DOWN, ex);
+        if (faultTolerant) {
+            App.LOGGER.info("RoboZonky is in fault-tolerant mode. The above will not be reported as error.");
+            App.exit(ReturnCode.OK, ex);
+        } else {
+            App.exit(ReturnCode.ERROR_DOWN, ex);
+        }
     }
 
 }

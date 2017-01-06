@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,14 +76,14 @@ public class Ratings {
 
     @Override
     public String toString() {
-        return ratings.stream().collect(Collectors.mapping(Rating::name, Collectors.joining("\", \"", "[\"", "\"]")));
+        return ratings.stream().map(Rating::name).collect(Collectors.joining("\", \"", "[\"", "\"]"));
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Ratings ratings1 = (Ratings) o;
+        final Ratings ratings1 = (Ratings) o;
         return Objects.equals(ratings, ratings1.ratings);
     }
 

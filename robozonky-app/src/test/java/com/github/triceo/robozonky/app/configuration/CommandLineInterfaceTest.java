@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,15 @@
 package com.github.triceo.robozonky.app.configuration;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 
 public class CommandLineInterfaceTest {
 
@@ -29,6 +34,18 @@ public class CommandLineInterfaceTest {
         return maybe.get();
     }
 
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
+    @Before
+    public void clearLog() {
+        systemOutRule.clearLog();
+        systemOutRule.muteForSuccessfulTests();
+    }
+
+    @Rule
+    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+
     @Test
     public void failingCli() {
         final Optional<CommandLineInterface> cli = CommandLineInterface.parse();
@@ -36,22 +53,21 @@ public class CommandLineInterfaceTest {
     }
 
     @Test
-    public void minimalStrategyDrivenCliWithKeyStoreAndToken() {
+    public void strategyDrivenCliWithKeyStoreAndTokenAndConfirmation() {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
-                CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "5"));
+                CommandLineInterface.parse("-s", "path", "-g", "key", "-p", "pwd", "-r", "5", "-x", "zonkoid:apitest"));
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(cli.getStrategyConfigurationLocation()).isPresent();
         softly.assertThat(cli.getKeyStoreLocation()).isPresent();
         softly.assertThat(cli.isTokenEnabled()).isTrue();
-        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isPresent()
-                .hasValue(5);
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isPresent().hasValue(5);
         softly.assertThat(cli.getPassword()).isNotNull();
         softly.assertThat(cli.getUsername()).isEmpty();
         softly.assertThat(cli.getCaptchaPreventingInvestingDelayInSeconds())
                 .isEqualTo(CommandLineInterface.DEFAULT_CAPTCHA_DELAY_SECONDS);
         softly.assertThat(cli.getMaximumSleepPeriodInMinutes())
                 .isEqualTo(CommandLineInterface.DEFAULT_SLEEP_PERIOD_MINUTES);
-        softly.assertThat(cli.getConfirmationCredentials()).isEmpty();
+        softly.assertThat(cli.getConfirmationCredentials()).isPresent();
         softly.assertAll();
     }
 
@@ -68,6 +84,7 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getUsername()).isEmpty();
         softly.assertThat(cli.isFaultTolerant()).isTrue();
         softly.assertThat(cli.newAuthenticationHandler()).isEmpty();
+        softly.assertThat(cli.getConfirmationCredentials()).isEmpty();
         softly.assertAll();
     }
 
@@ -109,6 +126,18 @@ public class CommandLineInterfaceTest {
     }
 
     @Test
+    public void printHelp() {
+        final CommandLineInterface cli = CommandLineInterfaceTest.process(
+                CommandLineInterface.parse("-l", "1", "-a", "1000", "-u", "user", "-p", "pwd"));
+        final String msg = UUID.randomUUID().toString();
+        cli.printHelp(msg, false);
+        Assertions.assertThat(this.systemOutRule.getLog()).contains(msg);
+        this.systemOutRule.clearLog();
+        cli.printHelp(msg, true);
+        Assertions.assertThat(this.systemOutRule.getLog()).contains("Error: " + msg);
+    }
+
+    @Test
     public void userDrivenCliWrongAmount() {
         final CommandLineInterface cli = CommandLineInterfaceTest.process(
                 CommandLineInterface.parse("-l", "1", "-a", "10a0", "-u", "user", "-p", "pwd"));
@@ -123,6 +152,25 @@ public class CommandLineInterfaceTest {
         softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
         softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
         softly.assertThat(cli.isTokenEnabled()).isFalse();
+        softly.assertAll();
+    }
+
+    @Test
+    public void properUserDrivenTokenBasedCli() {
+        final CommandLineInterface cli = CommandLineInterfaceTest.process(
+                CommandLineInterface.parse("-l", "1", "-a", "1000", "-u", "user", "-p", "pwd", "-r"));
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(cli.getLoanId()).isPresent();
+        softly.assertThat(cli.getUsername()).isPresent();
+        softly.assertThat(cli.getLoanAmount()).isPresent().hasValue(1000);
+        softly.assertThat(cli.getPassword()).isNotNull();
+        softly.assertThat(cli.getStrategyConfigurationLocation()).isEmpty();
+        softly.assertThat(cli.isDryRun()).isFalse();
+        softly.assertThat(cli.getDryRunBalance()).isEmpty();
+        softly.assertThat(cli.getKeyStoreLocation()).isEmpty();
+        softly.assertThat(cli.getTokenRefreshBeforeExpirationInSeconds()).isEmpty();
+        softly.assertThat(cli.isTokenEnabled()).isTrue();
+        softly.assertThat(cli.newAuthenticationHandler()).isPresent();
         softly.assertAll();
     }
 

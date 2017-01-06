@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,22 +57,22 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         return new BigInteger(1, mdEnc.digest()).toString(16);
     }
 
-    private static String getAuthenticationString(final RequestId requestId, final int loanId) {
+    static String getAuthenticationString(final RequestId requestId, final int loanId) {
+        final String auth = new StringJoiner("|")
+                .add(String.valueOf(requestId.getPassword()))
+                .add(ZonkoidConfirmationProvider.CLIENT_APP)
+                .add(requestId.getUserId())
+                .add(String.valueOf(loanId))
+                .toString();
         try {
-            final String auth = new StringJoiner("|")
-                    .add(String.valueOf(requestId.getPassword()))
-                    .add(ZonkoidConfirmationProvider.CLIENT_APP)
-                    .add(requestId.getUserId())
-                    .add(String.valueOf(loanId))
-                    .toString();
             return ZonkoidConfirmationProvider.md5(auth);
         } catch (final NoSuchAlgorithmException ex) {
             throw new IllegalStateException("Your Java Runtime Environment does not support MD5!", ex);
         }
     }
 
-    private static HttpEntity getFormData(final RequestId requestId, final int loanId, final int amount) throws
-            UnsupportedEncodingException {
+    static HttpEntity getFormData(final RequestId requestId, final int loanId, final int amount)
+            throws UnsupportedEncodingException {
         final List<NameValuePair> nvps = Arrays.asList(
             new BasicNameValuePair("clientApp", ZonkoidConfirmationProvider.CLIENT_APP),
             new BasicNameValuePair("username", requestId.getUserId()),
@@ -82,8 +82,8 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         return new UrlEncodedFormEntity(nvps);
     }
 
-    static HttpPost getRequest(final RequestId requestId, final int loanId, final int amount, final String domain,
-                               final String protocol) throws UnsupportedEncodingException {
+    static HttpPost getRequest(final RequestId requestId, final int loanId, final int amount, final String protocol,
+                               final String domain) throws UnsupportedEncodingException {
         final String auth = ZonkoidConfirmationProvider.getAuthenticationString(requestId, loanId);
         final HttpPost httpPost = new HttpPost(protocol + "://" + domain + ZonkoidConfirmationProvider.PATH);
         httpPost.addHeader("Accept", "text/plain");
@@ -112,29 +112,24 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     private static Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId,
                                                               final int amount, final String domain,
                                                               final String protocol) {
-        ZonkoidConfirmationProvider.LOGGER.trace("Opening Zonkoid connection.");
         try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
-            ZonkoidConfirmationProvider.LOGGER.trace("Opening Zonkoid request.");
-            final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, domain, protocol);
+            ZonkoidConfirmationProvider.LOGGER.trace("Sending request.");
+            final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, protocol, domain);
             try (final CloseableHttpResponse response = httpclient.execute(post)) {
                 final int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode >= 200 && statusCode < 300) {
-                    ZonkoidConfirmationProvider.LOGGER.debug("Zonkoid response: {}", response.getStatusLine());
+                    ZonkoidConfirmationProvider.LOGGER.debug("Response: {}", response.getStatusLine());
                     return Optional.of(new Confirmation(ConfirmationType.DELEGATED));
                 } else if (statusCode >= 400 && statusCode < 500){
-                    ZonkoidConfirmationProvider.LOGGER.warn("Zonkoid response: {}", response.getStatusLine());
+                    ZonkoidConfirmationProvider.LOGGER.warn("Response: {}", response.getStatusLine());
                     return Optional.of(new Confirmation(ConfirmationType.REJECTED));
                 } else {
-                    ZonkoidConfirmationProvider.LOGGER.error("Unknown Zonkoid response: {}", response.getStatusLine());
+                    ZonkoidConfirmationProvider.LOGGER.error("Unknown response: {}", response.getStatusLine());
                     return Optional.empty();
                 }
-            } finally {
-                ZonkoidConfirmationProvider.LOGGER.trace("Closing Zonkoid request.");
             }
         } catch (final Exception ex) {
             return ZonkoidConfirmationProvider.handleError(requestId, loanId, amount, domain, protocol, ex);
-        } finally {
-            ZonkoidConfirmationProvider.LOGGER.trace("Closing Zonkoid connection.");
         }
     }
 
