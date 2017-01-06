@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -36,8 +35,28 @@ final class Exclusivity implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Exclusivity.class);
 
+    private static final class LockControl {
+
+        private final RandomAccessFile randomAccessFile;
+        private final FileLock lock;
+
+        public LockControl(final File lockedFile) throws IOException {
+            this.randomAccessFile = new RandomAccessFile(lockedFile, "rw");
+            this.lock = this.randomAccessFile.getChannel().lock();
+        }
+
+        public boolean hasValidLock() {
+            return lock.isValid();
+        }
+
+        public void invalidateLock() throws IOException {
+            this.randomAccessFile.close();
+        }
+
+    }
+
     private final File fileToLock;
-    private FileLock lock = null;
+    private Exclusivity.LockControl lockControl = null;
 
     /**
      * Guarantees exclusivity based on a randomly created temp file. This is only useful for testing, since in all
@@ -66,7 +85,7 @@ final class Exclusivity implements ShutdownHook.Handler {
      * Will be false before first successful {@link #ensure()} or after every {@link #waive()}.
      */
     synchronized boolean isEnsured() {
-        return lock != null && lock.isValid() && !lock.isShared();
+        return lockControl != null && lockControl.hasValidLock();
     }
 
     /**
@@ -78,7 +97,7 @@ final class Exclusivity implements ShutdownHook.Handler {
             return;
         }
         try {
-            this.lock.release();
+            this.lockControl.invalidateLock();
             Exclusivity.LOGGER.debug("File lock released.");
         } catch (final IOException ex) {
             Exclusivity.LOGGER.warn("Failed releasing lock, new RoboZonky processes may not launch.", ex);
@@ -99,8 +118,7 @@ final class Exclusivity implements ShutdownHook.Handler {
         Exclusivity.LOGGER.info("Checking we're the only RoboZonky running.");
         Exclusivity.LOGGER.debug("Acquiring file lock: {}.", this.fileToLock.getAbsolutePath());
         try {
-            final FileChannel ch = new RandomAccessFile(this.fileToLock, "rw").getChannel();
-            this.lock = ch.lock();
+            this.lockControl = new Exclusivity.LockControl(this.fileToLock);
             Exclusivity.LOGGER.debug("File lock acquired.");
         } catch (final IOException ex) {
             Exclusivity.LOGGER.error("Failed acquiring lock, another RoboZonky process likely running.", ex);
