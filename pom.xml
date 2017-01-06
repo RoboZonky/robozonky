@@ -451,7 +451,7 @@
           <artifactId>pitest-maven</artifactId>
           <version>1.1.11</version>
           <configuration>
-            <skip>${skipTests}</skip>
+            <skip>true</skip>
             <timestampedReports>false</timestampedReports>
             <detectInlinedCode>true</detectInlinedCode>
             <mutationThreshold>85</mutationThreshold>
