@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.github.triceo.robozonky.api.Defaults;
 import freemarker.template.Configuration;
@@ -31,6 +33,8 @@ final class TemplateProcessor {
 
     private static Configuration getFreemarkerConfiguration() {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+        cfg.setLocale(Defaults.LOCALE);
+        cfg.setTimeZone(TimeZone.getTimeZone(Defaults.ZONE_ID));
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
         return cfg;
@@ -41,7 +45,7 @@ final class TemplateProcessor {
     public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
         final Map<String, Object> data = new HashMap<>();
-        data.put("timestamp", OffsetDateTime.now());
+        data.put("timestamp", Date.from(Instant.now()));
         data.put("robozonky", Defaults.ROBOZONKY_USER_AGENT);
         data.put("robozonkyUrl", Defaults.ROBOZONKY_URL);
         data.put("host", Defaults.ROBOZONKY_HOST_ADDRESS);

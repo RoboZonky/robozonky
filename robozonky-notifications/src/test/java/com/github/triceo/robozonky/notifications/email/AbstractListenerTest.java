@@ -56,12 +56,13 @@ public abstract class AbstractListenerTest {
     public static Collection<Object[]> getListeners() {
         // prepare data
         final Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getId()).thenReturn(66666);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        Mockito.when(loan.getRemainingInvestment()).thenReturn(1000.0);
+        Mockito.when(loan.getRemainingInvestment()).thenReturn(2000.0);
         Mockito.when(loan.getAmount()).thenReturn(100000.0);
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
-        final Recommendation recommendation = loanDescriptor.recommend(200, false).get();
-        final Investment i = new Investment(loan, 200);
+        final Recommendation recommendation = loanDescriptor.recommend(1200, false).get();
+        final Investment i = new Investment(loan, 1000);
         final NotificationProperties properties = AbstractListenerTest.getNotificationProperties();
         // create events for listeners
         final Map<Class<? extends Event>, Event> events = new HashMap<>(SupportedListener.values().length);

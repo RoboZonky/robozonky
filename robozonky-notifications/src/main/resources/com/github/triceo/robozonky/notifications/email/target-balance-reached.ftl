@@ -1,3 +1,3 @@
-Disponibilní zůstatek na Zonky účtu právě překročil stanovenou hranici ${data.targetBalance},- Kč.
-Nový disponibilní zůstatek na Zonky účtu je ${data.newBalance},- Kč.
+Disponibilní zůstatek na Zonky účtu právě překročil stanovenou hranici ${data.targetBalance?c},- Kč.
+Nový disponibilní zůstatek na Zonky účtu je ${data.newBalance?c},- Kč.
 
