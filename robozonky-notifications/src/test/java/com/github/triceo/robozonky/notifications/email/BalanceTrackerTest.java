@@ -43,10 +43,16 @@ public class BalanceTrackerTest {
         final State.ClassSpecificState state = State.INSTANCE.forClass(BalanceTracker.class);
         Assume.assumeFalse(state.getValue(BalanceTracker.BALANCE_KEY).isPresent());
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+        // store new value
         final int newBalance = 200;
         BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
+        // overwrite value
+        final int newerBalance = 100;
+        BalanceTracker.INSTANCE.setLastKnownBalance(newerBalance);
+        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newerBalance);
         Assertions.assertThat(state.getValue(BalanceTracker.BALANCE_KEY)).isPresent();
+        // reset value
         Assertions.assertThat(BalanceTracker.INSTANCE.reset()).isTrue();
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
     }
