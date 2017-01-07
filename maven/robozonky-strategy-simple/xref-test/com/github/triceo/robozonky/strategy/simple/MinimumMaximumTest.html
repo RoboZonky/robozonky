@@ -30,7 +30,7 @@
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.util.function.Function;
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.function.Supplier;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.strategy.InvestmentStrategy;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.github.triceo.robozonky.api.Defaults;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.assertj.core.api.Assertions;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.junit.runner.RunWith;
@@ -71,14 +71,14 @@
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>          <strong class="jxr_keyword">final</strong> ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>          Mockito.when(config.containsKey(propertyName)).thenReturn(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>          Mockito.when(config.getInt(propertyName))
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>                  .thenReturn(Optional.of(InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED - 1));
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>                  .thenReturn(Optional.of(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1));
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>          valueRetrieval.apply(config);
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>      }
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>      @Test
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> proper() {
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>          <strong class="jxr_keyword">final</strong> String propertyName = keyRetrieval.get();
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>          <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> result = InvestmentStrategy.MINIMAL_INVESTMENT_ALLOWED;
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>          <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> result = Defaults.MINIMUM_INVESTMENT_IN_CZK;
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>          <strong class="jxr_keyword">final</strong> ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>          Mockito.when(config.containsKey(propertyName)).thenReturn(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>          Mockito.when(config.getInt(propertyName)).thenReturn(Optional.of(result));
@@ -88,6 +88,6 @@
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2016. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2017. All rights reserved.</div>
 </body>
 </html>
