@@ -166,4 +166,12 @@ public class AuthenticationHandlerTest {
         Mockito.verify(zonky, Mockito.never()).logout();
     }
 
+    @Test
+    public void failWhileStoringToken() throws JAXBException {
+        final SecretProvider provider = Mockito.mock(SecretProvider.class);
+        Mockito.when(provider.setToken(ArgumentMatchers.any())).thenReturn(false);
+        final AuthenticationHandler auth = AuthenticationHandler.passwordBased(provider);
+        Assertions.assertThat(auth.storeToken(AuthenticationHandlerTest.TOKEN)).isFalse();
+    }
+
 }

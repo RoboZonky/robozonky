@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.ws.rs.BadRequestException;
+import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.Authentication;
@@ -133,6 +134,15 @@ public class AuthenticationHandler {
         });
     }
 
+    boolean storeToken(final ZonkyApiToken token) throws JAXBException {
+        final String marshalled = ZonkyApiToken.marshal(token);
+        final boolean tokenStored = this.data.setToken(new StringReader(marshalled));
+        if (!tokenStored) {
+            AuthenticationHandler.LOGGER.debug("Failed storing token.");
+        }
+        return tokenStored;
+    }
+
     /**
      * Decide whether or not to log out, based on user preferences.
      *
@@ -146,16 +156,8 @@ public class AuthenticationHandler {
         final Optional<Reader> tokenStream = this.data.getToken();
         if (tokenStream.isPresent()) { // token already exists, do not logout
             return false;
-        } else try { // try to store token
-            final String marshalled = ZonkyApiToken.marshal(token);
-            final boolean tokenStored = this.data.setToken(new StringReader(marshalled));
-            if (tokenStored) {
-                AuthenticationHandler.LOGGER.debug("Token stored successfully.");
-                return false;
-            } else {
-                AuthenticationHandler.LOGGER.debug("Failed storing token.");
-                return true;
-            }
+        } else try {
+            return !this.storeToken(token);
         } catch (final Exception ex) {
             AuthenticationHandler.LOGGER.info("Failed writing access token, will need to use password next time.", ex);
             return true;
