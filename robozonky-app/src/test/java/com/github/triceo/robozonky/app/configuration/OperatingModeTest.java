@@ -204,8 +204,9 @@ public class OperatingModeTest {
         final CommandLineInterface cli = OperatingModeTest.mockCli();
         final File tmp = File.createTempFile("robozonky-", ".strategy"); // this is an empty (= invalid) strategy file
         Mockito.when(cli.getStrategyConfigurationLocation()).thenReturn(Optional.of(tmp.getAbsolutePath()));
-        Assertions.assertThat(OperatingMode.STRATEGY_DRIVEN.configure(cli, OperatingModeTest.SECRETS))
-                .isEmpty();
+        final Optional<Configuration> cfg = OperatingMode.STRATEGY_DRIVEN.configure(cli, OperatingModeTest.SECRETS);
+        Assertions.assertThat(cfg).isPresent();
+        Assertions.assertThat(cfg.get().getInvestmentStrategy().get().getLatest()).isEmpty();
     }
 
     @Test
@@ -214,8 +215,9 @@ public class OperatingModeTest {
         final File tmp = File.createTempFile("robozonky-", ".strategy"); // this is an empty (= invalid) strategy file
         Assume.assumeTrue(tmp.delete());
         Mockito.when(cli.getStrategyConfigurationLocation()).thenReturn(Optional.of(tmp.getAbsolutePath()));
-        Assertions.assertThat(OperatingMode.STRATEGY_DRIVEN.configure(cli, OperatingModeTest.SECRETS))
-                .isEmpty();
+        final Optional<Configuration> cfg = OperatingMode.STRATEGY_DRIVEN.configure(cli, OperatingModeTest.SECRETS);
+        Assertions.assertThat(cfg).isPresent();
+        Assertions.assertThat(cfg.get().getInvestmentStrategy().get().getLatest()).isEmpty();
     }
 }
 

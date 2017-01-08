@@ -20,6 +20,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 import javax.ws.rs.NotAllowedException;
@@ -70,8 +71,11 @@ public class App {
         System.exit(returnCode.getCode());
     }
 
-    static ReturnCode execute(final Configuration configuration, final AuthenticationHandler auth) {
+    static ReturnCode execute(final Configuration configuration, final AuthenticationHandler auth,
+                              final Scheduler scheduler) {
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
+        configuration.getInvestmentStrategy()
+                .ifPresent(refresher -> scheduler.submit(refresher, Duration.ofSeconds(60)));
         final boolean loginSucceeded = new Remote(configuration, auth).call().isPresent();
         return loginSucceeded ? ReturnCode.OK : ReturnCode.ERROR_SETUP;
     }
@@ -88,6 +92,8 @@ public class App {
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
         // start the check for new version, making sure it is properly handled during execute
+        final Scheduler scheduler = new Scheduler();
+        App.SHUTDOWN_HOOKS.register(scheduler);
         App.SHUTDOWN_HOOKS.register(new VersionChecker());
         // read the command line and execute the runtime
         boolean faultTolerant = false;
@@ -106,7 +112,7 @@ public class App {
             }
             final AuthenticationHandler auth = optionalAuth.get();
             final Optional<Configuration> optionalCtx = cli.newApplicationConfiguration(auth.getSecretProvider());
-            optionalCtx.ifPresent(ctx -> App.exit(App.execute(ctx, auth))); // core investing algorithm
+            optionalCtx.ifPresent(ctx -> App.exit(App.execute(ctx, auth, scheduler))); // core investing algorithm
             App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
         } catch (final ProcessingException | NotAllowedException ex) {
             App.handleException(ex, faultTolerant);

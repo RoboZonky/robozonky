@@ -50,30 +50,22 @@ enum OperatingMode {
             }
             final Optional<String> strategyLocation = cli.getStrategyConfigurationLocation();
             if (!strategyLocation.isPresent()) {
-                cli.printHelp("Strategy file must be provided.", true);
+                cli.printHelp("Strategy location must be provided.", true);
                 return Optional.empty();
             }
-            // find investment strategy
-            final Optional<InvestmentStrategy> strategy = InvestmentStrategyLoader.load(strategyLocation.get());
-            if (!strategy.isPresent()) {
-                OperatingMode.LOGGER.error("No investment strategy found to support {}.", strategyLocation);
-                return Optional.empty();
-            }
-            OperatingMode.LOGGER.debug("Strategy '{}' will be processed using '{}'.", strategyLocation.get(),
-                    strategy.get().getClass());
             // find confirmation provider and finally create configuration
             final Optional<ZonkyProxy.Builder> optionalBuilder = cli.getConfirmationCredentials()
                     .map(credentials -> OperatingMode.getZonkyProxyBuilder(credentials, secrets))
                     .orElse(Optional.of(new ZonkyProxy.Builder()));
             return optionalBuilder.map(builder -> {
+                final Refreshable<InvestmentStrategy> strategy =
+                        RefreshableInvestmentStrategy.create(strategyLocation.get());
                 if (cli.isDryRun()) {
                     final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new Configuration(strategy.get(), builder,
-                            cli.getMaximumSleepPeriodInMinutes(),
+                    return Optional.of(new Configuration(strategy, builder, cli.getMaximumSleepPeriodInMinutes(),
                             cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
                 } else {
-                    return Optional.of(new Configuration(strategy.get(), builder,
-                            cli.getMaximumSleepPeriodInMinutes(),
+                    return Optional.of(new Configuration(strategy, builder, cli.getMaximumSleepPeriodInMinutes(),
                             cli.getCaptchaPreventingInvestingDelayInSeconds()));
                     }
                 }).orElse(Optional.empty());

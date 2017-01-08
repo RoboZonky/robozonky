@@ -17,8 +17,9 @@
 package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
+import java.net.MalformedURLException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.util.IoTestUtil;
@@ -28,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class InvestmentStrategyTest {
+public class RefreshableInvestmentStrategyTest {
 
     private static String getRoot() {
         return IoTestUtil.findMainSource("assembly", "resources");
@@ -36,20 +37,29 @@ public class InvestmentStrategyTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static Object[][] getParameters() {
-        return new File[][] {
-            new File[] {new File(InvestmentStrategyTest.getRoot(), "robozonky-balanced.cfg")},
-                new File[] {new File(InvestmentStrategyTest.getRoot(), "robozonky-conservative.cfg")},
-                new File[] {new File(InvestmentStrategyTest.getRoot(), "robozonky-dynamic.cfg")}
+        final String[] files = new String[] {
+                "robozonky-balanced.cfg", "robozonky-conservative.cfg", "robozonky-dynamic.cfg"
         };
+        return Stream.of(files)
+                .map(f -> new File[] {new File(RefreshableInvestmentStrategyTest.getRoot(), f)})
+                .collect(Collectors.toList())
+                .toArray(new Object[files.length][1]);
     }
 
     @Parameterized.Parameter
     public File strategy;
 
     @Test
-    public void loadStrategy() throws IOException {
-        final Optional<InvestmentStrategy> inv = InvestmentStrategyLoader.load(this.strategy.toURI().toURL().toString());
-        Assertions.assertThat(inv).isPresent();
+    public void loadStrategyAsFile() {
+        final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(strategy.getAbsolutePath());
+        Assertions.assertThat(r.getLatest()).isPresent();
+    }
+
+    @Test
+    public void loadStrategyAsUrl() throws MalformedURLException {
+        final String url = strategy.toURI().toURL().toString();
+        final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(url);
+        Assertions.assertThat(r.getLatest()).isPresent();
     }
 
 }

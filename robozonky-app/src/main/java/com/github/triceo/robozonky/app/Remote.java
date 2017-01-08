@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.triceo.robozonky.app;
 
 import java.math.BigDecimal;
@@ -37,6 +38,7 @@ import com.github.triceo.robozonky.api.notifications.MarketplaceCheckStartedEven
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.Configuration;
@@ -86,6 +88,11 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     }
 
     Optional<Collection<Investment>> executeStrategy(final ApiProvider apiProvider) {
+        final Optional<InvestmentStrategy> strategy = this.ctx.getInvestmentStrategy().get().getLatest();
+        if (!strategy.isPresent()) {
+            Remote.LOGGER.error("Strategy implementation not found.");
+            return Optional.empty();
+        }
         // check marketplace for loans
         Events.fire(new MarketplaceCheckStartedEvent());
         final Activity activity = new Activity(this.ctx, apiProvider.cache());
@@ -101,7 +108,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         // start the core investing algorithm
         final Function<Investor, Collection<Investment>> investor = i -> {
             Events.fire(new ExecutionStartedEvent(loans, i.getBalance().intValue()));
-            final Collection<Investment> result = i.invest(this.ctx.getInvestmentStrategy().get(), loans);
+            final Collection<Investment> result = i.invest(strategy.get(), loans);
             Events.fire(new ExecutionCompletedEvent(result, i.getBalance().intValue()));
             return result;
         };

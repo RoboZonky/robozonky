@@ -37,6 +37,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.configuration.Configuration;
+import com.github.triceo.robozonky.app.configuration.Refreshable;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,7 +63,10 @@ public class AppTest extends AbstractStateLeveragingTest {
         final Configuration ctx = Mockito.mock(Configuration.class);
         Mockito.when(ctx.getSleepPeriod()).thenReturn(Duration.ofMinutes(60));
         Mockito.when(ctx.getCaptchaDelay()).thenReturn(Duration.ofSeconds(120));
-        Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.of(Mockito.mock(InvestmentStrategy.class)));
+        final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
+        final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
+        Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));
+        Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.of(refreshable));
         Mockito.when(ctx.isDryRun()).thenReturn(false);
         return ctx;
     }
@@ -78,7 +82,7 @@ public class AppTest extends AbstractStateLeveragingTest {
 
     @Test
     public void wrongStrategyOnCli() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
+        exit.expectSystemExitWithStatus(ReturnCode.ERROR_SETUP.getCode());
         App.main("-s", "some.random.file", "-u", "user", "-p", "password", "-t");
     }
 
@@ -159,7 +163,7 @@ public class AppTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final ReturnCode rc = App.execute(ctx, auth);
+        final ReturnCode rc = App.execute(ctx, auth, new Scheduler());
         Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_SETUP);
     }
 
@@ -182,7 +186,7 @@ public class AppTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final ReturnCode rc = App.execute(ctx, auth);
+        final ReturnCode rc = App.execute(ctx, auth, new Scheduler());
         Assertions.assertThat(rc).isEqualTo(ReturnCode.OK);
     }
 

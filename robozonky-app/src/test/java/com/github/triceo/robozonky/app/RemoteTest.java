@@ -43,6 +43,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.configuration.Configuration;
+import com.github.triceo.robozonky.app.configuration.Refreshable;
 import com.github.triceo.robozonky.notifications.Events;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -59,7 +60,10 @@ public class RemoteTest extends AbstractStateLeveragingTest {
         Mockito.when(ctx.getLoanId()).thenReturn(OptionalInt.of(1));
         Mockito.when(ctx.getLoanAmount()).thenReturn(OptionalInt.of(1000));
         if (usesStrategy) {
-            Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.of(Mockito.mock(InvestmentStrategy.class)));
+            final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
+            final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
+            Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));
+            Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.of(refreshable));
         } else {
             Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.empty());
         }

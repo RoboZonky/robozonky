@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 
 public class Configuration {
 
-    private InvestmentStrategy investmentStrategy = null;
+    private Refreshable<InvestmentStrategy> investmentStrategy = null;
     private final ZonkyProxy.Builder zonkyProxyBuilder;
     private final boolean isDryRun;
     private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
@@ -53,7 +53,7 @@ public class Configuration {
         this.zonkyProxyBuilder = new ZonkyProxy.Builder();
     }
 
-    public Configuration(final InvestmentStrategy investmentStrategy, final ZonkyProxy.Builder builder,
+    public Configuration(final Refreshable<InvestmentStrategy> investmentStrategy, final ZonkyProxy.Builder builder,
                          final int sleepPeriodInMinutes, final int captchaDelayInSeconds) {
         this.zonkyProxyBuilder = builder;
         this.investmentStrategy = investmentStrategy;
@@ -62,7 +62,7 @@ public class Configuration {
         this.isDryRun = false;
     }
 
-    public Configuration(final InvestmentStrategy investmentStrategy, final ZonkyProxy.Builder builder,
+    public Configuration(final Refreshable<InvestmentStrategy> investmentStrategy, final ZonkyProxy.Builder builder,
                          final int sleepPeriodInMinutes, final int captchaDelayInSeconds, final int dryRunBalance) {
         this.zonkyProxyBuilder = builder;
         this.investmentStrategy = investmentStrategy;
@@ -100,7 +100,7 @@ public class Configuration {
         return zonkyProxyBuilder;
     }
 
-    public Optional<InvestmentStrategy> getInvestmentStrategy() {
+    public Optional<Refreshable<InvestmentStrategy>> getInvestmentStrategy() {
         return Optional.ofNullable(investmentStrategy);
     }
 }

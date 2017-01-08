@@ -16,17 +16,16 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.ExtensionsManager;
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import org.slf4j.Logger;
@@ -41,35 +40,18 @@ class InvestmentStrategyLoader {
     private static final ServiceLoader<InvestmentStrategyService> STRATEGY_LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(InvestmentStrategyService.class);
 
-    private static URL convertToUrl(final String maybeUrl) {
-        try {
-            return new URL(maybeUrl);
-        } catch (final MalformedURLException e) {
-            try {
-                return new File(maybeUrl).toURI().toURL();
-            } catch (final MalformedURLException e1) {
-                throw new IllegalStateException("Cannot load " + maybeUrl, e1);
-            }
-        }
-    }
-
-    public static Optional<InvestmentStrategy> load(final String maybeUrl) {
-        return InvestmentStrategyLoader.load(InvestmentStrategyLoader.convertToUrl(maybeUrl));
-    }
-
-    private static Optional<InvestmentStrategy> load(final URL url) {
-        InvestmentStrategyLoader.LOGGER.trace("Loading strategies.");
+    static Optional<InvestmentStrategy> load(final String strategy) {
         return StreamSupport.stream(InvestmentStrategyLoader.STRATEGY_LOADER.spliterator(), true)
-                .peek(iss -> InvestmentStrategyLoader.LOGGER.debug("Evaluating strategy '{}' with '{}'.", url,
-                        iss.getClass()))
                 .map(iss -> {
-                    try (final InputStream stream = url.openStream()) {
+                    InvestmentStrategyLoader.LOGGER.debug("Re-reading strategy.");
+                    try (final InputStream stream = new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET))) {
                         return iss.parse(stream);
                     } catch (final IOException ex) {
                         InvestmentStrategyLoader.LOGGER.error("Failed reading strategy.", ex);
-                        return Optional.empty();
+                        return Optional.<InvestmentStrategy>empty();
                     }
-                }).flatMap(o -> o.isPresent() ? Stream.of((InvestmentStrategy)o.get()) : Stream.empty())
+                })
+                .flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty())
                 .findFirst();
     }
 
