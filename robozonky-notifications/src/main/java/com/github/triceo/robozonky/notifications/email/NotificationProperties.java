@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
@@ -34,35 +33,39 @@ class NotificationProperties {
     static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications.cfg");
 
+    private static Properties loadProperties(final URL url) throws IOException {
+        final Properties properties = new Properties();
+        try (final InputStream i = url.openStream()) {
+            properties.load(i);
+        }
+        return properties;
+    }
+
     static Optional<NotificationProperties> getProperties() {
         final String propValue = System.getProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         if (propValue != null) { // attempt to read from the URL specified by the property
-            NotificationProperties.LOGGER.debug("Reading e-mail notification configuration from {}.", propValue);
+            NotificationProperties.LOGGER.debug("Reading e-mail notification configuration from '{}'.", propValue);
             try {
-                final URL propsUrl = new URL(propValue);
-                final Properties props = new Properties();
-                props.load(propsUrl.openStream());
-                return Optional.of(new NotificationProperties(props));
+                final Properties p = NotificationProperties.loadProperties(new URL(propValue));
+                return Optional.of(new NotificationProperties(p));
             } catch (final IOException ex) {
                 // fall back to the property file
-                NotificationProperties.LOGGER.debug("Failed reading configuration from {}.", propValue);
+                NotificationProperties.LOGGER.debug("Failed reading '{}'.", propValue);
             }
         }
-        if (NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.canRead()) {
-            final Properties props = new Properties();
-            try (final BufferedReader r =
-                         Files.newBufferedReader(NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath())) {
-                props.load(r);
-                NotificationProperties.LOGGER.debug("Read config file {}.",
-                        NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.getAbsolutePath());
-                return Optional.of(new NotificationProperties(props));
-            } catch (final IOException ex) {
-                NotificationProperties.LOGGER.debug("Failed reading configuration file {}.",
-                        NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION, ex);
-                return Optional.empty();
-            }
-        } else {
-            NotificationProperties.LOGGER.debug("No configuration file found.");
+        if (!NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.canRead()) {
+            NotificationProperties.LOGGER.debug("Failed reading configuration file '{}'.",
+                    NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.getAbsolutePath());
+            return Optional.empty();
+        }
+        try {
+            final URL url = NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toURI().toURL();
+            final Properties props = NotificationProperties.loadProperties(url);
+            NotificationProperties.LOGGER.debug("Read '{}'.", url);
+            return Optional.of(new NotificationProperties(props));
+        } catch (final IOException ex) {
+            NotificationProperties.LOGGER.debug("Failed reading '{}'.",
+                    NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.getAbsolutePath(), ex);
             return Optional.empty();
         }
     }

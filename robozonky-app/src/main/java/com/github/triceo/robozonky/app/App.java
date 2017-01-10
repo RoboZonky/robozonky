@@ -20,6 +20,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
 import javax.ws.rs.NotAllowedException;
@@ -84,9 +85,10 @@ public class App {
         // and actually start running
         Events.fire(new RoboZonkyStartingEvent());
         App.LOGGER.info("RoboZonky v{} loading.", Defaults.ROBOZONKY_VERSION);
-        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}).", System.getProperty("java.vendor"),
+        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
-                System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
+                System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
+                Charset.defaultCharset());
         // start the check for new version, making sure it is properly handled during execute
         App.SHUTDOWN_HOOKS.register(new VersionChecker());
         // read the command line and execute the runtime

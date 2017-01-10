@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ public class NotificationPropertiesTest {
 
     private static final URL CONFIG_ENABLED =
             NotificationPropertiesTest.class.getResource("notifications-enabled.cfg");
+    private static final URL WINDOWS_ENCODED =
+            NotificationPropertiesTest.class.getResource("notifications-windows-encoding.cfg");
 
     @Rule
     public final ClearSystemProperties myPropertyIsCleared =
@@ -58,6 +60,15 @@ public class NotificationPropertiesTest {
     public void correctUrlIgnoresPropertyFile() {
         System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.CONFIG_ENABLED.toString());
+        final Optional<NotificationProperties> np = NotificationProperties.getProperties();
+        Assertions.assertThat(np).isPresent();
+        Assertions.assertThat(np.get().isEnabled()).isTrue();
+    }
+
+    @Test
+    public void windowsEncoding() {
+        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                NotificationPropertiesTest.WINDOWS_ENCODED.toString());
         final Optional<NotificationProperties> np = NotificationProperties.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isTrue();
