@@ -110,6 +110,10 @@ class NotificationProperties {
         return this.getBooleanValue("enabled", false);
     }
 
+    public String getSender() {
+        return this.getStringValue("from", "noreply@robozonky.cz");
+    }
+
     public String getRecipient() {
         return this.getStringValue("to", "");
     }
