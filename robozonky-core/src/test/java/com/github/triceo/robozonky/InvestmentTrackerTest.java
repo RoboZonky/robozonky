@@ -35,13 +35,14 @@ public class InvestmentTrackerTest extends AbstractInvestingTest {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(it.getAvailableLoans())
-                .isNotSameAs(lds)
-                .containsExactly(ld);
-        softly.assertThat(it.getAllInvestments()).isEmpty();
-        softly.assertThat(it.getInvestmentsMade()).isEmpty();
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(it.isSeenBefore(0)).isFalse();
+            softly.assertThat(it.getAvailableLoans())
+                    .isNotSameAs(lds)
+                    .containsExactly(ld);
+            softly.assertThat(it.getAllInvestments()).isEmpty();
+            softly.assertThat(it.getInvestmentsMade()).isEmpty();
+        });
     }
 
     @Test
@@ -51,12 +52,12 @@ public class InvestmentTrackerTest extends AbstractInvestingTest {
         final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
         it.registerExistingInvestments(Collections.singletonList(new Investment(ld.getLoan(),
                 Defaults.MINIMUM_INVESTMENT_IN_CZK)));
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(it.getAvailableLoans())
-                .hasSize(1)
-                .doesNotContain(ld);
-        softly.assertThat(it.getInvestmentsMade()).isEmpty();
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(it.getAvailableLoans())
+                    .hasSize(1)
+                    .doesNotContain(ld);
+            softly.assertThat(it.getInvestmentsMade()).isEmpty();
+        });
     }
 
     @Test
@@ -66,10 +67,11 @@ public class InvestmentTrackerTest extends AbstractInvestingTest {
         final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
         final Investment i = new Investment(ld.getLoan(), 200);
         it.makeInvestment(i);
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(it.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
-        softly.assertThat(it.getInvestmentsMade()).containsExactly(i);
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(it.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
+            softly.assertThat(it.getInvestmentsMade()).containsExactly(i);
+            softly.assertAll();
+        });
     }
 
     @Test
@@ -78,7 +80,7 @@ public class InvestmentTrackerTest extends AbstractInvestingTest {
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
         // ignore the loan and persist
         final InvestmentTracker it = new InvestmentTracker(lds, BigDecimal.valueOf(10000));
-        it.ignoreLoanForever(ld.getLoan().getId());
+        it.discardLoan(ld.getLoan().getId());
         Assertions.assertThat(it.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
         // load it all over again
         final InvestmentTracker it2 = new InvestmentTracker(lds, BigDecimal.valueOf(10000));

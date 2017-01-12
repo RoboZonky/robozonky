@@ -51,6 +51,23 @@ public class WireInvestorTest extends AbstractInvestingTest {
         final Optional<Investment> result = Investor.actuallyInvest(recommendation.get(), null, t);
         // verify result
         Assertions.assertThat(result).isEmpty();
+        final List<Event> newEvents = this.getNewEvents();
+        Assertions.assertThat(newEvents).isEmpty();
+    }
+
+    @Test
+    public void underAmount() {
+        final BigDecimal currentBalance = BigDecimal.valueOf(100);
+        final Recommendation recommendation =
+                AbstractInvestingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
+        final InvestmentTracker t =
+                new InvestmentTracker(Collections.singletonList(recommendation.getLoanDescriptor()), currentBalance);
+        final Optional<Investment> result = Investor.actuallyInvest(recommendation, null, t);
+        // verify result
+        Assertions.assertThat(result).isEmpty();
+        Assertions.assertThat(t.isSeenBefore(recommendation.getLoanDescriptor().getLoan().getId())).isFalse();
+        final List<Event> newEvents = this.getNewEvents();
+        Assertions.assertThat(newEvents).isEmpty();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -58,7 +75,8 @@ public class WireInvestorTest extends AbstractInvestingTest {
         final InvestmentTracker t = new InvestmentTracker(Collections.emptyList(), BigDecimal.valueOf(10000));
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
-        Mockito.when(api.invest(ArgumentMatchers.eq(r))).thenReturn(new ZonkyResponse(ZonkyResponseType.FAILED));
+        Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
+                .thenReturn(new ZonkyResponse(ZonkyResponseType.FAILED));
         Investor.actuallyInvest(r, api, t);
     }
 
@@ -67,17 +85,20 @@ public class WireInvestorTest extends AbstractInvestingTest {
         final InvestmentTracker t = new InvestmentTracker(Collections.emptyList(), BigDecimal.valueOf(10000));
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
-        Mockito.when(api.invest(ArgumentMatchers.eq(r))).thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
+        Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
+                .thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
         Mockito.when(api.getConfirmationProvider()).thenReturn(Mockito.mock(ConfirmationProvider.class));
+        Assertions.assertThat(t.isSeenBefore(r.getLoanDescriptor().getLoan().getId())).isFalse();
         final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
         Assertions.assertThat(result).isEmpty();
+        Assertions.assertThat(t.isSeenBefore(r.getLoanDescriptor().getLoan().getId())).isTrue();
         // validate event
         final List<Event> newEvents = this.getNewEvents();
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(newEvents).hasSize(2);
-        softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-        softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentRejectedEvent.class);
-        softly.assertAll();
+        Assertions.assertThat(newEvents).hasSize(2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
+            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentRejectedEvent.class);
+        });
     }
 
     @Test
@@ -85,17 +106,20 @@ public class WireInvestorTest extends AbstractInvestingTest {
         final InvestmentTracker t = new InvestmentTracker(Collections.emptyList(), BigDecimal.valueOf(10000));
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
-        Mockito.when(api.invest(ArgumentMatchers.eq(r))).thenReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED));
+        Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
+                .thenReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED));
         Mockito.when(api.getConfirmationProvider()).thenReturn(Mockito.mock(ConfirmationProvider.class));
+        Assertions.assertThat(t.isSeenBefore(r.getLoanDescriptor().getLoan().getId())).isFalse();
         final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
+        Assertions.assertThat(t.isSeenBefore(r.getLoanDescriptor().getLoan().getId())).isTrue();
         Assertions.assertThat(result).isEmpty();
         // validate event
         final List<Event> newEvents = this.getNewEvents();
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(newEvents).hasSize(2);
-        softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-        softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentDelegatedEvent.class);
-        softly.assertAll();
+        Assertions.assertThat(newEvents).hasSize(2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
+            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentDelegatedEvent.class);
+        });
     }
 
     @Test
@@ -105,28 +129,29 @@ public class WireInvestorTest extends AbstractInvestingTest {
         final InvestmentTracker t = new InvestmentTracker(Collections.emptyList(), oldBalance);
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(amountToInvest).get();
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
-        Mockito.when(api.invest(ArgumentMatchers.eq(r))).thenReturn(new ZonkyResponse(amountToInvest));
+        Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
+                .thenReturn(new ZonkyResponse(amountToInvest));
         final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
         Assertions.assertThat(result).isPresent();
         final Investment investment = result.get();
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(investment.getAmount()).isEqualTo(r.getRecommendedInvestmentAmount());
-        softly.assertThat(investment.getLoanId()).isEqualTo(r.getLoanDescriptor().getLoan().getId());
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(investment.getAmount()).isEqualTo(r.getRecommendedInvestmentAmount());
+            softly.assertThat(investment.getLoanId()).isEqualTo(r.getLoanDescriptor().getLoan().getId());
+        });
         // validate event sequence
         final List<Event> newEvents = this.getNewEvents();
-        softly = new SoftAssertions();
-        softly.assertThat(newEvents).hasSize(2);
-        softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
-        softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentMadeEvent.class);
-        softly.assertAll();
+        Assertions.assertThat(newEvents).hasSize(2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
+            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentMadeEvent.class);
+        });
         // validate event contents
         final InvestmentMadeEvent e = (InvestmentMadeEvent)newEvents.get(1);
-        softly = new SoftAssertions();
-        Assertions.assertThat(e.getFinalBalance())
-                .isEqualTo(oldBalance.subtract(BigDecimal.valueOf(amountToInvest)).intValue());
-        Assertions.assertThat(e.getInvestment()).isEqualTo(investment);
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(e.getFinalBalance())
+                    .isEqualTo(oldBalance.subtract(BigDecimal.valueOf(amountToInvest)).intValue());
+            softly.assertThat(e.getInvestment()).isEqualTo(investment);
+        });
     }
 
 }

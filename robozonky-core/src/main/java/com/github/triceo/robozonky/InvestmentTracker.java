@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,25 +40,51 @@ import org.slf4j.LoggerFactory;
 final class InvestmentTracker {
 
     static final State.ClassSpecificState STATE = State.INSTANCE.forClass(InvestmentTracker.class);
+    private static final String SEEN_INVESTMENTS_ID = "seenInvestments";
     private static final String UNTOUCHABLE_INVESTMENTS_ID = "untouchableInvestments";
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentTracker.class);
 
-    private static Collection<Integer> readUntouchableInvestments() {
-        final Optional<String> result = InvestmentTracker.STATE.getValue(InvestmentTracker.UNTOUCHABLE_INVESTMENTS_ID);
+    private static Collection<Integer> readInvestments(final String propertyName) {
+        final Optional<String> result = InvestmentTracker.STATE.getValue(propertyName);
         return result.map(s -> Stream.of(s.split(","))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList()))
-                .orElse(new ArrayList<>());
+                .orElse(new ArrayList<>(0));
     }
 
-    private static void writeUntouchableInvestments(final Collection<Integer> rejectedInvestments) {
+    private static Collection<Integer> readUntouchableInvestments() {
+        return InvestmentTracker.readInvestments(InvestmentTracker.UNTOUCHABLE_INVESTMENTS_ID);
+    }
+
+    private static Collection<Integer> readSeenInvestments() {
+        return InvestmentTracker.readInvestments(InvestmentTracker.SEEN_INVESTMENTS_ID);
+    }
+
+    private static void writeInvestments(final String propertyName, final Collection<Integer> rejectedInvestments) {
         final String result = rejectedInvestments.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
-        InvestmentTracker.STATE.setValue(InvestmentTracker.UNTOUCHABLE_INVESTMENTS_ID, result);
+        InvestmentTracker.STATE.setValue(propertyName, result);
     }
 
-    private final Collection<Integer> rejectedLoanIds;
+    private static void writeUntouchableInvestments(final Collection<Integer> rejectedInvestments) {
+        InvestmentTracker.writeInvestments(InvestmentTracker.UNTOUCHABLE_INVESTMENTS_ID, rejectedInvestments);
+    }
+
+    private static void writeSeenInvestments(final Collection<Integer> rejectedInvestments) {
+        InvestmentTracker.writeInvestments(InvestmentTracker.SEEN_INVESTMENTS_ID, rejectedInvestments);
+    }
+
+    private static Collection<Integer> cleanIds(final Collection<Integer> loanIds,
+                                                final Collection<LoanDescriptor> availableLoans) {
+        final Collection<Integer> availableLoanIds = availableLoans.stream()
+                .map(l -> l.getLoan().getId())
+                .collect(Collectors.toList());
+        loanIds.removeIf(id -> !availableLoanIds.contains(id)); // prevent old stale IDs from piling up
+        return loanIds;
+    }
+
+    private final Collection<Integer> discardedLoans, seenLoans;
     private final List<LoanDescriptor> loansStillAvailable;
     private final Collection<Investment> investmentsMade = new LinkedHashSet<>();
     private final Collection<Investment> investmentsPreviouslyMade = new HashSet<>();
@@ -66,10 +92,12 @@ final class InvestmentTracker {
 
     public InvestmentTracker(final Collection<LoanDescriptor> availableLoans, final BigDecimal currentBalance) {
         this.currentBalance = currentBalance;
-        this.rejectedLoanIds = InvestmentTracker.readUntouchableInvestments();
-        InvestmentTracker.LOGGER.info("Loans previously rejected: {}", rejectedLoanIds);
+        this.discardedLoans = InvestmentTracker.cleanIds(InvestmentTracker.readUntouchableInvestments(), availableLoans);
+        InvestmentTracker.LOGGER.debug("Loans previously discarded: {}", discardedLoans);
+        this.seenLoans = InvestmentTracker.cleanIds(InvestmentTracker.readSeenInvestments(), availableLoans);
+        InvestmentTracker.LOGGER.debug("Loans previously seen: {}", seenLoans);
         this.loansStillAvailable = availableLoans.stream()
-                .filter(l -> !this.rejectedLoanIds.contains(l.getLoan().getId()))
+                .filter(l -> !this.discardedLoans.contains(l.getLoan().getId()))
                 .collect(Collectors.toList());
     }
 
@@ -88,9 +116,13 @@ final class InvestmentTracker {
      * @param investment Investment to register as successful.
      */
     public synchronized void makeInvestment(final Investment investment) {
-        this.ignoreLoanForNow(investment.getLoanId());
+        this.ignoreLoan(investment.getLoanId());
         this.investmentsMade.add(investment);
         this.currentBalance = this.currentBalance.subtract(BigDecimal.valueOf(investment.getAmount()));
+    }
+
+    public synchronized boolean isSeenBefore(final int loanId) {
+        return this.seenLoans.contains(loanId);
     }
 
     /**
@@ -98,8 +130,10 @@ final class InvestmentTracker {
      *
      * @param loanId ID of the loan in question.
      */
-    public synchronized void ignoreLoanForNow(final int loanId) {
+    public synchronized void ignoreLoan(final int loanId) {
         this.loansStillAvailable.removeIf(l -> loanId == l.getLoan().getId());
+        this.seenLoans.add(loanId);
+        InvestmentTracker.writeSeenInvestments(this.seenLoans);
     }
 
     /**
@@ -107,10 +141,10 @@ final class InvestmentTracker {
      *
      * @param loanId ID of the loan in question.
      */
-    public synchronized void ignoreLoanForever(final int loanId) {
-        this.ignoreLoanForNow(loanId);
-        this.rejectedLoanIds.add(loanId);
-        InvestmentTracker.writeUntouchableInvestments(this.rejectedLoanIds);
+    public synchronized void discardLoan(final int loanId) {
+        this.ignoreLoan(loanId);
+        this.discardedLoans.add(loanId);
+        InvestmentTracker.writeUntouchableInvestments(this.discardedLoans);
     }
 
     /**
@@ -120,8 +154,13 @@ final class InvestmentTracker {
      * @param investments Investments to carry over from previous sessions.
      */
     public synchronized void registerExistingInvestments(final Collection<Investment> investments) {
-        investments.forEach(i -> this.ignoreLoanForNow(i.getLoanId()));
+        investments.forEach(i -> this.ignoreLoan(i.getLoanId()));
         investmentsPreviouslyMade.addAll(investments);
+        InvestmentTracker.LOGGER.debug("Loans still available: {}.", this.loansStillAvailable.stream()
+                .map(l -> l.getLoan().getId())
+                .sorted()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", ", "[", "]")));
     }
 
     /**

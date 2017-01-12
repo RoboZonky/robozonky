@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
@@ -74,22 +75,23 @@ public class Investor {
             return Optional.empty();
         }
         Events.fire(new InvestmentRequestedEvent(recommendation));
-        final ZonkyResponse response = api.invest(recommendation);
+        final ZonkyResponse response = api.invest(recommendation, tracker.isSeenBefore(loanId));
+        Investor.LOGGER.debug("Response for loan {}: {}.", loanId, response);
         switch (response.getType()) {
             case REJECTED:
                 Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(),
                         api.getConfirmationProvider().getId()));
-                tracker.ignoreLoanForever(loanId);
+                tracker.discardLoan(loanId);
                 return Optional.empty();
             case DELEGATED:
                 Events.fire(new InvestmentDelegatedEvent(recommendation, balance.intValue(),
                         api.getConfirmationProvider().getId()));
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
-                    tracker.ignoreLoanForever(loanId);
+                    tracker.discardLoan(loanId);
                 } else {
-                    // confirmation not required, delegation successful => maybe try again in next session
-                    tracker.ignoreLoanForNow(loanId);
+                    // confirmation not required, delegation successful => make available for direct investment later
+                    tracker.ignoreLoan(loanId);
                 }
                 return Optional.empty();
             case INVESTED:

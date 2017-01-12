@@ -93,19 +93,40 @@ public class ZonkyProxy {
         return this.provider;
     }
 
-    public ZonkyResponse invest(final Recommendation recommendation) {
+    public ZonkyResponse invest(final Recommendation recommendation, final boolean alreadySeenBefore) {
         if (this.isDryRun) {
             ZonkyProxy.LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", recommendation);
             return new ZonkyResponse(recommendation.getRecommendedInvestmentAmount());
-        } else if (recommendation.isConfirmationRequired()) {
-            if (this.provider == null) {
-                ZonkyProxy.LOGGER.error("Confirmation required but no confirmation provider registered.");
-                return new ZonkyResponse(ZonkyResponseType.FAILED);
+        } else if (alreadySeenBefore) {
+            ZonkyProxy.LOGGER.debug("Loan seen before.");
+            final boolean protectedByCaptcha = recommendation.getLoanDescriptor().getLoanCaptchaProtectionEndDateTime()
+                    .map(date -> OffsetDateTime.now().isBefore(date))
+                    .orElse(false);
+            final boolean confirmationRequired = recommendation.isConfirmationRequired();
+            if (!protectedByCaptcha && !confirmationRequired) {
+                /*
+                 * investment is no longer protected by CAPTCHA and no confirmation is required. therefore we invest.
+                 */
+                return this.investLocallyFailingOnCaptcha(recommendation);
             } else {
-                return this.approveOrDelegate(recommendation);
+                /*
+                 * protected by captcha or confirmation required. yet already seen from a previous investment session.
+                 * this must mean that the previous response was DELEGATED and the user did not respond in the
+                 * meantime. we therefore keep the investment as delegated.
+                 */
+                return new ZonkyResponse(ZonkyResponseType.DELEGATED);
             }
         } else {
-            return this.investOrDelegateOnCaptcha(recommendation);
+            if (recommendation.isConfirmationRequired()) {
+                if (this.provider == null) {
+                    ZonkyProxy.LOGGER.error("Confirmation required but no confirmation provider registered.");
+                    return new ZonkyResponse(ZonkyResponseType.FAILED);
+                } else {
+                    return this.approveOrDelegate(recommendation);
+                }
+            } else {
+                return this.investOrDelegateOnCaptcha(recommendation);
+            }
         }
     }
 
@@ -148,10 +169,10 @@ public class ZonkyProxy {
         final Confirmation result = confirmation.get();
         switch (result.getType()) {
             case REJECTED:
-                ZonkyProxy.LOGGER.warn("Negative confirmation received, not investing: {}.", recommendation);
+                ZonkyProxy.LOGGER.debug("Negative confirmation received, not investing: {}.", recommendation);
                 return new ZonkyResponse(ZonkyResponseType.REJECTED);
             case DELEGATED:
-                ZonkyProxy.LOGGER.warn("Investment confirmed delegated, not investing: {}.", recommendation);
+                ZonkyProxy.LOGGER.debug("Investment confirmed delegated, not investing: {}.", recommendation);
                 return new ZonkyResponse(ZonkyResponseType.DELEGATED);
             case APPROVED:
                 return this.investLocallyFailingOnCaptcha(recommendation, confirmation.get());
@@ -172,7 +193,7 @@ public class ZonkyProxy {
         final Confirmation result = confirmation.get();
         switch (result.getType()) {
             case DELEGATED:
-                ZonkyProxy.LOGGER.warn("Investment confirmed delegated, not investing: {}.", recommendation);
+                ZonkyProxy.LOGGER.debug("Investment confirmed delegated, not investing: {}.", recommendation);
                 return new ZonkyResponse(ZonkyResponseType.DELEGATED);
             default:
                 ZonkyProxy.LOGGER.warn("Investment not delegated, not investing: {}.", recommendation);
