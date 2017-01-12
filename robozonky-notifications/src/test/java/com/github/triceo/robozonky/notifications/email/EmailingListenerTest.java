@@ -41,7 +41,7 @@ public class EmailingListenerTest extends AbstractEmailingListenerTest {
         final MimeMessage m = greenMail.getReceivedMessages()[0];
         Assertions.assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
         Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(l.getSubject(this.event));
-        Assertions.assertThat(m.getFrom()[0].toString()).contains("noreply@robozonky.cz");
+        Assertions.assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
     }
 
 }

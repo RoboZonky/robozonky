@@ -42,7 +42,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         email.setStartTLSRequired(properties.isStartTlsRequired());
         email.setSSLOnConnect(properties.isSslOnConnectRequired());
         email.setAuthentication(properties.getSmtpUsername(), properties.getSmtpPassword());
-        email.setFrom("noreply@robozonky.cz", "RoboZonky @ " + Defaults.ROBOZONKY_HOST_ADDRESS);
+        email.setFrom(properties.getSender(), "RoboZonky @ " + Defaults.ROBOZONKY_HOST_ADDRESS);
         email.addTo(properties.getRecipient());
         return email;
     }
@@ -68,10 +68,11 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
             return;
         } else try {
             final Email email = AbstractEmailingListener.createNewEmail(properties);
-            AbstractEmailingListener.LOGGER.debug("Will send '{}' to {} through {}:{} as {}.", email.getSubject(),
-                    email.getToAddresses(), email.getHostName(), email.getSmtpPort(), properties.getSmtpUsername());
             email.setSubject(this.getSubject(event));
             email.setMsg(this.templates.process(this.getTemplateFileName(), this.getData(event)));
+            AbstractEmailingListener.LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.",
+                    email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
+                    email.getSmtpPort(), properties.getSmtpUsername());
             email.send();
         } catch (final Exception ex) {
             throw new RuntimeException("Failed processing event.", ex);
