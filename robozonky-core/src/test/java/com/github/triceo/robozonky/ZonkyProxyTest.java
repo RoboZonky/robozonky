@@ -30,6 +30,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import org.assertj.core.api.Assertions;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -144,7 +145,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
     }
 
     private static final double LOAN_AMOUNT = 2000.0;
-    private static final int CONFIRMED_AMOUNT = (int) (LOAN_AMOUNT / 2);
+    private static final int CONFIRMED_AMOUNT = (int) (ZonkyProxyTest.LOAN_AMOUNT / 2);
 
     private static LoanDescriptor mockLoanDescriptor(final boolean protectByCaptcha) {
         final Loan loan = AbstractInvestingTest.mockLoan();
@@ -199,11 +200,10 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
         }
     }
 
-    @Test
-    public void test() {
+    private void test(final boolean seenBefore) {
         final Recommendation r = this.getRecommendation();
         final ZonkyProxy p = this.getZonkyProxy();
-        final ZonkyResponse result = p.invest(r);
+        final ZonkyResponse result = p.invest(r, seenBefore);
         if (this.proxyType == ZonkyProxyTest.ProxyType.CONFIRMING) {
             Assertions.assertThat(p.getConfirmationProvider()).isNotNull();
         } else {
@@ -215,6 +215,22 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
         } else {
             Assertions.assertThat(result.getConfirmedAmount()).isEmpty();
         }
+    }
+
+    @Test
+    public void testNeverSeen() {
+        test(false);
+    }
+
+    private boolean isValidForLoansSeenBefore() {
+        // previously delegated means it can still be on the marketplace when checked next time
+        return responseType == ZonkyResponseType.DELEGATED;
+    }
+
+    @Test
+    public void testBeforeSeen() {
+        Assume.assumeTrue(this.isValidForLoansSeenBefore());
+        test(true);
     }
 
 }
