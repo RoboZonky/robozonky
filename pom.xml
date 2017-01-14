@@ -334,6 +334,9 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <failOnError>true</failOnError>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -409,7 +412,9 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.6.0</version>
           <configuration>
+            <compilerArgument>-Werror</compilerArgument>
             <compilerVersion>${java.version}</compilerVersion>
+            <fork>true</fork>
             <source>${java.version}</source>
             <target>${java.version}</target>
             <testTarget>${java.version}</testTarget>
