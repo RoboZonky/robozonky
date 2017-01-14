@@ -28,6 +28,7 @@ import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
@@ -37,7 +38,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.app.configuration.Refreshable;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;

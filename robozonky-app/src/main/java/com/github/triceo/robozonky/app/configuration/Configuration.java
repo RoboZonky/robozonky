@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 
 public class Configuration {

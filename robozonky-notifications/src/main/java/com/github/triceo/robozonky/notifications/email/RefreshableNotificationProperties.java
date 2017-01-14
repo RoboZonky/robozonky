@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app;
+package com.github.triceo.robozonky.notifications.email;
 
-import com.github.triceo.robozonky.util.Scheduler;
-import org.junit.After;
+import java.util.Optional;
 
-public abstract class AbstractStateLeveragingTest {
+import com.github.triceo.robozonky.api.Refreshable;
 
-    @After
-    public void reinitScheduler() {
-        Scheduler.BACKGROUND_SCHEDULER.reinit();
+class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
+
+    @Override
+    public Optional<Refreshable<?>> getDependedOn() {
+        return Optional.empty();
     }
 
-    @After
-    public void resetState() {
-        Activity.STATE.reset();
+    @Override
+    protected Optional<String> getLatestSource() {
+        return NotificationProperties.getPropertiesContents();
+    }
+
+    @Override
+    protected Optional<NotificationProperties> transform(final String source) {
+        return NotificationProperties.getProperties(source);
     }
 
 }

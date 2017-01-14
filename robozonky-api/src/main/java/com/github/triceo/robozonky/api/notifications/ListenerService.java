@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-import java.util.Optional;
 import java.util.ServiceLoader;
+
+import com.github.triceo.robozonky.api.Refreshable;
 
 /**
  * Use Java's {@link ServiceLoader} to load {@link EventListener}s
@@ -32,6 +33,6 @@ public interface ListenerService {
      * @param eventType Type of the event listener to find.
      * @return A listener, if any, to register with RoboZonky.
      */
-    <T extends Event> Optional<EventListener<T>> findListener(final Class<T> eventType);
+    <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType);
 
 }

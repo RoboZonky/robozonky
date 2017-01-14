@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2016 Lukáš Petrovický
+  ~ Copyright 2017 Lukáš Petrovický
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -75,16 +75,30 @@
       <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
-        <version>0.7.0</version>
+        <version>0.8.0</version>
         <dependencies>
           <dependency>
             <groupId>org.revapi</groupId>
             <artifactId>revapi-java</artifactId>
-            <version>0.11.2</version>
+            <version>0.13.0</version>
           </dependency>
         </dependencies>
         <configuration>
           <versionFormat>[1-9]+\.[0-9]+\.[0-9]+</versionFormat>
+          <analysisConfiguration><![CDATA[
+            {
+              "revapi": {
+                "ignore": [
+                  {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method <T extends com.github.triceo.robozonky.api.notifications.Event> java.util.Optional<com.github.triceo.robozonky.api.notifications.EventListener<T>> com.github.triceo.robozonky.api.notifications.ListenerService::findListener(java.lang.Class<T>)",
+                    "new": "method <T extends com.github.triceo.robozonky.api.notifications.Event> com.github.triceo.robozonky.api.Refreshable<com.github.triceo.robozonky.api.notifications.EventListener<T>> com.github.triceo.robozonky.api.notifications.ListenerService::findListener(java.lang.Class<T>)",
+                    "justification": "Introduction of daemon mode forced us to implement refreshable configurations."
+                  }
+                ]
+              }
+            }
+          ]]></analysisConfiguration>
         </configuration>
         <executions>
           <execution>

@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -103,15 +105,18 @@ public class WireInvestorTest extends AbstractInvestingTest {
 
     @Test
     public void investmentDelegated() {
-        final InvestmentTracker t = new InvestmentTracker(Collections.emptyList(), BigDecimal.valueOf(10000));
-        final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
+        final InvestmentTracker t = new InvestmentTracker(availableLoans, BigDecimal.valueOf(10000));
+        final Recommendation r = ld.recommend(200).get();
+        final int loanId = ld.getLoan().getId();
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
         Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
                 .thenReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED));
         Mockito.when(api.getConfirmationProvider()).thenReturn(Mockito.mock(ConfirmationProvider.class));
-        Assertions.assertThat(t.isSeenBefore(r.getLoanDescriptor().getLoan().getId())).isFalse();
+        Assertions.assertThat(t.isSeenBefore(loanId)).isFalse();
         final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
-        Assertions.assertThat(t.isSeenBefore(r.getLoanDescriptor().getLoan().getId())).isTrue();
+        Assertions.assertThat(t.isSeenBefore(loanId)).isTrue();
         Assertions.assertThat(result).isEmpty();
         // validate event
         final List<Event> newEvents = this.getNewEvents();
@@ -120,6 +125,9 @@ public class WireInvestorTest extends AbstractInvestingTest {
             softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
             softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentDelegatedEvent.class);
         });
+        // check that seen information is persisted
+        final InvestmentTracker t2 = new InvestmentTracker(availableLoans, BigDecimal.valueOf(10000));
+        Assertions.assertThat(t2.isSeenBefore(loanId)).isTrue();
     }
 
     @Test

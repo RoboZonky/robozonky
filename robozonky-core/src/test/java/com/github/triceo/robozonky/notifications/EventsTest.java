@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.notifications;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import org.assertj.core.api.Assertions;
@@ -28,8 +29,10 @@ public class EventsTest {
     @Test
     public void firingAndFailing() {
         final EventListener<RoboZonkyStartingEvent> listener = Mockito.mock(EventListener.class);
+        final Refreshable<EventListener<RoboZonkyStartingEvent>> r = Refreshable.createImmutable(listener);
+        r.run();
         Mockito.doThrow(RuntimeException.class).when(listener).handle(ArgumentMatchers.any());
-        Events.INSTANCE.addListener(RoboZonkyStartingEvent.class, listener);
+        Events.INSTANCE.addListener(RoboZonkyStartingEvent.class, r);
         final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
         Events.fire(e);
         Assertions.assertThat(Events.getFired()).contains(e);

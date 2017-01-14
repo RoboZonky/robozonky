@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;

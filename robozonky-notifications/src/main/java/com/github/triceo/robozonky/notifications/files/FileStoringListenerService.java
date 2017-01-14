@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package com.github.triceo.robozonky.notifications.files;
 
 import java.util.Objects;
-import java.util.Optional;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
@@ -29,14 +29,14 @@ import com.github.triceo.robozonky.api.notifications.ListenerService;
 public final class FileStoringListenerService implements ListenerService {
 
     @Override
-    public <T extends Event> Optional<EventListener<T>> findListener(final Class<T> eventType) {
+    public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
         if (Objects.equals(eventType, InvestmentMadeEvent.class)) {
-            return Optional.of((EventListener<T>) new InvestmentMadeEventListener());
+            return Refreshable.createImmutable((EventListener<T>) new InvestmentMadeEventListener());
         } else if (Objects.equals(eventType, InvestmentRejectedEvent.class)) {
-            return Optional.of((EventListener<T>) new InvestmentRejectedEventListener());
+            return Refreshable.createImmutable((EventListener<T>) new InvestmentRejectedEventListener());
         } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
-            return Optional.of((EventListener<T>) new InvestmentDelegatedEventListener());
+            return Refreshable.createImmutable((EventListener<T>) new InvestmentDelegatedEventListener());
         }
-        return Optional.empty();
+        return Refreshable.createImmutable(null);
     }
 }

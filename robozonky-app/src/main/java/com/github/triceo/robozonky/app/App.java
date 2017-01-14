@@ -20,6 +20,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.notifications.Events;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -75,7 +77,7 @@ public class App {
                               final Scheduler scheduler) {
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
         configuration.getInvestmentStrategy()
-                .ifPresent(refresher -> scheduler.submit(refresher, Duration.ofSeconds(60)));
+                .ifPresent(refresher -> scheduler.submit(refresher, Duration.ofHours(1)));
         final boolean loginSucceeded = new Remote(configuration, auth).call().isPresent();
         return loginSucceeded ? ReturnCode.OK : ReturnCode.ERROR_SETUP;
     }
@@ -88,12 +90,13 @@ public class App {
         // and actually start running
         Events.fire(new RoboZonkyStartingEvent());
         App.LOGGER.info("RoboZonky v{} loading.", Defaults.ROBOZONKY_VERSION);
-        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}).", System.getProperty("java.vendor"),
+        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
-                System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault());
+                System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
+                Charset.defaultCharset());
         // start the check for new version, making sure it is properly handled during execute
-        final Scheduler scheduler = new Scheduler();
-        App.SHUTDOWN_HOOKS.register(scheduler);
+        final Scheduler scheduler = Scheduler.BACKGROUND_SCHEDULER;
+        App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> scheduler.shutdown()));
         App.SHUTDOWN_HOOKS.register(new VersionChecker());
         // read the command line and execute the runtime
         boolean faultTolerant = false;

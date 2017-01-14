@@ -122,7 +122,7 @@ public class AuthenticatorTest {
                 ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(apiMock, Mockito.times(1)).refresh(ArgumentMatchers.any(),
                 ArgumentMatchers.any(), ArgumentMatchers.any());
-        Assertions.assertThat(result.getZonkyApiToken()).isNotEqualTo(AuthenticatorTest.TOKEN);
+        Assertions.assertThat(result.getZonkyApiToken()).isNotNull().isNotEqualTo(AuthenticatorTest.TOKEN);
     }
 
 }

@@ -26,9 +26,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,13 +51,13 @@ public enum Events {
 
     private static class EventSpecific<E extends Event> {
 
-        private final Set<EventListener<E>> listeners = new HashSet<>();
+        private final Set<Refreshable<EventListener<E>>> listeners = new HashSet<>();
 
-        public void addListener(final EventListener<E> eventListener) {
+        public void addListener(final Refreshable<EventListener<E>> eventListener) {
             listeners.add(eventListener);
         }
 
-        public Collection<EventListener<E>> getListeners() {
+        public Collection<Refreshable<EventListener<E>>> getListeners() {
             return Collections.unmodifiableSet(new HashSet<>(this.listeners)); // defensive copy
         }
 
@@ -79,7 +81,8 @@ public enum Events {
      * @return True if added, false if already registered.
      */
     @SuppressWarnings("unchecked")
-    synchronized <E extends Event> void addListener(final Class<E> eventClass, final EventListener<E> eventListener) {
+    synchronized <E extends Event> void addListener(final Class<E> eventClass,
+                                                    final Refreshable<EventListener<E>> eventListener) {
         if (!this.registries.containsKey(eventClass)) {
             // just in case this method is called stand-alone, load all listeners from the provider
             this.getListeners(eventClass);
@@ -88,11 +91,12 @@ public enum Events {
     }
 
     @SuppressWarnings("unchecked")
-    private synchronized <E extends Event> Stream<EventListener<E>> getListeners(final Class<E> eventClass) {
+    private synchronized <E extends Event> Stream<Refreshable<EventListener<E>>> getListeners(final Class<E> eventClass) {
         if (!this.registries.containsKey(eventClass)) {
             Events.LOGGER.trace("Registering event listeners for {}.", eventClass);
             this.registries.put(eventClass, new Events.EventSpecific<E>());
-            ListenerServiceLoader.load(eventClass).forEach(l -> this.addListener(eventClass, l));
+            ListenerServiceLoader.load(eventClass, Scheduler.BACKGROUND_SCHEDULER)
+                    .forEach(l -> this.addListener(eventClass, l));
         }
         return ((Events.EventSpecific<E>) this.registries.get(eventClass)).getListeners().stream();
     }
@@ -110,7 +114,9 @@ public enum Events {
     public static <E extends Event> void fire(final E event) {
         final Class<E> eventClass = (Class<E>) event.getClass();
         Events.LOGGER.debug("Firing {}: '{}'.", eventClass, event);
-        Events.INSTANCE.getListeners(eventClass).parallel().forEach(l -> Events.fire(event, l));
+        Events.INSTANCE.getListeners(eventClass).parallel()
+                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
+                .forEach(l -> Events.fire(event, l));
         Events.EVENTS_FIRED.add(event);
     }
 

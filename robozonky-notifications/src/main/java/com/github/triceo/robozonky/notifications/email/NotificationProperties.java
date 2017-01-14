@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,19 @@
 package com.github.triceo.robozonky.notifications.email;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.URL;
-import java.nio.file.Files;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,28 +39,41 @@ class NotificationProperties {
     static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications.cfg");
 
-    static Optional<NotificationProperties> getProperties() {
+    static Optional<NotificationProperties> getProperties(final String source) {
+        try (final ByteArrayInputStream baos = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
+            final Properties p = new Properties();
+            p.load(baos);
+            return Optional.of(new NotificationProperties(p));
+        } catch (final IOException ex) {
+            NotificationProperties.LOGGER.warn("Failed transforming source.", ex);
+            return Optional.empty();
+        }
+    }
+
+    private static String readUrl(final URL url) throws IOException {
+        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
+            return r.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
+    }
+
+    static Optional<String> getPropertiesContents() {
         final String propValue = System.getProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         if (propValue != null) { // attempt to read from the URL specified by the property
             NotificationProperties.LOGGER.debug("Reading e-mail notification configuration from {}.", propValue);
             try {
-                final URL propsUrl = new URL(propValue);
-                final Properties props = new Properties();
-                props.load(propsUrl.openStream());
-                return Optional.of(new NotificationProperties(props));
+                return Optional.of(NotificationProperties.readUrl(new URL(propValue)));
             } catch (final IOException ex) {
                 // fall back to the property file
                 NotificationProperties.LOGGER.debug("Failed reading configuration from {}.", propValue);
             }
         }
         if (NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.canRead()) {
-            final Properties props = new Properties();
-            try (final BufferedReader r =
-                         Files.newBufferedReader(NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath())) {
-                props.load(r);
+            try {
                 NotificationProperties.LOGGER.debug("Read config file {}.",
                         NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.getAbsolutePath());
-                return Optional.of(new NotificationProperties(props));
+                final URL u = NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toURI().toURL();
+                final String content = NotificationProperties.readUrl(u);
+                return Optional.of(content);
             } catch (final IOException ex) {
                 NotificationProperties.LOGGER.debug("Failed reading configuration file {}.",
                         NotificationProperties.DEFAULT_CONFIG_FILE_LOCATION, ex);
@@ -146,4 +164,31 @@ class NotificationProperties {
         return this.getBooleanValue(NotificationProperties.getCompositePropertyName(listener, "enabled"), false);
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final NotificationProperties that = (NotificationProperties) o;
+        return Objects.equals(properties, that.properties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(properties);
+    }
+
+    @Override
+    public String toString() {
+        try (final StringWriter sw = new StringWriter()) {
+            properties.store(sw, "");
+            return sw.toString();
+        } catch (final IOException ex) {
+            NotificationProperties.LOGGER.warn("Failed converting properties to string.", ex);
+            return "";
+        }
+    }
 }

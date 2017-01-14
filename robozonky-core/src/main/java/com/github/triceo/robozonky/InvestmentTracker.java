@@ -71,8 +71,8 @@ final class InvestmentTracker {
         InvestmentTracker.writeInvestments(InvestmentTracker.UNTOUCHABLE_INVESTMENTS_ID, rejectedInvestments);
     }
 
-    private static void writeSeenInvestments(final Collection<Integer> rejectedInvestments) {
-        InvestmentTracker.writeInvestments(InvestmentTracker.SEEN_INVESTMENTS_ID, rejectedInvestments);
+    private static void writeSeenInvestments(final Collection<Integer> seenInvestments) {
+        InvestmentTracker.writeInvestments(InvestmentTracker.SEEN_INVESTMENTS_ID, seenInvestments);
     }
 
     private static Collection<Integer> cleanIds(final Collection<Integer> loanIds,

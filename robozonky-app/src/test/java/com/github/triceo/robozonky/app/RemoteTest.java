@@ -27,6 +27,7 @@ import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.ApiProvider;
 import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
@@ -43,7 +44,6 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.app.configuration.Refreshable;
 import com.github.triceo.robozonky.notifications.Events;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;

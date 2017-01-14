@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 
 class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
@@ -53,6 +54,11 @@ class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
 
     private RefreshableInvestmentStrategy(final URL target) {
         this.url = target;
+    }
+
+    @Override
+    public Optional<Refreshable<?>> getDependedOn() {
+        return Optional.empty();
     }
 
     @Override

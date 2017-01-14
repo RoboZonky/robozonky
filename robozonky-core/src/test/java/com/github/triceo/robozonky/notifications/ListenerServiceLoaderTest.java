@@ -17,12 +17,15 @@
 package com.github.triceo.robozonky.notifications;
 
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.List;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.Condition;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -32,13 +35,25 @@ public class ListenerServiceLoaderTest {
     @Test
     public void correctLoading() {
         final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
-        final EventListener l = Mockito.mock(EventListener.class);
+        final EventListener<RoboZonkyStartingEvent> l = Mockito.mock(EventListener.class);
         final ListenerService s1 = Mockito.mock(ListenerService.class);
-        Mockito.doReturn(Optional.of(l)).when(s1).findListener(ArgumentMatchers.eq(e.getClass()));
+        final Refreshable<EventListener<RoboZonkyStartingEvent>> returned = Refreshable.createImmutable(l);
+        returned.run();
+        Mockito.doReturn(returned).when(s1).findListener(ArgumentMatchers.eq(e.getClass()));
         final ListenerService s2 = Mockito.mock(ListenerService.class);
-        Mockito.doReturn(Optional.empty()).when(s2).findListener(ArgumentMatchers.eq(e.getClass()));
+        Mockito.doReturn(Refreshable.createImmutable()).when(s2).findListener(ArgumentMatchers.eq(e.getClass()));
         final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2).iterator();
-        Assertions.assertThat(ListenerServiceLoader.load(e.getClass(), s)).containsExactly(l);
+        final List<Refreshable<EventListener<RoboZonkyStartingEvent>>> r =
+                ListenerServiceLoader.load(RoboZonkyStartingEvent.class, s, new Scheduler());
+        Assertions.assertThat(r).hasSize(2);
+        Assertions.assertThat(r)
+                .first()
+                .has(new Condition<>(result -> result.getLatest().isPresent() && result.getLatest().get() == l,
+                        "Exists"));
+        Assertions.assertThat(r)
+                .last()
+                .has(new Condition<>(result -> !result.getLatest().isPresent(), "Does not exist"));
+
     }
 
 }

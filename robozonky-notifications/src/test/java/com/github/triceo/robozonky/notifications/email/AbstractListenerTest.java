@@ -47,7 +47,8 @@ public abstract class AbstractListenerTest {
     private static NotificationProperties getNotificationProperties() {
         System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
-        final Optional<NotificationProperties> p = NotificationProperties.getProperties();
+        final Optional<NotificationProperties> p =
+                NotificationProperties.getProperties(NotificationProperties.getPropertiesContents().get());
         System.clearProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         return p.get();
     }

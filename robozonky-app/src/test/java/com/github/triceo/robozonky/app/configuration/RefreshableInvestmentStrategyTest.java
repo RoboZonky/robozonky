@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;

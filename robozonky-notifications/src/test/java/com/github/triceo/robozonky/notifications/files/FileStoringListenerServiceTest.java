@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.github.triceo.robozonky.notifications.files;
 
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
@@ -27,23 +30,29 @@ public class FileStoringListenerServiceTest {
 
     private FileStoringListenerService service = new FileStoringListenerService();
 
+    private <T extends Event> Refreshable<EventListener<T>> getListener(final Class<T> eventType) {
+        final Refreshable<EventListener<T>> refreshable = service.findListener(eventType);
+        refreshable.run();
+        return refreshable;
+    }
+
     @Test
     public void supportsInvestmentDelegatedEvent() {
-        Assertions.assertThat(service.findListener(InvestmentDelegatedEvent.class)).isPresent();
+        Assertions.assertThat(getListener(InvestmentDelegatedEvent.class).getLatest()).isPresent();
     }
 
     @Test
     public void supportsInvestmentRejectedEvent() {
-        Assertions.assertThat(service.findListener(InvestmentRejectedEvent.class)).isPresent();
+        Assertions.assertThat(getListener(InvestmentRejectedEvent.class).getLatest()).isPresent();
     }
 
     @Test
     public void supportsInvestmentMadeEvent() {
-        Assertions.assertThat(service.findListener(InvestmentMadeEvent.class)).isPresent();
+        Assertions.assertThat(getListener(InvestmentMadeEvent.class).getLatest()).isPresent();
     }
 
     @Test
     public void doesNotSupportsUnknownEvent() {
-        Assertions.assertThat(service.findListener(RoboZonkyStartingEvent.class)).isEmpty();
+        Assertions.assertThat(getListener(RoboZonkyStartingEvent.class).getLatest()).isEmpty();
     }
 }

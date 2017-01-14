@@ -16,16 +16,19 @@
 
 package com.github.triceo.robozonky.notifications;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.ExtensionsManager;
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,18 +42,20 @@ class ListenerServiceLoader {
         return StreamSupport.stream(iterable.spliterator(), false);
     }
 
-    static <T extends Event> Set<EventListener<T>> load(final Class<T> eventType,
-                                                        final Iterable<ListenerService> loader) {
+    static <T extends Event> List<Refreshable<EventListener<T>>> load(final Class<T> eventType,
+                                                                      final Iterable<ListenerService> loader,
+                                                                      final Scheduler scheduler) {
         return ListenerServiceLoader.iteratorToStream(loader)
                 .parallel()
                 .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
                 .map(s -> s.findListener(eventType))
-                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
-                .collect(Collectors.toSet());
+                .peek(r -> scheduler.submit(r, Duration.ofHours(1)))
+                .collect(Collectors.toList());
     }
 
-    static <T extends Event> Set<EventListener<T>> load(final Class<T> eventType) {
-        return ListenerServiceLoader.load(eventType, ListenerServiceLoader.LOADER);
+    static <T extends Event> List<Refreshable<EventListener<T>>> load(final Class<T> eventType,
+                                                                     final Scheduler scheduler) {
+        return ListenerServiceLoader.load(eventType, ListenerServiceLoader.LOADER, scheduler);
     }
 
 }
