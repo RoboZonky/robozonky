@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,12 +48,19 @@ public class PortfolioOverviewTest {
 
     @Test
     public void emptyPortfolio() {
+        final int balance = 5000;
         final Statistics s = Mockito.mock(Statistics.class);
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(5000.0), s, Collections.emptyList());
-        final SoftAssertions softly = new SoftAssertions();
-        for (final Rating r: Rating.values()) {
-            softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
-        }
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), s, Collections.emptyList
+                ());
+        SoftAssertions.assertSoftly(softly -> {
+            for (final Rating r: Rating.values()) {
+                softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
+            }
+            softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
+            softly.assertThat(o.getCzkInvested()).isEqualTo(0);
+            softly.assertThat(o.getCzkExpectedYield()).isEqualTo(0);
+            softly.assertThat(o.getRelativeExpectedYield()).isEqualByComparingTo(BigDecimal.ZERO);
+        });
     }
 
     @Test

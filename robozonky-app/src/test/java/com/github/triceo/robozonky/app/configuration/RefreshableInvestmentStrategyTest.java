@@ -51,13 +51,13 @@ public class RefreshableInvestmentStrategyTest {
     public File strategy;
 
     @Test
-    public void loadStrategyAsFile() {
+    public void loadStrategyAsFile() throws InterruptedException {
         final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(strategy.getAbsolutePath());
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
-    public void loadStrategyAsUrl() throws MalformedURLException {
+    public void loadStrategyAsUrl() throws MalformedURLException, InterruptedException {
         final String url = strategy.toURI().toURL().toString();
         final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(url);
         Assertions.assertThat(r.getLatest()).isPresent();

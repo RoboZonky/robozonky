@@ -45,6 +45,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.notifications.Events;
+import com.github.triceo.robozonky.util.Retriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,9 +133,10 @@ public class Investor {
                                 Collectors.summingInt(BlockedAmount::getAmount)));
         // and then fetch all the loans in parallel, converting them into investments
         return Collections.unmodifiableList(amountsBlockedByLoans.entrySet().parallelStream()
-                .map(entry -> LoanRetriever.getLoan(api, entry.getKey())
-                        .map(l -> new Investment(l, entry.getValue()))
-                        .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
+                .map(entry ->
+                        Retriever.retrieve(() -> Optional.of(api.execute((zonky) -> zonky.getLoan(entry.getKey()))))
+                                .map(l -> new Investment(l, entry.getValue()))
+                                .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
                 ).collect(Collectors.toList()));
     }
 

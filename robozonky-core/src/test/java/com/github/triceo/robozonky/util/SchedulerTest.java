@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.util;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import org.assertj.core.api.Assertions;
@@ -36,8 +37,8 @@ public class SchedulerTest {
         }
 
         @Override
-        protected Optional<String> getLatestSource() {
-            return Optional.of("");
+        protected Supplier<Optional<String>> getLatestSource() {
+            return () -> Optional.of("");
         }
 
         @Override

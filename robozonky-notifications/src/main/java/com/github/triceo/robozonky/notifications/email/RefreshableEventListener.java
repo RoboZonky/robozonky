@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
@@ -40,8 +41,8 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
     }
 
     @Override
-    protected Optional<String> getLatestSource() {
-        return properties.getLatest().map(props -> Optional.of(props.toString())).orElse(Optional.empty());
+    protected Supplier<Optional<String>> getLatestSource() {
+        return () -> properties.getLatest().map(props -> Optional.of(props.toString())).orElse(Optional.empty());
     }
 
     @Override

@@ -22,12 +22,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.util.Scheduler;
 
 class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
 
@@ -46,7 +49,7 @@ class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
     public static Refreshable<InvestmentStrategy> create(final String maybeUrl) {
         final Refreshable<InvestmentStrategy> result =
                 new RefreshableInvestmentStrategy(RefreshableInvestmentStrategy.convertToUrl(maybeUrl));
-        result.run(); // initialize
+        Scheduler.BACKGROUND_SCHEDULER.submit(result, Duration.ofHours(1));
         return result;
     }
 
@@ -62,13 +65,15 @@ class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
     }
 
     @Override
-    protected Optional<String> getLatestSource() {
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
-            return Optional.of(r.lines().collect(Collectors.joining(System.lineSeparator())));
-        } catch (final IOException ex) {
-            LOGGER.warn("Failed reading strategy.", ex);
-            return Optional.empty();
-        }
+    protected Supplier<Optional<String>> getLatestSource() {
+        return () -> {
+            try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
+                return Optional.of(r.lines().collect(Collectors.joining(System.lineSeparator())));
+            } catch (final IOException ex) {
+                LOGGER.warn("Failed reading strategy.", ex);
+                return Optional.empty();
+            }
+        };
     }
 
     @Override

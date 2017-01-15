@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.notifications.email;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.Refreshable;
 
@@ -28,8 +29,8 @@ class RefreshableNotificationProperties extends Refreshable<NotificationProperti
     }
 
     @Override
-    protected Optional<String> getLatestSource() {
-        return NotificationProperties.getPropertiesContents();
+    protected Supplier<Optional<String>> getLatestSource() {
+        return NotificationProperties::getPropertiesContents;
     }
 
     @Override

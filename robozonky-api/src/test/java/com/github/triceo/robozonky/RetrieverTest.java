@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.github.triceo.robozonky;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import com.github.triceo.robozonky.util.Retriever;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
-public class LoanRetrieverTest {
+public class RetrieverTest {
 
     @Test
-    public void fault() {
-        final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
-        Mockito.doThrow(InterruptedException.class).when(api).execute(ArgumentMatchers.any());
-        Assertions.assertThat(LoanRetriever.getLoan(api, 1)).isEmpty();
+    public void proper() {
+        final Supplier<Optional<String>> s = () -> Optional.of("");
+        Assertions.assertThat(Retriever.retrieve(s)).isPresent().contains("");
     }
 
 }

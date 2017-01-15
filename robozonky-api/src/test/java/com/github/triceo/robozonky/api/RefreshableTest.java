@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.api;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -45,8 +46,8 @@ public class RefreshableTest {
         }
 
         @Override
-        protected Optional<String> getLatestSource() {
-            return Optional.ofNullable(latestSource);
+        protected Supplier<Optional<String>> getLatestSource() {
+            return () -> Optional.ofNullable(latestSource);
         }
 
         @Override
@@ -59,8 +60,7 @@ public class RefreshableTest {
     public void immutable() {
         final Refreshable<Void> r = Refreshable.createImmutable();
         Assertions.assertThat(r.getDependedOn()).isEmpty();
-        Assertions.assertThat(r.getLatest()).isEmpty();
-        r.run(); // register no change
+        r.run();
         Assertions.assertThat(r.getLatest()).isEmpty();
     }
 
@@ -68,13 +68,23 @@ public class RefreshableTest {
     public void mutableNoRefresh() {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
-        Assertions.assertThat(r.getLatest()).isEmpty(); // before run() is called, there is nothing
         r.run();
         Assertions.assertThat(r.getLatest()).isPresent().contains(RefreshableTest.transform(initial));
         final String original = r.getLatest().get();
         r.run();
         Assertions.assertThat(r.getLatest()).isPresent().contains(original);
         Assertions.assertThat(r.getLatest().get()).isSameAs(original);
+    }
+
+    @Test
+    public void mutableRefreshing() {
+        final String initial = "initial";
+        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
+        r.run();
+        Assertions.assertThat(r.getLatest()).isPresent().contains(RefreshableTest.transform(initial));
+        r.setLatestSource(null); // make sure latest will get reset
+        r.run();
+        Assertions.assertThat(r.getLatest()).isEmpty();
     }
 
 }

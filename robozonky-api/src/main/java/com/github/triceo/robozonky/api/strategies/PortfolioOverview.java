@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class PortfolioOverview {
      * @return Share of the given rating on overall investments.
      */
     public BigDecimal getShareOnInvestment(final Rating r) {
-        return this.sharesOnInvestment.getOrDefault(r, BigDecimal.ZERO);
+        return this.getSharesOnInvestment().getOrDefault(r, BigDecimal.ZERO);
     }
 
     /**

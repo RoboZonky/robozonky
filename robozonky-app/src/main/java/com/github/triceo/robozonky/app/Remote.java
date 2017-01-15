@@ -88,11 +88,6 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
     }
 
     Optional<Collection<Investment>> executeStrategy(final ApiProvider apiProvider) {
-        final Optional<InvestmentStrategy> strategy = this.ctx.getInvestmentStrategy().get().getLatest();
-        if (!strategy.isPresent()) {
-            Remote.LOGGER.error("Strategy implementation not found.");
-            return Optional.empty();
-        }
         // check marketplace for loans
         Events.fire(new MarketplaceCheckStartedEvent());
         final Activity activity = new Activity(this.ctx, apiProvider.cache());
@@ -105,6 +100,12 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
                 .peek(l -> Events.fire(new LoanArrivedEvent(l)))
                 .collect(Collectors.toList());
         Events.fire(new MarketplaceCheckCompletedEvent());
+        // instantiate strategy
+        final Optional<InvestmentStrategy> strategy = this.ctx.getInvestmentStrategy().get().getLatest();
+        if (!strategy.isPresent()) {
+            Remote.LOGGER.error("Strategy implementation not found.");
+            return Optional.empty();
+        }
         // start the core investing algorithm
         final Function<Investor, Collection<Investment>> investor = i -> {
             Events.fire(new ExecutionStartedEvent(loans, i.getBalance().intValue()));

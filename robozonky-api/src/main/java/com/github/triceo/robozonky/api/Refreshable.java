@@ -18,9 +18,12 @@ package com.github.triceo.robozonky.api;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
+import com.github.triceo.robozonky.util.Retriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +61,8 @@ public abstract class Refreshable<T> implements Runnable {
             }
 
             @Override
-            protected Optional<String> getLatestSource() {
-                return Optional.of("");
+            protected Supplier<Optional<String>> getLatestSource() {
+                return () -> Optional.of("");
             }
 
             @Override
@@ -73,6 +76,10 @@ public abstract class Refreshable<T> implements Runnable {
 
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
+    /**
+     * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
+     */
+    private final CountDownLatch completionAssurance = new CountDownLatch(1);
 
     /**
      * Whether or not the refresh of this resource depends on the refresh of another resource. This method exists so
@@ -82,14 +89,16 @@ public abstract class Refreshable<T> implements Runnable {
     public abstract Optional<Refreshable<?>> getDependedOn();
 
     /**
-     * Result of this method will be used as an identifier of the resource state. While {@link #run()} is being
-     * executed, if the result of this method no longer {@link #equals(Object)} its value from previous call,
+     * Result of this method will be used to fetch the latest resource state. While {@link #run()} is being
+     * executed, if the result of the call no longer {@link #equals(Object)} its value from previous call,
      * {@link #transform(String)} will be called, resulting in {@link #getLatest()} changing its return value.
      *
-     * @return Identifier for the content. If empty, {@link #transform(String)} will not be called and
-     * {@link #getLatest()} will become empty.
+     * The result of this method will be treated as a blocking operation, assuming it contains I/O calls.
+     *
+     * @return Method to retrieve identifier for the content. If empty, {@link #transform(String)} will not be called
+     * and {@link #getLatest()} will become empty.
      */
-    protected abstract Optional<String> getLatestSource();
+    protected abstract Supplier<Optional<String>> getLatestSource();
 
     /**
      * Transform resource source into a new version of the resource. This method will be called when a fresh resource
@@ -101,21 +110,27 @@ public abstract class Refreshable<T> implements Runnable {
     protected abstract Optional<T> transform(final String source);
 
     /**
-     * Latest version of the resource.
+     * Latest version of the resource. Will block until {@link #run()} has finished at least once.
      *
-     * @return Empty if the source could not be parsed, or if {@link #run()} was not yet executed.
+     * @return Empty if the source could not be parsed or if the wait operation was interrupted.
      */
     public Optional<T> getLatest() {
-        return Optional.ofNullable(cachedResult.get());
+        try {
+            completionAssurance.await();
+            return Optional.ofNullable(cachedResult.get());
+        } catch (final InterruptedException e) {
+            return Optional.empty();
+        }
     }
 
-    /**
-     * Update the value of {@link #getLatest()}, based on whether {@link #getLatestSource()} indicates there were any
-     * changes in the resource.
-     */
-    @Override
-    public void run() {
-        final Optional<String> maybeNewSource = this.getLatestSource();
+    private void storeResult(final T result) {
+        if (!Objects.equals(cachedResult.getAndSet(result), result)) {
+            LOGGER.debug("Latest changed.");
+        }
+    }
+
+    private void runLocked() {
+        final Optional<String> maybeNewSource = Retriever.retrieve(this.getLatestSource());
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
             if (Objects.equals(newSource, latestKnownSource.get())) {
@@ -128,16 +143,26 @@ public abstract class Refreshable<T> implements Runnable {
             if (maybeNewResult.isPresent()) {
                 final T newResult = maybeNewResult.get();
                 LOGGER.debug("Source successfully transformed to {}.", newResult.getClass());
-                cachedResult.set(newResult);
+                storeResult(newResult);
             } else {
-                cachedResult.set(null);
+                storeResult(null);
             }
         } else {
             this.latestKnownSource.set(null);
-            final T oldResult = this.cachedResult.getAndSet(null);
-            if (oldResult != null) {
-                LOGGER.debug("Result reset.");
-            }
+            storeResult(null);
+        }
+    }
+
+    /**
+     * Update the value of {@link #getLatest()}, based on whether {@link #getLatestSource()} indicates there were any
+     * changes in the resource.
+     */
+    @Override
+    public void run() {
+        try {
+            runLocked();
+        } finally {
+            completionAssurance.countDown();
         }
     }
 
