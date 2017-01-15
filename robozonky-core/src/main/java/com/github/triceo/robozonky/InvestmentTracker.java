@@ -48,8 +48,9 @@ final class InvestmentTracker {
         final Optional<String> result = InvestmentTracker.STATE.getValue(propertyName);
         return result.map(s -> Stream.of(s.split(","))
                 .map(Integer::parseInt)
-                .collect(Collectors.toList()))
-                .orElse(new ArrayList<>(0));
+                .sorted()
+                .collect(Collectors.toSet()))
+                .orElse(new LinkedHashSet<>(0));
     }
 
     private static Collection<Integer> readUntouchableInvestments() {
@@ -62,6 +63,8 @@ final class InvestmentTracker {
 
     private static void writeInvestments(final String propertyName, final Collection<Integer> rejectedInvestments) {
         final String result = rejectedInvestments.stream()
+                .distinct()
+                .sorted()
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
         InvestmentTracker.STATE.setValue(propertyName, result);
@@ -79,7 +82,7 @@ final class InvestmentTracker {
                                                 final Collection<LoanDescriptor> availableLoans) {
         final Collection<Integer> availableLoanIds = availableLoans.stream()
                 .map(l -> l.getLoan().getId())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         loanIds.removeIf(id -> !availableLoanIds.contains(id)); // prevent old stale IDs from piling up
         return loanIds;
     }
