@@ -4,7 +4,6 @@
 [![Maven central](https://maven-badges.herokuapp.com/maven-central/com.github.triceo.robozonky/robozonky-app/badge.svg)](http://search.maven.org/#search|ga|1|robozonky-)
 [![Linux Build Status](https://travis-ci.org/triceo/robozonky.svg)](https://travis-ci.org/triceo/robozonky)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/5okjq7ms19pn4kpr?svg=true)](https://ci.appveyor.com/project/triceo/robozonky)
-[![Ohloh](https://www.ohloh.net/p/robozonky/widgets/project_thin_badge.gif)](https://www.ohloh.net/p/robozonky)
 
 ## Odkazy
 
