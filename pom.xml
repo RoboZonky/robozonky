@@ -397,7 +397,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.5</version>
+          <version>1.6</version>
           <executions>
             <execution>
               <id>sign-artifacts</id>
@@ -410,7 +410,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>3.6.1</version>
           <configuration>
             <compilerArgument>-Werror</compilerArgument>
             <compilerVersion>${java.version}</compilerVersion>
@@ -518,7 +518,7 @@
         <artifactId>findbugs-maven-plugin</artifactId>
         <configuration>
           <effort>Max</effort>
-          <threshold>Low</threshold>
+          <maxRank>9</maxRank>
         </configuration>
       </plugin>
       <plugin>
