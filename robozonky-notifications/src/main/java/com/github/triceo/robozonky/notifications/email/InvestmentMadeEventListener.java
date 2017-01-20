@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,10 @@ final class InvestmentMadeEventListener extends AbstractEmailingListener<Investm
     @Override
     Map<String, Object> getData(final InvestmentMadeEvent event) {
         final Map<String, Object> result = new HashMap<>();
+        result.put("investedAmount", event.getInvestment().getAmount());
         result.put("loanId", event.getInvestment().getLoanId());
-        result.put("loanAmount", event.getInvestment().getAmount());
+        result.put("loanRating", event.getInvestment().getRating().getCode());
+        result.put("loanTerm", event.getInvestment().getLoanTermInMonth());
         result.put("newBalance", event.getFinalBalance());
         return result;
     }
