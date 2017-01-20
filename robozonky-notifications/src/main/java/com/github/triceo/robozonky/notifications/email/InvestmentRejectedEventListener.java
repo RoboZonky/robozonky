@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 final class InvestmentRejectedEventListener extends AbstractEmailingListener<InvestmentRejectedEvent> {
 
@@ -45,9 +46,13 @@ final class InvestmentRejectedEventListener extends AbstractEmailingListener<Inv
 
     @Override
     Map<String, Object> getData(final InvestmentRejectedEvent event) {
+        final Loan loan = event.getRecommendation().getLoanDescriptor().getLoan();
         final Map<String, Object> result = new HashMap<>();
         result.put("loanId", event.getRecommendation().getLoanDescriptor().getLoan().getId());
-        result.put("loanAmount", event.getRecommendation().getRecommendedInvestmentAmount());
+        result.put("loanRecommendation", event.getRecommendation().getRecommendedInvestmentAmount());
+        result.put("loanAmount", loan.getAmount());
+        result.put("loanRating", loan.getRating().getCode());
+        result.put("loanTerm", loan.getTermInMonths());
         result.put("newBalance", event.getBalance());
         return result;
     }

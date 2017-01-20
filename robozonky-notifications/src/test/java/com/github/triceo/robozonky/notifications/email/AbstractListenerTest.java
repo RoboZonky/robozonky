@@ -35,6 +35,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import org.junit.runner.RunWith;
@@ -60,6 +61,8 @@ public abstract class AbstractListenerTest {
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         Mockito.when(loan.getRemainingInvestment()).thenReturn(2000.0);
         Mockito.when(loan.getAmount()).thenReturn(100000.0);
+        Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
+        Mockito.when(loan.getTermInMonths()).thenReturn(25);
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final Recommendation recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = new Investment(loan, 1000);
