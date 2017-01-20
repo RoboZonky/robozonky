@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This provider will never return {@link ConfirmationType#APPROVED}. If delegated, this provider will allow
+ * This provider will either return {@link ConfirmationType#DELEGATED}, or fail. If delegated, this provider will allow
  * investors to fill out CAPTCHA.
  */
 public class ZonkoidConfirmationProvider implements ConfirmationProvider {
@@ -120,9 +120,6 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
                 if (statusCode >= 200 && statusCode < 300) {
                     ZonkoidConfirmationProvider.LOGGER.debug("Response: {}", response.getStatusLine());
                     return Optional.of(new Confirmation(ConfirmationType.DELEGATED));
-                } else if (statusCode >= 400 && statusCode < 500){
-                    ZonkoidConfirmationProvider.LOGGER.warn("Response: {}", response.getStatusLine());
-                    return Optional.of(new Confirmation(ConfirmationType.REJECTED));
                 } else {
                     ZonkoidConfirmationProvider.LOGGER.error("Unknown response: {}", response.getStatusLine());
                     return Optional.empty();

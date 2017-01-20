@@ -93,15 +93,13 @@ public class ZonkoidConfirmationProviderTest {
     @Test
     public void failingReponse1() {
         final Optional<Confirmation> result = this.execute(400);
-        Assertions.assertThat(result).isPresent();
-        Assertions.assertThat(result.get().getType()).isEqualTo(ConfirmationType.REJECTED);
+        Assertions.assertThat(result).isEmpty();
     }
 
     @Test
     public void failingResponse2() {
         final Optional<Confirmation> result = this.execute(403);
-        Assertions.assertThat(result).isPresent();
-        Assertions.assertThat(result.get().getType()).isEqualTo(ConfirmationType.REJECTED);
+        Assertions.assertThat(result).isEmpty();
     }
 
     @Test
