@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.Defaults;
-import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
@@ -89,7 +88,7 @@ public class WireInvestorTest extends AbstractInvestingTest {
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
         Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
                 .thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
-        Mockito.when(api.getConfirmationProvider()).thenReturn(Mockito.mock(ConfirmationProvider.class));
+        Mockito.when(api.getConfirmationProviderId()).thenReturn(Optional.of("something"));
         Assertions.assertThat(t.isSeenBefore(r.getLoanDescriptor().getLoan().getId())).isFalse();
         final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
         Assertions.assertThat(result).isEmpty();
@@ -113,7 +112,7 @@ public class WireInvestorTest extends AbstractInvestingTest {
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
         Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
                 .thenReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED));
-        Mockito.when(api.getConfirmationProvider()).thenReturn(Mockito.mock(ConfirmationProvider.class));
+        Mockito.when(api.getConfirmationProviderId()).thenReturn(Optional.of("something"));
         Assertions.assertThat(t.isSeenBefore(loanId)).isFalse();
         final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
         Assertions.assertThat(t.isSeenBefore(loanId)).isTrue();

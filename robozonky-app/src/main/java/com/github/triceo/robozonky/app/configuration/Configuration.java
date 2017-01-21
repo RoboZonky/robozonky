@@ -22,55 +22,45 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 
 public class Configuration {
 
     private Refreshable<InvestmentStrategy> investmentStrategy = null;
     private final ZonkyProxy.Builder zonkyProxyBuilder;
-    private final boolean isDryRun;
-    private int dryRunBalance = -1, loanId = -1, loanAmount = -1;
-    private final int captchaDelayInSeconds, sleepPeriodInMinutes;
+    private final boolean isDryRun, isFaultTolerant;
+    private int loanId = -1, loanAmount = -1;
+    private final int captchaDelayInSeconds = Defaults.getCaptchaDelayInSeconds(),
+            dryRunBalance = Defaults.getDefaultDryRunBalance();
+    private final TemporalAmount sleepPeriod;
+    private final AuthenticationHandler authenticationHandler;
 
-    public Configuration(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
-                         final int captchaDelayInSeconds) {
+    public Configuration(final int loanId, final int loanAmount, final AuthenticationHandler auth,
+                         final ZonkyProxy.Builder builder, final boolean faultTolerant, final boolean dryRun) {
         this.loanId = loanId;
         this.loanAmount = loanAmount;
-        this.captchaDelayInSeconds = captchaDelayInSeconds;
-        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
-        this.isDryRun = false;
-        this.zonkyProxyBuilder = new ZonkyProxy.Builder();
+        this.authenticationHandler = auth;
+        this.isDryRun = dryRun;
+        this.isFaultTolerant = faultTolerant;
+        this.zonkyProxyBuilder = builder;
+        this.sleepPeriod = Duration.ZERO;
     }
 
-    public Configuration(final int loanId, final int loanAmount, final int sleepPeriodInMinutes,
-                         final int captchaDelayInSeconds, final int dryRunBalance) {
-        this.loanId = loanId;
-        this.loanAmount = loanAmount;
-        this.captchaDelayInSeconds = captchaDelayInSeconds;
-        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
-        this.dryRunBalance = dryRunBalance;
-        this.isDryRun = true;
-        this.zonkyProxyBuilder = new ZonkyProxy.Builder();
-    }
-
-    public Configuration(final Refreshable<InvestmentStrategy> investmentStrategy, final ZonkyProxy.Builder builder,
-                         final int sleepPeriodInMinutes, final int captchaDelayInSeconds) {
+    public Configuration(final Refreshable<InvestmentStrategy> investmentStrategy, final AuthenticationHandler auth,
+                         final ZonkyProxy.Builder builder, final int sleepPeriodInMinutes, final boolean faultTolerant, final boolean dryRun) {
         this.zonkyProxyBuilder = builder;
         this.investmentStrategy = investmentStrategy;
-        this.captchaDelayInSeconds = captchaDelayInSeconds;
-        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
-        this.isDryRun = false;
+        this.authenticationHandler = auth;
+        this.sleepPeriod = Duration.ofMinutes(sleepPeriodInMinutes);
+        this.isDryRun = dryRun;
+        this.isFaultTolerant = faultTolerant;
     }
 
-    public Configuration(final Refreshable<InvestmentStrategy> investmentStrategy, final ZonkyProxy.Builder builder,
-                         final int sleepPeriodInMinutes, final int captchaDelayInSeconds, final int dryRunBalance) {
-        this.zonkyProxyBuilder = builder;
-        this.investmentStrategy = investmentStrategy;
-        this.captchaDelayInSeconds = captchaDelayInSeconds;
-        this.dryRunBalance = dryRunBalance;
-        this.sleepPeriodInMinutes = sleepPeriodInMinutes;
-        this.isDryRun = true;
+    public AuthenticationHandler getAuthenticationHandler() {
+        return authenticationHandler;
     }
 
     public TemporalAmount getCaptchaDelay() {
@@ -78,7 +68,7 @@ public class Configuration {
     }
 
     public TemporalAmount getSleepPeriod() {
-        return Duration.ofMinutes(sleepPeriodInMinutes);
+        return this.sleepPeriod;
     }
 
     public OptionalInt getLoanId() {
@@ -86,7 +76,11 @@ public class Configuration {
     }
 
     public OptionalInt getLoanAmount() {
-        return loanAmount < 0 ? OptionalInt.empty() : OptionalInt.of(loanAmount);
+        return loanAmount < Defaults.MINIMUM_INVESTMENT_IN_CZK ? OptionalInt.empty() : OptionalInt.of(loanAmount);
+    }
+
+    public boolean isFaultTolerant() {
+        return isFaultTolerant;
     }
 
     public boolean isDryRun() {
@@ -94,7 +88,7 @@ public class Configuration {
     }
 
     public OptionalInt getDryRunBalance() {
-        return dryRunBalance < 0 ? OptionalInt.empty() : OptionalInt.of(dryRunBalance);
+        return (isDryRun && dryRunBalance >= 0) ? OptionalInt.of(dryRunBalance) : OptionalInt.empty();
     }
 
     public ZonkyProxy.Builder getZonkyProxyBuilder() {

@@ -33,25 +33,44 @@ public final class Defaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Defaults.class);
 
-    static String getHostAddress() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (final UnknownHostException ex) {
-            Defaults.LOGGER.debug("Failed retrievieng local host adddress.", ex);
-            return "localhost";
-        }
-    }
-
     public static final Locale LOCALE = Locale.forLanguageTag("cs_CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;
     public static final ZoneId ZONE_ID = ZoneId.of("Europe/Prague");
     public static final int MINIMUM_INVESTMENT_IN_CZK = 200;
     public static final int MINIMUM_INVESTMENT_INCREMENT_IN_CZK = 200;
-
     public static final String ROBOZONKY_VERSION = Defaults.class.getPackage().getImplementationVersion();
     public static final String ROBOZONKY_URL = "http://www.robozonky.cz";
-    public static final String ROBOZONKY_USER_AGENT = "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" +
-            Defaults.ROBOZONKY_URL + ")";
+    public static final String ROBOZONKY_USER_AGENT =
+            "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" + Defaults.ROBOZONKY_URL + ")";
     public static final String ROBOZONKY_HOST_ADDRESS = Defaults.getHostAddress();
+
+    static String getHostAddress() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (final UnknownHostException ex) {
+            Defaults.LOGGER.debug("Failed retrieving local host address.", ex);
+            return "localhost";
+        }
+    }
+
+    private static int getPropertyValue(final String propertyName, final int defaultValue) {
+        final String value = System.getProperty(propertyName, String.valueOf(defaultValue));
+        int result = defaultValue;
+        try {
+            result = Integer.parseInt(value);
+        } catch (final NumberFormatException ex) {
+            // nothing to do here
+        }
+        Defaults.LOGGER.debug("Property '{}' contains '{}'.", propertyName, result);
+        return result;
+    }
+
+    public static int getCaptchaDelayInSeconds() {
+        return Defaults.getPropertyValue("robozonky.default.captcha_protection_seconds", 120);
+    }
+
+    public static int getDefaultDryRunBalance() {
+        return Defaults.getPropertyValue("robozonky.default.dry_run_balance", -1);
+    }
 
 }

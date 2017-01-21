@@ -78,15 +78,14 @@ public class Investor {
         Events.fire(new InvestmentRequestedEvent(recommendation));
         final ZonkyResponse response = api.invest(recommendation, tracker.isSeenBefore(loanId));
         Investor.LOGGER.debug("Response for loan {}: {}.", loanId, response);
+        final String providerId = api.getConfirmationProviderId().orElse("-");
         switch (response.getType()) {
             case REJECTED:
-                Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(),
-                        api.getConfirmationProvider().getId()));
+                Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(), providerId));
                 tracker.discardLoan(loanId);
                 return Optional.empty();
             case DELEGATED:
-                Events.fire(new InvestmentDelegatedEvent(recommendation, balance.intValue(),
-                        api.getConfirmationProvider().getId()));
+                Events.fire(new InvestmentDelegatedEvent(recommendation, balance.intValue(), providerId));
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
                     tracker.discardLoan(loanId);

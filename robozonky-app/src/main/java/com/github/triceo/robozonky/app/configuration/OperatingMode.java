@@ -16,98 +16,79 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.OptionalInt;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import com.github.triceo.robozonky.ZonkyProxy;
+import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
-import org.apache.commons.cli.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Represents different modes of operation of the application, their means of selection and configure.
- */
-enum OperatingMode {
+@Parameters
+enum OperatingMode implements CommandLineFragment {
 
-    /**
-     * Requires a strategy and performs 0 or more investments based on the strategy.
-     */
-    STRATEGY_DRIVEN(CommandLineInterface.OPTION_STRATEGY, CommandLineInterface.OPTION_DRY_RUN,
-            CommandLineInterface.OPTION_CONFIRMATION, CommandLineInterface.OPTION_ZONK,
-            CommandLineInterface.OPTION_CLOSED_SEASON) {
+    DIRECT_INVESTMENT {
 
-        @Override
-        public Optional<Configuration> configure(final CommandLineInterface cli, final SecretProvider secrets) {
-            if (cli.getLoanAmount().isPresent() || cli.getLoanId().isPresent()) {
-                cli.printHelp("Loan data makes no sense in this context.", true);
-                return Optional.empty();
-            }
-            final Optional<String> strategyLocation = cli.getStrategyConfigurationLocation();
-            if (!strategyLocation.isPresent()) {
-                cli.printHelp("Strategy location must be provided.", true);
-                return Optional.empty();
-            }
-            // find confirmation provider and finally create configuration
-            final Optional<ZonkyProxy.Builder> optionalBuilder = cli.getConfirmationCredentials()
-                    .map(credentials -> OperatingMode.getZonkyProxyBuilder(credentials, secrets))
-                    .orElse(Optional.of(new ZonkyProxy.Builder()));
-            return optionalBuilder.map(builder -> {
-                final Refreshable<InvestmentStrategy> strategy =
-                        RefreshableInvestmentStrategy.create(strategyLocation.get());
-                if (cli.isDryRun()) {
-                    final int balance = cli.getDryRunBalance().orElse(-1);
-                    return Optional.of(new Configuration(strategy, builder, cli.getMaximumSleepPeriodInMinutes(),
-                            cli.getCaptchaPreventingInvestingDelayInSeconds(), balance));
-                } else {
-                    return Optional.of(new Configuration(strategy, builder, cli.getMaximumSleepPeriodInMinutes(),
-                            cli.getCaptchaPreventingInvestingDelayInSeconds()));
-                    }
-                }).orElse(Optional.empty());
-        }
-    },
-    /**
-     * Requires a loan ID, into which it will invest a given amount and terminate.
-     */
-    USER_DRIVEN(CommandLineInterface.OPTION_INVESTMENT, CommandLineInterface.OPTION_AMOUNT,
-            CommandLineInterface.OPTION_DRY_RUN) {
+        @Parameter(names = {"-l", "--loan"}, required = true,
+                description = "ID of loan to invest into.",
+                validateValueWith = PositiveIntegerValueValidator.class)
+        Integer loanId = 0;
+
+        @Parameter(names = {"-a", "--amount"},
+                description = "Amount to invest.",
+                validateValueWith = PositiveIntegerValueValidator.class)
+        Integer loanAmount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
 
         @Override
-        public Optional<Configuration> configure(final CommandLineInterface cli, final SecretProvider secrets) {
-            final OptionalInt loanId = cli.getLoanId();
-            final OptionalInt loanAmount = cli.getLoanAmount();
-            if (!loanId.isPresent() || loanId.getAsInt() < 1) {
-                cli.printHelp("Loan ID must be provided and greater than 0.", true);
-                return Optional.empty();
-            } else if (!loanAmount.isPresent() || loanAmount.getAsInt() < 1) {
-                cli.printHelp("Loan amount must be provided and greater than 0.", true);
-                return Optional.empty();
-            } else if (cli.getConfirmationCredentials().isPresent()) {
-                cli.printHelp("External credentials make no sense in manual mode.", true);
-                return Optional.empty();
-            } else if (cli.isDryRun()) {
-                final int balance = cli.getDryRunBalance().orElse(-1);
-                return Optional.of(new Configuration(loanId.getAsInt(), loanAmount.getAsInt(),
-                        cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds(),
-                        balance));
-            } else {
-                return Optional.of(new Configuration(loanId.getAsInt(), loanAmount.getAsInt(),
-                        cli.getMaximumSleepPeriodInMinutes(), cli.getCaptchaPreventingInvestingDelayInSeconds()));
-            }
+        public String getName() {
+            return "single";
         }
+
+        @Override
+        protected Configuration getConfiguration(final CommandLineInterface cli, final AuthenticationHandler auth,
+                                                 final ZonkyProxy.Builder builder) {
+            return new Configuration(loanId, loanAmount, auth, builder, cli.getTweaksFragment().isFaultTolerant(),
+                    cli.getTweaksFragment().isDryRunEnabled());
+        }
+
+    }, STRATEGY_BASED {
+
+        @Parameter(names = {"-l", "--location"}, required = true,
+                description = "Points to a resource holding the investment strategy configuration.")
+        String strategyLocation = "";
+
+        @Parameter(names = {"-z", "--zonk"},
+                description = "Allows to override the default length of sleep period in minutes.",
+                validateValueWith = PositiveIntegerValueValidator.class)
+        Integer sleepPeriodInMinutes = 60;
+
+        @Override
+        public String getName() {
+            return "many";
+        }
+
+        @Override
+        protected Configuration getConfiguration(final CommandLineInterface cli, final AuthenticationHandler auth,
+                                                 final ZonkyProxy.Builder builder) {
+            final Refreshable<InvestmentStrategy> strategy = RefreshableInvestmentStrategy.create(strategyLocation);
+            final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
+            return new Configuration(strategy, auth, builder, sleepPeriodInMinutes, fragment.isFaultTolerant(),
+                    fragment.isDryRunEnabled());
+        }
+
     };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperatingMode.class);
 
-    private static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final ConfirmationCredentials credentials,
-                                                                     final SecretProvider secrets,
-                                                                     final ConfirmationProvider provider) {
+    static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final ConfirmationCredentials credentials,
+                                                             final SecretProvider secrets,
+                                                             final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
         final String username = secrets.getUsername();
         OperatingMode.LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
@@ -116,58 +97,42 @@ enum OperatingMode {
                     secrets.setSecret(svcId, token);
                     return Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, username, token));
                 }).orElseGet(() -> secrets.getSecret(svcId)
-                        .map(token -> Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, username, token)))
+                        .map(token ->
+                                Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, username, token)))
                         .orElseGet(() -> {
-                            OperatingMode.LOGGER.error("Password not provided for confirmation service '{}'.",
-                                    svcId);
+                            OperatingMode.LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
                             return Optional.empty();
                         })
                 );
     }
 
 
-    private static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final ConfirmationCredentials credentials,
-                                                                     final SecretProvider secrets) {
+    static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final ConfirmationCredentials credentials,
+                                                             final SecretProvider secrets) {
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
                 .map(provider -> OperatingMode.getZonkyProxyBuilder(credentials, secrets, provider))
                 .orElseGet(() -> {
                     OperatingMode.LOGGER.error("Confirmation provider '{}' not found, yet it is required.", svcId);
                     return Optional.empty();
-        });
+                });
     }
 
-    private final Option selectingOption;
-    private final Collection<Option> otherOptions;
+    public abstract String getName();
 
-    OperatingMode(final Option selectingOption, final Option... otherOptions) {
-        this.selectingOption = selectingOption;
-        this.otherOptions = new LinkedHashSet<>(Arrays.asList(otherOptions));
+    protected abstract Configuration getConfiguration(final CommandLineInterface cli, final AuthenticationHandler auth,
+                                                      final ZonkyProxy.Builder builder);
+
+    public Optional<Configuration> configure(final CommandLineInterface cli, final AuthenticationHandler auth) {
+        final Optional<ConfirmationCredentials> cred = cli.getConfirmationFragment().getConfirmationCredentials()
+                .map(value -> Optional.of(new ConfirmationCredentials(value)))
+                .orElse(Optional.empty());
+        final Optional<ZonkyProxy.Builder> optionalBuilder = cred
+                .map(credentials -> OperatingMode.getZonkyProxyBuilder(credentials, auth.getSecretProvider()))
+                .orElse(Optional.of(new ZonkyProxy.Builder()));
+        return optionalBuilder
+                .map(builder -> Optional.of(this.getConfiguration(cli, auth, builder)))
+                .orElse(Optional.empty());
     }
-
-    /**
-     * Option to be selected on the command line in order to activate this mode.
-     * @return Option in question.
-     */
-    public Option getSelectingOption() {
-        return selectingOption;
-    }
-
-    /**
-     * Other options that are valid for this operating mode.
-     * @return Options in question.
-     */
-    public Collection<Option> getOtherOptions() {
-        return otherOptions;
-    }
-
-    /**
-     * Transform the command line into a workable application configuration.
-     *
-     * @param cli Command line received from the application.
-     * @param secrets Provider for the storage of secret data.
-     * @return Present if configuration successful.
-     */
-    public abstract Optional<Configuration> configure(final CommandLineInterface cli, final SecretProvider secrets);
 
 }

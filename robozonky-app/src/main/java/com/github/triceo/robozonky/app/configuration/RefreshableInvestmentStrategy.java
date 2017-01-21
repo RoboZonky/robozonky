@@ -40,8 +40,8 @@ class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
         } catch (final MalformedURLException e) {
             try {
                 return new File(maybeUrl).toURI().toURL();
-            } catch (final MalformedURLException e1) {
-                throw new IllegalStateException("Cannot load " + maybeUrl, e1);
+            } catch (final NullPointerException | MalformedURLException e1) {
+                throw new IllegalStateException("Cannot load strategy " + maybeUrl, e1);
             }
         }
     }

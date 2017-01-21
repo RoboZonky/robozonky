@@ -40,7 +40,6 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.notifications.Events;
 import org.slf4j.Logger;
@@ -79,12 +78,10 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
         return Collections.unmodifiableCollection(investingFunction.apply(new Investor(proxy, balance)));
     }
 
-    private final AuthenticationHandler auth;
     private final Configuration ctx;
 
-    public Remote(final Configuration ctx, final AuthenticationHandler authenticationHandler) {
+    public Remote(final Configuration ctx) {
         this.ctx = ctx;
-        this.auth = authenticationHandler;
     }
 
     Optional<Collection<Investment>> executeStrategy(final ApiProvider apiProvider) {
@@ -114,7 +111,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
             return result;
         };
         final Optional<Collection<Investment>> optionalResult =
-                this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, investor));
+                this.ctx.getAuthenticationHandler().execute(apiProvider, api -> Remote.invest(this.ctx, api, investor));
         activity.settle(); // only settle the marketplace activity when we're sure the app is no longer likely to fail
         return optionalResult;
     }
@@ -125,7 +122,7 @@ public class Remote implements Callable<Optional<Collection<Investment>>> {
                     this.ctx.getLoanAmount().getAsInt(), this.ctx.getCaptchaDelay());
             return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
         };
-        return this.auth.execute(apiProvider, api -> Remote.invest(this.ctx, api, investor));
+        return this.ctx.getAuthenticationHandler().execute(apiProvider, api -> Remote.invest(this.ctx, api, investor));
     }
 
     @Override

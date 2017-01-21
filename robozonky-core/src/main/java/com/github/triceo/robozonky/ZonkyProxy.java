@@ -89,8 +89,8 @@ public class ZonkyProxy {
         return operation.apply(this.zonky);
     }
 
-    ConfirmationProvider getConfirmationProvider() {
-        return this.provider;
+    public Optional<String> getConfirmationProviderId() {
+        return (this.provider == null) ? Optional.empty() : Optional.of(this.provider.getId());
     }
 
     public ZonkyResponse invest(final Recommendation recommendation, final boolean alreadySeenBefore) {

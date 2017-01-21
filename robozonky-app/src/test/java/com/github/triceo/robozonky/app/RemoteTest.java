@@ -130,24 +130,29 @@ public class RemoteTest extends AbstractStateLeveragingTest {
     public void loginFailOnCredentials() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Optional.empty());
-        Assertions.assertThat(new Remote(RemoteTest.mockConfiguration(), auth).call()).isEmpty();
+        final Configuration config = RemoteTest.mockConfiguration();
+        Mockito.when(config.getAuthenticationHandler()).thenReturn(auth);
+        Assertions.assertThat(new Remote(config).call()).isEmpty();
     }
 
     @Test(expected = IllegalStateException.class)
     public void loginFailOnUnknownException() {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
-        new Remote(RemoteTest.mockConfiguration(), auth).call();
+        final Configuration config = RemoteTest.mockConfiguration();
+        Mockito.when(config.getAuthenticationHandler()).thenReturn(auth);
+        new Remote(config).call();
     }
 
     @Test
     public void singleInvestmentExecutionInvestingNothing() {
         // a lot of mocking to exercise the basic path all the way through to the core
-        final Configuration ctx = RemoteTest.mockConfiguration(false);
-        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = AuthenticationHandler.passwordBased(secret);
+        final Configuration ctx = RemoteTest.mockConfiguration(false);
+        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
+        Mockito.when(ctx.getAuthenticationHandler()).thenReturn(auth);
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
         final Loan loan = Mockito.mock(Loan.class);
@@ -157,7 +162,7 @@ public class RemoteTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final Remote r = new Remote(ctx, auth);
+        final Remote r = new Remote(ctx);
         final Optional<Collection<Investment>> result = r.executeSingleInvestment(api);
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(result.get()).isEmpty();
@@ -169,11 +174,12 @@ public class RemoteTest extends AbstractStateLeveragingTest {
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getDatePublished()).thenReturn(OffsetDateTime.now());
         Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
-        final Configuration ctx = RemoteTest.mockConfiguration(true);
-        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = AuthenticationHandler.passwordBased(secret);
+        final Configuration ctx = RemoteTest.mockConfiguration(true);
+        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
+        Mockito.when(ctx.getAuthenticationHandler()).thenReturn(auth);
         final ZotifyApi cache = Mockito.mock(ZotifyApi.class);
         Mockito.when(cache.getLoans()).thenReturn(Collections.singletonList(l));
         final ApiProvider api = Mockito.mock(ApiProvider.class);
@@ -188,7 +194,7 @@ public class RemoteTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getWallet()).thenReturn(wallet);
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final Optional<Collection<Investment>> result = new Remote(ctx, auth).executeStrategy(api);
+        final Optional<Collection<Investment>> result = new Remote(ctx).executeStrategy(api);
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(result.get()).isEmpty();
         // check events

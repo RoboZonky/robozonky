@@ -26,7 +26,7 @@ import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SecretProviderFactory {
+class SecretProviderFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretProviderFactory.class);
     private static final File DEFAULT_KEYSTORE = new File("robozonky.keystore");
@@ -55,8 +55,8 @@ public class SecretProviderFactory {
      */
     static Optional<SecretProvider> newSecretProvider(final CommandLineInterface cli, final File defaultKeyStore)
             throws KeyStoreException {
-        final Optional<File> keyStoreLocation = cli.getKeyStoreLocation();
-        final char[] password = cli.getPassword();
+        final Optional<File> keyStoreLocation = cli.getAuthenticationFragment().getKeystore();
+        final char[] password = cli.getAuthenticationFragment().getPassword();
         if (keyStoreLocation.isPresent()) { // if user requests keystore, cli is only used to retrieve keystore file
             try {
                 return Optional.of(SecretProviderFactory.existingSecretProvider(password, keyStoreLocation.get()));
@@ -65,7 +65,7 @@ public class SecretProviderFactory {
                 return Optional.empty();
             }
         } else { // else everything is read from the cli and put into a keystore
-            final Optional<String> usernameProvided = cli.getUsername();
+            final Optional<String> usernameProvided = cli.getAuthenticationFragment().getUsername();
             final boolean storageExists = defaultKeyStore.canRead();
             if (storageExists) {
                 if (defaultKeyStore.delete()) { // will create a new guided storage
@@ -91,13 +91,14 @@ public class SecretProviderFactory {
 
     static Optional<SecretProvider> getFallbackSecretProvider(final CommandLineInterface cli) {
         SecretProviderFactory.LOGGER.info("You should get a better Java runtime.");
-        final Optional<File> optionalKeyStore = cli.getKeyStoreLocation();
+        final Optional<File> optionalKeyStore = cli.getAuthenticationFragment().getKeystore();
         if (optionalKeyStore.isPresent()) { // keystore is demanded but apparently unsupported, fail
             SecretProviderFactory.LOGGER.error("No KeyStore support detected, yet it is demanded.");
             return Optional.empty();
         } else { // keystore is optional, fall back to other means
             SecretProviderFactory.LOGGER.warn("No KeyStore support detected, storing password insecurely.");
-            return Optional.of(SecretProvider.fallback(cli.getUsername().get(), cli.getPassword()));
+            final AuthenticationCommandLineFragment cliAuth = cli.getAuthenticationFragment();
+            return Optional.of(SecretProvider.fallback(cliAuth.getUsername().get(), cliAuth.getPassword()));
         }
     }
 

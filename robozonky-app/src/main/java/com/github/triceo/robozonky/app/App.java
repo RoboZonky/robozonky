@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -32,7 +33,6 @@ import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.configuration.Configuration;
 import com.github.triceo.robozonky.notifications.Events;
@@ -73,12 +73,11 @@ public class App {
         System.exit(returnCode.getCode());
     }
 
-    static ReturnCode execute(final Configuration configuration, final AuthenticationHandler auth,
-                              final Scheduler scheduler) {
+    static ReturnCode execute(final Configuration configuration, final Scheduler scheduler) {
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
         configuration.getInvestmentStrategy()
                 .ifPresent(refresher -> scheduler.submit(refresher, Duration.ofHours(1)));
-        final boolean loginSucceeded = new Remote(configuration, auth).call().isPresent();
+        final boolean loginSucceeded = new Remote(configuration).call().isPresent();
         return loginSucceeded ? ReturnCode.OK : ReturnCode.ERROR_SETUP;
     }
 
@@ -89,7 +88,6 @@ public class App {
         }
         // and actually start running
         Events.fire(new RoboZonkyStartingEvent());
-        App.LOGGER.info("RoboZonky v{} loading.", Defaults.ROBOZONKY_VERSION);
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
@@ -99,26 +97,18 @@ public class App {
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> scheduler.shutdown()));
         App.SHUTDOWN_HOOKS.register(new VersionChecker());
         // read the command line and execute the runtime
-        boolean faultTolerant = false;
+        final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try {
             // prepare command line
-            final Optional<CommandLineInterface> optionalCli = CommandLineInterface.parse(args);
-            if (!optionalCli.isPresent()) {
-                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
-            }
-            final CommandLineInterface cli = optionalCli.get();
-            // configure application
-            faultTolerant = cli.isFaultTolerant();
-            final Optional<AuthenticationHandler> optionalAuth = cli.newAuthenticationHandler();
-            if (!optionalAuth.isPresent()) {
-                App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
-            }
-            final AuthenticationHandler auth = optionalAuth.get();
-            final Optional<Configuration> optionalCtx = cli.newApplicationConfiguration(auth.getSecretProvider());
-            optionalCtx.ifPresent(ctx -> App.exit(App.execute(ctx, auth, scheduler))); // core investing algorithm
+            final Optional<Configuration> optionalCtx = CommandLineInterface.parse(args);
+            optionalCtx.ifPresent(ctx -> {
+                App.LOGGER.info("RoboZonky v{} starting.", Defaults.ROBOZONKY_VERSION);
+                faultTolerant.set(ctx.isFaultTolerant());
+                App.exit(App.execute(ctx, scheduler));
+            }); // core investing algorithm
             App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
         } catch (final ProcessingException | NotAllowedException ex) {
-            App.handleException(ex, faultTolerant);
+            App.handleException(ex, faultTolerant.get());
         } catch (final WebApplicationException ex) {
             App.handleException(ex);
         } catch (final RuntimeException ex) {

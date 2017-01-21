@@ -44,7 +44,6 @@ public enum ExtensionsManager {
     }
 
     ClassLoader retrieveExtensionClassLoader() {
-        this.LOGGER.info("Looking up extensions.");
         return FileUtils.findFolder("extensions")
                 .map(this::retrieveExtensionClassLoader)
                 .orElseGet(() -> {

@@ -22,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.Api;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.configuration.Configuration;
@@ -31,9 +32,10 @@ import org.mockito.Mockito;
 
 public class ActivityTest extends AbstractStateLeveragingTest {
 
-    private static final int CHECK_TIMEOUT_MINUTES = 60;
-
-    private final Configuration ctx = new Configuration(1, 200, ActivityTest.CHECK_TIMEOUT_MINUTES, 120);
+    private static final int SLEEP_PERIOD_MINUTES = 60;
+    private static final Configuration CTX =
+            new Configuration(Refreshable.createImmutable(null), null, null, ActivityTest.SLEEP_PERIOD_MINUTES,
+                    false, false);
 
     @Test
     public void timestampFailover() {
@@ -43,7 +45,7 @@ public class ActivityTest extends AbstractStateLeveragingTest {
 
     @Test
     public void doesNotSleepWhenFirstRunButSleepsOnSecondAttempt() {
-        final Activity activity = new Activity(ctx, Mockito.mock(Api.class));
+        final Activity activity = new Activity(ActivityTest.CTX, Mockito.mock(Api.class));
         Assertions.assertThat(activity.shouldSleep()).isFalse();
         activity.settle();
         // this will show that the marketplace check works
@@ -54,7 +56,7 @@ public class ActivityTest extends AbstractStateLeveragingTest {
     public void doesWakeUpWhenNewLoanAndThenSleeps() throws IOException {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp =
-                OffsetDateTime.now().minus(ActivityTest.CHECK_TIMEOUT_MINUTES / 2, ChronoUnit.MINUTES);
+                OffsetDateTime.now().minus(ActivityTest.SLEEP_PERIOD_MINUTES / 2, ChronoUnit.MINUTES);
         Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString());
         // load API that has loans more recent than that, but makes sure not to come within the closed period
         final Loan l = Mockito.mock(Loan.class);
@@ -63,7 +65,7 @@ public class ActivityTest extends AbstractStateLeveragingTest {
         final Api zonkyApi = Mockito.mock(Api.class);
         Mockito.when(zonkyApi.getLoans()).thenReturn(Collections.singletonList(l));
         // test proper wakeup
-        final Activity activity = new Activity(ctx, zonkyApi);
+        final Activity activity = new Activity(ActivityTest.CTX, zonkyApi);
         Assertions.assertThat(activity.shouldSleep()).isFalse();
         activity.settle();
         // after which it should properly fall asleep again
@@ -71,7 +73,7 @@ public class ActivityTest extends AbstractStateLeveragingTest {
         // and make sure that the timestamp has changed to a new reasonable value
         final OffsetDateTime newTimestamp =
                 OffsetDateTime.parse(Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID).get());
-        Assertions.assertThat(newTimestamp.isAfter(l.getDatePublished()));
+        Assertions.assertThat(newTimestamp).isAfter(timestamp);
     }
 
     @Test
@@ -89,7 +91,7 @@ public class ActivityTest extends AbstractStateLeveragingTest {
         final Api zonkyApi = Mockito.mock(Api.class);
         Mockito.when(zonkyApi.getLoans()).thenReturn(Arrays.asList(activeLoan, ignoredLoan));
         // there is nothing to do, so the app should fall asleep...
-        final Activity activity = new Activity(ctx, zonkyApi);
+        final Activity activity = new Activity(ActivityTest.CTX, zonkyApi);
         Assertions.assertThat(activity.shouldSleep()).isTrue();
         activity.settle();
         // ... but reconfigure the timestamp so that we treat the closed-season loans as new loans

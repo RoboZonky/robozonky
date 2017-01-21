@@ -102,7 +102,7 @@ final class Exclusivity implements ShutdownHook.Handler {
         } catch (final IOException ex) {
             Exclusivity.LOGGER.warn("Failed releasing lock, new RoboZonky processes may not launch.", ex);
         } finally {
-            Exclusivity.LOGGER.debug("Lock file deleted successfully: {}.", this.fileToLock.delete());
+            Exclusivity.LOGGER.trace("Lock file deleted successfully: {}.", this.fileToLock.delete());
         }
     }
 
@@ -115,7 +115,6 @@ final class Exclusivity implements ShutdownHook.Handler {
             Exclusivity.LOGGER.debug("Already ensured.");
             return;
         }
-        Exclusivity.LOGGER.info("Checking we're the only RoboZonky running.");
         Exclusivity.LOGGER.debug("Acquiring file lock: {}.", this.fileToLock.getAbsolutePath());
         try {
             this.lockControl = new Exclusivity.LockControl(this.fileToLock);

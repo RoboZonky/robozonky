@@ -179,6 +179,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
                 return new ZonkyProxy.Builder().build(api);
             case CONFIRMING:
                 final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
+                Mockito.when(cp.getId()).thenReturn("something");
                 switch (confirmationResponse) {
                     case PRESENT:
                         final Confirmation c = (captcha == ZonkyProxyTest.Captcha.PROTECTED) ?
@@ -205,9 +206,9 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
         final ZonkyProxy p = this.getZonkyProxy();
         final ZonkyResponse result = p.invest(r, seenBefore);
         if (this.proxyType == ZonkyProxyTest.ProxyType.CONFIRMING) {
-            Assertions.assertThat(p.getConfirmationProvider()).isNotNull();
+            Assertions.assertThat(p.getConfirmationProviderId()).isPresent();
         } else {
-            Assertions.assertThat(p.getConfirmationProvider()).isNull();
+            Assertions.assertThat(p.getConfirmationProviderId()).isEmpty();
         }
         Assertions.assertThat(result.getType()).isEqualTo(responseType);
         if (result.getType() == ZonkyResponseType.INVESTED) {

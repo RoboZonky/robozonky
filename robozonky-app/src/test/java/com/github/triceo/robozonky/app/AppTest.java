@@ -84,13 +84,13 @@ public class AppTest extends AbstractStateLeveragingTest {
     @Test
     public void wrongStrategyOnCli() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_SETUP.getCode());
-        App.main("-s", "some.random.file", "-u", "user", "-p", "password", "-t");
+        App.main("-u", "user", "-p", "password", "-t", "many", "-l", "some.random.file");
     }
 
     @Test
     public void wrongKeyStore() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
-        App.main("-l", "1", "-a", "1000", "-g", "some.random.file", "-p", "password");
+        App.main("-g", "some.random.file", "-p", "password", "single", "-l", "1", "-a", "1000");
     }
 
     @Test
@@ -150,11 +150,12 @@ public class AppTest extends AbstractStateLeveragingTest {
     @Test
     public void singleInvestmentExecutionFailingLogin() {
         // a lot of mocking to exercise the basic path all the way through to the core
-        final Configuration ctx = AppTest.mockDryRunConfiguration();
-        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        final Configuration ctx = AppTest.mockDryRunConfiguration();
+        Mockito.when(ctx.getAuthenticationHandler()).thenReturn(auth);
+        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
         final Loan loan = Mockito.mock(Loan.class);
@@ -164,20 +165,21 @@ public class AppTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final ReturnCode rc = App.execute(ctx, auth, new Scheduler());
+        final ReturnCode rc = App.execute(ctx, new Scheduler());
         Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_SETUP);
     }
 
     @Test
     public void strategyBasedExecutionInvestingNothing() {
         // a lot of mocking to exercise the basic path all the way through to the core
-        final Configuration ctx = AppTest.mockRegularConfiguration();
-        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(Optional.of(Collections.emptyList()));
+        final Configuration ctx = AppTest.mockRegularConfiguration();
+        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
+        Mockito.when(ctx.getAuthenticationHandler()).thenReturn(auth);
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
         final Loan loan = Mockito.mock(Loan.class);
@@ -187,7 +189,7 @@ public class AppTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final ReturnCode rc = App.execute(ctx, auth, new Scheduler());
+        final ReturnCode rc = App.execute(ctx, new Scheduler());
         Assertions.assertThat(rc).isEqualTo(ReturnCode.OK);
     }
 
