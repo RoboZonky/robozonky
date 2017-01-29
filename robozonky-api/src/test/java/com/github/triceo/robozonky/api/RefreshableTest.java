@@ -17,12 +17,21 @@
 package com.github.triceo.robozonky.api;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RefreshableTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshableTest.class);
+    private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
+
 
     private static String transform(final String original) {
         return "Transformed " + original;
@@ -85,6 +94,36 @@ public class RefreshableTest {
         r.setLatestSource(null); // make sure latest will get reset
         r.run();
         Assertions.assertThat(r.getLatest()).isEmpty();
+    }
+
+    @Test(timeout = 5000)
+    public void waitsForInitial() {
+        final String initial = "initial";
+        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
+        RefreshableTest.EXECUTOR.schedule(r, 1, TimeUnit.SECONDS); // execute only after the assertion is called
+        RefreshableTest.LOGGER.info("Blocking until value is found.");
+        Assertions.assertThat(r.getLatest()).isNotEmpty();
+    }
+
+    @Test(timeout = 5000)
+    public void waitsForValue() {
+        final String initial = "initial";
+        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
+        // set and remove value
+        r.run();
+        r.setLatestSource(null);
+        r.run();
+        // wait for new value
+        RefreshableTest.LOGGER.info("Scheduling.");
+        RefreshableTest.EXECUTOR.schedule(() -> {
+            RefreshableTest.LOGGER.info("Executing.");
+            r.setLatestSource("something");
+            r.run();
+            RefreshableTest.LOGGER.info("Executed.");
+        }, 1, TimeUnit.SECONDS); // execute only after the assertion is called
+        RefreshableTest.LOGGER.info("Blocking until value is found.");
+        Assertions.assertThat(r.getLatestBlocking()).isNotEmpty();
+        RefreshableTest.LOGGER.info("Found.");
     }
 
 }

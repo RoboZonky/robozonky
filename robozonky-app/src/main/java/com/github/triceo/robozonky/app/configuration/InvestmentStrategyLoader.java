@@ -24,10 +24,10 @@ import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import com.github.triceo.robozonky.ExtensionsManager;
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
+import com.github.triceo.robozonky.app.util.ExtensionsManager;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

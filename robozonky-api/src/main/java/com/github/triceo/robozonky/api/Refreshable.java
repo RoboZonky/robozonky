@@ -20,10 +20,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import com.github.triceo.robozonky.util.Retriever;
+import com.github.triceo.robozonky.internal.api.Retriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,12 +75,17 @@ public abstract class Refreshable<T> implements Runnable {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
+    private final Semaphore valueIsMissing = new Semaphore(1);
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
     /**
      * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
      */
     private final CountDownLatch completionAssurance = new CountDownLatch(1);
+
+    public Refreshable() {
+        this.valueIsMissing.acquireUninterruptibly();
+    }
 
     /**
      * Whether or not the refresh of this resource depends on the refresh of another resource. This method exists so
@@ -110,6 +116,19 @@ public abstract class Refreshable<T> implements Runnable {
     protected abstract Optional<T> transform(final String source);
 
     /**
+     * Will block until {@link #getLatest()} is able to return a non-empty result.
+     * @return The return of {@link #getLatest()}'s optional.
+     */
+    public T getLatestBlocking() {
+        try {
+            valueIsMissing.acquireUninterruptibly();
+            return cachedResult.get();
+        } finally {
+            valueIsMissing.release();
+        }
+    }
+
+    /**
      * Latest version of the resource. Will block until {@link #run()} has finished at least once.
      *
      * @return Empty if the source could not be parsed or if the wait operation was interrupted.
@@ -124,8 +143,16 @@ public abstract class Refreshable<T> implements Runnable {
     }
 
     private void storeResult(final T result) {
-        if (!Objects.equals(cachedResult.getAndSet(result), result)) {
-            LOGGER.debug("Latest changed.");
+        final T previous = cachedResult.getAndSet(result);
+        if (Objects.equals(previous, result)) {
+            return;
+        }
+        if (previous == null && result != null) { // value newly available
+            LOGGER.debug("New value.");
+            valueIsMissing.release();
+        } else if (previous != null && result == null) { // value lost
+            LOGGER.debug("No value.");
+            valueIsMissing.acquireUninterruptibly();
         }
     }
 

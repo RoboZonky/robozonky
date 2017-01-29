@@ -18,9 +18,9 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.util.Map;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;

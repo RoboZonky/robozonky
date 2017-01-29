@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
 enum StrategyFileProperty {
 

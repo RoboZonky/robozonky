@@ -16,8 +16,10 @@
 
 package com.github.triceo.robozonky.app.version;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.time.Duration;
+
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.app.util.Scheduler;
 
 /**
  * Class to perform version checks of the current version against the latest released version.
@@ -26,11 +28,13 @@ public class VersionCheck {
 
     /**
      * Will retrieve the latest version available in Maven Central. Executes in single thread executor.
-     * @param e Executor service to use for executing the HTTP request.
-     * @return Latest known release version of RoboZonky, as a {@link Future} to be retrieved later.
+     * @param s Scheduler to use for executing the HTTP request.
+     * @return Latest known release version of RoboZonky.
      */
-    public static Future<VersionIdentifier> retrieveLatestVersion(final ExecutorService e) {
-        return e.submit(new VersionRetriever());
+    public static Refreshable<VersionIdentifier> retrieveLatestVersion(final Scheduler s) {
+        final VersionRetriever r = new VersionRetriever();
+        s.submit(r, Duration.ofHours(1));
+        return r;
     }
 
     public static boolean isSmallerThan(final String first, final String second) {

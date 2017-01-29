@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.notifications.email;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import com.github.triceo.robozonky.api.State;
+import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.authentication;
 
 import java.io.StringReader;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.github.triceo.robozonky.app.AbstractStateLeveragingTest;
@@ -52,14 +51,11 @@ public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
         // create token
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(p.setToken(new StringReader(token))).isTrue();
-        softly.assertThat(p.getTokenSetDate()).isPresent();
-        softly.assertThat(p.getTokenSetDate().get()).isBefore(OffsetDateTime.now());
         softly.assertThat(p.getToken()).isPresent();
         softly.assertAll();
         // delete created token
         softly = new SoftAssertions();
         softly.assertThat(p.deleteToken()).isTrue();
-        softly.assertThat(p.getTokenSetDate()).isEmpty();
         softly.assertAll();
     }
 

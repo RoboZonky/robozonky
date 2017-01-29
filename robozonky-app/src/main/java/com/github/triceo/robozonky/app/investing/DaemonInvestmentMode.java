@@ -1,0 +1,109 @@
+/*
+ * Copyright 2017 Lukáš Petrovický
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.triceo.robozonky.app.investing;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.api.marketplaces.Marketplace;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.app.App;
+import com.github.triceo.robozonky.app.authentication.ApiProvider;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.notifications.Events;
+
+public class DaemonInvestmentMode extends AbstractInvestmentMode {
+
+    private final Refreshable<InvestmentStrategy> refreshableStrategy;
+    private final Marketplace marketplace;
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    final Semaphore blockUntilUserCancelled = new Semaphore(1);
+
+    public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+                                final boolean isFaultTolerant, final Marketplace marketplace,
+                                final Refreshable<InvestmentStrategy> strategy) {
+        super(auth, builder, isFaultTolerant);
+        this.refreshableStrategy = strategy;
+        this.marketplace = marketplace;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.debug("Shutdown requested.");
+            // will release the main thread and thus terminate the daemon
+            blockUntilUserCancelled.release();
+            // only allow to shut down after the daemon has been closed by the app
+            App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
+            LOGGER.debug("Shutdown allowed.");
+        }));
+    }
+
+    @Override
+    protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
+        blockUntilUserCancelled.acquireUninterruptibly();
+        return execute(apiProvider, blockUntilUserCancelled);
+    }
+
+    @Override
+    protected void openMarketplace(final Consumer<Collection<Loan>> target) {
+        marketplace.registerListener(target);
+        final Runnable marketplaceCheck = () -> {
+            try {
+                marketplace.run();
+            } catch (final Throwable t) { // not catching would case the thread to stop
+                LOGGER.warn("Caught unexpected exception, continuing operation.", t);
+                Events.fire(new RoboZonkyDaemonFailedEvent(t));
+            }
+        };
+        switch (marketplace.specifyExpectedTreatment()) {
+            case POLLING:
+                final int checkPeriodInSeconds = 1; // FIXME make configurable
+                LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
+                executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
+                break;
+            case LISTENING:
+                LOGGER.debug("Starting marketplace listener.");
+                executor.submit(marketplaceCheck);
+                break;
+            default:
+                throw new IllegalStateException("Impossible.");
+        }
+    }
+
+    @Override
+    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
+        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler());
+    }
+
+    @Override
+    public void close() throws Exception {
+        super.close();
+        blockUntilUserCancelled.release(); // just in case
+        LOGGER.trace("Shutting down executor.");
+        this.executor.shutdownNow();
+        LOGGER.trace("Closing marketplace.");
+        this.marketplace.close();
+    }
+}

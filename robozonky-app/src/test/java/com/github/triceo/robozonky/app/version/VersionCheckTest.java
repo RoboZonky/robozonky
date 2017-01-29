@@ -16,9 +16,8 @@
 
 package com.github.triceo.robozonky.app.version;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.app.util.Scheduler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -26,9 +25,8 @@ public class VersionCheckTest {
 
     @Test
     public void retrieveLatestVersion() throws Exception {
-        final Future<VersionIdentifier> version = VersionCheck.retrieveLatestVersion(Executors.newWorkStealingPool());
-        Assertions.assertThat(version).isNotNull();
-        Assertions.assertThat(version.get()).isNotNull();
+        final Refreshable<VersionIdentifier> v = VersionCheck.retrieveLatestVersion(Scheduler.BACKGROUND_SCHEDULER);
+        Assertions.assertThat(v.getLatest()).isPresent();
     }
 
     @Test

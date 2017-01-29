@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Collections;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 /**
- * Fired immediately before the loans are submitted for evaluation by strategy. May be followed by
+ * Fired immediately before the loans are submitted to the investing algorithm. May be followed by
  * {@link StrategyStartedEvent}, will eventually be followed by {@link ExecutionCompletedEvent}.
  */
 public final class ExecutionStartedEvent implements Event {

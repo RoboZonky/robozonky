@@ -18,8 +18,8 @@ package com.github.triceo.robozonky.notifications.email;
 
 import javax.mail.internet.MimeMessage;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import com.icegreen.greenmail.junit.GreenMailRule;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import org.assertj.core.api.Assertions;

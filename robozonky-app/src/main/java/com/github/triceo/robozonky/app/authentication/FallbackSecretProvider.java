@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.api.State;
+import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,18 +94,4 @@ final class FallbackSecretProvider extends SecretProvider {
         return FallbackSecretProvider.STATE.reset();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Optional<OffsetDateTime> getTokenSetDate() {
-        return (Optional<OffsetDateTime>)
-                FallbackSecretProvider.STATE.getValue(FallbackSecretProvider.TOKEN_DATE_STATE_ID)
-                        .map(d -> {
-                            try {
-                                return Optional.of(OffsetDateTime.parse(d));
-                            } catch (final Exception ex) {
-                                FallbackSecretProvider.LOGGER.warn("Failed getting token set date.", ex);
-                                return Optional.empty();
-                            }
-                        }).orElse(Optional.empty());
-    }
 }

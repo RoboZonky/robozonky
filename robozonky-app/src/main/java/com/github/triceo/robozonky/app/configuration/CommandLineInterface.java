@@ -24,6 +24,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +35,12 @@ public class CommandLineInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
 
-    private static Optional<Configuration> terminate(final JCommander jc, final String message) {
+    private static Optional<InvestmentMode> terminate(final JCommander jc, final String message) {
         System.out.println(message);
         return CommandLineInterface.terminate(jc);
     }
 
-    private static Optional<Configuration> terminate(final JCommander jc) {
+    private static Optional<InvestmentMode> terminate(final JCommander jc) {
         jc.usage();
         return Optional.empty();
     }
@@ -58,12 +59,12 @@ public class CommandLineInterface {
 
     /**
      * Takes command-line arguments and converts them into an application configuration, printing command line usage
-     * information in case the argumnets are somehow invalid.
+     * information in case the arguments are somehow invalid.
      *
      * @param args Command-line arguments, coming from the main() method.
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
-    public static Optional<Configuration> parse(final String... args) {
+    public static Optional<InvestmentMode> parse(final String... args) {
         final CommandLineInterface cli = new CommandLineInterface();
         final JCommander jc = new JCommander(cli);
         jc.setProgramName(CommandLineInterface.getScriptIdentifier());
@@ -92,7 +93,7 @@ public class CommandLineInterface {
         this.mode = (OperatingMode)jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
     }
 
-    private Optional<Configuration> newApplicationConfiguration() {
+    private Optional<InvestmentMode> newApplicationConfiguration() {
         final Optional<AuthenticationHandler> authenticationHandler = SecretProviderFactory.getSecretProvider(this)
                 .map(secrets -> Optional.of(authenticationFragment.createAuthenticationHandler(secrets)))
                 .orElse(Optional.empty());

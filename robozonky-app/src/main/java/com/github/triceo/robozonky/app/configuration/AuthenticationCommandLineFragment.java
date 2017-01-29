@@ -50,8 +50,13 @@ class AuthenticationCommandLineFragment implements CommandLineFragment {
     }
 
     AuthenticationCommandLineFragment(final String username, final File keystore) {
+        this(username, keystore, false);
+    }
+
+    AuthenticationCommandLineFragment(final String username, final File keystore, final boolean refreshTokenEnabled) {
         this.username = username;
         this.keystore = keystore;
+        this.refreshTokenEnabled = refreshTokenEnabled;
     }
 
     public Optional<String> getUsername() {
@@ -74,7 +79,6 @@ class AuthenticationCommandLineFragment implements CommandLineFragment {
             return AuthenticationHandler.passwordBased(secrets);
         }
     }
-
 
     @Override
     public void validate() throws ParameterException {

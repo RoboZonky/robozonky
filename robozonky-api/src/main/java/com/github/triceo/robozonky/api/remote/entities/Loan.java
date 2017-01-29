@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@
 package com.github.triceo.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
 import com.github.triceo.robozonky.api.remote.enums.Purpose;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.remote.enums.Region;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
 /**
  * This class carries several enumeration-based fields. Some of the enums are extremely important to the core function
@@ -37,21 +38,34 @@ import org.slf4j.LoggerFactory;
  */
 public class Loan implements BaseEntity {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Loan.class);
-
     private boolean topped, covered, published;
     private int id, termInMonths, investmentsCount, questionsCount, userId;
     private double amount, remainingInvestment;
     private String name, story, nickName;
-    private BigDecimal interestRate;
-    private OffsetDateTime datePublished, deadline;
+    private BigDecimal interestRate = BigDecimal.ZERO;
+    private OffsetDateTime datePublished, deadline = OffsetDateTime.MAX;
     private Rating rating;
-    private Collection<Photo> photos;
-    private BigDecimal investmentRate;
+    private Collection<Photo> photos = Collections.emptyList();
+    private BigDecimal investmentRate = BigDecimal.ZERO;
     private MyInvestment myInvestment;
-    private MainIncomeType mainIncomeType;
-    private Region region;
-    private Purpose purpose;
+    private MainIncomeType mainIncomeType = MainIncomeType.OTHERS_MAIN;
+    private Region region = Region.UNKNOWN;
+    private Purpose purpose = Purpose.JINE;
+
+    protected Loan() {
+        // for JAXB
+    }
+
+    public Loan(final int id, final int amount) { // creates a simple "fake" loan
+        this(id, amount, OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
+    }
+
+    public Loan(final int id, final int amount, final OffsetDateTime datePublished) { // creates a simple "fake" loan
+        this.id = id;
+        this.amount = amount;
+        this.remainingInvestment = amount;
+        this.datePublished = datePublished;
+    }
 
     @XmlElement
     public MyInvestment getMyInvestment() {

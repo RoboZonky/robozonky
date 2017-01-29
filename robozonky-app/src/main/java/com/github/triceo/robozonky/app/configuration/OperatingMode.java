@@ -20,13 +20,18 @@ import java.util.Optional;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.github.triceo.robozonky.ZonkyProxy;
-import com.github.triceo.robozonky.api.Defaults;
+import com.beust.jcommander.ParametersDelegate;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
+import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
+import com.github.triceo.robozonky.app.investing.InvestmentMode;
+import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
+import com.github.triceo.robozonky.app.investing.ZonkyProxy;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,46 +52,82 @@ enum OperatingMode implements CommandLineFragment {
 
         @Override
         public String getName() {
+            return "direct";
+        }
+
+        @Override
+        protected Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+                                                             final AuthenticationHandler auth,
+                                                             final ZonkyProxy.Builder builder) {
+            final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
+            return Optional.of(new DirectInvestmentMode(auth, builder, fragment.isFaultTolerant(), loanId, loanAmount));
+        }
+
+    }, SINGLE_SHOT {
+
+        @ParametersDelegate
+        MarketplaceCommandLineFragment marketplaceFragment = new MarketplaceCommandLineFragment();
+
+        @ParametersDelegate
+        StrategyCommandLineFragment strategyFragment = new StrategyCommandLineFragment();
+
+        @Override
+        public String getName() {
             return "single";
         }
 
         @Override
-        protected Configuration getConfiguration(final CommandLineInterface cli, final AuthenticationHandler auth,
-                                                 final ZonkyProxy.Builder builder) {
-            return new Configuration(loanId, loanAmount, auth, builder, cli.getTweaksFragment().isFaultTolerant(),
-                    cli.getTweaksFragment().isDryRunEnabled());
+        protected Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+                                                             final AuthenticationHandler auth,
+                                                             final ZonkyProxy.Builder builder) {
+            final Refreshable<InvestmentStrategy> strategy =
+                    RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
+            final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
+            return MarketplaceLoader.load(new Credentials(marketplaceFragment.getMarketplaceCredentials()))
+                    .map(marketplace -> {
+                        final InvestmentMode m = new SingleShotInvestmentMode(auth, builder, fragment.isFaultTolerant(),
+                                marketplace, strategy);
+                        return Optional.of(m);
+                    })
+                    .orElse(Optional.empty());
+
         }
 
-    }, STRATEGY_BASED {
+    }, DAEMON {
 
-        @Parameter(names = {"-l", "--location"}, required = true,
-                description = "Points to a resource holding the investment strategy configuration.")
-        String strategyLocation = "";
+        @ParametersDelegate
+        MarketplaceCommandLineFragment marketplaceFragment = new MarketplaceCommandLineFragment();
 
-        @Parameter(names = {"-z", "--zonk"},
-                description = "Allows to override the default length of sleep period in minutes.",
-                validateValueWith = PositiveIntegerValueValidator.class)
-        Integer sleepPeriodInMinutes = 60;
+        @ParametersDelegate
+        StrategyCommandLineFragment strategyFragment = new StrategyCommandLineFragment();
 
         @Override
         public String getName() {
-            return "many";
+            return "daemon";
         }
 
         @Override
-        protected Configuration getConfiguration(final CommandLineInterface cli, final AuthenticationHandler auth,
-                                                 final ZonkyProxy.Builder builder) {
-            final Refreshable<InvestmentStrategy> strategy = RefreshableInvestmentStrategy.create(strategyLocation);
+        protected Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+                                                             final AuthenticationHandler auth,
+                                                             final ZonkyProxy.Builder builder) {
+            final Refreshable<InvestmentStrategy> strategy =
+                    RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
             final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
-            return new Configuration(strategy, auth, builder, sleepPeriodInMinutes, fragment.isFaultTolerant(),
-                    fragment.isDryRunEnabled());
+            return MarketplaceLoader.load(new Credentials(marketplaceFragment.getMarketplaceCredentials()))
+                    .map(marketplace -> {
+                        final InvestmentMode m = new DaemonInvestmentMode(auth, builder, fragment.isFaultTolerant(),
+                                marketplace, strategy);
+                        return Optional.of(m);
+                    })
+                    .orElse(Optional.empty());
+
         }
 
     };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperatingMode.class);
 
-    static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final ConfirmationCredentials credentials,
+    static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final Credentials credentials,
                                                              final SecretProvider secrets,
                                                              final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
@@ -107,7 +148,7 @@ enum OperatingMode implements CommandLineFragment {
     }
 
 
-    static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final ConfirmationCredentials credentials,
+    static Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final Credentials credentials,
                                                              final SecretProvider secrets) {
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
@@ -120,18 +161,25 @@ enum OperatingMode implements CommandLineFragment {
 
     public abstract String getName();
 
-    protected abstract Configuration getConfiguration(final CommandLineInterface cli, final AuthenticationHandler auth,
-                                                      final ZonkyProxy.Builder builder);
+    protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+                                                                  final AuthenticationHandler auth,
+                                                                  final ZonkyProxy.Builder builder);
 
-    public Optional<Configuration> configure(final CommandLineInterface cli, final AuthenticationHandler auth) {
-        final Optional<ConfirmationCredentials> cred = cli.getConfirmationFragment().getConfirmationCredentials()
-                .map(value -> Optional.of(new ConfirmationCredentials(value)))
+    public Optional<InvestmentMode> configure(final CommandLineInterface cli, final AuthenticationHandler auth) {
+        final Optional<Credentials> cred = cli.getConfirmationFragment().getConfirmationCredentials()
+                .map(value -> Optional.of(new Credentials(value)))
                 .orElse(Optional.empty());
         final Optional<ZonkyProxy.Builder> optionalBuilder = cred
                 .map(credentials -> OperatingMode.getZonkyProxyBuilder(credentials, auth.getSecretProvider()))
                 .orElse(Optional.of(new ZonkyProxy.Builder()));
         return optionalBuilder
-                .map(builder -> Optional.of(this.getConfiguration(cli, auth, builder)))
+                .map(builder -> {
+                    if (cli.getTweaksFragment().isDryRunEnabled()) {
+                        OperatingMode.LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
+                        builder.asDryRun();
+                    }
+                    return this.getInvestmentMode(cli, auth, builder);
+                })
                 .orElse(Optional.empty());
     }
 

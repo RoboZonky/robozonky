@@ -16,16 +16,18 @@
 
 package com.github.triceo.robozonky.app.version;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -38,6 +40,9 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.app.util.IOUtils;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -48,42 +53,31 @@ import org.xml.sax.SAXException;
  * Retrieve latest released version from Maven Central. By default will check
  * https://repo1.maven.org/maven2/com/github/triceo/robozonky/robozonky-app/maven-metadata.xml.
  */
-class VersionRetriever implements Callable<VersionIdentifier> {
+class VersionRetriever extends Refreshable<VersionIdentifier> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionRetriever.class);
-
     private static final String GROUP_ID = VersionRetriever.class.getPackage().getImplementationVendor();
     private static final String ARTIFACT_ID = "robozonky-app";
+    private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
     private static final Pattern PATTERN_STABLE_VERSION = Pattern.compile("\\A[1-9][0-9]*\\.[0-9]+\\.[0-9]+\\z");
-
-    private final String groupId, artifactId;
-
-    // tests only; VersionCheck.class.getPackage() does not contain anything then
-    VersionRetriever(final String groupId, final String artifactId) {
-        this.groupId = groupId == null ? "com.github.triceo.robozonky" : groupId;
-        this.artifactId = artifactId == null ? VersionRetriever.ARTIFACT_ID : artifactId;
-    }
-
-    public VersionRetriever() {
-        this(VersionRetriever.GROUP_ID, VersionRetriever.ARTIFACT_ID);
-    }
 
     /**
      * Assemble the Maven Central metadata URL from the given groupId and artifactId.
      * @param groupId Group ID in question.
      * @param artifactId Artifact ID in question.
-     * @return URL to the Maven Central metadata file.
-     * @throws MalformedURLException Malformed URL. No real reason why that would happen.
+     * @return Stream to read the Maven Central metadata from.
+     * @throws IOException Network communications failure.
      */
-    private static URL getMavenCentralUrl(final String groupId, final String artifactId) throws MalformedURLException {
-        final String urlSeparator = "/";
-        final StringJoiner joiner = new StringJoiner(urlSeparator);
+    private static InputStream getMavenCentralData(final String groupId, final String artifactId)
+            throws IOException {
+        final StringJoiner joiner = new StringJoiner(VersionRetriever.URL_SEPARATOR);
         joiner.add("https://repo1.maven.org/maven2");
-        joiner.add(Arrays.stream(VersionRetriever.PATTERN_DOT.split(groupId)).collect(Collectors.joining(urlSeparator)));
+        joiner.add(Arrays.stream(VersionRetriever.PATTERN_DOT.split(groupId))
+                .collect(Collectors.joining(VersionRetriever.URL_SEPARATOR)));
         joiner.add(artifactId);
         joiner.add("maven-metadata.xml");
-        return new URL(joiner.toString());
+        return new URL(joiner.toString()).openStream();
     }
 
     private static boolean isStable(final String version) {
@@ -95,7 +89,8 @@ class VersionRetriever implements Callable<VersionIdentifier> {
         return versions.stream()
                 .sorted(new VersionComparator().reversed())
                 .filter(VersionRetriever::isStable)
-                .findFirst().orElseThrow(() -> new IllegalStateException("Impossible."));
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Impossible."));
     }
 
     private static VersionIdentifier parseNodeList(final NodeList nodeList) {
@@ -135,14 +130,45 @@ class VersionRetriever implements Callable<VersionIdentifier> {
         return VersionRetriever.parseNodeList((NodeList)expr.evaluate(doc, XPathConstants.NODESET));
     }
 
+    private final String groupId, artifactId;
+
+    // tests only; VersionCheck.class.getPackage() does not contain anything then
+    VersionRetriever(final String groupId, final String artifactId) {
+        this.groupId = groupId == null ? "com.github.triceo.robozonky" : groupId;
+        this.artifactId = artifactId == null ? VersionRetriever.ARTIFACT_ID : artifactId;
+    }
+
+    public VersionRetriever() {
+        this(VersionRetriever.GROUP_ID, VersionRetriever.ARTIFACT_ID);
+    }
+
     @Override
-    public VersionIdentifier call() throws Exception {
-        final URL url = VersionRetriever.getMavenCentralUrl(this.groupId, this.artifactId);
-        VersionRetriever.LOGGER.trace("Version check starting from {}.", url);
-        try (final InputStream urlStream = url.openStream()) {
-            return VersionRetriever.parseVersionString(urlStream);
-        } finally {
-            VersionRetriever.LOGGER.trace("Update check finished.");
+    public Optional<Refreshable<?>> getDependedOn() {
+        return Optional.empty();
+    }
+
+    @Override
+    protected Supplier<Optional<String>> getLatestSource() {
+        return () -> {
+            try (final InputStreamReader reader =
+                         new InputStreamReader(VersionRetriever.getMavenCentralData(this.groupId, this.artifactId))) {
+                final String result = IOUtils.toString(reader);
+                return Optional.of(result);
+            } catch (final Exception ex) {
+                VersionRetriever.LOGGER.debug("Failed reading source.", ex);
+                return Optional.empty();
+            }
+        };
+    }
+
+    @Override
+    protected Optional<VersionIdentifier> transform(final String source) {
+        try (final InputStream s = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
+            return Optional.of(VersionRetriever.parseVersionString(s));
+        } catch (final Exception ex) {
+            VersionRetriever.LOGGER.debug("Failed parsing source.", ex);
+            return Optional.empty();
         }
     }
+
 }

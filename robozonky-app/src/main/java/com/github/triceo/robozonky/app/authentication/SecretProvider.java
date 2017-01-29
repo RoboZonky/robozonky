@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.io.Reader;
 import java.security.KeyStore;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
@@ -119,13 +118,5 @@ public abstract class SecretProvider {
      * @return True if no token stored anymore.
      */
     abstract public boolean deleteToken();
-
-    /**
-     * Retrieve the timestamp of the stored token.
-     *
-     * @return the last time when {@link #setToken(Reader)} was called, unless {@link #deleteToken()} called after
-     * that.
-     */
-    abstract public Optional<OffsetDateTime> getTokenSetDate();
 
 }

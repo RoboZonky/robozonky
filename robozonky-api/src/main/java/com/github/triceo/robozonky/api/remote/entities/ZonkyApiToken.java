@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package com.github.triceo.robozonky.api.remote.entities;
 
 import java.io.Reader;
 import java.io.StringWriter;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -62,22 +65,32 @@ public class ZonkyApiToken implements BaseEntity {
     private String scope;
     @XmlElement(name = "expires_in")
     private int expiresIn;
+    /**
+     * This is not part of the Zonky API, but it will be useful inside RoboZonky.
+     */
+    @XmlElement(name = "obtained_on")
+    private OffsetDateTime obtainedOn = OffsetDateTime.now();
 
     ZonkyApiToken() {
-        // for JAXB
+        // fox JAXB
+    }
+
+    public ZonkyApiToken(final String accessToken, final String refreshToken, final OffsetDateTime obtainedOn) {
+        this(accessToken, refreshToken, 299, obtainedOn, "refresh_token", "SCOPE_APP_WEB");
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn) {
-        this(accessToken, refreshToken, expiresIn, "refresh_token", "SCOPE_APP_WEB");
+        this(accessToken, refreshToken, expiresIn, OffsetDateTime.now(), "refresh_token", "SCOPE_APP_WEB");
     }
 
-    public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn, final String type,
-                         final String scope) {
+    public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
+                         final OffsetDateTime obtainedOn, final String type, final String scope) {
         this.accessToken = accessToken.toCharArray();
         this.refreshToken = refreshToken.toCharArray();
         this.expiresIn = expiresIn;
         this.type = type;
         this.scope = scope;
+        this.obtainedOn = obtainedOn;
     }
 
     public char[] getAccessToken() {
@@ -102,6 +115,19 @@ public class ZonkyApiToken implements BaseEntity {
 
     public String getScope() {
         return scope;
+    }
+
+    public OffsetDateTime getObtainedOn() {
+        return obtainedOn;
+    }
+
+    public OffsetDateTime getExpiresOn() {
+        return obtainedOn.plus(Duration.ofSeconds(expiresIn));
+    }
+
+    public boolean willExpireIn(final TemporalAmount temporalAmount) {
+        final OffsetDateTime expiresBefore = OffsetDateTime.now().plus(temporalAmount);
+        return getExpiresOn().isBefore(expiresBefore);
     }
 
     @Override

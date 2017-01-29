@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,6 @@ public class KeyStoreSecretProviderTest {
     public void tokenNotSet() {
         final KeyStoreSecretProvider p = KeyStoreSecretProviderTest.newMockProvider();
         Assertions.assertThat(p.getToken()).isEmpty();
-        Assertions.assertThat(p.getTokenSetDate()).isEmpty();
     }
 
     @Test
@@ -115,13 +114,9 @@ public class KeyStoreSecretProviderTest {
         Assertions.assertThat(p.getToken()).isPresent();
         final String stored = IOUtils.toString(p.getToken().get());
         Assertions.assertThat(stored).isEqualTo(toStore);
-        Assertions.assertThat(p.getTokenSetDate()).isPresent();
-        final OffsetDateTime storedOn = p.getTokenSetDate().get();
-        Assertions.assertThat(storedOn).isAfter(beforeStoring);
         // clear token
         p.deleteToken();
         Assertions.assertThat(p.getToken()).isEmpty();
-        Assertions.assertThat(p.getTokenSetDate()).isEmpty();
     }
 
     @Test

@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app.configuration;
 import java.io.File;
 
 import com.beust.jcommander.ParameterException;
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -67,6 +68,15 @@ public class AuthenticationCommandLineFragmentTest {
             Assertions.assertThat(fragment.getKeystore()).hasValue(keystore);
         });
         fragment.validate();
+    }
+
+    @Test
+    public void refreshEnabled() {
+        final File keystore = new File("");
+        final AuthenticationCommandLineFragment fragment =
+                new AuthenticationCommandLineFragment("username", keystore, true);
+        Assertions.assertThat(fragment.createAuthenticationHandler(SecretProvider.fallback("username", new char[0])))
+                .isNotNull();
     }
 
 }

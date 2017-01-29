@@ -17,16 +17,14 @@
 package com.github.triceo.robozonky.app;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
+import com.github.triceo.robozonky.app.util.Scheduler;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.app.version.VersionIdentifier;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,15 +34,11 @@ import org.slf4j.LoggerFactory;
 class VersionChecker implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionChecker.class);
-    private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
     @Override
     public Optional<Consumer<ReturnCode>> get() {
-        final Future<VersionIdentifier> future = VersionCheck.retrieveLatestVersion(this.executor);
-        return Optional.of((code) -> {
-            VersionChecker.newerRoboZonkyVersionExists(future);
-            this.executor.shutdown();
-        });
+        final Refreshable<VersionIdentifier> r = VersionCheck.retrieveLatestVersion(Scheduler.BACKGROUND_SCHEDULER);
+        return Optional.of((code) -> VersionChecker.newerRoboZonkyVersionExists(r));
     }
 
     static boolean newerRoboZonkyVersionExists(final VersionIdentifier version, final String currentVersion) {
@@ -76,17 +70,11 @@ class VersionChecker implements ShutdownHook.Handler {
 
     /**
      * Check the current version against a different version. Print log message with results.
-     * @param futureVersion Version to check against.
+     * @param version Version to check against.
      * @return True when a more recent version was found.
      */
-    static boolean newerRoboZonkyVersionExists(final Future<VersionIdentifier> futureVersion) {
-        try {
-            final VersionIdentifier version = futureVersion.get();
-            return VersionChecker.newerRoboZonkyVersionExists(version);
-        } catch (final InterruptedException | ExecutionException ex) {
-            VersionChecker.LOGGER.trace("Version check failed.", ex);
-            return false;
-        }
+    static boolean newerRoboZonkyVersionExists(final Refreshable<VersionIdentifier> version) {
+        return version.getLatest().map(VersionChecker::newerRoboZonkyVersionExists).orElse(false);
     }
 
 }

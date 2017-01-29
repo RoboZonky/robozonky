@@ -33,23 +33,35 @@
   <dependencies>
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
-      <artifactId>robozonky-core</artifactId>
+      <artifactId>robozonky-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.triceo.robozonky</groupId>
+      <artifactId>robozonky-marketplaces</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
       <artifactId>robozonky-strategy-simple</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
       <artifactId>robozonky-integration-zonkoid</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
       <artifactId>robozonky-notifications</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jackson2-provider</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>

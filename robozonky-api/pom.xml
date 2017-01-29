@@ -28,16 +28,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jackson2-provider</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -64,6 +60,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>com.github.stefanbirkner</groupId>
+      <artifactId>system-rules</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <scope>test</scope>
@@ -88,12 +92,68 @@
           <analysisConfiguration><![CDATA[
             {
               "revapi": {
+                "java": {
+                  "filter": {
+                    "packages": {
+                      "regex": true,
+                      "exclude": ["com\\.github\\.triceo\\.robozonky\\.internal(\\..+)?"]
+                    }
+                  }
+                },
                 "ignore": [
                   {
                     "code": "java.method.returnTypeChanged",
                     "old": "method <T extends com.github.triceo.robozonky.api.notifications.Event> java.util.Optional<com.github.triceo.robozonky.api.notifications.EventListener<T>> com.github.triceo.robozonky.api.notifications.ListenerService::findListener(java.lang.Class<T>)",
                     "new": "method <T extends com.github.triceo.robozonky.api.notifications.Event> com.github.triceo.robozonky.api.Refreshable<com.github.triceo.robozonky.api.notifications.EventListener<T>> com.github.triceo.robozonky.api.notifications.ListenerService::findListener(java.lang.Class<T>)",
                     "justification": "Introduction of daemon mode forced us to implement refreshable configurations."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.triceo.robozonky.api.Defaults",
+                    "package": "com.github.triceo.robozonky.api",
+                    "classSimpleName": "Defaults",
+                    "justification": "Class mistakenly included in the public part of the API."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.triceo.robozonky.api.State",
+                    "package": "com.github.triceo.robozonky.api",
+                    "classSimpleName": "State",
+                    "justification": "Class mistakenly included in the public part of the API."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.triceo.robozonky.api.notifications.MarketplaceCheckCompletedEvent",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "MarketplaceCheckCompletedEvent",
+                    "justification": "Some marketplace implementations don't actively check, so this became confusing."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.triceo.robozonky.api.notifications.MarketplaceCheckStartedEvent",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "MarketplaceCheckStartedEvent",
+                    "justification": "Some marketplace implementations don't actively check, so this became confusing."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.triceo.robozonky.api.remote.ZotifyApi",
+                    "package": "com.github.triceo.robozonky.api.remote",
+                    "classSimpleName": "ZotifyApi",
+                    "justification": "Zotify API has moved into the default marketplace provider."
+                  }, {
+                    "code": "java.method.visibilityReduced",
+                    "old": "method void com.github.triceo.robozonky.api.remote.entities.Loan::<init>()",
+                    "new": "method void com.github.triceo.robozonky.api.remote.entities.Loan::<init>()",
+                    "oldVisibility": "public",
+                    "newVisibility": "protected",
+                    "package": "com.github.triceo.robozonky.api.remote.entities",
+                    "classSimpleName": "Loan",
+                    "methodName": "<init>",
+                    "justification": "Loan now has a constructor with attributes, and this one is now solely for JAXB."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, java.lang.String, java.lang.String)",
+                    "new": "method void com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken::<init>(java.lang.String, java.lang.String, int, java.time.OffsetDateTime, java.lang.String, java.lang.String)",
+                    "package": "com.github.triceo.robozonky.api.remote.entities",
+                    "classSimpleName": "ZonkyApiToken",
+                    "methodName": "<init>",
+                    "justification": "New constructor for testing purposes."
                   }
                 ]
               }

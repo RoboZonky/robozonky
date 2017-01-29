@@ -31,6 +31,7 @@ public interface ListenerService {
      * called in any specific order or on any specific thread.
      *
      * @param eventType Type of the event listener to find.
+     * @param <T> Class describing the event.
      * @return A listener, if any, to register with RoboZonky.
      */
     <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType);

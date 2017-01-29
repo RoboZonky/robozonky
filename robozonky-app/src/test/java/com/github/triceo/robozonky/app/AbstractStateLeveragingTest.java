@@ -16,10 +16,16 @@
 
 package com.github.triceo.robozonky.app;
 
-import com.github.triceo.robozonky.util.Scheduler;
+import java.io.File;
+
+import com.github.triceo.robozonky.app.util.Scheduler;
 import org.junit.After;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractStateLeveragingTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStateLeveragingTest.class);
 
     @After
     public void reinitScheduler() {
@@ -27,8 +33,9 @@ public abstract class AbstractStateLeveragingTest {
     }
 
     @After
-    public void resetState() {
-        Activity.STATE.reset();
+    public void deleteState() {
+        final File f = new File("robozonky.state");
+        AbstractStateLeveragingTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
     }
 
 }

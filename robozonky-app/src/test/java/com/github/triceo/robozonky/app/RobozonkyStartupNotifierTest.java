@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.triceo.robozonky.notifications.Events;
+import com.github.triceo.robozonky.app.notifications.Events;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -32,8 +32,8 @@ public class RobozonkyStartupNotifierTest {
     public void properEventsFired() {
         final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier();
         final Optional<Consumer<ReturnCode>> result = rzsn.get();
-        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
         Assertions.assertThat(result).isPresent();
+        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
         result.get().accept(ReturnCode.OK);
         Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyEndingEvent.class);
     }

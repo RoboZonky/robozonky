@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.util.UUID;
 
-import com.github.triceo.robozonky.api.State;
+import com.github.triceo.robozonky.internal.api.State;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Assume;

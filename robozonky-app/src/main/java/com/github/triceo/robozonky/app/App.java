@@ -21,22 +21,22 @@ import java.lang.management.ManagementFactory;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
-import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.notifications.Events;
-import com.github.triceo.robozonky.util.Scheduler;
+import com.github.triceo.robozonky.app.investing.InvestmentMode;
+import com.github.triceo.robozonky.app.notifications.Events;
+import com.github.triceo.robozonky.app.util.Scheduler;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -55,7 +55,10 @@ public class App {
     private static final File ROBOZONKY_LOCK = new File(System.getProperty("java.io.tmpdir"), "robozonky.lock");
     private static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
 
+    public static final Semaphore DAEMON_ALLOWED_TO_TERMINATE = new Semaphore(1);
+
     private static void exit(final ReturnCode returnCode) {
+        App.LOGGER.trace("Exit requested with return code {}.", returnCode);
         App.exit(returnCode, null);
     }
 
@@ -73,12 +76,29 @@ public class App {
         System.exit(returnCode.getCode());
     }
 
-    static ReturnCode execute(final Configuration configuration, final Scheduler scheduler) {
+    static ReturnCode execute(final InvestmentMode mode) {
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
-        configuration.getInvestmentStrategy()
-                .ifPresent(refresher -> scheduler.submit(refresher, Duration.ofHours(1)));
-        final boolean loginSucceeded = new Remote(configuration).call().isPresent();
-        return loginSucceeded ? ReturnCode.OK : ReturnCode.ERROR_SETUP;
+        try {
+            return mode.get().map(r -> {
+                App.LOGGER.info("RoboZonky {}invested into {} loans.", mode.isDryRun() ? "would have " : "", r.size());
+                return ReturnCode.OK;
+            }).orElse(ReturnCode.ERROR_SETUP);
+        } finally {
+            try {
+                mode.close();
+            } catch (final Exception ex) {
+                App.LOGGER.debug("Failed cleaning up post investing.", ex);
+            }
+        }
+    }
+
+    static ReturnCode execute(final String[] args, final AtomicBoolean faultTolerant) {
+        return CommandLineInterface.parse(args)
+                .map(mode -> {
+                    App.LOGGER.info("RoboZonky v{} starting.", Defaults.ROBOZONKY_VERSION);
+                    faultTolerant.set(mode.isFaultTolerant());
+                    return App.execute(mode);
+                }).orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
     }
 
     public static void main(final String... args) {
@@ -86,6 +106,11 @@ public class App {
         if (!App.SHUTDOWN_HOOKS.register(new Exclusivity(App.ROBOZONKY_LOCK))) {
             App.exit(ReturnCode.ERROR_LOCK);
         }
+        // pressing Ctrl+C in daemon mode must result in proper RoboZonky shutdown
+        App.SHUTDOWN_HOOKS.register(() -> {
+            App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
+            return Optional.of((returnCode -> App.DAEMON_ALLOWED_TO_TERMINATE.release()));
+        });
         // and actually start running
         Events.fire(new RoboZonkyStartingEvent());
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
@@ -93,20 +118,12 @@ public class App {
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
                 Charset.defaultCharset());
         // start the check for new version, making sure it is properly handled during execute
-        final Scheduler scheduler = Scheduler.BACKGROUND_SCHEDULER;
-        App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> scheduler.shutdown()));
+        App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.BACKGROUND_SCHEDULER.shutdown()));
         App.SHUTDOWN_HOOKS.register(new VersionChecker());
         // read the command line and execute the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try {
-            // prepare command line
-            final Optional<Configuration> optionalCtx = CommandLineInterface.parse(args);
-            optionalCtx.ifPresent(ctx -> {
-                App.LOGGER.info("RoboZonky v{} starting.", Defaults.ROBOZONKY_VERSION);
-                faultTolerant.set(ctx.isFaultTolerant());
-                App.exit(App.execute(ctx, scheduler));
-            }); // core investing algorithm
-            App.exit(ReturnCode.ERROR_WRONG_PARAMETERS);
+            App.exit(App.execute(args, faultTolerant));
         } catch (final ProcessingException | NotAllowedException ex) {
             App.handleException(ex, faultTolerant.get());
         } catch (final WebApplicationException ex) {

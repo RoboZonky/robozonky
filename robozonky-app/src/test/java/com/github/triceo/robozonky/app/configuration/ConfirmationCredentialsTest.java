@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ public class ConfirmationCredentialsTest {
     @Test
     public void fullCredentials() {
         final String first = "zonkoid", second = "password";
-        final ConfirmationCredentials cc = new ConfirmationCredentials(first + ":" + second);
+        final Credentials cc = new Credentials(first + ":" + second);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(cc.getToolId()).isEqualTo(first);
         softly.assertThat(cc.getToken()).contains(second.toCharArray());
@@ -34,7 +34,7 @@ public class ConfirmationCredentialsTest {
     @Test
     public void tokenLess() {
         final String first = "zonkoid";
-        final ConfirmationCredentials cc = new ConfirmationCredentials(first);
+        final Credentials cc = new Credentials(first);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(cc.getToolId()).isEqualTo(first);
         softly.assertThat(cc.getToken()).isEmpty();
@@ -44,7 +44,7 @@ public class ConfirmationCredentialsTest {
     @Test(expected = IllegalArgumentException.class)
     public void wrong() {
         final String wrong = "zonkoid:password:extra";
-        new ConfirmationCredentials(wrong);
+        new Credentials(wrong);
     }
 
 }

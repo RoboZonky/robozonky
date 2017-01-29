@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package com.github.triceo.robozonky.api.strategies;
 
 import java.util.Objects;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
 /**
  * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link Loan} for investing.

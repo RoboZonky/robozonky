@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.api.notifications;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 /**
- * Fired immediately after @{@link MarketplaceCheckStartedEvent}, when a loan is present.
+ * Fired immediately after a new loan is received from the marketplace.
  */
 public final class LoanArrivedEvent implements Event {
 

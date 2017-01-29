@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;

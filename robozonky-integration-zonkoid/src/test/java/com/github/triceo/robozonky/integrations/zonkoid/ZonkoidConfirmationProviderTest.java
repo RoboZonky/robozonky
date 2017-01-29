@@ -21,10 +21,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.assertj.core.api.Assertions;

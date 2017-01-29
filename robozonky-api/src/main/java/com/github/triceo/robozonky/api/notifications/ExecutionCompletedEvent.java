@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Collections;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 
 /**
- * Fired immediately after the strategy has finished evaluating loans and making investments.
+ * Fired immediately after the investing algorithm is finished making investments.
  */
 public final class ExecutionCompletedEvent implements Event {
 

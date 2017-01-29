@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.github.triceo.robozonky.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;

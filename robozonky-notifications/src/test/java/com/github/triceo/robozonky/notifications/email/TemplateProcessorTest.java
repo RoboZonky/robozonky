@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.io.IOException;
 
-import com.github.triceo.robozonky.api.Defaults;
 import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import freemarker.template.TemplateException;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;

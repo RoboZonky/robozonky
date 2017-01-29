@@ -18,27 +18,27 @@ package com.github.triceo.robozonky.app;
 
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.OptionalInt;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
-import com.github.triceo.robozonky.ApiProvider;
-import com.github.triceo.robozonky.ZonkyProxy;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
+import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
+import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
-import com.github.triceo.robozonky.app.configuration.Configuration;
-import com.github.triceo.robozonky.util.Scheduler;
+import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
+import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
+import com.github.triceo.robozonky.app.investing.ZonkyProxy;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,30 +48,6 @@ import org.mockito.Mockito;
 
 public class AppTest extends AbstractStateLeveragingTest {
 
-    private static Configuration mockDryRunConfiguration() {
-        final Configuration ctx = Mockito.mock(Configuration.class);
-        Mockito.when(ctx.getSleepPeriod()).thenReturn(Duration.ofMinutes(60));
-        Mockito.when(ctx.getCaptchaDelay()).thenReturn(Duration.ofSeconds(120));
-        Mockito.when(ctx.getLoanId()).thenReturn(OptionalInt.of(1));
-        Mockito.when(ctx.getLoanAmount()).thenReturn(OptionalInt.of(1000));
-        Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.empty());
-        Mockito.when(ctx.isDryRun()).thenReturn(true);
-        Mockito.when(ctx.getDryRunBalance()).thenReturn(OptionalInt.of(10000));
-        return ctx;
-    }
-
-    private static Configuration mockRegularConfiguration() {
-        final Configuration ctx = Mockito.mock(Configuration.class);
-        Mockito.when(ctx.getSleepPeriod()).thenReturn(Duration.ofMinutes(60));
-        Mockito.when(ctx.getCaptchaDelay()).thenReturn(Duration.ofSeconds(120));
-        final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
-        final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
-        Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));
-        Mockito.when(ctx.getInvestmentStrategy()).thenReturn(Optional.of(refreshable));
-        Mockito.when(ctx.isDryRun()).thenReturn(false);
-        return ctx;
-    }
-
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
@@ -79,12 +55,6 @@ public class AppTest extends AbstractStateLeveragingTest {
     public void notWellFormedCli() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
         App.main();
-    }
-
-    @Test
-    public void wrongStrategyOnCli() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_SETUP.getCode());
-        App.main("-u", "user", "-p", "password", "-t", "many", "-l", "some.random.file");
     }
 
     @Test
@@ -153,9 +123,7 @@ public class AppTest extends AbstractStateLeveragingTest {
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        final Configuration ctx = AppTest.mockDryRunConfiguration();
-        Mockito.when(ctx.getAuthenticationHandler()).thenReturn(auth);
-        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
+        Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
         final Loan loan = Mockito.mock(Loan.class);
@@ -165,7 +133,8 @@ public class AppTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
         // and now test
-        final ReturnCode rc = App.execute(ctx, new Scheduler());
+        final ReturnCode rc = App.execute(new DirectInvestmentMode(auth, new ZonkyProxy.Builder().asDryRun(),
+                false, 1, 1000));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_SETUP);
     }
 
@@ -175,11 +144,7 @@ public class AppTest extends AbstractStateLeveragingTest {
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
-        Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(Optional.of(Collections.emptyList()));
-        final Configuration ctx = AppTest.mockRegularConfiguration();
-        Mockito.when(ctx.getZonkyProxyBuilder()).thenReturn(new ZonkyProxy.Builder().asDryRun());
-        Mockito.when(ctx.getAuthenticationHandler()).thenReturn(auth);
+        Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Collections.emptyList());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
         final Loan loan = Mockito.mock(Loan.class);
@@ -188,8 +153,14 @@ public class AppTest extends AbstractStateLeveragingTest {
         Mockito.when(zonky.getLoan(ArgumentMatchers.anyInt())).thenReturn(loan);
         Mockito.when(zonky.getWallet()).thenReturn(Mockito.mock(Wallet.class));
         Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(zonky);
+        final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
+        final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
+        Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));
+        final Marketplace marketplace = Mockito.mock(Marketplace.class);
+        Mockito.when(marketplace.specifyExpectedTreatment()).thenReturn(ExpectedTreatment.POLLING);
         // and now test
-        final ReturnCode rc = App.execute(ctx, new Scheduler());
+        final ReturnCode rc = App.execute(new SingleShotInvestmentMode(auth, new ZonkyProxy.Builder().asDryRun(),
+                false, marketplace, refreshable));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.OK);
     }
 
