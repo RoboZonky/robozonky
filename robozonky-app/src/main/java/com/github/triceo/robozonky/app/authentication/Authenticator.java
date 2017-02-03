@@ -18,6 +18,8 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.time.temporal.TemporalAmount;
 import java.util.function.Function;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
@@ -89,8 +91,12 @@ class Authenticator {
      */
     public Authentication authenticate(final ApiProvider provider) {
         final ZonkyOAuthApi api = provider.oauth();
-        final ZonkyApiToken token = authenticationMethod.apply(api);
-        return new Authenticator.AuthenticationImpl(provider, token);
+        try {
+            final ZonkyApiToken token = authenticationMethod.apply(api);
+            return new Authenticator.AuthenticationImpl(provider, token);
+        } catch (final BadRequestException ex) {
+            throw new WebApplicationException("Failed authenticating with Zonky, check your password.", ex);
+        }
     }
 
     private static class AuthenticationImpl implements Authentication {
