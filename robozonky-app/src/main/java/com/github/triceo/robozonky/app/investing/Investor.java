@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Controls the investments based on the strategy, user portfolio and balance.
  */
-public class Investor {
+class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
 
