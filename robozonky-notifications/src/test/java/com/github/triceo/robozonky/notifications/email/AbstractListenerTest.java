@@ -33,6 +33,9 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
@@ -79,6 +82,12 @@ public abstract class AbstractListenerTest {
                 new ExecutionStartedEvent(Collections.emptyList(), 200));
         events.put(SupportedListener.CRASHED.getEventType(),
                 new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
+        events.put(SupportedListener.DAEMON_FAILED.getEventType(),
+                new RoboZonkyDaemonFailedEvent(new RuntimeException()));
+        events.put(SupportedListener.INITIALIZED.getEventType(),
+                new RoboZonkyInitializedEvent());
+        events.put(SupportedListener.ENDING.getEventType(),
+                new RoboZonkyEndingEvent());
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[] {s, s.getListener(properties), events.get(s.getEventType())})

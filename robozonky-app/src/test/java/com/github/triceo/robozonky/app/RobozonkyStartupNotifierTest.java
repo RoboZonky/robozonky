@@ -31,10 +31,11 @@ public class RobozonkyStartupNotifierTest {
     @Test
     public void properEventsFired() {
         final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier();
-        final Optional<Consumer<ReturnCode>> result = rzsn.get();
+        final Optional<Consumer<ShutdownHook.Result>> result = rzsn.get();
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
-        result.get().accept(ReturnCode.OK);
+        final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
+        result.get().accept(r);
         Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyEndingEvent.class);
     }
 

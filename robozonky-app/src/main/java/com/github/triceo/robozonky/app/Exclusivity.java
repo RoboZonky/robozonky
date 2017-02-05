@@ -23,7 +23,6 @@ import java.nio.channels.FileLock;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.github.triceo.robozonky.api.ReturnCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +128,7 @@ final class Exclusivity implements ShutdownHook.Handler {
      * @return If present, call in order to waive exclusivity. If empty, exclusivity not acquired.
      */
     @Override
-    public Optional<Consumer<ReturnCode>> get() {
+    public Optional<Consumer<ShutdownHook.Result>> get() {
         this.ensure();
         if (!this.isEnsured()) {
             return Optional.empty();

@@ -110,7 +110,7 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         App.DAEMON_ALLOWED_TO_TERMINATE.release(); // make sure the daemon is allowed to quit
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void standardDryRun() throws Exception {
         System.setProperty("robozonky.default.dry_run_balance", String.valueOf(1000)); // no need to mock wallet
         final Loan l = new Loan(1, 10000, OffsetDateTime.now());

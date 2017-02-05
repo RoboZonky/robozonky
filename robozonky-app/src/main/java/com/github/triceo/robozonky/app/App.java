@@ -30,7 +30,6 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.ReturnCode;
-import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
@@ -69,10 +68,7 @@ public class App {
      * @param cause Exception that caused the application to exit, if any.
      */
     private static void exit(final ReturnCode returnCode, final Exception cause) {
-        if (returnCode != ReturnCode.OK) {
-            Events.fire(new RoboZonkyCrashedEvent(returnCode, cause));
-        }
-        App.SHUTDOWN_HOOKS.execute(returnCode);
+        App.SHUTDOWN_HOOKS.execute(returnCode, cause);
         System.exit(returnCode.getCode());
     }
 

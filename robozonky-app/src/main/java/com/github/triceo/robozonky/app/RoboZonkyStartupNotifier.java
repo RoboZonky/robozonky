@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.ReturnCode;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.app.notifications.Events;
@@ -35,11 +36,15 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoboZonkyStartupNotifier.class);
 
     @Override
-    public Optional<Consumer<ReturnCode>> get() {
+    public Optional<Consumer<ShutdownHook.Result>> get() {
         RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky at your service! =====");
         Events.fire(new RoboZonkyInitializedEvent());
-        return Optional.of((code) -> {
-            Events.fire(new RoboZonkyEndingEvent(code));
+        return Optional.of((result) -> {
+            if (result.getReturnCode() == ReturnCode.OK) {
+                Events.fire(new RoboZonkyEndingEvent());
+            } else {
+                Events.fire(new RoboZonkyCrashedEvent(result.getReturnCode(), result.getCause()));
+            }
             RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky out. =====");
         });
     }

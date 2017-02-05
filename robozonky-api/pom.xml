@@ -178,6 +178,14 @@
                   }, {
                     "code": "java.class.kindChanged",
                     "justification": "Event changed from interface to abstract class in order to add toString()."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>(com.github.triceo.robozonky.api.ReturnCode)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyEndingEvent",
+                    "methodName": "<init>",
+                    "justification": "This event is for clean termination, therefore return code makes no sense."
                   }
                 ]
               }

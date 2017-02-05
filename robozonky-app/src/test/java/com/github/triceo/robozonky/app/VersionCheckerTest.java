@@ -31,9 +31,9 @@ public class VersionCheckerTest {
     @Test
     public void checkShutdownHook() {
         final VersionChecker v = new VersionChecker();
-        final Optional<Consumer<ReturnCode>> hook = v.get();
+        final Optional<Consumer<ShutdownHook.Result>> hook = v.get();
         Assertions.assertThat(hook).isPresent();
-        hook.get().accept(ReturnCode.OK);
+        hook.get().accept(new ShutdownHook.Result(ReturnCode.OK, null));
     }
 
     @Test

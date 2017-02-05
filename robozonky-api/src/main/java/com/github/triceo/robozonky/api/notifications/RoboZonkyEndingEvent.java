@@ -16,25 +16,9 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-import com.github.triceo.robozonky.api.ReturnCode;
-
 /**
- * Fired before the application shuts down, provided {@link RoboZonkyInitializedEvent} was fired before.
+ * Fired before the application shuts down cleanly, provided {@link RoboZonkyInitializedEvent} was fired before.
  */
 public final class RoboZonkyEndingEvent extends Event {
-
-    private final ReturnCode returnCode;
-
-    public RoboZonkyEndingEvent(final ReturnCode returnCode) {
-        this.returnCode = returnCode;
-    }
-
-    /**
-     *
-     * @return The error code that RoboZonky will end with.
-     */
-    public ReturnCode getReturnCode() {
-        return this.returnCode;
-    }
 
 }

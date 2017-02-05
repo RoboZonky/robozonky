@@ -23,6 +23,9 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 
 enum SupportedListener {
 
@@ -100,6 +103,51 @@ enum SupportedListener {
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyCrashedEventListener(properties);
+        }
+    }, DAEMON_FAILED {
+        @Override
+        public String getId() {
+            return "roboZonkyDaemonFailed";
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RoboZonkyDaemonFailedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new RoboZonkyDaemonFailedEventListener(properties);
+        }
+    }, INITIALIZED {
+        @Override
+        public String getId() {
+            return "roboZonkyInitialized";
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RoboZonkyInitializedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new RoboZonkyInitializedEventListener(properties);
+        }
+    }, ENDING {
+        @Override
+        public String getId() {
+            return "roboZonkyEnding";
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RoboZonkyEndingEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new RoboZonkyEndingEventListener(properties);
         }
     };
 

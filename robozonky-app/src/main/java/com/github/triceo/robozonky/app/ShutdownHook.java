@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,28 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to specify
- * such actions and {@link #execute(ReturnCode)} when it's time to shut the app down.
+ * such actions and {@link #execute(ReturnCode, Exception)} when it's time to shut the app down.
  */
 class ShutdownHook {
+
+    public final static class Result {
+
+        private final ReturnCode returnCode;
+        private final Exception cause;
+
+        public Result(final ReturnCode code, final Exception cause) {
+            this.returnCode = code;
+            this.cause = cause;
+        }
+
+        public ReturnCode getReturnCode() {
+            return returnCode;
+        }
+
+        public Exception getCause() {
+            return cause;
+        }
+    }
 
     /**
      * Represents a unit of state in the application.
@@ -37,17 +56,17 @@ class ShutdownHook {
 
         /**
          * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
-         * {@link ShutdownHook#execute(ReturnCode)}.
+         * {@link ShutdownHook#execute(ReturnCode, Exception)}.
          *
          * @return Will be called during app shutdown, if present.
          */
-        Optional<Consumer<ReturnCode>> get();
+        Optional<Consumer<ShutdownHook.Result>> get();
 
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownHook.class);
 
-    private final Stack<Consumer<ReturnCode>> stack = new Stack<>();
+    private final Stack<Consumer<ShutdownHook.Result>> stack = new Stack<>();
 
     /**
      * Register a handler to call arbitrary code during execute.
@@ -57,7 +76,7 @@ class ShutdownHook {
      */
     public boolean register(final ShutdownHook.Handler handler) {
         try {
-            final Optional<Consumer<ReturnCode>> end = handler.get();
+            final Optional<Consumer<ShutdownHook.Result>> end = handler.get();
             if (end.isPresent()) {
                 stack.push(end.get());
                 return true;
@@ -75,12 +94,14 @@ class ShutdownHook {
      * their registration. If any handler throws an exception, it will be ignored.
      *
      * @param returnCode The application's return code to pass to the handlers.
+     * @param cause Optional cause of the return.
      */
-    public void execute(final ReturnCode returnCode) {
+    public void execute(final ReturnCode returnCode, final Exception cause) {
         ShutdownHook.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
+        final ShutdownHook.Result result = new ShutdownHook.Result(returnCode, cause);
         while (!stack.isEmpty()) {
             try {
-                stack.pop().accept(returnCode);
+                stack.pop().accept(result);
             } catch (final RuntimeException ex) {
                 ShutdownHook.LOGGER.warn("Failed to execute state handler.", ex);
             }

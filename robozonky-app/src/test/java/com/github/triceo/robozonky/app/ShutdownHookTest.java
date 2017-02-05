@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class ShutdownHookTest {
         final ShutdownHook s = new ShutdownHook();
         Assertions.assertThat(s.register(h)).isFalse();
         try {
-            s.execute(ReturnCode.OK);
+            s.execute(ReturnCode.OK, null);
         } catch (final RuntimeException ex) {
             Assertions.fail("Should not have been thrown.", ex);
         }
@@ -54,7 +54,7 @@ public class ShutdownHookTest {
         final ShutdownHook s = new ShutdownHook();
         Assertions.assertThat(s.register(h)).isTrue();
         try {
-            s.execute(ReturnCode.OK);
+            s.execute(ReturnCode.OK, null);
         } catch (final RuntimeException ex) {
             Assertions.fail("Should not have been thrown.", ex);
         }
