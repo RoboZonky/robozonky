@@ -24,9 +24,15 @@ import org.junit.Test;
 public class RoboZonkyMarketplaceServiceTest {
 
     @Test
-    public void retrieval() {
+    public void zotifyRetrieval() {
         Assertions.assertThat(new RobozonkyMarketplaceService().find("zotify"))
                 .isPresent().containsInstanceOf(ZotifyMarketplace.class);
+    }
+
+    @Test
+    public void zonkyRetrieval() {
+        Assertions.assertThat(new RobozonkyMarketplaceService().find("zonky"))
+                .isPresent().containsInstanceOf(ZonkyMarketplace.class);
     }
 
     @Test

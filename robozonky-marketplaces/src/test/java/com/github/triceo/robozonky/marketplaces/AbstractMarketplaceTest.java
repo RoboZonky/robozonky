@@ -16,37 +16,51 @@
 
 package com.github.triceo.robozonky.marketplaces;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
-import javax.ws.rs.NotAllowedException;
-import javax.ws.rs.ProcessingException;
 
 import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
+import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Assume;
+import org.junit.AfterClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ZotifyMarketplaceTest {
+@RunWith(Parameterized.class)
+public class AbstractMarketplaceTest {
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getMarketplaces() {
+        return Arrays.asList(new Object[] {ZotifyMarketplace.class}, new Object[] {ZonkyMarketplace.class});
+    }
+
+    private static final MarketplaceApiProvider API_PROVIDER = new MarketplaceApiProvider();
+    @Parameterized.Parameter
+    public Class<? extends Marketplace> marketClass;
 
     @Test
-    public void retrieval() {
+    public void retrieval() throws Exception {
         final Consumer<Collection<Loan>> consumer = Mockito.mock(Consumer.class);
-        try (final ZotifyMarketplace market = new ZotifyMarketplace()) {
+        try (final Marketplace market = marketClass.newInstance()) {
+            Mockito.verify(consumer, Mockito.never()).accept(ArgumentMatchers.any());
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(market.specifyExpectedTreatment()).isEqualTo(ExpectedTreatment.POLLING);
                 softly.assertThat(market.registerListener(consumer)).isTrue();
             });
             market.run();
-        } catch (final ProcessingException | NotAllowedException e) {
-            Assume.assumeTrue(false); // Zotify is not available, test makes no sense
-        } catch (final Exception e) {
-            Assertions.fail("Unexpected exception.", e);
+            Mockito.verify(consumer, Mockito.times(1)).accept(ArgumentMatchers.any());
         }
-        Mockito.verify(consumer, Mockito.times(1)).accept(ArgumentMatchers.any());
     }
+
+    @AfterClass
+    public static void close() {
+        AbstractMarketplaceTest.API_PROVIDER.close();
+    }
+
 
 }

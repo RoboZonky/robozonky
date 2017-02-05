@@ -16,39 +16,13 @@
 
 package com.github.triceo.robozonky.marketplaces;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.function.Consumer;
-
-import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
-import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.Api;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-public class ZotifyMarketplace implements Marketplace {
-
-    private final Collection<Consumer<Collection<Loan>>> loanListeners = new LinkedHashSet<>();
-    private final MarketplaceApiProvider apis = new MarketplaceApiProvider();
-    private final Api api = apis.zotify();
+class ZotifyMarketplace extends AbstractMarketplace {
 
     @Override
-    public boolean registerListener(final Consumer<Collection<Loan>> listener) {
-        return this.loanListeners.add(listener);
+    protected Api newApi(final MarketplaceApiProvider apiProvider) {
+        return apiProvider.zotify();
     }
 
-    @Override
-    public ExpectedTreatment specifyExpectedTreatment() {
-        return ExpectedTreatment.POLLING;
-    }
-
-    @Override
-    public void run() {
-        final Collection<Loan> loans = api.getLoans();
-        loanListeners.forEach(l -> l.accept(loans));
-    }
-
-    @Override
-    public void close() {
-        apis.close();
-    }
 }

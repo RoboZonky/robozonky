@@ -16,24 +16,13 @@
 
 package com.github.triceo.robozonky.marketplaces;
 
-import javax.ws.rs.NotAllowedException;
-import javax.ws.rs.ProcessingException;
+import com.github.triceo.robozonky.api.remote.Api;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Assume;
-import org.junit.Test;
+class ZonkyMarketplace extends AbstractMarketplace {
 
-public class MarketplaceApiProviderTest {
-
-    @Test
-    public void apiRetrieve() {
-        try (final MarketplaceApiProvider apiProvider = new MarketplaceApiProvider()) {
-            apiProvider.zotify().getLoans();
-        } catch (final ProcessingException | NotAllowedException e) {
-            Assume.assumeTrue(false); // Zotify is not available, test makes no sense
-        } catch (final Throwable t) {
-            Assertions.fail("Unexpected exception.", t);
-        }
+    @Override
+    protected Api newApi(final MarketplaceApiProvider apiProvider) {
+        return apiProvider.zonky();
     }
 
 }
