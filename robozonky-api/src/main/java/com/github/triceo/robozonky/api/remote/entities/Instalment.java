@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
-public class Instalment implements BaseEntity {
+public class Instalment extends BaseEntity {
 
     private BigDecimal instalmentAmount, principalPaid, interestPaid;
     private OffsetDateTime month;
@@ -49,14 +49,4 @@ public class Instalment implements BaseEntity {
         return month;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Instalment{");
-        sb.append("instalmentAmount=").append(instalmentAmount);
-        sb.append(", principalPaid=").append(principalPaid);
-        sb.append(", interestPaid=").append(interestPaid);
-        sb.append(", month=").append(month);
-        sb.append('}');
-        return sb.toString();
-    }
 }

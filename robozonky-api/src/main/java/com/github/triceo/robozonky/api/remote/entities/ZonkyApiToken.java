@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.Arrays;
 import java.util.Objects;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -39,7 +40,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "token")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ZonkyApiToken implements BaseEntity {
+public class ZonkyApiToken extends BaseEntity {
 
     public static ZonkyApiToken unmarshal(final Reader token) throws JAXBException {
         final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
@@ -135,9 +136,14 @@ public class ZonkyApiToken implements BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final ZonkyApiToken that = (ZonkyApiToken) o;
-        return Objects.equals(accessToken, that.accessToken) &&
-                Objects.equals(refreshToken, that.refreshToken) &&
-                Objects.equals(scope, that.scope);
+        if (Arrays.equals(accessToken, that.accessToken)) {
+            if (Arrays.equals(refreshToken, that.refreshToken)) {
+                if (Objects.equals(scope, that.scope)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -145,13 +151,4 @@ public class ZonkyApiToken implements BaseEntity {
         return Objects.hash(accessToken, refreshToken, scope);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("ZonkyApiToken{");
-        sb.append("type='").append(type).append('\'');
-        sb.append(", expiresIn=").append(expiresIn);
-        sb.append(", scope='").append(scope).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
 }

@@ -32,6 +32,7 @@ import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.app.investing.ZonkyProxy;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,6 +182,10 @@ enum OperatingMode implements CommandLineFragment {
                     return this.getInvestmentMode(cli, auth, builder);
                 })
                 .orElse(Optional.empty());
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this).toString();
     }
 
 }

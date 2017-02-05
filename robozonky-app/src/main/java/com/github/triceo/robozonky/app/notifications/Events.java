@@ -113,7 +113,7 @@ public enum Events {
     @SuppressWarnings("unchecked")
     public static <E extends Event> void fire(final E event) {
         final Class<E> eventClass = (Class<E>) event.getClass();
-        Events.LOGGER.debug("Firing {}: '{}'.", eventClass, event);
+        Events.LOGGER.debug("Firing {}.", eventClass);
         Events.INSTANCE.getListeners(eventClass).parallel()
                 .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
                 .forEach(l -> Events.fire(event, l));

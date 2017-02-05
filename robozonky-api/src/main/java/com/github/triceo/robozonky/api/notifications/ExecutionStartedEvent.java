@@ -25,7 +25,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
  * Fired immediately before the loans are submitted to the investing algorithm. May be followed by
  * {@link StrategyStartedEvent}, will eventually be followed by {@link ExecutionCompletedEvent}.
  */
-public final class ExecutionStartedEvent implements Event {
+public final class ExecutionStartedEvent extends Event {
 
     private final Collection<LoanDescriptor> loanDescriptors;
     private final int balance;

@@ -26,7 +26,7 @@ import com.beust.jcommander.ParameterException;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
 
-class AuthenticationCommandLineFragment implements CommandLineFragment {
+class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
 
     @Parameter(names = {"-u", "--username"},
             description = "Used to connect to the Zonky server.")

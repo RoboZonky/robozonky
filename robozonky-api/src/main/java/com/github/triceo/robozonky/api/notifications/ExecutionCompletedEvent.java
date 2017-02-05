@@ -24,7 +24,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 /**
  * Fired immediately after the investing algorithm is finished making investments.
  */
-public final class ExecutionCompletedEvent implements Event {
+public final class ExecutionCompletedEvent extends Event {
 
     private final Collection<Investment> investment;
     private final int newBalance;

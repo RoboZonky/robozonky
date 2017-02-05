@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,18 +62,4 @@ public class CurrentOverview extends BaseOverview {
         return interestLeftDue;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("CurrentOverview{");
-        sb.append("principalLeft=").append(principalLeft);
-        sb.append(", principalLeftToPay=").append(principalLeftToPay);
-        sb.append(", principalLeftDue=").append(principalLeftDue);
-        sb.append(", interestPlanned=").append(interestPlanned);
-        sb.append(", interestLeft=").append(interestLeft);
-        sb.append(", interestLeftToPay=").append(interestLeftToPay);
-        sb.append(", interestLeftDue=").append(interestLeftDue);
-        sb.append("} extends ");
-        sb.append(super.toString());
-        return sb.toString();
-    }
 }

@@ -45,6 +45,10 @@
       <version>0.5.4</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
       <scope>test</scope>
@@ -62,10 +66,12 @@
     <dependency>
       <groupId>com.github.stefanbirkner</groupId>
       <artifactId>system-rules</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -154,6 +160,24 @@
                     "classSimpleName": "ZonkyApiToken",
                     "methodName": "<init>",
                     "justification": "New constructor for testing purposes."
+                  }, {
+                    "code": "java.class.noLongerImplementsInterface",
+                    "justification": "Events and JAXB Entities now have default toString(), and therefore extend instead of implement."
+                  }, {
+                    "code": "java.class.nonFinalClassInheritsFromNewClass",
+                    "justification": "Events and JAXB Entities now have default toString(), and therefore extend instead of implement."
+                  }, {
+                    "code": "java.method.nowFinal",
+                    "justification": "JAXB Entities now share single final toString()."
+                  }, {
+                    "code": "java.method.finalMethodAddedToNonFinalClass",
+                    "justification": "Events now share single final toString()."
+                  }, {
+                    "code": "java.method.removed",
+                    "justification": "handleGetter()/handleSetter() no longer default methods."
+                  }, {
+                    "code": "java.class.kindChanged",
+                    "justification": "Event changed from interface to abstract class in order to add toString()."
                   }
                 ]
               }

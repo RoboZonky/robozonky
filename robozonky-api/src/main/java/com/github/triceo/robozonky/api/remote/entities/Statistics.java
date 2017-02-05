@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Statistics implements BaseEntity {
+public class Statistics extends BaseEntity {
 
     private static BigDecimal getOrDefault(final BigDecimal actualValue) {
         return Statistics.getOrDefault(actualValue, () -> BigDecimal.ZERO);
@@ -88,17 +88,4 @@ public class Statistics implements BaseEntity {
         return Statistics.getOrDefault(this.riskPortfolio);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Statistics{");
-        sb.append("currentProfitability=").append(currentProfitability);
-        sb.append(", expectedProfitability=").append(expectedProfitability);
-        sb.append(", currentOverview=").append(currentOverview);
-        sb.append(", overallOverview=").append(overallOverview);
-        sb.append(", overallPortfolio=").append(overallPortfolio);
-        sb.append(", riskPortfolio=").append(riskPortfolio);
-        sb.append(", cashFlow=").append(cashFlow);
-        sb.append('}');
-        return sb.toString();
-    }
 }

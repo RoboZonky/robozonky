@@ -21,7 +21,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 /**
  * Fired immediately after a new loan is received from the marketplace.
  */
-public final class LoanArrivedEvent implements Event {
+public final class LoanArrivedEvent extends Event {
 
     private final LoanDescriptor loanDescriptor;
 

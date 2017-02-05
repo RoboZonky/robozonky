@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
 
-public class Wallet implements BaseEntity {
+public class Wallet extends BaseEntity {
 
     private int id;
     private BigDecimal balance, availableBalance, blockedBalance, creditSum, debitSum;
@@ -78,21 +78,6 @@ public class Wallet implements BaseEntity {
     @XmlElement
     public BankAccount getAccount() {
         return account;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Wallet{");
-        sb.append("id=").append(id);
-        sb.append(", balance=").append(balance);
-        sb.append(", availableBalance=").append(availableBalance);
-        sb.append(", blockedBalance=").append(blockedBalance);
-        sb.append(", creditSum=").append(creditSum);
-        sb.append(", debitSum=").append(debitSum);
-        sb.append(", variableSymbol=").append(variableSymbol);
-        sb.append(", account=").append(account);
-        sb.append('}');
-        return sb.toString();
     }
 
 }

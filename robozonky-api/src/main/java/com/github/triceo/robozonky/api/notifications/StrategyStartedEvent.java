@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
  * Fired before any loans are submitted for evaluation by the strategy and subsequent investment operations. May be
  * followed by {@link LoanRecommendedEvent} and will eventually be followed by {@link StrategyCompletedEvent}.
  */
-public final class StrategyStartedEvent implements Event {
+public final class StrategyStartedEvent extends Event {
 
     private final InvestmentStrategy strategyToBeUsed;
     private final Collection<LoanDescriptor> loanDescriptors;

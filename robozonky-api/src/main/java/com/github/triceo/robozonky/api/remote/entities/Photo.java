@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.api.remote.entities;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Photo  implements BaseEntity {
+public class Photo extends BaseEntity {
 
     private String name;
     private String url;
@@ -33,12 +33,4 @@ public class Photo  implements BaseEntity {
         return url;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Photo{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", url='").append(url).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
 }

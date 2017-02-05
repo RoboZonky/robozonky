@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,16 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
+import com.github.triceo.robozonky.internal.api.ToStringBuilder;
+
 /**
- * Marker interface for an event that may be fired any time during RoboZonky's runtime.
+ * Marker for an event that may be fired any time during RoboZonky's runtime.
  */
-public interface Event {
+public abstract class Event {
+
+    @Override
+    public final String toString() {
+        return new ToStringBuilder(this).toString();
+    }
 
 }

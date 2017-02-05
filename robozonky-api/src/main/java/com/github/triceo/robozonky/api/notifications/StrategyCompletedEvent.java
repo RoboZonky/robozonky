@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 /**
  * Fired immediately after all loans have been evaluated and all possible investment operations performed.
  */
-public final class StrategyCompletedEvent implements Event {
+public final class StrategyCompletedEvent extends Event {
 
     private final InvestmentStrategy investmentStrategyUsed;
     private final Collection<Investment> investmentsMade;

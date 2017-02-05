@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.app.configuration;
 
 import com.beust.jcommander.Parameter;
 
-class MarketplaceCommandLineFragment implements CommandLineFragment {
+class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
 
     @Parameter(names = {"-m", "--marketplace"}, description = "Which marketplace to use.")
     String marketplaceCredentials = "zotify";

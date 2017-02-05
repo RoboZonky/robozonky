@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.app.configuration;
 
 import com.beust.jcommander.Parameter;
 
-class TweaksCommandLineFragment implements CommandLineFragment {
+class TweaksCommandLineFragment extends AbstractCommandLineFragment {
 
     @Parameter(names = {"-d", "--dry"},
             description = "RoboZonky will simulate investments, but never actually spend money.")

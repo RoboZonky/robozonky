@@ -36,12 +36,12 @@ import com.github.triceo.robozonky.internal.api.Defaults;
  * provide non-failing deserializers which handle the missing values gracefully and provide a message warning users that
  * something needs an upgrade.
  */
-public class Loan implements BaseEntity {
+public class Loan extends BaseEntity {
 
     private boolean topped, covered, published;
     private int id, termInMonths, investmentsCount, questionsCount, userId;
     private double amount, remainingInvestment;
-    private String name, story, nickName;
+    private String name, nickName, story;
     private BigDecimal interestRate = BigDecimal.ZERO;
     private OffsetDateTime datePublished, deadline = OffsetDateTime.MAX;
     private Rating rating;
@@ -180,18 +180,6 @@ public class Loan implements BaseEntity {
     @XmlElement
     public int getUserId() {
         return userId;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Loan{");
-        sb.append("id=").append(id);
-        sb.append(", termInMonths=").append(termInMonths);
-        sb.append(", userId=").append(userId);
-        sb.append(", amount=").append(amount);
-        sb.append(", rating=").append(rating);
-        sb.append('}');
-        return sb.toString();
     }
 
 }

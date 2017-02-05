@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,31 @@ package com.github.triceo.robozonky.api.remote.entities;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.github.triceo.robozonky.internal.api.ToStringBuilder;
 import org.slf4j.LoggerFactory;
 
 /**
- * All JAX-RS entity classes in this package should implement this interface in order to be able to gracefully handle
+ * All JAX-RS entity classes in this package should extend this class in order to be able to gracefully handle
  * missing JSON properties. This happens occasionally when Zonky deploys a new version of the API and the app was not
  * yet updated with the changes.
  */
-interface BaseEntity {
+abstract class BaseEntity {
 
     @JsonAnyGetter
-    default void handleUnknownGetter(final String key) {
+    void handleUnknownGetter(final String key) {
         LoggerFactory.getLogger(this.getClass()).debug("Trying to get value of unknown property '{}'."
                 + " Indicates an unexpected API change, RoboZonky may misbehave.", key);
     }
 
     @JsonAnySetter
-    default void handleUnknownSetter(final String key, final Object value) {
+    void handleUnknownSetter(final String key, final Object value) {
         LoggerFactory.getLogger(this.getClass()).debug("Trying to set value '{}' to an unknown property '{}'."
                 + " Indicates an unexpected API change, RoboZonky may misbehave.", value, key);
+    }
+
+    @Override
+    public final String toString() {
+        return new ToStringBuilder(this).toString();
     }
 
 }

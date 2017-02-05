@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import com.beust.jcommander.Parameter;
 
-class ConfirmationCommandLineFragment implements CommandLineFragment {
+class ConfirmationCommandLineFragment extends AbstractCommandLineFragment {
 
     @Parameter(names = {"-x", "--external"},
             description = "Use external tool to confirm investments.")

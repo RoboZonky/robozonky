@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.app.configuration;
 
 import com.beust.jcommander.Parameter;
 
-class StrategyCommandLineFragment implements CommandLineFragment {
+class StrategyCommandLineFragment extends AbstractCommandLineFragment {
 
     @Parameter(names = {"-s", "--strategy"}, required = true,
             description = "Points to a resource holding the investment strategy configuration.")

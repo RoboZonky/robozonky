@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,4 @@ public class MyInvestment extends BaseInvestment {
         return timeCreated;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("MyInvestment{");
-        sb.append("status='").append(status).append('\'');
-        sb.append(", timeCreated=").append(timeCreated);
-        sb.append("} extends ");
-        sb.append(super.toString());
-        return sb.toString();
-    }
 }

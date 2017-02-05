@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import com.github.triceo.robozonky.api.strategies.Recommendation;
  * Fired immediately before {@link ZonkyApi#invest(Investment)} call is made or, in case of dry run,
  * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentMadeEvent}.
  */
-public final class InvestmentRequestedEvent implements Event {
+public final class InvestmentRequestedEvent extends Event {
 
     private final Recommendation recommendation;
 

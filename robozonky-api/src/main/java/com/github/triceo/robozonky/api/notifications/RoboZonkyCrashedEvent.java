@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import com.github.triceo.robozonky.api.ReturnCode;
 /**
  * Fired before the application forcibly terminates due to an error.
  */
-public final class RoboZonkyCrashedEvent implements Event {
+public final class RoboZonkyCrashedEvent extends Event {
 
     private final ReturnCode returnCode;
     private final Exception cause;

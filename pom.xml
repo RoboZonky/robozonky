@@ -180,6 +180,11 @@
         <artifactId>ini4j</artifactId>
         <version>0.5.4</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.5</version>
+      </dependency>
       <!-- testing -->
       <dependency>
         <groupId>org.junit.vintage</groupId>

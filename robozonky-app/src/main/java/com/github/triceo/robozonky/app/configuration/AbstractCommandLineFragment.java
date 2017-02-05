@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.remote.entities;
+package com.github.triceo.robozonky.app.configuration;
 
-import java.time.OffsetDateTime;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import com.github.triceo.robozonky.internal.api.ToStringBuilder;
 
-class OffsetDateTimeAdapter extends XmlAdapter<String, OffsetDateTime> {
-
-    @Override
-    public OffsetDateTime unmarshal(final String s) throws Exception {
-        return OffsetDateTime.parse(s);
-    }
+abstract class AbstractCommandLineFragment implements CommandLineFragment {
 
     @Override
-    public String marshal(final OffsetDateTime offsetDateTime) throws Exception {
-        return offsetDateTime.toString();
-
+    public final String toString() {
+        return new ToStringBuilder(this).toString();
     }
+
 }

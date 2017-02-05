@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.api.remote.entities;
 
 import javax.xml.bind.annotation.XmlElement;
 
-abstract class BaseOverview implements BaseEntity {
+abstract class BaseOverview extends BaseEntity {
 
     private int totalInvestment, principalPaid, interestPaid, investmentCount;
 
@@ -42,14 +42,4 @@ abstract class BaseOverview implements BaseEntity {
         return investmentCount;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Overview{");
-        sb.append("totalInvestment=").append(totalInvestment);
-        sb.append(", principalPaid=").append(principalPaid);
-        sb.append(", interestPaid=").append(interestPaid);
-        sb.append(", investmentCount=").append(investmentCount);
-        sb.append('}');
-        return sb.toString();
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 /**
  * Fired immediately after an investment was submitted to the API. Will not be fired in case of a dry run.
  */
-public final class InvestmentMadeEvent implements Event {
+public final class InvestmentMadeEvent extends Event {
 
     private final Investment investment;
     private final int finalBalance;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,4 @@ public class RiskPortfolio extends OverallPortfolio {
         return rating;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("RiskPortfolio{");
-        sb.append("totalAmount=").append(totalAmount);
-        sb.append(", rating=").append(rating);
-        sb.append("} extends ");
-        sb.append(super.toString());
-        return sb.toString();
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,22 +152,6 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public BigDecimal getExpectedInterest() {
         return expectedInterest;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Investment{");
-        sb.append("amountDue=").append(amountDue);
-        sb.append(", currentTerm=").append(currentTerm);
-        sb.append(", dpd=").append(dpd);
-        sb.append(", interestRate=").append(interestRate);
-        sb.append(", loanName='").append(loanName).append('\'');
-        sb.append(", loanTermInMonth=").append(loanTermInMonth);
-        sb.append(", rating=").append(rating);
-        sb.append(", paymentStatus='").append(paymentStatus).append('\'');
-        sb.append("} extends ");
-        sb.append(super.toString());
-        return sb.toString();
     }
 
 }

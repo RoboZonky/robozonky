@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.api.notifications;
 /**
  * Fired after the daemon encountered an exception, but continues to run.
  */
-public final class RoboZonkyDaemonFailedEvent implements Event {
+public final class RoboZonkyDaemonFailedEvent extends Event {
 
     private final Throwable cause;
 

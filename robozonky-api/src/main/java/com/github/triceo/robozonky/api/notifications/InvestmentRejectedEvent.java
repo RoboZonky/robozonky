@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.github.triceo.robozonky.api.strategies.Recommendation;
 /**
  * Fired immediately after {@link ConfirmationProvider} rejected a given investment.
  */
-public final class InvestmentRejectedEvent implements Event {
+public final class InvestmentRejectedEvent extends Event {
 
     private final Recommendation recommendation;
     private final int balance;

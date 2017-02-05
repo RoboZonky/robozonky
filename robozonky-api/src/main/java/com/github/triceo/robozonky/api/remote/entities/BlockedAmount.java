@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.api.remote.entities;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
-public class BlockedAmount implements BaseEntity {
+public class BlockedAmount extends BaseEntity {
 
     private int amount, loanId;
     private String category, loanName;
@@ -59,15 +59,4 @@ public class BlockedAmount implements BaseEntity {
         return dateStart;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("BlockedAmount{");
-        sb.append("loanId=").append(loanId);
-        sb.append(", loanName='").append(loanName).append('\'');
-        sb.append(", amount=").append(amount);
-        sb.append(", category='").append(category).append('\'');
-        sb.append(", dateStart=").append(dateStart);
-        sb.append('}');
-        return sb.toString();
-    }
 }

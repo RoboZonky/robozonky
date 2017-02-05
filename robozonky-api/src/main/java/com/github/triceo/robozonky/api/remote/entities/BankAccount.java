@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.api.remote.entities;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class BankAccount implements BaseEntity {
+public class BankAccount extends BaseEntity {
 
     private int id, accountNo, accountBank;
     private String accountName;
@@ -47,14 +47,4 @@ public class BankAccount implements BaseEntity {
         return id;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("BankAccount{");
-        sb.append("id=").append(id);
-        sb.append(", accountNo=").append(accountNo);
-        sb.append(", accountBank=").append(accountBank);
-        sb.append(", accountName='").append(accountName).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
 }
