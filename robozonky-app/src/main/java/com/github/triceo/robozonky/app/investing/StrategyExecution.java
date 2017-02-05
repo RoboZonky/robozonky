@@ -17,6 +17,8 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
@@ -60,13 +62,21 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
     private final AuthenticationHandler authenticationHandler;
     private final ZonkyProxy.Builder proxyBuilder;
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
+    private final TemporalAmount maximumSleepPeriod;
 
     public StrategyExecution(final ApiProvider apiProvider, final ZonkyProxy.Builder proxyBuilder,
-                             final Refreshable<InvestmentStrategy> strategy, final AuthenticationHandler auth) {
+                             final Refreshable<InvestmentStrategy> strategy, final AuthenticationHandler auth,
+                             final TemporalAmount maximumSleepPeriod) {
         this.apiProvider = apiProvider;
         this.authenticationHandler = auth;
         this.proxyBuilder = proxyBuilder;
         this.refreshableStrategy = strategy;
+        this.maximumSleepPeriod = maximumSleepPeriod;
+    }
+
+    public StrategyExecution(final ApiProvider apiProvider, final ZonkyProxy.Builder proxyBuilder,
+                             final Refreshable<InvestmentStrategy> strategy, final AuthenticationHandler auth) {
+        this(apiProvider, proxyBuilder, strategy, auth, Duration.ofMinutes(60));
     }
 
     Collection<Investment> invest(final InvestmentStrategy strategy, final Collection<LoanDescriptor> loans) {
@@ -95,7 +105,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
         final InvestmentStrategy strategy = refreshableStrategy.getLatestBlocking();
         StrategyExecution.LOGGER.debug("Strategy acquired, asking for loans.");
         // only after we've acquired the strategy work with the marketplace
-        final Activity activity = new Activity(loans);
+        final Activity activity = new Activity(loans, maximumSleepPeriod);
         final boolean shouldSleep = activity.shouldSleep();
         if (shouldSleep) {
             StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");

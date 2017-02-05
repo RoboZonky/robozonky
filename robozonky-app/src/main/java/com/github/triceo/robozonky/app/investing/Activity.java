@@ -52,8 +52,12 @@ class Activity {
     private final Collection<LoanDescriptor> recentLoansDescending;
     private Runnable settler = null;
 
-    public Activity(final Collection<LoanDescriptor> loans) {
-        this.sleepInterval = Duration.ofMinutes(60); // FIXME make configurable
+    Activity(final Collection<LoanDescriptor> loans) {
+        this(loans, Duration.ofMinutes(60));
+    }
+
+    public Activity(final Collection<LoanDescriptor> loans, final TemporalAmount maximumSleepPeriod) {
+        this.sleepInterval = maximumSleepPeriod;
         this.recentLoansDescending = new ArrayList<>(loans);
     }
 

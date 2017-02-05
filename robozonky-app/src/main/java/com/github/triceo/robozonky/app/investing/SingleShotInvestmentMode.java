@@ -16,6 +16,8 @@
 
 package com.github.triceo.robozonky.app.investing;
 
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
@@ -36,16 +38,25 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;
+    private final TemporalAmount maximumSleepPeriod;
 
     public SingleShotInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
                                     final boolean isFaultTolerant, final Marketplace marketplace,
-                                    final Refreshable<InvestmentStrategy> strategy) {
+                                    final Refreshable<InvestmentStrategy> strategy,
+                                    final TemporalAmount maximumSleepPeriod) {
         super(auth, builder, isFaultTolerant);
         if (marketplace.specifyExpectedTreatment() != ExpectedTreatment.POLLING) {
             throw new IllegalArgumentException("Polling marketplace implementation required.");
         }
         this.refreshableStrategy = strategy;
         this.marketplace = marketplace;
+        this.maximumSleepPeriod = maximumSleepPeriod;
+    }
+
+    public SingleShotInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+                                    final boolean isFaultTolerant, final Marketplace marketplace,
+                                    final Refreshable<InvestmentStrategy> strategy) {
+        this(auth, builder, isFaultTolerant, marketplace, strategy, Duration.ofMinutes(60));
     }
 
     @Override
@@ -61,7 +72,8 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler());
+        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
+                maximumSleepPeriod);
     }
 
     @Override

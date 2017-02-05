@@ -89,7 +89,7 @@ enum OperatingMode implements CommandLineFragment {
             return MarketplaceLoader.load(cred)
                     .map(marketplace -> {
                         final InvestmentMode m = new SingleShotInvestmentMode(auth, builder, fragment.isFaultTolerant(),
-                                marketplace, strategy);
+                                marketplace, strategy, marketplaceFragment.getMaximumSleepDuration());
                         return Optional.of(m);
                     })
                     .orElse(Optional.empty());
@@ -99,7 +99,7 @@ enum OperatingMode implements CommandLineFragment {
     }, DAEMON {
 
         @ParametersDelegate
-        MarketplaceCommandLineFragment marketplaceFragment = new MarketplaceCommandLineFragment();
+        DaemonModeMarketplaceCommandLineFragment marketplaceFragment = new DaemonModeMarketplaceCommandLineFragment();
 
         @ParametersDelegate
         StrategyCommandLineFragment strategyFragment = new StrategyCommandLineFragment();
@@ -121,7 +121,8 @@ enum OperatingMode implements CommandLineFragment {
             return MarketplaceLoader.load(cred)
                     .map(marketplace -> {
                         final InvestmentMode m = new DaemonInvestmentMode(auth, builder, fragment.isFaultTolerant(),
-                                marketplace, strategy);
+                                marketplace, strategy, marketplaceFragment.getMaximumSleepDuration(),
+                                marketplaceFragment.getDelayBetweenChecks());
                         return Optional.of(m);
                     })
                     .orElse(Optional.empty());

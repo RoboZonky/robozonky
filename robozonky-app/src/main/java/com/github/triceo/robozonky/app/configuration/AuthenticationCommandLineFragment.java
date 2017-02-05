@@ -25,6 +25,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
 class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
 
@@ -72,8 +73,8 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
     }
 
     public AuthenticationHandler createAuthenticationHandler(final SecretProvider secrets) {
-        if (refreshTokenEnabled) { // FIXME figure out refresh interval
-            final TemporalAmount duration = Duration.ofSeconds(60);
+        if (refreshTokenEnabled) {
+            final TemporalAmount duration = Duration.ofSeconds(Defaults.getTokenRefreshBeforeExpirationInSeconds());
             return AuthenticationHandler.tokenBased(secrets, duration);
         } else {
             return AuthenticationHandler.passwordBased(secrets);

@@ -65,6 +65,10 @@ public final class Defaults {
         return result;
     }
 
+    public static int getTokenRefreshBeforeExpirationInSeconds() {
+        return Defaults.getPropertyValue("robozonky.default.token_refresh_seconds", 60);
+    }
+
     public static int getCaptchaDelayInSeconds() {
         return Defaults.getPropertyValue("robozonky.default.captcha_protection_seconds", 120);
     }

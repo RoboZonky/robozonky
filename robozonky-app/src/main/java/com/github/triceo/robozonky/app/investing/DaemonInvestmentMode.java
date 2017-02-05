@@ -16,6 +16,9 @@
 
 package com.github.triceo.robozonky.app.investing;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -42,14 +45,18 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
     final Semaphore blockUntilUserCancelled = new Semaphore(1);
 
     public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
                                 final boolean isFaultTolerant, final Marketplace marketplace,
-                                final Refreshable<InvestmentStrategy> strategy) {
+                                final Refreshable<InvestmentStrategy> strategy,
+                                final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
         super(auth, builder, isFaultTolerant);
         this.refreshableStrategy = strategy;
         this.marketplace = marketplace;
+        this.maximumSleepPeriod = maximumSleepPeriod;
+        this.periodBetweenChecks = periodBetweenChecks;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             LOGGER.debug("Shutdown requested.");
             // will release the main thread and thus terminate the daemon
@@ -58,6 +65,12 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
             App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
             LOGGER.debug("Shutdown allowed.");
         }));
+    }
+
+    public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+                                final boolean isFaultTolerant, final Marketplace marketplace,
+                                final Refreshable<InvestmentStrategy> strategy) {
+        this(auth, builder, isFaultTolerant, marketplace, strategy, Duration.ofMinutes(60), Duration.ofSeconds(1));
     }
 
     @Override
@@ -79,7 +92,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         };
         switch (marketplace.specifyExpectedTreatment()) {
             case POLLING:
-                final int checkPeriodInSeconds = 1; // FIXME make configurable
+                final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
                 LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
                 executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
                 break;
@@ -94,7 +107,8 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler());
+        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
+                maximumSleepPeriod);
     }
 
     @Override

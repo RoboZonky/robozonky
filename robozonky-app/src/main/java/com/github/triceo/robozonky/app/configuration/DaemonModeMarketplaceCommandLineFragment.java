@@ -21,21 +21,14 @@ import java.time.temporal.TemporalAmount;
 
 import com.beust.jcommander.Parameter;
 
-class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
+class DaemonModeMarketplaceCommandLineFragment extends MarketplaceCommandLineFragment {
 
-    @Parameter(names = {"-m", "--marketplace"}, description = "Which marketplace to use.")
-    String marketplaceCredentials = "zotify";
+    @Parameter(names = {"-w", "--wait"},
+            description = "Number of seconds between consecutive marketplace checks, if applicable.")
+    int delayBetweenChecks = 1;
 
-    @Parameter(names = {"-z", "--zonk"},
-            description = "The longest amount of time in minutes for which Zonky is allowed to sleep, if applicable.")
-    int maximumSleepDuration = 60;
-
-    public String getMarketplaceCredentials() {
-        return marketplaceCredentials;
-    }
-
-    public TemporalAmount getMaximumSleepDuration() {
-        return Duration.ofMinutes(maximumSleepDuration);
+    public TemporalAmount getDelayBetweenChecks() {
+        return Duration.ofSeconds(delayBetweenChecks);
     }
 
 }
