@@ -18,26 +18,30 @@ package com.github.triceo.robozonky.app.configuration;
 
 import java.util.UUID;
 
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class MarketplaceLoaderTest {
 
+    private static final SecretProvider SECRETS = Mockito.mock(SecretProvider.class);
+
     @Test
     public void load() {
-        final Credentials c = new Credentials("zotify");
+        final Credentials c = new Credentials("zotify", MarketplaceLoaderTest.SECRETS);
         Assertions.assertThat(MarketplaceLoader.load(c)).isPresent();
     }
 
     @Test
     public void loadWithPassword() {
-        final Credentials c = new Credentials("zotify:password");
+        final Credentials c = new Credentials("zotify:password", MarketplaceLoaderTest.SECRETS);
         Assertions.assertThat(MarketplaceLoader.load(c)).isPresent();
     }
 
     @Test
     public void loadNonexistent() {
-        final Credentials c = new Credentials(UUID.randomUUID().toString());
+        final Credentials c = new Credentials(UUID.randomUUID().toString(), MarketplaceLoaderTest.SECRETS);
         Assertions.assertThat(MarketplaceLoader.load(c)).isEmpty();
     }
 }

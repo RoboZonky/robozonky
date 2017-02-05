@@ -19,19 +19,27 @@ package com.github.triceo.robozonky.app.configuration;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class Credentials {
 
-    private final String toolId;
-    private final char[] token;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Credentials.class);
 
-    Credentials(final String request) {
+    private final String toolId;
+    private final SecretProvider secretProvider;
+
+    Credentials(final String request, final SecretProvider secretProvider) {
+        this.secretProvider = secretProvider;
         final String[] parts = request.split(":");
         if (parts.length == 1) {
             this.toolId = parts[0];
-            this.token = null;
+            Credentials.LOGGER.debug("Credentials for '{}' not given password.", this.toolId);
         } else if (parts.length == 2) {
             this.toolId = parts[0];
-            this.token = parts[1].toCharArray();
+            this.secretProvider.setSecret(this.toolId, parts[1].toCharArray());
+            Credentials.LOGGER.debug("Credentials for '{}' stored password.", this.toolId);
         } else {
             throw new IllegalArgumentException("Request must be 1 or 2 parts: " + Arrays.toString(parts));
         }
@@ -42,7 +50,7 @@ public final class Credentials {
     }
 
     public Optional<char[]> getToken() {
-        return Optional.ofNullable(this.token);
+        return secretProvider.getSecret(this.toolId);
     }
 
     @Override

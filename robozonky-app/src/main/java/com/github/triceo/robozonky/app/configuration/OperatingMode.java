@@ -84,7 +84,9 @@ enum OperatingMode implements CommandLineFragment {
             final Refreshable<InvestmentStrategy> strategy =
                     RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
             final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
-            return MarketplaceLoader.load(new Credentials(marketplaceFragment.getMarketplaceCredentials()))
+            final Credentials cred = new Credentials(marketplaceFragment.getMarketplaceCredentials(),
+                    auth.getSecretProvider());
+            return MarketplaceLoader.load(cred)
                     .map(marketplace -> {
                         final InvestmentMode m = new SingleShotInvestmentMode(auth, builder, fragment.isFaultTolerant(),
                                 marketplace, strategy);
@@ -114,7 +116,9 @@ enum OperatingMode implements CommandLineFragment {
             final Refreshable<InvestmentStrategy> strategy =
                     RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
             final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
-            return MarketplaceLoader.load(new Credentials(marketplaceFragment.getMarketplaceCredentials()))
+            final Credentials cred = new Credentials(marketplaceFragment.getMarketplaceCredentials(),
+                    auth.getSecretProvider());
+            return MarketplaceLoader.load(cred)
                     .map(marketplace -> {
                         final InvestmentMode m = new DaemonInvestmentMode(auth, builder, fragment.isFaultTolerant(),
                                 marketplace, strategy);
@@ -168,7 +172,7 @@ enum OperatingMode implements CommandLineFragment {
 
     public Optional<InvestmentMode> configure(final CommandLineInterface cli, final AuthenticationHandler auth) {
         final Optional<Credentials> cred = cli.getConfirmationFragment().getConfirmationCredentials()
-                .map(value -> Optional.of(new Credentials(value)))
+                .map(value -> Optional.of(new Credentials(value, auth.getSecretProvider())))
                 .orElse(Optional.empty());
         final Optional<ZonkyProxy.Builder> optionalBuilder = cred
                 .map(credentials -> OperatingMode.getZonkyProxyBuilder(credentials, auth.getSecretProvider()))

@@ -16,25 +16,37 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class ConfirmationCredentialsTest {
 
+    private static final SecretProvider SECRETS = Mockito.mock(SecretProvider.class);
+
     @Test
     public void fullCredentials() {
+        final AuthenticationCommandLineFragment cliAuth = Mockito.mock(AuthenticationCommandLineFragment.class);
+        Mockito.when(cliAuth.getUsername()).thenReturn(Optional.of(UUID.randomUUID().toString()));
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getAuthenticationFragment()).thenReturn(cliAuth);
+        final SecretProvider secretProvider = SecretProviderFactory.getFallbackSecretProvider(cli).get();
         final String first = "zonkoid", second = "password";
-        final Credentials cc = new Credentials(first + ":" + second);
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(cc.getToolId()).isEqualTo(first);
-        softly.assertThat(cc.getToken()).contains(second.toCharArray());
-        softly.assertAll();
+        final Credentials cc = new Credentials(first + ":" + second, secretProvider);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(cc.getToolId()).isEqualTo(first);
+            softly.assertThat(cc.getToken()).contains(second.toCharArray());
+        });
     }
 
     @Test
     public void tokenLess() {
         final String first = "zonkoid";
-        final Credentials cc = new Credentials(first);
+        final Credentials cc = new Credentials(first, ConfirmationCredentialsTest.SECRETS);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(cc.getToolId()).isEqualTo(first);
         softly.assertThat(cc.getToken()).isEmpty();
@@ -44,7 +56,7 @@ public class ConfirmationCredentialsTest {
     @Test(expected = IllegalArgumentException.class)
     public void wrong() {
         final String wrong = "zonkoid:password:extra";
-        new Credentials(wrong);
+        new Credentials(wrong, null);
     }
 
 }
