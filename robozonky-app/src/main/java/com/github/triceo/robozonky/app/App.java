@@ -73,7 +73,6 @@ public class App {
     }
 
     static ReturnCode execute(final InvestmentMode mode) {
-        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
         try {
             return mode.get().map(r -> {
                 App.LOGGER.info("RoboZonky {}invested into {} loans.", mode.isDryRun() ? "would have " : "", r.size());
@@ -102,11 +101,6 @@ public class App {
         if (!App.SHUTDOWN_HOOKS.register(new Exclusivity(App.ROBOZONKY_LOCK))) {
             App.exit(ReturnCode.ERROR_LOCK);
         }
-        // pressing Ctrl+C in daemon mode must result in proper RoboZonky shutdown
-        App.SHUTDOWN_HOOKS.register(() -> {
-            App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
-            return Optional.of((returnCode -> App.DAEMON_ALLOWED_TO_TERMINATE.release()));
-        });
         // and actually start running
         Events.fire(new RoboZonkyStartingEvent());
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
@@ -115,10 +109,19 @@ public class App {
                 Charset.defaultCharset());
         // start the check for new version, making sure it is properly handled during execute
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.BACKGROUND_SCHEDULER.shutdown()));
-        App.SHUTDOWN_HOOKS.register(new VersionChecker());
         // read the command line and execute the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try {
+            // pressing Ctrl+C in daemon mode must result in proper RoboZonky shutdown
+            App.SHUTDOWN_HOOKS.register(() -> {
+                App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
+                return Optional.of((returnCode -> App.DAEMON_ALLOWED_TO_TERMINATE.release()));
+            });
+            // start RoboZonky update check
+            App.SHUTDOWN_HOOKS.register(new VersionChecker());
+            // notify of RoboZonky starting up
+            App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
+            // execute core code
             App.exit(App.execute(args, faultTolerant));
         } catch (final ProcessingException | NotAllowedException ex) {
             App.handleException(ex, faultTolerant.get());

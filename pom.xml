@@ -414,6 +414,7 @@
           <version>${surefire.version}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <reuseForks>false</reuseForks>
             <workingDirectory>${basedir}/target</workingDirectory>
           </configuration>
         </plugin>
