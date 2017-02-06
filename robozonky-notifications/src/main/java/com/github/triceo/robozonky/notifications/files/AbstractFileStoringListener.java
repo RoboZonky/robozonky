@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.notifications.files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Collection;
@@ -58,7 +57,7 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
 
     @Override
     public void handle(final T event) {
-        final Temporal now = OffsetDateTime.now();
+        final Temporal now = event.getCreatedOn();
         final String filename = "robozonky." + AbstractFileStoringListener.FORMATTER.format(now) + '.'
                 + this.getSuffix();
         AbstractFileStoringListener.storeInvestmentMade(new File(filename), this.getLoanId(event),

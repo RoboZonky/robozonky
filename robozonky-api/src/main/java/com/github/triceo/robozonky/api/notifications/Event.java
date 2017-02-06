@@ -16,12 +16,20 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
+import java.time.OffsetDateTime;
+
 import com.github.triceo.robozonky.internal.api.ToStringBuilder;
 
 /**
  * Marker for an event that may be fired any time during RoboZonky's runtime.
  */
 public abstract class Event {
+
+    private final OffsetDateTime creationDateTime = OffsetDateTime.now();
+
+    public OffsetDateTime getCreatedOn() {
+        return creationDateTime;
+    }
 
     @Override
     public final String toString() {
