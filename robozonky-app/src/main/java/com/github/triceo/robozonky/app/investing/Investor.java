@@ -190,7 +190,8 @@ class Investor {
         this.balance = tracker.getCurrentBalance();
         // report
         final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, tracker.getAllInvestments());
-        Investor.LOGGER.info("Expected annual yield of portfolio: {} % ({} CZK).",
+        Investor.LOGGER.info("Current value of portfolio is {} CZK, annual expected yield is {} % ({} CZK).",
+                portfolio.getCzkAvailable() + portfolio.getCzkInvested(),
                 portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
                 portfolio.getCzkExpectedYield());
         return tracker.getInvestmentsMade();
