@@ -1,0 +1,3 @@
+Tento adresář obsahuje ukázky strategií pro RoboZonky. Jeden z těchto souborů vyberte, upravte si jej
+podle vlastních potřeb a uložte do stejného adresáře jako soubor "robozonky.sh". Následně upravte soubor
+"robozonky.cli" tak, aby na Vaši strategii ukazoval. Následně můžete RoboZonky spustit.

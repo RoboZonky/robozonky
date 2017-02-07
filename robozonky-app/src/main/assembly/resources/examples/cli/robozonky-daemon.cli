@@ -1,0 +1,7 @@
+-u
+jan@novak.cz
+-p
+"HESLO"
+daemon
+-s
+strategie.cfg

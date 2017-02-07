@@ -112,6 +112,7 @@ public class App {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
+        App.LOGGER.debug("Current working directory is '{}'.", new File("").getAbsolutePath());
         Events.fire(new RoboZonkyStartingEvent(Defaults.ROBOZONKY_VERSION));
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),

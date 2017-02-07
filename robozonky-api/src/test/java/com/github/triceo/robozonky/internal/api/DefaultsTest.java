@@ -31,7 +31,7 @@ public class DefaultsTest {
     public void properties() {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(Defaults.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
-            softly.assertThat(Defaults.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(60);
+            softly.assertThat(Defaults.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(5);
             softly.assertThat(Defaults.getCaptchaDelayInSeconds()).isEqualTo(120);
             softly.assertThat(Defaults.getDefaultDryRunBalance()).isEqualTo(-1);
         });

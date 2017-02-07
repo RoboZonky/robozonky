@@ -1,0 +1,8 @@
+Tento adresář obsahuje ukázky konfiguračního souboru pro RoboZonky. Jeden z těchto souborů vyberte, upravte si jej
+podle vlastních potřeb a uložte do stejného adresáře jako soubor "robozonky.sh". Poté budete moci RoboZonky spustit.
+
+Soubor "robozonky-daemon.cli" spustí RoboZonky v režimu démona, který bude neustále kontrolovat tržiště a případně
+investovat podle strategie.
+
+Soubor "robozonky-old.cli" spustí RoboZonky v režimu jedné investice podle strategie, jak bylo běžné ve verzi 2.0.4 a
+všech starších.

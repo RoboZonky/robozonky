@@ -33,7 +33,7 @@ import org.junit.runners.Parameterized;
 public class RefreshableInvestmentStrategyTest {
 
     private static String getRoot() {
-        return IoTestUtil.findMainSource("assembly", "resources");
+        return IoTestUtil.findMainSource("assembly", "resources", "examples", "strategies");
     }
 
     @Parameterized.Parameters(name = "{0}")

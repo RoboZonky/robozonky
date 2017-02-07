@@ -57,7 +57,7 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionRetriever.class);
     private static final String GROUP_ID = VersionRetriever.class.getPackage().getImplementationVendor();
-    private static final String ARTIFACT_ID = "robozonky-app";
+    private static final String ARTIFACT_ID = "robozonky";
     private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
     private static final Pattern PATTERN_STABLE_VERSION = Pattern.compile("\\A[1-9][0-9]*\\.[0-9]+\\.[0-9]+\\z");
