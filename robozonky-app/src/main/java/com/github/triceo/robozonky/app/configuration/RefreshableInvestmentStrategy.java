@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -49,7 +48,7 @@ class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
     public static Refreshable<InvestmentStrategy> create(final String maybeUrl) {
         final Refreshable<InvestmentStrategy> result =
                 new RefreshableInvestmentStrategy(RefreshableInvestmentStrategy.convertToUrl(maybeUrl));
-        Scheduler.BACKGROUND_SCHEDULER.submit(result, Duration.ofHours(1));
+        Scheduler.BACKGROUND_SCHEDULER.submit(result);
         return result;
     }
 

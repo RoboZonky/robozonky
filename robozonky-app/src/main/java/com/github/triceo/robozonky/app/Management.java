@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.notifications;
+package com.github.triceo.robozonky.app;
 
-/**
- * Fired before the application shuts down cleanly, provided {@link RoboZonkyInitializedEvent} was fired before.
- */
-public final class RoboZonkyEndingEvent extends Event {
+import java.util.Optional;
+import java.util.function.Consumer;
 
-    private final String version;
+import com.github.triceo.robozonky.app.management.MBean;
 
-    public RoboZonkyEndingEvent(final String version) {
-        this.version = version;
+public class Management implements ShutdownHook.Handler {
+
+    @Override
+    public Optional<Consumer<ShutdownHook.Result>> get() {
+        MBean.loadAll();
+        return Optional.of((result) -> MBean.unloadAll());
     }
-
-    public String getVersion() {
-        return version;
-    }
-
 }

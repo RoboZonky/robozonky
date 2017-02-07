@@ -24,6 +24,7 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.app.notifications.Events;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +38,11 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
 
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
-        RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky at your service! =====");
-        Events.fire(new RoboZonkyInitializedEvent());
+        RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky v{} at your service! =====", Defaults.ROBOZONKY_VERSION);
+        Events.fire(new RoboZonkyInitializedEvent(Defaults.ROBOZONKY_VERSION));
         return Optional.of((result) -> {
             if (result.getReturnCode() == ReturnCode.OK) {
-                Events.fire(new RoboZonkyEndingEvent());
+                Events.fire(new RoboZonkyEndingEvent(Defaults.ROBOZONKY_VERSION));
             } else {
                 Events.fire(new RoboZonkyCrashedEvent(result.getReturnCode(), result.getCause()));
             }

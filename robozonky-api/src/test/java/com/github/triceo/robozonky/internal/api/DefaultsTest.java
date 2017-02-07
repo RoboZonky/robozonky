@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.internal.api;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -28,8 +29,12 @@ public class DefaultsTest {
 
     @Test
     public void properties() {
-        Assertions.assertThat(Defaults.getCaptchaDelayInSeconds()).isEqualTo(120);
-        Assertions.assertThat(Defaults.getDefaultDryRunBalance()).isEqualTo(-1);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(Defaults.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
+            softly.assertThat(Defaults.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(60);
+            softly.assertThat(Defaults.getCaptchaDelayInSeconds()).isEqualTo(120);
+            softly.assertThat(Defaults.getDefaultDryRunBalance()).isEqualTo(-1);
+        });
     }
 
     @Test

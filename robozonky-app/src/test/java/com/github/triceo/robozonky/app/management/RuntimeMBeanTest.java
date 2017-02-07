@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.notifications;
+package com.github.triceo.robozonky.app.management;
 
-/**
- * Fired before the application shuts down cleanly, provided {@link RoboZonkyInitializedEvent} was fired before.
- */
-public final class RoboZonkyEndingEvent extends Event {
+import java.util.concurrent.Semaphore;
 
-    private final String version;
+import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
 
-    public RoboZonkyEndingEvent(final String version) {
-        this.version = version;
-    }
+public class RuntimeMBeanTest {
 
-    public String getVersion() {
-        return version;
+    @Test
+    public void unblock() {
+        final Semaphore s = DaemonInvestmentMode.BLOCK_UNTIL_RELEASED;
+        s.acquireUninterruptibly(s.availablePermits());
+        ((Runtime)MBean.RUNTIME.getImplementation()).stopDaemon();
+        Assertions.assertThat(s.availablePermits()).isGreaterThan(0);
     }
 
 }
+
+

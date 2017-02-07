@@ -46,7 +46,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
-    final Semaphore blockUntilUserCancelled = new Semaphore(1);
+    public static final Semaphore BLOCK_UNTIL_RELEASED = new Semaphore(1);
 
     public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
                                 final boolean isFaultTolerant, final Marketplace marketplace,
@@ -60,7 +60,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             LOGGER.debug("Shutdown requested.");
             // will release the main thread and thus terminate the daemon
-            blockUntilUserCancelled.release();
+            DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
             // only allow to shut down after the daemon has been closed by the app
             App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
             LOGGER.debug("Shutdown allowed.");
@@ -75,8 +75,13 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
-        blockUntilUserCancelled.acquireUninterruptibly();
-        return execute(apiProvider, blockUntilUserCancelled);
+        /*
+         * in tests, the number of available permits may get over 1 as the semaphore is released multiple times.
+         * let's make sure we always acquire all the available permits, no matter what the actual number is.
+         */
+        final int permitCount = Math.max(1, DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.availablePermits());
+        DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.acquireUninterruptibly(permitCount);
+        return execute(apiProvider, DaemonInvestmentMode.BLOCK_UNTIL_RELEASED);
     }
 
     @Override
@@ -114,7 +119,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     @Override
     public void close() throws Exception {
         super.close();
-        blockUntilUserCancelled.release(); // just in case
+        DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release(); // just in case
         LOGGER.trace("Shutting down executor.");
         this.executor.shutdownNow();
         LOGGER.trace("Closing marketplace.");

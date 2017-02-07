@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.notifications;
+package com.github.triceo.robozonky.app.management;
 
-/**
- * Fired before the application shuts down cleanly, provided {@link RoboZonkyInitializedEvent} was fired before.
- */
-public final class RoboZonkyEndingEvent extends Event {
+import java.time.OffsetDateTime;
+import java.util.Map;
 
-    private final String version;
+public interface RuntimeMBean {
 
-    public RoboZonkyEndingEvent(final String version) {
-        this.version = version;
-    }
+    void stopDaemon();
 
-    public String getVersion() {
-        return version;
-    }
+    String getZonkyUsername();
+
+    String getVersion();
+
+    Map<Integer, Integer> getSuccessfulInvestments();
+
+    Map<Integer, Integer> getDelegatedInvestments();
+
+    Map<Integer, Integer> getRejectedInvestments();
+
+    OffsetDateTime getLastInvestmentRunTimestamp();
 
 }

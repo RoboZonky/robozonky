@@ -16,8 +16,6 @@
 
 package com.github.triceo.robozonky.app.version;
 
-import java.time.Duration;
-
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.app.util.Scheduler;
 
@@ -33,7 +31,7 @@ public class VersionCheck {
      */
     public static Refreshable<VersionIdentifier> retrieveLatestVersion(final Scheduler s) {
         final VersionRetriever r = new VersionRetriever();
-        s.submit(r, Duration.ofHours(1));
+        s.submit(r);
         return r;
     }
 

@@ -34,7 +34,7 @@ public class ListenerServiceLoaderTest {
 
     @Test
     public void correctLoading() {
-        final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
+        final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent("");
         final EventListener<RoboZonkyStartingEvent> l = Mockito.mock(EventListener.class);
         final ListenerService s1 = Mockito.mock(ListenerService.class);
         final Refreshable<EventListener<RoboZonkyStartingEvent>> returned = Refreshable.createImmutable(l);

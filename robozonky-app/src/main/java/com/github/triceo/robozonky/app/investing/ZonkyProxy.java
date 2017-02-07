@@ -35,18 +35,24 @@ public class ZonkyProxy {
 
     public static final class Builder {
 
+        private String username = "";
         private boolean isDryRun = false;
         private ConfirmationProvider provider;
         private RequestId requestId;
 
-        public Builder usingConfirmation(final ConfirmationProvider provider, final String username,
-                                         final char... password) {
+        public ZonkyProxy.Builder usingConfirmation(final ConfirmationProvider provider, final String username,
+                                                    final char... password) {
             this.provider = provider;
             this.requestId = new RequestId(username, password);
             return this;
         }
 
-        public Builder asDryRun() {
+        public ZonkyProxy.Builder asUser(final String username) {
+            this.username = username;
+            return this;
+        }
+
+        public ZonkyProxy.Builder asDryRun() {
             this.isDryRun = true;
             return this;
         }
@@ -57,9 +63,9 @@ public class ZonkyProxy {
 
         public ZonkyProxy build(final ZonkyApi zonky) {
             if (this.provider == null) {
-                return new ZonkyProxy(zonky, isDryRun);
+                return new ZonkyProxy(username, zonky, isDryRun);
             } else {
-                return new ZonkyProxy(zonky, provider, requestId, isDryRun);
+                return new ZonkyProxy(username, zonky, provider, requestId, isDryRun);
             }
         }
 
@@ -72,13 +78,15 @@ public class ZonkyProxy {
         return new Investment(r.getLoanDescriptor().getLoan(), amount);
     }
 
+    private final String username;
     private final ZonkyApi zonky;
     private final boolean isDryRun;
     private final RequestId requestId;
     private final ConfirmationProvider provider;
 
-    private ZonkyProxy(final ZonkyApi zonky, final ConfirmationProvider provider, final RequestId requestId,
-                       final boolean isDryRun) {
+    private ZonkyProxy(final String username, final ZonkyApi zonky, final ConfirmationProvider provider,
+                       final RequestId requestId, final boolean isDryRun) {
+        this.username = username;
         this.zonky = zonky;
         this.isDryRun = isDryRun;
         this.provider = provider;
@@ -89,12 +97,16 @@ public class ZonkyProxy {
         return isDryRun;
     }
 
-    private ZonkyProxy(final ZonkyApi zonky, final boolean isDryRun) {
-        this(zonky, null, null, isDryRun);
+    private ZonkyProxy(final String username, final ZonkyApi zonky, final boolean isDryRun) {
+        this(username, zonky, null, null, isDryRun);
     }
 
     public <T> T execute(final Function<ZonkyApi, T> operation) {
         return operation.apply(this.zonky);
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 
     public Optional<String> getConfirmationProviderId() {

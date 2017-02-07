@@ -184,6 +184,7 @@ enum OperatingMode implements CommandLineFragment {
                         OperatingMode.LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
                         builder.asDryRun();
                     }
+                    builder.asUser(auth.getSecretProvider().getUsername());
                     return this.getInvestmentMode(cli, auth, builder);
                 })
                 .orElse(Optional.empty());

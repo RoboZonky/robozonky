@@ -90,7 +90,17 @@ public class App {
     static ReturnCode execute(final String[] args, final AtomicBoolean faultTolerant) {
         return CommandLineInterface.parse(args)
                 .map(mode -> {
-                    App.LOGGER.info("RoboZonky v{} starting.", Defaults.ROBOZONKY_VERSION);
+                    // startup the MBeans
+                    App.SHUTDOWN_HOOKS.register(new Management());
+                    // pressing Ctrl+C in daemon mode must result in proper RoboZonky shutdown
+                    App.SHUTDOWN_HOOKS.register(() -> {
+                        App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
+                        return Optional.of((returnCode -> App.DAEMON_ALLOWED_TO_TERMINATE.release()));
+                    });
+                    // start RoboZonky update check
+                    App.SHUTDOWN_HOOKS.register(new VersionChecker());
+                    // notify of RoboZonky starting up
+                    App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
                     faultTolerant.set(mode.isFaultTolerant());
                     return App.execute(mode);
                 }).orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
@@ -102,7 +112,7 @@ public class App {
             App.exit(ReturnCode.ERROR_LOCK);
         }
         // and actually start running
-        Events.fire(new RoboZonkyStartingEvent());
+        Events.fire(new RoboZonkyStartingEvent(Defaults.ROBOZONKY_VERSION));
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
@@ -112,15 +122,6 @@ public class App {
         // read the command line and execute the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try {
-            // pressing Ctrl+C in daemon mode must result in proper RoboZonky shutdown
-            App.SHUTDOWN_HOOKS.register(() -> {
-                App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
-                return Optional.of((returnCode -> App.DAEMON_ALLOWED_TO_TERMINATE.release()));
-            });
-            // start RoboZonky update check
-            App.SHUTDOWN_HOOKS.register(new VersionChecker());
-            // notify of RoboZonky starting up
-            App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
             // execute core code
             App.exit(App.execute(args, faultTolerant));
         } catch (final ProcessingException | NotAllowedException ex) {

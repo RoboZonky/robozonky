@@ -33,7 +33,7 @@ public class EventsTest {
         r.run();
         Mockito.doThrow(RuntimeException.class).when(listener).handle(ArgumentMatchers.any());
         Events.INSTANCE.addListener(RoboZonkyStartingEvent.class, r);
-        final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
+        final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent("");
         Events.fire(e);
         Assertions.assertThat(Events.getFired()).contains(e);
         Mockito.verify(listener).handle(ArgumentMatchers.eq(e));

@@ -51,10 +51,10 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
 
     static Collection<Investment> invest(final ZonkyProxy proxy, final InvestmentCommand command) {
         final BigDecimal balance = StrategyExecution.getAvailableBalance(proxy);
-        Events.fire(new ExecutionStartedEvent(command.getLoans(), balance.intValue()));
+        Events.fire(new ExecutionStartedEvent(proxy.getUsername(), command.getLoans(), balance.intValue()));
         final Investor investor = new Investor(proxy, balance);
         final Collection<Investment> result = command.apply(investor);
-        Events.fire(new ExecutionCompletedEvent(result, investor.getBalance().intValue()));
+        Events.fire(new ExecutionCompletedEvent(proxy.getUsername(), result, investor.getBalance().intValue()));
         return Collections.unmodifiableCollection(result);
     }
 

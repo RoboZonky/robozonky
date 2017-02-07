@@ -161,6 +161,49 @@
                     "methodName": "<init>",
                     "justification": "New constructor for testing purposes."
                   }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::<init>(java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, int)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::<init>(java.lang.String, java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, int)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "ExecutionCompletedEvent",
+                    "methodName": "<init>",
+                    "justification": "Some events get new attributes."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::<init>(java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, int)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::<init>(java.lang.String, java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, int)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "ExecutionStartedEvent",
+                    "methodName": "<init>",
+                    "justification": "Some events get new attributes."
+                  }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "method parameter void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>(===com.github.triceo.robozonky.api.ReturnCode===)",
+                    "new": "method parameter void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>(===java.lang.String===)",
+                    "oldType": "com.github.triceo.robozonky.api.ReturnCode",
+                    "newType": "java.lang.String",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyEndingEvent",
+                    "methodName": "<init>",
+                    "parameterIndex": "0",
+                    "justification": "Some events get new attributes."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::<init>()",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::<init>(java.lang.String)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyInitializedEvent",
+                    "methodName": "<init>",
+                    "justification": "Some events get new attributes."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::<init>()",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::<init>(java.lang.String)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyStartingEvent",
+                    "methodName": "<init>",
+                    "justification": "Some events get new attributes."
+                  }, {
                     "code": "java.class.noLongerImplementsInterface",
                     "justification": "Events and JAXB Entities now have default toString(), and therefore extend instead of implement."
                   }, {

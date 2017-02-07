@@ -79,15 +79,15 @@ public abstract class AbstractListenerTest {
         events.put(SupportedListener.INVESTMENT_REJECTED.getEventType(),
                 new InvestmentRejectedEvent(recommendation, 200, "random"));
         events.put(SupportedListener.EXECUTION_STARTED.getEventType(),
-                new ExecutionStartedEvent(Collections.emptyList(), 200));
+                new ExecutionStartedEvent("", Collections.emptyList(), 200));
         events.put(SupportedListener.CRASHED.getEventType(),
                 new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
         events.put(SupportedListener.DAEMON_FAILED.getEventType(),
                 new RoboZonkyDaemonFailedEvent(new RuntimeException()));
         events.put(SupportedListener.INITIALIZED.getEventType(),
-                new RoboZonkyInitializedEvent());
+                new RoboZonkyInitializedEvent(""));
         events.put(SupportedListener.ENDING.getEventType(),
-                new RoboZonkyEndingEvent());
+                new RoboZonkyEndingEvent(""));
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[] {s, s.getListener(properties), events.get(s.getEventType())})

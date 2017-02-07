@@ -26,12 +26,19 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
  */
 public final class ExecutionCompletedEvent extends Event {
 
+    private final String username;
     private final Collection<Investment> investment;
     private final int newBalance;
 
-    public ExecutionCompletedEvent(final Collection<Investment> investment, final int newBalance) {
+    public ExecutionCompletedEvent(final String username, final Collection<Investment> investment,
+                                   final int newBalance) {
+        this.username = username;
         this.investment = Collections.unmodifiableCollection(investment);
         this.newBalance = newBalance;
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 
     /**

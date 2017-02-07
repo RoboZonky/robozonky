@@ -453,7 +453,7 @@
               <param>com.github.triceo.robozonky.*</param>
             </targetClasses>
             <targetTests>
-              <param>com.github.triceo.robozonky.*Test</param> <!-- No IT -->
+              <param>*Test</param> <!-- No IT -->
             </targetTests>
             <excludedMethods>
               <param>toString</param>

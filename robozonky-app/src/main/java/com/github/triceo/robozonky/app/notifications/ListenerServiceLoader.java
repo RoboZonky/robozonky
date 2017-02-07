@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.notifications;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
@@ -49,7 +48,7 @@ class ListenerServiceLoader {
                 .parallel()
                 .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
                 .map(s -> s.findListener(eventType))
-                .peek(r -> scheduler.submit(r, Duration.ofHours(1)))
+                .peek(r -> scheduler.submit(r))
                 .collect(Collectors.toList());
     }
 

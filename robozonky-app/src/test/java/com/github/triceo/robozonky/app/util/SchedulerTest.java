@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.util;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -54,7 +53,7 @@ public class SchedulerTest {
             softly.assertThat(s.isShutdown()).isFalse();
             softly.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
         });
-        s.submit(REFRESHABLE, Duration.ofHours(1));
+        s.submit(REFRESHABLE);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
             softly.assertThat(s.isSubmitted(REFRESHABLE.getDependedOn().get())).isTrue();

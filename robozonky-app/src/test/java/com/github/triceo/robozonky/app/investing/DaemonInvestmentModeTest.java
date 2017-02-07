@@ -50,6 +50,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class DaemonInvestmentModeTest extends AbstractInvestingTest {
@@ -108,6 +109,7 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
     @Before
     public void setupApp() {
         App.DAEMON_ALLOWED_TO_TERMINATE.release(); // make sure the daemon is allowed to quit
+        DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
     }
 
     @Test(timeout = 10000)
@@ -116,7 +118,8 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final Loan l = new Loan(1, 10000, OffsetDateTime.now());
         final LoanDescriptor ld = new LoanDescriptor(l);
         final Recommendation r = ld.recommend(200, false).get();
-        final TestMarketplace m = new TestMarketplace(Collections.singletonList(l), treatment);
+        final DaemonInvestmentModeTest.TestMarketplace m =
+                new DaemonInvestmentModeTest.TestMarketplace(Collections.singletonList(l), treatment);
         final InvestmentStrategy ms = Mockito.mock(InvestmentStrategy.class);
         Mockito.when(ms.recommend(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
                 .thenReturn(Collections.singletonList(r));
@@ -131,8 +134,9 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
                 new ZonkyProxy.Builder().asDryRun(), false, m, s)) {
             final Future<Boolean> wasLockedByUser = Executors.newScheduledThreadPool(1).schedule(() -> {
-                final boolean result = mode.blockUntilUserCancelled.hasQueuedThreads();
-                mode.blockUntilUserCancelled.release();
+                LoggerFactory.getLogger(DaemonInvestmentModeTest.class).info("Sending request to terminate.");
+                final boolean result = DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.hasQueuedThreads();
+                DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
                 return result;
             }, 1, TimeUnit.SECONDS);
             final Optional<Collection<Investment>> result = mode.execute(p);

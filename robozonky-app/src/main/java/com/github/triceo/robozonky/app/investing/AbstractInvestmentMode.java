@@ -100,6 +100,7 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
      * @return Investments made while this method was running, or empty if failure.
      */
     protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider, final Semaphore circuitBreaker) {
+        LOGGER.trace("Executing.");
         try {
             final ResultTracker buffer = new ResultTracker();
             final Consumer<Collection<Loan>> investor = (loans) -> {
@@ -108,7 +109,9 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
                 buffer.acceptInvestmentsFromRobot(result);
             };
             openMarketplace(investor);
-            circuitBreaker.acquireUninterruptibly();
+            LOGGER.trace("Will wait for user stop.");
+            circuitBreaker.acquireUninterruptibly(Math.max(1, circuitBreaker.availablePermits()));
+            LOGGER.trace("User stop received.");
             circuitBreaker.release();
             return Optional.of(buffer.getInvestmentsMade());
         } catch (final Exception ex) {

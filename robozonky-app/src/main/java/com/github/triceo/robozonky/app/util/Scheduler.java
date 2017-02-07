@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.util;
 
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashSet;
@@ -27,12 +28,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Scheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
+    private static final TemporalAmount REFRESH = Duration.ofMinutes(Defaults.getRemoteResourceRefreshIntervalInMinutes());
     public static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(1);
 
     private final Supplier<ScheduledExecutorService> executorProvider;
@@ -53,6 +56,10 @@ public class Scheduler {
         Scheduler.LOGGER.debug("Scheduling {} every {} seconds.", toSchedule, delayInSeconds);
         this.submitted.add(toSchedule);
         executor.scheduleWithFixedDelay(toSchedule, 0, delayInSeconds, TimeUnit.SECONDS);
+    }
+
+    public void submit(final Refreshable<?> toSchedule) {
+        this.submit(toSchedule, Scheduler.REFRESH);
     }
 
     public void submit(final Refreshable<?> toSchedule, final TemporalAmount delayInBetween) {

@@ -92,8 +92,10 @@ public class OperatingModeTest {
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         Mockito.when(cli.getConfirmationFragment()).thenReturn(Mockito.mock(ConfirmationCommandLineFragment.class));
+        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        Mockito.when(auth.getSecretProvider()).thenReturn(SecretProvider.fallback("user", new char[0]));
         final OperatingMode mode = OperatingMode.DIRECT_INVESTMENT;
-        final Optional<InvestmentMode> config = mode.configure(cli, null);
+        final Optional<InvestmentMode> config = mode.configure(cli, auth);
         Assertions.assertThat(config).isPresent();
     }
 
