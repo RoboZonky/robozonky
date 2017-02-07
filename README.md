@@ -1,7 +1,7 @@
 # RoboZonky
 
 [![Join the chat at https://gitter.im/robozonky/Lobby](https://badges.gitter.im/robozonky/Lobby.svg)](https://gitter.im/robozonky/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.github.triceo.robozonky/robozonky-app/badge.svg)](http://search.maven.org/#search|ga|1|robozonky-)
+[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.github.triceo.robozonky/robozonky/badge.svg)](http://search.maven.org/#search|ga|1|robozonky-)
 [![Linux Build Status](https://travis-ci.org/triceo/robozonky.svg)](https://travis-ci.org/triceo/robozonky)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/5okjq7ms19pn4kpr?svg=true)](https://ci.appveyor.com/project/triceo/robozonky)
 
