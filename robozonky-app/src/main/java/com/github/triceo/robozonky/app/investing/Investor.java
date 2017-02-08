@@ -100,6 +100,8 @@ class Investor {
                 Events.fire(new InvestmentMadeEvent(i, balance.intValue() - confirmedAmount));
                 tracker.makeInvestment(i);
                 return Optional.of(i);
+            case SEEN_BEFORE:
+                return Optional.empty();
             default:
                 throw new IllegalStateException("Investment operation failed remotely.");
         }

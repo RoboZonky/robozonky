@@ -22,6 +22,10 @@ import com.github.triceo.robozonky.api.remote.ZonkyApi;
 public enum ZonkyResponseType {
 
     /**
+     * Already seen and handled in a previous run, no action is being performed.
+     */
+    SEEN_BEFORE,
+    /**
      * Investment confirmed by {@link ZonkyApi}.
      */
     INVESTED,

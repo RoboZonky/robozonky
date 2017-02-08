@@ -210,7 +210,11 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
         } else {
             Assertions.assertThat(p.getConfirmationProviderId()).isEmpty();
         }
-        Assertions.assertThat(result.getType()).isEqualTo(responseType);
+        if (responseType == ZonkyResponseType.DELEGATED && seenBefore) {
+            Assertions.assertThat(result.getType()).isEqualTo(ZonkyResponseType.SEEN_BEFORE);
+        } else {
+            Assertions.assertThat(result.getType()).isEqualTo(responseType);
+        }
         if (result.getType() == ZonkyResponseType.INVESTED) {
             Assertions.assertThat(result.getConfirmedAmount()).hasValue(ZonkyProxyTest.CONFIRMED_AMOUNT);
         } else {

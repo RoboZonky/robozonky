@@ -134,7 +134,7 @@ public class ZonkyProxy {
                  * this must mean that the previous response was DELEGATED and the user did not respond in the
                  * meantime. we therefore keep the investment as delegated.
                  */
-                return new ZonkyResponse(ZonkyResponseType.DELEGATED);
+                return new ZonkyResponse(ZonkyResponseType.SEEN_BEFORE);
             }
         } else {
             if (recommendation.isConfirmationRequired()) {
