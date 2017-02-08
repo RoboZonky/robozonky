@@ -31,16 +31,23 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 public class JmxListenerService implements ListenerService {
 
     private static <T extends Event> EventListener<T> newListener(final Class<T> eventType) {
-        final Runtime bean = (Runtime)MBean.RUNTIME.getImplementation();
         if (Objects.equals(eventType, ExecutionStartedEvent.class)) {
-            return event -> bean.registerInvestmentRun((ExecutionStartedEvent)event);
+            return event -> {
+                final ExecutionStartedEvent evt = (ExecutionStartedEvent)event;
+                ((Runtime)MBean.RUNTIME.getImplementation()).registerInvestmentRun(evt);
+                ((Investments)MBean.INVESTMENTS.getImplementation()).registerInvestmentRun(evt);
+            };
         } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
+            final Investments bean = (Investments)MBean.INVESTMENTS.getImplementation();
             return event -> bean.addDelegatedInvestment((InvestmentDelegatedEvent)event);
         } else if (Objects.equals(eventType, InvestmentRejectedEvent.class)) {
+            final Investments bean = (Investments)MBean.INVESTMENTS.getImplementation();
             return event -> bean.addRejectedInvestment((InvestmentRejectedEvent)event);
         } else if (Objects.equals(eventType, InvestmentMadeEvent.class)) {
+            final Investments bean = (Investments)MBean.INVESTMENTS.getImplementation();
             return event -> bean.addSuccessfulInvestment((InvestmentMadeEvent) event);
         } else if (Objects.equals(eventType, RoboZonkyInitializedEvent.class)) {
+            final Runtime bean = (Runtime)MBean.RUNTIME.getImplementation();
             return event -> bean.registerInitialization((RoboZonkyInitializedEvent)event);
         } else {
             return null;

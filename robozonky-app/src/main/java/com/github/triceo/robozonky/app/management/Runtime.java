@@ -16,25 +16,13 @@
 
 package com.github.triceo.robozonky.app.management;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
-import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
-import com.github.triceo.robozonky.internal.api.Defaults;
 
 class Runtime implements RuntimeMBean {
 
     private String zonkyUsername, version;
-    private OffsetDateTime lastInvestmentRunTimestamp;
-    private final Map<Integer, Integer> successfulInvestments = new LinkedHashMap<>(),
-            delegatedInvestments = new LinkedHashMap<>(), rejectedInvestments = new LinkedHashMap<>();
 
     public Runtime() {
         this.clear();
@@ -59,52 +47,11 @@ class Runtime implements RuntimeMBean {
         this.version = event.getVersion();
     }
 
-    @Override
-    public Map<Integer, Integer> getSuccessfulInvestments() {
-        return this.successfulInvestments;
-    }
-
-    void addSuccessfulInvestment(final InvestmentMadeEvent event) {
-        this.successfulInvestments.put(event.getInvestment().getLoanId(), event.getInvestment().getAmount());
-    }
-
-    @Override
-    public Map<Integer, Integer> getDelegatedInvestments() {
-        return this.delegatedInvestments;
-    }
-
-    void addDelegatedInvestment(final InvestmentDelegatedEvent event) {
-        this.delegatedInvestments.put(
-                event.getRecommendation().getLoanDescriptor().getLoan().getId(),
-                event.getRecommendation().getRecommendedInvestmentAmount());
-    }
-
-    @Override
-    public Map<Integer, Integer> getRejectedInvestments() {
-        return this.rejectedInvestments;
-    }
-
-    void addRejectedInvestment(final InvestmentRejectedEvent event) {
-        this.rejectedInvestments.put(
-                event.getRecommendation().getLoanDescriptor().getLoan().getId(),
-                event.getRecommendation().getRecommendedInvestmentAmount());
-    }
-
-    @Override
-    public OffsetDateTime getLastInvestmentRunTimestamp() {
-        return this.lastInvestmentRunTimestamp;
-    }
-
     void registerInvestmentRun(final ExecutionStartedEvent event) {
-        this.lastInvestmentRunTimestamp = event.getCreatedOn();
         this.zonkyUsername = event.getUsername();
     }
 
     void clear() {
-        this.rejectedInvestments.clear();
-        this.delegatedInvestments.clear();
-        this.successfulInvestments.clear();
-        this.lastInvestmentRunTimestamp = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
         this.zonkyUsername = "";
         this.version = "";
     }

@@ -16,12 +16,19 @@
 
 package com.github.triceo.robozonky.app.management;
 
-public interface RuntimeMBean {
+import java.time.OffsetDateTime;
+import java.util.Map;
 
-    void stopDaemon();
+public interface InvestmentsMBean {
 
-    String getZonkyUsername();
+    void clear();
 
-    String getVersion();
+    Map<Integer, Integer> getSuccessfulInvestments();
+
+    Map<Integer, Integer> getDelegatedInvestments();
+
+    Map<Integer, Integer> getRejectedInvestments();
+
+    OffsetDateTime getLastInvestmentRunTimestamp();
 
 }

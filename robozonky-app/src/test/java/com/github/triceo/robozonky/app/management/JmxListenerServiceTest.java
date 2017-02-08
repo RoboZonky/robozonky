@@ -44,17 +44,18 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class JmxListenerServiceTest {
 
-    private static final Runtime BEAN = (Runtime)MBean.RUNTIME.getImplementation();
+    private static final Investments INVESTMENTS = (Investments)MBean.INVESTMENTS.getImplementation();
+    private static final Runtime RUNTIME = (Runtime)MBean.RUNTIME.getImplementation();
 
     private static Object[] getParametersForExecutionStarted() {
         final ExecutionStartedEvent evt = new ExecutionStartedEvent("user", Collections.emptyList(), 0);
         final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(BEAN.getLastInvestmentRunTimestamp()).isBefore(evt.getCreatedOn());
-            softly.assertThat(BEAN.getZonkyUsername()).isEqualTo("");
+            softly.assertThat(INVESTMENTS.getLastInvestmentRunTimestamp()).isBefore(evt.getCreatedOn());
+            softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo("");
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(BEAN.getLastInvestmentRunTimestamp()).isEqualTo(evt.getCreatedOn());
-            softly.assertThat(BEAN.getZonkyUsername()).isEqualTo(evt.getUsername());
+            softly.assertThat(INVESTMENTS.getLastInvestmentRunTimestamp()).isEqualTo(evt.getCreatedOn());
+            softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo(evt.getUsername());
         };
         return new Object[] {evt.getClass(), evt, before, after};
     }
@@ -65,10 +66,10 @@ public class JmxListenerServiceTest {
         final Recommendation r = ld.recommend(200).get();
         final Event evt = new InvestmentDelegatedEvent(r, 10000, "");
         final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(BEAN.getDelegatedInvestments()).isEmpty();
+            softly.assertThat(INVESTMENTS.getDelegatedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(BEAN.getDelegatedInvestments()).containsOnlyKeys(l.getId());
+            softly.assertThat(INVESTMENTS.getDelegatedInvestments()).containsOnlyKeys(l.getId());
         };
         return new Object[] {evt.getClass(), evt, before, after};
     }
@@ -79,10 +80,10 @@ public class JmxListenerServiceTest {
         final Recommendation r = ld.recommend(200).get();
         final Event evt = new InvestmentRejectedEvent(r, 10000, "");
         final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(BEAN.getRejectedInvestments()).isEmpty();
+            softly.assertThat(INVESTMENTS.getRejectedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(BEAN.getRejectedInvestments()).containsOnlyKeys(l.getId());
+            softly.assertThat(INVESTMENTS.getRejectedInvestments()).containsOnlyKeys(l.getId());
         };
         return new Object[] {evt.getClass(), evt, before, after};
     }
@@ -91,10 +92,10 @@ public class JmxListenerServiceTest {
         final Loan l = new Loan(1, 1000);
         final Event evt = new InvestmentMadeEvent(new Investment(l, 200), 1000);
         final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(BEAN.getSuccessfulInvestments()).isEmpty();
+            softly.assertThat(INVESTMENTS.getSuccessfulInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(BEAN.getSuccessfulInvestments()).containsOnlyKeys(l.getId());
+            softly.assertThat(INVESTMENTS.getSuccessfulInvestments()).containsOnlyKeys(l.getId());
         };
         return new Object[] {evt.getClass(), evt, before, after};
     }
@@ -102,10 +103,10 @@ public class JmxListenerServiceTest {
     private static Object[] getParametersForRoboZonkyInitialized() {
         final RoboZonkyInitializedEvent evt = new RoboZonkyInitializedEvent("version");
         final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(BEAN.getVersion()).isEqualTo("");
+            softly.assertThat(RUNTIME.getVersion()).isEqualTo("");
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(BEAN.getVersion()).isEqualTo(evt.getVersion());
+            softly.assertThat(RUNTIME.getVersion()).isEqualTo(evt.getVersion());
         };
         return new Object[] {evt.getClass(), evt, before, after};
     }
@@ -121,7 +122,7 @@ public class JmxListenerServiceTest {
 
     @Before
     public void clearBean() {
-        BEAN.clear();
+        RUNTIME.clear();
     }
 
     /**
@@ -150,7 +151,8 @@ public class JmxListenerServiceTest {
         SoftAssertions.assertSoftly(assertionsBefore);
         this.handleEvent(event);
         SoftAssertions.assertSoftly(assertionsAfter);
-        BEAN.clear();
+        RUNTIME.clear();
+        INVESTMENTS.clear();
         SoftAssertions.assertSoftly(assertionsBefore);
     }
 
