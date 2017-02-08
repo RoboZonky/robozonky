@@ -27,9 +27,12 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ResultTracker {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultTracker.class);
     static final TemporalAmount CAPTCHA_DELAY = Duration.ofSeconds(Defaults.getCaptchaDelayInSeconds());
 
     /**
@@ -38,6 +41,10 @@ class ResultTracker {
     private volatile Collection<Investment> investmentsMade = new ArrayList<>(0);
 
     public Collection<LoanDescriptor> acceptLoansFromMarketplace(final Collection<Loan> loans) {
+        if (loans == null) {
+            ResultTracker.LOGGER.info("Marketplace returned null loans, possible Zonky downtime.");
+            return Collections.emptyList();
+        }
         return loans.stream()
                 .filter(l -> l.getRemainingInvestment() >= Defaults.MINIMUM_INVESTMENT_IN_CZK)
                 .filter(l -> investmentsMade.stream().noneMatch(i -> i.getLoanId() == l.getId()))
