@@ -100,8 +100,6 @@ class Activity {
     public boolean shouldSleep() {
         final OffsetDateTime lastKnownAction = Activity.getLatestMarketplaceAction();
         final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
-        Activity.LOGGER.debug("Marketplace last checked on {}, has un-actionable loans: {}.", lastKnownAction,
-                hasUnactionableLoans);
         boolean shouldSleep = true;
         final Collection<LoanDescriptor> newLoans = this.getLoansNewerThan(lastKnownAction);
         if (!newLoans.isEmpty()) {

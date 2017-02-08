@@ -103,7 +103,6 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
             return Collections.emptyList();
         }
         final InvestmentStrategy strategy = refreshableStrategy.getLatestBlocking();
-        StrategyExecution.LOGGER.debug("Strategy acquired, asking for loans.");
         // only after we've acquired the strategy work with the marketplace
         final Activity activity = new Activity(loans, maximumSleepPeriod);
         final boolean shouldSleep = activity.shouldSleep();

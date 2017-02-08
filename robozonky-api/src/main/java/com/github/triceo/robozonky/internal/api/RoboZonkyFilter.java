@@ -38,14 +38,14 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
         clientRequestContext.getHeaders().putSingle("User-Agent", Defaults.ROBOZONKY_USER_AGENT);
-        this.logger.trace("Will '{}' to '{}'.", clientRequestContext.getMethod(), clientRequestContext.getUri());
+        this.logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext,
                        final ClientResponseContext clientResponseContext) throws IOException {
-        this.logger.debug("Operation '{}' to '{}' finished with HTTP {}.", clientRequestContext.getMethod(),
-                clientRequestContext.getUri(), clientResponseContext.getStatus());
+        this.logger.debug("Response HTTP {} {}.", clientResponseContext.getStatus(),
+                clientResponseContext.getStatusInfo().getReasonPhrase());
     }
 
 
