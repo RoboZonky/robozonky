@@ -18,14 +18,21 @@ package com.github.triceo.robozonky.app;
 
 import java.io.File;
 
+import com.github.triceo.robozonky.app.notifications.Events;
 import com.github.triceo.robozonky.app.util.Scheduler;
 import org.junit.After;
+import org.junit.Rule;
+import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractStateLeveragingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStateLeveragingTest.class);
+
+    @Rule
+    public final ProvideSystemProperty property = new ProvideSystemProperty("robozonky.debug.enable_event_storage",
+            "true");
 
     @After
     public void reinitScheduler() {
@@ -36,6 +43,11 @@ public abstract class AbstractStateLeveragingTest {
     public void deleteState() {
         final File f = new File("robozonky.state");
         AbstractStateLeveragingTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
+    }
+
+    @After
+    public void clearEvents() {
+        Events.getFired().clear();
     }
 
 }

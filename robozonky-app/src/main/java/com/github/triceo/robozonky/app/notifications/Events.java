@@ -31,6 +31,7 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.app.util.Scheduler;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public enum Events {
     INSTANCE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Events.class);
-    private static final Collection<Event> EVENTS_FIRED = new ArrayList<>();
+    private static final List<Event> EVENTS_FIRED = new ArrayList<>();
 
     private static class EventSpecific<E extends Event> {
 
@@ -117,11 +118,19 @@ public enum Events {
         Events.INSTANCE.getListeners(eventClass).parallel()
                 .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
                 .forEach(l -> Events.fire(event, l));
-        Events.EVENTS_FIRED.add(event);
+        if (Defaults.isDebugEventStorageEnabled()) {
+            Events.EVENTS_FIRED.add(event);
+        }
     }
 
+    /**
+     * This only exists for testing purposes. Also see {@link Defaults#isDebugEventStorageEnabled()}.
+     *
+     * @return Events that were stored, if any. Returns the storage directly, any mutation operations will mutate the
+     * storage.
+     */
     public static List<Event> getFired() {
-        return new ArrayList<>(Events.EVENTS_FIRED);
+        return Events.EVENTS_FIRED;
     }
 
 }

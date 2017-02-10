@@ -26,7 +26,7 @@ import com.github.triceo.robozonky.app.notifications.Events;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class RobozonkyStartupNotifierTest {
+public class RobozonkyStartupNotifierTest extends AbstractStateLeveragingTest {
 
     @Test
     public void properEventsFired() {

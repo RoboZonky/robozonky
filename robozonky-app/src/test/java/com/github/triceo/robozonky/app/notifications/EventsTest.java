@@ -19,12 +19,13 @@ package com.github.triceo.robozonky.app.notifications;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.triceo.robozonky.app.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class EventsTest {
+public class EventsTest extends AbstractStateLeveragingTest {
 
     @Test
     public void firingAndFailing() {

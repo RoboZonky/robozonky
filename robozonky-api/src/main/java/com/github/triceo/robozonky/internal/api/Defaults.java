@@ -55,14 +55,28 @@ public final class Defaults {
 
     private static int getPropertyValue(final String propertyName, final int defaultValue) {
         final String value = System.getProperty(propertyName, String.valueOf(defaultValue));
-        int result = defaultValue;
         try {
-            result = Integer.parseInt(value);
+            return Integer.parseInt(value);
         } catch (final NumberFormatException ex) {
-            // nothing to do here
+            return defaultValue;
         }
-        Defaults.LOGGER.debug("Property '{}' contains '{}'.", propertyName, result);
-        return result;
+    }
+
+    private static boolean getPropertyValue(final String propertyName, final boolean defaultValue) {
+        final String value = System.getProperty(propertyName, String.valueOf(defaultValue));
+        try {
+            return Boolean.parseBoolean(value);
+        } catch (final NumberFormatException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * When set to true, this is essentially a controlled memory leak. Generally only useful for testing.
+     * @return
+     */
+    public static boolean isDebugEventStorageEnabled() {
+        return Defaults.getPropertyValue("robozonky.debug.enable_event_storage", false);
     }
 
     public static int getTokenRefreshBeforeExpirationInSeconds() {

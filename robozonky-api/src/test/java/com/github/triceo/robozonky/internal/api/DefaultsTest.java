@@ -30,6 +30,7 @@ public class DefaultsTest {
     @Test
     public void properties() {
         SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(Defaults.isDebugEventStorageEnabled()).isFalse();
             softly.assertThat(Defaults.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
             softly.assertThat(Defaults.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(5);
             softly.assertThat(Defaults.getCaptchaDelayInSeconds()).isEqualTo(120);
