@@ -54,6 +54,7 @@ abstract class AbstractMarketplace implements Marketplace {
 
     @Override
     public void close() {
+        api = null;
         apis.close();
     }
 }
