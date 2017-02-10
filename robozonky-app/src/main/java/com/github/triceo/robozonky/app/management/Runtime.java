@@ -16,16 +16,19 @@
 
 package com.github.triceo.robozonky.app.management;
 
-import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import java.time.OffsetDateTime;
+
+import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
 
 class Runtime implements RuntimeMBean {
 
     private String zonkyUsername, version;
+    private OffsetDateTime lastUpdatedDateTime;
 
     public Runtime() {
-        this.clear();
+        this.reset();
     }
 
     @Override
@@ -47,12 +50,20 @@ class Runtime implements RuntimeMBean {
         this.version = event.getVersion();
     }
 
-    void registerInvestmentRun(final ExecutionStartedEvent event) {
+    void registerInvestmentRun(final ExecutionCompletedEvent event) {
         this.zonkyUsername = event.getUsername();
+        this.lastUpdatedDateTime = event.getCreatedOn();
     }
 
-    void clear() {
+    @Override
+    public void reset() {
         this.zonkyUsername = "";
         this.version = "";
+        this.lastUpdatedDateTime = null;
+    }
+
+    @Override
+    public OffsetDateTime getLatestUpdatedDateTime() {
+        return this.lastUpdatedDateTime;
     }
 }

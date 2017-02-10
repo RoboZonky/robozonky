@@ -16,16 +16,12 @@
 
 package com.github.triceo.robozonky.app.management;
 
-import java.util.Map;
+import java.time.OffsetDateTime;
 
-public interface InvestmentsMBean  extends BaseMBean {
+public interface BaseMBean {
+
+    OffsetDateTime getLatestUpdatedDateTime();
 
     void reset();
-
-    Map<Integer, Integer> getSuccessfulInvestments();
-
-    Map<Integer, Integer> getDelegatedInvestments();
-
-    Map<Integer, Integer> getRejectedInvestments();
 
 }

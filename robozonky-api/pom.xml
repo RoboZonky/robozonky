@@ -229,6 +229,28 @@
                     "classSimpleName": "RoboZonkyEndingEvent",
                     "methodName": "<init>",
                     "justification": "This event is for clean termination, therefore return code makes no sense."
+                  }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "method parameter void com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent::<init>(com.github.triceo.robozonky.api.strategies.InvestmentStrategy, java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, ===int===)",
+                    "new": "method parameter void com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent::<init>(com.github.triceo.robozonky.api.strategies.InvestmentStrategy, java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, ===com.github.triceo.robozonky.api.strategies.PortfolioOverview===)",
+                    "oldType": "int",
+                    "newType": "com.github.triceo.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "StrategyCompletedEvent",
+                    "methodName": "<init>",
+                    "parameterIndex": "2",
+                    "justification": "Balance argument changes into an entire portfolio overview."
+                  }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "method parameter void com.github.triceo.robozonky.api.notifications.StrategyStartedEvent::<init>(com.github.triceo.robozonky.api.strategies.InvestmentStrategy, java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, ===int===)",
+                    "new": "method parameter void com.github.triceo.robozonky.api.notifications.StrategyStartedEvent::<init>(com.github.triceo.robozonky.api.strategies.InvestmentStrategy, java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, ===com.github.triceo.robozonky.api.strategies.PortfolioOverview===)",
+                    "oldType": "int",
+                    "newType": "com.github.triceo.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "StrategyStartedEvent",
+                    "methodName": "<init>",
+                    "parameterIndex": "2",
+                    "justification": "Balance argument changes into an entire portfolio overview."
                   }
                 ]
               }

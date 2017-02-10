@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory;
 public enum MBean {
 
     RUNTIME(Runtime::new),
-    INVESTMENTS(Investments::new);
+    INVESTMENTS(Investments::new),
+    PORTFOLIO(Portfolio::new);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MBean.class);
 
@@ -73,10 +74,10 @@ public enum MBean {
         MBean.LOGGER.debug("MBeans unregistered.");
     }
 
-    private final Object implementation;
+    private final BaseMBean implementation;
     private ObjectName objectName;
 
-    MBean(final Supplier<?> impl) {
+    MBean(final Supplier<BaseMBean> impl) {
         this.implementation = impl.get();
         try {
             final String className = this.implementation.getClass().getSimpleName();
@@ -87,7 +88,7 @@ public enum MBean {
         }
     }
 
-    public Object getImplementation() {
+    public BaseMBean getImplementation() {
         return implementation;
     }
 

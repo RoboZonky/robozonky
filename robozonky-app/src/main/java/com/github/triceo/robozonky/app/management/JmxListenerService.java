@@ -21,19 +21,21 @@ import java.util.Objects;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
-import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 
 public class JmxListenerService implements ListenerService {
 
     private static <T extends Event> EventListener<T> newListener(final Class<T> eventType) {
-        if (Objects.equals(eventType, ExecutionStartedEvent.class)) {
+        if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
             return event -> {
-                final ExecutionStartedEvent evt = (ExecutionStartedEvent)event;
+                final ExecutionCompletedEvent evt = (ExecutionCompletedEvent)event;
                 ((Runtime)MBean.RUNTIME.getImplementation()).registerInvestmentRun(evt);
                 ((Investments)MBean.INVESTMENTS.getImplementation()).registerInvestmentRun(evt);
             };
@@ -47,8 +49,14 @@ public class JmxListenerService implements ListenerService {
             final Investments bean = (Investments)MBean.INVESTMENTS.getImplementation();
             return event -> bean.addSuccessfulInvestment((InvestmentMadeEvent) event);
         } else if (Objects.equals(eventType, RoboZonkyInitializedEvent.class)) {
-            final Runtime bean = (Runtime)MBean.RUNTIME.getImplementation();
-            return event -> bean.registerInitialization((RoboZonkyInitializedEvent)event);
+            final Runtime bean = (Runtime) MBean.RUNTIME.getImplementation();
+            return event -> bean.registerInitialization((RoboZonkyInitializedEvent) event);
+        } else if (Objects.equals(eventType, StrategyStartedEvent.class)) {
+            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
+            return event -> bean.setPortfolioOverview((StrategyStartedEvent) event);
+        } else if (Objects.equals(eventType, StrategyCompletedEvent.class)) {
+            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
+            return event -> bean.setPortfolioOverview((StrategyCompletedEvent) event);
         } else {
             return null;
         }

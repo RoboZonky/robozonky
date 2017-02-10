@@ -16,20 +16,24 @@
 
 package com.github.triceo.robozonky.app.management;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
-import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
@@ -46,15 +50,16 @@ public class JmxListenerServiceTest {
 
     private static final Investments INVESTMENTS = (Investments)MBean.INVESTMENTS.getImplementation();
     private static final Runtime RUNTIME = (Runtime)MBean.RUNTIME.getImplementation();
+    private static final Portfolio PORTFOLIO = (Portfolio) MBean.PORTFOLIO.getImplementation();
 
-    private static Object[] getParametersForExecutionStarted() {
-        final ExecutionStartedEvent evt = new ExecutionStartedEvent("user", Collections.emptyList(), 0);
+    private static Object[] getParametersForExecutionCompleted() {
+        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent("user", Collections.emptyList(), 0);
         final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(INVESTMENTS.getLastInvestmentRunTimestamp()).isBefore(evt.getCreatedOn());
+            softly.assertThat(INVESTMENTS.getLatestUpdatedDateTime()).isNull();
             softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo("");
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(INVESTMENTS.getLastInvestmentRunTimestamp()).isEqualTo(evt.getCreatedOn());
+            softly.assertThat(INVESTMENTS.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
             softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo(evt.getUsername());
         };
         return new Object[] {evt.getClass(), evt, before, after};
@@ -100,6 +105,34 @@ public class JmxListenerServiceTest {
         return new Object[] {evt.getClass(), evt, before, after};
     }
 
+    private static Object[] getParametersForStrategyStarted() {
+        final StrategyStartedEvent evt = new StrategyStartedEvent(null, Collections.emptyList(), null);
+        final Consumer<SoftAssertions> before = (softly) -> {
+            softly.assertThat(PORTFOLIO.getAvailableBalance()).isEqualTo(0);
+            softly.assertThat(PORTFOLIO.getExpectedYield()).isEqualTo(0);
+            softly.assertThat(PORTFOLIO.getInvestedAmount()).isEqualTo(0);
+            softly.assertThat(PORTFOLIO.getRelativeExpectedYield()).isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(PORTFOLIO.getInvestedAmountPerRating()).isNotEmpty();
+            softly.assertThat(PORTFOLIO.getRatingShare()).isNotEmpty();
+            softly.assertThat(PORTFOLIO.getLatestUpdatedDateTime()).isNull();
+        };
+        final Consumer<SoftAssertions> after = (softly) -> {
+            softly.assertThat(PORTFOLIO.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+        };
+        return new Object[] {evt.getClass(), evt, before, after};
+    }
+
+    private static Object[] getParametersForStrategyCompleted() {
+        final StrategyCompletedEvent evt = new StrategyCompletedEvent(null, Collections.emptyList(), null);
+        final Consumer<SoftAssertions> before = (softly) -> {
+            softly.assertThat(PORTFOLIO.getLatestUpdatedDateTime()).isNull();
+        };
+        final Consumer<SoftAssertions> after = (softly) -> {
+            softly.assertThat(PORTFOLIO.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+        };
+        return new Object[] {evt.getClass(), evt, before, after};
+    }
+
     private static Object[] getParametersForRoboZonkyInitialized() {
         final RoboZonkyInitializedEvent evt = new RoboZonkyInitializedEvent("version");
         final Consumer<SoftAssertions> before = (softly) -> {
@@ -113,16 +146,18 @@ public class JmxListenerServiceTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
-        return Arrays.asList(JmxListenerServiceTest.getParametersForExecutionStarted(),
+        return Arrays.asList(JmxListenerServiceTest.getParametersForExecutionCompleted(),
                 JmxListenerServiceTest.getParametersForInvestmentDelegated(),
                 JmxListenerServiceTest.getParametersForInvestmentMade(),
                 JmxListenerServiceTest.getParametersForInvestmentRejected(),
-                JmxListenerServiceTest.getParametersForRoboZonkyInitialized());
+                JmxListenerServiceTest.getParametersForRoboZonkyInitialized(),
+                JmxListenerServiceTest.getParametersForStrategyStarted(),
+                JmxListenerServiceTest.getParametersForStrategyCompleted());
     }
 
     @Before
     public void clearBean() {
-        RUNTIME.clear();
+        Stream.of(MBean.values()).forEach(b -> b.getImplementation().reset());
     }
 
     /**
@@ -151,8 +186,7 @@ public class JmxListenerServiceTest {
         SoftAssertions.assertSoftly(assertionsBefore);
         this.handleEvent(event);
         SoftAssertions.assertSoftly(assertionsAfter);
-        RUNTIME.clear();
-        INVESTMENTS.clear();
+        Stream.of(MBean.values()).forEach(b -> b.getImplementation().reset());
         SoftAssertions.assertSoftly(assertionsBefore);
     }
 

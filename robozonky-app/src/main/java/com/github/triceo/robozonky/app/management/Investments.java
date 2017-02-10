@@ -16,16 +16,14 @@
 
 package com.github.triceo.robozonky.app.management;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.triceo.robozonky.internal.api.Defaults;
 
 class Investments implements InvestmentsMBean {
 
@@ -34,7 +32,7 @@ class Investments implements InvestmentsMBean {
             delegatedInvestments = new LinkedHashMap<>(), rejectedInvestments = new LinkedHashMap<>();
 
     public Investments() {
-        this.clear();
+        this.reset();
     }
 
     @Override
@@ -69,19 +67,20 @@ class Investments implements InvestmentsMBean {
     }
 
     @Override
-    public OffsetDateTime getLastInvestmentRunTimestamp() {
+    public OffsetDateTime getLatestUpdatedDateTime() {
         return this.lastInvestmentRunTimestamp;
     }
 
-    void registerInvestmentRun(final ExecutionStartedEvent event) {
+    void registerInvestmentRun(final Event event) {
         this.lastInvestmentRunTimestamp = event.getCreatedOn();
     }
 
     @Override
-    public void clear() {
+    public void reset() {
         this.rejectedInvestments.clear();
         this.delegatedInvestments.clear();
         this.successfulInvestments.clear();
-        this.lastInvestmentRunTimestamp = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+        this.lastInvestmentRunTimestamp = null;
     }
+
 }

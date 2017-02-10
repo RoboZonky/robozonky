@@ -21,6 +21,7 @@ import java.util.Collections;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired before any loans are submitted for evaluation by the strategy and subsequent investment operations. May be
@@ -30,13 +31,14 @@ public final class StrategyStartedEvent extends Event {
 
     private final InvestmentStrategy strategyToBeUsed;
     private final Collection<LoanDescriptor> loanDescriptors;
-    private final int startingBalance;
+    private final PortfolioOverview portfolioOverview;
 
     public StrategyStartedEvent(final InvestmentStrategy strategyToBeUsed,
-                                final Collection<LoanDescriptor> loanDescriptors, final int startingBalance) {
+                                final Collection<LoanDescriptor> loanDescriptors,
+                                final PortfolioOverview portfolioOverview) {
         this.strategyToBeUsed = strategyToBeUsed;
         this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
-        this.startingBalance = startingBalance;
+        this.portfolioOverview = portfolioOverview;
     }
 
     public InvestmentStrategy getStrategyToBeUsed() {
@@ -47,7 +49,7 @@ public final class StrategyStartedEvent extends Event {
         return loanDescriptors;
     }
 
-    public int getStartingBalance() {
-        return startingBalance;
+    public PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 }

@@ -189,13 +189,6 @@ class Investor {
         tracker.registerExistingInvestments(Investor.retrieveInvestmentsRepresentedByBlockedAmounts(this.api));
         // invest the money
         this.runInvestmentLoop(strategy, tracker, stats, minimumInvestmentAmount);
-        this.balance = tracker.getCurrentBalance();
-        // report
-        final PortfolioOverview portfolio = PortfolioOverview.calculate(balance, stats, tracker.getAllInvestments());
-        Investor.LOGGER.info("Current value of portfolio is {} CZK, annual expected yield is {} % ({} CZK).",
-                portfolio.getCzkAvailable() + portfolio.getCzkInvested(),
-                portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
-                portfolio.getCzkExpectedYield());
         return tracker.getInvestmentsMade();
     }
 
@@ -206,10 +199,10 @@ class Investor {
                         .map(l -> String.valueOf(l.getLoan().getId()))
                         .sorted()
                         .collect(Collectors.joining(", ")));
-        Events.fire(new StrategyStartedEvent(strategy, tracker.getAvailableLoans(), balance.intValue()));
+        PortfolioOverview portfolio =
+                PortfolioOverview.calculate(tracker.getCurrentBalance(), stats, tracker.getAllInvestments());
+        Events.fire(new StrategyStartedEvent(strategy, tracker.getAvailableLoans(), portfolio));
         do {
-            final PortfolioOverview portfolio =
-                    PortfolioOverview.calculate(tracker.getCurrentBalance(), stats, tracker.getAllInvestments());
             Investor.LOGGER.debug("Current share of unpaid loans with a given rating: {}.",
                     portfolio.getSharesOnInvestment());
             final boolean investmentWasMade = strategy.recommend(tracker.getAvailableLoans(), portfolio).stream()
@@ -221,8 +214,15 @@ class Investor {
             if (!investmentWasMade) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }
+            portfolio = PortfolioOverview.calculate(tracker.getCurrentBalance(), stats, tracker.getAllInvestments());
         } while (tracker.getCurrentBalance().compareTo(minimumInvestmentAmount) >= 0);
-        Events.fire(new StrategyCompletedEvent(strategy, tracker.getInvestmentsMade(), balance.intValue()));
+        Events.fire(new StrategyCompletedEvent(strategy, tracker.getInvestmentsMade(), portfolio));
+        // report
+        this.balance = tracker.getCurrentBalance();
+        Investor.LOGGER.info("Current value of portfolio is {} CZK, annual expected yield is {} % ({} CZK).",
+                portfolio.getCzkAvailable() + portfolio.getCzkInvested(),
+                portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
+                portfolio.getCzkExpectedYield());
     }
 
     /**

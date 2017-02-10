@@ -21,6 +21,7 @@ import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately after all loans have been evaluated and all possible investment operations performed.
@@ -29,13 +30,14 @@ public final class StrategyCompletedEvent extends Event {
 
     private final InvestmentStrategy investmentStrategyUsed;
     private final Collection<Investment> investmentsMade;
-    private final int finalBalance;
+    private final PortfolioOverview portfolioOverview;
 
     public StrategyCompletedEvent(final InvestmentStrategy investmentStrategy,
-                                  final Collection<Investment> investmentsMade, final int finalBalance) {
+                                  final Collection<Investment> investmentsMade,
+                                  final PortfolioOverview portfolioOverview) {
         this.investmentStrategyUsed = investmentStrategy;
         this.investmentsMade = Collections.unmodifiableCollection(investmentsMade);
-        this.finalBalance = finalBalance;
+        this.portfolioOverview = portfolioOverview;
     }
 
     public InvestmentStrategy getInvestmentStrategyUsed() {
@@ -46,7 +48,7 @@ public final class StrategyCompletedEvent extends Event {
         return investmentsMade;
     }
 
-    public int getFinalBalance() {
-        return finalBalance;
+    public PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 }

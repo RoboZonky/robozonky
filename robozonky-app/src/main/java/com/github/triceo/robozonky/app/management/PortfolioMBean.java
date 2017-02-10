@@ -16,16 +16,21 @@
 
 package com.github.triceo.robozonky.app.management;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
-public interface InvestmentsMBean  extends BaseMBean {
+public interface PortfolioMBean extends BaseMBean {
 
-    void reset();
+    int getAvailableBalance();
 
-    Map<Integer, Integer> getSuccessfulInvestments();
+    int getInvestedAmount();
 
-    Map<Integer, Integer> getDelegatedInvestments();
+    Map<String, Integer> getInvestedAmountPerRating();
 
-    Map<Integer, Integer> getRejectedInvestments();
+    Map<String, BigDecimal> getRatingShare();
+
+    int getExpectedYield();
+
+    BigDecimal getRelativeExpectedYield();
 
 }

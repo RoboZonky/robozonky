@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.app.management;
 
-public interface RuntimeMBean {
+public interface RuntimeMBean extends BaseMBean {
 
     void stopDaemon();
 
