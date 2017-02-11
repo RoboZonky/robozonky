@@ -51,7 +51,7 @@ public class ManagementTest {
     public void registerAndUnregister() throws IntrospectionException, ReflectionException {
         final Management m = new Management();
         try {
-            ManagementTest.SERVER.getMBeanInfo(bean.getObjectName().get());
+            ManagementTest.SERVER.getMBeanInfo(bean.getObjectName());
             Assertions.fail("The MBean is registered and it shoudln't be.");
         } catch (final InstanceNotFoundException ex) {
             // all is OK.
@@ -59,13 +59,13 @@ public class ManagementTest {
         final Optional<Consumer<ShutdownHook.Result>> hook = m.get(); // register the mbean
         Assertions.assertThat(hook).isPresent();
         try {
-            ManagementTest.SERVER.getMBeanInfo(bean.getObjectName().get());
+            ManagementTest.SERVER.getMBeanInfo(bean.getObjectName());
         } catch (final InstanceNotFoundException ex) {
             Assertions.fail("MBean was not registered.", ex);
         }
         hook.get().accept(new ShutdownHook.Result(ReturnCode.OK, null)); // unregister the mbean
         try {
-            ManagementTest.SERVER.getMBeanInfo(bean.getObjectName().get());
+            ManagementTest.SERVER.getMBeanInfo(bean.getObjectName());
             Assertions.fail("The MBean was not unregistered.");
         } catch (final InstanceNotFoundException ex) {
             // all is OK.

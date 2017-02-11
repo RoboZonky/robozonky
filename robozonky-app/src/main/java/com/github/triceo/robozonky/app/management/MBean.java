@@ -17,8 +17,6 @@
 package com.github.triceo.robozonky.app.management;
 
 import java.lang.management.ManagementFactory;
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -33,9 +31,24 @@ import org.slf4j.LoggerFactory;
 
 public enum MBean {
 
-    RUNTIME(Runtime::new),
-    INVESTMENTS(Investments::new),
-    PORTFOLIO(Portfolio::new);
+    RUNTIME {
+        @Override
+        protected BaseMBean createImplementation() {
+            return new Runtime();
+        }
+    },
+    INVESTMENTS {
+        @Override
+        protected BaseMBean createImplementation() {
+            return new Investments();
+        }
+    },
+    PORTFOLIO {
+        @Override
+        protected BaseMBean createImplementation() {
+            return new Portfolio();
+        }
+    };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MBean.class);
 
@@ -43,10 +56,10 @@ public enum MBean {
         MBean.LOGGER.debug("Registering MBeans.");
         final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         Stream.of(MBean.values())
-                .filter(mbean -> mbean.getObjectName().isPresent())
+                .filter(mbean -> mbean.getObjectName() != null)
                 .forEach(mbean -> {
                     try {
-                        final ObjectName name = mbean.getObjectName().get();
+                        final ObjectName name = mbean.getObjectName();
                         server.registerMBean(mbean.getImplementation(), name);
                         MBean.LOGGER.debug("Registered MBean '{}'.", name);
                     } catch (final NotCompliantMBeanException | InstanceAlreadyExistsException |
@@ -61,8 +74,8 @@ public enum MBean {
         MBean.LOGGER.debug("Unregistering MBeans.");
         final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         Stream.of(MBean.values())
-                .filter(mbean -> mbean.getObjectName().isPresent())
-                .flatMap(mbean -> mbean.getObjectName().map(Stream::of).orElse(Stream.empty()))
+                .filter(mbean -> mbean.getObjectName() != null)
+                .map(MBean::getObjectName)
                 .forEach(name -> {
                     try {
                         server.unregisterMBean(name);
@@ -74,26 +87,32 @@ public enum MBean {
         MBean.LOGGER.debug("MBeans unregistered.");
     }
 
+    private static ObjectName assembleObjectName(final BaseMBean implementation) {
+        try {
+            final String className = implementation.getClass().getSimpleName();
+            return new ObjectName("com.github.triceo.robozonky:type=" + className);
+        } catch (final MalformedObjectNameException ex) {
+            LoggerFactory.getLogger(MBean.class).warn("MBean '{}' will be ignored.", implementation.getClass(), ex);
+            return null;
+        }
+    }
+
     private final BaseMBean implementation;
     private ObjectName objectName;
 
-    MBean(final Supplier<BaseMBean> impl) {
-        this.implementation = impl.get();
-        try {
-            final String className = this.implementation.getClass().getSimpleName();
-            this.objectName = new ObjectName("com.github.triceo.robozonky:type=" + className);
-        } catch (final MalformedObjectNameException ex) {
-            LoggerFactory.getLogger(MBean.class).warn("MBean '{}' will be ignored.", this, ex);
-            this.objectName = null;
-        }
+    MBean() {
+        this.implementation = this.createImplementation();
+        this.objectName = MBean.assembleObjectName(implementation);
     }
+
+    abstract protected BaseMBean createImplementation();
 
     public BaseMBean getImplementation() {
         return implementation;
     }
 
-    public Optional<ObjectName> getObjectName() {
-        return Optional.ofNullable(objectName);
+    public ObjectName getObjectName() {
+        return objectName;
     }
 
 }

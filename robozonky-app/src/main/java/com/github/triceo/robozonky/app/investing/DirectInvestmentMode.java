@@ -32,39 +32,54 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
 
-    private final int loanId, loanAmount;
+    private static final class DirectInvestmentCommand implements InvestmentCommand {
+
+        private final int loanId, loanAmount;
+
+        public DirectInvestmentCommand(final int loanId, final int loanAmount) {
+            this.loanId = loanId;
+            this.loanAmount = loanAmount;
+        }
+
+        @Override
+        public Collection<LoanDescriptor> getLoans() {
+            return Collections.singletonList(new LoanDescriptor(new Loan(loanId, loanAmount)));
+        }
+
+        @Override
+        public Collection<Investment> apply(final Investor investor) {
+            final Optional<Investment> optional = investor.invest(loanId, loanAmount, ResultTracker.CAPTCHA_DELAY);
+            return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
+        }
+
+        public int getLoanId() {
+            return loanId;
+        }
+
+        public int getLoanAmount() {
+            return loanAmount;
+        }
+    }
+
+    private final DirectInvestmentMode.DirectInvestmentCommand investmentCommand;
 
     public DirectInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
                                 final boolean isFaultTolerant, final int loanId, final int loanAmount) {
         super(auth, builder, isFaultTolerant);
-        this.loanId = loanId;
-        this.loanAmount = loanAmount;
+        this.investmentCommand = new DirectInvestmentMode.DirectInvestmentCommand(loanId, loanAmount);
     }
 
     Collection<Investment> invest(final ApiProvider apiProvider) {
-        final InvestmentCommand c = new InvestmentCommand() {
-
-            @Override
-            public Collection<LoanDescriptor> getLoans() {
-                return Collections.singletonList(new LoanDescriptor(new Loan(loanId, loanAmount)));
-            }
-
-            @Override
-            public Collection<Investment> apply(final Investor investor) {
-                final Optional<Investment> optional = investor.invest(loanId, loanAmount, ResultTracker.CAPTCHA_DELAY);
-                return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
-            }
-
-        };
         return this.getAuthenticationHandler().execute(apiProvider, api -> {
             final ZonkyProxy proxy = getProxyBuilder().build(api);
-            return StrategyExecution.invest(proxy, c);
+            return StrategyExecution.invest(proxy, investmentCommand);
         });
     }
 
     @Override
     protected void openMarketplace(final Consumer<Collection<Loan>> target) {
-        target.accept(Collections.singleton(new Loan(loanId, loanAmount)));
+        final DirectInvestmentMode.DirectInvestmentCommand c = investmentCommand;
+        target.accept(Collections.singleton(new Loan(c.getLoanId(), c.getLoanAmount())));
     }
 
     @Override

@@ -42,6 +42,29 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecution.class);
 
+    private static final class StrategyBasedInvestmentCommand implements InvestmentCommand {
+
+        private final InvestmentStrategy strategy;
+        private final Collection<LoanDescriptor> loans;
+
+        public StrategyBasedInvestmentCommand(final InvestmentStrategy strategy,
+                                              final Collection<LoanDescriptor> loans) {
+            this.strategy = strategy;
+            this.loans = loans;
+        }
+
+        @Override
+        public Collection<LoanDescriptor> getLoans() {
+            return loans;
+        }
+
+        @Override
+        public Collection<Investment> apply(final Investor investor) {
+            return investor.invest(strategy, loans);
+        }
+
+    }
+
     static BigDecimal getAvailableBalance(final ZonkyProxy api) {
         final int balance = Defaults.getDefaultDryRunBalance();
         return (api.isDryRun() && balance > -1) ?
@@ -80,20 +103,9 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
     }
 
     Collection<Investment> invest(final InvestmentStrategy strategy, final Collection<LoanDescriptor> loans) {
-        final InvestmentCommand c = new InvestmentCommand() {
-            @Override
-            public Collection<LoanDescriptor> getLoans() {
-                return loans;
-            }
-
-            @Override
-            public Collection<Investment> apply(final Investor investor) {
-                return investor.invest(strategy, loans);
-            }
-        };
         return authenticationHandler.execute(apiProvider, api -> {
-            final ZonkyProxy proxy = proxyBuilder.build(api);
-            return StrategyExecution.invest(proxy, c);
+            final InvestmentCommand c = new StrategyExecution.StrategyBasedInvestmentCommand(strategy, loans);
+            return StrategyExecution.invest(proxyBuilder.build(api), c);
         });
     }
 
