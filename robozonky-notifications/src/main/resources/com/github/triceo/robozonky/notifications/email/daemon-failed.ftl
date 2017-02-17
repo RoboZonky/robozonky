@@ -2,5 +2,4 @@ Uvnitř RoboZonky démona došlo k chybě, ten však pokračuje v běhu. Násled
 
 ${data.cause}
 
-Toto selhání mohlo být způsobeno nedostupností serverů Zonky nebo chybou internetového připojení.
-I přesto doporučujeme překontrolovat nastavení robota.
+Toto selhání bylo pravděpodobně způsobeno chybou uvnitř RoboZonky. Zvažte její nahlášení autorovi RoboZonky.

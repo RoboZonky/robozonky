@@ -16,13 +16,9 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
@@ -61,60 +57,6 @@ public class AppTest extends AbstractStateLeveragingTest {
     public void wrongKeyStore() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
         App.main("-g", "some.random.file", "-p", "password", "single", "-l", "1", "-a", "1000");
-    }
-
-    @Test
-    public void handleUnexpectedError() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
-        App.handleUnexpectedException(null);
-    }
-
-    @Test
-    public void handleMaintenanceError() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
-        App.handleZonkyMaintenanceError(null, false);
-    }
-
-    @Test
-    public void handleMaintenanceErrorFaultTolerant() {
-        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
-        App.handleZonkyMaintenanceError(null, true);
-    }
-
-    @Test
-    public void handleProcessingExceptionWithoutCase() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
-        App.handleException(new ProcessingException("No cause."), false);
-    }
-
-    @Test
-    public void handleProcessingExceptionOkCausedBySocket() {
-        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
-        App.handleException(new ProcessingException(new SocketException()), true);
-    }
-
-    @Test
-    public void handleProcessingExceptionOkCausedByHost() {
-        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
-        App.handleException(new ProcessingException(new UnknownHostException()), true);
-    }
-
-    @Test
-    public void handleProcessingExceptionDownCausedBySocket() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
-        App.handleException(new ProcessingException(new SocketException()), false);
-    }
-
-    @Test
-    public void handleProcessingExceptionDownCausedByHost() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
-        App.handleException(new ProcessingException(new UnknownHostException()), false);
-    }
-
-    @Test
-    public void handleException() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_REMOTE.getCode());
-        App.handleException(new WebApplicationException());
     }
 
     @Test

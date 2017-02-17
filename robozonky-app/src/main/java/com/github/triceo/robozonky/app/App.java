@@ -18,22 +18,18 @@ package com.github.triceo.robozonky.app;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.ws.rs.NotAllowedException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.notifications.Events;
+import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
 import com.github.triceo.robozonky.app.util.Scheduler;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
@@ -56,7 +52,7 @@ public class App {
 
     public static final Semaphore DAEMON_ALLOWED_TO_TERMINATE = new Semaphore(1);
 
-    private static void exit(final ReturnCode returnCode) {
+    static void exit(final ReturnCode returnCode) {
         App.LOGGER.trace("Exit requested with return code {}.", returnCode);
         App.exit(returnCode, null);
     }
@@ -67,7 +63,7 @@ public class App {
      * @param returnCode Will be passed to {@link System#exit(int)}.
      * @param cause Exception that caused the application to exit, if any.
      */
-    private static void exit(final ReturnCode returnCode, final Exception cause) {
+    static void exit(final ReturnCode returnCode, final Throwable cause) {
         App.SHUTDOWN_HOOKS.execute(returnCode, cause);
         System.exit(returnCode.getCode());
     }
@@ -122,45 +118,11 @@ public class App {
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.BACKGROUND_SCHEDULER.shutdown()));
         // read the command line and execute the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
-        try {
-            // execute core code
+        try { // execute core code
             App.exit(App.execute(args, faultTolerant));
-        } catch (final ProcessingException | NotAllowedException ex) {
-            App.handleException(ex, faultTolerant.get());
-        } catch (final WebApplicationException ex) {
-            App.handleException(ex);
-        } catch (final RuntimeException ex) {
-            App.handleUnexpectedException(ex);
-        }
-    }
-
-    static void handleException(final Exception ex, final boolean faultTolerant) {
-        final Throwable cause = ex.getCause();
-        if (ex instanceof NotAllowedException || cause instanceof SocketException ||
-                cause instanceof UnknownHostException) {
-            App.handleZonkyMaintenanceError(ex, faultTolerant);
-        } else {
-            App.handleUnexpectedException(ex);
-        }
-    }
-
-    static void handleException(final WebApplicationException ex) {
-        App.LOGGER.error("Application encountered remote API error.", ex);
-        App.exit(ReturnCode.ERROR_REMOTE, ex);
-    }
-
-    static void handleUnexpectedException(final Exception ex) {
-        App.LOGGER.error("Unexpected error, likely RoboZonky bug.", ex);
-        App.exit(ReturnCode.ERROR_UNEXPECTED, ex);
-    }
-
-    static void handleZonkyMaintenanceError(final Exception ex, final boolean faultTolerant) {
-        App.LOGGER.warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
-        if (faultTolerant) {
-            App.LOGGER.info("RoboZonky is in fault-tolerant mode. The above will not be reported as error.");
-            App.exit(ReturnCode.OK, ex);
-        } else {
-            App.exit(ReturnCode.ERROR_DOWN, ex);
+        } catch (final Throwable throwable) {
+            final RuntimeExceptionHandler handler = new AppRuntimeExceptionHandler(faultTolerant.get());
+            handler.handle(throwable);
         }
     }
 

@@ -22,6 +22,7 @@ import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
+import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -118,6 +119,21 @@ enum SupportedListener {
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyDaemonFailedEventListener(properties);
+        }
+    }, REMOTE_OPERATION_FAILED {
+        @Override
+        public String getId() {
+            return "remoteOperationFailed";
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RemoteOperationFailedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new RemoteOperationFailedEventListener(properties);
         }
     }, INITIALIZED {
         @Override

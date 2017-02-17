@@ -16,29 +16,19 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-import java.util.Optional;
-
-import com.github.triceo.robozonky.api.ReturnCode;
-
 /**
- * Fired before the application forcibly terminates due to an error.
+ * Fired after the daemon encountered an exception due to a failure in communication with remote servers.
  */
-public final class RoboZonkyCrashedEvent extends Event {
+public final class RemoteOperationFailedEvent extends Event {
 
-    private final ReturnCode returnCode;
     private final Throwable cause;
 
-    public RoboZonkyCrashedEvent(final ReturnCode returnCode, final Throwable cause) {
-        this.returnCode = returnCode;
+    public RemoteOperationFailedEvent(final Throwable cause) {
         this.cause = cause;
     }
 
-    public ReturnCode getReturnCode() {
-        return this.returnCode;
-    }
-
-    public Optional<Throwable> getCause() {
-        return Optional.ofNullable(this.cause);
+    public Throwable getCause() {
+        return cause;
     }
 
 }

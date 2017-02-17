@@ -30,7 +30,6 @@ import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
-import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
@@ -38,7 +37,6 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.App;
 import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.notifications.Events;
 
 public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
@@ -90,9 +88,8 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         final Runnable marketplaceCheck = () -> {
             try {
                 marketplace.run();
-            } catch (final Throwable t) { // not catching would case the thread to stop
-                LOGGER.warn("Caught unexpected exception, continuing operation.", t);
-                Events.fire(new RoboZonkyDaemonFailedEvent(t));
+            } catch (final Throwable t) {
+                new DaemonRuntimeExceptionHandler().handle(t);
             }
         };
         switch (marketplace.specifyExpectedTreatment()) {

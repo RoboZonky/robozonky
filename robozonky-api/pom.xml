@@ -251,6 +251,27 @@
                     "methodName": "<init>",
                     "parameterIndex": "2",
                     "justification": "Balance argument changes into an entire portfolio overview."
+                  }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "method parameter void com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent::<init>(com.github.triceo.robozonky.api.ReturnCode, ===java.lang.Exception===)",
+                    "new": "method parameter void com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent::<init>(com.github.triceo.robozonky.api.ReturnCode, ===java.lang.Throwable===)",
+                    "oldType": "java.lang.Exception",
+                    "newType": "java.lang.Throwable",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyCrashedEvent",
+                    "methodName": "<init>",
+                    "parameterIndex": "1",
+                    "justification": "Event now accepts Throwable to make it more generic."
+                  }, {
+                    "code": "java.method.returnTypeTypeParametersChanged",
+                    "old": "method java.util.Optional<java.lang.Exception> com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent::getCause()",
+                    "new": "method java.util.Optional<java.lang.Throwable> com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent::getCause()",
+                    "oldType": "java.util.Optional<java.lang.Exception>",
+                    "newType": "java.util.Optional<java.lang.Throwable>",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyCrashedEvent",
+                    "methodName": "getCause",
+                    "justification": "Event now accepts Throwable to make it more generic."
                   }
                 ]
               }

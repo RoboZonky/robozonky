@@ -26,16 +26,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to specify
- * such actions and {@link #execute(ReturnCode, Exception)} when it's time to shut the app down.
+ * such actions and {@link #execute(ReturnCode, Throwable)} when it's time to shut the app down.
  */
 class ShutdownHook {
 
     public final static class Result {
 
         private final ReturnCode returnCode;
-        private final Exception cause;
+        private final Throwable cause;
 
-        public Result(final ReturnCode code, final Exception cause) {
+        public Result(final ReturnCode code, final Throwable cause) {
             this.returnCode = code;
             this.cause = cause;
         }
@@ -44,7 +44,7 @@ class ShutdownHook {
             return returnCode;
         }
 
-        public Exception getCause() {
+        public Throwable getCause() {
             return cause;
         }
     }
@@ -56,7 +56,7 @@ class ShutdownHook {
 
         /**
          * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
-         * {@link ShutdownHook#execute(ReturnCode, Exception)}.
+         * {@link ShutdownHook#execute(ReturnCode, Throwable)}.
          *
          * @return Will be called during app shutdown, if present.
          */
@@ -96,7 +96,7 @@ class ShutdownHook {
      * @param returnCode The application's return code to pass to the handlers.
      * @param cause Optional cause of the return.
      */
-    public void execute(final ReturnCode returnCode, final Exception cause) {
+    public void execute(final ReturnCode returnCode, final Throwable cause) {
         ShutdownHook.LOGGER.debug("RoboZonky terminating with '{}' return code.", returnCode);
         final ShutdownHook.Result result = new ShutdownHook.Result(returnCode, cause);
         while (!stack.isEmpty()) {
