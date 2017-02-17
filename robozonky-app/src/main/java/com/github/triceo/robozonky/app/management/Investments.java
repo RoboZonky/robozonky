@@ -31,10 +31,6 @@ class Investments implements InvestmentsMBean {
     private final Map<Integer, Integer> successfulInvestments = new LinkedHashMap<>(),
             delegatedInvestments = new LinkedHashMap<>(), rejectedInvestments = new LinkedHashMap<>();
 
-    public Investments() {
-        this.reset();
-    }
-
     @Override
     public Map<Integer, Integer> getSuccessfulInvestments() {
         return this.successfulInvestments;

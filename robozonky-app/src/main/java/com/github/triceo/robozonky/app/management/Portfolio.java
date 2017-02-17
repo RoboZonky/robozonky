@@ -50,10 +50,6 @@ public class Portfolio implements PortfolioMBean {
         }
     }
 
-    public Portfolio() {
-        this.reset();
-    }
-
     @Override
     public int getAvailableBalance() {
         return get(PortfolioOverview::getCzkAvailable, 0);

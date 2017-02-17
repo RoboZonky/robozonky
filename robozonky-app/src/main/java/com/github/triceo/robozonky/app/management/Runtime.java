@@ -24,12 +24,8 @@ import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
 
 class Runtime implements RuntimeMBean {
 
-    private String zonkyUsername, version;
+    private String zonkyUsername = "", version = "";
     private OffsetDateTime lastUpdatedDateTime;
-
-    public Runtime() {
-        this.reset();
-    }
 
     @Override
     public void stopDaemon() {

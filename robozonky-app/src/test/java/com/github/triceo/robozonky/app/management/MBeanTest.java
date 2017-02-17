@@ -39,7 +39,7 @@ public class MBeanTest {
     @Test
     public void isValid() {
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(mbean.getImplementation()).isNotNull();
+            softly.assertThat(mbean.getImplementation().getLatestUpdatedDateTime()).isNull();
             softly.assertThat(mbean.getObjectName()).isNotNull();
         });
     }

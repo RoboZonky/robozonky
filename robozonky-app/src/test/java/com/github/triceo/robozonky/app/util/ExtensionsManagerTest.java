@@ -27,6 +27,14 @@ import org.junit.Test;
 
 public class ExtensionsManagerTest {
 
+    private static final ClassLoader CLASSLOADER = ExtensionsManager.class.getClassLoader();
+
+    @Test
+    public void retrieveDefaultClassLoader() {
+        final ClassLoader result = ExtensionsManager.INSTANCE.retrieveExtensionClassLoader("");
+        Assertions.assertThat(result).isSameAs(CLASSLOADER);
+    }
+
     @Test
     public void noExtensionsWithFolderPresent() {
         final ServiceLoader<ListenerService> result =
