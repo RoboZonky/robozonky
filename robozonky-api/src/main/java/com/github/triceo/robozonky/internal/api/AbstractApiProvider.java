@@ -16,16 +16,19 @@
 
 package com.github.triceo.robozonky.internal.api;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import javax.xml.ws.WebServiceClient;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
@@ -38,9 +41,54 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides instances of APIs for the rest of RoboZonky to use. When no longer needed, the ApiProvider needs to be
- * {@link #close()}ed in order to not leak {@link WebServiceClient}s.
+ * {@link #close()}ed in order to not leak {@link WebServiceClient}s that weren't already closed by
+ * {@link AbstractApiProvider.ApiWrapper#close()}.
  */
 public abstract class AbstractApiProvider implements AutoCloseable {
+
+    /**
+     * Represents a close-able RESTEasy client proxy. Users should preferably call {@link #close()} after they're
+     * done with the API.
+     *
+     * @param <T> Type of the API to be handled.
+     */
+    public static class ApiWrapper<T> implements AutoCloseable {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiProvider.ApiWrapper.class);
+
+        private final ResteasyClient client;
+        private final T api;
+
+        public ApiWrapper(final T api) {
+            this(api, null);
+        }
+
+        public ApiWrapper(final T api, final ResteasyClient client) {
+            AbstractApiProvider.ApiWrapper.LOGGER.trace("Registering new RESTEasy client: {}.", client);
+            this.client = client;
+            this.api = api;
+        }
+
+        public <S> S execute(final Function<T, S> function) {
+            return function.apply(api);
+        }
+
+        public void execute(final Consumer<T> function) {
+            function.accept(api);
+        }
+
+        boolean isClosed() {
+            return client == null || client.isClosed();
+        }
+
+        @Override
+        public synchronized void close() {
+            if (client != null && !client.isClosed()) {
+                AbstractApiProvider.ApiWrapper.LOGGER.trace("Destroying RESTEasy client: {}.", client);
+                client.close();
+            }
+        }
+    }
 
     private static final ResteasyProviderFactory RESTEASY;
     static {
@@ -52,9 +100,11 @@ public abstract class AbstractApiProvider implements AutoCloseable {
         }
     }
 
+    private static final HttpClientBuilder HTTP_CLIENT_BUILDER =
+            HttpClientBuilder.create().setConnectionManager(new PoolingHttpClientConnectionManager());
+
     private static ResteasyClientBuilder newResteasyClientBuilder() {
-        final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        final CloseableHttpClient closeableHttpClient = HttpClientBuilder.create().setConnectionManager(cm).build();
+        final CloseableHttpClient closeableHttpClient = AbstractApiProvider.HTTP_CLIENT_BUILDER.build();
         final ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(closeableHttpClient);
         final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder().httpEngine(engine);
         clientBuilder.providerFactory(AbstractApiProvider.RESTEASY);
@@ -62,9 +112,12 @@ public abstract class AbstractApiProvider implements AutoCloseable {
     }
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final ClientBuilder clientBuilder;
+    private final ResteasyClientBuilder clientBuilder;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
-    private final Collection<Client> clients = new ArrayList<>();
+    /**
+     * Use weak references so that the clients aren't kept around forever, with all the entities they carry.
+     */
+    private final Collection<WeakReference<AutoCloseable>> clients = new ArrayList<>();
 
     /**
      * Create a new instance of the API provider that will use a given instance of {@link ResteasyClientBuilder}. It is
@@ -73,7 +126,7 @@ public abstract class AbstractApiProvider implements AutoCloseable {
      *
      * @param clientBuilder Client builder to use to instantiate all the APIs.
      */
-    public AbstractApiProvider(final ResteasyClientBuilder clientBuilder) {
+    protected AbstractApiProvider(final ResteasyClientBuilder clientBuilder) {
         this.clientBuilder = clientBuilder;
     }
 
@@ -85,13 +138,6 @@ public abstract class AbstractApiProvider implements AutoCloseable {
         this(AbstractApiProvider.newResteasyClientBuilder());
     }
 
-    private synchronized Client newClient() {
-        final Client client = this.clientBuilder.build();
-        LOGGER.trace("Registering new RESTEasy client: {}.", client);
-        this.clients.add(client);
-        return client;
-    }
-
     /**
      * Instantiate an API as a RESTEasy client proxy.
      *
@@ -101,13 +147,17 @@ public abstract class AbstractApiProvider implements AutoCloseable {
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
-    protected <T> T obtain(final Class<T> api, final String apiUrl, final RoboZonkyFilter filter) {
+    protected <T> AbstractApiProvider.ApiWrapper<T> obtain(final Class<T> api, final String apiUrl,
+                                                           final RoboZonkyFilter filter) {
         if (this.isClosed.get()) {
             throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
         }
-        final ResteasyWebTarget target = (ResteasyWebTarget)this.newClient().register(filter).target(apiUrl);
+        final ResteasyClient client = this.clientBuilder.build();
+        final ResteasyWebTarget target = client.register(filter).target(apiUrl);
         target.register(new BrowserCacheFeature()); // honor server-sent cache-related headers
-        return target.proxy(api);
+        final AbstractApiProvider.ApiWrapper<T> wrapper = new AbstractApiProvider.ApiWrapper<>(target.proxy(api), client);
+        this.clients.add(new WeakReference<>(wrapper));
+        return wrapper;
     }
 
     @Override
@@ -115,10 +165,15 @@ public abstract class AbstractApiProvider implements AutoCloseable {
         if (this.isClosed.get()) {
             return;
         }
-        this.clients.forEach(c -> {
-            LOGGER.trace("Destroying RESTEasy client: {}.", c);
-            c.close();
-        });
+        this.clients.stream()
+                .flatMap(w -> w.get() == null ? Stream.empty() : Stream.of(w.get()))
+                .forEach(c -> {
+                    try {
+                        c.close();
+                    } catch (final Exception ex) {
+                        LOGGER.trace("Failed closing client: {}.", c, ex);
+                    }
+                });
         this.isClosed.set(true);
     }
 

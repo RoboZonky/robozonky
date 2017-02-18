@@ -31,7 +31,6 @@ import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
-import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
@@ -41,6 +40,7 @@ import com.github.triceo.robozonky.app.App;
 import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
@@ -124,10 +124,10 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         Mockito.when(ms.recommend(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
                 .thenReturn(Collections.singletonList(r));
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
         final ZonkyApi z = Mockito.mock(ZonkyApi.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(z);
+        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new AbstractApiProvider.ApiWrapper<>(z));
+        Mockito.when(p.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(ms);
         s.run();
         try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(

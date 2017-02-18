@@ -26,7 +26,7 @@ public class ApiProvider extends AbstractApiProvider {
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
 
-    public ApiProvider(final ResteasyClientBuilder clientBuilder) {
+    ApiProvider(final ResteasyClientBuilder clientBuilder) {
         super(clientBuilder);
     }
 
@@ -39,7 +39,7 @@ public class ApiProvider extends AbstractApiProvider {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ZonkyOAuthApi oauth() {
+    public AbstractApiProvider.ApiWrapper<ZonkyOAuthApi> oauth() {
         return this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter());
     }
 
@@ -50,7 +50,7 @@ public class ApiProvider extends AbstractApiProvider {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ZonkyApi authenticated(final ZonkyApiToken token) {
+    public AbstractApiProvider.ApiWrapper<ZonkyApi> authenticated(final ZonkyApiToken token) {
         return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, new AuthenticatedFilter(token));
     }
 

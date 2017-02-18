@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,6 @@ public class AuthenticationHandler {
     private final boolean tokenBased;
     private final SecretProvider data;
     private final TemporalAmount tokenRefreshBeforeExpiration;
-    private Authentication currentAuthentication;
 
     private AuthenticationHandler(final SecretProvider data) {
         this(data, false, Duration.ZERO);
@@ -162,23 +162,18 @@ public class AuthenticationHandler {
      */
     public Collection<Investment> execute(final ApiProvider provider,
                                           final Function<ZonkyApi, Collection<Investment>> operation) {
-        if (currentAuthentication == null || currentAuthentication.willExpireIn(this.tokenRefreshBeforeExpiration)) {
-            currentAuthentication = this.build().authenticate(provider);
-        }
-        final Collection<Investment> result = operation.apply(currentAuthentication.getZonkyApi());
-        try { // log out and ignore any resulting error
+        final Authentication currentAuthentication = this.build().authenticate(provider);
+        try (final AbstractApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.getZonkyApi()) {
+            final Collection<Investment> result = apiWrapper.execute(operation);
             final boolean logoutAllowed = this.isLogoutAllowed(currentAuthentication.getZonkyApiToken());
             if (logoutAllowed) {
                 AuthenticationHandler.LOGGER.debug("Logging out.");
-                currentAuthentication.getZonkyApi().logout();
+                apiWrapper.execute(ZonkyApi::logout);
             } else { // if we're using the token, we should never log out
                 AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
             }
-        } catch (final RuntimeException ex) {
-            AuthenticationHandler.LOGGER.warn("Failed logging out of Zonky.", ex);
-            this.currentAuthentication = null;
+            return result;
         }
-        return result;
     }
 
 }

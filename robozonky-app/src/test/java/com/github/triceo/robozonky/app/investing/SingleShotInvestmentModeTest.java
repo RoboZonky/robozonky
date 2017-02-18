@@ -31,13 +31,13 @@ import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
-import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -95,8 +95,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final ZonkyApi z = Mockito.mock(ZonkyApi.class);
         Mockito.when(z.getWallet()).thenReturn(w);
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(z);
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
+        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new AbstractApiProvider.ApiWrapper<>(z));
+        Mockito.when(p.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
@@ -131,8 +131,9 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
     @Test
     public void empty() {
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(ZonkyApi.class));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
+        Mockito.when(p.authenticated(ArgumentMatchers.any()))
+                .thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
+        Mockito.when(p.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
         final TestMarketplace m = new TestMarketplace(Collections.emptyList());
         try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(null, null, true, m, null)) {
             Assertions.assertThat(exec.execute(p)).isPresent();
@@ -151,8 +152,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final ZonkyApi z = Mockito.mock(ZonkyApi.class);
         Mockito.doThrow(IllegalStateException.class).when(z).getWallet();
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(z);
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ZonkyOAuthApi.class));
+        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new AbstractApiProvider.ApiWrapper<>(z));
+        Mockito.when(p.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);

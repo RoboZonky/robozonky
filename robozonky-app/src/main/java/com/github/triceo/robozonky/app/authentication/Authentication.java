@@ -20,13 +20,14 @@ import java.time.temporal.TemporalAmount;
 
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 
 /**
  * Result of a successful authentication.
  */
 public interface Authentication {
 
-    ZonkyApi getZonkyApi();
+    AbstractApiProvider.ApiWrapper<ZonkyApi> getZonkyApi();
 
     ZonkyApiToken getZonkyApiToken();
 

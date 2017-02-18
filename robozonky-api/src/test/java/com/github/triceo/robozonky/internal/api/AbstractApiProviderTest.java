@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.internal.api;
 
-import com.github.triceo.robozonky.api.remote.Api;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -25,7 +24,7 @@ public class AbstractApiProviderTest {
 
     private static final class ApiProvider extends AbstractApiProvider {
 
-        public Api getApi() {
+        public AbstractApiProvider.ApiWrapper<ZonkyApi> getApi() {
             return this.obtain(ZonkyApi.class, "https://api.zonky.cz", new RoboZonkyFilter());
         }
 
@@ -38,18 +37,16 @@ public class AbstractApiProviderTest {
         }
     }
 
-    @Test
-    public void doubleClosedNoException() {
-        final ApiProvider provider = new ApiProvider();
-        provider.close();
-        provider.close();
-    }
-
     @Test(expected = IllegalStateException.class)
-    public void obtainClosedThrows() {
-        final ApiProvider provider = new ApiProvider();
-        provider.close();
-        provider.getApi();
+    public void obtainClosedThrows() {  // tests double-closing as a side-effect
+        try (final AbstractApiProviderTest.ApiProvider provider = new AbstractApiProviderTest.ApiProvider()) {
+            try (final AbstractApiProvider.ApiWrapper<ZonkyApi> w = provider.getApi()) {
+                Assertions.assertThat(w.isClosed()).isFalse();
+                provider.close();
+                Assertions.assertThat(w.isClosed()).isTrue();
+            }
+            provider.getApi();
+        }
     }
 
 }

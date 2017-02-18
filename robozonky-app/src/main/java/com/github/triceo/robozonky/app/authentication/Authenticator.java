@@ -24,6 +24,7 @@ import javax.ws.rs.WebApplicationException;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,9 +91,8 @@ class Authenticator {
      * @return Information about the authentication.
      */
     public Authentication authenticate(final ApiProvider provider) {
-        final ZonkyOAuthApi api = provider.oauth();
-        try {
-            final ZonkyApiToken token = authenticationMethod.apply(api);
+        try (final AbstractApiProvider.ApiWrapper<ZonkyOAuthApi> api = provider.oauth()) {
+            final ZonkyApiToken token = api.execute(authenticationMethod);
             return new Authenticator.AuthenticationImpl(provider, token);
         } catch (final BadRequestException ex) {
             throw new WebApplicationException("Failed authenticating with Zonky, check your password.", ex);
@@ -101,7 +101,7 @@ class Authenticator {
 
     private static class AuthenticationImpl implements Authentication {
 
-        private final ZonkyApi zonkyApi;
+        private final AbstractApiProvider.ApiWrapper<ZonkyApi> zonkyApi;
         private final ZonkyApiToken token;
 
         public AuthenticationImpl(final ApiProvider provider, final ZonkyApiToken token) {
@@ -110,7 +110,7 @@ class Authenticator {
         }
 
         @Override
-        public ZonkyApi getZonkyApi() {
+        public AbstractApiProvider.ApiWrapper<ZonkyApi> getZonkyApi() {
             return zonkyApi;
         }
 

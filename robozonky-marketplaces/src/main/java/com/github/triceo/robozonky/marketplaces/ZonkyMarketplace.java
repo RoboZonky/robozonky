@@ -17,11 +17,12 @@
 package com.github.triceo.robozonky.marketplaces;
 
 import com.github.triceo.robozonky.api.remote.Api;
+import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 
 class ZonkyMarketplace extends AbstractMarketplace {
 
     @Override
-    protected Api newApi(final MarketplaceApiProvider apiProvider) {
+    protected AbstractApiProvider.ApiWrapper<? extends Api> newApi(final MarketplaceApiProvider apiProvider) {
         return apiProvider.zonky();
     }
 

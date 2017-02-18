@@ -16,8 +16,13 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import com.github.triceo.robozonky.api.remote.Api;
+import java.util.List;
+import java.util.function.Function;
+
+import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -26,12 +31,12 @@ public class ApiProviderTest {
 
     @Test(expected = IllegalStateException.class)
     public void authenticated() {
-        Api api;
+        AbstractApiProvider.ApiWrapper<ZonkyApi> api;
         try (final ApiProvider provider = new ApiProvider()) {
             api = provider.authenticated(Mockito.mock(ZonkyApiToken.class));
             Assertions.assertThat(api).isNotNull();
         }
-        api.getLoans();
+        api.execute((Function<ZonkyApi, List<Loan>>) ZonkyApi::getLoans);
     }
 
 }
