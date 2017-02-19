@@ -85,7 +85,7 @@ public class AuthenticatorTest {
         final ApiProvider provider = new ApiProvider(mock);
         final Authenticator a = Authenticator.withCredentials(AuthenticatorTest.DUMMY_USER,
                 AuthenticatorTest.DUMMY_PWD.toCharArray());
-        final Authentication auth = a.authenticate(provider);
+        final Authentication auth = a.apply(provider);
         Assertions.assertThat(auth.getZonkyApi()).isNotNull();
         Mockito.verify(apiMock, Mockito.times(1))
                 .login(ArgumentMatchers.eq(AuthenticatorTest.DUMMY_USER),
@@ -100,7 +100,7 @@ public class AuthenticatorTest {
         final ApiProvider provider = new ApiProvider(mock);
         final Authenticator a =
                 Authenticator.withAccessToken(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.TOKEN, Duration.ZERO);
-        final Authentication auth = a.authenticate(provider);
+        final Authentication auth = a.apply(provider);
         Assertions.assertThat(auth.getZonkyApiToken()).isEqualTo(AuthenticatorTest.TOKEN);
         Mockito.verify(apiMock, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any(), ArgumentMatchers.any());
@@ -115,7 +115,7 @@ public class AuthenticatorTest {
         final ApiProvider provider = new ApiProvider(mock);
         final Authentication result =
                 Authenticator.withAccessToken(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.TOKEN,
-                        Duration.ofSeconds(AuthenticatorTest.TOKEN.getExpiresIn())).authenticate(provider);
+                        Duration.ofSeconds(AuthenticatorTest.TOKEN.getExpiresIn())).apply(provider);
         Mockito.verify(apiMock, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(apiMock, Mockito.times(1)).refresh(ArgumentMatchers.any(),

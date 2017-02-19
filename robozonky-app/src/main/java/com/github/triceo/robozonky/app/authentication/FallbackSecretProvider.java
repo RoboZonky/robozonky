@@ -20,7 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -33,19 +33,19 @@ import org.slf4j.LoggerFactory;
  * Plain-text secret storage. Should only be used as fallback in case the JDK does not support KeyStores. This is
  * unlikely, but we've seen that happen. (See https://github.com/triceo/robozonky/issues/52.)
  */
-final class FallbackSecretProvider extends SecretProvider {
+final class FallbackSecretProvider implements SecretProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FallbackSecretProvider.class);
     private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(FallbackSecretProvider.class);
-    static final String TOKEN_STATE_ID = "token", TOKEN_DATE_STATE_ID = "tokenSetDate";
+    private static final String TOKEN_STATE_ID = "token";
 
     private final String username;
     private final char[] password;
     private final Map<String, char[]> secrets = new HashMap<>();
 
-    public FallbackSecretProvider(final String username, final char[] password) {
+    public FallbackSecretProvider(final String username, final char... password) {
         this.username = username;
-        this.password = password;
+        this.password = Arrays.copyOf(password, password.length);
     }
 
     @Override
@@ -69,8 +69,6 @@ final class FallbackSecretProvider extends SecretProvider {
     public boolean setToken(final Reader token) {
         try (final BufferedReader r = new BufferedReader(token)) {
             FallbackSecretProvider.STATE.setValue(FallbackSecretProvider.TOKEN_STATE_ID, r.readLine());
-            FallbackSecretProvider.STATE.setValue(FallbackSecretProvider.TOKEN_DATE_STATE_ID,
-                    OffsetDateTime.now().toString());
             return true;
         } catch (final IOException ex) {
             FallbackSecretProvider.LOGGER.warn("Failed setting token.", ex);

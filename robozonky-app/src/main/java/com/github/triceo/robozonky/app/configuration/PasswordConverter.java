@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.app.configuration;
 
 import com.beust.jcommander.IStringConverter;
 
-class PasswordConverter implements IStringConverter<char[]> {
+final class PasswordConverter implements IStringConverter<char[]> {
 
     @Override
     public char[] convert(final String s) {

@@ -27,7 +27,7 @@ import com.github.triceo.robozonky.app.util.ExtensionsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ConfirmationProviderLoader {
+final class ConfirmationProviderLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmationProviderLoader.class);
     private static final ServiceLoader<ConfirmationProviderService> LOADER =

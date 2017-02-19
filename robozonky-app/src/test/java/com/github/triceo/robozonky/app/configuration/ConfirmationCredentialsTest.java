@@ -32,6 +32,7 @@ public class ConfirmationCredentialsTest {
     public void fullCredentials() {
         final AuthenticationCommandLineFragment cliAuth = Mockito.mock(AuthenticationCommandLineFragment.class);
         Mockito.when(cliAuth.getUsername()).thenReturn(Optional.of(UUID.randomUUID().toString()));
+        Mockito.when(cliAuth.getPassword()).thenReturn(new char[0]);
         final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
         Mockito.when(cli.getAuthenticationFragment()).thenReturn(cliAuth);
         final SecretProvider secretProvider = SecretProviderFactory.getFallbackSecretProvider(cli).get();

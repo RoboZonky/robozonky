@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements Java's {@link ServiceLoader} to provide suitable {@link InvestmentStrategy} implementations.
  */
-class InvestmentStrategyLoader {
+final class InvestmentStrategyLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentStrategyLoader.class);
     private static final ServiceLoader<InvestmentStrategyService> STRATEGY_LOADER =

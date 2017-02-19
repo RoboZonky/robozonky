@@ -21,7 +21,6 @@ import java.util.function.Function;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * Used to authenticate to the Zonky API. Use either {@link #withAccessToken(String, ZonkyApiToken, TemporalAmount)},
  * or {@link #withCredentials(String, char[])} to log in.
  */
-class Authenticator {
+abstract class Authenticator implements Function<ApiProvider, Authentication> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Authenticator.class);
     private static final String TARGET_SCOPE = "SCOPE_APP_WEB";
@@ -44,14 +43,17 @@ class Authenticator {
      * @param password Zonky password.
      * @return Instance ready for authentication.
      */
-    public static Authenticator withCredentials(final String username, final char[] password) {
-        return new Authenticator(api -> {
-            Authenticator.LOGGER.info("Authenticating as '{}' using password.", username);
-            final ZonkyApiToken token =
-                    api.login(username, new String(password), "password", Authenticator.TARGET_SCOPE);
-            Authenticator.LOGGER.debug("Authenticated.");
-            return token;
-        });
+    public static Authenticator withCredentials(final String username, final char... password) {
+        return new Authenticator() {
+            @Override
+            protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
+                Authenticator.LOGGER.info("Authenticating as '{}' using password.", username);
+                final ZonkyApiToken token =
+                        api.login(username, new String(password), "password", Authenticator.TARGET_SCOPE);
+                Authenticator.LOGGER.debug("Authenticated.");
+                return token;
+            }
+        };
     }
 
     /**
@@ -59,70 +61,43 @@ class Authenticator {
      *
      * @param username Zonky username.
      * @param token OAuth token.
+     * @param tokenRefreshBeforeExpiration How long before token expiration to refresh the token.
      * @return Instance ready for authentication.
      */
     public static Authenticator withAccessToken(final String username, final ZonkyApiToken token,
                                                 final TemporalAmount tokenRefreshBeforeExpiration) {
-        return new Authenticator(api -> {
-            if (token.willExpireIn(tokenRefreshBeforeExpiration)) {
-                final String tokenId = String.valueOf(token.getRefreshToken());
-                final ZonkyApiToken newToken = api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
-                Authenticator.LOGGER.info("Authenticating as '{}', refreshing existing access token.", username);
-                return newToken;
-            } else {
-                Authenticator.LOGGER.info("Authenticated as '{}', reusing existing access token.", username);
-                return token;
+        return new Authenticator() {
+            @Override
+            protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
+                if (token.willExpireIn(tokenRefreshBeforeExpiration)) {
+                    final String tokenId = String.valueOf(token.getRefreshToken());
+                    final ZonkyApiToken newToken =
+                            api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
+                    Authenticator.LOGGER.info("Authenticating as '{}', refreshing existing access token.", username);
+                    return newToken;
+                } else {
+                    Authenticator.LOGGER.info("Authenticated as '{}', reusing existing access token.", username);
+                    return token;
+                }
             }
-        });
+        };
     }
 
-    private final Function<ZonkyOAuthApi, ZonkyApiToken> authenticationMethod;
-
-    private Authenticator(final Function<ZonkyOAuthApi, ZonkyApiToken> authenticationMethod) {
-        if (authenticationMethod == null) {
-            throw new IllegalArgumentException("Authentication method must be provided.");
-        }
-        this.authenticationMethod = authenticationMethod;
-    }
+    protected abstract ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api);
 
     /**
      * Perform the actual authentication. Will throw an unchecked exception in case authentication failed.
      * @param provider The provider to be used when constructing the APIs.
      * @return Information about the authentication.
      */
-    public Authentication authenticate(final ApiProvider provider) {
+    @Override
+    public Authentication apply(final ApiProvider provider) {
         try (final AbstractApiProvider.ApiWrapper<ZonkyOAuthApi> api = provider.oauth()) {
-            final ZonkyApiToken token = api.execute(authenticationMethod);
-            return new Authenticator.AuthenticationImpl(provider, token);
+            final ZonkyApiToken token = api.execute(this::getAuthenticationMethod);
+            return new Authentication(provider, token);
         } catch (final BadRequestException ex) {
             throw new WebApplicationException("Failed authenticating with Zonky, check your password.", ex);
         }
     }
 
-    private static class AuthenticationImpl implements Authentication {
-
-        private final AbstractApiProvider.ApiWrapper<ZonkyApi> zonkyApi;
-        private final ZonkyApiToken token;
-
-        public AuthenticationImpl(final ApiProvider provider, final ZonkyApiToken token) {
-            this.zonkyApi = provider.authenticated(token);
-            this.token = token;
-        }
-
-        @Override
-        public AbstractApiProvider.ApiWrapper<ZonkyApi> getZonkyApi() {
-            return zonkyApi;
-        }
-
-        @Override
-        public ZonkyApiToken getZonkyApiToken() {
-            return token;
-        }
-
-        @Override
-        public boolean willExpireIn(final TemporalAmount temporalAmount) {
-            return token.willExpireIn(temporalAmount);
-        }
-
-    }
 }

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Every set*() operation must result in a {@link KeyStoreHandler#save()} call.
  */
-final class KeyStoreSecretProvider extends SecretProvider {
+final class KeyStoreSecretProvider implements SecretProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreSecretProvider.class);
     private static final String ALIAS_PASSWORD = "pwd";

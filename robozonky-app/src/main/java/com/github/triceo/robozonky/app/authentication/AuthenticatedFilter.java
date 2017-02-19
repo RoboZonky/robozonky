@@ -22,7 +22,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.internal.api.RoboZonkyFilter;
 
-class AuthenticatedFilter extends RoboZonkyFilter {
+final class AuthenticatedFilter extends RoboZonkyFilter {
 
     private final char[] accessToken; // treat the access token as if it were a password
 

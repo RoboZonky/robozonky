@@ -31,7 +31,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.util.Scheduler;
 import com.github.triceo.robozonky.internal.api.Defaults;
 
-class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
+final class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy> {
 
     private static URL convertToUrl(final String maybeUrl) {
         try {

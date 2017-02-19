@@ -48,5 +48,4 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
                 clientResponseContext.getStatusInfo().getReasonPhrase());
     }
 
-
 }

@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app.configuration;
 import com.beust.jcommander.IValueValidator;
 import com.beust.jcommander.ParameterException;
 
-public class PositiveIntegerValueValidator implements IValueValidator<Integer> {
+final public class PositiveIntegerValueValidator implements IValueValidator<Integer> {
 
     @Override
     public void validate(final String name, final Integer value) throws ParameterException {

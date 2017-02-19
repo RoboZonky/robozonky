@@ -23,12 +23,12 @@ import java.util.Optional;
 import com.github.triceo.robozonky.app.util.KeyStoreHandler;
 
 /**
- * Children of this class implement various ways of providing sensitive information, such as passwords or access tokens.
+ * Implementations provide various ways of storing sensitive information, such as passwords or access tokens.
  *
  * Users shall not be given access to these children - instead, they should get them by calling static methods on this
  * class, such as {@link #keyStoreBased(KeyStoreHandler)} or {@link #fallback(String, char[])}.
  */
-public abstract class SecretProvider {
+public interface SecretProvider {
 
     /**
      * Create a @{@link KeyStore}-based provider based on a given key store.
@@ -36,7 +36,7 @@ public abstract class SecretProvider {
      * @param ksh Initialized KeyStore for the provider to work with.
      * @return The provider.
      */
-    public static SecretProvider keyStoreBased(final KeyStoreHandler ksh) {
+    static SecretProvider keyStoreBased(final KeyStoreHandler ksh) {
         return new KeyStoreSecretProvider(ksh);
     }
 
@@ -48,7 +48,7 @@ public abstract class SecretProvider {
      * @param password Zonky password to store in the key store.
      * @return The provider.
      */
-    public static SecretProvider keyStoreBased(final KeyStoreHandler ksh, final String user, final char[] password) {
+    static SecretProvider keyStoreBased(final KeyStoreHandler ksh, final String user, final char... password) {
         final KeyStoreSecretProvider ks = (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh);
         ks.setPassword(password);
         ks.setUsername(user);
@@ -58,11 +58,12 @@ public abstract class SecretProvider {
     /**
      * For cases where there is no KeyStore support available in JDK, this secret provider stores all secrets in plain
      * text.
+     *
      * @param username Zonky username.
      * @param password Zonky password.
      * @return The provider.
      */
-    public static SecretProvider fallback(final String username, final char[] password) {
+    static SecretProvider fallback(final String username, final char... password) {
         return new FallbackSecretProvider(username, password);
     }
 
@@ -71,7 +72,7 @@ public abstract class SecretProvider {
      *
      * @return The password.
      */
-    abstract public char[] getPassword();
+    char[] getPassword();
 
 
     /**
@@ -79,7 +80,7 @@ public abstract class SecretProvider {
      *
      * @return The username.
      */
-    abstract public String getUsername();
+    String getUsername();
 
     /**
      * Retrieve serialization of Zonky's OAuth token.
@@ -87,7 +88,7 @@ public abstract class SecretProvider {
      * @return Present if {@link #setToken(Reader)} previously called, unless {@link #deleteToken()} was called after
      * that.
      */
-    abstract public Optional<Reader> getToken();
+    Optional<Reader> getToken();
 
     /**
      * Store serialization of Zonky's OAuth token.
@@ -95,28 +96,30 @@ public abstract class SecretProvider {
      * @param token The serialization of the token to be stored.
      * @return True if successful.
      */
-    abstract public boolean setToken(final Reader token);
+    boolean setToken(final Reader token);
 
     /**
      * Retrieve a secret stored through {@link #setSecret(String, char[])}.
+     *
      * @param secretId ID of the secret to retrieve.
      * @return The secret, if found.
      */
-    abstract public Optional<char[]> getSecret(final String secretId);
+    Optional<char[]> getSecret(final String secretId);
 
     /**
      * Store a secret.
+     *
      * @param secretId ID of the secret.
      * @param secret The secret to store.
      * @return True if successful.
      */
-    abstract public boolean setSecret(final String secretId, final char... secret);
+    boolean setSecret(final String secretId, final char... secret);
 
     /**
      * Delete the stored token, if any.
      *
      * @return True if no token stored anymore.
      */
-    abstract public boolean deleteToken();
+    boolean deleteToken();
 
 }

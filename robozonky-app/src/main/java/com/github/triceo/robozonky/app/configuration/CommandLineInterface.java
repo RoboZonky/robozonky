@@ -23,7 +23,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,13 +93,10 @@ public class CommandLineInterface {
     }
 
     private Optional<InvestmentMode> newApplicationConfiguration() {
-        final Optional<AuthenticationHandler> authenticationHandler = SecretProviderFactory.getSecretProvider(this)
-                .map(secrets -> Optional.of(authenticationFragment.createAuthenticationHandler(secrets)))
-                .orElse(Optional.empty());
-        return authenticationHandler
-                .map(auth -> Optional.ofNullable(mode)
-                    .map(i -> i.configure(this, auth))
-                    .orElse(Optional.empty()))
+        return SecretProviderFactory.getSecretProvider(this)
+                .map(secrets -> Optional.ofNullable(mode)
+                        .map(i -> i.configure(this, authenticationFragment.createAuthenticationHandler(secrets)))
+                        .orElse(Optional.empty()))
                 .orElse(Optional.empty());
     }
 

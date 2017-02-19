@@ -23,7 +23,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.internal.api.RoboZonkyFilter;
 
-class AuthenticationFilter extends RoboZonkyFilter {
+final class AuthenticationFilter extends RoboZonkyFilter {
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {

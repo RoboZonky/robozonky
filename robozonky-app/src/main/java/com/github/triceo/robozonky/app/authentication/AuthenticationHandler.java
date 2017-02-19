@@ -80,7 +80,7 @@ public class AuthenticationHandler {
         return data;
     }
 
-    private Authenticator buildWithPassword() {
+    private Function<ApiProvider, Authentication> buildAuthenticatorWithPassword() {
         if (!this.data.deleteToken()) { // get rid of any stale token
             AuthenticationHandler.LOGGER.warn("Failed deleting token.");
         }
@@ -92,10 +92,10 @@ public class AuthenticationHandler {
      *
      * @return Authentication method matching user preferences.
      */
-    private Authenticator build() {
+    private Function<ApiProvider, Authentication> buildAuthenticator() {
         if (!this.tokenBased) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
-            return this.buildWithPassword();
+            return this.buildAuthenticatorWithPassword();
         }
         return this.data.getToken().map(r -> {
             try {
@@ -104,18 +104,18 @@ public class AuthenticationHandler {
                         token.getExpiresOn());
                 if (token.willExpireIn(Duration.ZERO)) {
                     AuthenticationHandler.LOGGER.debug("Token expired, using password-based authentication.");
-                    return this.buildWithPassword();
+                    return this.buildAuthenticatorWithPassword();
                 } else {
                     return Authenticator.withAccessToken(this.data.getUsername(), token,
                             this.tokenRefreshBeforeExpiration);
                 }
             } catch (final Exception ex) {
                 AuthenticationHandler.LOGGER.warn("Failed parsing token, using password-based authentication.", ex);
-                return this.buildWithPassword();
+                return this.buildAuthenticatorWithPassword();
             }
         }).orElseGet(() -> {  // no token available, also using password-based
             AuthenticationHandler.LOGGER.debug("Token not available, using password-based authentication.");
-            return this.buildWithPassword();
+            return this.buildAuthenticatorWithPassword();
         });
     }
 
@@ -162,7 +162,7 @@ public class AuthenticationHandler {
      */
     public Collection<Investment> execute(final ApiProvider provider,
                                           final Function<ZonkyApi, Collection<Investment>> operation) {
-        final Authentication currentAuthentication = this.build().authenticate(provider);
+        final Authentication currentAuthentication = this.buildAuthenticator().apply(provider);
         try (final AbstractApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.getZonkyApi()) {
             final Collection<Investment> result = apiWrapper.execute(operation);
             final boolean logoutAllowed = this.isLogoutAllowed(currentAuthentication.getZonkyApiToken());

@@ -16,20 +16,26 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import java.time.temporal.TemporalAmount;
-
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
 
-/**
- * Result of a successful authentication.
- */
-public interface Authentication {
+public final class Authentication {
 
-    AbstractApiProvider.ApiWrapper<ZonkyApi> getZonkyApi();
+    private final AbstractApiProvider.ApiWrapper<ZonkyApi> zonkyApi;
+    private final ZonkyApiToken token;
 
-    ZonkyApiToken getZonkyApiToken();
+    Authentication(final ApiProvider provider, final ZonkyApiToken token) {
+        this.zonkyApi = provider.authenticated(token);
+        this.token = token;
+    }
 
-    boolean willExpireIn(TemporalAmount temporalAmount);
+    public AbstractApiProvider.ApiWrapper<ZonkyApi> getZonkyApi() {
+        return zonkyApi;
+    }
+
+    public ZonkyApiToken getZonkyApiToken() {
+        return token;
+    }
+
 }

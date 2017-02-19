@@ -27,7 +27,7 @@ import com.github.triceo.robozonky.app.util.ExtensionsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class MarketplaceLoader {
+final class MarketplaceLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketplaceLoader.class);
     private static final ServiceLoader<MarketplaceService> LOADER =
