@@ -37,9 +37,10 @@ public class VersionRetrieverTest {
         Assertions.assertThat(v.getLatest()).isEmpty();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void checkNoStable() {
-        VersionRetriever.findLastStable(Collections.singleton("1.2.0-beta-1"));
+        Assertions.assertThatThrownBy(() -> VersionRetriever.findLastStable(Collections.singleton("1.2.0-beta-1")))
+                .isInstanceOf(IllegalStateException.class);
     }
 
 }

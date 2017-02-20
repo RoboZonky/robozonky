@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,16 @@ public class InvestmentStatusesTest {
                 .containsExactly(InvestmentStatus.COVERED, InvestmentStatus.ACTIVE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void invalidValueOf() {
-        InvestmentStatuses.valueOf("[");
+        Assertions.assertThatThrownBy(() -> InvestmentStatuses.valueOf("["))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void unknownValueOf() {
-        InvestmentStatuses.valueOf("[SOME_UNKNOWN_VALUE]");
+        Assertions.assertThatThrownBy(() -> InvestmentStatuses.valueOf("[SOME_UNKNOWN_VALUE]"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
 }

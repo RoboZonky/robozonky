@@ -57,19 +57,20 @@ public class RatingsTest {
                 .containsExactly(Rating.AAA, Rating.B);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void invalidValueOf() {
-        Ratings.valueOf("[");
+        Assertions.assertThatThrownBy(() -> Ratings.valueOf("[")).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void unquotedValueOf() {
-        Ratings.valueOf("[A]");
+        Assertions.assertThatThrownBy(() -> Ratings.valueOf("[A]")).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void unknownValueOf() {
-        Ratings.valueOf("[\"SOME_UNKNOWN_VALUE\"]");
+        Assertions.assertThatThrownBy(() -> Ratings.valueOf("[\"SOME_UNKNOWN_VALUE\"]"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

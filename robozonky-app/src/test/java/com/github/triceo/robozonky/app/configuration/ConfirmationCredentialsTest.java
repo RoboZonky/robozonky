@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -54,10 +55,10 @@ public class ConfirmationCredentialsTest {
         softly.assertAll();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void wrong() {
         final String wrong = "zonkoid:password:extra";
-        new Credentials(wrong, null);
+        Assertions.assertThatThrownBy(() -> new Credentials(wrong, null)).isInstanceOf(IllegalArgumentException.class);
     }
 
 }

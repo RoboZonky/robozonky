@@ -82,11 +82,12 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void wrongMarketplace() {
         final Marketplace m = Mockito.mock(Marketplace.class);
         Mockito.when(m.specifyExpectedTreatment()).thenReturn(ExpectedTreatment.LISTENING);
-        new SingleShotInvestmentMode(null, null, false, m, null);
+        Assertions.assertThatThrownBy(() -> new SingleShotInvestmentMode(null, null, false, m, null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

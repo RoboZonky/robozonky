@@ -51,15 +51,18 @@ public class RecommendationTest {
         softly.assertAll();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void constructorNoLoanDescriptor() {
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
-        new Recommendation(null, amount, true);
+        Assertions.assertThatThrownBy(() -> new Recommendation(null, amount, true))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void constructorSmallAmount() {
-        new Recommendation(RecommendationTest.mockLoanDescriptor(), Defaults.MINIMUM_INVESTMENT_IN_CZK - 1, true);
+        Assertions.assertThatThrownBy(() -> new Recommendation(RecommendationTest.mockLoanDescriptor(),
+                Defaults.MINIMUM_INVESTMENT_IN_CZK - 1, true))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

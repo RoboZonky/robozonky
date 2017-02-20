@@ -123,11 +123,10 @@ public class ZonkoidConfirmationProviderTest {
         Assertions.assertThat(result).isEmpty();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void errorOverUnknown() {
-        final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
-                UUID.randomUUID().toString(), new RuntimeException());
-        Assertions.assertThat(result).isEmpty();
+        Assertions.assertThatThrownBy(() -> ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
+                UUID.randomUUID().toString(), new RuntimeException())).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

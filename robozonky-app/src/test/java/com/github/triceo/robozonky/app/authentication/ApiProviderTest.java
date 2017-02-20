@@ -29,14 +29,15 @@ import org.mockito.Mockito;
 
 public class ApiProviderTest {
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void authenticated() {
         AbstractApiProvider.ApiWrapper<ZonkyApi> api;
         try (final ApiProvider provider = new ApiProvider()) {
             api = provider.authenticated(Mockito.mock(ZonkyApiToken.class));
             Assertions.assertThat(api).isNotNull();
         }
-        api.execute((Function<ZonkyApi, List<Loan>>) ZonkyApi::getLoans);
+        Assertions.assertThatThrownBy(() -> api.execute((Function<ZonkyApi, List<Loan>>) ZonkyApi::getLoans))
+                .isInstanceOf(IllegalStateException.class);
     }
 
 }

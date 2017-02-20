@@ -49,22 +49,22 @@ public class MinimumMaximumTest {
     @Parameterized.Parameter(1)
     public Function<ImmutableConfiguration, Integer> valueRetrieval;
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void nonexistent() {
         final String propertyName = keyRetrieval.get();
         final ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.class);
         Mockito.when(config.containsKey(propertyName)).thenReturn(false);
-        valueRetrieval.apply(config);
+        Assertions.assertThatThrownBy(() -> valueRetrieval.apply(config)).isInstanceOf(IllegalStateException.class);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void outOfBounds() {
         final String propertyName = keyRetrieval.get();
         final ImmutableConfiguration config = Mockito.mock(ImmutableConfiguration.class);
         Mockito.when(config.containsKey(propertyName)).thenReturn(true);
         Mockito.when(config.getInt(propertyName))
                 .thenReturn(Optional.of(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1));
-        valueRetrieval.apply(config);
+        Assertions.assertThatThrownBy(() -> valueRetrieval.apply(config)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

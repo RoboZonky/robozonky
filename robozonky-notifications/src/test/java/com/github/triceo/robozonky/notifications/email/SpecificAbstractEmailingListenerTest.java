@@ -19,12 +19,13 @@ package com.github.triceo.robozonky.notifications.email;
 import java.util.Map;
 
 import com.github.triceo.robozonky.api.notifications.Event;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class SpecificAbstractEmailingListenerTest {
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void failedTemplate() {
         final AbstractEmailingListener<Event> l = new AbstractEmailingListener<Event>(null) {
             @Override
@@ -47,7 +48,7 @@ public class SpecificAbstractEmailingListenerTest {
                 return null;
             }
         };
-        l.handle(Mockito.mock(Event.class));
+        Assertions.assertThatThrownBy(() -> l.handle(Mockito.mock(Event.class))).isInstanceOf(RuntimeException.class);
     }
 
 }

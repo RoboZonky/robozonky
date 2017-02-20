@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,20 +42,20 @@ public class StrategyPerRatingTest {
             StrategyPerRatingTest.MINIMUM_ASK, StrategyPerRatingTest.MAXIMUM_ASK, true, false
     );
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void loanIsNotAcceptableWithoutMatchingRating() {
         final Loan mockLoan = Mockito.mock(Loan.class);
         Mockito.when(mockLoan.getRating()).thenReturn(StrategyPerRatingTest.DIFFERENT_RATING);
-
-        StrategyPerRatingTest.STRATEGY.isAcceptable(mockLoan);
+        Assertions.assertThatThrownBy(() -> StrategyPerRatingTest.STRATEGY.isAcceptable(mockLoan))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void loanIsNotAcceptableWithoutMatchingRating2() {
         final Loan mockLoan = Mockito.mock(Loan.class);
         Mockito.when(mockLoan.getRating()).thenReturn(StrategyPerRatingTest.DIFFERENT_RATING);
-
-        StrategyPerRatingTest.STRATEGY.recommendInvestmentAmount(mockLoan);
+        Assertions.assertThatThrownBy(() -> StrategyPerRatingTest.STRATEGY.recommendInvestmentAmount(mockLoan))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

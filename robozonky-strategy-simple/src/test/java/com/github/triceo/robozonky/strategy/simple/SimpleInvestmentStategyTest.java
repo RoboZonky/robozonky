@@ -86,12 +86,13 @@ public class SimpleInvestmentStategyTest {
         overallStrategy = new SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void constructorEnsuringAllStrategiesPresent() {
         final Map<Rating, StrategyPerRating> strategies = new EnumMap<>(Rating.class);
         strategies.put(SimpleInvestmentStategyTest.RATING_A, SimpleInvestmentStategyTest.STRATEGY_A);
         strategies.put(SimpleInvestmentStategyTest.RATING_B, SimpleInvestmentStategyTest.STRATEGY_B);
-        new SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
+        Assertions.assertThatThrownBy(() -> new SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

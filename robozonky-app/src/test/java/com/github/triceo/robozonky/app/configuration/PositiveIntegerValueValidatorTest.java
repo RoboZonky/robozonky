@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app.configuration;
 
 import com.beust.jcommander.ParameterException;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class PositiveIntegerValueValidatorTest {
@@ -26,9 +27,10 @@ public class PositiveIntegerValueValidatorTest {
         new PositiveIntegerValueValidator().validate("something", 0);
     }
 
-    @Test(expected = ParameterException.class)
+    @Test
     public void isNotPositive() {
-        new PositiveIntegerValueValidator().validate("something", -1);
+        Assertions.assertThatThrownBy(() -> new PositiveIntegerValueValidator().validate("something", -1))
+                .isInstanceOf(ParameterException.class);
     }
 
 }

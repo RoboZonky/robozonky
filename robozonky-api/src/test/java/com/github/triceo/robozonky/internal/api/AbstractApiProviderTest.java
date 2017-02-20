@@ -37,7 +37,7 @@ public class AbstractApiProviderTest {
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void obtainClosedThrows() {  // tests double-closing as a side-effect
         try (final AbstractApiProviderTest.ApiProvider provider = new AbstractApiProviderTest.ApiProvider()) {
             try (final AbstractApiProvider.ApiWrapper<ZonkyApi> w = provider.getApi()) {
@@ -45,7 +45,7 @@ public class AbstractApiProviderTest {
                 provider.close();
                 Assertions.assertThat(w.isClosed()).isTrue();
             }
-            provider.getApi();
+            Assertions.assertThatThrownBy(provider::getApi).isInstanceOf(IllegalStateException.class);
         }
     }
 

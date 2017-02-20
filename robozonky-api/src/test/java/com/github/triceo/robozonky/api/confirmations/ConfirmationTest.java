@@ -40,9 +40,10 @@ public class ConfirmationTest {
         softly.assertThat(c.getType()).isSameAs(ConfirmationType.APPROVED);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void constructorWithWrongAmount() {
-        new Confirmation(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
+        Assertions.assertThatThrownBy(() -> new Confirmation(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

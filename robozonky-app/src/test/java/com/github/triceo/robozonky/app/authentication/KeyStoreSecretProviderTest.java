@@ -62,14 +62,16 @@ public class KeyStoreSecretProviderTest {
         return (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh, username, password.toCharArray());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void usernameNotSet() {
-        KeyStoreSecretProviderTest.newMockProvider().getUsername();
+        Assertions.assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getUsername())
+                .isInstanceOf(IllegalStateException.class);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void passwordNotSet() {
-        KeyStoreSecretProviderTest.newMockProvider().getPassword();
+        Assertions.assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getPassword())
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -149,9 +151,10 @@ public class KeyStoreSecretProviderTest {
         Mockito.verify(ksh, Mockito.times(2)).set(Mockito.any(), Mockito.any(char[].class));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void noKeyStoreHandlerProvided() {
-        new KeyStoreSecretProvider(null);
+        Assertions.assertThatThrownBy(() -> new KeyStoreSecretProvider(null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
 }

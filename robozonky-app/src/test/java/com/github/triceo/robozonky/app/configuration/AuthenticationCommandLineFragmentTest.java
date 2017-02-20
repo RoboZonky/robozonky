@@ -26,17 +26,17 @@ import org.junit.Test;
 
 public class AuthenticationCommandLineFragmentTest {
 
-    @Test(expected = ParameterException.class)
+    @Test
     public void defaults() {
         final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment();
         SoftAssertions.assertSoftly(softly -> {
             Assertions.assertThat(fragment.getUsername()).isEmpty();
             Assertions.assertThat(fragment.getKeystore()).isEmpty();
         });
-        fragment.validate();
+        Assertions.assertThatThrownBy(fragment::validate).isInstanceOf(ParameterException.class);
     }
 
-    @Test(expected = ParameterException.class)
+    @Test
     public void bothSet() {
         final String username = "usr";
         final File keystore = new File("");
@@ -45,7 +45,7 @@ public class AuthenticationCommandLineFragmentTest {
             Assertions.assertThat(fragment.getUsername()).hasValue(username);
             Assertions.assertThat(fragment.getKeystore()).hasValue(keystore);
         });
-        fragment.validate();
+        Assertions.assertThatThrownBy(fragment::validate).isInstanceOf(ParameterException.class);
     }
 
     @Test
