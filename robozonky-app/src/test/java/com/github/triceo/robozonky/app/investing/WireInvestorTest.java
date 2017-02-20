@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
@@ -71,14 +72,14 @@ public class WireInvestorTest extends AbstractInvestingTest {
         Assertions.assertThat(newEvents).isEmpty();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void investmentFailed() {
         final InvestmentTracker t = new InvestmentTracker(Collections.emptyList(), BigDecimal.valueOf(10000));
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
-        Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
-                .thenReturn(new ZonkyResponse(ZonkyResponseType.FAILED));
-        Investor.actuallyInvest(r, api, t);
+        final Exception thrown = new ServiceUnavailableException();
+        Mockito.doThrow(thrown).when(api).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
+        Assertions.assertThatThrownBy(() -> Investor.actuallyInvest(r, api, t)).isSameAs(thrown);
     }
 
     @Test

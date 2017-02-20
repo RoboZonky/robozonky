@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app.investing;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
@@ -139,8 +140,7 @@ public class ZonkyProxy {
         } else {
             if (recommendation.isConfirmationRequired()) {
                 if (this.provider == null) {
-                    ZonkyProxy.LOGGER.error("Confirmation required but no confirmation provider registered.");
-                    return new ZonkyResponse(ZonkyResponseType.FAILED);
+                    throw new IllegalStateException("Confirmation required but no confirmation provider specified.");
                 } else {
                     return this.approveOrDelegate(recommendation);
                 }
@@ -182,23 +182,19 @@ public class ZonkyProxy {
         final Optional<Confirmation> confirmation = this.provider.requestConfirmation(this.requestId,
                 recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount());
-        if (!confirmation.isPresent()) {
-            ZonkyProxy.LOGGER.warn("Did not receive confirmation response, not investing: {}.", recommendation);
-            return new ZonkyResponse(ZonkyResponseType.FAILED);
-        }
-        final Confirmation result = confirmation.get();
-        switch (result.getType()) {
-            case REJECTED:
-                ZonkyProxy.LOGGER.debug("Negative confirmation received, not investing: {}.", recommendation);
-                return new ZonkyResponse(ZonkyResponseType.REJECTED);
-            case DELEGATED:
-                ZonkyProxy.LOGGER.debug("Investment confirmed delegated, not investing: {}.", recommendation);
-                return new ZonkyResponse(ZonkyResponseType.DELEGATED);
-            case APPROVED:
-                return this.investLocallyFailingOnCaptcha(recommendation, confirmation.get());
-            default:
-                throw new IllegalStateException("No way how this could happen.");
-        }
+        return confirmation.map(result -> {
+            switch (result.getType()) {
+                case REJECTED:
+                    ZonkyProxy.LOGGER.debug("Negative confirmation received, not investing: {}.", recommendation);
+                    return new ZonkyResponse(ZonkyResponseType.REJECTED);
+                case DELEGATED:
+                    ZonkyProxy.LOGGER.debug("Investment confirmed delegated, not investing: {}.", recommendation);
+                    return new ZonkyResponse(ZonkyResponseType.DELEGATED);
+                case APPROVED:
+                    return this.investLocallyFailingOnCaptcha(recommendation, confirmation.get());
+                default:
+                    throw new IllegalStateException("No way how this could happen.");
+            }}).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond."));
     }
 
     private ZonkyResponse delegateOrReject(final Recommendation recommendation) {
@@ -206,19 +202,15 @@ public class ZonkyProxy {
         final Optional<Confirmation> confirmation = this.provider.requestConfirmation(this.requestId,
                 recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount());
-        if (!confirmation.isPresent()) {
-            ZonkyProxy.LOGGER.warn("Did not receive confirmation response, not investing: {}.", recommendation);
-            return new ZonkyResponse(ZonkyResponseType.FAILED);
-        }
-        final Confirmation result = confirmation.get();
-        switch (result.getType()) {
-            case DELEGATED:
-                ZonkyProxy.LOGGER.debug("Investment confirmed delegated, not investing: {}.", recommendation);
-                return new ZonkyResponse(ZonkyResponseType.DELEGATED);
-            default:
-                ZonkyProxy.LOGGER.warn("Investment not delegated, not investing: {}.", recommendation);
-                return new ZonkyResponse(ZonkyResponseType.REJECTED);
-        }
+        return confirmation.map(result -> {
+            switch (result.getType()) {
+                case DELEGATED:
+                    ZonkyProxy.LOGGER.debug("Investment confirmed delegated, not investing: {}.", recommendation);
+                    return new ZonkyResponse(ZonkyResponseType.DELEGATED);
+                default:
+                    ZonkyProxy.LOGGER.warn("Investment not delegated, not investing: {}.", recommendation);
+                    return new ZonkyResponse(ZonkyResponseType.REJECTED);
+            }}).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond"));
     }
 
 }

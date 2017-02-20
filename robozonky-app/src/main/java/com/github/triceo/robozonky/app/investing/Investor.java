@@ -103,7 +103,7 @@ class Investor {
             case SEEN_BEFORE:
                 return Optional.empty();
             default:
-                throw new IllegalStateException("Investment operation failed remotely.");
+                throw new IllegalStateException("Not possible.  ");
         }
     }
 

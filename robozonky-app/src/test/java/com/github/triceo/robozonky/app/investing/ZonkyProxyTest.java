@@ -116,11 +116,11 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
         }
         // simple proxy
         result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, null, ZonkyResponseType.FAILED});
+                ZonkyProxyTest.Remote.CONFIRMED, null, null});
         result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.PROTECTED,
                 ZonkyProxyTest.Remote.UNCONFIRMED, null, ZonkyResponseType.REJECTED});
         result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, null, ZonkyResponseType.FAILED});
+                ZonkyProxyTest.Remote.CONFIRMED, null, null});
         result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.UNPROTECTED,
                 ZonkyProxyTest.Remote.UNCONFIRMED, null, ZonkyResponseType.INVESTED});
         // confirming proxy, response present
@@ -134,11 +134,11 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
                 ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
         // confirming proxy, network failure
         result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, ZonkyResponseType.FAILED});
+                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, null});
         result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, ZonkyResponseType.FAILED});
+                ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, null});
         result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, ZonkyResponseType.FAILED});
+                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, null});
         result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.UNPROTECTED,
                 ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, ZonkyResponseType.INVESTED});
         return Collections.unmodifiableCollection(result);
@@ -204,7 +204,15 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
     private void test(final boolean seenBefore) {
         final Recommendation r = this.getRecommendation();
         final ZonkyProxy p = this.getZonkyProxy();
-        final ZonkyResponse result = p.invest(r, seenBefore);
+        ZonkyResponse result;
+        try {
+            result = p.invest(r, seenBefore);
+        } catch (final Exception ex) {
+            if (responseType != null) {
+                Assertions.fail("Thrown an exception when it shouldn't have.");
+            }
+            return;
+        }
         if (this.proxyType == ZonkyProxyTest.ProxyType.CONFIRMING) {
             Assertions.assertThat(p.getConfirmationProviderId()).isPresent();
         } else {

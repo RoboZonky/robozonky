@@ -36,10 +36,6 @@ public enum ZonkyResponseType {
     /**
      * Investment rejected by the selected {@link ConfirmationProvider}, or required CAPTCHA.
      */
-    REJECTED,
-    /**
-     * Confirmation required and {@link ConfirmationProvider} did not respond, or investment failed.
-     */
-    FAILED
+    REJECTED
 
 }
