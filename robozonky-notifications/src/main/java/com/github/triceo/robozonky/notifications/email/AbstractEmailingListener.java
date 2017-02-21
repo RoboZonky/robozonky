@@ -27,9 +27,6 @@ import org.apache.commons.mail.SimpleEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Will convert an investment into a timestamped file informing user of when the investment was made.
- */
 abstract class AbstractEmailingListener<T extends Event> implements EventListener<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEmailingListener.class);
@@ -42,13 +39,12 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         email.setStartTLSRequired(properties.isStartTlsRequired());
         email.setSSLOnConnect(properties.isSslOnConnectRequired());
         email.setAuthentication(properties.getSmtpUsername(), properties.getSmtpPassword());
-        email.setFrom(properties.getSender(), "RoboZonky @ " + Defaults.ROBOZONKY_HOST_ADDRESS);
+        email.setFrom(properties.getSender(), "RoboZonky @ " + properties.getLocalHostAddress());
         email.addTo(properties.getRecipient());
         return email;
     }
 
     private final ListenerSpecificNotificationProperties properties;
-    private final TemplateProcessor templates = new TemplateProcessor();
 
     public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
@@ -69,7 +65,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         } else try {
             final Email email = AbstractEmailingListener.createNewEmail(properties);
             email.setSubject(this.getSubject(event));
-            email.setMsg(this.templates.process(this.getTemplateFileName(), this.getData(event)));
+            email.setMsg(TemplateProcessor.INSTANCE.process(this.getTemplateFileName(), this.getData(event)));
             AbstractEmailingListener.LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.",
                     email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
                     email.getSmtpPort(), properties.getSmtpUsername());

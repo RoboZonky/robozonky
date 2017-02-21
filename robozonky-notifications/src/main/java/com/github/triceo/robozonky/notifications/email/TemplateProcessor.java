@@ -29,7 +29,9 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-final class TemplateProcessor {
+enum TemplateProcessor {
+
+    INSTANCE;
 
     private static Configuration getFreemarkerConfiguration() {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
@@ -48,7 +50,6 @@ final class TemplateProcessor {
         data.put("timestamp", Date.from(Instant.now()));
         data.put("robozonky", Defaults.ROBOZONKY_USER_AGENT);
         data.put("robozonkyUrl", Defaults.ROBOZONKY_URL);
-        data.put("host", Defaults.ROBOZONKY_HOST_ADDRESS);
         data.put("embed", embeddedTemplate);
         data.put("data", embeddedData);
         final Template template = this.config.getTemplate("core.ftl");

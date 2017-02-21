@@ -40,13 +40,7 @@ public class DefaultsTest {
 
     @Test
     public void userAgent() {
-        Assertions.assertThat(Defaults.ROBOZONKY_USER_AGENT)
-                .contains(Defaults.ROBOZONKY_URL);
-    }
-
-    @Test
-    public void hostname() {
-        Assertions.assertThat(Defaults.ROBOZONKY_HOST_ADDRESS).isEqualTo(Defaults.getHostAddress());
+        Assertions.assertThat(Defaults.ROBOZONKY_USER_AGENT).contains(Defaults.ROBOZONKY_URL);
     }
 
 }

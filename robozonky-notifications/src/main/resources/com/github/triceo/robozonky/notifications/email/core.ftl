@@ -5,4 +5,4 @@ RoboZonky Vás tímto informuje o následujícím:
 --
 Tuto zprávu dostáváte, protože je tak Váš robot nakonfigurován.
 
-Vygeneroval ${robozonky} dne ${timestamp?date} v ${timestamp?time} na adrese ${host}.
+Vygeneroval ${robozonky} dne ${timestamp?date} v ${timestamp?time}.

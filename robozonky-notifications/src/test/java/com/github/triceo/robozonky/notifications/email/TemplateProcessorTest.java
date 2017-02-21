@@ -29,8 +29,7 @@ public class TemplateProcessorTest extends AbstractEmailingListenerTest {
     @Test
     public void processingWithoutErrors() throws IOException, TemplateException {
         final AbstractEmailingListener<Event> l = this.getEmailingListener();
-        final TemplateProcessor t = new TemplateProcessor();
-        final String s = t.process(l.getTemplateFileName(), l.getData(event));
+        final String s = TemplateProcessor.INSTANCE.process(l.getTemplateFileName(), l.getData(event));
         Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 

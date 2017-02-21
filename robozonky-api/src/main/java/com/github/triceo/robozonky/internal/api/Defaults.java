@@ -16,8 +16,9 @@
 
 package com.github.triceo.robozonky.internal.api;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
@@ -42,12 +43,18 @@ public final class Defaults {
     public static final String ROBOZONKY_URL = "http://www.robozonky.cz";
     public static final String ROBOZONKY_USER_AGENT =
             "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" + Defaults.ROBOZONKY_URL + ")";
-    public static final String ROBOZONKY_HOST_ADDRESS = Defaults.getHostAddress();
 
-    static String getHostAddress() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (final UnknownHostException ex) {
+    /**
+     * Will execute call to a remote web service which will return the external IP address of this machine.
+     *
+     * @return Whatever the web service returned as the address, or "localhost" if the remote call failed.
+     */
+    public static String getHostAddress() {
+        final String url = "http://checkip.amazonaws.com";
+        try (final BufferedReader in =
+                     new BufferedReader(new InputStreamReader(new URL(url).openStream(), Defaults.CHARSET))) {
+            return in.readLine();
+        } catch (final Exception ex) {
             Defaults.LOGGER.debug("Failed retrieving local host address.", ex);
             return "localhost";
         }

@@ -90,9 +90,14 @@ class NotificationProperties {
     }
 
     protected Properties properties;
+    private String localHostAddress = Defaults.getHostAddress();
 
     NotificationProperties(final Properties source) {
         this.properties = source;
+    }
+
+    public String getLocalHostAddress() {
+        return localHostAddress;
     }
 
     protected boolean getBooleanValue(final String propertyName, final boolean defaultValue) {
