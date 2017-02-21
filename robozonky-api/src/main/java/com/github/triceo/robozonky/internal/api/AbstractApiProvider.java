@@ -25,6 +25,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.xml.ws.WebServiceClient;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -32,7 +35,9 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.client.jaxrs.internal.ClientInvocation;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
@@ -45,6 +50,21 @@ import org.slf4j.LoggerFactory;
  * {@link AbstractApiProvider.ApiWrapper#close()}.
  */
 public abstract class AbstractApiProvider implements AutoCloseable {
+
+    private static class RedirectingHttpClient extends ApacheHttpClient43Engine {
+
+        public RedirectingHttpClient(final HttpClient httpClient) {
+            super(httpClient);
+        }
+
+        @Override
+        protected void loadHttpMethod(final ClientInvocation request, final HttpRequestBase httpMethod)
+                throws Exception {
+            super.loadHttpMethod(request, httpMethod);
+            httpMethod.setConfig(RequestConfig.copy(httpMethod.getConfig()).setRedirectsEnabled(true).build());
+        }
+
+    }
 
     /**
      * Represents a close-able RESTEasy client proxy. Users should preferably call {@link #close()} after they're
@@ -105,7 +125,7 @@ public abstract class AbstractApiProvider implements AutoCloseable {
 
     private static ResteasyClientBuilder newResteasyClientBuilder() {
         final CloseableHttpClient closeableHttpClient = AbstractApiProvider.HTTP_CLIENT_BUILDER.build();
-        final ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(closeableHttpClient);
+        final ApacheHttpClient4Engine engine = new AbstractApiProvider.RedirectingHttpClient(closeableHttpClient);
         final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder().httpEngine(engine);
         clientBuilder.providerFactory(AbstractApiProvider.RESTEASY);
         return clientBuilder;
