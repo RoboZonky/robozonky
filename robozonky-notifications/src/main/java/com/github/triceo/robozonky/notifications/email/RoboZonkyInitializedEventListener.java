@@ -16,20 +16,12 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
-import java.util.Collections;
-import java.util.Map;
-
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 
 class RoboZonkyInitializedEventListener extends AbstractEmailingListener<RoboZonkyInitializedEvent> {
 
     public RoboZonkyInitializedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
-    }
-
-    @Override
-    boolean shouldSendEmail(final RoboZonkyInitializedEvent event) {
-        return true;
     }
 
     @Override
@@ -42,8 +34,4 @@ class RoboZonkyInitializedEventListener extends AbstractEmailingListener<RoboZon
         return "initialized.ftl";
     }
 
-    @Override
-    Map<String, Object> getData(final RoboZonkyInitializedEvent event) {
-        return Collections.emptyMap();
-    }
 }

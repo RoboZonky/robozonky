@@ -28,6 +28,10 @@ class ListenerSpecificNotificationProperties extends NotificationProperties {
         this.listener = listener;
     }
 
+    public int getListenerSpecificHourlyEmailLimit() {
+        return this.getListenerSpecificIntProperty(NotificationProperties.HOURLY_LIMIT).orElse(Integer.MAX_VALUE);
+    }
+
     public int getListenerSpecificIntProperty(final String property, final int defaultValue) {
         return this.getListenerSpecificIntProperty(property).orElse(defaultValue);
     }

@@ -29,11 +29,6 @@ final class InvestmentDelegatedEventListener extends AbstractEmailingListener<In
     }
 
     @Override
-    boolean shouldSendEmail(final InvestmentDelegatedEvent event) {
-        return true;
-    }
-
-    @Override
     String getSubject(final InvestmentDelegatedEvent event) {
         return "Investice delegována - " + event.getRecommendation().getRecommendedInvestmentAmount() + ",- Kč, " +
                 "půjčka č. " + event.getRecommendation().getLoanDescriptor().getLoan().getId();

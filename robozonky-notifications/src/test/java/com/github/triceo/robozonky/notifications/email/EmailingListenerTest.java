@@ -36,6 +36,7 @@ public class EmailingListenerTest extends AbstractEmailingListenerTest {
         final AbstractEmailingListener<Event> l = this.getEmailingListener();
         Assertions.assertThat(this.event).isInstanceOf(this.listenerType.getEventType());
         l.handle(this.event);
+        Assertions.assertThat(l.getData(this.event)).isNotNull();
         Assertions.assertThat(l.shouldSendEmail(this.event)).isTrue();
         Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(1);
         final MimeMessage m = greenMail.getReceivedMessages()[0];

@@ -28,11 +28,6 @@ final class InvestmentMadeEventListener extends AbstractEmailingListener<Investm
     }
 
     @Override
-    boolean shouldSendEmail(final InvestmentMadeEvent event) {
-        return true;
-    }
-
-    @Override
     String getSubject(final InvestmentMadeEvent event) {
         return "Nová investice - " + event.getInvestment().getAmount() + ",- Kč, půjčka č. " +
                 event.getInvestment().getLoanId();

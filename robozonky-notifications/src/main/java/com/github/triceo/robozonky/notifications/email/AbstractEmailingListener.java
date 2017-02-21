@@ -16,6 +16,9 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
 import java.util.Map;
 
 import com.github.triceo.robozonky.api.notifications.Event;
@@ -29,7 +32,12 @@ import org.slf4j.LoggerFactory;
 
 abstract class AbstractEmailingListener<T extends Event> implements EventListener<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEmailingListener.class);
+    protected static String stackTraceToString(final Throwable t) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        return sw.toString();
+    }
 
     private static Email createNewEmail(final NotificationProperties properties) throws EmailException {
         final Email email = new SimpleEmail();
@@ -44,32 +52,42 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return email;
     }
 
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final EmailCounter emailsOfThisType;
     private final ListenerSpecificNotificationProperties properties;
 
     public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
+        this.emailsOfThisType = new EmailCounter(properties.getListenerSpecificHourlyEmailLimit());
     }
 
-    abstract boolean shouldSendEmail(final T event);
+    boolean shouldSendEmail(final T event) {
+        return this.properties.getGlobalEmailCounter().allowEmail() && this.emailsOfThisType.allowEmail();
+    }
 
     abstract String getSubject(final T event);
 
     abstract String getTemplateFileName();
 
-    abstract Map<String, Object> getData(final T event);
+    Map<String, Object> getData(final T event) {
+        return Collections.emptyMap();
+    }
 
     @Override
     public void handle(final T event) {
         if (!this.shouldSendEmail(event)) {
+            LOGGER.debug("Will not send e-mail.");
             return;
         } else try {
             final Email email = AbstractEmailingListener.createNewEmail(properties);
             email.setSubject(this.getSubject(event));
             email.setMsg(TemplateProcessor.INSTANCE.process(this.getTemplateFileName(), this.getData(event)));
-            AbstractEmailingListener.LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.",
+            LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.",
                     email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
                     email.getSmtpPort(), properties.getSmtpUsername());
             email.send();
+            emailsOfThisType.emailSent();
+            this.properties.getGlobalEmailCounter().emailSent();
         } catch (final Exception ex) {
             throw new RuntimeException("Failed processing event.", ex);
         }

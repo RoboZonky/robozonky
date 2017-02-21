@@ -34,7 +34,7 @@ public class ExecutionStartedEventListener extends AbstractEmailingListener<Exec
 
     @Override
     boolean shouldSendEmail(final ExecutionStartedEvent event) {
-        return this.shouldSendEmail;
+        return super.shouldSendEmail(event) && this.shouldSendEmail;
     }
 
     @Override

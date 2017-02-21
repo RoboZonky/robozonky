@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 class NotificationProperties {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationProperties.class);
+    protected static final String HOURLY_LIMIT = "hourlyMaxEmails";
     static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications.cfg");
 
@@ -90,13 +91,19 @@ class NotificationProperties {
     }
 
     protected Properties properties;
-    private String localHostAddress = Defaults.getHostAddress();
+    private String localHostAddress;
+    private final EmailCounter globalEmailCounter;
 
     NotificationProperties(final Properties source) {
         this.properties = source;
+        this.globalEmailCounter = new EmailCounter(this.getGlobalHourlyEmailLimit());
     }
 
-    public String getLocalHostAddress() {
+    public synchronized String getLocalHostAddress() {
+        if (localHostAddress == null) {
+            // lazy init so that the remote request penalty is not incurred needlessly
+            localHostAddress = Defaults.getHostAddress();
+        }
         return localHostAddress;
     }
 
@@ -163,6 +170,20 @@ class NotificationProperties {
 
     public int getSmtpPort() {
         return this.getIntValue("smtp.port", 25);
+    }
+
+    private int getGlobalHourlyEmailLimit() {
+        final int val = this.getIntValue(NotificationProperties.HOURLY_LIMIT)
+                .orElse(Integer.MAX_VALUE);
+        if (val < 0) {
+            return Integer.MAX_VALUE;
+        } else {
+            return val;
+        }
+    }
+
+    public EmailCounter getGlobalEmailCounter() {
+        return globalEmailCounter;
     }
 
     public boolean isListenerEnabled(final SupportedListener listener) {

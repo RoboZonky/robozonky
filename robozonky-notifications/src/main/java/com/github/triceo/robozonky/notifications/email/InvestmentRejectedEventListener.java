@@ -29,11 +29,6 @@ final class InvestmentRejectedEventListener extends AbstractEmailingListener<Inv
     }
 
     @Override
-    boolean shouldSendEmail(final InvestmentRejectedEvent event) {
-        return true;
-    }
-
-    @Override
     String getSubject(final InvestmentRejectedEvent event) {
         return "Investice zamítnuta - " + event.getRecommendation().getRecommendedInvestmentAmount() + ",- Kč, " +
                 "půjčka č. " + event.getRecommendation().getLoanDescriptor().getLoan().getId();
@@ -56,7 +51,5 @@ final class InvestmentRejectedEventListener extends AbstractEmailingListener<Inv
         result.put("newBalance", event.getBalance());
         return result;
     }
-
-
 
 }

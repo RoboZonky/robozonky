@@ -16,22 +16,22 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
-import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
+import java.time.Duration;
 
-class RoboZonkyEndingEventListener extends AbstractEmailingListener<RoboZonkyEndingEvent> {
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
 
-    public RoboZonkyEndingEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(properties);
-    }
+public class EmailCounterTest {
 
-    @Override
-    String getSubject(final RoboZonkyEndingEvent event) {
-        return "RoboZonky byl ukončen";
-    }
-
-    @Override
-    String getTemplateFileName() {
-        return "ending.ftl";
+    @Test
+    public void testTiming() throws InterruptedException {
+        final int seconds = 1;
+        final EmailCounter c = new EmailCounter(1, Duration.ofSeconds(seconds));
+        Assertions.assertThat(c.allowEmail()).isTrue();
+        c.emailSent();
+        Assertions.assertThat(c.allowEmail()).isFalse();
+        Thread.sleep(seconds * 1000 + 1);
+        Assertions.assertThat(c.allowEmail()).isTrue();
     }
 
 }

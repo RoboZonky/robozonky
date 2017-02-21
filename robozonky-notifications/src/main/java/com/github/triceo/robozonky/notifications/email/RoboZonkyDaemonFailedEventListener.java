@@ -16,9 +16,7 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -27,11 +25,6 @@ class RoboZonkyDaemonFailedEventListener extends AbstractEmailingListener<RoboZo
 
     public RoboZonkyDaemonFailedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
-    }
-
-    @Override
-    boolean shouldSendEmail(final RoboZonkyDaemonFailedEvent event) {
-        return true;
     }
 
     @Override
@@ -46,11 +39,6 @@ class RoboZonkyDaemonFailedEventListener extends AbstractEmailingListener<RoboZo
 
     @Override
     Map<String, Object> getData(final RoboZonkyDaemonFailedEvent event) {
-        final Map<String, Object> result = new HashMap<>();
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        event.getCause().printStackTrace(pw);
-        result.put("cause", sw.toString());
-        return result;
+        return Collections.singletonMap("cause", AbstractEmailingListener.stackTraceToString(event.getCause()));
     }
 }
