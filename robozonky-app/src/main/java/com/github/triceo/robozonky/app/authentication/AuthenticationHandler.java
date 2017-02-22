@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.io.StringReader;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.function.Function;
@@ -81,9 +82,6 @@ public class AuthenticationHandler {
     }
 
     private Function<ApiProvider, Authentication> buildAuthenticatorWithPassword() {
-        if (!this.data.deleteToken()) { // get rid of any stale token
-            AuthenticationHandler.LOGGER.warn("Failed deleting token.");
-        }
         return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
     }
 
@@ -99,22 +97,27 @@ public class AuthenticationHandler {
         }
         return this.data.getToken().map(r -> {
             try {
+                final long refreshIntervalInSeconds = tokenRefreshBeforeExpiration.get(ChronoUnit.SECONDS);
                 final ZonkyApiToken token = ZonkyApiToken.unmarshal(r);
-                AuthenticationHandler.LOGGER.debug("Token obtained on {}, expires on {}.", token.getObtainedOn(),
-                        token.getExpiresOn());
-                if (token.willExpireIn(Duration.ZERO)) {
-                    AuthenticationHandler.LOGGER.debug("Token expired, using password-based authentication.");
+                AuthenticationHandler.LOGGER.debug("Token obtained: {}, expires: {}. Refresh {} seconds before.",
+                        token.getObtainedOn(), token.getExpiresOn(), refreshIntervalInSeconds);
+                final int safetyRefreshIntervalInSeconds = 5;
+                if (token.willExpireIn(Duration.ofSeconds(safetyRefreshIntervalInSeconds))) {
+                    if (safetyRefreshIntervalInSeconds > refreshIntervalInSeconds) {
+                        AuthenticationHandler.LOGGER.info("Ignoring pre-set token refresh time.");
+                    }
+                    // may not be enough time for token refresh; rather disregard than risk auth exception
+                    AuthenticationHandler.LOGGER.debug("Token expired or expiring too soon, using password.");
                     return this.buildAuthenticatorWithPassword();
                 } else {
-                    return Authenticator.withAccessToken(this.data.getUsername(), token,
-                            this.tokenRefreshBeforeExpiration);
+                    return Authenticator.withAccessToken(this.data.getUsername(), token, tokenRefreshBeforeExpiration);
                 }
             } catch (final Exception ex) {
-                AuthenticationHandler.LOGGER.warn("Failed parsing token, using password-based authentication.", ex);
+                AuthenticationHandler.LOGGER.warn("Failed parsing token, using password.", ex);
                 return this.buildAuthenticatorWithPassword();
             }
         }).orElseGet(() -> {  // no token available, also using password-based
-            AuthenticationHandler.LOGGER.debug("Token not available, using password-based authentication.");
+            AuthenticationHandler.LOGGER.debug("Token not available, using password.");
             return this.buildAuthenticatorWithPassword();
         });
     }
@@ -122,6 +125,7 @@ public class AuthenticationHandler {
     boolean storeToken(final ZonkyApiToken token) throws JAXBException {
         final String marshalled = ZonkyApiToken.marshal(token);
         if (this.data.setToken(new StringReader(marshalled))) {
+            AuthenticationHandler.LOGGER.debug("Token stored.");
             return true;
         } else {
             AuthenticationHandler.LOGGER.debug("Failed storing token.");
@@ -132,24 +136,20 @@ public class AuthenticationHandler {
     /**
      * Decide whether or not to log out, based on user preferences.
      *
-     * @param token Token in question.
+     * @param token The token to use for the next login, if enabled.
      * @return True if RoboZonky should log out, false otherwise.
      */
     private boolean isLogoutAllowed(final ZonkyApiToken token) {
         if (!this.tokenBased) { // not using token; always logout
             return true;
         }
-        return this.data.getToken().map(s -> {
-            // already exists, do not log out
-            return false;
-        }).orElseGet(() -> {
-            try {
-                return !this.storeToken(token);
-            } catch (final Exception ex) {
-                AuthenticationHandler.LOGGER.info("Access token not written, will need to use password next time.", ex);
-                return true;
-            }
-        });
+        try { // store token so that, in case of token refresh or new token, we always have the latest data
+            return !this.storeToken(token);
+        } catch (final Exception ex) {
+            AuthenticationHandler.LOGGER.info("Access token not written, will need to use password next time.", ex);
+            this.data.deleteToken();
+            return true;
+        }
     }
 
     /**
@@ -164,15 +164,17 @@ public class AuthenticationHandler {
                                           final Function<ZonkyApi, Collection<Investment>> operation) {
         final Authentication currentAuthentication = this.buildAuthenticator().apply(provider);
         try (final AbstractApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.getZonkyApi()) {
-            final Collection<Investment> result = apiWrapper.execute(operation);
-            final boolean logoutAllowed = this.isLogoutAllowed(currentAuthentication.getZonkyApiToken());
-            if (logoutAllowed) {
-                AuthenticationHandler.LOGGER.debug("Logging out.");
-                apiWrapper.execute(ZonkyApi::logout);
-            } else { // if we're using the token, we should never log out
-                AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
+            try {
+                return apiWrapper.execute(operation);
+            } finally { // attempt to log out no matter what happens
+                final boolean logoutAllowed = this.isLogoutAllowed(currentAuthentication.getZonkyApiToken());
+                if (logoutAllowed) {
+                    AuthenticationHandler.LOGGER.info("Logging out.");
+                    apiWrapper.execute(ZonkyApi::logout);
+                } else { // if we're using the token, we should never log out
+                    AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
+                }
             }
-            return result;
         }
     }
 

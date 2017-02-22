@@ -70,11 +70,9 @@ abstract class Authenticator implements Function<ApiProvider, Authentication> {
             @Override
             protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
                 if (token.willExpireIn(tokenRefreshBeforeExpiration)) {
-                    final String tokenId = String.valueOf(token.getRefreshToken());
-                    final ZonkyApiToken newToken =
-                            api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
                     Authenticator.LOGGER.info("Authenticating as '{}', refreshing existing access token.", username);
-                    return newToken;
+                    final String tokenId = String.valueOf(token.getRefreshToken());
+                    return api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
                 } else {
                     Authenticator.LOGGER.info("Authenticated as '{}', reusing existing access token.", username);
                     return token;

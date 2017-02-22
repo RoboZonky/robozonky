@@ -23,14 +23,30 @@ import java.util.UUID;
 import javax.xml.bind.JAXBException;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 public class ZonkyApiTokenTest {
 
     @Test
-    public void marshall() throws JAXBException {
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 60);
-        Assertions.assertThat(ZonkyApiToken.marshal(token)).isNotEmpty();
+    public void roundTrip() throws JAXBException {
+        final OffsetDateTime obtainedOn = OffsetDateTime.MIN;
+        final int expirationInSeconds = 60;
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                expirationInSeconds, obtainedOn);
+        final String marshalled = ZonkyApiToken.marshal(token);
+        final ZonkyApiToken unmarshalled = ZonkyApiToken.unmarshal(new StringReader(marshalled));
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(unmarshalled.getObtainedOn()).isEqualTo(obtainedOn);
+            softly.assertThat(unmarshalled.getExpiresOn())
+                    .isEqualTo(obtainedOn.plus(expirationInSeconds, ChronoUnit.SECONDS));
+        });
+    }
+
+    @Test
+    public void fresh() {
+        final ZonkyApiToken token = new ZonkyApiToken();
+        Assertions.assertThat(token.getObtainedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
     }
 
     @Test

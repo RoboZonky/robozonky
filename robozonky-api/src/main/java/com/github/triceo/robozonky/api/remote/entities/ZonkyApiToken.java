@@ -85,6 +85,11 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
+                         final OffsetDateTime obtainedOn) {
+        this(accessToken, refreshToken, expiresIn, obtainedOn, "refresh_token", "SCOPE_APP_WEB");
+    }
+
+    public ZonkyApiToken(final String accessToken, final String refreshToken, final int expiresIn,
                          final OffsetDateTime obtainedOn, final String type, final String scope) {
         this.accessToken = accessToken.toCharArray();
         this.refreshToken = refreshToken.toCharArray();
@@ -127,8 +132,8 @@ public class ZonkyApiToken extends BaseEntity {
     }
 
     public boolean willExpireIn(final TemporalAmount temporalAmount) {
-        final OffsetDateTime expiresBefore = OffsetDateTime.now().plus(temporalAmount);
-        return getExpiresOn().isBefore(expiresBefore);
+        final OffsetDateTime maxExpirationDate = OffsetDateTime.now().plus(temporalAmount);
+        return getExpiresOn().isBefore(maxExpirationDate);
     }
 
     @Override

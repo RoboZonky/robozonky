@@ -130,6 +130,9 @@ public class AuthenticationHandlerTest {
         final AuthenticationHandler auth = AuthenticationHandler.tokenBased(secrets, Duration.ofSeconds(60));
         final ZonkyApi zonky = Mockito.mock(ZonkyApi.class);
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        Mockito.when(zonkyOauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
+                ArgumentMatchers.any())).thenReturn(token);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
                 .thenReturn(new AbstractApiProvider.ApiWrapper<>(zonky));
@@ -144,11 +147,14 @@ public class AuthenticationHandlerTest {
 
     @Test
     public void tokenBasedWithExpiringToken() throws JAXBException {
-        final OffsetDateTime expiring = OffsetDateTime.now().minus(298, ChronoUnit.SECONDS);
+        final OffsetDateTime expiring = OffsetDateTime.now().minus(250, ChronoUnit.SECONDS);
         final SecretProvider secrets = AuthenticationHandlerTest.mockExistingProvider(expiring);
         final AuthenticationHandler auth = AuthenticationHandler.tokenBased(secrets, Duration.ofSeconds(60));
         final ZonkyApi zonky = Mockito.mock(ZonkyApi.class);
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        Mockito.when(zonkyOauth.refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+                .thenReturn(token);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
                 .thenReturn(new AbstractApiProvider.ApiWrapper<>(zonky));
@@ -157,6 +163,28 @@ public class AuthenticationHandlerTest {
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(zonkyOauth, Mockito.never())
+                .login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
+        Mockito.verify(zonky, Mockito.never()).logout();
+    }
+
+    @Test
+    public void tokenBasedWithImmediatelyExpiringToken() throws JAXBException {
+        final OffsetDateTime expiring = OffsetDateTime.now().minus(298, ChronoUnit.SECONDS);
+        final SecretProvider secrets = AuthenticationHandlerTest.mockExistingProvider(expiring);
+        final AuthenticationHandler auth = AuthenticationHandler.tokenBased(secrets, Duration.ofSeconds(60));
+        final ZonkyApi zonky = Mockito.mock(ZonkyApi.class);
+        final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
+        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
+        Mockito.when(zonkyOauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
+                ArgumentMatchers.any())).thenReturn(token);
+        final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
+        Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
+                .thenReturn(new AbstractApiProvider.ApiWrapper<>(zonky));
+        Mockito.when(apiProvider.oauth()).thenReturn(new AbstractApiProvider.ApiWrapper<>(zonkyOauth));
+        Assertions.assertThat(auth.execute(apiProvider, (api) -> Collections.emptyList())).isNotNull();
+        Mockito.verify(zonkyOauth, Mockito.never())
+                .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
+        Mockito.verify(zonkyOauth, Mockito.times(1))
                 .login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(zonky, Mockito.never()).logout();
     }
