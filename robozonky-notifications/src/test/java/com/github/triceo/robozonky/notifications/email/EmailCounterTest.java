@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.notifications.email;
 
 import java.time.Duration;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -26,7 +27,7 @@ public class EmailCounterTest {
     @Test
     public void testTiming() throws InterruptedException {
         final int seconds = 1;
-        final EmailCounter c = new EmailCounter(1, Duration.ofSeconds(seconds));
+        final EmailCounter c = new EmailCounter(UUID.randomUUID().toString(), 1, Duration.ofSeconds(seconds));
         Assertions.assertThat(c.allowEmail()).isTrue();
         c.emailSent();
         Assertions.assertThat(c.allowEmail()).isFalse();

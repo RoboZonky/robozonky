@@ -58,7 +58,8 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
 
     public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
-        this.emailsOfThisType = new EmailCounter(properties.getListenerSpecificHourlyEmailLimit());
+        this.emailsOfThisType = new EmailCounter(this.getClass().getSimpleName(),
+                properties.getListenerSpecificHourlyEmailLimit());
     }
 
     boolean shouldSendEmail(final T event) {

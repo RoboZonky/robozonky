@@ -96,7 +96,7 @@ class NotificationProperties {
 
     NotificationProperties(final Properties source) {
         this.properties = source;
-        this.globalEmailCounter = new EmailCounter(this.getGlobalHourlyEmailLimit());
+        this.globalEmailCounter = new EmailCounter("global", this.getGlobalHourlyEmailLimit());
     }
 
     public synchronized String getLocalHostAddress() {
