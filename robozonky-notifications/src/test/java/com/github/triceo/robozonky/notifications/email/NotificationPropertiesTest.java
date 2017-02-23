@@ -49,6 +49,15 @@ public class NotificationPropertiesTest {
     }
 
     @Test
+    public void localHostAddress() {
+        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                NotificationPropertiesTest.WINDOWS_ENCODED.toString());
+        final Optional<String> contents = NotificationProperties.getPropertiesContents();
+        final NotificationProperties np = NotificationProperties.getProperties(contents.get()).get();
+        Assertions.assertThat(np.getLocalHostAddress()).isNotEmpty();
+    }
+
+    @Test
     public void wrongPropertiesUrlReadsPropertyFile() {
         System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "wrongprotocol://somewhere");
         final Optional<String> contents = NotificationProperties.getPropertiesContents();

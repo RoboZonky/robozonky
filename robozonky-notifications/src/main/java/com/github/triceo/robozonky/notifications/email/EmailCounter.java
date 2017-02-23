@@ -48,6 +48,7 @@ final class EmailCounter {
                 .map(value -> {
                     final String[] split = value.split(EmailCounter.SEPARATOR);
                     return Stream.of(split)
+                            .filter(s -> !s.trim().isEmpty())
                             .map(OffsetDateTime::parse)
                             .collect(Collectors.toSet());
                 }).orElse(Collections.emptySet());
