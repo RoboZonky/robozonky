@@ -9,7 +9,7 @@ Environment=ROBOZONKY_IP=1.2.3.4
 Environment=ROBOZONKY_PORT=7091
 Restart=true
 WorkingDirectory=/usr/robozonky
-ExecStart=/usr/robozonky/robozonky.sh
+ExecStart=/usr/robozonky/robozonky.sh @robozonky.cli
 ExecStop=
 
 [Install]
