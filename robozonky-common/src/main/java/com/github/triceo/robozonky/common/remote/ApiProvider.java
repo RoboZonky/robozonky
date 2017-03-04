@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.common.remote;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -31,15 +32,15 @@ import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.client.jaxrs.internal.ClientInvocation;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
@@ -53,8 +54,6 @@ import org.slf4j.LoggerFactory;
  * {@link ApiProvider.ApiWrapper#close()}.
  */
 public class ApiProvider implements AutoCloseable {
-
-    protected static final String ZONKY_URL = "https://api.zonky.cz";
 
     static class RedirectingHttpClient extends ApacheHttpClient43Engine {
 
@@ -115,72 +114,54 @@ public class ApiProvider implements AutoCloseable {
         }
     }
 
-    private static final ResteasyProviderFactory RESTEASY;
+    private static final ResteasyProviderFactory RESTEASY = ResteasyProviderFactory.getInstance();
     static {
-        RESTEASY = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(ApiProvider.RESTEASY);
         final Class<?> jsonProvider = ResteasyJackson2Provider.class;
-        if (!ApiProvider.RESTEASY.isRegistered(jsonProvider)) { // https://github.com/triceo/robozonky/issues/56
+        if (!ApiProvider.RESTEASY.isRegistered(jsonProvider)) {
             ApiProvider.RESTEASY.registerProvider(jsonProvider);
         }
     }
+    private static final HttpClientConnectionManager CONNECTION_MANAGER = new PoolingHttpClientConnectionManager();
+    private static final String ZONKY_URL = "https://api.zonky.cz";
 
-    static final HttpClientBuilder HTTP_CLIENT_BUILDER =
-            HttpClientBuilder.create().setConnectionManager(new PoolingHttpClientConnectionManager());
-
-    static ResteasyClientBuilder newResteasyClientBuilder() {
-        final CloseableHttpClient closeableHttpClient = ApiProvider.HTTP_CLIENT_BUILDER.build();
-        final ApacheHttpClient4Engine engine = new ApiProvider.RedirectingHttpClient(closeableHttpClient);
-        final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder().httpEngine(engine);
-        clientBuilder.providerFactory(ApiProvider.RESTEASY);
-        return clientBuilder;
-    }
-
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final ResteasyClientBuilder clientBuilder;
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
     /**
      * Use weak references so that the clients aren't kept around forever, with all the entities they carry.
      */
     private final Collection<WeakReference<AutoCloseable>> clients = new ArrayList<>();
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    /**
-     * Create a new instance of the API provider that will use a given instance of {@link ResteasyClientBuilder}. It is
-     * the responsibility of the caller to make sure that the builder and all clients are thread-safe and can process
-     * parallel HTTP requests.
-     *
-     * @param clientBuilder Client builder to use to instantiate all the APIs.
-     */
-    protected ApiProvider(final ResteasyClientBuilder clientBuilder) {
-        this.clientBuilder = clientBuilder;
-    }
-
-    /**
-     * Create a new instance of the API provider that will use a fresh instance of {@link ResteasyClientBuilder}. This
-     * client will be thread-safe.
-     */
-    public ApiProvider() {
-        this(ApiProvider.newResteasyClientBuilder());
+    private static ResteasyClient newResteasyClient() {
+        final CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setConnectionManager(ApiProvider.CONNECTION_MANAGER)
+                .build();
+        final ClientHttpEngine httpEngine = new ApiProvider.RedirectingHttpClient(httpClient);
+        return new ResteasyClientBuilder()
+                .httpEngine(httpEngine)
+                .providerFactory(ApiProvider.RESTEASY)
+                .build();
     }
 
     /**
      * Instantiate an API as a RESTEasy client proxy.
      *
      * @param api RESTEasy endpoint.
-     * @param apiUrl URL to the web API represented by the endpoint.
+     * @param url URL to the web API represented by the endpoint.
      * @param filter Filter to use when communicating with the endpoint.
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
-    protected <T> ApiProvider.ApiWrapper<T> obtain(final Class<T> api, final String apiUrl,
-                                                   final RoboZonkyFilter filter) {
+    protected <T> ApiProvider.ApiWrapper<T> obtain(final Class<T> api, final String url, final RoboZonkyFilter filter) {
         if (this.isClosed.get()) {
             throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
         }
-        final ResteasyClient client = this.clientBuilder.build();
-        final ResteasyWebTarget target = client.register(filter).target(apiUrl);
-        target.register(new BrowserCacheFeature()); // honor server-sent cache-related headers
-        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(target.proxy(api), client);
+        final ResteasyClient client = ApiProvider.newResteasyClient();
+        final T proxy = client.register(filter)
+                .target(url)
+                .register(new BrowserCacheFeature())
+                .proxy(api);
+        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(proxy, client);
         this.clients.add(new WeakReference<>(wrapper));
         return wrapper;
     }
@@ -231,6 +212,8 @@ public class ApiProvider implements AutoCloseable {
                     }
                 });
         this.isClosed.set(true);
+        ApiProvider.CONNECTION_MANAGER.closeExpiredConnections();
+        ApiProvider.CONNECTION_MANAGER.closeIdleConnections(5, TimeUnit.MINUTES);
     }
 
 }

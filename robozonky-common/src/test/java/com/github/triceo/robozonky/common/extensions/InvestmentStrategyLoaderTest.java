@@ -20,8 +20,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 public class InvestmentStrategyLoaderTest {
 
@@ -29,6 +32,20 @@ public class InvestmentStrategyLoaderTest {
     public void unknown() {
         final Optional<InvestmentStrategy> result = InvestmentStrategyLoader.load(UUID.randomUUID().toString());
         Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void failedProcessing() {
+        final InvestmentStrategyService iss = Mockito.mock(InvestmentStrategyService.class);
+        Mockito.doThrow(new IllegalStateException("Testing")).when(iss).parse(ArgumentMatchers.any());
+        Assertions.assertThat(InvestmentStrategyLoader.processInvestmentStrategyService(iss, "")).isEmpty();
+    }
+
+    @Test
+    public void standardProcessing() {
+        final InvestmentStrategyService iss = Mockito.mock(InvestmentStrategyService.class);
+        Mockito.when(iss.parse(ArgumentMatchers.any())).thenReturn(Optional.of(Mockito.mock(InvestmentStrategy.class)));
+        Assertions.assertThat(InvestmentStrategyLoader.processInvestmentStrategyService(iss, "")).isPresent();
     }
 
 }

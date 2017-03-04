@@ -27,7 +27,7 @@
 
   <artifactId>robozonky-common</artifactId>
 
-  <name>RoboZonky: Common code shared between various modules</name>
+  <name>RoboZonky: Code shared between various modules</name>
 
   <dependencies>
     <dependency>

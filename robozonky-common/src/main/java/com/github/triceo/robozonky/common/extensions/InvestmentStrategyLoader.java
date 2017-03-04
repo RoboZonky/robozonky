@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.common.extensions;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -39,17 +38,20 @@ public final class InvestmentStrategyLoader {
     private static final ServiceLoader<InvestmentStrategyService> STRATEGY_LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(InvestmentStrategyService.class);
 
+    static Optional<InvestmentStrategy> processInvestmentStrategyService(final InvestmentStrategyService service,
+                                                                         final String strategy) {
+        InvestmentStrategyLoader.LOGGER.debug("Reading strategy.");
+        try (final InputStream stream = new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET))) {
+            return service.parse(stream);
+        } catch (final Exception ex) {
+            InvestmentStrategyLoader.LOGGER.error("Failed reading strategy.", ex);
+            return Optional.empty();
+        }
+    }
+
     public static Optional<InvestmentStrategy> load(final String strategy) {
         return StreamSupport.stream(InvestmentStrategyLoader.STRATEGY_LOADER.spliterator(), true)
-                .map(iss -> {
-                    InvestmentStrategyLoader.LOGGER.debug("Re-reading strategy.");
-                    try (final InputStream stream = new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET))) {
-                        return iss.parse(stream);
-                    } catch (final IOException ex) {
-                        InvestmentStrategyLoader.LOGGER.error("Failed reading strategy.", ex);
-                        return Optional.<InvestmentStrategy>empty();
-                    }
-                })
+                .map(iss -> InvestmentStrategyLoader.processInvestmentStrategyService(iss, strategy))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
     }
