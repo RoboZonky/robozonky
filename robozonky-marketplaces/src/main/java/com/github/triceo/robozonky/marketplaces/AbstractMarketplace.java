@@ -24,14 +24,14 @@ import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.Api;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 abstract class AbstractMarketplace implements Marketplace {
 
     private final Collection<Consumer<Collection<Loan>>> loanListeners = new LinkedHashSet<>();
     private final MarketplaceApiProvider apis = new MarketplaceApiProvider();
 
-    protected abstract AbstractApiProvider.ApiWrapper<? extends Api> newApi(final MarketplaceApiProvider apiProvider);
+    protected abstract ApiProvider.ApiWrapper<? extends Api> newApi(final MarketplaceApiProvider apiProvider);
 
     @Override
     public synchronized boolean registerListener(final Consumer<Collection<Loan>> listener) {
@@ -45,7 +45,7 @@ abstract class AbstractMarketplace implements Marketplace {
 
     @Override
     public synchronized void run() {
-        try (final AbstractApiProvider.ApiWrapper<? extends Api> apiWrapper = this.newApi(apis)) {
+        try (final ApiProvider.ApiWrapper<? extends Api> apiWrapper = this.newApi(apis)) {
             final Collection<Loan> loans = apiWrapper.execute(Api::getLoans);
             loanListeners.forEach(l -> l.accept(loans));
         }

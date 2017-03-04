@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2017 Lukáš Petrovický
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>robozonky-installer</artifactId>
+    <groupId>com.github.triceo.robozonky</groupId>
+    <version>3.1.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.github.triceo.robozonky.installer</groupId>
+  <artifactId>robozonky-installer-app</artifactId>
+  <name>RoboZonky Installer: Distributable</name>
+
+  <!-- Launch IzPack automatically -->
+  <packaging>izpack-jar</packaging>
+
+  <properties>
+    <!-- Installer variables -->
+    <info.appname>RoboZonky</info.appname>
+    <info.appversion>${project.version}</info.appversion>
+    <info.appsubpath>robozonky</info.appsubpath>
+    <izpack.dir.app>${basedir}/src/main/izpack</izpack.dir.app>
+    <staging.dir>${project.build.directory}/staging</staging.dir>
+    <staging.dir.app>${staging.dir}/appfiles</staging.dir.app>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.github.triceo.robozonky.installer</groupId>
+      <artifactId>robozonky-installer-panels</artifactId>
+      <classifier>jar-with-dependencies</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.github.triceo.robozonky</groupId>
+      <artifactId>robozonky-app</artifactId>
+      <classifier>dist</classifier>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>com.github.triceo.robozonky.extensions</groupId>
+      <artifactId>robozonky-strategy-rules</artifactId>
+      <classifier>jar-with-dependencies</classifier>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin> <!-- Disable testing as there are no tests -->
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin> <!-- Create staging directory since Izpack is stupid -->
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-sources</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <tasks>
+                <mkdir dir="${staging.dir}"/>
+                <mkdir dir="${staging.dir.app}"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-maven-plugin</artifactId>
+        <version>${version.org.codehaus.izpack}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <baseDir>${staging.dir.app}</baseDir>
+          <installFile>${izpack.dir.app}/install.xml</installFile>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+          <finalName>${project.build.finalName}</finalName>
+          <enableOverrideArtifact>true</enableOverrideArtifact>
+          <mkdirs>true</mkdirs>
+          <autoIncludeUrl>false</autoIncludeUrl>
+          <autoIncludeDevelopers>true</autoIncludeDevelopers>
+          <comprLevel>9</comprLevel>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+        <configuration>
+          <stripVersion>true</stripVersion>
+          <overWriteReleases>true</overWriteReleases>
+          <overWriteSnapshots>true</overWriteSnapshots>
+          <overWriteIfNewer>true</overWriteIfNewer>
+          <excludeTransitive>true</excludeTransitive>
+          <excludeScope>system</excludeScope>
+        </configuration>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${staging.dir}/tmp</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

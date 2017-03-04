@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Optional;
 
-import com.github.triceo.robozonky.app.authentication.SecretProvider;
-import com.github.triceo.robozonky.app.util.KeyStoreHandler;
+import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
+import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

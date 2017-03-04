@@ -24,7 +24,7 @@ import java.util.Optional;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import com.github.triceo.robozonky.internal.api.Defaults;
 
 class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {

@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.common.State;
 import com.github.triceo.robozonky.internal.api.Defaults;
-import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
  * {@link #shouldSleep()}.
  */
 class Activity {
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
     private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);

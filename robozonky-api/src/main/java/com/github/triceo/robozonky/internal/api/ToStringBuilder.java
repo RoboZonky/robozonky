@@ -26,10 +26,8 @@ public class ToStringBuilder {
     private final ReflectionToStringBuilder builder;
 
     public ToStringBuilder(final Object o, final String... excludeFields) {
-        this.builder = new ToStringBuilder.CustomReflectionToStringBuilder(o);
-        this.builder.setAppendStatics(false);
-        this.builder.setAppendTransients(false);
-        this.builder.setExcludeFieldNames(excludeFields);
+        this.builder = new ToStringBuilder.CustomReflectionToStringBuilder(o)
+                .setExcludeFieldNames(excludeFields);
     }
 
 

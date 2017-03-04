@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.AbstractStateLeveragingTest;
-import com.github.triceo.robozonky.app.notifications.Events;
+import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
+import com.github.triceo.robozonky.app.Events;
 import org.junit.Before;
 import org.mockito.Mockito;
 
-public class AbstractInvestingTest extends AbstractStateLeveragingTest {
+public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
 

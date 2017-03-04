@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app.configuration;
 import java.io.File;
 
 import com.beust.jcommander.ParameterException;
-import com.github.triceo.robozonky.app.authentication.SecretProvider;
+import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;

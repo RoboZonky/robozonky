@@ -43,7 +43,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import com.github.triceo.robozonky.app.notifications.Events;
+import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.internal.api.Retriever;
 import org.slf4j.Logger;

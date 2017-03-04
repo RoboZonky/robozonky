@@ -26,13 +26,12 @@ import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.authentication.SecretProvider;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.app.investing.ZonkyProxy;
-import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,7 +39,7 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class AppTest extends AbstractStateLeveragingTest {
+public class AppTest extends AbstractEventsAndStateLeveragingTest {
 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
@@ -65,7 +64,7 @@ public class AppTest extends AbstractStateLeveragingTest {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         // and now test
@@ -82,10 +81,10 @@ public class AppTest extends AbstractStateLeveragingTest {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Collections.emptyList());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
+        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
         final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
         Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));

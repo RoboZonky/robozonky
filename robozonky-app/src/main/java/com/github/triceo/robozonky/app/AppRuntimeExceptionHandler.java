@@ -43,21 +43,21 @@ final class AppRuntimeExceptionHandler extends RuntimeExceptionHandler {
 
     private static void handleException(final Throwable ex) {
         AppRuntimeExceptionHandler.LOGGER.error("Application encountered remote API error.", ex);
-        App.exit(ReturnCode.ERROR_REMOTE, ex);
+        App.exit(new ShutdownHook.Result(ReturnCode.ERROR_REMOTE, ex));
     }
 
     private static void handleUnexpectedException(final Throwable ex) {
         AppRuntimeExceptionHandler.LOGGER.error("Unexpected error, likely RoboZonky bug.", ex);
-        App.exit(ReturnCode.ERROR_UNEXPECTED, ex);
+        App.exit(new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, ex));
     }
 
     private static void handleZonkyMaintenanceError(final Throwable ex, final boolean faultTolerant) {
         AppRuntimeExceptionHandler.LOGGER.warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
         if (faultTolerant) {
             AppRuntimeExceptionHandler.LOGGER.info("RoboZonky is in fault-tolerant mode. The above will not be reported as error.");
-            App.exit(ReturnCode.OK, ex);
+            App.exit(new ShutdownHook.Result(ReturnCode.OK, ex));
         } else {
-            App.exit(ReturnCode.ERROR_DOWN, ex);
+            App.exit(new ShutdownHook.Result(ReturnCode.ERROR_DOWN, ex));
         }
     }
 

@@ -25,8 +25,8 @@ import java.util.function.Function;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

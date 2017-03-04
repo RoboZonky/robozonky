@@ -20,13 +20,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.ReturnCode;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.triceo.robozonky.app.notifications.Events;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class RobozonkyStartupNotifierTest extends AbstractStateLeveragingTest {
+public class RobozonkyStartupNotifierTest extends AbstractEventsAndStateLeveragingTest {
 
     @Test
     public void properEventsFired() {
@@ -37,6 +37,9 @@ public class RobozonkyStartupNotifierTest extends AbstractStateLeveragingTest {
         final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
         result.get().accept(r);
         Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyEndingEvent.class);
+        final ShutdownHook.Result r2 = new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null);
+        result.get().accept(r2);
+        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyCrashedEvent.class);
     }
 
 }

@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
 

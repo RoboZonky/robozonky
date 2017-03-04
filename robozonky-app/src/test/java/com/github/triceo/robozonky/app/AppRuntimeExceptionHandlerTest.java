@@ -28,7 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
-public class AppRuntimeExceptionHandlerTest extends AbstractStateLeveragingTest {
+public class AppRuntimeExceptionHandlerTest extends AbstractEventsAndStateLeveragingTest {
 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();

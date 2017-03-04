@@ -23,7 +23,6 @@ import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.triceo.robozonky.app.notifications.Events;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

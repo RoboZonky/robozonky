@@ -74,7 +74,7 @@ public final class Defaults {
         try {
             return Boolean.parseBoolean(value);
         } catch (final NumberFormatException ex) {
-            return false;
+            return defaultValue;
         }
     }
 

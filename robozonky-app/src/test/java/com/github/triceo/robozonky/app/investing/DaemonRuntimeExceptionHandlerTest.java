@@ -24,13 +24,13 @@ import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
-import com.github.triceo.robozonky.app.AbstractStateLeveragingTest;
-import com.github.triceo.robozonky.app.notifications.Events;
+import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
+import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class DaemonRuntimeExceptionHandlerTest extends AbstractStateLeveragingTest {
+public class DaemonRuntimeExceptionHandlerTest extends AbstractEventsAndStateLeveragingTest {
 
     private final RuntimeExceptionHandler handler = new DaemonRuntimeExceptionHandler();
 

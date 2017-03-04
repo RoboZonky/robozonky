@@ -27,7 +27,8 @@ import javax.xml.bind.JAXBException;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,7 +164,7 @@ public class AuthenticationHandler {
     public Collection<Investment> execute(final ApiProvider provider,
                                           final Function<ZonkyApi, Collection<Investment>> operation) {
         final Authentication currentAuthentication = this.buildAuthenticator().apply(provider);
-        try (final AbstractApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.getZonkyApi()) {
+        try (final ApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.getZonkyApi()) {
             try {
                 return apiWrapper.execute(operation);
             } finally { // attempt to log out no matter what happens

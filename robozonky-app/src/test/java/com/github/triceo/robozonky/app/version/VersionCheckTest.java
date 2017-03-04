@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky.app.version;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.app.util.Scheduler;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

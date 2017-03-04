@@ -1,0 +1,179 @@
+<!--
+  ~ Copyright 2017 Lukáš Petrovický
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<izpack:userinput version="5.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:izpack="http://izpack.org/schema/userinput" xsi:schemaLocation="http://izpack.org/schema/userinput http://izpack.org/schema/5.0/izpack-userinput-5.0.xsd">
+  <panel id="zonkyUserInput">
+    <field type="title" align="left" txt="Nastavení komunikace se Zonky" id="zonky.title"/>
+
+    <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky" id="zonky.title"/>
+    <field type="divider" />
+    <field type="text" variable="zonkyUsername">
+      <spec txt="Uživatelské jméno na Zonky:" id="zonky.username" size="20" set=""/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
+                 txt="Uživatelské jméno musí mít tvar e-mailové adresy.">
+        <param name="pattern" value="[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+"/>
+      </validator>
+    </field>
+    <field type="password" variable="zonkyPassword">
+      <spec>
+        <pwd txt="Uživatelské heslo:" id="zonky.password" size="20" set=""/>
+      </spec>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Heslo je povinná položka." />
+    </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:" id="robozonky.controls"/>
+    <field type="divider" />
+    <field type="check" variable="isZonkoidEnabled">
+      <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>
+    </field>
+    <field type="check" variable="isEmailEnabled">
+      <spec txt="Notifikovat e-mailem." set="false"/>
+    </field>
+    <field type="check" variable="isUsingToken">
+      <spec txt="Neodhlašovat ze Zonky." set="false"/>
+    </field>
+    <field type="check" variable="isDryRun">
+      <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat." set="false"/>
+    </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" txt="Pokračováním dojde ke zkušebnímu přihlášení do Zonky."
+           id="zonky.test"/>
+  </panel>
+  <panel id="zonkoidUserInput">
+    <field type="title" align="left" txt="Nastavení notifikací do Zonkoidu" id="zonkoid.title"/>
+
+    <field type="staticText" align="left" id="zonky.title"
+           txt="Umožní RoboZonky odesílat notifikace do mobilní aplikace Zonkoid. Budete potřebovat šestimístný číselný kod, který najdete v nastavení notifikací v Zonkoidu." />
+    <field type="text" variable="zonkoidToken">
+      <spec txt="Vložte kod ze Zonkoidu:" id="zonkoid.token" size="10" set=""/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Kod je povinná položka." />
+      <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
+          txt="Kod musí být šestimístné číslo.">
+        <param name="pattern" value="[0-9][0-9][0-9][0-9][0-9][0-9]" />
+      </validator>
+    </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true"
+           txt="Pokračováním bude odeslána zkušební notifikace, běžte si pro telefon."
+           id="zonkoid.test"/>
+  </panel>
+  <panel id="emailUserInput">
+    <field type="title" align="left" txt="Nastavení notifikací do e-mailu" id="email.title"/>
+
+    <field type="staticText" align="left" bold="true" txt="Nastavení e-mailového serveru (GMail, Seznam, ...)"
+           id="smtp.title"/>
+    <field type="divider" />
+    <field type="text" variable="smtpTo">
+      <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
+                 txt="Adresát není platný.">
+        <param name="pattern" value="[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+"/>
+      </validator>
+    </field>
+    <field type="text" variable="smtpUsername">
+      <spec txt="Uživatel SMTP:" id="smtp.username" size="20" set="${zonkyUsername}"/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Uživatelské jméno je povinná položka." />
+    </field>
+    <field type="password" variable="smtpPassword">
+      <spec>
+        <pwd txt="Heslo k SMTP:" id="smtp.password" size="20" set=""/>
+      </spec>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Heslo je povinná položka." />
+    </field>
+    <field type="text" variable="smtpHostname">
+      <spec txt="Adresa SMTP serveru:" id="smtp.hostname" size="20" set=""/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Adresa serveru je povinná položka." />
+    </field>
+    <field type="text" variable="smtpPort">
+      <spec txt="Port na SMTP serveru:" id="smtp.port" size="20" set=""/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Port serveru je povinná položka." />
+      <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
+                 txt="Port musí být číslo.">
+        <param name="pattern" value="[0-9]+" />
+      </validator>
+    </field>
+    <field type="check" variable="smtpIsTls">
+      <spec txt="Vyžaduje TLS." set="false"/>
+    </field>
+    <field type="check" variable="smtpIsSsl">
+      <spec txt="Vyžaduje SSL." set="false"/>
+    </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" txt="Vyberte notifikace, které si přejete povolit:"
+           id="notifications.title"/>
+    <field type="divider" />
+    <field type="check" variable="isInvestmentNotificationEnabled">
+      <spec txt="Investice zpracována." set="false"/>
+    </field>
+    <field type="check" variable="isBalanceOver200NotificationEnabled">
+      <spec txt="Zůstatek v peněžence přesáhl 200,- Kč." set="false"/>
+    </field>
+    <field type="check" variable="isFailureNotificationEnabled">
+      <spec txt="Chyba RoboZonky, robot pravděpodobně pokračuje." set="false"/>
+    </field>
+    <field type="check" variable="isCriticalFailureNotificationEnabled">
+      <spec txt="Kritická chyba RoboZonky, robot se pravděpodobně ukončí." set="false"/>
+    </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" txt="Pokračováním bude odeslán zkušební e-mail."
+           id="email.test"/>
+  </panel>
+  <panel id="strategyUserInput">
+    <field type="title" align="left" txt="Nastavení investiční strategie" id="strategy.title"/>
+
+    <field type="radio" variable="strategyType">
+      <description txt="Odkud načíst strategii:" id="strategy.radio"/>
+      <spec>
+        <choice txt="Ze zadaného souboru." id="strategy.file" value="file" set="true"/>
+        <choice txt="Ze zadané webové adresy." id="strategy.url" value="url" />
+      </spec>
+    </field>
+
+    <field type="divider" />
+    <field type="file" variable="strategy" conditionid="isStrategyByFile">
+      <spec txt="Vyberte soubor s investiční strategií:" size="30" />
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Strategie je povinná položka." />
+    </field>
+    <field type="text" variable="strategy"  conditionid="isStrategyByUrl">
+      <spec txt="Zadejte URL, kde se nachází investiční strategie:" size="30" />
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Strategie je povinná položka." />
+    </field>
+
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true"
+           txt="Pokračováním dojde k instalaci RoboZonky na tento počítač."
+           id="zonkoid.test"/>
+  </panel>
+</izpack:userinput>

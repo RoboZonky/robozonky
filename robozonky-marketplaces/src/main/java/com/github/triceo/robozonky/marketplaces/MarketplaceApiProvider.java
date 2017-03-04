@@ -16,14 +16,12 @@
 
 package com.github.triceo.robozonky.marketplaces;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
-import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
-import com.github.triceo.robozonky.internal.api.RoboZonkyFilter;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.RoboZonkyFilter;
 
-class MarketplaceApiProvider extends AbstractApiProvider {
+class MarketplaceApiProvider extends ApiProvider {
 
     private static final String ZOTIFY_URL = "https://zotify.cz";
-    private static final String ZONKY_URL = "https://api.zonky.cz/";
     private static final RoboZonkyFilter FILTER = new RoboZonkyFilter();
 
     /**
@@ -32,18 +30,8 @@ class MarketplaceApiProvider extends AbstractApiProvider {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public AbstractApiProvider.ApiWrapper<ZotifyApi> zotify() {
+    public ApiProvider.ApiWrapper<ZotifyApi> zotify() {
         return this.obtain(ZotifyApi.class, MarketplaceApiProvider.ZOTIFY_URL, MarketplaceApiProvider.FILTER);
-    }
-
-    /**
-     * Retrieve Zonky's marketplace.
-     *
-     * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
-     */
-    public AbstractApiProvider.ApiWrapper<ZonkyApi> zonky() {
-        return this.obtain(ZonkyApi.class, MarketplaceApiProvider.ZONKY_URL, MarketplaceApiProvider.FILTER);
     }
 
 }

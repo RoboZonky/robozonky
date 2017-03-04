@@ -23,7 +23,7 @@ import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +90,7 @@ abstract class Authenticator implements Function<ApiProvider, Authentication> {
      */
     @Override
     public Authentication apply(final ApiProvider provider) {
-        try (final AbstractApiProvider.ApiWrapper<ZonkyOAuthApi> api = provider.oauth()) {
+        try (final ApiProvider.ApiWrapper<ZonkyOAuthApi> api = provider.oauth()) {
             final ZonkyApiToken token = api.execute(this::getAuthenticationMethod);
             return new Authentication(provider, token);
         } catch (final BadRequestException ex) {

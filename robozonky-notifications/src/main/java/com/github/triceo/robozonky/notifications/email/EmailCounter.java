@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.internal.api.State;
+import com.github.triceo.robozonky.common.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

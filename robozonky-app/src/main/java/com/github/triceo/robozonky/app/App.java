@@ -28,10 +28,9 @@ import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
-import com.github.triceo.robozonky.app.notifications.Events;
 import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
-import com.github.triceo.robozonky.app.util.Scheduler;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -54,18 +53,17 @@ public class App {
 
     static void exit(final ReturnCode returnCode) {
         App.LOGGER.trace("Exit requested with return code {}.", returnCode);
-        App.exit(returnCode, null);
+        App.exit(new ShutdownHook.Result(returnCode, null));
     }
 
     /**
      * Will terminate the application. Call this on every exit of the app to ensure proper termination. Failure to do
      * so may result in unpredictable behavior of this instance of RoboZonky or future ones.
-     * @param returnCode Will be passed to {@link System#exit(int)}.
-     * @param cause Exception that caused the application to exit, if any.
+     * @param result Will be passed to {@link System#exit(int)}.
      */
-    static void exit(final ReturnCode returnCode, final Throwable cause) {
-        App.SHUTDOWN_HOOKS.execute(returnCode, cause);
-        System.exit(returnCode.getCode());
+    static void exit(final ShutdownHook.Result result) {
+        App.SHUTDOWN_HOOKS.execute(result);
+        System.exit(result.getReturnCode().getCode());
     }
 
     static ReturnCode execute(final InvestmentMode mode) {

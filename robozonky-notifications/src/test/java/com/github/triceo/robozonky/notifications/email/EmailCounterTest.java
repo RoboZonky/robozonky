@@ -31,7 +31,7 @@ public class EmailCounterTest {
         Assertions.assertThat(c.allowEmail()).isTrue();
         c.emailSent();
         Assertions.assertThat(c.allowEmail()).isFalse();
-        Thread.sleep(seconds * 2 * 1000);
+        Thread.sleep(seconds * 5 * 1000);
         Assertions.assertThat(c.allowEmail()).isTrue();
     }
 

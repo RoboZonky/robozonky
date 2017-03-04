@@ -24,12 +24,12 @@ import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.AbstractStateLeveragingTest;
+import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class ActivityTest extends AbstractStateLeveragingTest {
+public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
 
     private static final int SLEEP_PERIOD_MINUTES = 60;
 

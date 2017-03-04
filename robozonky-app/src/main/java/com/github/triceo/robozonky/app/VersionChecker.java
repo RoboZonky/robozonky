@@ -20,10 +20,10 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.app.util.Scheduler;
 import com.github.triceo.robozonky.app.version.VersionCheck;
 import com.github.triceo.robozonky.app.version.VersionIdentifier;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

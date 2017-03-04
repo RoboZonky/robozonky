@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2016 Lukáš Petrovický
+  ~ Copyright 2017 Lukáš Petrovický
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -30,6 +30,10 @@
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
       <artifactId>robozonky-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.triceo.robozonky</groupId>
+      <artifactId>robozonky-common</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

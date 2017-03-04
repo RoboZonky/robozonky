@@ -39,6 +39,11 @@ public class DefaultsTest {
     }
 
     @Test
+    public void hostAddress() {
+        Assertions.assertThat(Defaults.getHostAddress()).isNotEmpty();
+    }
+
+    @Test
     public void userAgent() {
         Assertions.assertThat(Defaults.ROBOZONKY_USER_AGENT).contains(Defaults.ROBOZONKY_URL);
     }

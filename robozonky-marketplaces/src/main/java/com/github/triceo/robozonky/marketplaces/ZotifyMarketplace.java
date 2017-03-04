@@ -17,12 +17,12 @@
 package com.github.triceo.robozonky.marketplaces;
 
 import com.github.triceo.robozonky.api.remote.Api;
-import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 class ZotifyMarketplace extends AbstractMarketplace {
 
     @Override
-    protected AbstractApiProvider.ApiWrapper<? extends Api> newApi(final MarketplaceApiProvider apiProvider) {
+    protected ApiProvider.ApiWrapper<? extends Api> newApi(final MarketplaceApiProvider apiProvider) {
         return apiProvider.zotify();
     }
 

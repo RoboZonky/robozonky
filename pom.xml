@@ -28,6 +28,8 @@
     <module>robozonky-notifications</module>
     <module>robozonky-extensions</module>
     <module>robozonky-marketplaces</module>
+    <module>robozonky-installer</module>
+    <module>robozonky-common</module>
   </modules>
   <packaging>pom</packaging>
   <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -51,12 +53,12 @@
       </dependency>
       <dependency>
         <groupId>com.github.triceo.robozonky</groupId>
-        <artifactId>robozonky-extensions</artifactId>
+        <artifactId>robozonky-common</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.triceo.robozonky</groupId>
-        <artifactId>robozonky-api</artifactId>
+        <artifactId>robozonky-common</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type> <!-- Primary place for test utils -->
         <scope>test</scope>
@@ -73,11 +75,6 @@
       </dependency>
       <dependency>
         <groupId>com.github.triceo.robozonky</groupId>
-        <artifactId>robozonky-strategy-rules</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
         <artifactId>robozonky-integration-zonkoid</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -90,6 +87,40 @@
         <groupId>com.github.triceo.robozonky</groupId>
         <artifactId>robozonky-app</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky</groupId>
+        <artifactId>robozonky-app</artifactId>
+        <version>${project.version}</version>
+        <classifier>dist</classifier>
+        <type>zip</type>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky</groupId>
+        <artifactId>robozonky-installer</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky.installer</groupId>
+        <artifactId>robozonky-installer-panels</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky.installer</groupId>
+        <artifactId>robozonky-installer-panels</artifactId>
+        <version>${project.version}</version>
+        <classifier>jar-with-dependencies</classifier>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky</groupId>
+        <artifactId>robozonky-extensions</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky.extensions</groupId>
+        <artifactId>robozonky-strategy-rules</artifactId>
+        <version>${project.version}</version>
+        <classifier>jar-with-dependencies</classifier>
       </dependency>
       <!-- RESTEasy -->
       <dependency>
@@ -172,7 +203,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>2.7.9</version>
+        <version>2.7.13</version>
         <scope>test</scope>
       </dependency>
       <dependency>

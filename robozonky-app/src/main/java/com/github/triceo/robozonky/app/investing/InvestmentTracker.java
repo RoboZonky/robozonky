@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.internal.api.State;
+import com.github.triceo.robozonky.common.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

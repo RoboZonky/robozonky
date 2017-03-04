@@ -21,10 +21,9 @@ import java.math.BigDecimal;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
-import com.github.triceo.robozonky.app.authentication.ApiProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.app.authentication.SecretProvider;
-import com.github.triceo.robozonky.internal.api.AbstractApiProvider;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -41,8 +40,8 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
         Mockito.when(z.getWallet()).thenReturn(w);
         Mockito.when(z.getLoan(ArgumentMatchers.anyInt())).thenReturn(l);
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new AbstractApiProvider.ApiWrapper<>(z));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
+        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new ApiProvider.ApiWrapper<>(z));
+        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
                 new ZonkyProxy.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {
@@ -64,8 +63,8 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
         Mockito.when(z.getWallet()).thenReturn(w);
         Mockito.doThrow(IllegalStateException.class).when(z).getLoan(ArgumentMatchers.anyInt());
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new AbstractApiProvider.ApiWrapper<>(z));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(AbstractApiProvider.ApiWrapper.class));
+        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new ApiProvider.ApiWrapper<>(z));
+        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
                 new ZonkyProxy.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {

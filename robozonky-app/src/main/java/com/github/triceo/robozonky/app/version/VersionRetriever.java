@@ -41,8 +41,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.app.util.IOUtils;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
