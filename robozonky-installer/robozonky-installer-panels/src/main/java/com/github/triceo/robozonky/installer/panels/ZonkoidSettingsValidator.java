@@ -29,7 +29,7 @@ public class ZonkoidSettingsValidator implements DataValidator {
 
     private final Supplier<Optional<ConfirmationProvider>> zonkoidSupplier;
 
-    ZonkoidSettingsValidator() {
+    public ZonkoidSettingsValidator() {
         this(() -> ConfirmationProviderLoader.load("zonkoid"));
     }
 
