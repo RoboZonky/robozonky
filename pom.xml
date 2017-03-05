@@ -41,7 +41,7 @@
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <surefire.version>2.19.1</surefire.version>
-    <version.org.jboss.resteasy>3.1.0.Final</version.org.jboss.resteasy>
+    <version.org.jboss.resteasy>3.1.1.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.21</version.org.slf4j>
   </properties>
   <dependencyManagement>
@@ -126,7 +126,7 @@
       <dependency>
         <groupId>org.jboss.spec.javax.ws.rs</groupId>
         <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-        <version>1.0.0.Final</version>
+        <version>1.0.1.Beta1</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
