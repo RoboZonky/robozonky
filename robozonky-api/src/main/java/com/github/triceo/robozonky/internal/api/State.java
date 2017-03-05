@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.common;
+package com.github.triceo.robozonky.internal.api;
 
 import java.io.File;
 import java.io.IOException;

@@ -23,10 +23,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
-import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.notifications.email.EmailListenerService;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
@@ -59,13 +59,22 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
      *
      * @param data Installer data to store.
      */
-    public static void setInstallData(final InstallData data) {
+    static void setInstallData(final InstallData data) {
         RoboZonkyInstallerListener.DATA = data;
         INSTALL_PATH = new File(Variables.INSTALL_PATH.getValue(DATA));
         DIST_PATH = new File(INSTALL_PATH, "Dist/");
         KEYSTORE_FILE = new File(INSTALL_PATH, "robozonky.keystore");
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
         CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
+    }
+
+    static void resetInstallData() {
+        RoboZonkyInstallerListener.DATA = null;
+        INSTALL_PATH = null;
+        DIST_PATH = null;
+        KEYSTORE_FILE = null;
+        EMAIL_CONFIG_FILE = null;
+        CLI_CONFIG_FILE = null;
     }
 
     CommandLinePart prepareStrategy() {
@@ -91,29 +100,12 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         if (!Boolean.valueOf(Variables.IS_EMAIL_ENABLED.getValue(DATA))) {
             return new CommandLinePart();
         }
-        final String[] lines = new String[] {
-                "enabled = true",
-                "to = " + Variables.SMTP_TO.getValue(DATA),
-                "smtp.username = " + Variables.SMTP_USERNAME.getValue(DATA),
-                "smtp.password= " + Variables.SMTP_PASSWORD.getValue(DATA),
-                "smtp.hostname = " + Variables.SMTP_HOSTNAME.getValue(DATA),
-                "smtp.port = " + Variables.SMTP_PORT.getValue(DATA),
-                "smtp.requiresStartTLS = " + Variables.SMTP_IS_TLS.getValue(DATA),
-                "smtp.requiresSslOnConnect = " + Variables.SMTP_IS_SSL.getValue(DATA),
-                "investmentRejected.enabled = " + Variables.EMAIL_IS_INVESTMENT.getValue(DATA),
-                "investmentMade.enabled = " + Variables.EMAIL_IS_INVESTMENT.getValue(DATA),
-                "investmentDelegated.enabled = " + Variables.EMAIL_IS_INVESTMENT.getValue(DATA),
-                "balanceTracker.enabled = " + Variables.EMAIL_IS_BALANCE_OVER_200.getValue(DATA),
-                "balanceTracker.targetBalance = 200",
-                "roboZonkyDaemonFailed.enabled = " + Variables.EMAIL_IS_FAILURE.getValue(DATA),
-                "roboZonkyCrashed.enabled = " + Variables.EMAIL_IS_CRITICAL_FAILURE.getValue(DATA),
-                "hourlyMaxEmails = 20"
-        };
+        final Properties p = Util.configureEmailNotifications(DATA);
         try {
-            Files.write(EMAIL_CONFIG_FILE.toPath(), Arrays.asList(lines), Defaults.CHARSET);
-            return new CommandLinePart()
-                    .setProperty("robozonky.notifications.email.config.file", EMAIL_CONFIG_FILE.getAbsolutePath());
-        } catch (final IOException ex) {
+            Util.writeOutProperties(p, EMAIL_CONFIG_FILE);
+            return new CommandLinePart().setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
+                    EMAIL_CONFIG_FILE.toURI().toURL().toExternalForm());
+        } catch (final Exception ex) {
             throw new IllegalStateException("Failed writing e-mail configuration.", ex);
         }
     }

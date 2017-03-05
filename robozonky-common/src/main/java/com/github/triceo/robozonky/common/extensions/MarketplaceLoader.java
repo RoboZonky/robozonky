@@ -33,15 +33,17 @@ public final class MarketplaceLoader {
     private static final ServiceLoader<MarketplaceService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(MarketplaceService.class);
 
-    public static Optional<Marketplace> load(final Credentials credentials) {
+    static Optional<Marketplace> processMarketplace(final MarketplaceService service, final Credentials credentials) {
         final String providerId = credentials.getToolId();
-        MarketplaceLoader.LOGGER.trace("Looking up marketplace '{}'.", providerId);
+        MarketplaceLoader.LOGGER.debug("Evaluating marketplace '{}' with '{}'.", providerId, service.getClass());
+        final char[] secret = credentials.getToken().orElse(new char[0]);
+        return service.find(providerId, secret);
+    }
+
+    public static Optional<Marketplace> load(final Credentials credentials) {
+        MarketplaceLoader.LOGGER.trace("Looking up marketplace '{}'.", credentials.getToolId());
         return StreamSupport.stream(MarketplaceLoader.LOADER.spliterator(), false)
-                .map(cp -> {
-                    MarketplaceLoader.LOGGER.debug("Evaluating marketplace '{}' with '{}'.", providerId, cp.getClass());
-                    final char[] secret = credentials.getToken().orElse(new char[0]);
-                    return cp.find(providerId, secret);
-                })
+                .map(service -> MarketplaceLoader.processMarketplace(service, credentials))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
     }

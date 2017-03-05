@@ -32,7 +32,6 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.triceo.robozonky.internal.api.Defaults;
-import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +88,7 @@ public enum Events {
         Events.LOGGER.trace("Registering event listeners for {}.", eventClass);
         this.registries.put(eventClass, new Events.EventSpecific<E>());
         final Stream<Refreshable<EventListener<E>>> listeners = Stream.concat(
-                ListenerServiceLoader.load(eventClass, Scheduler.BACKGROUND_SCHEDULER).stream(),
+                ListenerServiceLoader.load(eventClass).stream(),
                 listener == null ? Stream.empty() : Stream.of(listener)
         );
         listeners.forEach(l -> ((Events.EventSpecific<E>) this.registries.get(eventClass)).addListener(l));

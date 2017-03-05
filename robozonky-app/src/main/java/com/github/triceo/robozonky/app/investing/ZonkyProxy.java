@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.ws.rs.ServiceUnavailableException;
@@ -39,13 +40,22 @@ public class ZonkyProxy {
         private String username = "";
         private boolean isDryRun = false;
         private ConfirmationProvider provider;
-        private RequestId requestId;
+        private char[] password;
 
-        public ZonkyProxy.Builder usingConfirmation(final ConfirmationProvider provider, final String username,
-                                                    final char... password) {
+        public ZonkyProxy.Builder usingConfirmation(final ConfirmationProvider provider, final char... password) {
             this.provider = provider;
-            this.requestId = new RequestId(username, password);
+            this.password = Arrays.copyOf(password, password.length);
             return this;
+        }
+
+        public Optional<ConfirmationProvider> getConfirmationUsed() {
+            return Optional.ofNullable(provider);
+        }
+
+        public Optional<RequestId> getConfirmationRequestUsed() {
+            return this.getConfirmationUsed()
+                    .map(c -> Optional.of(new RequestId(username, password)))
+                    .orElse(Optional.empty());
         }
 
         public ZonkyProxy.Builder asUser(final String username) {
@@ -63,11 +73,9 @@ public class ZonkyProxy {
         }
 
         public ZonkyProxy build(final ZonkyApi zonky) {
-            if (this.provider == null) {
-                return new ZonkyProxy(username, zonky, isDryRun);
-            } else {
-                return new ZonkyProxy(username, zonky, provider, requestId, isDryRun);
-            }
+            return this.getConfirmationRequestUsed()
+                    .map(r -> new ZonkyProxy(r, provider, zonky, isDryRun))
+                    .orElse(new ZonkyProxy(username, zonky, isDryRun));
         }
 
     }
@@ -85,9 +93,9 @@ public class ZonkyProxy {
     private final RequestId requestId;
     private final ConfirmationProvider provider;
 
-    private ZonkyProxy(final String username, final ZonkyApi zonky, final ConfirmationProvider provider,
-                       final RequestId requestId, final boolean isDryRun) {
-        this.username = username;
+    private ZonkyProxy(final RequestId requestId, final ConfirmationProvider provider, final ZonkyApi zonky,
+                       final boolean isDryRun) {
+        this.username = requestId.getUserId();
         this.zonky = zonky;
         this.isDryRun = isDryRun;
         this.provider = provider;
@@ -99,7 +107,11 @@ public class ZonkyProxy {
     }
 
     private ZonkyProxy(final String username, final ZonkyApi zonky, final boolean isDryRun) {
-        this(username, zonky, null, null, isDryRun);
+        this.username = username;
+        this.zonky = zonky;
+        this.isDryRun = isDryRun;
+        this.provider = null;
+        this.requestId = null;
     }
 
     public <T> T execute(final Function<ZonkyApi, T> operation) {

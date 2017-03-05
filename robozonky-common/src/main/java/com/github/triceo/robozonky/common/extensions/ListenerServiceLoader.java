@@ -51,9 +51,8 @@ public final class ListenerServiceLoader {
                 .collect(Collectors.toList());
     }
 
-    public static <T extends Event> List<Refreshable<EventListener<T>>> load(final Class<T> eventType,
-                                                                             final Scheduler scheduler) {
-        return ListenerServiceLoader.load(eventType, ListenerServiceLoader.LOADER, scheduler);
+    public static <T extends Event> List<Refreshable<EventListener<T>>> load(final Class<T> eventType) {
+        return ListenerServiceLoader.load(eventType, ListenerServiceLoader.LOADER, Scheduler.BACKGROUND_SCHEDULER);
     }
 
 }

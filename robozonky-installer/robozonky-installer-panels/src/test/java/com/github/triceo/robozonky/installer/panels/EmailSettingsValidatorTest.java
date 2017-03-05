@@ -42,7 +42,8 @@ public class EmailSettingsValidatorTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(validator.getDefaultAnswer()).isFalse();
             softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
-            softly.assertThat(validator.getErrorMessageId()).isNull();
+            softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
+            softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
         });
     }
 
@@ -64,7 +65,8 @@ public class EmailSettingsValidatorTest {
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);
         Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(1);
         final MimeMessage m = greenMail.getReceivedMessages()[0];
-        Assertions.assertThat(m.getFrom()[0].toString()).contains("sender@server.cz");
+        Assertions.assertThat(m.getFrom()[0].toString()).contains("RoboZonky");
+        Assertions.assertThat(m.getSubject()).contains("RoboZonky");
     }
 
     @Test

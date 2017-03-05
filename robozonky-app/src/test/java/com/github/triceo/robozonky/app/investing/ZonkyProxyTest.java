@@ -195,7 +195,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
                     default:
                             throw new IllegalStateException();
                 }
-                return new ZonkyProxy.Builder().usingConfirmation(cp, "user").build(api);
+                return new ZonkyProxy.Builder().usingConfirmation(cp).build(api);
             default:
                 throw new IllegalStateException();
         }

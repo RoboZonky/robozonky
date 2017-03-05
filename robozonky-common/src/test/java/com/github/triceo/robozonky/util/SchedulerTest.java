@@ -62,4 +62,25 @@ public class SchedulerTest {
         Assertions.assertThat(s.isShutdown()).isTrue();
     }
 
+    @Test
+    public void reinitBeforeShutdown() {
+        final Refreshable<Void> r = Refreshable.createImmutable();
+        final Scheduler s = new Scheduler();
+        s.submit(r);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(s.isSubmitted(r)).isTrue();
+            softly.assertThat(s.isShutdown()).isFalse();
+            softly.assertThat(s.reinit()).isFalse();
+        });
+        s.shutdown();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(s.isShutdown()).isTrue();
+            softly.assertThat(s.reinit()).isTrue();
+        });
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(s.isSubmitted(r)).isFalse();
+            softly.assertThat(s.isShutdown()).isFalse();
+        });
+    }
+
 }

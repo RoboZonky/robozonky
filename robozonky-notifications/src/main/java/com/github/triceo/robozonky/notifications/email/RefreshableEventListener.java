@@ -50,11 +50,12 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
         final Optional<NotificationProperties> optionalProps = properties.getLatest();
         return optionalProps.map(props ->
                 Stream.of(SupportedListener.values())
-                    .filter(l -> Objects.equals(eventType, l.getEventType()))
-                    .filter(props::isListenerEnabled)
-                    .findFirst()
-                    .map(l -> Optional.of((EventListener<T>)l.getListener(props)))
-                    .orElse(Optional.empty()))
+                        .filter(l -> Objects.equals(eventType, l.getEventType()))
+                        .filter(l -> props.isEnabled())
+                        .filter(props::isListenerEnabled)
+                        .findFirst()
+                        .map(l -> Optional.of((EventListener<T>)l.getListener(props)))
+                        .orElse(Optional.empty()))
                 .orElse(Optional.empty());
     }
 }

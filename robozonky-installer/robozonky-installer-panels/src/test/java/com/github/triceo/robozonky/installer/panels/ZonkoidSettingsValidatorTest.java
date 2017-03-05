@@ -16,15 +16,11 @@
 
 package com.github.triceo.robozonky.installer.panels;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
@@ -49,41 +45,10 @@ public class ZonkoidSettingsValidatorTest {
     }
 
     @Test
-    public void marketplaceFail() {
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.doThrow(new IllegalStateException("Testing")).when(provider).anonymous();
-        final DataValidator validator = new ZonkoidSettingsValidator(() -> provider);
-        final DataValidator.Status result = validator.validateData(Mockito.mock(InstallData.class));
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
-    }
-
-    @Test
-    public void marketplaceWithoutLoans() {
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
-        Mockito.when(api.getLoans()).thenReturn(Collections.emptyList());
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.when(provider.anonymous()).thenReturn(new ApiProvider.ApiWrapper<>(api));
-        // execute SUT
-        final DataValidator validator = new ZonkoidSettingsValidator(() -> provider);
-        final DataValidator.Status result = validator.validateData(Mockito.mock(InstallData.class));
-        // run test
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
-    }
-
-    private static ApiProvider mockApiThatReturnsOneLoan() {
-        final Loan l = Mockito.mock(Loan.class);
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
-        Mockito.doReturn(Collections.singletonList(l)).when(api).getLoans();
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.doReturn(new ApiProvider.ApiWrapper<>(api)).when(provider).anonymous();
-        return provider;
-    }
-
-    @Test
     public void zonkoidMissing() {
         // execute SUT
         final DataValidator validator =
-                new ZonkoidSettingsValidator(ZonkoidSettingsValidatorTest::mockApiThatReturnsOneLoan, Optional::empty);
+                new ZonkoidSettingsValidator(Optional::empty);
         final DataValidator.Status result = validator.validateData(Mockito.mock(InstallData.class));
         // run test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.ERROR);
@@ -103,9 +68,7 @@ public class ZonkoidSettingsValidatorTest {
                 ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
-        final DataValidator validator =
-                new ZonkoidSettingsValidator(ZonkoidSettingsValidatorTest::mockApiThatReturnsOneLoan,
-                        () -> Optional.of(cp));
+        final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
         final DataValidator.Status result = validator.validateData(d);
         // run test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.ERROR);
@@ -118,9 +81,7 @@ public class ZonkoidSettingsValidatorTest {
                 ArgumentMatchers.anyInt())).thenReturn(Optional.of(new Confirmation(ConfirmationType.REJECTED)));
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
-        final DataValidator validator =
-                new ZonkoidSettingsValidator(ZonkoidSettingsValidatorTest::mockApiThatReturnsOneLoan,
-                        () -> Optional.of(cp));
+        final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
         final DataValidator.Status result = validator.validateData(d);
         // run test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
@@ -133,9 +94,7 @@ public class ZonkoidSettingsValidatorTest {
                 ArgumentMatchers.anyInt())).thenReturn(Optional.of(new Confirmation(ConfirmationType.DELEGATED)));
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
-        final DataValidator validator =
-                new ZonkoidSettingsValidator(ZonkoidSettingsValidatorTest::mockApiThatReturnsOneLoan,
-                        () -> Optional.of(cp));
+        final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
         final DataValidator.Status result = validator.validateData(d);
         // run test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);

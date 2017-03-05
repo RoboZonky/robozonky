@@ -37,7 +37,6 @@ class NotificationProperties {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationProperties.class);
     protected static final String HOURLY_LIMIT = "hourlyMaxEmails";
-    static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications.cfg");
 
     static Optional<NotificationProperties> getProperties(final String source) {
@@ -58,7 +57,7 @@ class NotificationProperties {
     }
 
     static Optional<String> getPropertiesContents() {
-        final String propValue = System.getProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
+        final String propValue = System.getProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY);
         if (propValue != null) { // attempt to read from the URL specified by the property
             NotificationProperties.LOGGER.debug("Reading e-mail notification configuration from {}.", propValue);
             try {
@@ -187,7 +186,11 @@ class NotificationProperties {
     }
 
     public boolean isListenerEnabled(final SupportedListener listener) {
-        return this.getBooleanValue(NotificationProperties.getCompositePropertyName(listener, "enabled"), false);
+        if (listener == SupportedListener.TESTING) { // always enabled so that notification testing works
+            return true;
+        } else {
+            return this.getBooleanValue(NotificationProperties.getCompositePropertyName(listener, "enabled"), false);
+        }
     }
 
     @Override

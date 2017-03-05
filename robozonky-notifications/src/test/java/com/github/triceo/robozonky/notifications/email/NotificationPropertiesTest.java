@@ -36,7 +36,7 @@ public class NotificationPropertiesTest {
 
     @Rule
     public final ClearSystemProperties myPropertyIsCleared =
-            new ClearSystemProperties(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
+            new ClearSystemProperties(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY);
 
     @Before
     public void prepareBackupConfig() throws Exception {
@@ -50,7 +50,7 @@ public class NotificationPropertiesTest {
 
     @Test
     public void localHostAddress() {
-        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.WINDOWS_ENCODED.toString());
         final Optional<String> contents = NotificationProperties.getPropertiesContents();
         final NotificationProperties np = NotificationProperties.getProperties(contents.get()).get();
@@ -59,7 +59,7 @@ public class NotificationPropertiesTest {
 
     @Test
     public void wrongPropertiesUrlReadsPropertyFile() {
-        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "wrongprotocol://somewhere");
+        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY, "wrongprotocol://somewhere");
         final Optional<String> contents = NotificationProperties.getPropertiesContents();
         Assertions.assertThat(contents).isPresent();
         final Optional<NotificationProperties> np = NotificationProperties.getProperties(contents.get());
@@ -69,7 +69,7 @@ public class NotificationPropertiesTest {
 
     @Test
     public void correctUrlIgnoresPropertyFile() {
-        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.CONFIG_ENABLED.toString());
         final Optional<String> contents = NotificationProperties.getPropertiesContents();
         Assertions.assertThat(contents).isPresent();
@@ -80,7 +80,7 @@ public class NotificationPropertiesTest {
 
     @Test
     public void windowsEncoding() {
-        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.WINDOWS_ENCODED.toString());
         final Optional<String> contents = NotificationProperties.getPropertiesContents();
         Assertions.assertThat(contents).isPresent();
@@ -91,7 +91,7 @@ public class NotificationPropertiesTest {
 
     @Test
     public void equals() {
-        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.CONFIG_ENABLED.toString());
         final Optional<String> contents = NotificationProperties.getPropertiesContents();
         Assertions.assertThat(contents).isPresent();
@@ -100,7 +100,7 @@ public class NotificationPropertiesTest {
         final NotificationProperties props2 = NotificationProperties.getProperties(contents.get()).get();
         Assertions.assertThat(props1).isNotSameAs(props2).isEqualTo(props2);
         Assertions.assertThat(props2).isEqualTo(props1);
-        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.WINDOWS_ENCODED.toString());
         final Optional<String> contents2 = NotificationProperties.getPropertiesContents();
         final NotificationProperties props3 = NotificationProperties.getProperties(contents2.get()).get();

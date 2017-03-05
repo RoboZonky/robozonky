@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.common.extensions;
 
 import java.util.UUID;
 
+import com.github.triceo.robozonky.api.marketplaces.MarketplaceService;
 import com.github.triceo.robozonky.common.secrets.Credentials;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
@@ -32,5 +33,13 @@ public class MarketplaceLoaderTest {
     public void loadNonexistent() {
         final Credentials c = new Credentials(UUID.randomUUID().toString(), MarketplaceLoaderTest.SECRETS);
         Assertions.assertThat(MarketplaceLoader.load(c)).isEmpty();
+    }
+
+    @Test
+    public void processing() {
+        final Credentials c = new Credentials(UUID.randomUUID().toString(), MarketplaceLoaderTest.SECRETS);
+        Assertions.assertThat(MarketplaceLoader.processMarketplace(Mockito.mock(MarketplaceService.class), c))
+                .isEmpty();
+
     }
 }

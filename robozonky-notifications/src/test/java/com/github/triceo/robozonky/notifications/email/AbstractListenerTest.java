@@ -37,6 +37,7 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
@@ -50,11 +51,11 @@ import org.mockito.Mockito;
 public abstract class AbstractListenerTest {
 
     private static NotificationProperties getNotificationProperties() {
-        System.setProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
         final Optional<NotificationProperties> p =
                 NotificationProperties.getProperties(NotificationProperties.getPropertiesContents().get());
-        System.clearProperty(NotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
+        System.clearProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY);
         return p.get();
     }
 
@@ -91,6 +92,8 @@ public abstract class AbstractListenerTest {
                 new RoboZonkyInitializedEvent(""));
         events.put(SupportedListener.ENDING.getEventType(),
                 new RoboZonkyEndingEvent(""));
+        events.put(SupportedListener.TESTING.getEventType(),
+                new RoboZonkyTestingEvent());
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[] {s, s.getListener(properties), events.get(s.getEventType())})

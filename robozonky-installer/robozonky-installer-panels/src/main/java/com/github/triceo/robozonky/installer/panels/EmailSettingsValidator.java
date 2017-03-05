@@ -16,13 +16,15 @@
 
 package com.github.triceo.robozonky.installer.panels;
 
+import java.io.File;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.github.triceo.robozonky.common.extensions.Checker;
+import com.github.triceo.robozonky.notifications.email.EmailListenerService;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.SimpleEmail;
 
 public class EmailSettingsValidator implements DataValidator {
 
@@ -30,29 +32,25 @@ public class EmailSettingsValidator implements DataValidator {
 
     @Override
     public DataValidator.Status validateData(final InstallData installData) {
-        final Email email = new SimpleEmail();
-        email.setSubject("RoboZonky: Správně nastavené e-mailové notifikace");
-        email.setHostName(Variables.SMTP_HOSTNAME.getValue(installData));
-        email.setSmtpPort(Integer.parseInt(Variables.SMTP_PORT.getValue(installData)));
-        email.setStartTLSRequired(Boolean.valueOf(Variables.SMTP_IS_TLS.getValue(installData)));
-        email.setSSLOnConnect(Boolean.valueOf(Variables.SMTP_IS_SSL.getValue(installData)));
-        final String username = Variables.SMTP_USERNAME.getValue(installData);
-        email.setAuthentication(username, Variables.SMTP_PASSWORD.getValue(installData));
         try {
-            email.setMsg("Tento e-mail je důkazem, že jste správně nastavili e-mailové notifikace. Gratulujeme!");
-            email.setFrom(username, "RoboZonky instalátor");
-            email.addTo(Variables.SMTP_TO.getValue(installData));
-            email.send();
-            return DataValidator.Status.OK;
+            // configure e-mail notification properties
+            final Properties emailConfig = Util.configureEmailNotifications(installData);
+            final File emailConfigTarget = File.createTempFile("robozonky-", ".cfg");
+            Util.writeOutProperties(emailConfig, emailConfigTarget);
+            System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
+                    emailConfigTarget.toURI().toURL().toExternalForm());
+            return Checker.notifications() ? DataValidator.Status.OK : DataValidator.Status.ERROR;
         } catch (final Exception ex) {
             EmailSettingsValidator.LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
             return DataValidator.Status.WARNING;
+        } finally {
+            System.clearProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY);
         }
     }
 
     @Override
     public String getErrorMessageId() {
-        return null;
+        return "Konfigurace se nezdařila. Pravděpodobně se jedná o chybu v RoboZonky.";
     }
 
     @Override

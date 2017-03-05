@@ -16,6 +16,8 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 import com.beust.jcommander.Parameter;
@@ -23,6 +25,7 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
@@ -30,6 +33,7 @@ import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.app.investing.ZonkyProxy;
+import com.github.triceo.robozonky.common.extensions.Checker;
 import com.github.triceo.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
@@ -94,9 +98,7 @@ enum OperatingMode implements CommandLineFragment {
                         final InvestmentMode m = new SingleShotInvestmentMode(auth, builder, fragment.isFaultTolerant(),
                                 marketplace, strategy, marketplaceFragment.getMaximumSleepDuration());
                         return Optional.of(m);
-                    })
-                    .orElse(Optional.empty());
-
+                    }).orElse(Optional.empty());
         }
 
     }, DAEMON {
@@ -127,9 +129,45 @@ enum OperatingMode implements CommandLineFragment {
                                 marketplace, strategy, marketplaceFragment.getMaximumSleepDuration(),
                                 marketplaceFragment.getDelayBetweenChecks());
                         return Optional.of(m);
-                    })
-                    .orElse(Optional.empty());
+                    }).orElse(Optional.empty());
+        }
 
+    }, TESTING {
+
+        @Override
+        public String getName() {
+            return "test";
+        }
+
+        @Override
+        protected Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+                                                             final AuthenticationHandler auth,
+                                                             final ZonkyProxy.Builder builder) {
+            return Optional.of(new InvestmentMode() {
+
+                private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+                @Override
+                public Optional<Collection<Investment>> get() {
+                    if (!Checker.notifications()) {
+                        LOGGER.warn("No e-mail notifications sent. Perhaps they were never enabled?");
+                    } else {
+                        LOGGER.info("E-mail notification successfully sent, check your inbox.");
+                    }
+                    builder.getConfirmationUsed().ifPresent(c ->
+                            builder.getConfirmationRequestUsed().ifPresent(r -> {
+                                final Optional<Boolean> result =
+                                        Checker.confirmations(c, r.getUserId(),r.getPassword());
+                                if (result.isPresent() && result.get()) {
+                                    LOGGER.info("Confirmation from '{}' received.", c.getId());
+                                } else {
+                                    LOGGER.warn("Did not receive remote confirmation. Perhaps service misconfigured?");
+                                }
+                            }));
+                    return Optional.of(Collections.emptyList());
+                }
+
+            });
         }
 
     };
@@ -140,15 +178,14 @@ enum OperatingMode implements CommandLineFragment {
                                                              final SecretProvider secrets,
                                                              final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
-        final String username = secrets.getUsername();
         OperatingMode.LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
         return credentials.getToken()
                 .map(token -> {
                     secrets.setSecret(svcId, token);
-                    return Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, username, token));
+                    return Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, token));
                 }).orElseGet(() -> secrets.getSecret(svcId)
                         .map(token ->
-                                Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, username, token)))
+                                Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, token)))
                         .orElseGet(() -> {
                             OperatingMode.LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
                             return Optional.empty();

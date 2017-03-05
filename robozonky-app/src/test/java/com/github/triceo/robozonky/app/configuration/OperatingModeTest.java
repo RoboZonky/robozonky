@@ -16,15 +16,18 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.ZonkyProxy;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -40,6 +43,25 @@ public class OperatingModeTest {
         final OperatingMode mode = OperatingMode.DIRECT_INVESTMENT;
         final Optional<InvestmentMode> config = mode.getInvestmentMode(cli, auth, builder);
         Assertions.assertThat(config.get()).isExactlyInstanceOf(DirectInvestmentMode.class);
+    }
+
+    @Test
+    public void defaultTesting() {
+        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
+        final ZonkyProxy.Builder builder = new ZonkyProxy.Builder();
+        builder.usingConfirmation(Mockito.mock(ConfirmationProvider.class), new char[0]);
+        final AuthenticationHandler auth =
+                AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
+        final OperatingMode mode = OperatingMode.TESTING;
+        final Optional<InvestmentMode> config = mode.getInvestmentMode(cli, auth, builder);
+        Assertions.assertThat(config).isPresent();
+        final InvestmentMode result = config.get();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result.isDryRun()).isFalse();
+            softly.assertThat(result.isFaultTolerant()).isFalse();
+            softly.assertThat(result.get()).isPresent().contains(Collections.emptyList());
+        });
     }
 
     @Test

@@ -55,10 +55,6 @@
       <groupId>org.codehaus.izpack</groupId>
       <artifactId>izpack-panel</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-email</artifactId>
-    </dependency>
     <dependency> <!-- So that Logback is included in the Installer JAR -->
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>

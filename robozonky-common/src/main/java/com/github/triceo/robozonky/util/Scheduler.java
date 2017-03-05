@@ -87,13 +87,15 @@ public class Scheduler {
 
     /**
      * Re-start the scheduler following {@link #shutdown()}. This is only to help with testing.
+     * @return True of re-initialization happened.
      */
-    public void reinit() {
+    public boolean reinit() {
         if (!isShutdown()) {
             Scheduler.LOGGER.debug("Not reinitializing scheduler as it is not yet shut down.");
-            return;
+            return false;
         }
         this.submitted.clear();
         this.executor = executorProvider.get();
+        return true;
     }
 }

@@ -70,6 +70,10 @@ public class RoboZonkyInstallerListenerTest {
         Mockito.when(data.getVariable(Variables.ZONKY_PASSWORD.getKey()))
                 .thenReturn(RoboZonkyInstallerListenerTest.ZONKY_PASSWORD);
         Mockito.when(data.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
+        Mockito.when(data.getVariable(Variables.SMTP_HOSTNAME.getKey())).thenReturn("127.0.0.1");
+        Mockito.when(data.getVariable(Variables.SMTP_TO.getKey())).thenReturn("recipient@server.cz");
+        Mockito.when(data.getVariable(Variables.SMTP_USERNAME.getKey())).thenReturn("sender@server.cz");
+        Mockito.when(data.getVariable(Variables.SMTP_PASSWORD.getKey())).thenReturn(UUID.randomUUID().toString());
         return data;
     }
 
@@ -120,15 +124,15 @@ public class RoboZonkyInstallerListenerTest {
     @Test
     public void emailEnabled() {
         // prepare
-        final InstallData data = RoboZonkyInstallerListenerTest.mockBaseData();
-        Mockito.when(data.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
-        RoboZonkyInstallerListener.setInstallData(data);
+        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
+        Mockito.when(localData.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("true");
+        RoboZonkyInstallerListener.setInstallData(localData);
         // execute SUT
         final CommandLinePart clp = new RoboZonkyInstallerListener().prepareEmailConfiguration();
         // test
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(clp.getProperties()).isNotEmpty();
-            softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE).exists();
+            softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE).canRead();
         });
     }
 

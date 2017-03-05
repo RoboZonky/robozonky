@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.api.notifications;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import com.github.triceo.robozonky.api.remote.entities.Investment;
-
-public interface InvestmentMode extends Supplier<Optional<Collection<Investment>>>, AutoCloseable {
-
-    default boolean isFaultTolerant() {
-        return false;
-    }
-
-    default boolean isDryRun() {
-        return false;
-    }
-
-    @Override
-    default void close() throws Exception {
-        // no need to do anything
-    }
+/**
+ * Fired when testing notifications.
+ */
+public class RoboZonkyTestingEvent extends Event {
 
 }

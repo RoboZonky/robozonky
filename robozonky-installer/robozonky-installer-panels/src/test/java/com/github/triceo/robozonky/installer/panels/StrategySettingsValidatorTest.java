@@ -27,12 +27,18 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class StrategySettingsValidatorTest {
+
+    @After
+    public void resetDataTransfer() {
+        RoboZonkyInstallerListener.resetInstallData();
+    }
 
     @Test
     public void messages() {
@@ -84,6 +90,7 @@ public class StrategySettingsValidatorTest {
         final DataValidator.Status result = validator.validateData(d);
         // execute test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);
+        Assertions.assertThat(RoboZonkyInstallerListener.INSTALL_PATH).isNotNull();
     }
 
     @Test

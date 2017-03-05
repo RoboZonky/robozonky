@@ -27,6 +27,7 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 
 enum SupportedListener {
 
@@ -164,6 +165,21 @@ enum SupportedListener {
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyEndingEventListener(properties);
+        }
+    }, TESTING {
+        @Override
+        public String getId() {
+            return "roboZonkyTesting";
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RoboZonkyTestingEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(ListenerSpecificNotificationProperties properties) {
+            return new RoboZonkyTestingEventListener(properties);
         }
     };
 

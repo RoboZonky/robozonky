@@ -35,9 +35,8 @@
       <artifactId>robozonky-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ini4j</groupId>
-      <artifactId>ini4j</artifactId>
-      <version>0.5.4</version>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
