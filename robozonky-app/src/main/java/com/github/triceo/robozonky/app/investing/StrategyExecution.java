@@ -114,21 +114,25 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
         if (loans.isEmpty()) {
             return Collections.emptyList();
         }
-        final InvestmentStrategy strategy = refreshableStrategy.getLatestBlocking();
-        // only after we've acquired the strategy work with the marketplace
-        final Activity activity = new Activity(loans, maximumSleepPeriod);
-        final boolean shouldSleep = activity.shouldSleep();
-        if (shouldSleep) {
-            StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
-            return Collections.emptyList();
-        } else {
-            StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
-                    .peek(l -> Events.fire(new LoanArrivedEvent(l)))
-                    .map(l -> String.valueOf(l.getLoan().getId()))
-                    .collect(Collectors.joining(", ")));
-            final Collection<Investment> investments = invest(strategy, loans);
-            activity.settle();
-            return investments;
-        }
+        return refreshableStrategy.getLatest()
+                .map(strategy -> {
+                    final Activity activity = new Activity(loans, maximumSleepPeriod);
+                    final boolean shouldSleep = activity.shouldSleep();
+                    if (shouldSleep) {
+                        StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
+                        return Collections.<Investment>emptyList();
+                    } else {
+                        StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
+                                .peek(l -> Events.fire(new LoanArrivedEvent(l)))
+                                .map(l -> String.valueOf(l.getLoan().getId()))
+                                .collect(Collectors.joining(", ")));
+                        final Collection<Investment> investments = invest(strategy, loans);
+                        activity.settle();
+                        return investments;
+                    }
+                }).orElseGet(() -> {
+                    StrategyExecution.LOGGER.info("RoboZonky is asleep as there is no investment strategy.");
+                    return Collections.emptyList();
+                });
     }
 }

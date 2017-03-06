@@ -20,9 +20,13 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
@@ -63,6 +67,19 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
     public void empty() {
         final StrategyExecution exec = new StrategyExecution(null, null, null, null);
         Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
+        // check events
+        final List<Event> events = this.getNewEvents();
+        Assertions.assertThat(events).isEmpty();
+    }
+
+    @Test
+    public void noStrategy() {
+        final Loan loan = new Loan(1, 2);
+        final LoanDescriptor ld = new LoanDescriptor(loan);
+        final Refreshable<InvestmentStrategy> r = Refreshable.createImmutable(null);
+        r.run();
+        final StrategyExecution exec = new StrategyExecution(null, null, r, null);
+        Assertions.assertThat(exec.apply(Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).isEmpty();
