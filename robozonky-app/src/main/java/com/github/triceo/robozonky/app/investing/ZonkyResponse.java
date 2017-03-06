@@ -49,4 +49,13 @@ public class ZonkyResponse {
     public OptionalInt getConfirmedAmount() {
         return confirmedAmount == null ? OptionalInt.empty() : OptionalInt.of(confirmedAmount);
     }
+
+    @Override
+    public String toString() {
+        return "ZonkyResponse{" +
+                "type=" + type +
+                ", confirmedAmount=" + confirmedAmount +
+                '}';
+    }
+
 }
