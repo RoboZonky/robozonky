@@ -163,7 +163,6 @@ public abstract class Refreshable<T> implements Runnable {
             if (Objects.equals(newSource, latestKnownSource.get())) {
                 return;
             }
-            LOGGER.trace("New source found.");
             // source changed, result needs to be refreshed
             latestKnownSource.set(newSource);
             final Optional<T> maybeNewResult = transform(newSource);
@@ -172,6 +171,7 @@ public abstract class Refreshable<T> implements Runnable {
                 LOGGER.debug("Source successfully transformed to {}.", newResult.getClass());
                 storeResult(newResult);
             } else {
+                LOGGER.debug("Source not transformed.");
                 storeResult(null);
             }
         } else {
