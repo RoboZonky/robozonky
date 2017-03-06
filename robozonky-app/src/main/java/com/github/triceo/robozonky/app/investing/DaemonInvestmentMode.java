@@ -34,7 +34,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.App;
+import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 
@@ -60,7 +60,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
             // will release the main thread and thus terminate the daemon
             DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
             // only allow to shut down after the daemon has been closed by the app
-            App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
+            ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
             LOGGER.debug("Shutdown allowed.");
         }));
     }

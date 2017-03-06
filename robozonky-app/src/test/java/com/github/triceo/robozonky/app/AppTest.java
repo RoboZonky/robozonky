@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
@@ -28,11 +29,13 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
+import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.app.investing.ZonkyProxy;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -94,6 +97,20 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         final ReturnCode rc = App.execute(new SingleShotInvestmentMode(auth, new ZonkyProxy.Builder().asDryRun(),
                 false, marketplace, refreshable));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.OK);
+    }
+
+    @Test
+    public void modeProcessed() throws Exception {
+        final AtomicBoolean faultTolerant = new AtomicBoolean(false);
+        final InvestmentMode mode = Mockito.mock(InvestmentMode.class);
+        Mockito.when(mode.get()).thenReturn(Optional.empty());
+        Mockito.when(mode.isFaultTolerant()).thenReturn(!faultTolerant.get());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(App.execute(mode, faultTolerant)).isEqualTo(ReturnCode.ERROR_SETUP);
+            softly.assertThat(faultTolerant.get()).isTrue();
+            softly.assertThat(App.SHUTDOWN_HOOKS.getRegisteredCount()).isGreaterThanOrEqualTo(4);
+        });
+        Mockito.verify(mode).close();
     }
 
 }

@@ -36,7 +36,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import com.github.triceo.robozonky.app.App;
+import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
@@ -107,7 +107,7 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
 
     @Before
     public void setupApp() {
-        App.DAEMON_ALLOWED_TO_TERMINATE.release(); // make sure the daemon is allowed to quit
+        ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.release(); // make sure the daemon is allowed to quit
         DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
     }
 

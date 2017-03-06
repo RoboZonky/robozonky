@@ -16,12 +16,10 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.triceo.robozonky.api.ReturnCode;
@@ -46,10 +44,7 @@ public class App {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final File ROBOZONKY_LOCK = new File(System.getProperty("java.io.tmpdir"), "robozonky.lock");
-    private static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
-
-    public static final Semaphore DAEMON_ALLOWED_TO_TERMINATE = new Semaphore(1);
+    static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
 
     static void exit(final ReturnCode returnCode) {
         App.LOGGER.trace("Exit requested with return code {}.", returnCode);
@@ -81,38 +76,28 @@ public class App {
         }
     }
 
+    static ReturnCode execute(final InvestmentMode mode, final AtomicBoolean faultTolerant) {
+        App.SHUTDOWN_HOOKS.register(new ShutdownEnabler());
+        App.SHUTDOWN_HOOKS.register(new Management());
+        App.SHUTDOWN_HOOKS.register(new VersionChecker());
+        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
+        faultTolerant.set(mode.isFaultTolerant());
+        return App.execute(mode);
+    }
+
     static ReturnCode execute(final String[] args, final AtomicBoolean faultTolerant) {
         return CommandLineInterface.parse(args)
-                .map(mode -> {
-                    // startup the MBeans
-                    App.SHUTDOWN_HOOKS.register(new Management());
-                    // pressing Ctrl+C in daemon mode must result in proper RoboZonky shutdown
-                    App.SHUTDOWN_HOOKS.register(() -> {
-                        App.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
-                        return Optional.of((returnCode -> App.DAEMON_ALLOWED_TO_TERMINATE.release()));
-                    });
-                    // start RoboZonky update check
-                    App.SHUTDOWN_HOOKS.register(new VersionChecker());
-                    // notify of RoboZonky starting up
-                    App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
-                    faultTolerant.set(mode.isFaultTolerant());
-                    return App.execute(mode);
-                }).orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
+                .map(mode -> App.execute(mode, faultTolerant))
+                .orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
     }
 
     public static void main(final String... args) {
-        // make sure other RoboZonky processes are excluded
-        if (!App.SHUTDOWN_HOOKS.register(new Exclusivity(App.ROBOZONKY_LOCK))) {
-            App.exit(ReturnCode.ERROR_LOCK);
-        }
-        // and actually start running
-        App.LOGGER.debug("Current working directory is '{}'.", new File("").getAbsolutePath());
+        App.LOGGER.debug("Current working directory is '{}'.", System.getProperty("user.dir"));
         Events.fire(new RoboZonkyStartingEvent(Defaults.ROBOZONKY_VERSION));
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
                 Charset.defaultCharset());
-        // start the check for new version, making sure it is properly handled during execute
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.BACKGROUND_SCHEDULER.shutdown()));
         // read the command line and execute the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
