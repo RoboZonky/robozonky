@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -89,7 +90,13 @@ public class CommandLineInterface {
     }
 
     private void setImplementation(final JCommander jc) {
-        this.mode = (OperatingMode)jc.getCommands().get(jc.getParsedCommand()).getObjects().get(0);
+        final String parsedCommand = jc.getParsedCommand();
+        if (parsedCommand == null) {
+            throw new ParameterException("You must specify one mode of operation. Check usage.");
+        }
+        final JCommander command = jc.getCommands().get(parsedCommand);
+        final List<Object> objects = command.getObjects();
+        this.mode = (OperatingMode)objects.get(0);
     }
 
     private Optional<InvestmentMode> newApplicationConfiguration() {
