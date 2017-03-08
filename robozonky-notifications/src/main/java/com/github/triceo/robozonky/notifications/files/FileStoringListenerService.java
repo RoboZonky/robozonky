@@ -24,6 +24,7 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 
 public final class FileStoringListenerService implements ListenerService {
@@ -36,6 +37,8 @@ public final class FileStoringListenerService implements ListenerService {
             return Refreshable.createImmutable((EventListener<T>) new InvestmentRejectedEventListener());
         } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
             return Refreshable.createImmutable((EventListener<T>) new InvestmentDelegatedEventListener());
+        } else if (Objects.equals(eventType, InvestmentSkippedEvent.class)) {
+            return Refreshable.createImmutable((EventListener<T>) new InvestmentSkippedEventListener());
         }
         return Refreshable.createImmutable(null);
     }

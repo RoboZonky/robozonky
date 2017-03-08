@@ -31,6 +31,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
@@ -81,9 +82,18 @@ class Investor {
         final String providerId = api.getConfirmationProviderId().orElse("-");
         switch (response.getType()) {
             case REJECTED:
-                Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(), providerId));
-                tracker.discardLoan(loanId);
-                return Optional.empty();
+                return api.getConfirmationProviderId().map(c -> {
+                    Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(), providerId));
+                    // rejected through a confirmation provider => forget
+                    tracker.discardLoan(loanId);
+                    return Optional.<Investment>empty();
+                }).orElseGet(() -> {
+                    // rejected due to no confirmation provider => make available for direct investment later
+                    Events.fire(new InvestmentSkippedEvent(recommendation));
+                    Investor.LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
+                    tracker.ignoreLoan(loanId);
+                    return Optional.empty();
+                });
             case DELEGATED:
                 Events.fire(new InvestmentDelegatedEvent(recommendation, balance.intValue(), providerId));
                 if (recommendation.isConfirmationRequired()) {
@@ -101,9 +111,10 @@ class Investor {
                 tracker.makeInvestment(i);
                 return Optional.of(i);
             case SEEN_BEFORE:
+                Events.fire(new InvestmentSkippedEvent(recommendation));
                 return Optional.empty();
             default:
-                throw new IllegalStateException("Not possible.  ");
+                throw new IllegalStateException("Not possible.");
         }
     }
 
