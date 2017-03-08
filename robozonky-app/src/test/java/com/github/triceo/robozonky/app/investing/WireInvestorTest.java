@@ -28,6 +28,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
@@ -128,6 +129,57 @@ public class WireInvestorTest extends AbstractInvestingTest {
         // check that seen information is persisted
         final InvestmentTracker t2 = new InvestmentTracker(availableLoans, BigDecimal.valueOf(10000));
         Assertions.assertThat(t2.isSeenBefore(loanId)).isTrue();
+    }
+
+    @Test
+    public void investmentDelegatedButExpectedConfirmed() {
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
+        final InvestmentTracker t = new InvestmentTracker(availableLoans, BigDecimal.valueOf(10000));
+        final Recommendation r = ld.recommend(200, true).get();
+        final int loanId = ld.getLoan().getId();
+        final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
+        Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
+                .thenReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED));
+        Mockito.when(api.getConfirmationProviderId()).thenReturn(Optional.of("something"));
+        Assertions.assertThat(t.isDiscarded(loanId)).isFalse();
+        final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
+        Assertions.assertThat(t.isDiscarded(loanId)).isTrue();
+        Assertions.assertThat(result).isEmpty();
+        // validate event
+        final List<Event> newEvents = this.getNewEvents();
+        Assertions.assertThat(newEvents).hasSize(2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
+            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentDelegatedEvent.class);
+        });
+        // check that discard information is persisted
+        final InvestmentTracker t2 = new InvestmentTracker(availableLoans, BigDecimal.valueOf(10000));
+        Assertions.assertThat(t2.isDiscarded(loanId)).isTrue();
+    }
+
+    @Test
+    public void investmentIgnoredWhenNoConfirmationProviderAndCaptcha() {
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
+        final InvestmentTracker t = new InvestmentTracker(availableLoans, BigDecimal.valueOf(10000));
+        final Recommendation r = ld.recommend(200).get();
+        final int loanId = ld.getLoan().getId();
+        final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
+        Mockito.when(api.invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean()))
+                .thenReturn(new ZonkyResponse(ZonkyResponseType.REJECTED));
+        Mockito.when(api.getConfirmationProviderId()).thenReturn(Optional.empty());
+        Assertions.assertThat(t.isSeenBefore(loanId)).isFalse();
+        final Optional<Investment> result = Investor.actuallyInvest(r, api, t);
+        Assertions.assertThat(t.isSeenBefore(loanId)).isTrue();
+        Assertions.assertThat(result).isEmpty();
+        // validate event
+        final List<Event> newEvents = this.getNewEvents();
+        Assertions.assertThat(newEvents).hasSize(2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(newEvents.get(0)).isInstanceOf(InvestmentRequestedEvent.class);
+            softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentSkippedEvent.class);
+        });
     }
 
     @Test

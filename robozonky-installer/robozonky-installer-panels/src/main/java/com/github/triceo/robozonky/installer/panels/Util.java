@@ -55,9 +55,11 @@ class Util {
         p.setProperty("smtp.port", toInt(Variables.SMTP_PORT.getValue(data)));
         p.setProperty("smtp.requiresStartTLS", toBoolean(Variables.SMTP_IS_TLS.getValue(data)));
         p.setProperty("smtp.requiresSslOnConnect", toBoolean(Variables.SMTP_IS_SSL.getValue(data)));
-        p.setProperty("investmentRejected.enabled", toBoolean(Variables.EMAIL_IS_INVESTMENT.getValue(data)));
-        p.setProperty("investmentMade.enabled", toBoolean(Variables.EMAIL_IS_INVESTMENT.getValue(data)));
-        p.setProperty("investmentDelegated.enabled", toBoolean(Variables.EMAIL_IS_INVESTMENT.getValue(data)));
+        final String isInvestmentEmailEnabled = toBoolean(Variables.EMAIL_IS_INVESTMENT.getValue(data));
+        p.setProperty("investmentSkipped.enabled", isInvestmentEmailEnabled);
+        p.setProperty("investmentRejected.enabled", isInvestmentEmailEnabled);
+        p.setProperty("investmentMade.enabled", isInvestmentEmailEnabled);
+        p.setProperty("investmentDelegated.enabled", isInvestmentEmailEnabled);
         p.setProperty("balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
         p.setProperty("balanceTracker.targetBalance", "200");
         p.setProperty("roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));

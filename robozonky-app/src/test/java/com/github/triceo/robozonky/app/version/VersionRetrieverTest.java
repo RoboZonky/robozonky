@@ -19,7 +19,12 @@ package com.github.triceo.robozonky.app.version;
 import java.util.Collections;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class VersionRetrieverTest {
 
@@ -41,6 +46,39 @@ public class VersionRetrieverTest {
     public void checkNoStable() {
         Assertions.assertThatThrownBy(() -> VersionRetriever.findLastStable(Collections.singleton("1.2.0-beta-1")))
                 .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    public void parseSingleNodeList() {
+        final String version = "1.2.3";
+        final Node n = Mockito.mock(Node.class);
+        Mockito.when(n.getTextContent()).thenReturn(version);
+        final NodeList l = Mockito.mock(NodeList.class);
+        Mockito.when(l.getLength()).thenReturn(1);
+        Mockito.when(l.item(ArgumentMatchers.eq(0))).thenReturn(n);
+        final VersionIdentifier actual = VersionRetriever.parseNodeList(l);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(actual.getLatestStable()).isEqualTo(version);
+            softly.assertThat(actual.getLatestUnstable()).isEmpty();
+        });
+    }
+
+    @Test
+    public void parseLongerNodeList() {
+        final String version = "1.2.3", version2 = "1.2.4-SNAPSHOT";
+        final Node n1 = Mockito.mock(Node.class);
+        Mockito.when(n1.getTextContent()).thenReturn(version);
+        final Node n2 = Mockito.mock(Node.class);
+        Mockito.when(n2.getTextContent()).thenReturn(version2);
+        final NodeList l = Mockito.mock(NodeList.class);
+        Mockito.when(l.getLength()).thenReturn(2);
+        Mockito.when(l.item(ArgumentMatchers.eq(0))).thenReturn(n1);
+        Mockito.when(l.item(ArgumentMatchers.eq(1))).thenReturn(n2);
+        final VersionIdentifier actual = VersionRetriever.parseNodeList(l);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(actual.getLatestStable()).isEqualTo(version);
+            softly.assertThat(actual.getLatestUnstable()).contains(version2);
+        });
     }
 
 }

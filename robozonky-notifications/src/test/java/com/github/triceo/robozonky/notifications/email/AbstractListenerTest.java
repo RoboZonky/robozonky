@@ -32,6 +32,7 @@ import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -78,6 +79,7 @@ public abstract class AbstractListenerTest {
         events.put(SupportedListener.INVESTMENT_DELEGATED.getEventType(),
                 new InvestmentDelegatedEvent(recommendation, 200, "random"));
         events.put(SupportedListener.INVESTMENT_MADE.getEventType(), new InvestmentMadeEvent(i, 200));
+        events.put(SupportedListener.INVESTMENT_SKIPPED.getEventType(), new InvestmentSkippedEvent(recommendation));
         events.put(SupportedListener.INVESTMENT_REJECTED.getEventType(),
                 new InvestmentRejectedEvent(recommendation, 200, "random"));
         events.put(SupportedListener.EXECUTION_STARTED.getEventType(),

@@ -93,7 +93,7 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
                 .orElseThrow(() -> new IllegalStateException("Impossible."));
     }
 
-    private static VersionIdentifier parseNodeList(final NodeList nodeList) {
+    static VersionIdentifier parseNodeList(final NodeList nodeList) {
         final SortedSet<String> versions = new TreeSet<>(new VersionComparator());
         for (int i = 0; i < nodeList.getLength(); i++) {
             final String version = nodeList.item(i).getTextContent();
@@ -103,7 +103,7 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
         final String stable = VersionRetriever.findLastStable(versions);
         // and check if it is followed by any other versions
         final SortedSet<String> tail = versions.tailSet(stable);
-        if (tail.isEmpty()) {
+        if (tail.size() == 1) {
             return new VersionIdentifier(stable);
         } else {
             return new VersionIdentifier(stable, tail.last());

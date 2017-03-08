@@ -128,6 +128,10 @@ final class InvestmentTracker {
         return this.seenLoans.contains(loanId);
     }
 
+    public synchronized boolean isDiscarded(final int loanId) {
+        return this.discardedLoans.contains(loanId);
+    }
+
     /**
      * Mark a given loan as no longer relevant for this session.
      *
