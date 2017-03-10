@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
@@ -83,6 +84,10 @@ public class AbstractFileStoringListenerTest {
         final Runnable r3 = () -> new InvestmentDelegatedEventListener().handle(ide);
         result.add(new Object[] {r3, recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount(), "delegated"} );
+        final InvestmentSkippedEvent ise = new InvestmentSkippedEvent(recommendation);
+        final Runnable r4 = () -> new InvestmentSkippedEventListener().handle(ise);
+        result.add(new Object[] {r4, recommendation.getLoanDescriptor().getLoan().getId(),
+                recommendation.getRecommendedInvestmentAmount(), "skipped"} );
         return result;
     }
 

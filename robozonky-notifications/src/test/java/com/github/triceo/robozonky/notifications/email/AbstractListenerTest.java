@@ -75,30 +75,23 @@ public abstract class AbstractListenerTest {
         final Investment i = new Investment(loan, 1000);
         final NotificationProperties properties = AbstractListenerTest.getNotificationProperties();
         // create events for listeners
-        final Map<Class<? extends Event>, Event> events = new HashMap<>(SupportedListener.values().length);
-        events.put(SupportedListener.INVESTMENT_DELEGATED.getEventType(),
+        final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
+        events.put(SupportedListener.INVESTMENT_DELEGATED,
                 new InvestmentDelegatedEvent(recommendation, 200, "random"));
-        events.put(SupportedListener.INVESTMENT_MADE.getEventType(), new InvestmentMadeEvent(i, 200));
-        events.put(SupportedListener.INVESTMENT_SKIPPED.getEventType(), new InvestmentSkippedEvent(recommendation));
-        events.put(SupportedListener.INVESTMENT_REJECTED.getEventType(),
-                new InvestmentRejectedEvent(recommendation, 200, "random"));
-        events.put(SupportedListener.EXECUTION_STARTED.getEventType(),
-                new ExecutionStartedEvent("", Collections.emptyList(), 200));
-        events.put(SupportedListener.CRASHED.getEventType(),
-                new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
-        events.put(SupportedListener.REMOTE_OPERATION_FAILED.getEventType(),
-                new RemoteOperationFailedEvent(new RuntimeException()));
-        events.put(SupportedListener.DAEMON_FAILED.getEventType(),
-                new RoboZonkyDaemonFailedEvent(new RuntimeException()));
-        events.put(SupportedListener.INITIALIZED.getEventType(),
-                new RoboZonkyInitializedEvent(""));
-        events.put(SupportedListener.ENDING.getEventType(),
-                new RoboZonkyEndingEvent(""));
-        events.put(SupportedListener.TESTING.getEventType(),
-                new RoboZonkyTestingEvent());
+        events.put(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200));
+        events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
+        events.put(SupportedListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, 200, "random"));
+        events.put(SupportedListener.BALANCE_ON_TARGET, new ExecutionStartedEvent("", Collections.emptyList(), 200));
+        events.put(SupportedListener.BALANCE_UNDER_MINIMUM, new ExecutionStartedEvent("", Collections.emptyList(), 199));
+        events.put(SupportedListener.CRASHED, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
+        events.put(SupportedListener.REMOTE_OPERATION_FAILED, new RemoteOperationFailedEvent(new RuntimeException()));
+        events.put(SupportedListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException()));
+        events.put(SupportedListener.INITIALIZED, new RoboZonkyInitializedEvent(""));
+        events.put(SupportedListener.ENDING, new RoboZonkyEndingEvent(""));
+        events.put(SupportedListener.TESTING, new RoboZonkyTestingEvent());
         // create the listeners
         return Stream.of(SupportedListener.values())
-                .map(s -> new Object[] {s, s.getListener(properties), events.get(s.getEventType())})
+                .map(s -> new Object[] {s, s.getListener(properties), events.get(s)})
                 .collect(Collectors.toList());
     }
 

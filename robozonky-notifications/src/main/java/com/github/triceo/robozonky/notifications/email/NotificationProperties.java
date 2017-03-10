@@ -86,7 +86,7 @@ class NotificationProperties {
     }
 
     protected static String getCompositePropertyName(final SupportedListener listener, final String property) {
-        return listener.getId() + "." + property;
+        return listener.getLabel() + "." + property;
     }
 
     protected Properties properties;

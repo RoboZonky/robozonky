@@ -22,12 +22,12 @@ import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 
-public class ExecutionStartedEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {
+public class BalanceOnTargetEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {
 
     private final int targetBalance;
     private boolean shouldSendEmail = false;
 
-    public ExecutionStartedEventListener(final ListenerSpecificNotificationProperties properties) {
+    public BalanceOnTargetEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
         this.targetBalance = properties.getListenerSpecificIntProperty("targetBalance", 200);
     }
@@ -39,7 +39,7 @@ public class ExecutionStartedEventListener extends AbstractEmailingListener<Exec
 
     @Override
     String getSubject(final ExecutionStartedEvent event) {
-        return "Zůstatek na Zonky účtu překročil " + this.targetBalance + ",- Kč";
+        return "Zůstatek na Zonky účtu dosáhl " + this.targetBalance + ",- Kč";
     }
 
     @Override

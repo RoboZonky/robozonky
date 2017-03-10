@@ -22,6 +22,7 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -49,6 +50,11 @@ public class FileStoringListenerServiceTest {
     @Test
     public void supportsInvestmentMadeEvent() {
         Assertions.assertThat(getListener(InvestmentMadeEvent.class).getLatest()).isPresent();
+    }
+
+    @Test
+    public void supportsInvestmentSkippedEvent() {
+        Assertions.assertThat(getListener(InvestmentSkippedEvent.class).getLatest()).isPresent();
     }
 
     @Test

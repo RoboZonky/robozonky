@@ -34,7 +34,7 @@ enum SupportedListener {
 
     INVESTMENT_MADE {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "investmentMade";
         }
 
@@ -49,7 +49,7 @@ enum SupportedListener {
         }
     }, INVESTMENT_SKIPPED {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "investmentSkipped";
         }
 
@@ -64,7 +64,7 @@ enum SupportedListener {
         }
     }, INVESTMENT_DELEGATED {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "investmentDelegated";
         }
 
@@ -79,7 +79,7 @@ enum SupportedListener {
         }
     }, INVESTMENT_REJECTED {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "investmentRejected";
         }
 
@@ -92,9 +92,9 @@ enum SupportedListener {
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentRejectedEventListener(properties);
         }
-    }, EXECUTION_STARTED {
+    }, BALANCE_ON_TARGET {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "balanceTracker";
         }
 
@@ -105,11 +105,26 @@ enum SupportedListener {
 
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
-            return new ExecutionStartedEventListener(properties);
+            return new BalanceOnTargetEventListener(properties);
+        }
+    }, BALANCE_UNDER_MINIMUM {
+        @Override
+        public String getLabel() {
+            return "balanceTracker";
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return ExecutionStartedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new BalanceUnderMinimumEventListener(properties);
         }
     }, CRASHED {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "roboZonkyCrashed";
         }
 
@@ -124,7 +139,7 @@ enum SupportedListener {
         }
     }, DAEMON_FAILED {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "roboZonkyDaemonFailed";
         }
 
@@ -139,7 +154,7 @@ enum SupportedListener {
         }
     }, REMOTE_OPERATION_FAILED {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "remoteOperationFailed";
         }
 
@@ -154,7 +169,7 @@ enum SupportedListener {
         }
     }, INITIALIZED {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "roboZonkyInitialized";
         }
 
@@ -169,7 +184,7 @@ enum SupportedListener {
         }
     }, ENDING {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "roboZonkyEnding";
         }
 
@@ -184,7 +199,7 @@ enum SupportedListener {
         }
     }, TESTING {
         @Override
-        public String getId() {
+        public String getLabel() {
             return "roboZonkyTesting";
         }
 
@@ -199,8 +214,18 @@ enum SupportedListener {
         }
     };
 
-    public abstract String getId();
+    /**
+     * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
+     *
+     * @return ID of the listener which will be used as namespace in the config file.
+     */
+    public abstract String getLabel();
 
+    /**
+     * Type of event that this listener responds to.
+     *
+     * @return Event type.
+     */
     public abstract Class<? extends Event> getEventType();
 
     protected abstract EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties);
