@@ -51,6 +51,10 @@
       <name>isEmailEnabled</name>
       <value>true</value>
     </condition>
+    <condition type="variable" id="enableJmxPanel">
+      <name>isJmxEnabled</name>
+      <value>true</value>
+    </condition>
     <condition type="variable" id="isStrategyByFile">
       <name>strategyType</name>
       <value>file</value>
@@ -80,6 +84,7 @@
     <panel classname="UserInputPanel" id="emailUserInput" condition="enableEmailPanel">
       <validator classname="com.github.triceo.robozonky.installer.panels.EmailSettingsValidator" />
     </panel>
+    <panel classname="UserInputPanel" id="jmxUserInput" condition="enableJmxPanel" />
     <panel classname="UserInputPanel" id="strategyUserInput">
       <validator classname="com.github.triceo.robozonky.installer.panels.StrategySettingsValidator" />
     </panel>

@@ -48,6 +48,9 @@
     <field type="check" variable="isUsingToken">
       <spec txt="Neodhlašovat ze Zonky." set="false"/>
     </field>
+    <field type="check" variable="isJmxEnabled">
+      <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
+    </field>
     <field type="check" variable="isDryRun">
       <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat." set="false"/>
     </field>
@@ -105,17 +108,13 @@
     </field>
     <field type="text" variable="smtpHostname">
       <spec txt="Adresa SMTP serveru:" id="smtp.hostname" size="20" set=""/>
-      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+      <validator class="com.izforge.izpack.panels.userinput.validator.HostAddressValidator"
                  txt="Adresa serveru je povinná položka." />
     </field>
     <field type="text" variable="smtpPort">
       <spec txt="Port na SMTP serveru:" id="smtp.port" size="20" set=""/>
-      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
-                 txt="Port serveru je povinná položka." />
-      <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
-                 txt="Port musí být číslo.">
-        <param name="pattern" value="[0-9]+" />
-      </validator>
+      <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator"
+                 txt="Port musí být číslo." />
     </field>
     <field type="check" variable="smtpIsTls">
       <spec txt="Vyžaduje TLS." set="false"/>
@@ -146,6 +145,30 @@
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Pokračováním bude odeslán zkušební e-mail."
            id="email.test"/>
+  </panel>
+  <panel id="jmxUserInput">
+    <field type="title" align="left" txt="Nastavení vzdáleného přístupu k JMX" id="jmx.title"/>
+
+    <field type="staticText" align="left" bold="true" txt="Parametry připojení"
+           id="jmx.host.title"/>
+    <field type="divider" />
+    <field type="text" variable="jmxHostname">
+      <spec txt="Vnější adresa zařízení:" id="jmx.hostname" size="20" set="${IP_ADDRESS}"/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
+                 txt="Adresa je povinná položka." />
+    </field>
+    <field type="text" variable="jmxPort">
+      <spec txt="Port pro JMX:" id="jmxPort" size="20" set="7091"/>
+      <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator"
+                 txt="Port musí být číslo." />
+    </field>
+    <field type="check" variable="isJmxSecurityEnabled">
+      <spec txt="Vyžadovat autentizaci." id="jmxSecurity" size="20" set="false"/>
+    </field>
+    <field type="space" />
+    <field type="space" />
+    <field type="staticText" align="left" bold="true" id="jmx.warning.2"
+           txt="Pozor: Nevhodné nastavení může způsobit, že se robot nespustí!" />
   </panel>
   <panel id="strategyUserInput">
     <field type="title" align="left" txt="Nastavení investiční strategie" id="strategy.title"/>

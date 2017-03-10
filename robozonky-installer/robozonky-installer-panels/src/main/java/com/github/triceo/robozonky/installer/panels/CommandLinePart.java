@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,8 +32,8 @@ import com.github.triceo.robozonky.internal.api.Defaults;
 public class CommandLinePart {
 
     private final Map<String, Collection<String>> options = new LinkedHashMap<>();
-    private final Map<String, String> properties = new TreeMap<>();
-    private final Map<String, String> environmentVariables = new TreeMap<>();
+    private final Map<String, String> properties = new LinkedHashMap<>();
+    private final Map<String, String> environmentVariables = new LinkedHashMap<>();
 
 
     public CommandLinePart setOption(final String key, final String... value) {

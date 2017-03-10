@@ -122,6 +122,20 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    CommandLinePart prepareJmx() {
+        if (!Boolean.valueOf(Variables.IS_JMX_ENABLED.getValue(DATA))) {
+            return new CommandLinePart();
+        }
+        final String port = Variables.JMX_PORT.getValue(DATA);
+        return new CommandLinePart()
+                .setProperty("com.sun.management.jmxremote.authenticate",
+                        Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA))
+                .setProperty("com.sun.management.jmxremote.ssl", "false")
+                .setProperty("com.sun.management.jmxremote.rmi.port", port)
+                .setProperty("com.sun.management.jmxremote.port", port)
+                .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
+    }
+
     CommandLinePart prepareCore() {
         return prepareCore(KEYSTORE_PASSWORD);
     }
@@ -154,7 +168,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
-                                       final CommandLinePart credentials) {
+                                       final CommandLinePart jmxConfig, final CommandLinePart credentials) {
         // assemble the CLI
         final CommandLinePart cli = new CommandLinePart();
         credentials.getOptions().forEach((k, v) -> cli.setOption(k, v.toArray(new String[v.size()])));
@@ -167,7 +181,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final CommandLinePart result = new CommandLinePart()
                     .setOption("@" + CLI_CONFIG_FILE.getAbsolutePath())
                     .setEnvironmentVariable("JAVA_HOME", Variables.JAVA_HOME.getValue(DATA));
-            Stream.of(strategy.getProperties(), emailConfig.getProperties(), credentials.getProperties())
+            Stream.of(strategy.getProperties(), emailConfig.getProperties(), jmxConfig.getProperties(),
+                    credentials.getProperties())
                     .forEach(m -> m.forEach(result::setProperty));
             return result;
         } catch (final IOException ex) {
@@ -234,18 +249,20 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
-        progressListener.startAction("Konfigurace RoboZonky", 6);
+        progressListener.startAction("Konfigurace RoboZonky", 7);
         progressListener.nextStep("Příprava strategie.", 1, 1);
         final CommandLinePart strategyConfig = prepareStrategy();
         progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
         final CommandLinePart emailConfig = prepareEmailConfiguration();
-        progressListener.nextStep("Příprava nastavení Zonky.", 3, 1);
+        progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
+        final CommandLinePart jmx = prepareJmx();
+        progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
         final CommandLinePart credentials = prepareCore();
-        progressListener.nextStep("Generování parametrů příkazové řádky.", 4, 1);
-        final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, credentials);
-        progressListener.nextStep("Příprava nastavení logování.", 5, 1);
+        progressListener.nextStep("Generování parametrů příkazové řádky.", 5, 1);
+        final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials);
+        progressListener.nextStep("Příprava nastavení logování.", 6, 1);
         moveLog();
-        progressListener.nextStep("Generování spustitelného souboru.", 6, 1);
+        progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
         prepareRunScript(result);
         progressListener.stopAction();
     }
