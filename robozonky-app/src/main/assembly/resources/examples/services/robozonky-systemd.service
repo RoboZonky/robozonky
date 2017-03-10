@@ -3,10 +3,6 @@ Description=RoboZonky: Automated Zonky.cz investing robot
 After=network.target
 
 [Service]
-# Change this to the actual external IP of your machine; localhost or 127.0.0.1 will not work
-Environment=ROBOZONKY_IP=1.2.3.4
-# Use any port that is not occupied by anything else
-Environment=ROBOZONKY_PORT=7091
 Restart=true
 WorkingDirectory=/usr/robozonky
 ExecStart=/usr/robozonky/robozonky.sh @robozonky.cli
