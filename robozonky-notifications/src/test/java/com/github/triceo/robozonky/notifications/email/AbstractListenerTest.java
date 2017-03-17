@@ -51,11 +51,11 @@ import org.mockito.Mockito;
 @RunWith(Parameterized.class)
 public abstract class AbstractListenerTest {
 
-    private static NotificationProperties getNotificationProperties() {
+    private static EmailNotificationProperties getNotificationProperties() {
         System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
                 NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
-        final Optional<NotificationProperties> p =
-                NotificationProperties.getProperties(NotificationProperties.getPropertiesContents().get());
+        final Optional<EmailNotificationProperties> p =
+                EmailNotificationProperties.getProperties(EmailNotificationProperties.getPropertiesContents().get());
         System.clearProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY);
         return p.get();
     }
@@ -73,7 +73,7 @@ public abstract class AbstractListenerTest {
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final Recommendation recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = new Investment(loan, 1000);
-        final NotificationProperties properties = AbstractListenerTest.getNotificationProperties();
+        final EmailNotificationProperties properties = AbstractListenerTest.getNotificationProperties();
         // create events for listeners
         final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
         events.put(SupportedListener.INVESTMENT_DELEGATED,

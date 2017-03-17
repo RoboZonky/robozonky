@@ -23,12 +23,11 @@ import com.github.triceo.robozonky.api.notifications.ListenerService;
 
 public final class FileStoringListenerService implements ListenerService {
 
-    public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.files.config.file";
-    private final Refreshable<NotificationProperties> properties = new RefreshableNotificationProperties();
+    private final Refreshable<FileNotificationProperties> properties = new RefreshableFileNotificationProperties();
 
     @Override
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
-        return new RefreshableEventListener<>(properties, eventType);
+        return new RefreshableFileEventListener<>(properties, eventType);
     }
 
 }

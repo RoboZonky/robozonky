@@ -18,18 +18,18 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.util.OptionalInt;
 
-class ListenerSpecificNotificationProperties extends NotificationProperties {
+class ListenerSpecificNotificationProperties extends EmailNotificationProperties {
 
     private final SupportedListener listener;
 
     public ListenerSpecificNotificationProperties(final SupportedListener listener,
-                                                  final NotificationProperties props) {
-        super(props.properties);
+                                                  final EmailNotificationProperties props) {
+        super(props);
         this.listener = listener;
     }
 
     public int getListenerSpecificHourlyEmailLimit() {
-        return this.getListenerSpecificIntProperty(NotificationProperties.HOURLY_LIMIT).orElse(Integer.MAX_VALUE);
+        return this.getListenerSpecificIntProperty(EmailNotificationProperties.HOURLY_LIMIT).orElse(Integer.MAX_VALUE);
     }
 
     public int getListenerSpecificIntProperty(final String property, final int defaultValue) {
@@ -37,7 +37,7 @@ class ListenerSpecificNotificationProperties extends NotificationProperties {
     }
 
     public OptionalInt getListenerSpecificIntProperty(final String property) {
-        return this.getIntValue(NotificationProperties.getCompositePropertyName(this.listener, property));
+        return this.getIntValue(EmailNotificationProperties.getCompositePropertyName(this.listener, property));
     }
 
 }

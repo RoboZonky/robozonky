@@ -18,22 +18,22 @@ package com.github.triceo.robozonky.notifications.files;
 
 import java.util.OptionalInt;
 
-class ListenerSpecificNotificationProperties extends NotificationProperties {
+class ListenerSpecificNotificationProperties extends FileNotificationProperties {
 
     private final SupportedListener listener;
 
     public ListenerSpecificNotificationProperties(final SupportedListener listener,
-                                                  final NotificationProperties props) {
-        super(props.properties);
+                                                  final FileNotificationProperties props) {
+        super(props);
         this.listener = listener;
     }
 
     public int getListenerSpecificHourlyLimit() {
-        return this.getListenerSpecificIntProperty(NotificationProperties.HOURLY_LIMIT).orElse(Integer.MAX_VALUE);
+        return this.getListenerSpecificIntProperty(FileNotificationProperties.HOURLY_LIMIT).orElse(Integer.MAX_VALUE);
     }
 
     public OptionalInt getListenerSpecificIntProperty(final String property) {
-        return this.getIntValue(NotificationProperties.getCompositePropertyName(this.listener, property));
+        return this.getIntValue(FileNotificationProperties.getCompositePropertyName(this.listener, property));
     }
 
 }

@@ -40,7 +40,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return sw.toString();
     }
 
-    private static Email createNewEmail(final NotificationProperties properties) throws EmailException {
+    private static Email createNewEmail(final EmailNotificationProperties properties) throws EmailException {
         final Email email = new SimpleEmail();
         email.setCharset(Defaults.CHARSET.displayName());
         email.setHostName(properties.getSmtpHostname());

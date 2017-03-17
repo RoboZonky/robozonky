@@ -230,7 +230,7 @@ enum SupportedListener {
 
     protected abstract EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties);
 
-    public EventListener<? extends Event> getListener(final NotificationProperties properties) {
+    public EventListener<? extends Event> getListener(final EmailNotificationProperties properties) {
         return this.newListener(new ListenerSpecificNotificationProperties(this, properties));
     }
 

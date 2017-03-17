@@ -23,12 +23,11 @@ import com.github.triceo.robozonky.api.notifications.ListenerService;
 
 public final class EmailListenerService implements ListenerService {
 
-    public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
-    private final Refreshable<NotificationProperties> properties = new RefreshableNotificationProperties();
+    private final Refreshable<EmailNotificationProperties> properties = new RefreshableEmailNotificationProperties();
 
     @Override
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
-        return new RefreshableEventListener<>(properties, eventType);
+        return new RefreshableEmailEventListener<>(properties, eventType);
     }
 
 }

@@ -14,25 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications.files;
+package com.github.triceo.robozonky.notifications;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 
-class RefreshableEventListener<T extends Event> extends Refreshable<EventListener<T>> {
+public abstract class RefreshableEventListener<T extends Event, N extends NotificationProperties>
+        extends Refreshable<EventListener<T>> {
 
-    private final Refreshable<NotificationProperties> properties;
+    private final Refreshable<N> properties;
     private final Class<T> eventType;
 
-    public RefreshableEventListener(final Refreshable<NotificationProperties> properties, final Class<T> eventType) {
+    public RefreshableEventListener(final Refreshable<N> properties, final Class<T> eventType) {
         this.properties = properties;
         this.eventType = eventType;
+    }
+
+    protected Refreshable<N> getProperties() {
+        return properties;
+    }
+
+    protected Class<T> getEventType() {
+        return eventType;
     }
 
     @Override
@@ -45,17 +52,6 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
         return () -> properties.getLatest().map(props -> Optional.of(props.toString())).orElse(Optional.empty());
     }
 
-    @Override
-    protected Optional<EventListener<T>> transform(final String source) {
-        final Optional<NotificationProperties> optionalProps = properties.getLatest();
-        return optionalProps.map(props ->
-                Stream.of(SupportedListener.values())
-                        .filter(l -> Objects.equals(eventType, l.getEventType()))
-                        .filter(l -> props.isEnabled())
-                        .filter(props::isListenerEnabled)
-                        .findFirst()
-                        .map(l -> Optional.of((EventListener<T>)l.getListener(props)))
-                        .orElse(Optional.empty()))
-                .orElse(Optional.empty());
-    }
+    abstract protected Optional<EventListener<T>> transform(final String source);
+
 }
