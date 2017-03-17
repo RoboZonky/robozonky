@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,13 +34,21 @@ enum TemplateProcessor {
 
     INSTANCE;
 
-    private static Configuration getFreemarkerConfiguration() {
+    static Configuration getFreemarkerConfiguration(final Charset charset) {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-        cfg.setLocale(Defaults.LOCALE);
-        cfg.setTimeZone(TimeZone.getTimeZone(Defaults.ZONE_ID));
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
+        cfg.setTimeZone(TimeZone.getTimeZone(Defaults.ZONE_ID));
+        cfg.setLocale(Defaults.LOCALE);
+        // don't give Freemarker an option to use any other encoding than the specified, ever
+        cfg.setDefaultEncoding(charset.displayName());
+        cfg.setEncoding(cfg.getLocale(), cfg.getDefaultEncoding());
+        cfg.setOutputEncoding(cfg.getDefaultEncoding());
         return cfg;
+    }
+
+    static Configuration getFreemarkerConfiguration() {
+        return TemplateProcessor.getFreemarkerConfiguration(Defaults.CHARSET);
     }
 
     private final Configuration config = TemplateProcessor.getFreemarkerConfiguration();
