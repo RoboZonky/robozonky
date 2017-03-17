@@ -16,30 +16,19 @@
 
 package com.github.triceo.robozonky.notifications.files;
 
-import java.util.Objects;
-
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
-import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
-import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 
 public final class FileStoringListenerService implements ListenerService {
 
+    public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.files.config.file";
+    private final Refreshable<NotificationProperties> properties = new RefreshableNotificationProperties();
+
     @Override
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
-        if (Objects.equals(eventType, InvestmentMadeEvent.class)) {
-            return Refreshable.createImmutable((EventListener<T>) new InvestmentMadeEventListener());
-        } else if (Objects.equals(eventType, InvestmentRejectedEvent.class)) {
-            return Refreshable.createImmutable((EventListener<T>) new InvestmentRejectedEventListener());
-        } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
-            return Refreshable.createImmutable((EventListener<T>) new InvestmentDelegatedEventListener());
-        } else if (Objects.equals(eventType, InvestmentSkippedEvent.class)) {
-            return Refreshable.createImmutable((EventListener<T>) new InvestmentSkippedEventListener());
-        }
-        return Refreshable.createImmutable(null);
+        return new RefreshableEventListener<>(properties, eventType);
     }
+
 }

@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
+import com.github.triceo.robozonky.notifications.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +36,32 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractFileStoringListener<T extends Event> implements EventListener<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileStoringListener.class);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
-    static Optional<File> storeInvestmentMade(final File target, final int loanId, final int amount) {
+    Optional<File> storeInvestmentMade(final File target, final int loanId, final int amount) {
         final Collection<String> output = Collections.singletonList("#" + loanId + ": " + amount + " CZK");
         try {
             Files.write(target.toPath(), output);
             return Optional.of(target);
         } catch (final IOException ex) {
-            AbstractFileStoringListener.LOGGER.warn("Failed writing out {}.", target, ex);
+            LOGGER.warn("Failed writing out {}.", target, ex);
             return Optional.empty();
         }
     }
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Counter filesOfThisType;
+    private final ListenerSpecificNotificationProperties properties;
+
+    protected AbstractFileStoringListener(final ListenerSpecificNotificationProperties properties) {
+        this.properties = properties;
+        this.filesOfThisType = new Counter(this.getClass().getSimpleName(), properties.getListenerSpecificHourlyLimit());
+    }
+
+    boolean shouldStoreFile(final T event) {
+        return this.properties.getGlobalCounter().allow() && this.filesOfThisType.allow();
+    }
+
 
     abstract int getLoanId(final T event);
 
@@ -57,11 +71,17 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
 
     @Override
     public void handle(final T event) {
+        if (!this.shouldStoreFile(event)) {
+            LOGGER.debug("Will not store file.");
+            return;
+        }
         final Temporal now = event.getCreatedOn();
         final String filename = "robozonky." + AbstractFileStoringListener.FORMATTER.format(now) + '.'
                 + this.getSuffix();
-        AbstractFileStoringListener.storeInvestmentMade(new File(filename), this.getLoanId(event),
-                this.getAmount(event));
+        this.storeInvestmentMade(new File(filename), this.getLoanId(event), this.getAmount(event)).ifPresent(f -> {
+            this.properties.getGlobalCounter().increase();
+            this.filesOfThisType.increase();
+        });
     }
 
 }

@@ -20,6 +20,10 @@ import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 
 final class InvestmentRejectedEventListener extends AbstractFileStoringListener<InvestmentRejectedEvent> {
 
+    protected InvestmentRejectedEventListener(final ListenerSpecificNotificationProperties properties) {
+        super(properties);
+    }
+
     @Override
     int getLoanId(final InvestmentRejectedEvent event) {
         return event.getRecommendation().getLoanDescriptor().getLoan().getId();

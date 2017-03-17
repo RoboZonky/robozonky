@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications.email;
+package com.github.triceo.robozonky.notifications;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -30,23 +30,23 @@ import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class EmailCounter {
+public final class Counter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmailCounter.class);
-    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(EmailCounter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
+    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Counter.class);
     private static final String SEPARATOR = ";";
 
     private static void store(final String id, final Set<OffsetDateTime> timestamps) {
         final String result = timestamps.stream()
                 .map(OffsetDateTime::toString)
-                .collect(Collectors.joining(EmailCounter.SEPARATOR));
-        EmailCounter.STATE.setValue(id, result);
+                .collect(Collectors.joining(Counter.SEPARATOR));
+        Counter.STATE.setValue(id, result);
     }
 
     private static Collection<OffsetDateTime> load(final String id) {
-        return EmailCounter.STATE.getValue(id)
+        return Counter.STATE.getValue(id)
                 .map(value -> {
-                    final String[] split = value.split(EmailCounter.SEPARATOR);
+                    final String[] split = value.split(Counter.SEPARATOR);
                     return Stream.of(split)
                             .filter(s -> !s.trim().isEmpty())
                             .map(OffsetDateTime::parse)
@@ -55,34 +55,34 @@ final class EmailCounter {
     }
 
     private final String id;
-    private final int maxEmails;
+    private final int maxItems;
     private final TemporalAmount period;
     private final Set<OffsetDateTime> timestamps = new LinkedHashSet<>();
 
-    public EmailCounter(final String id, final int maxEmailsPerHour) {
-        this(id, maxEmailsPerHour, Duration.ofHours(1));
+    public Counter(final String id, final int maxItemsPerHour) {
+        this(id, maxItemsPerHour, Duration.ofHours(1));
     }
 
-    EmailCounter(final String id, final int maxEmails, final TemporalAmount period) {
+    Counter(final String id, final int maxItems, final TemporalAmount period) {
         this.id = id;
-        this.maxEmails = maxEmails;
+        this.maxItems = maxItems;
         this.period = period;
-        this.timestamps.addAll(EmailCounter.load(id));
+        this.timestamps.addAll(Counter.load(id));
     }
 
-    public synchronized void emailSent() {
+    public synchronized void increase() {
         timestamps.add(OffsetDateTime.now());
-        EmailCounter.store(id, timestamps);
+        Counter.store(id, timestamps);
     }
 
-    public synchronized boolean allowEmail() {
+    public synchronized boolean allow() {
         final OffsetDateTime now = OffsetDateTime.now();
         final boolean removed = timestamps.removeIf(timestamp -> timestamp.plus(period).isBefore(now));
         if (removed) {
-            EmailCounter.LOGGER.trace("Some timestamps removed.");
-            EmailCounter.store(id, timestamps);
+            Counter.LOGGER.trace("Some timestamps removed.");
+            Counter.store(id, timestamps);
         }
-        return timestamps.size() < maxEmails;
+        return timestamps.size() < maxItems;
     }
 
 }

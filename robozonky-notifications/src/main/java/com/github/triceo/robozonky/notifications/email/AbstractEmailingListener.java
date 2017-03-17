@@ -24,6 +24,7 @@ import java.util.Map;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.notifications.Counter;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -53,17 +54,17 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     }
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final EmailCounter emailsOfThisType;
+    private final Counter emailsOfThisType;
     private final ListenerSpecificNotificationProperties properties;
 
     public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
-        this.emailsOfThisType = new EmailCounter(this.getClass().getSimpleName(),
+        this.emailsOfThisType = new Counter(this.getClass().getSimpleName(),
                 properties.getListenerSpecificHourlyEmailLimit());
     }
 
     boolean shouldSendEmail(final T event) {
-        return this.properties.getGlobalEmailCounter().allowEmail() && this.emailsOfThisType.allowEmail();
+        return this.properties.getGlobalEmailCounter().allow() && this.emailsOfThisType.allow();
     }
 
     abstract String getSubject(final T event);
@@ -87,8 +88,8 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
                     email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
                     email.getSmtpPort(), properties.getSmtpUsername());
             email.send();
-            emailsOfThisType.emailSent();
-            this.properties.getGlobalEmailCounter().emailSent();
+            emailsOfThisType.increase();
+            this.properties.getGlobalEmailCounter().increase();
         } catch (final Exception ex) {
             throw new RuntimeException("Failed processing event.", ex);
         }

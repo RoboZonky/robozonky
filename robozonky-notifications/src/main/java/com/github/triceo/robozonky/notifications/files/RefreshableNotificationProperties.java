@@ -16,26 +16,26 @@
 
 package com.github.triceo.robozonky.notifications.files;
 
-import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-final class InvestmentSkippedEventListener extends AbstractFileStoringListener<InvestmentSkippedEvent> {
+import com.github.triceo.robozonky.api.Refreshable;
 
-    protected InvestmentSkippedEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(properties);
+class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
+
+    @Override
+    public Optional<Refreshable<?>> getDependedOn() {
+        return Optional.empty();
     }
 
     @Override
-    int getLoanId(final InvestmentSkippedEvent event) {
-        return event.getRecommendation().getLoanDescriptor().getLoan().getId();
+    protected Supplier<Optional<String>> getLatestSource() {
+        return NotificationProperties::getPropertiesContents;
     }
 
     @Override
-    int getAmount(final InvestmentSkippedEvent event) {
-        return event.getRecommendation().getRecommendedInvestmentAmount();
+    protected Optional<NotificationProperties> transform(final String source) {
+        return NotificationProperties.getProperties(source);
     }
 
-    @Override
-    String getSuffix() {
-        return "skipped";
-    }
 }

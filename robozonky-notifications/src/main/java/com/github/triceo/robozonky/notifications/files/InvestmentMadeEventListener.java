@@ -20,6 +20,10 @@ import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 
 final class InvestmentMadeEventListener extends AbstractFileStoringListener<InvestmentMadeEvent> {
 
+    protected InvestmentMadeEventListener(final ListenerSpecificNotificationProperties properties) {
+        super(properties);
+    }
+
     @Override
     int getLoanId(final InvestmentMadeEvent event) {
         return event.getInvestment().getLoanId();

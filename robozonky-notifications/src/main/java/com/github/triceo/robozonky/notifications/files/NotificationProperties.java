@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications.email;
+package com.github.triceo.robozonky.notifications.files;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -31,14 +31,15 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.notifications.Counter;
+import com.github.triceo.robozonky.notifications.email.EmailListenerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class NotificationProperties {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationProperties.class);
-    protected static final String HOURLY_LIMIT = "hourlyMaxEmails";
-    static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
+    protected static final String HOURLY_LIMIT = "hourlyMaxFiles";
+    static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-file.cfg");
 
     static Optional<NotificationProperties> getProperties(final String source) {
         try (final ByteArrayInputStream baos = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
@@ -91,37 +92,16 @@ class NotificationProperties {
     }
 
     protected Properties properties;
-    private String localHostAddress;
-    private final Counter globalEmailCounter;
+    private final Counter globalCounter;
 
     NotificationProperties(final Properties source) {
         this.properties = source;
-        this.globalEmailCounter = new Counter("global", this.getGlobalHourlyEmailLimit());
-    }
-
-    public synchronized String getLocalHostAddress() {
-        if (localHostAddress == null) {
-            // lazy init so that the remote request penalty is not incurred needlessly
-            localHostAddress = Defaults.getHostAddress();
-        }
-        return localHostAddress;
+        this.globalCounter = new Counter("global", this.getGlobalHourlyLimit());
     }
 
     protected boolean getBooleanValue(final String propertyName, final boolean defaultValue) {
         final String result = this.properties.getProperty(propertyName, String.valueOf(defaultValue));
         return Boolean.valueOf(result);
-    }
-
-    protected Optional<String> getStringValue(final String propertyName) {
-        if (this.properties.containsKey(propertyName)) {
-            return Optional.of(this.properties.getProperty(propertyName));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    protected String getStringValue(final String propertyName, final String defaultValue) {
-        return this.getStringValue(propertyName).orElse(defaultValue);
     }
 
     protected OptionalInt getIntValue(final String propertyName) {
@@ -132,47 +112,11 @@ class NotificationProperties {
         }
     }
 
-    protected int getIntValue(final String propertyName, final int defaultValue) {
-        return this.getIntValue(propertyName).orElse(defaultValue);
-    }
-
     public boolean isEnabled() {
         return this.getBooleanValue("enabled", false);
     }
 
-    public String getSender() {
-        return this.getStringValue("from", "noreply@robozonky.cz");
-    }
-
-    public String getRecipient() {
-        return this.getStringValue("to", "");
-    }
-
-    public boolean isStartTlsRequired() {
-        return this.getBooleanValue("smtp.requiresStartTLS", false);
-    }
-
-    public boolean isSslOnConnectRequired() {
-        return this.getBooleanValue("smtp.requiresSslOnConnect", false);
-    }
-
-    public String getSmtpUsername() {
-        return this.getStringValue("smtp.username", this.getRecipient());
-    }
-
-    public String getSmtpPassword() {
-        return this.getStringValue("smtp.password", "");
-    }
-
-    public String getSmtpHostname() {
-        return this.getStringValue("smtp.hostname", "localhost");
-    }
-
-    public int getSmtpPort() {
-        return this.getIntValue("smtp.port", 25);
-    }
-
-    private int getGlobalHourlyEmailLimit() {
+    private int getGlobalHourlyLimit() {
         final int val = this.getIntValue(NotificationProperties.HOURLY_LIMIT)
                 .orElse(Integer.MAX_VALUE);
         if (val < 0) {
@@ -182,16 +126,12 @@ class NotificationProperties {
         }
     }
 
-    public Counter getGlobalEmailCounter() {
-        return globalEmailCounter;
+    public Counter getGlobalCounter() {
+        return globalCounter;
     }
 
     public boolean isListenerEnabled(final SupportedListener listener) {
-        if (listener == SupportedListener.TESTING) { // always enabled so that notification testing works
-            return true;
-        } else {
-            return this.getBooleanValue(NotificationProperties.getCompositePropertyName(listener, "enabled"), false);
-        }
+        return this.getBooleanValue(NotificationProperties.getCompositePropertyName(listener, "enabled"), false);
     }
 
     @Override
