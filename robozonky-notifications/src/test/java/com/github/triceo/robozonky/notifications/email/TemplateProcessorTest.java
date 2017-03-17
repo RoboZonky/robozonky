@@ -17,14 +17,32 @@
 package com.github.triceo.robozonky.notifications.email;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Objects;
 
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class TemplateProcessorTest extends AbstractEmailingListenerTest {
+
+    @Test
+    public void properEncoding() throws IOException {
+        // use some arbitrary non-default charset
+        final Charset ch = Charset.availableCharsets().values().stream()
+                .filter(s -> !Objects.equals(s, Defaults.CHARSET))
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("No charsets!"));
+        final Configuration c = TemplateProcessor.getFreemarkerConfiguration(ch);
+        final AbstractEmailingListener<Event> l = this.getEmailingListener();
+        final Template t = c.getTemplate(l.getTemplateFileName());
+        // make sure the arbitrary charset was preferred over the default
+        Assertions.assertThat(t.getEncoding()).isEqualTo(ch.displayName());
+    }
 
     @Test
     public void processingWithoutErrors() throws IOException, TemplateException {
