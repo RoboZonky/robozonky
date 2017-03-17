@@ -64,8 +64,8 @@ public class ZonkySettingsValidatorTest {
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenReturn(token);
         Mockito.when(provider.authenticated(ArgumentMatchers.eq(token)))
-                .thenReturn(new ApiProvider.ApiWrapper<>(api));
-        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(oauth));
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, api));
+        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, oauth));
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
@@ -86,7 +86,7 @@ public class ZonkySettingsValidatorTest {
         final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenThrow(new IllegalStateException());
-        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(oauth));
+        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, oauth));
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
@@ -102,7 +102,7 @@ public class ZonkySettingsValidatorTest {
         final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenThrow(new ServerErrorException(Response.Status.INTERNAL_SERVER_ERROR));
-        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(oauth));
+        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, oauth));
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);

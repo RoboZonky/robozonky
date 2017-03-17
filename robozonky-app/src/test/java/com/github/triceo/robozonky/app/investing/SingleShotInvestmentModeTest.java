@@ -95,7 +95,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final ZonkyApi z = Mockito.mock(ZonkyApi.class);
         Mockito.when(z.getWallet()).thenReturn(w);
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new ApiProvider.ApiWrapper<>(z));
+        Mockito.when(p.authenticated(ArgumentMatchers.any()))
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, z));
         Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
@@ -152,7 +153,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final ZonkyApi z = Mockito.mock(ZonkyApi.class);
         Mockito.doThrow(IllegalStateException.class).when(z).getWallet();
         final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any())).thenReturn(new ApiProvider.ApiWrapper<>(z));
+        Mockito.when(p.authenticated(ArgumentMatchers.any()))
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, z));
         Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);

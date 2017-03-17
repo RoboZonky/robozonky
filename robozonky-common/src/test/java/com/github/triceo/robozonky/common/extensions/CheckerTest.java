@@ -49,7 +49,7 @@ public class CheckerTest {
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.when(api.getLoans()).thenReturn(Collections.emptyList());
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.when(provider.anonymous()).thenReturn(new ApiProvider.ApiWrapper<>(api));
+        Mockito.when(provider.anonymous()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, api));
         final Optional<Boolean> result =
                 Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
         Assertions.assertThat(result).isPresent().hasValue(false);
@@ -60,7 +60,7 @@ public class CheckerTest {
         final ZonkyApi api = Mockito.mock(ZonkyApi.class);
         Mockito.doReturn(Collections.singletonList(l)).when(api).getLoans();
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.doReturn(new ApiProvider.ApiWrapper<>(api)).when(provider).anonymous();
+        Mockito.doReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, api)).when(provider).anonymous();
         return provider;
     }
 

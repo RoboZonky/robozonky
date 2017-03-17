@@ -22,16 +22,16 @@ import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 public final class Authentication {
 
-    private final ApiProvider.ApiWrapper<ZonkyApi> zonkyApi;
+    private final ApiProvider apiProvider;
     private final ZonkyApiToken token;
 
     Authentication(final ApiProvider provider, final ZonkyApiToken token) {
-        this.zonkyApi = provider.authenticated(token);
+        this.apiProvider = provider;
         this.token = token;
     }
 
-    public ApiProvider.ApiWrapper<ZonkyApi> getZonkyApi() {
-        return zonkyApi;
+    public ApiProvider.ApiWrapper<ZonkyApi> newZonkyApi() {
+        return apiProvider.authenticated(token);
     }
 
     public ZonkyApiToken getZonkyApiToken() {

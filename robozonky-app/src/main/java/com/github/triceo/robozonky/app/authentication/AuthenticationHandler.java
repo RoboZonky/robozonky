@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Function;
 import javax.xml.bind.JAXBException;
 
@@ -100,8 +101,6 @@ public class AuthenticationHandler {
             try {
                 final long refreshIntervalInSeconds = tokenRefreshBeforeExpiration.get(ChronoUnit.SECONDS);
                 final ZonkyApiToken token = ZonkyApiToken.unmarshal(r);
-                AuthenticationHandler.LOGGER.debug("Token obtained: {}, expires: {}. Refresh {} seconds before.",
-                        token.getObtainedOn(), token.getExpiresOn(), refreshIntervalInSeconds);
                 final int safetyRefreshIntervalInSeconds = 5;
                 if (token.willExpireIn(Duration.ofSeconds(safetyRefreshIntervalInSeconds))) {
                     if (safetyRefreshIntervalInSeconds > refreshIntervalInSeconds) {
@@ -140,7 +139,7 @@ public class AuthenticationHandler {
      * @param token The token to use for the next login, if enabled.
      * @return True if RoboZonky should log out, false otherwise.
      */
-    private boolean isLogoutAllowed(final ZonkyApiToken token) {
+    private boolean isLogoutRequired(final ZonkyApiToken token) {
         if (!this.tokenBased) { // not using token; always logout
             return true;
         }
@@ -158,22 +157,33 @@ public class AuthenticationHandler {
      *
      * @param provider API provider to be used for constructing the authenticated API.
      * @param operation Operation to execute over the API.
-     * @return Investments newly made through the API.
+     * @return Investments newly made through the API. If operation null and {@link #tokenBased} true, will only refresh
+     * token (if necessary) and return empty.
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
     public Collection<Investment> execute(final ApiProvider provider,
                                           final Function<ZonkyApi, Collection<Investment>> operation) {
+        if (operation == null && !tokenBased) {
+            // needs password, yet won't do anything = don't log in
+            return Collections.emptyList();
+        }
         final Authentication currentAuthentication = this.buildAuthenticator().apply(provider);
-        try (final ApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.getZonkyApi()) {
+        final boolean logoutRequired = this.isLogoutRequired(currentAuthentication.getZonkyApiToken());
+        if (operation == null && !logoutRequired) {
+            // token created or refreshed, and there is no operation to perform; no need to create any other APIs
+            return Collections.emptyList();
+        }
+        try (final ApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.newZonkyApi()) {
             try {
-                return apiWrapper.execute(operation);
+                if (operation == null) {
+                    return Collections.emptyList();
+                } else {
+                    return apiWrapper.execute(operation);
+                }
             } finally { // attempt to log out no matter what happens
-                final boolean logoutAllowed = this.isLogoutAllowed(currentAuthentication.getZonkyApiToken());
-                if (logoutAllowed) {
+                if (logoutRequired) {
                     AuthenticationHandler.LOGGER.info("Logging out.");
                     apiWrapper.execute(ZonkyApi::logout);
-                } else { // if we're using the token, we should never log out
-                    AuthenticationHandler.LOGGER.info("Refresh token needs to be reused, not logging out of Zonky.");
                 }
             }
         }

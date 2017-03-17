@@ -83,12 +83,12 @@ public class ApiProvider implements AutoCloseable {
         private final ResteasyClient client;
         private final T api;
 
-        public ApiWrapper(final T api) {
-            this(api, null);
+        public ApiWrapper(final Class<T> apiClass, T api) {
+            this(apiClass, api, null);
         }
 
-        public ApiWrapper(final T api, final ResteasyClient client) {
-            ApiProvider.ApiWrapper.LOGGER.trace("Registering new RESTEasy client: {}.", client);
+        public ApiWrapper(final Class<T> apiClass, final T api, final ResteasyClient client) {
+            ApiProvider.ApiWrapper.LOGGER.trace("Registering {} REST client: {}.", apiClass.getSimpleName(), client);
             this.client = client;
             this.api = api;
         }
@@ -108,7 +108,7 @@ public class ApiProvider implements AutoCloseable {
         @Override
         public synchronized void close() {
             if (client != null && !client.isClosed()) {
-                ApiProvider.ApiWrapper.LOGGER.trace("Destroying RESTEasy client: {}.", client);
+                ApiProvider.ApiWrapper.LOGGER.trace("Destroying REST client: {}.", client);
                 client.close();
             }
         }
@@ -161,7 +161,7 @@ public class ApiProvider implements AutoCloseable {
                 .target(url)
                 .register(new BrowserCacheFeature())
                 .proxy(api);
-        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(proxy, client);
+        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(api, proxy, client);
         this.clients.add(new WeakReference<>(wrapper));
         return wrapper;
     }

@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.function.Function;
 import javax.ws.rs.BadRequestException;
@@ -43,7 +44,7 @@ abstract class Authenticator implements Function<ApiProvider, Authentication> {
      * @param password Zonky password.
      * @return Instance ready for authentication.
      */
-    public static Authenticator withCredentials(final String username, final char... password) {
+    public static Function<ApiProvider, Authentication> withCredentials(final String username, final char... password) {
         return new Authenticator() {
             @Override
             protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
@@ -61,24 +62,26 @@ abstract class Authenticator implements Function<ApiProvider, Authentication> {
      *
      * @param username Zonky username.
      * @param token OAuth token.
-     * @param tokenRefreshBeforeExpiration How long before token expiration to refresh the token.
-     * @return Instance ready for authentication.
+     * @param refreshBeforeExpiration How long before token expiration to refresh the token.
+     * @return Instance ready for authentication, or empty if token still fresh.
      */
-    public static Authenticator withAccessToken(final String username, final ZonkyApiToken token,
-                                                final TemporalAmount tokenRefreshBeforeExpiration) {
-        return new Authenticator() {
-            @Override
-            protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
-                if (token.willExpireIn(tokenRefreshBeforeExpiration)) {
+    public static Function<ApiProvider, Authentication> withAccessToken(final String username,
+                                                                        final ZonkyApiToken token,
+                                                                        final TemporalAmount refreshBeforeExpiration) {
+        if (token.willExpireIn(refreshBeforeExpiration)) {
+            return new Authenticator() {
+                @Override
+                protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
                     Authenticator.LOGGER.info("Authenticating as '{}', refreshing existing access token.", username);
                     final String tokenId = String.valueOf(token.getRefreshToken());
                     return api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
-                } else {
-                    Authenticator.LOGGER.info("Authenticated as '{}', reusing existing access token.", username);
-                    return token;
                 }
-            }
-        };
+            };
+        } else { // auth token is still up to date; don't even create the API endpoint
+            Authenticator.LOGGER.debug("Token obtained: {}, expires: {}. Refresh {} seconds before.", token.getObtainedOn(),
+                    token.getExpiresOn(), refreshBeforeExpiration.get(ChronoUnit.SECONDS));
+            return (api) -> new Authentication(api, token);
+        }
     }
 
     protected abstract ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api);

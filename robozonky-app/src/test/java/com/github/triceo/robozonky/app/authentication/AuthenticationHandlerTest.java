@@ -72,8 +72,8 @@ public class AuthenticationHandlerTest {
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(zonky));
-        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(zonkyOauth));
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, zonky));
+        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, zonkyOauth));
         Assertions.assertThat(auth.getSecretProvider()).isSameAs(secrets);
         Assertions.assertThat(auth.execute(apiProvider, (api) -> Collections.emptyList())).isNotNull();
         Mockito.verify(zonkyOauth, Mockito.times(1))
@@ -93,8 +93,8 @@ public class AuthenticationHandlerTest {
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(zonky));
-        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(zonkyOauth));
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, zonky));
+        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, zonkyOauth));
         Assertions.assertThat(h.execute(apiProvider, (api) -> Collections.emptyList())).isNotNull();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
@@ -112,8 +112,8 @@ public class AuthenticationHandlerTest {
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(zonky));
-        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(zonkyOauth));
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, zonky));
+        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, zonkyOauth));
         Assertions.assertThat(auth.execute(apiProvider, (api) -> Collections.emptyList())).isNotNull();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
@@ -136,8 +136,8 @@ public class AuthenticationHandlerTest {
                 ArgumentMatchers.any())).thenReturn(token);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(zonky));
-        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(zonkyOauth));
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, zonky));
+        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, zonkyOauth));
         Assertions.assertThat(auth.execute(apiProvider, (api) -> Collections.emptyList())).isNotNull();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
@@ -158,8 +158,8 @@ public class AuthenticationHandlerTest {
                 .thenReturn(token);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(zonky));
-        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(zonkyOauth));
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, zonky));
+        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, zonkyOauth));
         Assertions.assertThat(auth.execute(apiProvider, (api) -> Collections.emptyList())).isNotNull();
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
@@ -180,8 +180,8 @@ public class AuthenticationHandlerTest {
                 ArgumentMatchers.any())).thenReturn(token);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
         Mockito.when(apiProvider.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(zonky));
-        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(zonkyOauth));
+                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, zonky));
+        Mockito.when(apiProvider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(ZonkyOAuthApi.class, zonkyOauth));
         Assertions.assertThat(auth.execute(apiProvider, (api) -> Collections.emptyList())).isNotNull();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());

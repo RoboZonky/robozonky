@@ -109,6 +109,10 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
         });
     }
 
+    Collection<Investment> justReauth() {
+        return authenticationHandler.execute(apiProvider, null);
+    }
+
     @Override
     public Collection<Investment> apply(final Collection<LoanDescriptor> loans) {
         if (loans.isEmpty()) {
@@ -119,8 +123,9 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                     final Activity activity = new Activity(loans, maximumSleepPeriod);
                     final boolean shouldSleep = activity.shouldSleep();
                     if (shouldSleep) {
+                        final Collection<Investment> empty = justReauth();
                         StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
-                        return Collections.<Investment>emptyList();
+                        return empty;
                     } else {
                         StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
                                 .peek(l -> Events.fire(new LoanArrivedEvent(l)))
