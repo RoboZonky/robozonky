@@ -28,7 +28,7 @@ enum Variables {
     IS_DRY_RUN("isDryRun"),
     IS_EMAIL_ENABLED("isEmailEnabled"),
     IS_USING_OAUTH_TOKEN("isUsingToken"),
-    IS_WINDOWS("izpack.windowsinstall"),
+    IS_WINDOWS("isWindowsInstall"),
     IS_ZONKOID_ENABLED("isZonkoidEnabled"),
     JAVA_HOME("JAVA_HOME"),
     SMTP_TO("smtpTo"),
