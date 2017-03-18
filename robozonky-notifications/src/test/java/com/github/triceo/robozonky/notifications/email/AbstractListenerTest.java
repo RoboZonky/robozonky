@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
@@ -52,11 +53,12 @@ import org.mockito.Mockito;
 public abstract class AbstractListenerTest {
 
     private static EmailNotificationProperties getNotificationProperties() {
-        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
-                NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
-        final Optional<EmailNotificationProperties> p =
-                EmailNotificationProperties.getProperties(EmailNotificationProperties.getPropertiesContents().get());
-        System.clearProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY);
+        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                EmailNotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
+        final Refreshable<EmailNotificationProperties> r = new RefreshableEmailNotificationProperties();
+        r.run();
+        final Optional<EmailNotificationProperties> p = r.getLatest();
+        System.clearProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         return p.get();
     }
 

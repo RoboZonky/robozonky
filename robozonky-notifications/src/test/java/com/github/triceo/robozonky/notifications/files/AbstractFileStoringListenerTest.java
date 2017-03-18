@@ -26,8 +26,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
@@ -64,6 +68,16 @@ public class AbstractFileStoringListenerTest {
                 .collect(Collectors.toList());
     }
 
+    private static FileNotificationProperties getNotificationProperties() {
+        System.setProperty(RefreshableFileNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                AbstractFileStoringListener.class.getResource("notifications-enabled.cfg").toString());
+        final Refreshable<FileNotificationProperties> r = new RefreshableFileNotificationProperties();
+        r.run();
+        final Optional<FileNotificationProperties> p = r.getLatest();
+        System.clearProperty(RefreshableFileNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
+        return p.get();
+    }
+
     @Parameterized.Parameters
     public static Collection<Object[]> getListenerInfo() {
         final Collection<Object[]> result = new ArrayList<>();
@@ -71,33 +85,36 @@ public class AbstractFileStoringListenerTest {
         Mockito.when(l.getId()).thenReturn(1000);
         Mockito.when(l.getRemainingInvestment()).thenReturn(Double.MAX_VALUE);
         Mockito.when(l.getDatePublished()).thenReturn(OffsetDateTime.now());
+        final FileNotificationProperties p = AbstractFileStoringListenerTest.getNotificationProperties();
         final Investment i = new Investment(l, 300);
         final InvestmentMadeEvent ime = new InvestmentMadeEvent(i, 0);
-        final Runnable r = () -> new InvestmentMadeEventListener().handle(ime);
-        result.add(new Object[] {r, i.getLoanId(), i.getAmount(), "invested"} );
+        final EventListener l1 = SupportedListener.INVESTMENT_MADE.getListener(p);
+        result.add(new Object[] {l1, ime, i.getLoanId(), i.getAmount(), "invested"} );
         final Recommendation recommendation = new LoanDescriptor(l).recommend(300).get();
         final InvestmentRejectedEvent ire = new InvestmentRejectedEvent(recommendation, Integer.MAX_VALUE, "random");
-        final Runnable r2 = () -> new InvestmentRejectedEventListener().handle(ire);
-        result.add(new Object[] {r2, recommendation.getLoanDescriptor().getLoan().getId(),
+        final EventListener l2 = SupportedListener.INVESTMENT_REJECTED.getListener(p);
+        result.add(new Object[] {l2, ire, recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount(), "rejected"} );
         final InvestmentDelegatedEvent ide = new InvestmentDelegatedEvent(recommendation, 0, "random");
-        final Runnable r3 = () -> new InvestmentDelegatedEventListener().handle(ide);
-        result.add(new Object[] {r3, recommendation.getLoanDescriptor().getLoan().getId(),
+        final EventListener l3 = SupportedListener.INVESTMENT_DELEGATED.getListener(p);
+        result.add(new Object[] {l3, ide, recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount(), "delegated"} );
         final InvestmentSkippedEvent ise = new InvestmentSkippedEvent(recommendation);
-        final Runnable r4 = () -> new InvestmentSkippedEventListener().handle(ise);
-        result.add(new Object[] {r4, recommendation.getLoanDescriptor().getLoan().getId(),
+        final EventListener l4 = SupportedListener.INVESTMENT_SKIPPED.getListener(p);
+        result.add(new Object[] {l4, ise, recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount(), "skipped"} );
         return result;
     }
 
     @Parameterized.Parameter
-    public Runnable testedOperation;
+    public EventListener listener;
     @Parameterized.Parameter(1)
-    public int loanId;
+    public Event event;
     @Parameterized.Parameter(2)
-    public int loanAmount;
+    public int loanId;
     @Parameterized.Parameter(3)
+    public int loanAmount;
+    @Parameterized.Parameter(4)
     public String suffix;
 
     @Before
@@ -110,7 +127,7 @@ public class AbstractFileStoringListenerTest {
     public void checkInvestmentReported() throws IOException {
         // run class under test
         final Collection<Path> oldFiles = AbstractFileStoringListenerTest.getFilesInWorkingDirectory();
-        testedOperation.run();
+        listener.handle(event);
         final List<Path> newFiles = AbstractFileStoringListenerTest.getNewFilesInWorkingDirectory(oldFiles);
         // check existence and contents of new file
         final SoftAssertions softly = new SoftAssertions();

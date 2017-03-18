@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications.email;
+package com.github.triceo.robozonky.notifications;
 
 import java.time.Duration;
 import java.util.UUID;
 
-import com.github.triceo.robozonky.notifications.Counter;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class EmailCounterTest {
+public class CounterTest {
 
     @Test
     public void testTiming() throws InterruptedException {

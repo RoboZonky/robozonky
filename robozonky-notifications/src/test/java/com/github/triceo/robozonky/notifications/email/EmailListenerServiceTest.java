@@ -28,8 +28,8 @@ public class EmailListenerServiceTest extends AbstractListenerTest {
 
     @Rule
     public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
-            EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
-            NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
+            RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+            EmailNotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
 
     private final EmailListenerService service = new EmailListenerService();
 
@@ -42,7 +42,7 @@ public class EmailListenerServiceTest extends AbstractListenerTest {
 
     @Test
     public void noPropertiesNoListeners() {
-        System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY, "");
+        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "");
         Assertions.assertThat(getListener(this.event.getClass()).getLatest()).isEmpty();
     }
 

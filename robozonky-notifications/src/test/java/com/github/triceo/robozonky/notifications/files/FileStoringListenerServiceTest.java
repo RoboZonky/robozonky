@@ -25,20 +25,28 @@ import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import org.assertj.core.api.Assertions;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 
 public class FileStoringListenerServiceTest {
+
+    @Rule
+    public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
+            RefreshableFileNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+            FileStoringListenerServiceTest.class.getResource("notifications-enabled.cfg").toString());
 
     private FileStoringListenerService service = new FileStoringListenerService();
 
     private <T extends Event> Refreshable<EventListener<T>> getListener(final Class<T> eventType) {
         final Refreshable<EventListener<T>> refreshable = service.findListener(eventType);
+        refreshable.getDependedOn().get().run();
         refreshable.run();
         return refreshable;
     }
 
     @Test
-    public void supportsInvestmentDelegatedEvent() {
+    public void supports() {
         Assertions.assertThat(getListener(InvestmentDelegatedEvent.class).getLatest()).isPresent();
     }
 

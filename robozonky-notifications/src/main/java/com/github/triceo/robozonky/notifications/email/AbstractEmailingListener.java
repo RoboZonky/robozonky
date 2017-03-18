@@ -64,7 +64,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     }
 
     boolean shouldSendEmail(final T event) {
-        return this.properties.getGlobalEmailCounter().allow() && this.emailsOfThisType.allow();
+        return this.properties.getGlobalCounter().allow() && this.emailsOfThisType.allow();
     }
 
     abstract String getSubject(final T event);
@@ -89,7 +89,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
                     email.getSmtpPort(), properties.getSmtpUsername());
             email.send();
             emailsOfThisType.increase();
-            this.properties.getGlobalEmailCounter().increase();
+            this.properties.getGlobalCounter().increase();
         } catch (final Exception ex) {
             throw new RuntimeException("Failed processing event.", ex);
         }

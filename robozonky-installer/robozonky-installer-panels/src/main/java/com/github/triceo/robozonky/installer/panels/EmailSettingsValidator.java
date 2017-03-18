@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.github.triceo.robozonky.common.extensions.Checker;
-import com.github.triceo.robozonky.notifications.email.EmailListenerService;
+import com.github.triceo.robozonky.notifications.email.RefreshableEmailNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
@@ -37,14 +37,14 @@ public class EmailSettingsValidator implements DataValidator {
             final Properties emailConfig = Util.configureEmailNotifications(installData);
             final File emailConfigTarget = File.createTempFile("robozonky-", ".cfg");
             Util.writeOutProperties(emailConfig, emailConfigTarget);
-            System.setProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY,
+            System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                     emailConfigTarget.toURI().toURL().toExternalForm());
             return Checker.notifications() ? DataValidator.Status.OK : DataValidator.Status.ERROR;
         } catch (final Exception ex) {
             EmailSettingsValidator.LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
             return DataValidator.Status.WARNING;
         } finally {
-            System.clearProperty(EmailListenerService.CONFIG_FILE_LOCATION_PROPERTY);
+            System.clearProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         }
     }
 

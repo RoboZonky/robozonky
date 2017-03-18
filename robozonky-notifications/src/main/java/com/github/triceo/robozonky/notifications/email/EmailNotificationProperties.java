@@ -80,7 +80,12 @@ class EmailNotificationProperties extends NotificationProperties {
     }
 
     public boolean isListenerEnabled(final SupportedListener listener) {
-        return this.getBooleanValue(EmailNotificationProperties.getCompositePropertyName(listener, "enabled"), false);
+        if (listener == SupportedListener.TESTING) {
+            return true;
+        } else {
+            final String propName = EmailNotificationProperties.getCompositePropertyName(listener, "enabled");
+            return this.isEnabled() && this.getBooleanValue(propName, false);
+        }
     }
 
     @Override

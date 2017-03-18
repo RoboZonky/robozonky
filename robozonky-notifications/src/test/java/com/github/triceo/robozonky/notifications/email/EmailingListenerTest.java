@@ -34,9 +34,7 @@ public class EmailingListenerTest extends AbstractEmailingListenerTest {
     @Test
     public void testMailSent() throws Exception {
         final AbstractEmailingListener<Event> l = this.getEmailingListener();
-        System.out.println(l);
         Assertions.assertThat(this.event).isInstanceOf(this.listenerType.getEventType());
-        System.out.println(this.event);
         l.handle(this.event);
         Assertions.assertThat(l.getData(this.event)).isNotNull();
         Assertions.assertThat(l.shouldSendEmail(this.event)).isTrue();
