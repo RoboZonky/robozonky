@@ -93,15 +93,11 @@
     </field>
     <field type="text" variable="smtpUsername">
       <spec txt="Uživatel SMTP:" id="smtp.username" size="20" set="${zonkyUsername}"/>
-      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
-                 txt="Uživatelské jméno je povinná položka." />
     </field>
     <field type="password" variable="smtpPassword">
       <spec>
         <pwd txt="Heslo k SMTP:" id="smtp.password" size="20" set=""/>
       </spec>
-      <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
-                 txt="Heslo je povinná položka." />
     </field>
     <field type="text" variable="smtpHostname">
       <spec txt="Adresa SMTP serveru:" id="smtp.hostname" size="20" set=""/>
