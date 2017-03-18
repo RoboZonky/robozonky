@@ -35,15 +35,10 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread@%X{process_id}] %-5level %logger{36} %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <queueSize>1024</queueSize>
-        <neverBlock>true</neverBlock>
-        <appender-ref ref="FILE" />
-    </appender>
     <logger name="org.apache.http" level="INFO"/>
     <logger name="org.jboss" level="INFO"/>
     <root level="TRACE">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="ASYNC"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>
