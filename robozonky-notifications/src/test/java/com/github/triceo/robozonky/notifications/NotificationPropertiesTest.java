@@ -43,7 +43,10 @@ public class NotificationPropertiesTest {
         final Properties p = new Properties();
         p.load(NotificationPropertiesTest.class.getResourceAsStream("email/notifications-enabled.cfg"));
         final NotificationPropertiesTest.TestingProperties tp = new NotificationPropertiesTest.TestingProperties(p);
-        Assertions.assertThat(tp).isEqualTo(tp);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(tp).isEqualTo(tp);
+            softly.assertThat(tp.hashCode()).isEqualTo(tp.properties.hashCode());
+        });
     }
 
     @Test
@@ -57,6 +60,8 @@ public class NotificationPropertiesTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(tp).isNotEqualTo(tp2);
             softly.assertThat(tp2).isNotEqualTo(tp);
+            softly.assertThat(tp).isNotEqualTo(null);
+            softly.assertThat(tp).isNotEqualTo("");
         });
     }
 

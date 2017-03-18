@@ -34,7 +34,7 @@ public abstract class NotificationProperties {
         return this.properties;
     }
 
-    protected Properties properties;
+    final protected Properties properties;
     private final Counter globalCounter;
 
     protected NotificationProperties(final Properties source) {
@@ -95,7 +95,7 @@ public abstract class NotificationProperties {
 
     @Override
     public int hashCode() {
-        return Objects.hash(properties);
+        return properties.hashCode();
     }
 
     @Override
