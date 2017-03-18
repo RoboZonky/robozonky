@@ -47,7 +47,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
     private static InstallData DATA;
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
-    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, EMAIL_CONFIG_FILE, CLI_CONFIG_FILE;
+    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, EMAIL_CONFIG_FILE, CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
 
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
@@ -66,6 +66,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         KEYSTORE_FILE = new File(INSTALL_PATH, "robozonky.keystore");
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
         CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
+        LOGBACK_CONFIG_FILE = new File(INSTALL_PATH, "logback.xml");
+
     }
 
     static void resetInstallData() {
@@ -75,6 +77,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         KEYSTORE_FILE = null;
         EMAIL_CONFIG_FILE = null;
         CLI_CONFIG_FILE = null;
+        LOGBACK_CONFIG_FILE = null;
     }
 
     CommandLinePart prepareStrategy() {
@@ -239,30 +242,38 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     void moveLog() {
         final File logFile = new File(DIST_PATH, "logback.xml");
-        final File targetFile = new File(INSTALL_PATH, "logback.xml");
         try {
-            Files.copy(logFile.toPath(), targetFile.toPath());
+            Files.copy(logFile.toPath(), LOGBACK_CONFIG_FILE.toPath());
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed copying log file.", ex);
         }
     }
 
+    void prepareDirectory() {
+        KEYSTORE_FILE.delete();
+        EMAIL_CONFIG_FILE.delete();
+        CLI_CONFIG_FILE.delete();
+        LOGBACK_CONFIG_FILE.delete();
+    }
+
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
-        progressListener.startAction("Konfigurace RoboZonky", 7);
-        progressListener.nextStep("Příprava strategie.", 1, 1);
+        progressListener.startAction("Konfigurace RoboZonky", 8);
+        progressListener.nextStep("Příprava instalačního adresáře.", 1, 1);
+        prepareDirectory();
+        progressListener.nextStep("Příprava strategie.", 2, 1);
         final CommandLinePart strategyConfig = prepareStrategy();
-        progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
+        progressListener.nextStep("Příprava nastavení e-mailu.", 3, 1);
         final CommandLinePart emailConfig = prepareEmailConfiguration();
-        progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
+        progressListener.nextStep("Příprava nastavení JMX.", 4, 1);
         final CommandLinePart jmx = prepareJmx();
-        progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
+        progressListener.nextStep("Příprava nastavení Zonky.", 5, 1);
         final CommandLinePart credentials = prepareCore();
-        progressListener.nextStep("Generování parametrů příkazové řádky.", 5, 1);
+        progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
         final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials);
-        progressListener.nextStep("Příprava nastavení logování.", 6, 1);
+        progressListener.nextStep("Příprava nastavení logování.", 7, 1);
         moveLog();
-        progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
+        progressListener.nextStep("Generování spustitelného souboru.", 8, 1);
         prepareRunScript(result);
         progressListener.stopAction();
     }
