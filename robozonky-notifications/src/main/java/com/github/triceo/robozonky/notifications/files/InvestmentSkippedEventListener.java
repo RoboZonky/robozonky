@@ -35,7 +35,7 @@ final class InvestmentSkippedEventListener extends AbstractFileStoringListener<I
     }
 
     @Override
-    String getSuffix() {
+    String getSuffix(InvestmentSkippedEvent event) {
         return "skipped";
     }
 }

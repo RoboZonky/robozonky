@@ -62,12 +62,11 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
         return this.properties.getGlobalCounter().allow() && this.filesOfThisType.allow();
     }
 
-
     abstract int getLoanId(final T event);
 
     abstract int getAmount(final T event);
 
-    abstract String getSuffix();
+    abstract String getSuffix(final T event);
 
     @Override
     public void handle(final T event) {
@@ -77,7 +76,7 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
         }
         final Temporal now = event.getCreatedOn();
         final String filename = "robozonky." + AbstractFileStoringListener.FORMATTER.format(now) + '.'
-                + this.getSuffix();
+                + this.getSuffix(event);
         this.storeInvestmentMade(new File(filename), this.getLoanId(event), this.getAmount(event)).ifPresent(f -> {
             this.properties.getGlobalCounter().increase();
             this.filesOfThisType.increase();

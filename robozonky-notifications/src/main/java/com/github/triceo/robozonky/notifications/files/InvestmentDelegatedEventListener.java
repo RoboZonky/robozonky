@@ -35,7 +35,7 @@ final class InvestmentDelegatedEventListener extends AbstractFileStoringListener
     }
 
     @Override
-    String getSuffix() {
+    String getSuffix(InvestmentDelegatedEvent event) {
         return "delegated";
     }
 }

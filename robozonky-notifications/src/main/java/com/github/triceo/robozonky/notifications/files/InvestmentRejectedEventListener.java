@@ -35,7 +35,7 @@ final class InvestmentRejectedEventListener extends AbstractFileStoringListener<
     }
 
     @Override
-    String getSuffix() {
+    String getSuffix(InvestmentRejectedEvent event) {
         return "rejected";
     }
 }

@@ -35,7 +35,7 @@ final class InvestmentMadeEventListener extends AbstractFileStoringListener<Inve
     }
 
     @Override
-    String getSuffix() {
-        return "invested";
+    String getSuffix(final InvestmentMadeEvent event) {
+        return event.isDryRun() ? "dry" : "invested";
     }
 }

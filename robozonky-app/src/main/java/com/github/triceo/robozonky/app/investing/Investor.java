@@ -107,7 +107,7 @@ class Investor {
             case INVESTED:
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
                 final Investment i = new Investment(recommendation.getLoanDescriptor().getLoan(), confirmedAmount);
-                Events.fire(new InvestmentMadeEvent(i, balance.intValue() - confirmedAmount));
+                Events.fire(new InvestmentMadeEvent(i, balance.intValue() - confirmedAmount, api.isDryRun()));
                 tracker.makeInvestment(i);
                 return Optional.of(i);
             case SEEN_BEFORE:

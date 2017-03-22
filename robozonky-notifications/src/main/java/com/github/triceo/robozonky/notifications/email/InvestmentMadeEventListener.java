@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 
 final class InvestmentMadeEventListener extends AbstractEmailingListener<InvestmentMadeEvent> {
 
@@ -40,12 +41,14 @@ final class InvestmentMadeEventListener extends AbstractEmailingListener<Investm
 
     @Override
     Map<String, Object> getData(final InvestmentMadeEvent event) {
+        final Investment i = event.getInvestment();
         final Map<String, Object> result = new HashMap<>();
-        result.put("investedAmount", event.getInvestment().getAmount());
-        result.put("loanId", event.getInvestment().getLoanId());
-        result.put("loanRating", event.getInvestment().getRating().getCode());
-        result.put("loanTerm", event.getInvestment().getLoanTermInMonth());
+        result.put("investedAmount", i.getAmount());
+        result.put("loanId", i.getLoanId());
+        result.put("loanRating", i.getRating().getCode());
+        result.put("loanTerm", i.getLoanTermInMonth());
         result.put("newBalance", event.getFinalBalance());
+        result.put("isDryRun", event.isDryRun());
         return result;
     }
 

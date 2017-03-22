@@ -25,10 +25,17 @@ public final class InvestmentMadeEvent extends Event {
 
     private final Investment investment;
     private final int finalBalance;
+    private final boolean dryRun;
 
-    public InvestmentMadeEvent(final Investment investment, final int finalBalance) {
+    public InvestmentMadeEvent(final Investment investment, final int finalBalance, final boolean isDryRun) {
         this.investment = investment;
         this.finalBalance = finalBalance;
+        this.dryRun = isDryRun;
+    }
+
+    @Deprecated
+    public InvestmentMadeEvent(final Investment investment, final int finalBalance) {
+        this(investment, finalBalance, false);
     }
 
     /**
@@ -43,6 +50,14 @@ public final class InvestmentMadeEvent extends Event {
      */
     public int getFinalBalance() {
         return this.finalBalance;
+    }
+
+    /**
+     *
+     * @return True if investment was only simulated.
+     */
+    public boolean isDryRun() {
+        return dryRun;
     }
 
 }

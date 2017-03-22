@@ -80,7 +80,7 @@ public abstract class AbstractListenerTest {
         final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
         events.put(SupportedListener.INVESTMENT_DELEGATED,
                 new InvestmentDelegatedEvent(recommendation, 200, "random"));
-        events.put(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200));
+        events.put(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200, true));
         events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
         events.put(SupportedListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, 200, "random"));
         events.put(SupportedListener.BALANCE_ON_TARGET, new ExecutionStartedEvent("", Collections.emptyList(), 200));
