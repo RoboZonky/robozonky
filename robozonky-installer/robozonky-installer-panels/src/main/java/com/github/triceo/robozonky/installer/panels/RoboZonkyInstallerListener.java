@@ -85,7 +85,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         if (Objects.equals(Variables.STRATEGY_TYPE.getValue(DATA), "file")) {
             final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
             try {
-                Files.copy(new File(content).toPath(), strategyFile.toPath());
+                Files.copy(new File(content).toPath(), strategyFile.getAbsoluteFile().toPath());
                 return new CommandLinePart().setOption("-s", strategyFile.getName());
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed copying strategy file.", ex);
@@ -193,7 +193,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private String createScript(final CommandLinePart commandLine, final String name) {
         final File subexecutable = new File(DIST_PATH, name);
         subexecutable.setExecutable(true);
-        return subexecutable.getPath() + " " + commandLine.convertOptions();
+        return subexecutable.getAbsolutePath() + " " + commandLine.convertOptions();
     }
 
     private Collection<String> getWindowsScript(final CommandLinePart commandLine) {
