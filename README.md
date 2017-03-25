@@ -8,7 +8,8 @@
 
 * [Ke stažení](http://triceo.github.io/robozonky/).
 * [Dokumentace](https://github.com/triceo/robozonky/wiki).
-* [Facebooková skupina](https://www.facebook.com/groups/1730149903922159/) na dotazy a diskusi.
+* [Uživatelská podpora](https://groups.google.com/forum/#!forum/robozonky-users) pro dotazy a diskusi.
+* [Hlášení chyb](https://github.com/triceo/robozonky/issues) přímo na Githubu.
 
 
 ## Proč to dělám
