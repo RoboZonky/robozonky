@@ -44,6 +44,7 @@ public class SchedulerTest {
         protected Optional<String> transform(final String source) {
             return Optional.of(source);
         }
+
     };
 
     @Test

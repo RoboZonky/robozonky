@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -32,66 +31,35 @@ import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
 
-    private static final class DirectInvestmentCommand implements InvestmentCommand {
-
-        private final int loanId, loanAmount;
-
-        public DirectInvestmentCommand(final int loanId, final int loanAmount) {
-            this.loanId = loanId;
-            this.loanAmount = loanAmount;
-        }
-
-        @Override
-        public Collection<LoanDescriptor> getLoans() {
-            return Collections.singletonList(new LoanDescriptor(new Loan(loanId, loanAmount)));
-        }
-
-        @Override
-        public Collection<Investment> apply(final Investor investor) {
-            final Optional<Investment> optional = investor.invest(loanId, loanAmount, ResultTracker.CAPTCHA_DELAY);
-            return (optional.isPresent()) ? Collections.singletonList(optional.get()) : Collections.emptyList();
-        }
-
-        public int getLoanId() {
-            return loanId;
-        }
-
-        public int getLoanAmount() {
-            return loanAmount;
-        }
-    }
-
-    private final DirectInvestmentMode.DirectInvestmentCommand investmentCommand;
+    private final int loanId, loanAmount;
 
     public DirectInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
                                 final boolean isFaultTolerant, final int loanId, final int loanAmount) {
         super(auth, builder, isFaultTolerant);
-        this.investmentCommand = new DirectInvestmentMode.DirectInvestmentCommand(loanId, loanAmount);
-    }
-
-    Collection<Investment> invest(final ApiProvider apiProvider) {
-        return this.getAuthenticationHandler().execute(apiProvider, api -> {
-            final ZonkyProxy proxy = getProxyBuilder().build(api);
-            return StrategyExecution.invest(proxy, investmentCommand);
-        });
+        this.loanId = loanId;
+        this.loanAmount = loanAmount;
     }
 
     @Override
     protected void openMarketplace(final Consumer<Collection<Loan>> target) {
-        final DirectInvestmentMode.DirectInvestmentCommand c = investmentCommand;
-        target.accept(Collections.singleton(new Loan(c.getLoanId(), c.getLoanAmount())));
+        target.accept(Collections.emptyList()); // marketplace is abstracted away since we're only using the one loan
     }
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return (loans) -> loans.stream()
-            .map(ld -> this.invest(apiProvider))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+        return (loans) -> this.getAuthenticationHandler().execute(apiProvider, api -> {
+            final ZonkyProxy proxy = getProxyBuilder().build(api);
+            final Loan l = proxy.execute(z -> z.getLoan(loanId));
+            final LoanDescriptor d = new LoanDescriptor(l);
+            return d.recommend(loanAmount, false)
+                    .map(r -> Session.invest(proxy, new DirectInvestmentCommand(r)))
+                    .orElse(Collections.emptyList());
+        });
     }
 
     @Override
     protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
         return this.execute(apiProvider, new Semaphore(1));
     }
+
 }

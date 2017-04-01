@@ -31,13 +31,13 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class BlockedAmountsInvestorTest {
+public class BlockedAmountsTest {
 
     @Test
     public void noBlockedAmounts() {
         final ZonkyProxy api = Mockito.mock(ZonkyProxy.class);
         Mockito.when(api.execute(ArgumentMatchers.any())).thenReturn(Collections.emptyList());
-        final Collection<Investment> result = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(api);
+        final Collection<Investment> result = Session.retrieveInvestmentsRepresentedByBlockedAmounts(api);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -65,12 +65,12 @@ public class BlockedAmountsInvestorTest {
         Mockito.when(api.getLoan(ArgumentMatchers.eq(loanId2))).thenReturn(loan2);
         final ZonkyProxy proxy = new ZonkyProxy.Builder().build(api);
         // check the loan amounts have been properly merged, investors' fees ignored
-        final List<Investment> result = Investor.retrieveInvestmentsRepresentedByBlockedAmounts(proxy);
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(result).hasSize(2);
-        softly.assertThat(result.get(0).getAmount()).isEqualTo(loan1amount1 + loan1amount2);
-        softly.assertThat(result.get(1).getAmount()).isEqualTo(loan2amount);
-        softly.assertAll();
+        final List<Investment> result = Session.retrieveInvestmentsRepresentedByBlockedAmounts(proxy);
+        Assertions.assertThat(result).hasSize(2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result.get(0).getAmount()).isEqualTo(loan1amount1 + loan1amount2);
+            softly.assertThat(result.get(1).getAmount()).isEqualTo(loan2amount);
+        });
     }
 
 }

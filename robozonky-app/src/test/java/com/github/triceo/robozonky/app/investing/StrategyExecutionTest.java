@@ -16,52 +16,20 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.mockito.Mockito;
 
 public class StrategyExecutionTest extends AbstractInvestingTest {
-
-    @Rule
-    public final RestoreSystemProperties propertyRestore = new RestoreSystemProperties();
-
-    @Test
-    public void getBalancePropertyInDryRun() {
-        final int value = 200;
-        System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
-        final ZonkyProxy.Builder p = new ZonkyProxy.Builder().asDryRun();
-        Assertions.assertThat(StrategyExecution.getAvailableBalance(p.build(null)).intValue()).isEqualTo(value);
-    }
-
-    @Test
-    public void getBalancePropertyIgnoredWhenNotDryRun() {
-        System.setProperty("robozonky.default.dry_run_balance", "200");
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
-        Mockito.when(api.getWallet()).thenReturn(new Wallet(1, 2, BigDecimal.TEN, BigDecimal.ZERO));
-        final ZonkyProxy.Builder p = new ZonkyProxy.Builder();
-        Assertions.assertThat(StrategyExecution.getAvailableBalance(p.build(api))).isEqualTo(BigDecimal.ZERO);
-    }
-
-    @Test
-    public void getRemoteBalanceInDryRun() {
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
-        Mockito.when(api.getWallet()).thenReturn(new Wallet(1, 2, BigDecimal.TEN, BigDecimal.ZERO));
-        final ZonkyProxy.Builder p = new ZonkyProxy.Builder().asDryRun();
-        Assertions.assertThat(StrategyExecution.getAvailableBalance(p.build(api))).isEqualTo(BigDecimal.ZERO);
-    }
 
     @Test
     public void empty() {

@@ -93,9 +93,4 @@ public abstract class RefreshableNotificationProperties<N extends NotificationPr
         }
     }
 
-    @Override
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.empty();
-    }
-
 }

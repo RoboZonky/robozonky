@@ -56,10 +56,6 @@ public abstract class Refreshable<T> implements Runnable {
      */
     public static <I> Refreshable<I> createImmutable(final I toReturn) {
         return new Refreshable<I>() {
-            @Override
-            public Optional<Refreshable<?>> getDependedOn() {
-                return Optional.empty();
-            }
 
             @Override
             protected Supplier<Optional<String>> getLatestSource() {
@@ -70,6 +66,7 @@ public abstract class Refreshable<T> implements Runnable {
             protected Optional<I> transform(final String source) {
                 return Optional.ofNullable(toReturn);
             }
+
         };
     }
 
@@ -89,10 +86,12 @@ public abstract class Refreshable<T> implements Runnable {
 
     /**
      * Whether or not the refresh of this resource depends on the refresh of another resource. This method exists so
-     * that any scheduler can properly include all the required {@link Refreshable}s.
+     * that any scheduler can properly include all the required {@link Refreshable}s by overriding this one.
      * @return Present if this resource needs another resource to be properly refreshed.
      */
-    public abstract Optional<Refreshable<?>> getDependedOn();
+    public Optional<Refreshable<?>> getDependedOn() {
+        return Optional.empty();
+    }
 
     /**
      * Result of this method will be used to fetch the latest resource state. While {@link #run()} is being

@@ -17,12 +17,27 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.Collections;
 
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.strategies.Recommendation;
 
-interface InvestmentCommand extends Consumer<Session> {
+final class DirectInvestmentCommand implements InvestmentCommand {
 
-    Collection<LoanDescriptor> getLoans();
+    private final Recommendation recommendation;
+
+    public DirectInvestmentCommand(final Recommendation recommendation) {
+        this.recommendation = recommendation;
+    }
+
+    @Override
+    public Collection<LoanDescriptor> getLoans() {
+        return Collections.singletonList(recommendation.getLoanDescriptor());
+    }
+
+    @Override
+    public void accept(final Session s) {
+        s.invest(recommendation);
+    }
 
 }

@@ -17,10 +17,8 @@
 package com.github.triceo.robozonky.notifications.files;
 
 import java.io.File;
-import java.util.Optional;
 import java.util.Properties;
 
-import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.notifications.RefreshableNotificationProperties;
 
 class RefreshableFileNotificationProperties extends RefreshableNotificationProperties<FileNotificationProperties> {
@@ -41,11 +39,6 @@ class RefreshableFileNotificationProperties extends RefreshableNotificationPrope
     @Override
     protected File getDefaultConfigFileLocation() {
         return RefreshableFileNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION;
-    }
-
-    @Override
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.empty();
     }
 
 }

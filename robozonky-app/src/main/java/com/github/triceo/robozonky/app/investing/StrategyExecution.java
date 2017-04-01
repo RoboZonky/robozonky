@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
@@ -25,8 +24,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
@@ -34,52 +31,12 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class StrategyExecution implements Function<Collection<LoanDescriptor>, Collection<Investment>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecution.class);
-
-    private static final class StrategyBasedInvestmentCommand implements InvestmentCommand {
-
-        private final InvestmentStrategy strategy;
-        private final Collection<LoanDescriptor> loans;
-
-        public StrategyBasedInvestmentCommand(final InvestmentStrategy strategy,
-                                              final Collection<LoanDescriptor> loans) {
-            this.strategy = strategy;
-            this.loans = loans;
-        }
-
-        @Override
-        public Collection<LoanDescriptor> getLoans() {
-            return loans;
-        }
-
-        @Override
-        public Collection<Investment> apply(final Investor investor) {
-            return investor.invest(strategy, loans);
-        }
-
-    }
-
-    static BigDecimal getAvailableBalance(final ZonkyProxy api) {
-        final int balance = Defaults.getDefaultDryRunBalance();
-        return (api.isDryRun() && balance > -1) ?
-                BigDecimal.valueOf(balance) :
-                api.execute(zonky -> zonky.getWallet().getAvailableBalance());
-    }
-
-    static Collection<Investment> invest(final ZonkyProxy proxy, final InvestmentCommand command) {
-        final BigDecimal balance = StrategyExecution.getAvailableBalance(proxy);
-        Events.fire(new ExecutionStartedEvent(proxy.getUsername(), command.getLoans(), balance.intValue()));
-        final Investor investor = new Investor(proxy, balance);
-        final Collection<Investment> result = command.apply(investor);
-        Events.fire(new ExecutionCompletedEvent(proxy.getUsername(), result, investor.getBalance().intValue()));
-        return Collections.unmodifiableCollection(result);
-    }
 
     private final ApiProvider apiProvider;
     private final AuthenticationHandler authenticationHandler;
@@ -102,14 +59,12 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
         this(apiProvider, proxyBuilder, strategy, auth, Duration.ofMinutes(60));
     }
 
-    Collection<Investment> invest(final InvestmentStrategy strategy, final Collection<LoanDescriptor> loans) {
-        return authenticationHandler.execute(apiProvider, api -> {
-            final InvestmentCommand c = new StrategyExecution.StrategyBasedInvestmentCommand(strategy, loans);
-            return StrategyExecution.invest(proxyBuilder.build(api), c);
-        });
+    private Collection<Investment> invest(final InvestmentStrategy strategy, final Collection<LoanDescriptor> loans) {
+        final InvestmentCommand c = new StrategyBasedInvestmentCommand(strategy, loans);
+        return authenticationHandler.execute(apiProvider, api -> Session.invest(proxyBuilder.build(api), c));
     }
 
-    Collection<Investment> justReauth() {
+    private Collection<Investment> justReauth() {
         return authenticationHandler.execute(apiProvider, null);
     }
 

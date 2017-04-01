@@ -143,11 +143,6 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
     }
 
     @Override
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.empty();
-    }
-
-    @Override
     protected Supplier<Optional<String>> getLatestSource() {
         return () -> {
             try (final InputStreamReader reader =

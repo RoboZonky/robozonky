@@ -60,11 +60,6 @@ final class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy
     }
 
     @Override
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.empty();
-    }
-
-    @Override
     protected Supplier<Optional<String>> getLatestSource() {
         return () -> {
             try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
