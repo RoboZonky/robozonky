@@ -35,7 +35,7 @@ enum TemplateProcessor {
     INSTANCE;
 
     static Configuration getFreemarkerConfiguration(final Charset charset) {
-        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_26);
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
         cfg.setTimeZone(TimeZone.getTimeZone(Defaults.ZONE_ID));
