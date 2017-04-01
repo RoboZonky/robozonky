@@ -33,8 +33,8 @@
   </modules>
   <packaging>pom</packaging>
   <name>RoboZonky: Easy automated investing with Zonky</name>
-  <description>Automated investing on Zonky. Define investment strategy, run repeatedly, profit.</description>
-  <url>https://triceo.github.io/robozonky/</url>
+  <description>Automated investing on Zonky. Define investment strategy, run, profit.</description>
+  <url>http://www.robozonky.cz/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
