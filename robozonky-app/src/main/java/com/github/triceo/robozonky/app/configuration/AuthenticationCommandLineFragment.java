@@ -33,8 +33,8 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
             description = "Used to connect to the Zonky server.")
     private String username = null;
 
-    @Parameter(names = {"-p", "--password"}, required = true,
-            description = "Used to connect to the Zonky server, or to read the secure storage.",
+    @Parameter(names = {"-p", "--password"}, password = true, required = true,
+            description = "Enter Zonky account password or secure storage password.",
             converter = PasswordConverter.class)
     private char[] password = null;
 
