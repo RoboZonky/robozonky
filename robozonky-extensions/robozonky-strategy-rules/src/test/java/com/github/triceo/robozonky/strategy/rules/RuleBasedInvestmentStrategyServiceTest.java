@@ -81,8 +81,14 @@ public class RuleBasedInvestmentStrategyServiceTest {
         Mockito.when(aaaa.getRating()).thenReturn(Rating.AAAA);
         Mockito.when(aaaa.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(aaaa.getTermInMonths()).thenReturn(30);
+        final Loan c = Mockito.mock(Loan.class); // will be rejected by the filter
+        Mockito.when(c.getId()).thenReturn(6);
+        Mockito.when(c.getRemainingInvestment()).thenReturn(100000.0);
+        Mockito.when(c.getRating()).thenReturn(Rating.C);
+        Mockito.when(c.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
+        Mockito.when(c.getTermInMonths()).thenReturn(30);
         final Loan d = Mockito.mock(Loan.class); // will be accepted and prioritized over AAAA
-        Mockito.when(d.getId()).thenReturn(6);
+        Mockito.when(d.getId()).thenReturn(7);
         Mockito.when(d.getRemainingInvestment()).thenReturn(100000.0);
         Mockito.when(d.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         Mockito.when(d.getAmount()).thenReturn(50000.0);
@@ -95,7 +101,7 @@ public class RuleBasedInvestmentStrategyServiceTest {
                 .forEach(r -> Mockito.when(portfolio.getShareOnInvestment(r)).thenReturn(BigDecimal.ZERO));
         Mockito.when(portfolio.getShareOnInvestment(Rating.AAA)).thenReturn(BigDecimal.ONE);
         // check investing logic
-        final Map<Loan, LoanDescriptor> loans = Stream.of(aaaaa, aaaa, aaa, aa, b, d)
+        final Map<Loan, LoanDescriptor> loans = Stream.of(aaaaa, aaaa, aaa, aa, b, c, d)
                 .collect(Collectors.toMap(Function.identity(), l -> new LoanDescriptor(l, Duration.ofSeconds(100))));
         final List<Recommendation> result = is.recommend(loans.values(), portfolio);
         Assertions.assertThat(result).containsOnly(loans.get(d).recommend(200).get(),

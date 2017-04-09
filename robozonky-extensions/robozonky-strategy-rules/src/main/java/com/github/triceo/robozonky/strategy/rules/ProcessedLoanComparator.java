@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,15 @@ package com.github.triceo.robozonky.strategy.rules;
 
 import java.util.Comparator;
 
-import com.github.triceo.robozonky.strategy.rules.facts.AcceptedLoan;
-
-public class AcceptedLoanComparator implements Comparator<AcceptedLoan> {
+class ProcessedLoanComparator implements Comparator<ProcessedLoan> {
 
     @Override
-    public int compare(final AcceptedLoan acceptedLoan, final AcceptedLoan t1) {
+    public int compare(final ProcessedLoan acceptedLoan, final ProcessedLoan t1) {
         // most important first
-        final Comparator<AcceptedLoan> byPriority = Comparator.comparing(AcceptedLoan::getPriority).reversed();
+        final Comparator<ProcessedLoan> byPriority = Comparator.comparing(ProcessedLoan::getPriority).reversed();
         // then oldest
-        final Comparator<AcceptedLoan> byId = Comparator.comparing(AcceptedLoan::getId);
-        return byPriority.thenComparing(byId).compare(acceptedLoan, t1);
+        final Comparator<ProcessedLoan> byRecent =
+                (p1, p2) -> Comparator.comparing((ProcessedLoan p) -> p.getLoan().getDatePublished()).compare(p1, p2);
+        return byPriority.thenComparing(byRecent).compare(acceptedLoan, t1);
     }
 }

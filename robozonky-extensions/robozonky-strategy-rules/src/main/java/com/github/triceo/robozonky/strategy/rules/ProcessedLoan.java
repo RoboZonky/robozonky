@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.strategy.rules.facts;
+package com.github.triceo.robozonky.strategy.rules;
 
-import com.github.triceo.robozonky.strategy.rules.AcceptedLoanComparator;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-public class AcceptedLoan implements Comparable<AcceptedLoan> {
+public class ProcessedLoan implements Comparable<ProcessedLoan> {
 
-    private int id;
-    private int priority;
-    private int amount;
-    private boolean confirmationRequired;
+    private final Loan loan;
+    private final int priority;
+    private int amount = 0;
+    private boolean confirmationRequired = false;
+
+    public ProcessedLoan(final Loan loan, final int priority) {
+        this.loan = loan;
+        this.priority = priority;
+    }
 
     public int getAmount() {
         return amount;
@@ -41,24 +46,17 @@ public class AcceptedLoan implements Comparable<AcceptedLoan> {
         this.confirmationRequired = confirmationRequired;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(final int id) {
-        this.id = id;
+    public Loan getLoan() {
+        return loan;
     }
 
     public int getPriority() {
         return priority;
     }
 
-    public void setPriority(final int priority) {
-        this.priority = priority;
+    @Override
+    public int compareTo(final ProcessedLoan other) {
+        return new ProcessedLoanComparator().compare(this, other);
     }
 
-    @Override
-    public int compareTo(final AcceptedLoan acceptedLoan) {
-        return new AcceptedLoanComparator().compare(this, acceptedLoan);
-    }
 }
