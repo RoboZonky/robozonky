@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -37,13 +38,19 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 
 public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
+    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzMarketplace"));
+
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService executor =
+            Executors.newScheduledThreadPool(2, DaemonInvestmentMode.THREAD_FACTORY);
     private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
+    private final SuddenDeathWorkaround suddenDeath =
+            new SuddenDeathWorkaround(DaemonInvestmentMode.BLOCK_UNTIL_RELEASED, 5);
     public static final Semaphore BLOCK_UNTIL_RELEASED = new Semaphore(1);
 
     public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
@@ -90,6 +97,8 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
                 marketplace.run();
             } catch (final Throwable t) {
                 new DaemonRuntimeExceptionHandler().handle(t);
+            } finally {
+                suddenDeath.registerMarketplaceCheck(); // sudden death averted for now
             }
         };
         switch (marketplace.specifyExpectedTreatment()) {
@@ -97,6 +106,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
                 final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
                 LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
                 executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
+                executor.scheduleWithFixedDelay(this.suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
                 break;
             case LISTENING:
                 LOGGER.debug("Starting marketplace listener.");
@@ -111,6 +121,11 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
         return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
                 maximumSleepPeriod);
+    }
+
+    @Override
+    protected boolean wasSuddenDeath() {
+        return suddenDeath.isSuddenDeath();
     }
 
     @Override

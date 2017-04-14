@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -76,6 +77,10 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
         }
     }
 
+    protected boolean wasSuddenDeath() {
+        return false; // only daemon can suddenly die
+    }
+
     /**
      * Start marketplace which will be putting loans into a given buffer.
      *
@@ -109,12 +114,22 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
                 buffer.acceptInvestmentsFromRobot(result);
             };
             openMarketplace(investor);
-            LOGGER.trace("Will wait for user stop.");
+            LOGGER.trace("Will wait for request to stop.");
             circuitBreaker.acquireUninterruptibly(Math.max(1, circuitBreaker.availablePermits()));
-            LOGGER.trace("User stop received.");
+            LOGGER.trace("Request to stop received.");
             circuitBreaker.release();
+            if (this.wasSuddenDeath()) {
+                throw new SuddenDeathException();
+            }
             return Optional.of(buffer.getInvestmentsMade());
-        } catch (final Exception ex) {
+        } catch (final SuddenDeathException ex) {
+            LOGGER.error("Thread stack traces:");
+            Thread.getAllStackTraces().forEach((key, value) -> {
+                LOGGER.error("Stack trace for thread {}:", key);
+                Stream.of(value).forEach(ste -> LOGGER.error("{}", ste));
+            });
+            throw new IllegalStateException(ex);
+        } catch (final Throwable ex) {
             LOGGER.error("Failed executing investments.", ex);
             return Optional.empty();
         }

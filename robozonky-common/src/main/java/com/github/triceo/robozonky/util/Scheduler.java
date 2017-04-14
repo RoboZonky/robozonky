@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -35,45 +36,48 @@ import org.slf4j.LoggerFactory;
 public class Scheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
+    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
     private static final TemporalAmount REFRESH =
             Duration.ofMinutes(Settings.INSTANCE.getRemoteResourceRefreshIntervalInMinutes());
     public static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(1);
 
     private final Supplier<ScheduledExecutorService> executorProvider;
     private ScheduledExecutorService executor;
-    private final Set<Refreshable<?>> submitted = new LinkedHashSet<>();
+    private final Set<Runnable> submitted = new LinkedHashSet<>();
 
     public Scheduler() {
         this(1);
     }
 
     public Scheduler(final int poolSize) {
-        this.executorProvider = () -> Executors.newScheduledThreadPool(poolSize);
+        this.executorProvider = () -> Executors.newScheduledThreadPool(poolSize, Scheduler.THREAD_FACTORY);
         this.executor = executorProvider.get();
     }
 
-    private void actuallySubmit(final Refreshable<?> toSchedule, final TemporalAmount delayInBetween) {
+    private void actuallySubmit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
         final long delayInSeconds = delayInBetween.get(ChronoUnit.SECONDS);
         Scheduler.LOGGER.debug("Scheduling {} every {} seconds.", toSchedule, delayInSeconds);
         this.submitted.add(toSchedule);
         executor.scheduleWithFixedDelay(toSchedule, 0, delayInSeconds, TimeUnit.SECONDS);
     }
 
-    public void submit(final Refreshable<?> toSchedule) {
+    public void submit(final Runnable toSchedule) {
         this.submit(toSchedule, Scheduler.REFRESH);
     }
 
-    public void submit(final Refreshable<?> toSchedule, final TemporalAmount delayInBetween) {
-        final Optional<Refreshable<?>> maybeDependedOn = toSchedule.getDependedOn();
-        maybeDependedOn.ifPresent(dependedOn -> {
-            this.submit(dependedOn, delayInBetween); // make sure the parent's parent is also submitted
-        });
+    public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
+        if (toSchedule instanceof Refreshable) {
+            final Optional<Refreshable<?>> maybeDependedOn = ((Refreshable<?>)toSchedule).getDependedOn();
+            maybeDependedOn.ifPresent(dependedOn -> {
+                this.submit(dependedOn, delayInBetween); // make sure the parent's parent is also submitted
+            });
+        }
         if (!isSubmitted(toSchedule)) {
             this.actuallySubmit(toSchedule, delayInBetween);
         }
     }
 
-    public boolean isSubmitted(final Refreshable<?> refreshable) {
+    public boolean isSubmitted(final Runnable refreshable) {
         return submitted.contains(refreshable);
     }
 
