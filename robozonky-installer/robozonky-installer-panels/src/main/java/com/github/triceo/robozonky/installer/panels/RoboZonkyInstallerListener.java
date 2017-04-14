@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.installer.panels;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -36,6 +37,7 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.notifications.email.RefreshableEmailNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
@@ -47,7 +49,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
     private static InstallData DATA;
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
-    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, EMAIL_CONFIG_FILE, CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
+    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, CLI_CONFIG_FILE,
+            LOGBACK_CONFIG_FILE;
 
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
@@ -64,6 +67,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         INSTALL_PATH = new File(Variables.INSTALL_PATH.getValue(DATA));
         DIST_PATH = new File(INSTALL_PATH, "Dist/");
         KEYSTORE_FILE = new File(INSTALL_PATH, "robozonky.keystore");
+        JMX_PROPERTIES_FILE = new File(INSTALL_PATH, "management.properties");
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
         CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
         LOGBACK_CONFIG_FILE = new File(INSTALL_PATH, "logback.xml");
@@ -75,6 +79,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         INSTALL_PATH = null;
         DIST_PATH = null;
         KEYSTORE_FILE = null;
+        JMX_PROPERTIES_FILE = null;
         EMAIL_CONFIG_FILE = null;
         CLI_CONFIG_FILE = null;
         LOGBACK_CONFIG_FILE = null;
@@ -126,17 +131,28 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     CommandLinePart prepareJmx() {
-        if (!Boolean.valueOf(Variables.IS_JMX_ENABLED.getValue(DATA))) {
-            return new CommandLinePart();
+        final String coreProperty = "com.sun.management.jmxremote";
+        if (!Boolean.valueOf(Variables.IS_JMX_ENABLED.getValue(DATA))) { // ignore JMX
+            return new CommandLinePart().setProperty(coreProperty, "false");
         }
+        // write JMX properties file
         final String port = Variables.JMX_PORT.getValue(DATA);
+        final Properties props = new Properties();
+        props.setProperty("com.sun.management.jmxremote.authenticate",
+                Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA));
+        props.setProperty("com.sun.management.jmxremote.ssl", "false");
+        props.setProperty("com.sun.management.jmxremote.rmi.port", port);
+        props.setProperty("com.sun.management.jmxremote.port", port);
+        props.setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
+        try (final Writer w = Files.newBufferedWriter(JMX_PROPERTIES_FILE.toPath(), Defaults.CHARSET)) {
+            props.store(w, Defaults.ROBOZONKY_USER_AGENT);
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Failed writing JMX configuration.", ex);
+        }
+        // configure JMX to read the props file
         return new CommandLinePart()
-                .setProperty("com.sun.management.jmxremote.authenticate",
-                        Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA))
-                .setProperty("com.sun.management.jmxremote.ssl", "false")
-                .setProperty("com.sun.management.jmxremote.rmi.port", port)
-                .setProperty("com.sun.management.jmxremote.port", port)
-                .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
+                .setProperty(coreProperty, "true")
+                .setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath());
     }
 
     CommandLinePart prepareCore() {
