@@ -245,7 +245,7 @@ public class RoboZonkyInstallerListenerTest {
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
         Mockito.verify(progress, times(1)).startAction(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt());
-        Mockito.verify(progress, times(8))
+        Mockito.verify(progress, times(7))
                 .nextStep(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), ArgumentMatchers.eq(1));
         Mockito.verify(progress, times(1)).stopAction();
     }
@@ -267,7 +267,7 @@ public class RoboZonkyInstallerListenerTest {
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
         Mockito.verify(progress, times(1)).startAction(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt());
-        Mockito.verify(progress, times(8))
+        Mockito.verify(progress, times(7))
                 .nextStep(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), ArgumentMatchers.eq(1));
         Mockito.verify(progress, times(1)).stopAction();
     }

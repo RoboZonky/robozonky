@@ -17,10 +17,9 @@
 package com.github.triceo.robozonky.installer.panels;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.Properties;
 
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -40,8 +39,8 @@ class Util {
     }
 
     public static void writeOutProperties(final Properties properties, final File target) throws IOException {
-        try (final Writer w = new OutputStreamWriter(new FileOutputStream(target), Defaults.CHARSET)) {
-            properties.store(w, "Konfigurace e-mailových notifikací z RoboZonky");
+        try (final Writer w = Files.newBufferedWriter(target.toPath(), Defaults.CHARSET)) {
+            properties.store(w, Defaults.ROBOZONKY_USER_AGENT);
         }
     }
 

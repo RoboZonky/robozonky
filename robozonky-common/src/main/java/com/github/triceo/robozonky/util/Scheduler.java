@@ -28,14 +28,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Scheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    private static final TemporalAmount REFRESH = Duration.ofMinutes(Defaults.getRemoteResourceRefreshIntervalInMinutes());
+    private static final TemporalAmount REFRESH =
+            Duration.ofMinutes(Settings.INSTANCE.getRemoteResourceRefreshIntervalInMinutes());
     public static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(1);
 
     private final Supplier<ScheduledExecutorService> executorProvider;

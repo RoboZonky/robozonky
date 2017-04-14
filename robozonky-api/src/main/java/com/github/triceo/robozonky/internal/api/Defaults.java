@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Carries default values for some basic application properties, such as charset or locale.
+ * Carries application constants (such as version) and desired environmental settings (such as charset or locale).
  */
 public final class Defaults {
 
@@ -58,48 +58,6 @@ public final class Defaults {
             Defaults.LOGGER.debug("Failed retrieving local host address.", ex);
             return "localhost";
         }
-    }
-
-    private static int getPropertyValue(final String propertyName, final int defaultValue) {
-        final String value = System.getProperty(propertyName, String.valueOf(defaultValue));
-        try {
-            return Integer.parseInt(value);
-        } catch (final NumberFormatException ex) {
-            return defaultValue;
-        }
-    }
-
-    private static boolean getPropertyValue(final String propertyName, final boolean defaultValue) {
-        final String value = System.getProperty(propertyName, String.valueOf(defaultValue));
-        try {
-            return Boolean.parseBoolean(value);
-        } catch (final NumberFormatException ex) {
-            return defaultValue;
-        }
-    }
-
-    /**
-     * When set to true, this is essentially a controlled memory leak. Generally only useful for testing.
-     * @return
-     */
-    public static boolean isDebugEventStorageEnabled() {
-        return Defaults.getPropertyValue("robozonky.debug.enable_event_storage", false);
-    }
-
-    public static int getTokenRefreshBeforeExpirationInSeconds() {
-        return Defaults.getPropertyValue("robozonky.default.token_refresh_seconds", 60);
-    }
-
-    public static int getRemoteResourceRefreshIntervalInMinutes() {
-        return Defaults.getPropertyValue("robozonky.default.resource_refresh_minutes", 5);
-    }
-
-    public static int getCaptchaDelayInSeconds() {
-        return Defaults.getPropertyValue("robozonky.default.captcha_protection_seconds", 120);
-    }
-
-    public static int getDefaultDryRunBalance() {
-        return Defaults.getPropertyValue("robozonky.default.dry_run_balance", -1);
     }
 
 }

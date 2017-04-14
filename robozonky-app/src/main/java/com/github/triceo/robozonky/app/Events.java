@@ -31,7 +31,7 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.common.extensions.ListenerServiceLoader;
-import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,13 +116,13 @@ public enum Events {
         Events.INSTANCE.getListeners(eventClass).parallel()
                 .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
                 .forEach(l -> Events.fire(event, l));
-        if (Defaults.isDebugEventStorageEnabled()) {
+        if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
             Events.EVENTS_FIRED.add(event);
         }
     }
 
     /**
-     * This only exists for testing purposes. Also see {@link Defaults#isDebugEventStorageEnabled()}.
+     * This only exists for testing purposes. Also see {@link Settings#isDebugEventStorageEnabled()}.
      *
      * @return Events that were stored, if any. Returns the storage directly, any mutation operations will mutate the
      * storage.

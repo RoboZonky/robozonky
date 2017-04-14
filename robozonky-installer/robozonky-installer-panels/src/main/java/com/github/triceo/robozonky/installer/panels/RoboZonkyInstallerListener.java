@@ -18,7 +18,6 @@ package com.github.triceo.robozonky.installer.panels;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -38,7 +37,7 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
-import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import com.github.triceo.robozonky.notifications.email.RefreshableEmailNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
@@ -50,8 +49,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
     private static InstallData DATA;
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
-    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, CLI_CONFIG_FILE,
-            LOGBACK_CONFIG_FILE;
+    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
+            CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
 
     private static void copyFile(final File from, final File to) throws IOException {
         Files.copy(from.toPath(), to.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -74,6 +73,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         KEYSTORE_FILE = new File(INSTALL_PATH, "robozonky.keystore");
         JMX_PROPERTIES_FILE = new File(INSTALL_PATH, "management.properties");
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
+        SETTINGS_FILE = new File(INSTALL_PATH, "robozonky.properties");
         CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
         LOGBACK_CONFIG_FILE = new File(INSTALL_PATH, "logback.xml");
 
@@ -86,6 +86,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         KEYSTORE_FILE = null;
         JMX_PROPERTIES_FILE = null;
         EMAIL_CONFIG_FILE = null;
+        SETTINGS_FILE = null;
         CLI_CONFIG_FILE = null;
         LOGBACK_CONFIG_FILE = null;
     }
@@ -127,6 +128,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final String username = Variables.ZONKY_USERNAME.getValue(DATA);
         final char[] password = Variables.ZONKY_PASSWORD.getValue(DATA).toCharArray();
         try {
+            KEYSTORE_FILE.delete();
             final KeyStoreHandler keystore = KeyStoreHandler.create(KEYSTORE_FILE, keystorePassword);
             return SecretProvider.keyStoreBased(keystore, username, password);
         } catch (final Exception ex) {
@@ -149,8 +151,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         props.setProperty("com.sun.management.jmxremote.rmi.port", port);
         props.setProperty("com.sun.management.jmxremote.port", port);
         props.setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
-        try (final Writer w = Files.newBufferedWriter(JMX_PROPERTIES_FILE.toPath(), Defaults.CHARSET)) {
-            props.store(w, Defaults.ROBOZONKY_USER_AGENT);
+        try {
+            Util.writeOutProperties(props, JMX_PROPERTIES_FILE);
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed writing JMX configuration.", ex);
         }
@@ -203,13 +205,27 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             // store it to a file
             cli.storeOptions(CLI_CONFIG_FILE);
             // and have the file loaded during RoboZonky startup
-            final CommandLinePart result = new CommandLinePart()
+            final CommandLinePart commandLine = new CommandLinePart()
                     .setOption("@" + CLI_CONFIG_FILE.getAbsolutePath())
+                    .setProperty(Settings.FILE_LOCATION_PROPERTY, SETTINGS_FILE.getAbsolutePath())
                     .setEnvironmentVariable("JAVA_HOME", Variables.JAVA_HOME.getValue(DATA));
+            // now proceed to set all system properties and settings
+            final Properties settings = new Properties();
             Stream.of(strategy.getProperties(), emailConfig.getProperties(), jmxConfig.getProperties(),
                     credentials.getProperties(), logging.getProperties())
-                    .forEach(m -> m.forEach(result::setProperty));
-            return result;
+                    .flatMap(p -> p.entrySet().stream())
+                    .forEach(e -> {
+                        final String key = e.getKey();
+                        final String value = e.getValue();
+                        if (key.startsWith("robozonky")) { // RoboZonky setting to be written to separate file
+                            settings.setProperty(key, value);
+                        } else { // general Java system property to end up on the command line
+                            commandLine.setProperty(key, value);
+                        }
+                    });
+            // write settings to a file
+            Util.writeOutProperties(settings, SETTINGS_FILE);
+            return commandLine;
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed writing CLI.", ex);
         }
@@ -272,31 +288,22 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    void prepareDirectory() {
-        KEYSTORE_FILE.delete();
-        EMAIL_CONFIG_FILE.delete();
-        CLI_CONFIG_FILE.delete();
-        LOGBACK_CONFIG_FILE.delete();
-    }
-
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
-        progressListener.startAction("Konfigurace RoboZonky", 8);
-        progressListener.nextStep("Příprava instalačního adresáře.", 1, 1);
-        prepareDirectory();
-        progressListener.nextStep("Příprava strategie.", 2, 1);
+        progressListener.startAction("Konfigurace RoboZonky", 7);
+        progressListener.nextStep("Příprava strategie.", 1, 1);
         final CommandLinePart strategyConfig = prepareStrategy();
-        progressListener.nextStep("Příprava nastavení e-mailu.", 3, 1);
+        progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
         final CommandLinePart emailConfig = prepareEmailConfiguration();
-        progressListener.nextStep("Příprava nastavení JMX.", 4, 1);
+        progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
         final CommandLinePart jmx = prepareJmx();
-        progressListener.nextStep("Příprava nastavení Zonky.", 5, 1);
+        progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
         final CommandLinePart credentials = prepareCore();
-        progressListener.nextStep("Příprava nastavení logování.", 6, 1);
+        progressListener.nextStep("Příprava nastavení logování.", 5, 1);
         final CommandLinePart logging = prepareLogging();
-        progressListener.nextStep("Generování parametrů příkazové řádky.", 7, 1);
+        progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
         final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials, logging);
-        progressListener.nextStep("Generování spustitelného souboru.", 8, 1);
+        progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
         prepareRunScript(result);
         progressListener.stopAction();
     }

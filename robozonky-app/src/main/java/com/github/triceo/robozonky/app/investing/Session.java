@@ -49,6 +49,7 @@ import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import com.github.triceo.robozonky.internal.api.Retriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ class Session implements AutoCloseable {
     }
 
     static BigDecimal getAvailableBalance(final ZonkyProxy api) {
-        final int balance = Defaults.getDefaultDryRunBalance();
+        final int balance = Settings.INSTANCE.getDefaultDryRunBalance();
         return (api.isDryRun() && balance > -1) ?
                 BigDecimal.valueOf(balance) :
                 api.execute(zonky -> zonky.getWallet().getAvailableBalance());

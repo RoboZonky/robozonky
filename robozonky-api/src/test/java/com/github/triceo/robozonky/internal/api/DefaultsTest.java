@@ -17,26 +17,9 @@
 package com.github.triceo.robozonky.internal.api;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
 public class DefaultsTest {
-
-    @Rule
-    public final RestoreSystemProperties propertiesRestorer = new RestoreSystemProperties();
-
-    @Test
-    public void properties() {
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(Defaults.isDebugEventStorageEnabled()).isFalse();
-            softly.assertThat(Defaults.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
-            softly.assertThat(Defaults.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(5);
-            softly.assertThat(Defaults.getCaptchaDelayInSeconds()).isEqualTo(120);
-            softly.assertThat(Defaults.getDefaultDryRunBalance()).isEqualTo(-1);
-        });
-    }
 
     @Test
     public void hostAddress() {

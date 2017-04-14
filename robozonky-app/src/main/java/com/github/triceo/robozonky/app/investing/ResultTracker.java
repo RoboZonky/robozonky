@@ -27,13 +27,15 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class ResultTracker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultTracker.class);
-    static final TemporalAmount CAPTCHA_DELAY = Duration.ofSeconds(Defaults.getCaptchaDelayInSeconds());
+    static final TemporalAmount CAPTCHA_DELAY =
+            Duration.ofSeconds(Settings.INSTANCE.getCaptchaDelayInSeconds());
 
     /**
      * We are using volatile so that the write operation is guaranteed to be atomic.
