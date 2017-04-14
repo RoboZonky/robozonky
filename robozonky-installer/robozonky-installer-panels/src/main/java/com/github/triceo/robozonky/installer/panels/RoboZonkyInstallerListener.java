@@ -192,7 +192,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
-                                       final CommandLinePart jmxConfig, final CommandLinePart credentials) {
+                                       final CommandLinePart jmxConfig, final CommandLinePart credentials,
+                                       final CommandLinePart logging) {
         // assemble the CLI
         final CommandLinePart cli = new CommandLinePart();
         credentials.getOptions().forEach((k, v) -> cli.setOption(k, v.toArray(new String[v.size()])));
@@ -206,7 +207,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                     .setOption("@" + CLI_CONFIG_FILE.getAbsolutePath())
                     .setEnvironmentVariable("JAVA_HOME", Variables.JAVA_HOME.getValue(DATA));
             Stream.of(strategy.getProperties(), emailConfig.getProperties(), jmxConfig.getProperties(),
-                    credentials.getProperties())
+                    credentials.getProperties(), logging.getProperties())
                     .forEach(m -> m.forEach(result::setProperty));
             return result;
         } catch (final IOException ex) {
@@ -261,9 +262,11 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    void moveLog() {
+    CommandLinePart prepareLogging() {
         try {
             RoboZonkyInstallerListener.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
+            return new CommandLinePart()
+                    .setProperty("logback.configurationFile", LOGBACK_CONFIG_FILE.getAbsolutePath());
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed copying log file.", ex);
         }
@@ -289,10 +292,10 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final CommandLinePart jmx = prepareJmx();
         progressListener.nextStep("Příprava nastavení Zonky.", 5, 1);
         final CommandLinePart credentials = prepareCore();
-        progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
-        final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials);
-        progressListener.nextStep("Příprava nastavení logování.", 7, 1);
-        moveLog();
+        progressListener.nextStep("Příprava nastavení logování.", 6, 1);
+        final CommandLinePart logging = prepareLogging();
+        progressListener.nextStep("Generování parametrů příkazové řádky.", 7, 1);
+        final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials, logging);
         progressListener.nextStep("Generování spustitelného souboru.", 8, 1);
         prepareRunScript(result);
         progressListener.stopAction();

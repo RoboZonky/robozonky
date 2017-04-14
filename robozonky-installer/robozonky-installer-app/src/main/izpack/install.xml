@@ -25,6 +25,7 @@
     <appsubpath>@{info.appsubpath}</appsubpath>
     <url>http://www.robozonky.cz/</url>
     <javaversion>@{java.version}</javaversion>
+    <uninstaller write="no" />
   </info>
 
   <logging level="ALL">
@@ -107,7 +108,7 @@
       <file src="@{staging.dir}/tmp/robozonky-app-dist.zip"
             targetdir="${INSTALL_PATH}/Dist"
             override="true"
-            unpack="true"/>
+            unpack="true" />
     </pack>
     <pack name="RoboZonky rozšíření: Na pravidlech založená investiční strategie" required="no" preselected="no">
       <description>Podpora pro investiční strategii, která umožnuje deklarativně definovat investiční pravidla.
