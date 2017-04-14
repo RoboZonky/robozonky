@@ -43,7 +43,7 @@
       <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>
     </field>
     <field type="check" variable="isEmailEnabled">
-      <spec txt="Notifikovat e-mailem." set="false"/>
+      <spec txt="Notifikovat e-mailem." set="true"/>
     </field>
     <field type="check" variable="isUsingToken">
       <spec txt="Neodhlašovat ze Zonky." set="false"/>
@@ -134,7 +134,7 @@
       <spec txt="Chyba RoboZonky, robot pravděpodobně pokračuje." set="false"/>
     </field>
     <field type="check" variable="isCriticalFailureNotificationEnabled">
-      <spec txt="Kritická chyba RoboZonky, robot se pravděpodobně ukončí." set="false"/>
+      <spec txt="Kritická chyba RoboZonky, robot se pravděpodobně ukončí." set="true"/>
     </field>
 
     <field type="space" />
@@ -184,7 +184,7 @@
                  txt="Strategie je povinná položka." />
     </field>
     <field type="text" variable="strategy"  conditionid="isStrategyByUrl">
-      <spec txt="Zadejte URL, kde se nachází investiční strategie:" size="30" />
+      <spec txt="Vložte odkaz na investiční strategii:" size="30" />
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Strategie je povinná položka." />
     </field>
@@ -192,7 +192,7 @@
     <field type="space" />
     <field type="space" />
     <field type="staticText" align="left" bold="true"
-           txt="Pokračováním dojde k instalaci RoboZonky na tento počítač."
+           txt="Budete-li pokračovat, RoboZonky bude nainstalován na tento počítač."
            id="zonkoid.test"/>
   </panel>
 </izpack:userinput>
