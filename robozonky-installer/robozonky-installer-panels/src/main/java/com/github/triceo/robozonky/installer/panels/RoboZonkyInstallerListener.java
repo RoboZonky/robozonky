@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +52,10 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, CLI_CONFIG_FILE,
             LOGBACK_CONFIG_FILE;
+
+    private static void copyFile(final File from, final File to) throws IOException {
+        Files.copy(from.toPath(), to.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
 
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
@@ -90,7 +95,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         if (Objects.equals(Variables.STRATEGY_TYPE.getValue(DATA), "file")) {
             final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
             try {
-                Files.copy(new File(content).toPath(), strategyFile.getAbsoluteFile().toPath());
+                RoboZonkyInstallerListener.copyFile(new File(content), strategyFile);
                 return new CommandLinePart().setOption("-s", strategyFile.getName());
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed copying strategy file.", ex);
@@ -257,9 +262,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     void moveLog() {
-        final File logFile = new File(DIST_PATH, "logback.xml");
         try {
-            Files.copy(logFile.toPath(), LOGBACK_CONFIG_FILE.toPath());
+            RoboZonkyInstallerListener.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed copying log file.", ex);
         }
