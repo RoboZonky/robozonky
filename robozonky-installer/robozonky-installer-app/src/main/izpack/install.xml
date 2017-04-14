@@ -27,6 +27,10 @@
     <javaversion>@{java.version}</javaversion>
   </info>
 
+  <logging level="ALL">
+    <log-file pattern="robozonky-installer.log" append="false" level="ALL" />
+  </logging>
+
   <jar src="@{staging.dir}/tmp/robozonky-installer-panels-jar-with-dependencies.jar" />
 
   <locale>

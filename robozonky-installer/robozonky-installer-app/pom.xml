@@ -103,7 +103,7 @@
           <mkdirs>true</mkdirs>
           <autoIncludeUrl>false</autoIncludeUrl>
           <autoIncludeDevelopers>true</autoIncludeDevelopers>
-          <comprLevel>9</comprLevel>
+          <comprFormat>xz</comprFormat>
         </configuration>
       </plugin>
       <plugin>
