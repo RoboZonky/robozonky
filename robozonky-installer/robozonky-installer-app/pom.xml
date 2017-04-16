@@ -97,10 +97,8 @@
         <configuration>
           <baseDir>${staging.dir.app}</baseDir>
           <installFile>${izpack.dir.app}/install.xml</installFile>
-          <outputDirectory>${project.build.directory}</outputDirectory>
-          <finalName>${project.build.finalName}</finalName>
-          <enableOverrideArtifact>true</enableOverrideArtifact>
           <mkdirs>true</mkdirs>
+          <classifier>dist</classifier>
           <autoIncludeUrl>false</autoIncludeUrl>
           <autoIncludeDevelopers>true</autoIncludeDevelopers>
           <comprFormat>xz</comprFormat>
