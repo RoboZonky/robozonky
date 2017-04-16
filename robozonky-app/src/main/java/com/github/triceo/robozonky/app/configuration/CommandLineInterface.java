@@ -68,7 +68,8 @@ public class CommandLineInterface {
         final CommandLineInterface cli = new CommandLineInterface();
         final JCommander jc = new JCommander(cli);
         jc.setProgramName(CommandLineInterface.getScriptIdentifier());
-        Stream.of(OperatingMode.values()).forEach(mode -> jc.addCommand(mode.getName(), mode));
+        Stream.of(new DaemonOperatingMode(), new SingleShotOperatingMode(), new DirectInvestmentOperatingMode(),
+                new TestOperatingMode()).forEach(jc::addCommand);
         try { // internal validation
             jc.parse(args);
             if (cli.help) { // don't validate since the CLI is likely to be invalid

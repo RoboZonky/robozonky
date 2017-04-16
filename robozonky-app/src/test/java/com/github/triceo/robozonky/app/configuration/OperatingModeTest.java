@@ -40,7 +40,7 @@ public class OperatingModeTest {
         final ZonkyProxy.Builder builder = new ZonkyProxy.Builder();
         final AuthenticationHandler auth =
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
-        final OperatingMode mode = OperatingMode.DIRECT_INVESTMENT;
+        final OperatingMode mode = new DirectInvestmentOperatingMode();
         final Optional<InvestmentMode> config = mode.getInvestmentMode(cli, auth, builder);
         Assertions.assertThat(config.get()).isExactlyInstanceOf(DirectInvestmentMode.class);
     }
@@ -53,7 +53,7 @@ public class OperatingModeTest {
         builder.usingConfirmation(Mockito.mock(ConfirmationProvider.class), new char[0]);
         final AuthenticationHandler auth =
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
-        final OperatingMode mode = OperatingMode.TESTING;
+        final OperatingMode mode = new TestOperatingMode();
         final Optional<InvestmentMode> config = mode.getInvestmentMode(cli, auth, builder);
         Assertions.assertThat(config).isPresent();
         final InvestmentMode result = config.get();
@@ -75,7 +75,7 @@ public class OperatingModeTest {
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = "zonkoid:123456";
         Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
-        final OperatingMode mode = OperatingMode.DIRECT_INVESTMENT;
+        final OperatingMode mode = new DirectInvestmentOperatingMode();
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
         Assertions.assertThat(config).isPresent();
         Assertions.assertThat(config.get().isDryRun()).isTrue();
@@ -90,7 +90,7 @@ public class OperatingModeTest {
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = UUID.randomUUID().toString();
         Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
-        final OperatingMode mode = OperatingMode.DIRECT_INVESTMENT;
+        final OperatingMode mode = new DirectInvestmentOperatingMode();
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
         Assertions.assertThat(config).isEmpty();
     }
@@ -104,7 +104,7 @@ public class OperatingModeTest {
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = "zonkoid";
         Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
-        final OperatingMode mode = OperatingMode.DIRECT_INVESTMENT;
+        final OperatingMode mode = new DirectInvestmentOperatingMode();
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
         Assertions.assertThat(config).isEmpty();
     }
@@ -116,7 +116,7 @@ public class OperatingModeTest {
         Mockito.when(cli.getConfirmationFragment()).thenReturn(Mockito.mock(ConfirmationCommandLineFragment.class));
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.getSecretProvider()).thenReturn(SecretProvider.fallback("user", new char[0]));
-        final OperatingMode mode = OperatingMode.DIRECT_INVESTMENT;
+        final OperatingMode mode = new DirectInvestmentOperatingMode();
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
         Assertions.assertThat(config).isPresent();
     }
