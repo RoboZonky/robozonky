@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -104,18 +103,14 @@ public class SimpleInvestmentStategyTest {
         Mockito.when(mockLoan.getAmount()).thenReturn(loanAmount.doubleValue());
 
         // with unlimited balance
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
         final int maxInvestment = Math.min(
                 loanAmount.multiply(SimpleInvestmentStategyTest.MAXIMUM_LOAN_SHARE_A).intValue(),
                 SimpleInvestmentStategyTest.MAXIMUM_LOAN_INVESTMENT);
-        final int actualInvestment = overallStrategy.recommendInvestmentAmount(mockLoan, portfolio);
+        final int actualInvestment = overallStrategy.recommendInvestmentAmount(mockLoan, Integer.MAX_VALUE);
         Assertions.assertThat(actualInvestment).isLessThanOrEqualTo(maxInvestment);
 
         // with balance just a little less than the recommended investment
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(actualInvestment - 1);
-        final int adjustedForBalance = overallStrategy.recommendInvestmentAmount(mockLoan, portfolio);
+        final int adjustedForBalance = overallStrategy.recommendInvestmentAmount(mockLoan, actualInvestment - 1);
         Assertions.assertThat(adjustedForBalance).isLessThanOrEqualTo(actualInvestment);
 
         // and make sure the recommendation is 200 times X, where X is a positive integer
@@ -124,14 +119,18 @@ public class SimpleInvestmentStategyTest {
         Assertions.assertThat(remainder.intValue()).isEqualTo(0);
     }
 
-    private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
-                                                           final BigDecimal ratingC) {
+    private static PortfolioOverview prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
+                                                     final BigDecimal ratingC) {
         final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
         Arrays.stream(Rating.values()).forEach(r -> map.put(r, BigDecimal.ZERO));
         map.put(Rating.A, ratingA);
         map.put(Rating.B, ratingB);
         map.put(Rating.C, ratingC);
-        return Collections.unmodifiableMap(map);
+        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
+        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(map);
+        map.forEach((key, value) ->
+                Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.eq(key))).thenReturn(value));
+        return portfolio;
     }
 
     private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
@@ -149,13 +148,11 @@ public class SimpleInvestmentStategyTest {
     }
 
     private static Loan mockLoan(final int id, final double amount, final int term, final Rating rating) {
-        final Loan loan = Mockito.mock(Loan.class);
+        final Loan spied = new Loan(id, (int)amount, OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
+        final Loan loan = Mockito.spy(spied);
         Mockito.when(loan.getRemainingInvestment()).thenReturn(amount * 2);
-        Mockito.when(loan.getAmount()).thenReturn(amount);
-        Mockito.when(loan.getId()).thenReturn(id);
         Mockito.when(loan.getTermInMonths()).thenReturn(term);
         Mockito.when(loan.getRating()).thenReturn(rating);
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
         return loan;
     }
 
@@ -176,9 +173,11 @@ public class SimpleInvestmentStategyTest {
         final Collection<LoanDescriptor> loans = Arrays.asList(a1, b1, c1, a2, b1, c1);
         final Map<Rating, Collection<LoanDescriptor>> result = SimpleInvestmentStrategy.sortLoansByRating(loans);
         Assertions.assertThat(result).containsOnlyKeys(Rating.A, Rating.B, Rating.C);
-        Assertions.assertThat(result.get(Rating.A)).containsExactly(a1, a2);
-        Assertions.assertThat(result.get(Rating.B)).containsExactly(b1);
-        Assertions.assertThat(result.get(Rating.C)).containsExactly(c1);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result.get(Rating.A)).containsExactly(a1, a2);
+            softly.assertThat(result.get(Rating.B)).containsExactly(b1);
+            softly.assertThat(result.get(Rating.C)).containsExactly(c1);
+        });
     }
 
     @Test
@@ -198,18 +197,20 @@ public class SimpleInvestmentStategyTest {
         final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(0, Integer.MAX_VALUE, strategies);
 
         // all ratings have zero share; C > B > A
-        Map<Rating, BigDecimal> tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO,
-                BigDecimal.ZERO);
-        SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(tmp), Rating.C, Rating.B, Rating.A);
+        PortfolioOverview portfolio = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO);
+        SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(portfolio.getSharesOnInvestment()), Rating.C,
+                Rating.B, Rating.A);
 
         // A only; B, C overinvested
-        tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.TEN);
-        SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(tmp), Rating.A);
+        portfolio = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.TEN);
+        SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(portfolio.getSharesOnInvestment()), Rating.A);
 
         // B > C > A
-        tmp = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.valueOf(0.00095), BigDecimal.ZERO,
+        portfolio = SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.valueOf(0.00095), BigDecimal.ZERO,
                 BigDecimal.valueOf(0.099));
-        SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(tmp), Rating.B, Rating.C, Rating.A);
+        SimpleInvestmentStategyTest.assertOrder(sis.rankRatingsByDemand(portfolio.getSharesOnInvestment()), Rating.B,
+                Rating.C, Rating.A);
     }
 
     private static Map<Rating, StrategyPerRating> mockStrategies() {
@@ -221,6 +222,7 @@ public class SimpleInvestmentStategyTest {
                 .collect(Collectors.toMap(Function.identity(), r -> {
                     final StrategyPerRating s = Mockito.mock(StrategyPerRating.class);
                     Mockito.when(s.isLongerTermPreferred()).thenReturn(r.ordinal() % 2 == 0); // exercise both branches
+                    Mockito.when(s.isConfirmationRequired()).thenReturn(r.ordinal() % 2 == 0); // exercise both branches
                     Mockito.when(s.getRating()).thenReturn(r);
                     Mockito.when(s.getTargetShare()).thenReturn(defaultTargetShare);
                     Mockito.when(s.getMaximumShare()).thenReturn(BigDecimal.ONE);
@@ -239,8 +241,9 @@ public class SimpleInvestmentStategyTest {
                 new SimpleInvestmentStrategy(balance, ceiling, SimpleInvestmentStategyTest.mockStrategies());
 
         // all ratings have zero share; C > B > A
-        final Map<Rating, BigDecimal> tmp =
+        final PortfolioOverview portfolio =
                 SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
 
         // prepare some loans
         final LoanDescriptor a1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
@@ -254,9 +257,6 @@ public class SimpleInvestmentStategyTest {
         final List<LoanDescriptor> loans = Arrays.asList(a1, b1, c1, a2);
 
         // make sure we never go below the minimum balance
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling + 1);
         Assertions.assertThat(sis.recommend(loans, portfolio)).isEmpty();
         Mockito.when(portfolio.getCzkInvested()).thenReturn(ceiling);
@@ -273,8 +273,10 @@ public class SimpleInvestmentStategyTest {
                 new SimpleInvestmentStrategy(balance, ceiling, SimpleInvestmentStategyTest.mockStrategies());
 
         // all ratings have zero share; C > B > A
-        final Map<Rating, BigDecimal> tmp =
+        final PortfolioOverview portfolio =
                 SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
+        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
 
         // prepare some loans
         final int aTerm = 3, bTerm = 4;
@@ -288,45 +290,19 @@ public class SimpleInvestmentStategyTest {
                 (10, 1100, aTerm + 1, Rating.A));
         final List<LoanDescriptor> loans = Arrays.asList(a1, b1, a2, b2);
 
-        // prepare portfolio
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
-
         // make sure the loans are properly sorted according to their terms
         final List<Recommendation> result = sis.recommend(loans, portfolio);
         Assertions.assertThat(result).hasSameSizeAs(loans);
-        Assertions.assertThat(result.get(0).getLoanDescriptor()).isSameAs(a2);
-        Assertions.assertThat(result.get(1).getLoanDescriptor()).isSameAs(a1);
-        Assertions.assertThat(result.get(2).getLoanDescriptor()).isSameAs(b1);
-        Assertions.assertThat(result.get(3).getLoanDescriptor()).isSameAs(b2);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result.get(0).getLoanDescriptor()).isSameAs(a2);
+            softly.assertThat(result.get(1).getLoanDescriptor()).isSameAs(a1);
+            softly.assertThat(result.get(2).getLoanDescriptor()).isSameAs(b1);
+            softly.assertThat(result.get(3).getLoanDescriptor()).isSameAs(b2);
+        });
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result.get(0).isConfirmationRequired()).isTrue();
+            softly.assertThat(result.get(2).isConfirmationRequired()).isFalse();
+        });
     }
 
-    @Test
-    public void investingDoesNotGoOverBalance() { // https://github.com/triceo/robozonky/issues/62
-        // prepare loan
-        final int balance = 260;
-        final int ceiling = 100000;
-        final Rating rating = Rating.A;
-        final Loan a1 = SimpleInvestmentStategyTest.mockLoan(1, 1000, 24, rating);
-        // mock core strategies
-        final Map<Rating, StrategyPerRating> s = SimpleInvestmentStategyTest.mockStrategies();
-        final StrategyPerRating strategyMock = s.get(rating);
-        Mockito.when(strategyMock.recommendInvestmentAmount(ArgumentMatchers.eq(a1)))
-                .thenReturn(Optional.of(new int[] {200, 600}));
-        final SimpleInvestmentStrategy sis = new SimpleInvestmentStrategy(balance, ceiling, s);
-        // all ratings have zero share
-        final Map<Rating, BigDecimal> tmp =
-                SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        // prepare portfolio
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(tmp);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(balance);
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
-
-        // make sure the loans are properly sorted according to their terms
-        final int result = sis.recommendInvestmentAmount(a1, portfolio);
-        Assertions.assertThat(result).isEqualTo(200);
-    }
 }
