@@ -50,7 +50,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
             Executors.newScheduledThreadPool(2, DaemonInvestmentMode.THREAD_FACTORY);
     private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
     private final SuddenDeathWorkaround suddenDeath =
-            new SuddenDeathWorkaround(DaemonInvestmentMode.BLOCK_UNTIL_RELEASED, 5);
+            new SuddenDeathWorkaround(DaemonInvestmentMode.BLOCK_UNTIL_RELEASED, 300);
     public static final Semaphore BLOCK_UNTIL_RELEASED = new Semaphore(1);
 
     public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
