@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,6 +35,7 @@ public class CommandLinePart {
     private final Map<String, Collection<String>> options = new LinkedHashMap<>();
     private final Map<String, String> properties = new LinkedHashMap<>();
     private final Map<String, String> environmentVariables = new LinkedHashMap<>();
+    private final Map<String, Optional<String>> jvmArguments = new LinkedHashMap<>();
 
 
     public CommandLinePart setOption(final String key, final String... value) {
@@ -43,6 +45,16 @@ public class CommandLinePart {
 
     public CommandLinePart setProperty(final String key, final String value) {
         this.properties.put(key, value);
+        return this;
+    }
+
+    public CommandLinePart setJvmArgument(final String argument) {
+        this.jvmArguments.put(argument, Optional.empty());
+        return this;
+    }
+
+    public CommandLinePart setJvmArgument(final String argument, final String value) {
+        this.jvmArguments.put(argument, Optional.of(value));
         return this;
     }
 
@@ -80,4 +92,7 @@ public class CommandLinePart {
         Files.write(cliFile.toPath(), this.getOptionItems(), Defaults.CHARSET);
     }
 
+    public Map<String, Optional<String>> getJvmArguments() {
+        return Collections.unmodifiableMap(jvmArguments);
+    }
 }

@@ -231,15 +231,20 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    private String prepareJavaOpts(final CommandLinePart commandLine, final String javaOptsPrefix) {
+        final Stream<String> properties = commandLine.getProperties().entrySet().stream()
+                .map(e -> "-D" + e.getKey() + '=' + e.getValue());
+        final Stream<String> jvmArgs = commandLine.getJvmArguments().entrySet().stream()
+                .map(e -> '-' + e.getValue().map(v -> e.getKey() + ' ' + v).orElse(e.getKey()));
+        return Stream.concat(jvmArgs, properties).collect(Collectors.joining(" ", javaOptsPrefix, "\""));
+    }
+
     private Collection<String> getScript(final CommandLinePart commandLine,
                                          final BiFunction<String, String, String> envConverter,
                                          final String javaOptsPrefix) {
         final Collection<String> result = new ArrayList<>();
         commandLine.getEnvironmentVariables().forEach((k, v) -> result.add(envConverter.apply(k, v)));
-        final String javaOpts = commandLine.getProperties().entrySet().stream()
-                .map(e -> "-D" + e.getKey() + "=" + e.getValue())
-                .collect(Collectors.joining(" ", javaOptsPrefix, "\""));
-        result.add(javaOpts);
+        result.add(prepareJavaOpts(commandLine, javaOptsPrefix));
         return result;
     }
 
@@ -268,6 +273,11 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     void prepareRunScript(final CommandLinePart commandLine) {
         final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
+        if (System.getProperty("java.version").startsWith("1.8")) { // use G1GC on Java 8
+            commandLine.setJvmArgument("XX:+UseG1GC");
+        } else { // Java 9 or newer; pre-modularization
+            commandLine.setJvmArgument("-add-modules", "java.xml.bind");
+        }
         final Collection<String> lines = isWindows ? getWindowsScript(commandLine) : getUnixScript(commandLine);
         try {
             final File file = new File(INSTALL_PATH, isWindows ? "run.bat" : "run.sh");
