@@ -16,6 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-public class SuddenDeathException extends Exception {
+class SuddenDeathException extends Exception {
 
 }
