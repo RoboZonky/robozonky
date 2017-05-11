@@ -24,24 +24,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * From time to time, very infrequently, the robot just stops checking marketplace while the app itself is still
- * running. So far, we have no idea why that would happen. And we can not get any reasonable logs, since we usually
- * find out days after this has happened.
+ * For whatever reason, if the marketplace stops being repeatedly checked, the robot is effectively dead. And we can
+ * not get any reasonable logs, since we usually find out days after this has happened.
  *
  * This little piece of code is designed to detect such a situation. Surrounding code will then take this and kill
- * the robot, sending a warning e-mail. When that happens, we will have up-to-date logs and will, perhaps, be able to
- * identify the culprit.
+ * the robot, sending a warning e-mail. When that happens, we will have up-to-date logs and will be able to identify
+ * the culprit.
  */
-class SuddenDeathWorkaround implements Runnable {
+class SuddenDeathDetection implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SuddenDeathWorkaround.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SuddenDeathDetection.class);
 
     private final Semaphore daemonStopsIfReleased;
     private final AtomicInteger missedChecks = new AtomicInteger(0);
     private final AtomicBoolean suddenDeath = new AtomicBoolean(false);
     private final int missedChecksThreshold;
 
-    public SuddenDeathWorkaround(final Semaphore daemonStopsIfReleased, final int missedChecksThreshold) {
+    public SuddenDeathDetection(final Semaphore daemonStopsIfReleased, final int missedChecksThreshold) {
         this.daemonStopsIfReleased = daemonStopsIfReleased;
         this.missedChecksThreshold = missedChecksThreshold;
     }
@@ -56,16 +55,20 @@ class SuddenDeathWorkaround implements Runnable {
 
     @Override
     public void run() {
-        if (isSuddenDeath()) { // nothing to do
-            return;
-        }
-        final int missing = missedChecks.incrementAndGet();
-        if (missing > missedChecksThreshold) {
-            SuddenDeathWorkaround.LOGGER.error("Sudden death is here.");
-            suddenDeath.set(true); // make the rest of the code notice the sudden death
-            daemonStopsIfReleased.release(); // kill daemon and report
-        } else if (missing == missedChecksThreshold) {
-            SuddenDeathWorkaround.LOGGER.warn("Sudden death is just around the corner.");
+        try {
+            if (isSuddenDeath()) { // nothing to do
+                return;
+            }
+            final int missing = missedChecks.incrementAndGet();
+            if (missing > missedChecksThreshold) {
+                SuddenDeathDetection.LOGGER.error("Sudden death is here.");
+                suddenDeath.set(true); // make the rest of the code notice the sudden death
+                daemonStopsIfReleased.release(); // kill daemon and report
+            } else if (missing == ((missedChecksThreshold / 10) * 9)) {
+                SuddenDeathDetection.LOGGER.warn("Sudden death is just around the corner.");
+            }
+        } catch (final Throwable t) { // not catching here would stop the thread, disabling sudden death detection
+            SuddenDeathDetection.LOGGER.warn("Sudden death workaround error.", t);
         }
     }
 }
