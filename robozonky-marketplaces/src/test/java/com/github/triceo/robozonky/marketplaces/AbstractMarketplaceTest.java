@@ -53,7 +53,8 @@ public class AbstractMarketplaceTest {
                 softly.assertThat(market.registerListener(consumer)).isTrue();
             });
             market.run();
-            Mockito.verify(consumer, Mockito.times(1)).accept(ArgumentMatchers.any());
+            Mockito.verify(consumer, Mockito.times(1))
+                    .accept(ArgumentMatchers.argThat(argument -> argument != null && !argument.isEmpty()));
         }
     }
 
