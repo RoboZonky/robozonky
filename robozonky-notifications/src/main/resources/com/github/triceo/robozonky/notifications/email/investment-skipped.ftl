@@ -7,7 +7,7 @@ Půjčka s následujícími parametry byla přeskočena:
 - Navržená výše investice:     ${data.loanRecommendation?c},- Kč
 
 Informace o této půjčce jsou dostupné na následující adrese:
-https://app.zonky.cz/#/marketplace/detail/${data.loanId?c}/
+${data.loanUrl}
 
 Pokud tato půjčka vydrží na tržišti až do vypršení CAPTCHA, robot se k ní vrátí.
 

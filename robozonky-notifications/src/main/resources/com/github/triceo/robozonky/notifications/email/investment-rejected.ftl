@@ -7,7 +7,7 @@ Půjčka s následujícími parametry byla zamítnuta:
 - Navržená výše investice:      ${data.loanRecommendation?c},- Kč
 
 Informace o této půjčce jsou dostupné na následující adrese:
-https://app.zonky.cz/#/marketplace/detail/${data.loanId?c}/
+${data.loanUrl}
 
 Zůstatek na Zonky účtu je ${data.newBalance?c},- Kč.
 

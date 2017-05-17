@@ -16,17 +16,21 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
+import java.util.Optional;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 abstract class BaseInvestment extends BaseEntity {
 
     private int id, loanId, amount, additionalAmount, firstAmount;
+    private Loan loan;
 
     BaseInvestment() {
         // for JAXB
     }
 
     BaseInvestment(final Loan loan, final int amount) {
+        this.loan = loan;
         this.loanId = loan.getId();
         this.amount = amount;
         if (loan.getMyInvestment() != null) {
@@ -60,6 +64,11 @@ abstract class BaseInvestment extends BaseEntity {
     @XmlElement
     public int getId() {
         return id;
+    }
+
+    @XmlTransient
+    public Optional<Loan> getLoan() {
+        return Optional.ofNullable(loan);
     }
 
 }

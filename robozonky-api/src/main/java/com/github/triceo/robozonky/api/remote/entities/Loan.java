@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Function;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
@@ -38,10 +39,25 @@ import com.github.triceo.robozonky.internal.api.Defaults;
  */
 public class Loan extends BaseEntity {
 
+    private static final Function<Integer, String> LOAN_URL_SUPPLIER =
+            (id) -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
+
+    /**
+     * Zonky's API documentation states that {@link #getUrl()} is optional. Therefore the only safe use of that
+     * attribute is through this method.
+     *
+     * @return URL to a loan on Zonky's website. Guessed if not present.
+     */
+    public static String getUrlSafe(final Loan l) {
+        // in case investment has no loan, we guess loan URL
+        final String providedUrl = l.getUrl();
+        return providedUrl == null ? Loan.LOAN_URL_SUPPLIER.apply(l.getId()) : providedUrl;
+    }
+
     private boolean topped, covered, published;
     private int id, termInMonths, investmentsCount, questionsCount, userId;
     private double amount, remainingInvestment;
-    private String name, nickName, story;
+    private String name, nickName, story, url;
     private BigDecimal interestRate = BigDecimal.ZERO;
     private OffsetDateTime datePublished, deadline = OffsetDateTime.MAX;
     private Rating rating;
@@ -181,5 +197,12 @@ public class Loan extends BaseEntity {
     public int getUserId() {
         return userId;
     }
+
+    /**
+     * Return loan URL provided by Zonky API. Also see {@link #getUrlSafe(Loan)}.
+     * @return Zonky URL as provided by the API.
+     */
+    @XmlElement
+    public String getUrl() { return url; }
 
 }

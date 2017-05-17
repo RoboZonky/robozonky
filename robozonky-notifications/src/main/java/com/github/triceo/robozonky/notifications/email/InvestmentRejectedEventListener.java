@@ -48,6 +48,7 @@ final class InvestmentRejectedEventListener extends AbstractEmailingListener<Inv
         result.put("loanAmount", loan.getAmount());
         result.put("loanRating", loan.getRating().getCode());
         result.put("loanTerm", loan.getTermInMonths());
+        result.put("loanUrl", Loan.getUrlSafe(loan));
         result.put("newBalance", event.getBalance());
         return result;
     }
