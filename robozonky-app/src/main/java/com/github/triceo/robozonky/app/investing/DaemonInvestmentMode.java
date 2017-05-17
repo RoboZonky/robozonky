@@ -130,7 +130,6 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     public void close() throws Exception {
-        super.close();
         DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release(); // just in case
         LOGGER.trace("Shutting down executor.");
         this.executor.shutdownNow();

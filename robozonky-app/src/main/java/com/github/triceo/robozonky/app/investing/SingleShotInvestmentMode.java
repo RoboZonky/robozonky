@@ -78,7 +78,6 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     public void close() throws Exception {
-        super.close();
         this.marketplace.close();
     }
 }
