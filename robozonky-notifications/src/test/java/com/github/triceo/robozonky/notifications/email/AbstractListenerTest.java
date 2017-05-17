@@ -72,6 +72,7 @@ public abstract class AbstractListenerTest {
         Mockito.when(loan.getAmount()).thenReturn(100000.0);
         Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
         Mockito.when(loan.getTermInMonths()).thenReturn(25);
+        Mockito.when(loan.getUrl()).thenReturn("http://www.robozonky.cz/");
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final Recommendation recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = new Investment(loan, 1000);
