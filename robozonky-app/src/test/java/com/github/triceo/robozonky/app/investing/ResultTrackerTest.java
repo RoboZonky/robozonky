@@ -32,6 +32,11 @@ import org.mockito.Mockito;
 public class ResultTrackerTest {
 
     @Test
+    public void nullSafeMarketplace() {
+        Assertions.assertThat(new ResultTracker().acceptLoansFromMarketplace(null)).isEmpty();
+    }
+
+    @Test
     public void filteringUselessLoans() {
         final Loan usefulLoan = Mockito.mock(Loan.class);
         Mockito.when(usefulLoan.getId()).thenReturn(1);

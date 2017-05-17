@@ -135,8 +135,4 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
         }
     }
 
-    @Override
-    public void close() throws Exception {
-        LOGGER.trace("Closing investing operations.");
-    }
 }
