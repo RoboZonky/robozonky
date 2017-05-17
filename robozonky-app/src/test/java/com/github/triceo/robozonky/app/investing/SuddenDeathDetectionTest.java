@@ -23,14 +23,14 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Assume;
 import org.junit.Test;
 
-public class SuddenDeathWorkaroundTest {
+public class SuddenDeathDetectionTest {
 
     @Test
     public void detection() throws InterruptedException {
         final Semaphore semaphore = new Semaphore(1);
         semaphore.acquire();
         Assume.assumeTrue(semaphore.availablePermits() == 0);
-        final SuddenDeathWorkaround workaround = new SuddenDeathWorkaround(semaphore, 1);
+        final SuddenDeathDetection workaround = new SuddenDeathDetection(semaphore, 1);
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
         workaround.run();
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
@@ -46,7 +46,7 @@ public class SuddenDeathWorkaroundTest {
         final Semaphore semaphore = new Semaphore(1);
         semaphore.acquire();
         Assume.assumeTrue(semaphore.availablePermits() == 0);
-        final SuddenDeathWorkaround workaround = new SuddenDeathWorkaround(semaphore, 1);
+        final SuddenDeathDetection workaround = new SuddenDeathDetection(semaphore, 1);
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
         workaround.run();
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
