@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.Properties;
 import java.util.function.Function;
 
@@ -96,6 +98,14 @@ public enum Settings {
 
     public int getRemoteResourceRefreshIntervalInMinutes() {
         return get("robozonky.default.resource_refresh_minutes", 5);
+    }
+
+    public TemporalAmount getSocketTimeout() {
+        return Duration.ofSeconds(get("robozonky.default.socket_timeout_seconds", 5));
+    }
+
+    public TemporalAmount getConnectionTimeout() {
+        return Duration.ofSeconds(get("robozonky.default.connection_timeout_seconds", 5));
     }
 
     public int getCaptchaDelayInSeconds() {

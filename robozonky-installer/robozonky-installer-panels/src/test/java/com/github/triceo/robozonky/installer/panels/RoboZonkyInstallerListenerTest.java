@@ -214,6 +214,26 @@ public class RoboZonkyInstallerListenerTest {
     }
 
     @Test
+    public void jmx() {
+        // prepare
+        RoboZonkyInstallerListener.setInstallData(data);
+        Mockito.when(data.getVariable(Variables.IS_JMX_ENABLED.getKey())).thenReturn("true");
+        Mockito.when(data.getVariable(Variables.IS_JMX_SECURITY_ENABLED.getKey())).thenReturn("false");
+        Mockito.when(data.getVariable(Variables.JMX_PORT.getKey())).thenReturn("1234");
+        Mockito.when(data.getVariable(Variables.JMX_HOSTNAME.getKey())).thenReturn("somewhere");
+        // execute SUT
+        final CommandLinePart clp = new RoboZonkyInstallerListener().prepareJmx();
+        // test
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(clp.getProperties().get("com.sun.management.jmxremote"))
+                    .isEqualTo("true");
+            softly.assertThat(clp.getProperties().get("com.sun.management.config.file"))
+                    .isEqualTo(RoboZonkyInstallerListener.JMX_PROPERTIES_FILE.getAbsolutePath());
+            softly.assertThat(RoboZonkyInstallerListener.JMX_PROPERTIES_FILE).exists();
+        });
+    }
+
+    @Test
     public void strategyUrl() {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockBaseData();

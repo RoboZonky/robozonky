@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
@@ -48,6 +49,7 @@ public class CommandLinePartTest {
             softly.assertThat(options.get(firstOption)).isEmpty();
             softly.assertThat(options.get(secondOption)).containsExactly(secondValue, firstValue);
             softly.assertThat(options.get(thirdOption)).containsExactly(firstValue, secondValue);
+            softly.assertThat(clp.getJvmArguments()).isEmpty();
             softly.assertThat(clp.getProperties()).isEmpty();
             softly.assertThat(clp.getEnvironmentVariables()).isEmpty();
         });
@@ -67,6 +69,7 @@ public class CommandLinePartTest {
             softly.assertThat(properties.get(UUID.randomUUID().toString())).isNull();
             softly.assertThat(properties.get(firstProperty)).isSameAs(firstValue);
             softly.assertThat(properties.get(secondProperty)).isSameAs(secondValue);
+            softly.assertThat(clp.getJvmArguments()).isEmpty();
             softly.assertThat(clp.getOptions()).isEmpty();
             softly.assertThat(clp.getEnvironmentVariables()).isEmpty();
         });
@@ -86,6 +89,26 @@ public class CommandLinePartTest {
             softly.assertThat(variables.get(UUID.randomUUID().toString())).isNull();
             softly.assertThat(variables.get(firstVariable)).isSameAs(firstValue);
             softly.assertThat(variables.get(secondVariable)).isSameAs(secondValue);
+            softly.assertThat(clp.getJvmArguments()).isEmpty();
+            softly.assertThat(clp.getOptions()).isEmpty();
+            softly.assertThat(clp.getProperties()).isEmpty();
+        });
+    }
+
+    @Test
+    public void jvmArguments() {
+        final String firstVariable = UUID.randomUUID().toString();
+        final String secondVariable = UUID.randomUUID().toString();
+        final String firstValue = UUID.randomUUID().toString();
+        final CommandLinePart clp = new CommandLinePart()
+                .setJvmArgument(firstVariable, firstValue)
+                .setJvmArgument(secondVariable);
+        SoftAssertions.assertSoftly(softly -> {
+            final Map<String, Optional<String>> variables = clp.getJvmArguments();
+            softly.assertThat(variables.get(UUID.randomUUID().toString())).isNull();
+            softly.assertThat(variables.get(firstVariable)).isPresent().contains(firstValue);
+            softly.assertThat(variables.get(secondVariable)).isEmpty();
+            softly.assertThat(clp.getEnvironmentVariables()).isEmpty();
             softly.assertThat(clp.getOptions()).isEmpty();
             softly.assertThat(clp.getProperties()).isEmpty();
         });

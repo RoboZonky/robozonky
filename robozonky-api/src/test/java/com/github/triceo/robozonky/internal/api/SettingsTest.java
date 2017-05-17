@@ -23,9 +23,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
-/**
- * Created by lpetrovi on 14.4.17.
- */
 public class SettingsTest {
 
     @Rule
@@ -42,6 +39,8 @@ public class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(5);
             softly.assertThat(Settings.INSTANCE.getCaptchaDelayInSeconds()).isEqualTo(120);
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
+            softly.assertThat(Settings.INSTANCE.getSocketTimeout()).isNotNull();
+            softly.assertThat(Settings.INSTANCE.getConnectionTimeout()).isNotNull();
         });
     }
 

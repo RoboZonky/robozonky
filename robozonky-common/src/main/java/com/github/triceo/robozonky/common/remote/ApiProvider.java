@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.common.remote;
 
 import java.lang.ref.WeakReference;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,7 @@ import javax.xml.ws.WebServiceClient;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -133,7 +135,15 @@ public class ApiProvider implements AutoCloseable {
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private static ResteasyClient newResteasyClient() {
+        final int socketTimeout = (int)(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000;
+        final int connectionTimeout = (int)(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000;
+        final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
+                .setConnectTimeout(connectionTimeout)
+                .setConnectionRequestTimeout(connectionTimeout)
+                .setSocketTimeout(socketTimeout)
+                .build();
         final CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig) // avoid "sudden death" (marketplace forever blocking on socket)
                 .setConnectionManager(ApiProvider.CONNECTION_MANAGER)
                 .build();
         final ClientHttpEngine httpEngine = new ApiProvider.RedirectingHttpClient(httpClient);
