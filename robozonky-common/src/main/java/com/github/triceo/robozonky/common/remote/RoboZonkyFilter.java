@@ -45,7 +45,8 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
     @Override
     public void filter(final ClientRequestContext clientRequestContext,
                        final ClientResponseContext clientResponseContext) throws IOException {
-        this.logger.debug("Response HTTP {} {}.", clientResponseContext.getStatus(),
+        this.logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
+                clientRequestContext.getUri(), clientResponseContext.getStatus(),
                 clientResponseContext.getStatusInfo().getReasonPhrase());
     }
 
