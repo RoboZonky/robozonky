@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app;
 
-import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
@@ -31,17 +30,11 @@ import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * You are required to exit this app by calling {@link #exit(ReturnCode)}.
  */
 public class App {
-
-    static {
-        // add process identification to log files
-        MDC.put("process_id", ManagementFactory.getRuntimeMXBean().getName());
-    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();

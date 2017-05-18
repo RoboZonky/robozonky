@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.function.Function;
 import javax.ws.rs.BadRequestException;
@@ -49,10 +48,7 @@ abstract class Authenticator implements Function<ApiProvider, Authentication> {
             @Override
             protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
                 Authenticator.LOGGER.info("Authenticating as '{}' using password.", username);
-                final ZonkyApiToken token =
-                        api.login(username, new String(password), "password", Authenticator.TARGET_SCOPE);
-                Authenticator.LOGGER.debug("Authenticated.");
-                return token;
+                return api.login(username, new String(password), "password", Authenticator.TARGET_SCOPE);
             }
         };
     }
@@ -78,8 +74,6 @@ abstract class Authenticator implements Function<ApiProvider, Authentication> {
                 }
             };
         } else { // auth token is still up to date; don't even create the API endpoint
-            Authenticator.LOGGER.debug("Token obtained: {}, expires: {}. Refresh {} seconds before.", token.getObtainedOn(),
-                    token.getExpiresOn(), refreshBeforeExpiration.get(ChronoUnit.SECONDS));
             return (api) -> new Authentication(api, token);
         }
     }
