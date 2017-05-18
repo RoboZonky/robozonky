@@ -90,7 +90,6 @@ public class ApiProvider implements AutoCloseable {
         }
 
         public ApiWrapper(final Class<T> apiClass, final T api, final ResteasyClient client) {
-            ApiProvider.ApiWrapper.LOGGER.trace("Registering {} REST client: {}.", apiClass.getSimpleName(), client);
             this.client = client;
             this.api = api;
         }
@@ -110,7 +109,6 @@ public class ApiProvider implements AutoCloseable {
         @Override
         public synchronized void close() {
             if (client != null && !client.isClosed()) {
-                ApiProvider.ApiWrapper.LOGGER.trace("Destroying REST client: {}.", client);
                 client.close();
             }
         }

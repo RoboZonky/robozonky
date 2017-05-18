@@ -125,7 +125,6 @@ public class AuthenticationHandler {
     boolean storeToken(final ZonkyApiToken token) throws JAXBException {
         final String marshalled = ZonkyApiToken.marshal(token);
         if (this.data.setToken(new StringReader(marshalled))) {
-            AuthenticationHandler.LOGGER.debug("Token stored.");
             return true;
         } else {
             AuthenticationHandler.LOGGER.debug("Failed storing token.");
