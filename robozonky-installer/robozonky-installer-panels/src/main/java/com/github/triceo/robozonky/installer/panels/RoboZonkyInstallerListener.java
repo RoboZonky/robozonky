@@ -56,6 +56,10 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         Files.copy(from.toPath(), to.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
+    private static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
+        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[v.size()])));
+    }
+
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
      * accept {@link InstallData}, Picocontainer would have thrown some weird exception.
@@ -193,26 +197,31 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         return cli;
     }
 
+    private File assembleCliFile(final CommandLinePart credentials, final CommandLinePart strategy) throws IOException {
+        // assemble the CLI
+        final CommandLinePart cli = new CommandLinePart();
+        copyOptions(credentials, cli);
+        cli.setOption("daemon");
+        copyOptions(strategy, cli);
+        // store it to a file
+        cli.storeOptions(CLI_CONFIG_FILE);
+        return CLI_CONFIG_FILE.getAbsoluteFile();
+    }
+
     CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
                                        final CommandLinePart jmxConfig, final CommandLinePart credentials,
                                        final CommandLinePart logging) {
-        // assemble the CLI
-        final CommandLinePart cli = new CommandLinePart();
-        credentials.getOptions().forEach((k, v) -> cli.setOption(k, v.toArray(new String[v.size()])));
-        cli.setOption("daemon");
-        strategy.getOptions().forEach((k, v) -> cli.setOption(k, v.toArray(new String[v.size()])));
         try {
-            // store it to a file
-            cli.storeOptions(CLI_CONFIG_FILE);
-            // and have the file loaded during RoboZonky startup
+            final File cliConfigFile = assembleCliFile(credentials, strategy);
+            // have the CLI file loaded during RoboZonky startup
             final CommandLinePart commandLine = new CommandLinePart()
-                    .setOption("@" + CLI_CONFIG_FILE.getAbsolutePath())
+                    .setOption("@" + cliConfigFile.getAbsolutePath())
                     .setProperty(Settings.FILE_LOCATION_PROPERTY, SETTINGS_FILE.getAbsolutePath())
                     .setEnvironmentVariable("JAVA_HOME", Variables.JAVA_HOME.getValue(DATA));
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
-            Stream.of(strategy.getProperties(), emailConfig.getProperties(), jmxConfig.getProperties(),
-                    credentials.getProperties(), logging.getProperties())
+            Stream.of(strategy, emailConfig, jmxConfig, credentials, logging)
+                    .map(CommandLinePart::getProperties)
                     .flatMap(p -> p.entrySet().stream())
                     .forEach(e -> {
                         final String key = e.getKey();
@@ -231,7 +240,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    private String prepareJavaOpts(final CommandLinePart commandLine, final String javaOptsPrefix) {
+    private String assembleJavaOpts(final CommandLinePart commandLine, final String javaOptsPrefix) {
         final Stream<String> properties = commandLine.getProperties().entrySet().stream()
                 .map(e -> "-D" + e.getKey() + '=' + e.getValue());
         final Stream<String> jvmArgs = commandLine.getJvmArguments().entrySet().stream()
@@ -244,7 +253,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
                                          final String javaOptsPrefix) {
         final Collection<String> result = new ArrayList<>();
         commandLine.getEnvironmentVariables().forEach((k, v) -> result.add(envConverter.apply(k, v)));
-        result.add(prepareJavaOpts(commandLine, javaOptsPrefix));
+        result.add(assembleJavaOpts(commandLine, javaOptsPrefix));
         return result;
     }
 
@@ -254,30 +263,34 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         return subexecutable.getAbsolutePath() + " " + commandLine.convertOptions();
     }
 
-    private Collection<String> getWindowsScript(final CommandLinePart commandLine) {
-        final Collection<String> result =
-                this.getScript(commandLine, (s, s2) -> "set \"" + s + "=" + s2 + "\"", "set \"JAVA_OPTS=%JAVA_OPTS% ");
-        result.add(this.createScript(commandLine, "robozonky.bat"));
+    private Collection<String> getCommonScript(final CommandLinePart commandLine,
+                                               final BiFunction<String, String, String> envConverter,
+                                               final String javaOptsPrefix, final String scriptName) {
+        final Collection<String> result = this.getScript(commandLine, envConverter, javaOptsPrefix);
+        result.add(this.createScript(commandLine, scriptName));
         return result;
+    }
+
+    private Collection<String> getWindowsScript(final CommandLinePart commandLine) {
+        return this.getCommonScript(commandLine, (s, s2) -> "set \"" + s + "=" + s2 + "\"",
+                "set \"JAVA_OPTS=%JAVA_OPTS% ", "robozonky.bat");
     }
 
     private Collection<String> getUnixScript(final CommandLinePart commandLine) {
         final Collection<String> result = new ArrayList<>();
         result.add("#!/bin/bash");
-        result.addAll(this.getScript(commandLine, (s, s2) -> s + "=\"" + s2 + "\"",
-                "JAVA_OPTS=\"$JAVA_OPTS "));
-        // make script executable
-        result.add(this.createScript(commandLine, "robozonky.sh"));
+        result.addAll(this.getCommonScript(commandLine, (s, s2) -> s + "=\"" + s2 + "\"", "JAVA_OPTS=\"$JAVA_OPTS ",
+                "robozonky.sh"));
         return result;
     }
 
     void prepareRunScript(final CommandLinePart commandLine) {
-        final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
         if (System.getProperty("java.version").startsWith("1.8")) { // use G1GC on Java 8
             commandLine.setJvmArgument("XX:+UseG1GC");
         } else { // Java 9 or newer; pre-modularization
             commandLine.setJvmArgument("-add-modules", "java.xml.bind");
         }
+        final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
         final Collection<String> lines = isWindows ? getWindowsScript(commandLine) : getUnixScript(commandLine);
         try {
             final File file = new File(INSTALL_PATH, isWindows ? "run.bat" : "run.sh");

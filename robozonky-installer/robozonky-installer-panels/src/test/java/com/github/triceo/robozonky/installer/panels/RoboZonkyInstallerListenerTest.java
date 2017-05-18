@@ -260,6 +260,8 @@ public class RoboZonkyInstallerListenerTest {
         // test
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "logback.xml")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.bat")).doesNotExist();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.sh")).exists();
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
@@ -282,6 +284,8 @@ public class RoboZonkyInstallerListenerTest {
         // test
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "logback.xml")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.sh")).doesNotExist();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.bat")).exists();
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();

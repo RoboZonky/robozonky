@@ -49,6 +49,7 @@ public class CommandLinePartTest {
             softly.assertThat(options.get(firstOption)).isEmpty();
             softly.assertThat(options.get(secondOption)).containsExactly(secondValue, firstValue);
             softly.assertThat(options.get(thirdOption)).containsExactly(firstValue, secondValue);
+            softly.assertThat(clp.convertOptions()).isNotEmpty();
             softly.assertThat(clp.getJvmArguments()).isEmpty();
             softly.assertThat(clp.getProperties()).isEmpty();
             softly.assertThat(clp.getEnvironmentVariables()).isEmpty();
