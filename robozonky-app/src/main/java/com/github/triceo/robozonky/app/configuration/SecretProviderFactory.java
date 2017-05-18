@@ -53,7 +53,7 @@ final class SecretProviderFactory {
      * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
      * @throws KeyStoreException In case keystores are unsupported on this JRE. Unlikely with Java 8, but seen happen.
      */
-    static Optional<SecretProvider> newSecretProvider(final CommandLineInterface cli, final File defaultKeyStore)
+    static Optional<SecretProvider> newSecretProvider(final CommandLine cli, final File defaultKeyStore)
             throws KeyStoreException {
         final Optional<File> keyStoreLocation = cli.getAuthenticationFragment().getKeystore();
         final char[] password = cli.getAuthenticationFragment().getPassword();
@@ -90,7 +90,7 @@ final class SecretProviderFactory {
         }
     }
 
-    static Optional<SecretProvider> getFallbackSecretProvider(final CommandLineInterface cli) {
+    static Optional<SecretProvider> getFallbackSecretProvider(final CommandLine cli) {
         SecretProviderFactory.LOGGER.info("You should get a better Java runtime.");
         final AuthenticationCommandLineFragment cliAuth = cli.getAuthenticationFragment();
         return cliAuth.getKeystore()
@@ -103,7 +103,7 @@ final class SecretProviderFactory {
                 });
     }
 
-    public static Optional<SecretProvider> getSecretProvider(final CommandLineInterface cli) {
+    public static Optional<SecretProvider> getSecretProvider(final CommandLine cli) {
         try {
             return SecretProviderFactory.newSecretProvider(cli, SecretProviderFactory.DEFAULT_KEYSTORE);
         } catch (final KeyStoreException ex) {

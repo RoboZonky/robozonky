@@ -16,11 +16,12 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
 interface CommandLineFragment {
 
-    default void validate() throws ParameterException {
+    default void validate(final JCommander args) throws ParameterException {
         // do nothing
     }
 

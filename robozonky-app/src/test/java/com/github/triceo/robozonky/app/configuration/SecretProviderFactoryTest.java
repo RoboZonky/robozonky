@@ -25,12 +25,12 @@ import org.mockito.Mockito;
 
 public class SecretProviderFactoryTest {
 
-    private static CommandLineInterface mockCli(final String username, final File file, final char... password) {
+    private static CommandLine mockCli(final String username, final File file, final char... password) {
         final AuthenticationCommandLineFragment delegate = Mockito.mock(AuthenticationCommandLineFragment.class);
         Mockito.when(delegate.getUsername()).thenReturn(Optional.ofNullable(username));
         Mockito.when(delegate.getKeystore()).thenReturn(Optional.ofNullable(file));
         Mockito.when(delegate.getPassword()).thenReturn(password);
-        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getAuthenticationFragment()).thenReturn(delegate);
         return cli;
     }
@@ -38,13 +38,13 @@ public class SecretProviderFactoryTest {
     @Test
     public void wrongFormatKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
-        final CommandLineInterface cli = SecretProviderFactoryTest.mockCli(null, tmp, "password".toCharArray());
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, tmp, "password".toCharArray());
         Assertions.assertThat(SecretProviderFactory.newSecretProvider(cli, null)).isEmpty();
     }
 
     @Test
     public void failedDeletingKeyStore() throws Exception {
-        final CommandLineInterface cli = SecretProviderFactoryTest.mockCli(null, null);
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, null);
         final File f = Mockito.mock(File.class);
         Mockito.when(f.canRead()).thenReturn(true);
         Mockito.when(f.delete()).thenReturn(false);
@@ -53,7 +53,7 @@ public class SecretProviderFactoryTest {
 
     @Test
     public void noKeyStoreNoUsername() throws Exception {
-        final CommandLineInterface cli = SecretProviderFactoryTest.mockCli(null, null);
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, null);
         final File f = Mockito.mock(File.class);
         Mockito.when(f.canRead()).thenReturn(false);
         Assertions.assertThat(SecretProviderFactory.newSecretProvider(cli, f)).isEmpty();
@@ -61,13 +61,13 @@ public class SecretProviderFactoryTest {
 
     @Test
     public void fallbackDemandingKeystore() {
-        final CommandLineInterface cli = SecretProviderFactoryTest.mockCli(null, new File(""));
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, new File(""));
         Assertions.assertThat(SecretProviderFactory.getFallbackSecretProvider(cli)).isEmpty();
     }
 
     @Test
     public void fallbackSuccess() {
-        final CommandLineInterface cli = SecretProviderFactoryTest.mockCli("user", null, "pass".toCharArray());
+        final CommandLine cli = SecretProviderFactoryTest.mockCli("user", null, "pass".toCharArray());
         Assertions.assertThat(SecretProviderFactory.getFallbackSecretProvider(cli)).isNotEmpty();
     }
 

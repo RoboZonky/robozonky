@@ -39,7 +39,7 @@ class SingleShotOperatingMode extends OperatingMode {
     StrategyCommandLineFragment strategyFragment = new StrategyCommandLineFragment();
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
                                                          final AuthenticationHandler auth,
                                                          final ZonkyProxy.Builder builder) {
         final Refreshable<InvestmentStrategy> strategy =

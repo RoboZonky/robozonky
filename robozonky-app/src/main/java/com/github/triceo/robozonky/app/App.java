@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
-import com.github.triceo.robozonky.app.configuration.CommandLineInterface;
+import com.github.triceo.robozonky.app.configuration.CommandLine;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -86,7 +86,7 @@ public class App {
     }
 
     static ReturnCode execute(final String[] args, final AtomicBoolean faultTolerant) {
-        return CommandLineInterface.parse(args)
+        return CommandLine.parse(args)
                 .map(mode -> App.execute(mode, faultTolerant))
                 .orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
     }

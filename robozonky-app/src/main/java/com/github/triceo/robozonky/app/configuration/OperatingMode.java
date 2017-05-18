@@ -63,11 +63,11 @@ abstract class OperatingMode implements CommandLineFragment {
                 });
     }
 
-    protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+    protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
                                                                   final AuthenticationHandler auth,
                                                                   final ZonkyProxy.Builder builder);
 
-    public Optional<InvestmentMode> configure(final CommandLineInterface cli, final AuthenticationHandler auth) {
+    public Optional<InvestmentMode> configure(final CommandLine cli, final AuthenticationHandler auth) {
         final Optional<Credentials> cred = cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> Optional.of(new Credentials(value, auth.getSecretProvider())))
                 .orElse(Optional.empty());

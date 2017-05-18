@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 class TestOperatingMode extends OperatingMode {
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
                                                          final AuthenticationHandler auth,
                                                          final ZonkyProxy.Builder builder) {
         return Optional.of(new InvestmentMode() {

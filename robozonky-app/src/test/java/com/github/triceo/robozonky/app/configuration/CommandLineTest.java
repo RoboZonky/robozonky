@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 
-public class CommandLineInterfaceTest {
+public class CommandLineTest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
@@ -45,31 +45,31 @@ public class CommandLineInterfaceTest {
     @Test
     public void properScriptIdentification() {
         System.setProperty("os.name", "Some Windows System");
-        Assertions.assertThat(CommandLineInterface.getScriptIdentifier()).isEqualTo("robozonky.bat");
+        Assertions.assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.bat");
         System.setProperty("os.name", "Any Other System");
-        Assertions.assertThat(CommandLineInterface.getScriptIdentifier()).isEqualTo("robozonky.sh");
+        Assertions.assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.sh");
     }
 
     @Test
     public void helpCli() {
-        final Optional<InvestmentMode> cfg = CommandLineInterface.parse("-h");
+        final Optional<InvestmentMode> cfg = CommandLine.parse("-h");
         Assertions.assertThat(cfg).isEmpty();
-        Assertions.assertThat(systemOutRule.getLog()).contains(CommandLineInterface.getScriptIdentifier());
+        Assertions.assertThat(systemOutRule.getLog()).contains(CommandLine.getScriptIdentifier());
     }
 
     @Test
     public void invalidFragmentCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLineInterface.parse("-u", "someone", "-g", "somewhere",
+        final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-g", "somewhere",
                 "-p", "password", "single", "-s", "somewhere");
         Assertions.assertThat(cfg).isEmpty();
-        Assertions.assertThat(systemOutRule.getLog()).contains(CommandLineInterface.getScriptIdentifier());
+        Assertions.assertThat(systemOutRule.getLog()).contains(CommandLine.getScriptIdentifier());
     }
 
     @Test
     public void validDaemonCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLineInterface.parse("-u", "someone", "-p", "password",
+        final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
                 "daemon", "-s", "somewhere");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
     }
@@ -77,7 +77,7 @@ public class CommandLineInterfaceTest {
     @Test
     public void validSingleShotCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLineInterface.parse("-u", "someone", "-p", "password",
+        final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
                 "single", "-s", "somewhere");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(SingleShotInvestmentMode.class);
     }
@@ -85,7 +85,7 @@ public class CommandLineInterfaceTest {
     @Test
     public void validDirectCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLineInterface.parse("-u", "someone", "-p", "password",
+        final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
                 "direct", "-l", "1", "-a", "200");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(DirectInvestmentMode.class);
     }

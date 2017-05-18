@@ -33,7 +33,7 @@ public class AuthenticationCommandLineFragmentTest {
             Assertions.assertThat(fragment.getUsername()).isEmpty();
             Assertions.assertThat(fragment.getKeystore()).isEmpty();
         });
-        Assertions.assertThatThrownBy(fragment::validate).isInstanceOf(ParameterException.class);
+        Assertions.assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class AuthenticationCommandLineFragmentTest {
             Assertions.assertThat(fragment.getUsername()).hasValue(username);
             Assertions.assertThat(fragment.getKeystore()).hasValue(keystore);
         });
-        Assertions.assertThatThrownBy(fragment::validate).isInstanceOf(ParameterException.class);
+        Assertions.assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class AuthenticationCommandLineFragmentTest {
             Assertions.assertThat(fragment.getUsername()).hasValue(username);
             Assertions.assertThat(fragment.getKeystore()).isEmpty();
         });
-        fragment.validate();
+        fragment.validate(null);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class AuthenticationCommandLineFragmentTest {
             Assertions.assertThat(fragment.getUsername()).isEmpty();
             Assertions.assertThat(fragment.getKeystore()).hasValue(keystore);
         });
-        fragment.validate();
+        fragment.validate(null);
     }
 
     @Test

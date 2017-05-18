@@ -35,7 +35,7 @@ public class OperatingModeTest {
 
     @Test
     public void defaultDirect() {
-        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         final ZonkyProxy.Builder builder = new ZonkyProxy.Builder();
         final AuthenticationHandler auth =
@@ -47,7 +47,7 @@ public class OperatingModeTest {
 
     @Test
     public void defaultTesting() {
-        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         final ZonkyProxy.Builder builder = new ZonkyProxy.Builder();
         builder.usingConfirmation(Mockito.mock(ConfirmationProvider.class), new char[0]);
@@ -68,7 +68,7 @@ public class OperatingModeTest {
     public void withConfirmation() {
         final TweaksCommandLineFragment f = Mockito.mock(TweaksCommandLineFragment.class);
         Mockito.when(f.isDryRunEnabled()).thenReturn(true);
-        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(f);
         final AuthenticationHandler auth =
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
@@ -83,7 +83,7 @@ public class OperatingModeTest {
 
     @Test
     public void withConfirmationAndUnknownId() {
-        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         final AuthenticationHandler auth =
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
@@ -97,7 +97,7 @@ public class OperatingModeTest {
 
     @Test
     public void withConfirmationAndNoSecret() {
-        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         final AuthenticationHandler auth =
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
@@ -111,7 +111,7 @@ public class OperatingModeTest {
 
     @Test
     public void withoutConfirmation() {
-        final CommandLineInterface cli = Mockito.mock(CommandLineInterface.class);
+        final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         Mockito.when(cli.getConfirmationFragment()).thenReturn(Mockito.mock(ConfirmationCommandLineFragment.class));
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);

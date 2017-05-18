@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
@@ -82,12 +83,20 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
         }
     }
 
-    @Override
-    public void validate() throws ParameterException {
+    private Optional<ParameterException> actuallyValidate() {
         if (!this.getKeystore().isPresent() && !this.getUsername().isPresent()) {
-            throw new ParameterException("Either --username or --guarded parameter must be specified.");
+            return Optional.of(new ParameterException("Either --username or --guarded parameter must be used."));
         } else if (this.getKeystore().isPresent() && this.getUsername().isPresent()) {
-            throw new ParameterException("Only one of --username or --guarded parameters must be specified.");
+            return Optional.of(new ParameterException("Only one of --username or --guarded parameters may be used."));
         }
+        return Optional.empty();
+    }
+
+    @Override
+    public void validate(final JCommander args) throws ParameterException {
+        actuallyValidate().ifPresent(ex -> {
+            ex.setJCommander(args);
+            throw ex;
+        });
     }
 }

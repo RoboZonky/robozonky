@@ -31,13 +31,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Converts command line into application configuration using {@link JCommander}.
  */
-public class CommandLineInterface {
+public class CommandLine {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLineInterface.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
 
-    private static Optional<InvestmentMode> terminate(final JCommander jc, final String message) {
-        System.out.println(message);
-        return CommandLineInterface.terminate(jc);
+    private static Optional<InvestmentMode> terminate(final ParameterException ex) {
+        System.out.println(ex.getMessage());
+        return CommandLine.terminate(ex.getJCommander());
     }
 
     private static Optional<InvestmentMode> terminate(final JCommander jc) {
@@ -65,42 +65,48 @@ public class CommandLineInterface {
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
     public static Optional<InvestmentMode> parse(final String... args) {
-        final CommandLineInterface cli = new CommandLineInterface();
-        final JCommander jc = new JCommander(cli);
-        jc.setProgramName(CommandLineInterface.getScriptIdentifier());
-        Stream.of(new DaemonOperatingMode(), new SingleShotOperatingMode(), new DirectInvestmentOperatingMode(),
-                new TestOperatingMode()).forEach(jc::addCommand);
-        try { // internal validation
-            jc.parse(args);
-            if (cli.help) { // don't validate since the CLI is likely to be invalid
-                return CommandLineInterface.terminate(jc);
-            }
-            cli.setImplementation(jc);
-            cli.validate();
-            return cli.newApplicationConfiguration();
+        try {
+            return CommandLine.parseUnsafe(args);
         } catch (final ParameterException ex) {
-            CommandLineInterface.LOGGER.debug("Command line parsing ended with parameter exception.", ex);
-            return CommandLineInterface.terminate(jc, ex.getMessage());
+            CommandLine.LOGGER.debug("Command line parsing ended with parameter exception.", ex);
+            return CommandLine.terminate(ex);
         }
     }
 
-    private OperatingMode mode;
-
-    private void validate() throws ParameterException {
-        Stream.of(authenticationFragment, mode, confirmationFragment, tweaksFragment).forEach(CommandLineFragment::validate);
+    private static Optional<InvestmentMode> parseUnsafe(final String... args) throws ParameterException {
+        final CommandLine cli = new CommandLine();
+        final JCommander.Builder builder = new JCommander.Builder()
+                .programName(CommandLine.getScriptIdentifier())
+                .addCommand(new DaemonOperatingMode())
+                .addCommand(new SingleShotOperatingMode())
+                .addCommand(new DirectInvestmentOperatingMode())
+                .addCommand(new TestOperatingMode())
+                .addObject(cli);
+        final JCommander jc = builder.build();
+        jc.parse(args);
+        if (cli.help) { // don't validate since the CLI is likely to be invalid
+            return CommandLine.terminate(jc);
+        }
+        final OperatingMode mode = cli.determineOperatingMode(jc);
+        return cli.newApplicationConfiguration(mode);
     }
 
-    private void setImplementation(final JCommander jc) {
+    private OperatingMode determineOperatingMode(final JCommander jc) throws ParameterException {
         final String parsedCommand = jc.getParsedCommand();
         if (parsedCommand == null) {
-            throw new ParameterException("You must specify one mode of operation. Check usage.");
+            final ParameterException ex = new ParameterException("You must specify one mode of operation. See usage.");
+            ex.setJCommander(jc);
+            throw ex;
         }
         final JCommander command = jc.getCommands().get(parsedCommand);
         final List<Object> objects = command.getObjects();
-        this.mode = (OperatingMode)objects.get(0);
+        final OperatingMode mode = (OperatingMode)objects.get(0);
+        Stream.of(authenticationFragment, confirmationFragment, tweaksFragment, mode)
+                .forEach(commandLineFragment -> commandLineFragment.validate(jc));
+        return mode;
     }
 
-    private Optional<InvestmentMode> newApplicationConfiguration() {
+    private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
         return SecretProviderFactory.getSecretProvider(this)
                 .map(secrets -> Optional.ofNullable(mode)
                         .map(i -> i.configure(this, authenticationFragment.createAuthenticationHandler(secrets)))

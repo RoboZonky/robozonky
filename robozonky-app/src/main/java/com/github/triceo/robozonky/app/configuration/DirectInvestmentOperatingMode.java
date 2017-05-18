@@ -40,7 +40,7 @@ class DirectInvestmentOperatingMode extends OperatingMode {
     Integer loanAmount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final CommandLineInterface cli,
+    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
                                                          final AuthenticationHandler auth,
                                                          final ZonkyProxy.Builder builder) {
         final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
