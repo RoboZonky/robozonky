@@ -49,6 +49,7 @@ public interface ZonkyApi extends Api {
     String MARKETPLACE = LOANS + "/marketplace";
     String ME = "/users/me";
     String WALLET = ME + "/wallet";
+    @Deprecated
     String INVESTMENT = ME + "/investment";
     String INVESTMENTS = ME + "/investments";
 
