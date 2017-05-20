@@ -37,8 +37,6 @@ public class SerializationTest {
         return "\"" + toEscape + "\"";
     }
 
-    private static final String REPRESENTING_INVALID_VALUE = SerializationTest.escape(Integer.MAX_VALUE);
-
     @Parameterized.Parameters(name = "{0} <=> {1}")
     public static Collection<Object[]> getParameters() {
         final Collection<Object[]> result = new ArrayList<>();
@@ -46,17 +44,14 @@ public class SerializationTest {
         for (final MainIncomeType mit: MainIncomeType.values()) {
             result.add(new Object[]{mit, SerializationTest.escape(mit.name())});
         }
-        result.add(new Object[]{MainIncomeType.OTHERS_MAIN, SerializationTest.REPRESENTING_INVALID_VALUE});
         // process purpose
         for (final Purpose p: Purpose.values()) {
             result.add(new Object[]{p, SerializationTest.escape(p.ordinal() + 1)});
         }
-        result.add(new Object[]{Purpose.JINE, SerializationTest.REPRESENTING_INVALID_VALUE});
         // process region
         for (final Region r: Region.values()) {
             result.add(new Object[]{r, SerializationTest.escape(r.ordinal() + 1)});
         }
-        result.add(new Object[]{Region.UNKNOWN, SerializationTest.REPRESENTING_INVALID_VALUE});
         return result;
     }
 
@@ -70,6 +65,13 @@ public class SerializationTest {
         final ObjectMapper mapper = new ObjectMapper();
         final Object result = mapper.readValue(name, value.getClass());
         Assertions.assertThat(result).isSameAs(value);
+    }
+
+    @Test
+    public void deserializationOfInvalid() throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+        Assertions.assertThatThrownBy(() -> mapper.readValue(String.valueOf(Integer.MAX_VALUE), value.getClass()))
+                .isInstanceOf(RuntimeException.class);
     }
 
 }
