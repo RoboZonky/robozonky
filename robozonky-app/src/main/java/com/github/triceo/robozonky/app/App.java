@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app;
 
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,7 +26,7 @@ import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.configuration.CommandLine;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
-import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
+import com.github.triceo.robozonky.app.version.UpdateMonitor;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
@@ -72,7 +73,6 @@ public class App {
     static ReturnCode execute(final InvestmentMode mode, final AtomicBoolean faultTolerant) {
         App.SHUTDOWN_HOOKS.register(new ShutdownEnabler());
         App.SHUTDOWN_HOOKS.register(new Management());
-        App.SHUTDOWN_HOOKS.register(new VersionChecker());
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
         faultTolerant.set(mode.isFaultTolerant());
         return App.execute(mode);
@@ -92,13 +92,14 @@ public class App {
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
                 Charset.defaultCharset());
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.BACKGROUND_SCHEDULER.shutdown()));
+        // check for new RoboZonky version every now and then
+        Scheduler.BACKGROUND_SCHEDULER.submit(new UpdateMonitor(), Duration.ofHours(1));
         // read the command line and execute the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try { // execute core code
             App.exit(App.execute(args, faultTolerant));
         } catch (final Throwable throwable) {
-            final RuntimeExceptionHandler handler = new AppRuntimeExceptionHandler(faultTolerant.get());
-            handler.handle(throwable);
+            new AppRuntimeExceptionHandler(faultTolerant.get()).handle(throwable);
         }
     }
 

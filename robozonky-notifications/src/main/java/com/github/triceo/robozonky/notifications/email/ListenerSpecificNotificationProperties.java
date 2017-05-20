@@ -20,9 +20,9 @@ import java.util.OptionalInt;
 
 class ListenerSpecificNotificationProperties extends EmailNotificationProperties {
 
-    private final SupportedListener listener;
+    private final SupportedEmailListener listener;
 
-    public ListenerSpecificNotificationProperties(final SupportedListener listener,
+    public ListenerSpecificNotificationProperties(final SupportedEmailListener listener,
                                                   final EmailNotificationProperties props) {
         super(props);
         this.listener = listener;

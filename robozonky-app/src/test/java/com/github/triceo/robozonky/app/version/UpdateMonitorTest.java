@@ -26,25 +26,25 @@ import org.mockito.Mockito;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class VersionRetrieverTest {
+public class UpdateMonitorTest {
 
     @Test
     public void checkRetrieval() throws Exception {
-        final VersionRetriever v = new VersionRetriever("com.github.triceo.robozonky", "robozonky-app");
+        final UpdateMonitor v = new UpdateMonitor("com.github.triceo.robozonky", "robozonky-app");
         v.run();
         Assertions.assertThat(v.getLatest()).isPresent();
     }
 
     @Test
     public void checkNonExistentUrl() throws Exception {
-        final VersionRetriever v = new VersionRetriever("com.github.triceo.robozonky", "robozonky-nonexistent");
+        final UpdateMonitor v = new UpdateMonitor("com.github.triceo.robozonky", "robozonky-nonexistent");
         v.run();
         Assertions.assertThat(v.getLatest()).isEmpty();
     }
 
     @Test
     public void checkNoStable() {
-        Assertions.assertThatThrownBy(() -> VersionRetriever.findLastStable(Collections.singleton("1.2.0-beta-1")))
+        Assertions.assertThatThrownBy(() -> UpdateMonitor.findLastStable(Collections.singleton("1.2.0-beta-1")))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -56,7 +56,7 @@ public class VersionRetrieverTest {
         final NodeList l = Mockito.mock(NodeList.class);
         Mockito.when(l.getLength()).thenReturn(1);
         Mockito.when(l.item(ArgumentMatchers.eq(0))).thenReturn(n);
-        final VersionIdentifier actual = VersionRetriever.parseNodeList(l);
+        final VersionIdentifier actual = UpdateMonitor.parseNodeList(l);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(actual.getLatestStable()).isEqualTo(version);
             softly.assertThat(actual.getLatestUnstable()).isEmpty();
@@ -74,7 +74,7 @@ public class VersionRetrieverTest {
         Mockito.when(l.getLength()).thenReturn(2);
         Mockito.when(l.item(ArgumentMatchers.eq(0))).thenReturn(n1);
         Mockito.when(l.item(ArgumentMatchers.eq(1))).thenReturn(n2);
-        final VersionIdentifier actual = VersionRetriever.parseNodeList(l);
+        final VersionIdentifier actual = UpdateMonitor.parseNodeList(l);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(actual.getLatestStable()).isEqualTo(version);
             softly.assertThat(actual.getLatestUnstable()).contains(version2);

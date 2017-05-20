@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app;
 
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.ServerErrorException;
@@ -37,27 +38,51 @@ public class AppRuntimeExceptionHandlerTest extends AbstractEventsAndStateLevera
     private final RuntimeExceptionHandler regular = new AppRuntimeExceptionHandler(false);
 
     @Test
-    public void randomException() {
+    public void unexpectedException() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
         regular.handle(new IllegalStateException());
     }
 
     @Test
-    public void randomExceptionFaultTolerant() {
+    public void unexpectedExceptionFaultTolerant() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
         faultTolerant.handle(new IllegalStateException());
     }
 
     @Test
-    public void processingException() {
+    public void unexpectedProcessingException() {
+        exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
+        regular.handle(new ProcessingException(new IllegalStateException()));
+    }
+
+    @Test
+    public void unexpectedProcessingExceptionFaultTolerant() {
+        exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
+        faultTolerant.handle(new ProcessingException(new IllegalStateException()));
+    }
+
+    @Test
+    public void socketException() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
         regular.handle(new ProcessingException(new SocketException("Testing exception")));
     }
 
     @Test
-    public void processingExceptionFaultTolerant() {
+    public void socketExceptionFaultTolerant() {
         exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
         faultTolerant.handle(new ProcessingException(new SocketException("Testing exception")));
+    }
+
+    @Test
+    public void unknownHostException() {
+        exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
+        regular.handle(new ProcessingException(new UnknownHostException("Testing exception")));
+    }
+
+    @Test
+    public void unknownHostExceptionFaultTolerant() {
+        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
+        faultTolerant.handle(new ProcessingException(new UnknownHostException("Testing exception")));
     }
 
     @Test

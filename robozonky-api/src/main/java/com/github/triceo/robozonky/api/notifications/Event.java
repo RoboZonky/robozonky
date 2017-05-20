@@ -21,11 +21,20 @@ import java.time.OffsetDateTime;
 import com.github.triceo.robozonky.internal.api.ToStringBuilder;
 
 /**
- * Marker for an event that may be fired any time during RoboZonky's runtime.
+ * Mandatory parent for any event that may be fired any time during RoboZonky's runtime.
+ *
+ * Subclasses must make sure that their class name ends with "Event", or else the default constructor of this class
+ * will throw an exception.
  */
 public abstract class Event {
 
     private final OffsetDateTime creationDateTime = OffsetDateTime.now();
+
+    public Event() {
+        if (!this.getClass().getSimpleName().endsWith("Event")) { // guarantee for dependent code
+            throw new IllegalStateException("Event subclass' names must end with 'Event'.");
+        }
+    }
 
     public OffsetDateTime getCreatedOn() {
         return creationDateTime;

@@ -28,10 +28,12 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// FIXME convert the properties to an enum
 /**
  * These are RoboZonky settings read from a property file at system startup. The location of this file will be looked
  * up in a property {@link #FILE_LOCATION_PROPERTY}. Defaults for all settings looked up through this class come from
  * {@link System#getProperties()}.
+ *
  */
 public enum Settings {
 

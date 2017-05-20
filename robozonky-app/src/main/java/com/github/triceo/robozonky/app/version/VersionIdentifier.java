@@ -18,21 +18,31 @@ package com.github.triceo.robozonky.app.version;
 
 import java.util.Optional;
 
-public class VersionIdentifier {
+class VersionIdentifier {
 
     private final String stable, unstable;
 
+    /**
+     * Represents a stable version that has no available follow-up unstable versions.
+     *
+     * @param stable The stable version string.
+     */
     VersionIdentifier(final String stable) {
         this(stable, null);
     }
 
+    /**
+     * Represents a stable version that has a subsequent unstable version available.
+     * @param stable The stable version string.
+     * @param unstable The unstable version string.
+     */
     VersionIdentifier(final String stable, final String unstable) {
         this.stable = stable;
         this.unstable = unstable;
     }
 
     public Optional<String> getLatestUnstable() {
-        return this.unstable == null ? Optional.empty() : Optional.of(this.unstable);
+        return Optional.ofNullable(this.unstable);
     }
 
     public String getLatestStable() {

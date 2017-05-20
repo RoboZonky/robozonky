@@ -53,7 +53,7 @@ public class VersionComparatorTest {
 
     @Test
     public void compares() {
-        final boolean result = VersionCheck.isSmallerThan(this.left, this.right);
+        final boolean result = VersionComparator.isSmallerThan(this.left, this.right);
         if (compareResult > -1) {
             Assertions.assertThat(result).isFalse();
         } else {
@@ -63,12 +63,17 @@ public class VersionComparatorTest {
 
     @Test
     public void comparesReverse() {
-        final boolean result = VersionCheck.isSmallerThan(this.right, this.left);
+        final boolean result = VersionComparator.isSmallerThan(this.right, this.left);
         if (compareResult < 1) {
             Assertions.assertThat(result).isFalse();
         } else {
             Assertions.assertThat(result).isTrue();
         }
+    }
+
+    @Test
+    public void compareNulls() throws Exception {
+        Assertions.assertThat(VersionComparator.isSmallerThan(null, null)).isFalse();
     }
 
 }

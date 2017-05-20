@@ -28,6 +28,13 @@ class VersionComparator implements Comparator<String>, Serializable {
 
     private static final long serialVersionUID = -4138266839888566436L;
 
+    public static boolean isSmallerThan(final String first, final String second) {
+        if (first == null || second == null) { // this is a development snapshot during tests
+            return false;
+        }
+        return new VersionComparator().compare(first, second) < 0;
+    }
+
     @Override
     public int compare(final String s1, final String s2) {
         return new ComparableVersion(s1).compareTo(new ComparableVersion(s2));

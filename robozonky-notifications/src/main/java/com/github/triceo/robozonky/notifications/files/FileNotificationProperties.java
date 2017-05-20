@@ -24,7 +24,7 @@ class FileNotificationProperties extends NotificationProperties {
 
     protected static final String HOURLY_LIMIT = "hourlyMaxFiles";
 
-    protected static String getCompositePropertyName(final SupportedListener listener, final String property) {
+    protected static String getCompositePropertyName(final SupportedFileListener listener, final String property) {
         return listener.getLabel() + "." + property;
     }
 
@@ -36,7 +36,7 @@ class FileNotificationProperties extends NotificationProperties {
         super(source);
     }
 
-    public boolean isListenerEnabled(final SupportedListener listener) {
+    public boolean isListenerEnabled(final SupportedFileListener listener) {
         return this.getBooleanValue(FileNotificationProperties.getCompositePropertyName(listener, "enabled"), false);
     }
 

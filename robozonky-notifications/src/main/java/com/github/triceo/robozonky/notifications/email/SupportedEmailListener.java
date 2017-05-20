@@ -27,17 +27,15 @@ import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
+import com.github.triceo.robozonky.notifications.SupportedListener;
 
-enum SupportedListener {
+enum SupportedEmailListener implements SupportedListener<EmailNotificationProperties> {
 
     INVESTMENT_MADE {
-        @Override
-        public String getLabel() {
-            return "investmentMade";
-        }
-
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentMadeEvent.class;
@@ -49,11 +47,6 @@ enum SupportedListener {
         }
     }, INVESTMENT_SKIPPED {
         @Override
-        public String getLabel() {
-            return "investmentSkipped";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return InvestmentSkippedEvent.class;
         }
@@ -64,11 +57,6 @@ enum SupportedListener {
         }
     }, INVESTMENT_DELEGATED {
         @Override
-        public String getLabel() {
-            return "investmentDelegated";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return InvestmentDelegatedEvent.class;
         }
@@ -78,11 +66,6 @@ enum SupportedListener {
             return new InvestmentDelegatedEventListener(properties);
         }
     }, INVESTMENT_REJECTED {
-        @Override
-        public String getLabel() {
-            return "investmentRejected";
-        }
-
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentRejectedEvent.class;
@@ -124,11 +107,6 @@ enum SupportedListener {
         }
     }, CRASHED {
         @Override
-        public String getLabel() {
-            return "roboZonkyCrashed";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyCrashedEvent.class;
         }
@@ -138,11 +116,6 @@ enum SupportedListener {
             return new RoboZonkyCrashedEventListener(properties);
         }
     }, DAEMON_FAILED {
-        @Override
-        public String getLabel() {
-            return "roboZonkyDaemonFailed";
-        }
-
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyDaemonFailedEvent.class;
@@ -154,11 +127,6 @@ enum SupportedListener {
         }
     }, REMOTE_OPERATION_FAILED {
         @Override
-        public String getLabel() {
-            return "remoteOperationFailed";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return RemoteOperationFailedEvent.class;
         }
@@ -168,11 +136,6 @@ enum SupportedListener {
             return new RemoteOperationFailedEventListener(properties);
         }
     }, INITIALIZED {
-        @Override
-        public String getLabel() {
-            return "roboZonkyInitialized";
-        }
-
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyInitializedEvent.class;
@@ -184,11 +147,6 @@ enum SupportedListener {
         }
     }, ENDING {
         @Override
-        public String getLabel() {
-            return "roboZonkyEnding";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyEndingEvent.class;
         }
@@ -199,37 +157,39 @@ enum SupportedListener {
         }
     }, TESTING {
         @Override
-        public String getLabel() {
-            return "roboZonkyTesting";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyTestingEvent.class;
         }
 
         @Override
-        protected EventListener<? extends Event> newListener(ListenerSpecificNotificationProperties properties) {
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyTestingEventListener(properties);
+        }
+    }, UPDATE_DETECTED {
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RoboZonkyUpdateDetectedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new RoboZonkyUpdateDetectedEventListener(properties);
+        }
+    }, EXPERIMENTAL_UPDATE_DETECTED {
+        @Override
+        public Class<? extends Event> getEventType() {
+            return RoboZonkyExperimentalUpdateDetectedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new RoboZonkyExperimentalUpdateDetectedEventListener(properties);
         }
     };
 
-    /**
-     * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
-     *
-     * @return ID of the listener which will be used as namespace in the config file.
-     */
-    public abstract String getLabel();
-
-    /**
-     * Type of event that this listener responds to.
-     *
-     * @return Event type.
-     */
-    public abstract Class<? extends Event> getEventType();
-
     protected abstract EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties);
 
+    @Override
     public EventListener<? extends Event> getListener(final EmailNotificationProperties properties) {
         return this.newListener(new ListenerSpecificNotificationProperties(this, properties));
     }

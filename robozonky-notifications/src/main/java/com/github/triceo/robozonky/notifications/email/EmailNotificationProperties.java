@@ -25,7 +25,7 @@ class EmailNotificationProperties extends NotificationProperties {
 
     protected static final String HOURLY_LIMIT = "hourlyMaxEmails";
 
-    protected static String getCompositePropertyName(final SupportedListener listener, final String property) {
+    protected static String getCompositePropertyName(final SupportedEmailListener listener, final String property) {
         return listener.getLabel() + "." + property;
     }
 
@@ -79,8 +79,8 @@ class EmailNotificationProperties extends NotificationProperties {
         return this.getIntValue("smtp.port", 25);
     }
 
-    public boolean isListenerEnabled(final SupportedListener listener) {
-        if (listener == SupportedListener.TESTING) {
+    public boolean isListenerEnabled(final SupportedEmailListener listener) {
+        if (listener == SupportedEmailListener.TESTING) {
             return true;
         } else {
             final String propName = EmailNotificationProperties.getCompositePropertyName(listener, "enabled");

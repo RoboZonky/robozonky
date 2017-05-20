@@ -20,9 +20,9 @@ import java.util.OptionalInt;
 
 class ListenerSpecificNotificationProperties extends FileNotificationProperties {
 
-    private final SupportedListener listener;
+    private final SupportedFileListener listener;
 
-    public ListenerSpecificNotificationProperties(final SupportedListener listener,
+    public ListenerSpecificNotificationProperties(final SupportedFileListener listener,
                                                   final FileNotificationProperties props) {
         super(props);
         this.listener = listener;

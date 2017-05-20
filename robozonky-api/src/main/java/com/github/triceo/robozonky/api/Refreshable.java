@@ -18,6 +18,8 @@ package com.github.triceo.robozonky.api;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
@@ -37,6 +39,44 @@ import org.slf4j.LoggerFactory;
  * @param <T> Type of the resource.
  */
 public abstract class Refreshable<T> implements Runnable {
+
+    /**
+     * Listener for changes to the original resource. Use {@link #registerListener(Refreshable.RefreshListener)} to enable.
+     * Implementations of methods in this interface must not throw exceptions.
+     *
+     * @param <T> Target {@link Refreshable}'s generic type.
+     */
+    public interface RefreshListener<T> {
+
+        /**
+         * Resource now has a value where there was none before.
+         *
+         * @param newValue New value for the resource.
+         */
+        default void valueSet(final T newValue) {
+            // do nothing
+        }
+
+        /**
+         * Resource used to have a value but no longer has one.
+         *
+         * @param oldValue Former value of the resource.
+         */
+        default void valueUnset(final T oldValue) {
+            // do nothing
+        }
+
+        /**
+         * Resource continues to have a value, and that value has changed.
+         *
+         * @param oldValue Former value of the resource.
+         * @param newValue New value of the resource.
+         */
+        default void valueChanged(final T oldValue, final T newValue) {
+            // do nothing
+        }
+
+    }
 
     /**
      * Create an instance of this class that will always return empty resource.
@@ -79,9 +119,29 @@ public abstract class Refreshable<T> implements Runnable {
      * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
      */
     private final CountDownLatch completionAssurance = new CountDownLatch(1);
+    private final Set<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
     public Refreshable() {
         this.valueIsMissing.acquireUninterruptibly();
+        // the only task of this listener is to log changes to the resource
+        this.registerListener(new Refreshable.RefreshListener<T>() {
+
+            @Override
+            public void valueSet(final T newValue) {
+                LOGGER.debug("New value for {}: {}.", Refreshable.this, newValue);
+            }
+
+            @Override
+            public void valueUnset(final T oldValue) {
+                LOGGER.debug("Value removed from {}.", Refreshable.this);
+            }
+
+            @Override
+            public void valueChanged(final T oldValue, final T newValue) {
+                this.valueSet(newValue);
+            }
+
+        });
     }
 
     /**
@@ -141,17 +201,39 @@ public abstract class Refreshable<T> implements Runnable {
         }
     }
 
+    /**
+     * Register an object to listen for changes to {@link #getLatest()}.
+     *
+     * @param listener Listener to register.
+     * @return False if already registered.
+     */
+    public boolean registerListener(final Refreshable.RefreshListener<T> listener) {
+        return this.listeners.add(listener);
+    }
+
+    /**
+     * Unregister a listener previously registered through {@link #registerListener(Refreshable.RefreshListener)}.
+     *
+     * @param listener Listener to unregister.
+     * @return False if not registered before.
+     */
+    public boolean unregisterListener(final Refreshable.RefreshListener<T> listener) {
+        return this.listeners.remove(listener);
+    }
+
     private void storeResult(final T result) {
         final T previous = cachedResult.getAndSet(result);
         if (Objects.equals(previous, result)) {
             return;
         }
         if (previous == null && result != null) { // value newly available
-            LOGGER.debug("New value.");
+            this.listeners.forEach(l -> l.valueSet(result));
             valueIsMissing.release();
         } else if (previous != null && result == null) { // value lost
-            LOGGER.debug("No value.");
+            this.listeners.forEach(l -> l.valueUnset(previous));
             valueIsMissing.acquireUninterruptibly();
+        } else { // value changed
+            this.listeners.forEach(l -> l.valueChanged(previous, result));
         }
     }
 
@@ -167,10 +249,8 @@ public abstract class Refreshable<T> implements Runnable {
             final Optional<T> maybeNewResult = transform(newSource);
             if (maybeNewResult.isPresent()) {
                 final T newResult = maybeNewResult.get();
-                LOGGER.debug("Source successfully transformed to {}.", newResult.getClass());
                 storeResult(newResult);
             } else {
-                LOGGER.debug("Source not transformed.");
                 storeResult(null);
             }
         } else {

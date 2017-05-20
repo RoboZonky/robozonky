@@ -35,7 +35,7 @@ class RefreshableEmailEventListener<T extends Event> extends RefreshableEventLis
     protected Optional<EventListener<T>> transform(final String source) {
         final Optional<EmailNotificationProperties> optionalProps = this.getProperties().getLatest();
         return optionalProps.map(props ->
-                Stream.of(SupportedListener.values())
+                Stream.of(SupportedEmailListener.values())
                         .filter(l -> Objects.equals(this.getEventType(), l.getEventType()))
                         .filter(l -> props.isEnabled())
                         .filter(props::isListenerEnabled)

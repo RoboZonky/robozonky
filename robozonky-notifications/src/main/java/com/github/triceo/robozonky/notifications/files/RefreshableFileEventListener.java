@@ -35,7 +35,7 @@ class RefreshableFileEventListener<T extends Event> extends RefreshableEventList
     protected Optional<EventListener<T>> transform(final String source) {
         final Optional<FileNotificationProperties> optionalProps = this.getProperties().getLatest();
         return optionalProps.map(props ->
-                Stream.of(SupportedListener.values())
+                Stream.of(SupportedFileListener.values())
                         .filter(l -> Objects.equals(this.getEventType(), l.getEventType()))
                         .filter(l -> props.isEnabled())
                         .filter(props::isListenerEnabled)

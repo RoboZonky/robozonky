@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,21 +110,43 @@ public class RefreshableTest {
     public void waitsForValue() {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
+        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
+        r.registerListener(l);
         // set and remove value
         r.run();
+        Mockito.verify(l, Mockito.times(1)).valueSet(RefreshableTest.transform(initial));
         r.setLatestSource(null);
         r.run();
+        Mockito.verify(l, Mockito.times(1)).valueUnset(RefreshableTest.transform(initial));
         // wait for new value
         RefreshableTest.LOGGER.info("Scheduling.");
         RefreshableTest.EXECUTOR.schedule(() -> {
             RefreshableTest.LOGGER.info("Executing.");
-            r.setLatestSource("something");
+            r.setLatestSource(initial);
             r.run();
             RefreshableTest.LOGGER.info("Executed.");
         }, 1, TimeUnit.SECONDS); // execute only after the assertion is called
         RefreshableTest.LOGGER.info("Blocking until value is found.");
         Assertions.assertThat(r.getLatestBlocking()).isNotEmpty();
         RefreshableTest.LOGGER.info("Found.");
+        // and now change the value
+        final String otherValue = "other";
+        r.setLatestSource(otherValue);
+        r.run();
+        Assertions.assertThat(r.getLatestBlocking()).isEqualTo(RefreshableTest.transform(otherValue));
+        Mockito.verify(l, Mockito.times(1))
+                .valueChanged(RefreshableTest.transform(initial), RefreshableTest.transform(otherValue));
+    }
+
+    @Test
+    public void registersListeners() {
+        final Refreshable<Void> r = Refreshable.createImmutable();
+        final Refreshable.RefreshListener<Void> l = Mockito.mock(Refreshable.RefreshListener.class);
+        Assertions.assertThat(r.registerListener(l)).isTrue();
+        Assertions.assertThat(r.registerListener(l)).isFalse(); // repeat registration
+        Assertions.assertThat(r.unregisterListener(l)).isTrue();
+        Assertions.assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
+        Assertions.assertThat(r.registerListener(l)).isTrue(); // re-registration
     }
 
 }

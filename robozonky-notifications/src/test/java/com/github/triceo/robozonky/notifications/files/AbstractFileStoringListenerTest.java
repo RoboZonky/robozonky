@@ -88,19 +88,19 @@ public class AbstractFileStoringListenerTest {
         final FileNotificationProperties p = AbstractFileStoringListenerTest.getNotificationProperties();
         final Investment i = new Investment(l, 300);
         final InvestmentMadeEvent ime = new InvestmentMadeEvent(i, 0);
-        final EventListener l1 = SupportedListener.INVESTMENT_MADE.getListener(p);
+        final EventListener l1 = SupportedFileListener.INVESTMENT_MADE.getListener(p);
         result.add(new Object[] {l1, ime, i.getLoanId(), i.getAmount(), "invested"} );
         final Recommendation recommendation = new LoanDescriptor(l).recommend(300).get();
         final InvestmentRejectedEvent ire = new InvestmentRejectedEvent(recommendation, Integer.MAX_VALUE, "random");
-        final EventListener l2 = SupportedListener.INVESTMENT_REJECTED.getListener(p);
+        final EventListener l2 = SupportedFileListener.INVESTMENT_REJECTED.getListener(p);
         result.add(new Object[] {l2, ire, recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount(), "rejected"} );
         final InvestmentDelegatedEvent ide = new InvestmentDelegatedEvent(recommendation, 0, "random");
-        final EventListener l3 = SupportedListener.INVESTMENT_DELEGATED.getListener(p);
+        final EventListener l3 = SupportedFileListener.INVESTMENT_DELEGATED.getListener(p);
         result.add(new Object[] {l3, ide, recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount(), "delegated"} );
         final InvestmentSkippedEvent ise = new InvestmentSkippedEvent(recommendation);
-        final EventListener l4 = SupportedListener.INVESTMENT_SKIPPED.getListener(p);
+        final EventListener l4 = SupportedFileListener.INVESTMENT_SKIPPED.getListener(p);
         result.add(new Object[] {l4, ise, recommendation.getLoanDescriptor().getLoan().getId(),
                 recommendation.getRecommendedInvestmentAmount(), "skipped"} );
         return result;

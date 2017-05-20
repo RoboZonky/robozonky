@@ -22,15 +22,11 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.triceo.robozonky.notifications.SupportedListener;
 
-enum SupportedListener {
+enum SupportedFileListener implements SupportedListener<FileNotificationProperties> {
 
     INVESTMENT_MADE {
-        @Override
-        public String getLabel() {
-            return "investmentMade";
-        }
-
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentMadeEvent.class;
@@ -42,11 +38,6 @@ enum SupportedListener {
         }
     }, INVESTMENT_SKIPPED {
         @Override
-        public String getLabel() {
-            return "investmentSkipped";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return InvestmentSkippedEvent.class;
         }
@@ -56,11 +47,6 @@ enum SupportedListener {
             return new InvestmentSkippedEventListener(properties);
         }
     }, INVESTMENT_DELEGATED {
-        @Override
-        public String getLabel() {
-            return "investmentDelegated";
-        }
-
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentDelegatedEvent.class;
@@ -72,11 +58,6 @@ enum SupportedListener {
         }
     }, INVESTMENT_REJECTED {
         @Override
-        public String getLabel() {
-            return "investmentRejected";
-        }
-
-        @Override
         public Class<? extends Event> getEventType() {
             return InvestmentRejectedEvent.class;
         }
@@ -86,20 +67,6 @@ enum SupportedListener {
             return new InvestmentRejectedEventListener(properties);
         }
     };
-
-    /**
-     * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
-     *
-     * @return ID of the listener which will be used as namespace in the config file.
-     */
-    public abstract String getLabel();
-
-    /**
-     * Type of event that this listener responds to.
-     *
-     * @return Event type.
-     */
-    public abstract Class<? extends Event> getEventType();
 
     protected abstract EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties);
 

@@ -51,13 +51,11 @@ import org.xml.sax.SAXException;
 
 /**
  * Retrieve latest released version from Maven Central. By default will check
- * https://repo1.maven.org/maven2/com/github/triceo/robozonky/robozonky-app/maven-metadata.xml.
+ * https://repo1.maven.org/maven2/com/github/triceo/robozonky/robozonky/maven-metadata.xml.
  */
-class VersionRetriever extends Refreshable<VersionIdentifier> {
+public class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VersionRetriever.class);
-    private static final String GROUP_ID = VersionRetriever.class.getPackage().getImplementationVendor();
-    private static final String ARTIFACT_ID = "robozonky";
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateMonitor.class);
     private static final String URL_SEPARATOR = "/";
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
     private static final Pattern PATTERN_STABLE_VERSION = Pattern.compile("\\A[1-9][0-9]*\\.[0-9]+\\.[0-9]+\\z");
@@ -71,24 +69,24 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
      */
     private static InputStream getMavenCentralData(final String groupId, final String artifactId)
             throws IOException {
-        final StringJoiner joiner = new StringJoiner(VersionRetriever.URL_SEPARATOR);
+        final StringJoiner joiner = new StringJoiner(UpdateMonitor.URL_SEPARATOR);
         joiner.add("https://repo1.maven.org/maven2");
-        joiner.add(Arrays.stream(VersionRetriever.PATTERN_DOT.split(groupId))
-                .collect(Collectors.joining(VersionRetriever.URL_SEPARATOR)));
+        joiner.add(Arrays.stream(UpdateMonitor.PATTERN_DOT.split(groupId))
+                .collect(Collectors.joining(UpdateMonitor.URL_SEPARATOR)));
         joiner.add(artifactId);
         joiner.add("maven-metadata.xml");
         return new URL(joiner.toString()).openStream();
     }
 
     private static boolean isStable(final String version) {
-        final Matcher matcher = VersionRetriever.PATTERN_STABLE_VERSION.matcher(version);
+        final Matcher matcher = UpdateMonitor.PATTERN_STABLE_VERSION.matcher(version);
         return matcher.find();
     }
 
     static String findLastStable(final Set<String> versions) {
         return versions.stream()
                 .sorted(new VersionComparator().reversed())
-                .filter(VersionRetriever::isStable)
+                .filter(UpdateMonitor::isStable)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Impossible."));
     }
@@ -100,7 +98,7 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
             versions.add(version);
         }
         // find latest stable
-        final String stable = VersionRetriever.findLastStable(versions);
+        final String stable = UpdateMonitor.findLastStable(versions);
         // and check if it is followed by any other versions
         final SortedSet<String> tail = versions.tailSet(stable);
         if (tail.size() == 1) {
@@ -127,30 +125,31 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
         final XPathFactory xPathfactory = XPathFactory.newInstance();
         final XPath xpath = xPathfactory.newXPath();
         final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
-        return VersionRetriever.parseNodeList((NodeList)expr.evaluate(doc, XPathConstants.NODESET));
+        return UpdateMonitor.parseNodeList((NodeList)expr.evaluate(doc, XPathConstants.NODESET));
     }
 
     private final String groupId, artifactId;
 
-    // tests only; VersionCheck.class.getPackage() does not contain anything then
-    VersionRetriever(final String groupId, final String artifactId) {
-        this.groupId = groupId == null ? "com.github.triceo.robozonky" : groupId;
-        this.artifactId = artifactId == null ? VersionRetriever.ARTIFACT_ID : artifactId;
+    // for testing purposes only
+    UpdateMonitor(final String groupId, final String artifactId) {
+        this.groupId = groupId;
+        this.artifactId = artifactId;
     }
 
-    public VersionRetriever() {
-        this(VersionRetriever.GROUP_ID, VersionRetriever.ARTIFACT_ID);
+    public UpdateMonitor() {
+        this("com.github.triceo.robozonky", "robozonky"); // RoboZonky's parent POM
+        this.registerListener(new UpdateNotification());
     }
 
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
         return () -> {
             try (final InputStreamReader reader =
-                         new InputStreamReader(VersionRetriever.getMavenCentralData(this.groupId, this.artifactId))) {
+                         new InputStreamReader(UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId))) {
                 final String result = IOUtils.toString(reader);
                 return Optional.of(result);
             } catch (final Exception ex) {
-                VersionRetriever.LOGGER.debug("Failed reading source.", ex);
+                UpdateMonitor.LOGGER.debug("Failed reading source.", ex);
                 return Optional.empty();
             }
         };
@@ -159,9 +158,9 @@ class VersionRetriever extends Refreshable<VersionIdentifier> {
     @Override
     protected Optional<VersionIdentifier> transform(final String source) {
         try (final InputStream s = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
-            return Optional.of(VersionRetriever.parseVersionString(s));
+            return Optional.of(UpdateMonitor.parseVersionString(s));
         } catch (final Exception ex) {
-            VersionRetriever.LOGGER.debug("Failed parsing source.", ex);
+            UpdateMonitor.LOGGER.debug("Failed parsing source.", ex);
             return Optional.empty();
         }
     }

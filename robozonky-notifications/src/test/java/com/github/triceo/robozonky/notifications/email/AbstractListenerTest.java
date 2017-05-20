@@ -40,6 +40,8 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
@@ -78,22 +80,24 @@ public abstract class AbstractListenerTest {
         final Investment i = new Investment(loan, 1000);
         final EmailNotificationProperties properties = AbstractListenerTest.getNotificationProperties();
         // create events for listeners
-        final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
-        events.put(SupportedListener.INVESTMENT_DELEGATED,
+        final Map<SupportedEmailListener, Event> events = new HashMap<>(SupportedEmailListener.values().length);
+        events.put(SupportedEmailListener.INVESTMENT_DELEGATED,
                 new InvestmentDelegatedEvent(recommendation, 200, "random"));
-        events.put(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200, true));
-        events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
-        events.put(SupportedListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, 200, "random"));
-        events.put(SupportedListener.BALANCE_ON_TARGET, new ExecutionStartedEvent("", Collections.emptyList(), 200));
-        events.put(SupportedListener.BALANCE_UNDER_MINIMUM, new ExecutionStartedEvent("", Collections.emptyList(), 199));
-        events.put(SupportedListener.CRASHED, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
-        events.put(SupportedListener.REMOTE_OPERATION_FAILED, new RemoteOperationFailedEvent(new RuntimeException()));
-        events.put(SupportedListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException()));
-        events.put(SupportedListener.INITIALIZED, new RoboZonkyInitializedEvent(""));
-        events.put(SupportedListener.ENDING, new RoboZonkyEndingEvent(""));
-        events.put(SupportedListener.TESTING, new RoboZonkyTestingEvent());
+        events.put(SupportedEmailListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200, true));
+        events.put(SupportedEmailListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
+        events.put(SupportedEmailListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, 200, "random"));
+        events.put(SupportedEmailListener.BALANCE_ON_TARGET, new ExecutionStartedEvent("", Collections.emptyList(), 200));
+        events.put(SupportedEmailListener.BALANCE_UNDER_MINIMUM, new ExecutionStartedEvent("", Collections.emptyList(), 199));
+        events.put(SupportedEmailListener.CRASHED, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
+        events.put(SupportedEmailListener.REMOTE_OPERATION_FAILED, new RemoteOperationFailedEvent(new RuntimeException()));
+        events.put(SupportedEmailListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException()));
+        events.put(SupportedEmailListener.INITIALIZED, new RoboZonkyInitializedEvent(""));
+        events.put(SupportedEmailListener.ENDING, new RoboZonkyEndingEvent(""));
+        events.put(SupportedEmailListener.TESTING, new RoboZonkyTestingEvent());
+        events.put(SupportedEmailListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3"));
+        events.put(SupportedEmailListener.EXPERIMENTAL_UPDATE_DETECTED, new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
         // create the listeners
-        return Stream.of(SupportedListener.values())
+        return Stream.of(SupportedEmailListener.values())
                 .map(s -> new Object[] {s, s.getListener(properties), events.get(s)})
                 .collect(Collectors.toList());
     }
@@ -104,6 +108,6 @@ public abstract class AbstractListenerTest {
     public Event event;
     // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
     @Parameterized.Parameter
-    public SupportedListener listenerType;
+    public SupportedEmailListener listenerType;
 
 }

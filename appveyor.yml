@@ -13,6 +13,6 @@ install:
   - cmd: mvn --version
   - cmd: java -version
 build_script:
-  - mvn clean post-integration-test --batch-mode -DskipTests
+  - mvn compile --batch-mode
 test_script:
-  - mvn post-integration-test --batch-mode
+  - mvn test --batch-mode

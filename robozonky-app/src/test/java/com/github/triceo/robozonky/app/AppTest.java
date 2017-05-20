@@ -108,7 +108,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(App.execute(mode, faultTolerant)).isEqualTo(ReturnCode.ERROR_SETUP);
             softly.assertThat(faultTolerant.get()).isTrue();
-            softly.assertThat(App.SHUTDOWN_HOOKS.getRegisteredCount()).isGreaterThanOrEqualTo(4);
+            softly.assertThat(App.SHUTDOWN_HOOKS.getRegisteredCount()).isGreaterThanOrEqualTo(3);
         });
         Mockito.verify(mode).close();
     }
