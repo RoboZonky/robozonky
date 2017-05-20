@@ -107,6 +107,14 @@
                   }
                 },
                 "ignore": [
+                  {
+                    "code": "java.field.removedWithConstant",
+                    "old": "field com.github.triceo.robozonky.api.remote.ZonkyApi.INVESTMENT",
+                    "package": "com.github.triceo.robozonky.api.remote",
+                    "classSimpleName": "ZonkyApi",
+                    "fieldName": "INVESTMENT",
+                    "justification": "The constant was never used."
+                  }
                 ]
               }
             }
