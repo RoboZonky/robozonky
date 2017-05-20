@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app;
 
 import com.github.triceo.robozonky.common.AbstractStateLeveragingTest;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
@@ -24,8 +25,8 @@ import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 public abstract class AbstractEventsAndStateLeveragingTest extends AbstractStateLeveragingTest {
 
     @Rule
-    public final ProvideSystemProperty property = new ProvideSystemProperty("robozonky.debug.enable_event_storage",
-            "true");
+    public final ProvideSystemProperty property =
+            new ProvideSystemProperty(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE.getName(), "true");
 
     @After
     public void clear() {

@@ -28,16 +28,36 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// FIXME convert the properties to an enum
 /**
  * These are RoboZonky settings read from a property file at system startup. The location of this file will be looked
  * up in a property {@link #FILE_LOCATION_PROPERTY}. Defaults for all settings looked up through this class come from
  * {@link System#getProperties()}.
- *
  */
 public enum Settings {
 
     INSTANCE; // cheap thread-safe singleton
+
+    public enum Key {
+
+        DEBUG_ENABLE_EVENT_STORAGE("robozonky.debug.enable_event_storage"),
+        DEFAULTS_TOKEN_REFRESH("robozonky.default.token_refresh_seconds"),
+        DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),
+        DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
+        DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
+        DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
+        DEFAULTS_DRY_RUN_BALANCE("robozonky.default.dry_run_balance");
+
+        private final String name;
+
+        Key(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+    }
 
     public static final String FILE_LOCATION_PROPERTY = "robozonky.properties.file";
     private final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
@@ -86,37 +106,52 @@ public enum Settings {
         return get(key, Boolean::parseBoolean);
     }
 
+    public <T> T get(final Settings.Key key, final Function<String, T> adapter) {
+        return get(key.getName(), adapter);
+    }
+
+    public String get(final Settings.Key key, final String defaultValue) {
+        return get(key.getName(), defaultValue);
+    }
+
+    public int get(final Settings.Key key, final int defaultValue) {
+        return get(key.getName(), defaultValue);
+    }
+
+    public boolean get(final Settings.Key key) {
+        return get(key.getName());
+    }
+
     /**
      * When set to true, this is essentially a controlled memory leak. Generally only useful for testing.
      * @return
      */
     public boolean isDebugEventStorageEnabled() {
-        return get("robozonky.debug.enable_event_storage");
+        return get(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE);
     }
 
     public int getTokenRefreshBeforeExpirationInSeconds() {
-        return get("robozonky.default.token_refresh_seconds", 60);
+        return get(Settings.Key.DEFAULTS_TOKEN_REFRESH, 60);
     }
 
     public int getRemoteResourceRefreshIntervalInMinutes() {
-        return get("robozonky.default.resource_refresh_minutes", 5);
+        return get(Settings.Key.DEFAULTS_RESOURCE_REFRESH, 5);
     }
 
     public TemporalAmount getSocketTimeout() {
-        return Duration.ofSeconds(get("robozonky.default.socket_timeout_seconds", 5));
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_SOCKET_TIMEOUT, 5));
     }
 
     public TemporalAmount getConnectionTimeout() {
-        return Duration.ofSeconds(get("robozonky.default.connection_timeout_seconds", 5));
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 5));
     }
 
     public int getCaptchaDelayInSeconds() {
-        return get("robozonky.default.captcha_protection_seconds", 120);
+        return get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 120);
     }
 
     public int getDefaultDryRunBalance() {
-        return get("robozonky.default.dry_run_balance", -1);
+        return get(Settings.Key.DEFAULTS_DRY_RUN_BALANCE, -1);
     }
-
 
 }
