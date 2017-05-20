@@ -22,8 +22,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @JsonDeserialize(using = MainIncomeType.MainIncomeTypeDeserializer.class)
 public enum MainIncomeType {
@@ -38,8 +36,6 @@ public enum MainIncomeType {
     LIBERAL_PROFESSION, // "svobodné povolání"
     OTHERS_MAIN; // "ostatní"
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MainIncomeType.class);
-
     static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
 
         @Override
@@ -47,12 +43,7 @@ public enum MainIncomeType {
                                           final DeserializationContext deserializationContext)
                 throws IOException {
             final String id = jsonParser.getText();
-            try {
-                return MainIncomeType.valueOf(id);
-            } catch (final IllegalArgumentException ex) { // whatever went wrong, don't fail on this unimportant enum
-                MainIncomeType.LOGGER.warn("Unknown value '{}', API may be incomplete.", id);
-                return MainIncomeType.OTHERS_MAIN;
-            }
+            return MainIncomeType.valueOf(id);
         }
 
     }
