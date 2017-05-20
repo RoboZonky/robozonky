@@ -150,7 +150,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         props.setProperty("com.sun.management.jmxremote.ssl", "false");
         props.setProperty("com.sun.management.jmxremote.rmi.port", port);
         props.setProperty("com.sun.management.jmxremote.port", port);
-        props.setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
         try {
             Util.writeOutProperties(props, JMX_PROPERTIES_FILE);
         } catch (final IOException ex) {
@@ -159,7 +158,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         // configure JMX to read the props file
         return new CommandLinePart()
                 .setProperty(coreProperty, "true")
-                .setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath());
+                .setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath())
+                .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
     }
 
     CommandLinePart prepareCore() {
