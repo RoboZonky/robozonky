@@ -31,7 +31,7 @@ public class ApiWrapperTest {
     @Test
     public void executeFunction() {
         final Api mock = Mockito.mock(Api.class);
-        final ApiProvider.ApiWrapper<Api> wrapper = new ApiProvider.ApiWrapper<>(Api.class, mock);
+        final ApiProvider.ApiWrapper<Api> wrapper = new ApiProvider.ApiWrapper<>(mock);
         final String expected = UUID.randomUUID().toString();
         final Function<Api, String> function = api -> expected;
         final String result = wrapper.execute(function);
@@ -41,7 +41,7 @@ public class ApiWrapperTest {
     @Test
     public void executeProcedure() {
         final Api mock = Mockito.mock(Api.class);
-        final ApiProvider.ApiWrapper<Api> wrapper = new ApiProvider.ApiWrapper<>(Api.class, mock);
+        final ApiProvider.ApiWrapper<Api> wrapper = new ApiProvider.ApiWrapper<>(mock);
         final Consumer<Api> procedure = Mockito.mock(Consumer.class);
         wrapper.execute(procedure);
         Mockito.verify(procedure, Mockito.times(1)).accept(ArgumentMatchers.eq(mock));

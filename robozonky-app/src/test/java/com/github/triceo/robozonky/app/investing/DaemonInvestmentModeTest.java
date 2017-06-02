@@ -126,7 +126,7 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final ZonkyApi z = Mockito.mock(ZonkyApi.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         Mockito.when(p.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, z));
+                .thenReturn(new ApiProvider.ApiWrapper<>(z));
         Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(ms);
         s.run();

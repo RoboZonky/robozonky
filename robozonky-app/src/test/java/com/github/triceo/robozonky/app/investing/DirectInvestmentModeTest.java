@@ -41,7 +41,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
         Mockito.when(z.getLoan(ArgumentMatchers.anyInt())).thenReturn(l);
         final ApiProvider p = Mockito.mock(ApiProvider.class);
         Mockito.when(p.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, z));
+                .thenReturn(new ApiProvider.ApiWrapper<>(z));
         Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
@@ -65,7 +65,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
         Mockito.doThrow(IllegalStateException.class).when(z).getLoan(ArgumentMatchers.anyInt());
         final ApiProvider p = Mockito.mock(ApiProvider.class);
         Mockito.when(p.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, z));
+                .thenReturn(new ApiProvider.ApiWrapper<>(z));
         Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),

@@ -80,16 +80,14 @@ public class ApiProvider implements AutoCloseable {
      */
     public static class ApiWrapper<T> implements AutoCloseable {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(ApiProvider.ApiWrapper.class);
-
         private final ResteasyClient client;
         private final T api;
 
-        public ApiWrapper(final Class<T> apiClass, T api) {
-            this(apiClass, api, null);
+        public ApiWrapper(final T api) {
+            this(api, null);
         }
 
-        public ApiWrapper(final Class<T> apiClass, final T api, final ResteasyClient client) {
+        public ApiWrapper(final T api, final ResteasyClient client) {
             this.client = client;
             this.api = api;
         }
@@ -169,7 +167,7 @@ public class ApiProvider implements AutoCloseable {
                 .target(url)
                 .register(new BrowserCacheFeature())
                 .proxy(api);
-        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(api, proxy, client);
+        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(proxy, client);
         this.clients.add(new WeakReference<>(wrapper));
         return wrapper;
     }
