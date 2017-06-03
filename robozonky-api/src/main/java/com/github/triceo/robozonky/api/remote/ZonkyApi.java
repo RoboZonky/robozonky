@@ -73,34 +73,8 @@ public interface ZonkyApi extends Api {
 
     @GET
     @Path(ZonkyApi.MARKETPLACE)
-    List<Loan> getLoans(
-            @QueryParam("rating__in") Ratings ratings,
-            @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
-            @QueryParam("termInMonths__gte") @DefaultValue("0") int leastPossibleTermInMonths,
-            @QueryParam("termInMonths__lte") int mostPossibleTermInMonths);
-
-    @GET
-    @Path(ZonkyApi.MARKETPLACE)
-    List<Loan> getLoans(
-            @QueryParam("rating__in") Ratings ratings,
-            @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment,
-            @QueryParam("termInMonths__gte") @DefaultValue("0") int leastPossibleTermInMonths);
-
-    @GET
-    @Path(ZonkyApi.MARKETPLACE)
-    List<Loan> getLoans(
-            @QueryParam("rating__in") Ratings ratings,
-            @QueryParam("remainingInvestment__gt") @DefaultValue("0") int leastRemainingInvestment);
-
-    @GET
-    @Path(ZonkyApi.MARKETPLACE)
-    List<Loan> getLoans(@QueryParam("rating__in") Ratings ratings);
-
-    @GET
-    @Path(ZonkyApi.MARKETPLACE)
     @Override
     List<Loan> getLoans();
-
 
     @GET
     @Path(ZonkyApi.ME + "/logout")
@@ -112,13 +86,7 @@ public interface ZonkyApi extends Api {
 
     @GET
     @Path(ZonkyApi.INVESTMENTS)
-    Collection<Investment> getInvestments(
-            @QueryParam("loan.status__in") InvestmentStatuses statuses,
-            @QueryParam("loan.dpd__gt") @DefaultValue("0") int daysPastDueGreaterThan);
-
-    @GET
-    @Path(ZonkyApi.INVESTMENTS)
-    Collection<Investment> getInvestments(@QueryParam("loan.status__in") InvestmentStatuses statuses);
+    Collection<Investment> getInvestments();
 
     @POST
     @Path("/marketplace/investment")
