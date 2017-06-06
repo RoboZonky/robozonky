@@ -37,7 +37,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 
 public class DaemonInvestmentMode extends AbstractInvestmentMode {
@@ -79,14 +79,14 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     }
 
     @Override
-    protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
+    protected Optional<Collection<Investment>> execute(final Apis apis) {
         /*
          * in tests, the number of available permits may get over 1 as the semaphore is released multiple times.
          * let's make sure we always acquire all the available permits, no matter what the actual number is.
          */
         final int permitCount = Math.max(1, DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.availablePermits());
         DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.acquireUninterruptibly(permitCount);
-        return execute(apiProvider, DaemonInvestmentMode.BLOCK_UNTIL_RELEASED);
+        return execute(apis, DaemonInvestmentMode.BLOCK_UNTIL_RELEASED);
     }
 
     @Override
@@ -118,8 +118,8 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     }
 
     @Override
-    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
+    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final Apis apis) {
+        return new StrategyExecution(apis, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
                 maximumSleepPeriod);
     }
 

@@ -27,7 +27,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
 
@@ -46,20 +46,21 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
     }
 
     @Override
-    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return (loans) -> this.getAuthenticationHandler().execute(apiProvider, api -> {
-            final ZonkyProxy proxy = getProxyBuilder().build(api);
-            final Loan l = proxy.execute(z -> z.getLoan(loanId));
+    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final Apis apis) {
+        final Apis.Executable<Collection<Investment>> op = (control, loans, wallet, portfolio) -> {
+            final ZonkyProxy proxy = getProxyBuilder().build(control);
+            final Loan l = loans.item(loanId);
             final LoanDescriptor d = new LoanDescriptor(l);
             return d.recommend(loanAmount, false)
-                    .map(r -> Session.invest(proxy, new DirectInvestmentCommand(r)))
+                    .map(r -> Session.invest(proxy, loans, portfolio, wallet, new DirectInvestmentCommand(r)))
                     .orElse(Collections.emptyList());
-        });
+        };
+        return (marketplace) -> this.getAuthenticationHandler().execute(apis, op);
     }
 
     @Override
-    protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
-        return this.execute(apiProvider, new Semaphore(1));
+    protected Optional<Collection<Investment>> execute(final Apis apis) {
+        return this.execute(apis, new Semaphore(1));
     }
 
 }

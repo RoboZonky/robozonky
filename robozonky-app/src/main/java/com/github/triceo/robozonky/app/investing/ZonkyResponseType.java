@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky.app.investing;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
 
 public enum ZonkyResponseType {
 
@@ -26,7 +26,7 @@ public enum ZonkyResponseType {
      */
     SEEN_BEFORE,
     /**
-     * Investment confirmed by {@link ZonkyApi}.
+     * Investment confirmed by {@link ControlApi}.
      */
     INVESTED,
     /**

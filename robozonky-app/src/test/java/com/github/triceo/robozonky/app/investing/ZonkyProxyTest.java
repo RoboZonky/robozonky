@@ -25,7 +25,7 @@ import java.util.Optional;
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
@@ -171,7 +171,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
     }
 
     private ZonkyProxy getZonkyProxy() {
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        final ControlApi api = Mockito.mock(ControlApi.class);
         switch (proxyType) {
             case DRY:
                 return new ZonkyProxy.Builder().asDryRun().build(api);

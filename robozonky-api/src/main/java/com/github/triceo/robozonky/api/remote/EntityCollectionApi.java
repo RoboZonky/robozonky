@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
+package com.github.triceo.robozonky.api.remote;
 
-import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.Apis;
+import java.util.List;
 
-class ZotifyMarketplace extends AbstractMarketplace {
+/**
+ * The use of this API signifies that the resource in question supports pagination as defined by the Zonky API.
+ *
+ * @param <T> The type of resource.
+ */
+public interface EntityCollectionApi<T> {
 
-    @Override
-    protected Apis.Wrapper<? extends EntityCollectionApi<Loan>> newApi(final MarketplaceApis apis) {
-        return apis.zotify();
-    }
+    List<T> items();
 
 }

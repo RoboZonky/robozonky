@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,27 @@
 package com.github.triceo.robozonky.api.remote;
 
 import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
-public interface Api {
+@Path("/loans")
+@Produces(Defaults.MEDIA_TYPE)
+@Consumes(Defaults.MEDIA_TYPE)
+public interface LoanApi extends EntityCollectionApi<Loan> {
 
-    List<Loan> getLoans();
+    @GET
+    @Path("marketplace")
+    @Override
+    List<Loan> items();
+
+    @GET
+    @Path("{loanId}")
+    Loan item(@PathParam("loanId") int id);
 
 }

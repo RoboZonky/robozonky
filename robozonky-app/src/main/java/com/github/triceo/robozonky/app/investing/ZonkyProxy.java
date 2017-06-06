@@ -19,13 +19,12 @@ package com.github.triceo.robozonky.app.investing;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Function;
 import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public class ZonkyProxy {
             return isDryRun;
         }
 
-        public ZonkyProxy build(final ZonkyApi zonky) {
+        public ZonkyProxy build(final ControlApi zonky) {
             return this.getConfirmationRequestUsed()
                     .map(r -> new ZonkyProxy(r, provider, zonky, isDryRun))
                     .orElse(new ZonkyProxy(username, zonky, isDryRun));
@@ -88,12 +87,12 @@ public class ZonkyProxy {
     }
 
     private final String username;
-    private final ZonkyApi zonky;
+    private final ControlApi zonky;
     private final boolean isDryRun;
     private final RequestId requestId;
     private final ConfirmationProvider provider;
 
-    private ZonkyProxy(final RequestId requestId, final ConfirmationProvider provider, final ZonkyApi zonky,
+    private ZonkyProxy(final RequestId requestId, final ConfirmationProvider provider, final ControlApi zonky,
                        final boolean isDryRun) {
         this.username = requestId.getUserId();
         this.zonky = zonky;
@@ -106,16 +105,12 @@ public class ZonkyProxy {
         return isDryRun;
     }
 
-    private ZonkyProxy(final String username, final ZonkyApi zonky, final boolean isDryRun) {
+    private ZonkyProxy(final String username, final ControlApi zonky, final boolean isDryRun) {
         this.username = username;
         this.zonky = zonky;
         this.isDryRun = isDryRun;
         this.provider = null;
         this.requestId = null;
-    }
-
-    public <T> T execute(final Function<ZonkyApi, T> operation) {
-        return operation.apply(this.zonky);
     }
 
     public String getUsername() {

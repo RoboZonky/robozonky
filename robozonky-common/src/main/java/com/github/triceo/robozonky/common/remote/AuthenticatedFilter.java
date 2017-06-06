@@ -26,7 +26,8 @@ final class AuthenticatedFilter extends RoboZonkyFilter {
     private final char[] accessToken; // treat the access token as if it were a password
 
     public AuthenticatedFilter(final ZonkyApiToken token) {
-        this.accessToken = token.getAccessToken();
+        // null token = no token
+        this.accessToken = token == null ? new char[0] : token.getAccessToken();
     }
 
     @Override

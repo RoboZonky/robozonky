@@ -16,12 +16,12 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 
 /**
- * Fired immediately before {@link ZonkyApi#invest(Investment)} call is made or, in case of dry run,
+ * Fired immediately before {@link ControlApi#invest(Investment)} call is made or, in case of dry run,
  * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentMadeEvent}.
  */
 public final class InvestmentRequestedEvent extends Event {

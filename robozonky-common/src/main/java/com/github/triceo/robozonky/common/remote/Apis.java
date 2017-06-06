@@ -27,7 +27,10 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.xml.ws.WebServiceClient;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.remote.LoanApi;
+import com.github.triceo.robozonky.api.remote.PortfolioApi;
+import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.internal.api.Settings;
@@ -53,9 +56,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides instances of APIs for the rest of RoboZonky to use. When no longer needed, the ApiProvider needs to be
  * {@link #close()}ed in order to not leak {@link WebServiceClient}s that weren't already closed by
- * {@link ApiProvider.ApiWrapper#close()}.
+ * {@link Apis.Wrapper#close()}.
  */
-public class ApiProvider implements AutoCloseable {
+public class Apis implements AutoCloseable {
 
     static class RedirectingHttpClient extends ApacheHttpClient43Engine {
 
@@ -78,16 +81,16 @@ public class ApiProvider implements AutoCloseable {
      *
      * @param <T> Type of the API to be handled.
      */
-    public static class ApiWrapper<T> implements AutoCloseable {
+    public static class Wrapper<T> implements AutoCloseable {
 
         private final ResteasyClient client;
         private final T api;
 
-        public ApiWrapper(final T api) {
+        public Wrapper(final T api) {
             this(api, null);
         }
 
-        public ApiWrapper(final T api, final ResteasyClient client) {
+        public Wrapper(final T api, final ResteasyClient client) {
             this.client = client;
             this.api = api;
         }
@@ -112,16 +115,22 @@ public class ApiProvider implements AutoCloseable {
         }
     }
 
+    public interface Executable<T> {
+
+        T execute(final ControlApi control, final LoanApi loans, final WalletApi wallet, final PortfolioApi portfolio);
+
+    }
+
     private static final ResteasyProviderFactory RESTEASY = ResteasyProviderFactory.getInstance();
     static {
-        RegisterBuiltin.register(ApiProvider.RESTEASY);
+        RegisterBuiltin.register(Apis.RESTEASY);
         final Class<?> jsonProvider = ResteasyJackson2Provider.class;
-        if (!ApiProvider.RESTEASY.isRegistered(jsonProvider)) {
-            ApiProvider.RESTEASY.registerProvider(jsonProvider);
+        if (!Apis.RESTEASY.isRegistered(jsonProvider)) {
+            Apis.RESTEASY.registerProvider(jsonProvider);
         }
     }
     private static final HttpClientConnectionManager CONNECTION_MANAGER = new PoolingHttpClientConnectionManager();
-    private static final String ZONKY_URL = "https://api.zonky.cz";
+    public static final String ZONKY_URL = "https://api.zonky.cz";
 
     /**
      * Use weak references so that the clients aren't kept around forever, with all the entities they carry.
@@ -140,12 +149,12 @@ public class ApiProvider implements AutoCloseable {
                 .build();
         final CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig) // avoid "sudden death" (marketplace forever blocking on socket)
-                .setConnectionManager(ApiProvider.CONNECTION_MANAGER)
+                .setConnectionManager(Apis.CONNECTION_MANAGER)
                 .build();
-        final ClientHttpEngine httpEngine = new ApiProvider.RedirectingHttpClient(httpClient);
+        final ClientHttpEngine httpEngine = new Apis.RedirectingHttpClient(httpClient);
         return new ResteasyClientBuilder()
                 .httpEngine(httpEngine)
-                .providerFactory(ApiProvider.RESTEASY)
+                .providerFactory(Apis.RESTEASY)
                 .build();
     }
 
@@ -158,16 +167,16 @@ public class ApiProvider implements AutoCloseable {
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
-    protected <T> ApiProvider.ApiWrapper<T> obtain(final Class<T> api, final String url, final RoboZonkyFilter filter) {
+    protected <T> Apis.Wrapper<T> obtain(final Class<T> api, final String url, final RoboZonkyFilter filter) {
         if (this.isClosed.get()) {
             throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
         }
-        final ResteasyClient client = ApiProvider.newResteasyClient();
+        final ResteasyClient client = Apis.newResteasyClient();
         final T proxy = client.register(filter)
                 .target(url)
                 .register(new BrowserCacheFeature())
                 .proxy(api);
-        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(proxy, client);
+        final Apis.Wrapper<T> wrapper = new Apis.Wrapper<>(proxy, client);
         this.clients.add(new WeakReference<>(wrapper));
         return wrapper;
     }
@@ -178,8 +187,8 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ApiProvider.ApiWrapper<ZonkyOAuthApi> oauth() {
-        return this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter());
+    public Apis.Wrapper<ZonkyOAuthApi> oauth() {
+        return this.obtain(ZonkyOAuthApi.class, Apis.ZONKY_URL, new AuthenticationFilter());
     }
 
     /**
@@ -188,19 +197,58 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ApiProvider.ApiWrapper<ZonkyApi> anonymous() {
-        return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, new RoboZonkyFilter());
+    public Apis.Wrapper<LoanApi> loans() {
+        return this.obtain(LoanApi.class, Apis.ZONKY_URL, new RoboZonkyFilter());
     }
 
     /**
-     * Retrieve user-specific Zonky API which requires authentication.
+     * Retrieve user-specific Zonky loan API which requires authentication.
      *
-     * @param token The Zonky API token, representing an authenticated user.
+     * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ApiProvider.ApiWrapper<ZonkyApi> authenticated(final ZonkyApiToken token) {
-        return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, new AuthenticatedFilter(token));
+    public Apis.Wrapper<LoanApi> loans(final ZonkyApiToken token) {
+        return this.obtain(LoanApi.class, Apis.ZONKY_URL, new AuthenticatedFilter(token));
+    }
+
+    /**
+     * Retrieve user-specific Zonky wallet API which requires authentication.
+     *
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     * @throws IllegalStateException If {@link #close()} already called.
+     */
+    public Apis.Wrapper<WalletApi> wallet(final ZonkyApiToken token) {
+        return this.obtain(WalletApi.class, Apis.ZONKY_URL, new AuthenticatedFilter(token));
+    }
+
+    /**
+     * Retrieve user-specific Zonky portfolio API which requires authentication.
+     *
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     * @throws IllegalStateException If {@link #close()} already called.
+     */
+    public Apis.Wrapper<PortfolioApi> portfolio(final ZonkyApiToken token) {
+        return this.obtain(PortfolioApi.class, Apis.ZONKY_URL, new AuthenticatedFilter(token));
+    }
+
+    /**
+     * Retrieve user-specific Zonky control API which requires authentication.
+     *
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     * @throws IllegalStateException If {@link #close()} already called.
+     */
+    public Apis.Wrapper<ControlApi> control(final ZonkyApiToken token) {
+        return this.obtain(ControlApi.class, Apis.ZONKY_URL, new AuthenticatedFilter(token));
+    }
+
+    public <T> T execute(final Apis.Executable<T> executable, final ZonkyApiToken token) {
+        try (final Api a = new Api(this, token)) {
+            return a.execute(executable);
+        }
     }
 
     @Override
@@ -218,8 +266,8 @@ public class ApiProvider implements AutoCloseable {
                     }
                 });
         this.isClosed.set(true);
-        ApiProvider.CONNECTION_MANAGER.closeExpiredConnections();
-        ApiProvider.CONNECTION_MANAGER.closeIdleConnections(5, TimeUnit.MINUTES);
+        Apis.CONNECTION_MANAGER.closeExpiredConnections();
+        Apis.CONNECTION_MANAGER.closeIdleConnections(5, TimeUnit.MINUTES);
     }
 
 }

@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,9 +29,9 @@ import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +43,10 @@ public class Checker {
     private static final Comparator<Loan> COMPARATOR =
             Comparator.comparing(Loan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
 
-    static Optional<Loan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
-        try (final ApiProvider p = apiProviderSupplier.get()) {
-            final ApiProvider.ApiWrapper<ZonkyApi> oauth = p.anonymous();
-            final Collection<Loan> loans = oauth.execute((Function<ZonkyApi, List<Loan>>) ZonkyApi::getLoans);
+    static Optional<Loan> getOneLoanFromMarketplace(final Supplier<Apis> apiProviderSupplier) {
+        try (final Apis p = apiProviderSupplier.get()) {
+            final Apis.Wrapper<LoanApi> oauth = p.loans();
+            final Collection<Loan> loans = oauth.execute(LoanApi::items);
             /*
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.
@@ -76,11 +75,11 @@ public class Checker {
 
     public static Optional<Boolean> confirmations(final ConfirmationProvider provider, final String username,
                                                   final char[] secret) {
-        return Checker.confirmations(provider, username, secret, ApiProvider::new);
+        return Checker.confirmations(provider, username, secret, Apis::new);
     }
 
     static Optional<Boolean> confirmations(final ConfirmationProvider provider, final String username,
-                                           final char[] secret, final Supplier<ApiProvider> apiProviderSupplier) {
+                                           final char[] secret, final Supplier<Apis> apiProviderSupplier) {
         return Checker.getOneLoanFromMarketplace(apiProviderSupplier)
                 .map(l -> Checker.notifyProvider(l, provider, username, secret))
                 .orElse(Optional.of(false));

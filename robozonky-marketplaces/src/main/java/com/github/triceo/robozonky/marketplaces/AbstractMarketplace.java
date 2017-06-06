@@ -22,16 +22,16 @@ import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
-import com.github.triceo.robozonky.api.remote.Api;
+import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 
 abstract class AbstractMarketplace implements Marketplace {
 
     private final Collection<Consumer<Collection<Loan>>> loanListeners = new LinkedHashSet<>();
-    private final MarketplaceApiProvider apis = new MarketplaceApiProvider();
+    private final MarketplaceApis apis = new MarketplaceApis();
 
-    protected abstract ApiProvider.ApiWrapper<? extends Api> newApi(final MarketplaceApiProvider apiProvider);
+    protected abstract Apis.Wrapper<? extends EntityCollectionApi<Loan>> newApi(final MarketplaceApis apis);
 
     @Override
     public synchronized boolean registerListener(final Consumer<Collection<Loan>> listener) {
@@ -45,8 +45,10 @@ abstract class AbstractMarketplace implements Marketplace {
 
     @Override
     public synchronized void run() {
-        try (final ApiProvider.ApiWrapper<? extends Api> apiWrapper = this.newApi(apis)) {
-            final Collection<Loan> loans = apiWrapper.execute(Api::getLoans);
+        try (final Apis.Wrapper<? extends EntityCollectionApi<Loan>> wrapper = this.newApi(apis)) {
+            final Collection<Loan> loans = wrapper.execute(a -> {
+                return a.items();
+            });
             loanListeners.forEach(l -> l.accept(loans));
         }
     }

@@ -20,10 +20,10 @@ import java.util.UUID;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
@@ -57,15 +57,15 @@ public class ZonkySettingsValidatorTest {
     @Test
     public void properLogin() {
         // mock data
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        final Apis provider = Mockito.mock(Apis.class);
         final ZonkyApiToken token = Mockito.mock(ZonkyApiToken.class);
         final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
-        final ZonkyApi api = Mockito.mock(ZonkyApi.class);
+        final ControlApi api = Mockito.mock(ControlApi.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenReturn(token);
-        Mockito.when(provider.authenticated(ArgumentMatchers.eq(token)))
-                .thenReturn(new ApiProvider.ApiWrapper<>(api));
-        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(oauth));
+        Mockito.when(provider.control(ArgumentMatchers.eq(token)))
+                .thenReturn(new Apis.Wrapper<>(api));
+        Mockito.when(provider.oauth()).thenReturn(new Apis.Wrapper<>(oauth));
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
@@ -82,11 +82,11 @@ public class ZonkySettingsValidatorTest {
     @Test
     public void warning() {
         // mock data
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        final Apis provider = Mockito.mock(Apis.class);
         final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenThrow(new IllegalStateException());
-        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(oauth));
+        Mockito.when(provider.oauth()).thenReturn(new Apis.Wrapper<>(oauth));
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
@@ -98,11 +98,11 @@ public class ZonkySettingsValidatorTest {
     @Test
     public void error() {
         // mock data
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        final Apis provider = Mockito.mock(Apis.class);
         final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenThrow(new ServerErrorException(Response.Status.INTERNAL_SERVER_ERROR));
-        Mockito.when(provider.oauth()).thenReturn(new ApiProvider.ApiWrapper<>(oauth));
+        Mockito.when(provider.oauth()).thenReturn(new Apis.Wrapper<>(oauth));
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);

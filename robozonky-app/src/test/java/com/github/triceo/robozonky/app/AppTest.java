@@ -32,7 +32,7 @@ import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.app.investing.ZonkyProxy;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -66,8 +66,8 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
-        final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        final Apis api = Mockito.mock(Apis.class);
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(Apis.Wrapper.class));
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         // and now test
@@ -83,11 +83,11 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Collections.emptyList());
-        final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        final Apis api = Mockito.mock(Apis.class);
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(Apis.Wrapper.class));
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        Mockito.when(api.control(ArgumentMatchers.any())).thenReturn(Mockito.mock(Apis.Wrapper.class));
         final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
         final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
         Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));

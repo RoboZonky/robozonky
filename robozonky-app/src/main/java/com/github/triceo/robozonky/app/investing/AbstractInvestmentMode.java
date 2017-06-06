@@ -27,7 +27,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +65,11 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
         return authenticationHandler;
     }
 
-    protected abstract Optional<Collection<Investment>> execute(final ApiProvider apiProvider);
+    protected abstract Optional<Collection<Investment>> execute(final Apis apis);
 
     @Override
     public Optional<Collection<Investment>> get() {
-        try (final ApiProvider api = new ApiProvider()) {
+        try (final Apis api = new Apis()) {
             LOGGER.trace("Executing.");
             return this.execute(api);
         } finally {
@@ -91,26 +91,26 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
     /**
      * Provide the investing algorithm.
      *
-     * @param apiProvider API provider to use when constructing the investing mechanism.
+     * @param apis API provider to use when constructing the investing mechanism.
      * @return Investments made by the algorithm.
      */
-    protected abstract Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(ApiProvider apiProvider);
+    protected abstract Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(Apis apis);
 
     /**
      * Execute the algorithm and give it a circuit breaker which, when turning true, tells the orchestration to
      * finish the operation and terminate.
      *
-     * @param apiProvider The API provider to use when constructing the investing mechanism.
+     * @param apis The API provider to use when constructing the investing mechanism.
      * @param circuitBreaker Release in order to have this method stop and return.
      * @return Investments made while this method was running, or empty if failure.
      */
-    protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider, final Semaphore circuitBreaker) {
+    protected Optional<Collection<Investment>> execute(final Apis apis, final Semaphore circuitBreaker) {
         LOGGER.trace("Executing.");
         try {
             final ResultTracker buffer = new ResultTracker();
             final Consumer<Collection<Loan>> investor = (loans) -> {
                 final Collection<LoanDescriptor> descriptors = buffer.acceptLoansFromMarketplace(loans);
-                final Collection<Investment> result = getInvestor(apiProvider).apply(descriptors);
+                final Collection<Investment> result = getInvestor(apis).apply(descriptors);
                 buffer.acceptInvestmentsFromRobot(result);
             };
             openMarketplace(investor);

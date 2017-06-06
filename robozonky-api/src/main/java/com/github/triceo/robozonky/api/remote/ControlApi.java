@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Lukáš Petrovický
+ * Copyright 2016 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.github.triceo.robozonky.api.remote;
 
-package com.github.triceo.robozonky.marketplaces;
-
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
-import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.internal.api.Defaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Simple Zonky API cache from zotify.cz.
- */
 @Path("/")
-@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-@Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-interface ZotifyApi extends EntityCollectionApi<Loan> {
+@Produces(Defaults.MEDIA_TYPE)
+@Consumes(Defaults.MEDIA_TYPE)
+public interface ControlApi {
+
+    Logger LOGGER = LoggerFactory.getLogger(ControlApi.class);
+
+    String ME = "/users/me";
 
     @GET
-    @Path("/json")
-    @Override
-    List<Loan> items();
+    @Path(ControlApi.ME + "/logout")
+    void logout();
 
+    @POST
+    @Path("/marketplace/investment")
+    void invest(Investment investment);
 }
 

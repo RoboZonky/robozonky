@@ -30,7 +30,10 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.remote.LoanApi;
+import com.github.triceo.robozonky.api.remote.PortfolioApi;
+import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
@@ -38,7 +41,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -122,12 +125,19 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final InvestmentStrategy ms = Mockito.mock(InvestmentStrategy.class);
         Mockito.when(ms.recommend(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
                 .thenReturn(Collections.singletonList(r));
-        final ApiProvider p = Mockito.mock(ApiProvider.class);
-        final ZonkyApi z = Mockito.mock(ZonkyApi.class);
-        Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        Mockito.when(p.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(z));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        final Apis p = Mockito.spy(Apis.class);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        Mockito.when(la.item(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
+        Mockito.when(la.items()).thenReturn(Collections.singletonList(l));
+        Mockito.doReturn(new Apis.Wrapper<>(la)).when(p).loans();
+        Mockito.doReturn(new Apis.Wrapper<>(la)).when(p).loans(ArgumentMatchers.any());
+        final ControlApi z = Mockito.mock(ControlApi.class);
+        Mockito.doReturn(new Apis.Wrapper<>(z)).when(p).control(ArgumentMatchers.any());
+        Mockito.doReturn(Mockito.mock(Apis.Wrapper.class)).when(p).oauth();
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        Mockito.doReturn(new Apis.Wrapper<>(pa)).when(p).portfolio(ArgumentMatchers.any());
+        final WalletApi wa = Mockito.mock(WalletApi.class);
+        Mockito.doReturn(new Apis.Wrapper<>(wa)).when(p).wallet(ArgumentMatchers.any());
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(ms);
         s.run();
         try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(

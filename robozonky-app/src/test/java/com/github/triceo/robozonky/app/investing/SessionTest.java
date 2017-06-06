@@ -31,10 +31,12 @@ import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.remote.LoanApi;
+import com.github.triceo.robozonky.api.remote.PortfolioApi;
+import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -53,10 +55,13 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void constructor() {
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
-        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), lds)) {
+        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), la, pa, wa, lds)) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(it.getAvailableLoans())
                         .isNotSameAs(lds)
@@ -75,9 +80,12 @@ public class SessionTest extends AbstractInvestingTest {
         final SessionState sst = new SessionState(lds);
         sst.discard(ld);
         // setup APIs
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         // test that the loan is not available
-        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), lds)) {
+        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), la, pa, wa, lds)) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(it.getAvailableLoans())
                         .hasSize(1)
@@ -92,12 +100,15 @@ public class SessionTest extends AbstractInvestingTest {
         final int loanId = 1;
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(loanId);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
-        final ZonkyApi a = SessionTest.mockApi(10_000);
-        Mockito.when(a.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.getLoan());
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
         final BlockedAmount ba = new BlockedAmount(loanId, Defaults.MINIMUM_INVESTMENT_IN_CZK);
-        Mockito.when(a.getBlockedAmounts(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt()))
-                .thenReturn(Collections.singletonList(ba));
-        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), lds)) {
+        Mockito.when(wa.items()).thenReturn(Collections.singletonList(ba));
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        Mockito.when(la.item(ArgumentMatchers.eq(loanId))).thenReturn(ld.getLoan());
+        final ControlApi a = Mockito.mock(ControlApi.class);
+        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), la, pa, wa, lds)) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(it.getAvailableLoans())
                         .hasSize(1)
@@ -109,11 +120,16 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void makeInvestment() {
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
+        // run test
         final int amount = 200;
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(Duration.ZERO);
-        final ZonkyApi a = SessionTest.mockApi(10_000);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
-        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), lds)) {
+        try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), la, pa, wa, lds)) {
             it.invest(ld.recommend(amount).get());
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(it.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
@@ -128,29 +144,36 @@ public class SessionTest extends AbstractInvestingTest {
         final int value = 200;
         System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
         final ZonkyProxy.Builder p = new ZonkyProxy.Builder().asDryRun();
-        Assertions.assertThat(Session.getAvailableBalance(p.build(null)).intValue()).isEqualTo(value);
+        Assertions.assertThat(Session.getAvailableBalance(p.build(null), null).intValue()).isEqualTo(value);
     }
 
     @Test
     public void getBalancePropertyIgnoredWhenNotDryRun() {
         System.setProperty("robozonky.default.dry_run_balance", "200");
-        final ZonkyApi api = SessionTest.mockApi(0);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(0);
+        final ControlApi api = Mockito.mock(ControlApi.class);
         final ZonkyProxy.Builder p = new ZonkyProxy.Builder();
-        Assertions.assertThat(Session.getAvailableBalance(p.build(api))).isEqualTo(BigDecimal.ZERO);
+        Assertions.assertThat(Session.getAvailableBalance(p.build(api), wa)).isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
     public void getRemoteBalanceInDryRun() {
-        final ZonkyApi api = SessionTest.mockApi(0);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(0);
+        final ControlApi api = Mockito.mock(ControlApi.class);
         final ZonkyProxy.Builder p = new ZonkyProxy.Builder().asDryRun();
-        Assertions.assertThat(Session.getAvailableBalance(p.build(api))).isEqualTo(BigDecimal.ZERO);
+        Assertions.assertThat(Session.getAvailableBalance(p.build(api), wa)).isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
     public void underBalance() {
-        final ZonkyApi a = SessionTest.mockApi(0);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(0);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
+        // run test
         final ZonkyProxy p = new ZonkyProxy.Builder().build(a);
-        try (final Session it = Session.create(p, Collections.emptyList())) {
+        try (final Session it = Session.create(p, la, pa, wa, Collections.emptyList())) {
             final Optional<Recommendation> recommendation =
                     AbstractInvestingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK);
             final boolean result = it.invest(recommendation.get());
@@ -163,11 +186,15 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void underAmount() {
-        final ZonkyApi a = SessionTest.mockApi(100);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(100);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = new ZonkyProxy.Builder().build(a);
         final Recommendation recommendation =
                 AbstractInvestingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
-        try (final Session t = Session.create(p,
+        try (final Session t = Session.create(p, la, pa, wa,
                 Collections.singletonList(recommendation.getLoanDescriptor()))) {
             final boolean result = t.invest(recommendation);
             // verify result
@@ -179,25 +206,33 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void investmentFailed() {
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         final Exception thrown = new ServiceUnavailableException();
         Mockito.doThrow(thrown).when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
-        try (final Session t = Session.create(p, Collections.emptyList())) {
+        try (final Session t = Session.create(p, la, pa, wa, Collections.emptyList())) {
             Assertions.assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
         }
     }
 
     @Test
     public void investmentRejected() {
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        try (final Session t = Session.create(p, Collections.emptyList())) {
+        try (final Session t = Session.create(p, la, pa, wa, Collections.emptyList())) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -214,13 +249,17 @@ public class SessionTest extends AbstractInvestingTest {
     public void investmentDelegated() {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Recommendation r = ld.recommend(200).get();
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        try (final Session t = Session.create(p, availableLoans)) {
+        try (final Session t = Session.create(p, la, pa, wa, availableLoans)) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -238,12 +277,16 @@ public class SessionTest extends AbstractInvestingTest {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Recommendation r = ld.recommend(200, true).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        try (final Session t = Session.create(p, availableLoans)) {
+        try (final Session t = Session.create(p, la, pa, wa, availableLoans)) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -261,12 +304,16 @@ public class SessionTest extends AbstractInvestingTest {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Recommendation r = ld.recommend(200).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.empty()).when(p).getConfirmationProviderId();
-        try (final Session t = Session.create(p, availableLoans)) {
+        try (final Session t = Session.create(p, la, pa, wa, availableLoans)) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -284,12 +331,16 @@ public class SessionTest extends AbstractInvestingTest {
         final int oldBalance = 10_000;
         final int amountToInvest = 200;
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(amountToInvest).get();
-        final ZonkyApi a = SessionTest.mockApi(oldBalance);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(oldBalance);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
         Mockito.doReturn(new ZonkyResponse(amountToInvest))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.empty()).when(p).getConfirmationProviderId();
-        try (final Session t = Session.create(p, Collections.emptyList())) {
+        try (final Session t = Session.create(p, la, pa, wa, Collections.emptyList())) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isTrue();
             final List<Investment> investments = t.getInvestmentsMade();
@@ -311,16 +362,20 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void exclusivity() {
-        final ZonkyApi a = SessionTest.mockApi(10_000);
+        // setup APIs
+        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
+        final WalletApi wa = AbstractInvestingTest.mockWallet(10_000);
+        final LoanApi la = Mockito.mock(LoanApi.class);
+        final ControlApi a = Mockito.mock(ControlApi.class);
         final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
-        try (final Session t = Session.create(p, Collections.emptyList())) {
+        try (final Session t = Session.create(p, la, pa, wa, Collections.emptyList())) {
             Assertions.assertThat(t).isNotNull();
             // verify second session fails
-            Assertions.assertThatThrownBy(() -> Session.create(p, Collections.emptyList()))
+            Assertions.assertThatThrownBy(() -> Session.create(p, la, pa, wa, Collections.emptyList()))
                     .isExactlyInstanceOf(IllegalStateException.class);
         }
         // and verify sessions are properly closed
-        try (final Session t2 = Session.create(p, Collections.emptyList())) {
+        try (final Session t2 = Session.create(p, la, pa, wa, Collections.emptyList())) {
             Assertions.assertThat(t2).isNotNull();
         }
     }

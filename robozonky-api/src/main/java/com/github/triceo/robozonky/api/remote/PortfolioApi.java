@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
+package com.github.triceo.robozonky.api.remote;
 
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
-import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Statistics;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
-/**
- * Simple Zonky API cache from zotify.cz.
- */
-@Path("/")
-@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-@Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-interface ZotifyApi extends EntityCollectionApi<Loan> {
+@Path(ControlApi.ME + "/investments")
+@Produces(Defaults.MEDIA_TYPE)
+@Consumes(Defaults.MEDIA_TYPE)
+public interface PortfolioApi extends EntityCollectionApi<Investment> {
 
     @GET
-    @Path("/json")
+    @Path("statistics")
+    Statistics statistics();
+
+    @GET
     @Override
-    List<Loan> items();
+    List<Investment> items();
 
 }
-

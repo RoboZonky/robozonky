@@ -28,7 +28,7 @@ import org.mockito.Mockito;
 
 public class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
-    private static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
+    static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
             UUID.randomUUID().toString(), 300);
 
     @Override

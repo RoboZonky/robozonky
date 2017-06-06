@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -28,7 +28,7 @@ public class ZonkyProxyBuilderTest {
         final String username = "user";
         final ZonkyProxy.Builder b = new ZonkyProxy.Builder();
         b.asUser(username).asDryRun();
-        final ZonkyProxy p = b.build(Mockito.mock(ZonkyApi.class));
+        final ZonkyProxy p = b.build(Mockito.mock(ControlApi.class));
         SoftAssertions.assertSoftly(softly -> {
           softly.assertThat(p.getUsername()).isEqualTo(username);
           softly.assertThat(p.isDryRun()).isTrue();

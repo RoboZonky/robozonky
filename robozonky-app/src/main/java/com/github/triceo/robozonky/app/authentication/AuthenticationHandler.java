@@ -25,10 +25,9 @@ import java.util.Collections;
 import java.util.function.Function;
 import javax.xml.bind.JAXBException;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Apis;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +82,7 @@ public class AuthenticationHandler {
         return data;
     }
 
-    private Function<ApiProvider, Authentication> buildAuthenticatorWithPassword() {
+    private Function<Apis, ZonkyApiToken> buildAuthenticatorWithPassword() {
         return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
     }
 
@@ -92,7 +91,7 @@ public class AuthenticationHandler {
      *
      * @return Authentication method matching user preferences.
      */
-    private Function<ApiProvider, Authentication> buildAuthenticator() {
+    private Function<Apis, ZonkyApiToken> buildAuthenticator() {
         if (needsPassword) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
             return this.buildAuthenticatorWithPassword();
@@ -152,39 +151,40 @@ public class AuthenticationHandler {
     }
 
     /**
-     * Execute investment operation over authenticated API.
+     * Execute investment operation over control API.
      *
-     * @param provider API provider to be used for constructing the authenticated API.
-     * @param operation Operation to execute over the API.
+     * @param provider API provider to be used for constructing the control API.
+     * @param op Operation to execute over the API.
      * @return Investments newly made through the API. If operation null and {@link #needsPassword} true, will only refresh
      * token (if necessary) and return empty.
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
-    public Collection<Investment> execute(final ApiProvider provider,
-                                          final Function<ZonkyApi, Collection<Investment>> operation) {
-        final boolean hasOperation = operation != null;
+    public Collection<Investment> execute(final Apis provider,
+                                          final Apis.Executable<Collection<Investment>> op) {
+        final boolean hasOperation = op != null;
         if (needsPassword && !hasOperation) { // needs password, yet won't do anything = don't log in
             return Collections.emptyList();
         }
-        final Authentication currentAuthentication = this.buildAuthenticator().apply(provider);
-        final boolean logoutRequired = this.isLogoutRequired(currentAuthentication.getZonkyApiToken());
+        final ZonkyApiToken token = this.buildAuthenticator().apply(provider);
+        final boolean logoutRequired = this.isLogoutRequired(token);
         if (!logoutRequired && !hasOperation) { // token created or refreshed, no operation to perform
             return Collections.emptyList();
         }
-        try (final ApiProvider.ApiWrapper<ZonkyApi> apiWrapper = currentAuthentication.newZonkyApi()) {
+        final Apis.Executable<Collection<Investment>> outerOp = (control, loans, wallet, portfolio) -> {
             try {
                 if (hasOperation) {
-                    return apiWrapper.execute(operation);
+                    return provider.execute(op, token);
                 } else {
                     return Collections.emptyList();
                 }
             } finally { // attempt to log out no matter what happens
                 if (logoutRequired) {
                     AuthenticationHandler.LOGGER.info("Logging out.");
-                    apiWrapper.execute(ZonkyApi::logout);
+                    control.logout();
                 }
             }
-        }
+        };
+        return provider.execute(outerOp, token);
     }
 
 }
