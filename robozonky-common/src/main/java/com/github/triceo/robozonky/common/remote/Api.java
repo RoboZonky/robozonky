@@ -16,41 +16,45 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.ControlApi;
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.api.remote.PortfolioApi;
-import com.github.triceo.robozonky.api.remote.WalletApi;
-import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
-class Api implements AutoCloseable {
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-    private static <T> T extractApi(final Apis.Wrapper<T> wrapper) {
-        return wrapper.execute(a -> a);
+/**
+ * Represents a close-able RESTEasy client proxy. Users should preferably call {@link #close()} after they're
+ * done with the API.
+ *
+ * @param <T> Type of the API to be handled.
+ */
+public class Api<T> implements ApiBlueprint<T>, AutoCloseable {
+
+    private final AtomicReference<ResteasyClient> client;
+    private final T api;
+
+    public Api(final T api) {
+        this(api, null);
     }
 
-    private final Apis.Wrapper<LoanApi> loans;
-    private final Apis.Wrapper<WalletApi> wallet;
-    private final Apis.Wrapper<PortfolioApi> portfolio;
-    private final Apis.Wrapper<ControlApi> control;
-
-    public Api(final Apis apis, final ZonkyApiToken token) {
-        this.loans = apis.loans(token);
-        this.wallet = apis.wallet(token);
-        this.portfolio = apis.portfolio(token);
-        this.control = apis.control(token);
+    public Api(final T api, final ResteasyClient client) {
+        this.client = new AtomicReference<>(client);
+        this.api = api;
     }
 
-    public <T> T execute(final Apis.Executable<T> executable) {
-        return executable.execute(Api.extractApi(control), Api.extractApi(loans),
-                Api.extractApi(wallet),
-                Api.extractApi(portfolio));
+    @Override
+    public <S> S execute(final Function<T, S> function) {
+        return function.apply(api);
+    }
+
+    boolean isClosed() {
+        return client.get() == null;
     }
 
     @Override
     public void close() {
-        this.loans.close();
-        this.wallet.close();
-        this.portfolio.close();
-        this.control.close();
+        if (this.isClosed()) {
+            return;
+        }
+        client.getAndSet(null).close();
     }
 }

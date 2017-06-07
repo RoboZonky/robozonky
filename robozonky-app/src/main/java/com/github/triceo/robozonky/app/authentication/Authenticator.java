@@ -23,7 +23,8 @@ import javax.ws.rs.WebApplicationException;
 
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * Used to authenticate to the Zonky API. Use either {@link #withAccessToken(String, ZonkyApiToken, TemporalAmount)},
  * or {@link #withCredentials(String, char[])} to log in.
  */
-abstract class Authenticator implements Function<Apis, ZonkyApiToken> {
+abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Authenticator.class);
     private static final String TARGET_SCOPE = "SCOPE_APP_WEB";
@@ -43,7 +44,7 @@ abstract class Authenticator implements Function<Apis, ZonkyApiToken> {
      * @param password Zonky password.
      * @return Instance ready for authentication.
      */
-    public static Function<Apis, ZonkyApiToken> withCredentials(final String username, final char... password) {
+    public static Function<ApiProvider, ZonkyApiToken> withCredentials(final String username, final char... password) {
         return new Authenticator() {
             @Override
             protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
@@ -61,9 +62,9 @@ abstract class Authenticator implements Function<Apis, ZonkyApiToken> {
      * @param refreshBeforeExpiration How long before token expiration to refresh the token.
      * @return Instance ready for authentication, or empty if token still fresh.
      */
-    public static Function<Apis, ZonkyApiToken> withAccessToken(final String username,
-                                                                 final ZonkyApiToken token,
-                                                                 final TemporalAmount refreshBeforeExpiration) {
+    public static Function<ApiProvider, ZonkyApiToken> withAccessToken(final String username,
+                                                                       final ZonkyApiToken token,
+                                                                       final TemporalAmount refreshBeforeExpiration) {
         if (token.willExpireIn(refreshBeforeExpiration)) {
             return new Authenticator() {
                 @Override
@@ -86,8 +87,8 @@ abstract class Authenticator implements Function<Apis, ZonkyApiToken> {
      * @return Information about the authentication.
      */
     @Override
-    public ZonkyApiToken apply(final Apis provider) {
-        try (final Apis.Wrapper<ZonkyOAuthApi> api = provider.oauth()) {
+    public ZonkyApiToken apply(final ApiProvider provider) {
+        try (final Api<ZonkyOAuthApi> api = provider.oauth()) {
             return api.execute(this::getAuthenticationMethod);
         } catch (final BadRequestException ex) {
             throw new WebApplicationException("Failed authenticating with Zonky, check your password.", ex);

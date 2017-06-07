@@ -17,17 +17,14 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.remote.ControlApi;
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.api.remote.PortfolioApi;
-import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -41,24 +38,16 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
     public void standard() {
         final Loan l = new Loan(1, 1000);
         final Wallet w = new Wallet(1, 2, BigDecimal.TEN, BigDecimal.ZERO);
-        final ControlApi z = Mockito.mock(ControlApi.class);
-        final Apis p = Mockito.spy(Apis.class);
-        Mockito.doReturn(new Apis.Wrapper<>(z)).when(p).control(ArgumentMatchers.any());
-        final WalletApi wa = Mockito.mock(WalletApi.class);
-        Mockito.when(wa.wallet()).thenReturn(w);
-        Mockito.doReturn(new Apis.Wrapper<>(wa)).when(p).wallet(ArgumentMatchers.any());
-        final LoanApi la = Mockito.mock(LoanApi.class);
-        Mockito.when(la.item(ArgumentMatchers.anyInt())).thenReturn(l);
-        Mockito.when(la.items()).thenReturn(Collections.singletonList(l));
-        Mockito.doReturn(new Apis.Wrapper<>(la)).when(p).loans(ArgumentMatchers.any());
-        final PortfolioApi pa = Mockito.mock(PortfolioApi.class);
-        Mockito.when(pa.statistics()).thenReturn(Mockito.mock(Statistics.class));
-        Mockito.when(pa.items()).thenReturn(Collections.emptyList());
-        Mockito.doReturn(new Apis.Wrapper<>(pa)).when(p).portfolio(ArgumentMatchers.any());
-        Mockito.doReturn(Mockito.mock(Apis.Wrapper.class)).when(p).oauth();
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.when(z.getWallet()).thenReturn(w);
+        Mockito.when(z.getLoan(ArgumentMatchers.anyInt())).thenReturn(l);
+        Mockito.when(z.getAvailableLoans()).thenReturn(Stream.of(l));
+        Mockito.when(z.getStatistics()).thenReturn(Mockito.mock(Statistics.class));
+        Mockito.when(z.getInvestments()).thenReturn(Stream.empty());
+        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                new ZonkyProxy.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {
+                new Investor.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(exec.execute(p)).isPresent();
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
@@ -73,19 +62,13 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
     public void failingDuringInvest() {
         final Loan l = new Loan(1, 1000);
         final Wallet w = new Wallet(1, 2, BigDecimal.TEN, BigDecimal.ZERO);
-        final ControlApi z = Mockito.mock(ControlApi.class);
-        final Apis p = Mockito.mock(Apis.class);
-        final WalletApi wa = Mockito.mock(WalletApi.class);
-        Mockito.when(wa.wallet()).thenReturn(w);
-        Mockito.when(p.wallet(ArgumentMatchers.any())).thenReturn(new Apis.Wrapper<>(wa));
-        final LoanApi la = Mockito.mock(LoanApi.class);
-        Mockito.doThrow(IllegalStateException.class).when(la).item(ArgumentMatchers.anyInt());
-        Mockito.when(p.loans(ArgumentMatchers.any())).thenReturn(new Apis.Wrapper<>(la));
-        Mockito.when(p.control(ArgumentMatchers.any())).thenReturn(new Apis.Wrapper<>(z));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(Apis.Wrapper.class));
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.when(z.getWallet()).thenReturn(w);
+        Mockito.doThrow(IllegalStateException.class).when(z).getLoan(ArgumentMatchers.anyInt());
+        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                new ZonkyProxy.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {
+                new Investor.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {
             Assertions.assertThat(exec.execute(p)).isEmpty();
         } catch (final Exception ex) {
             Assertions.fail("Unexpected exception.", ex);

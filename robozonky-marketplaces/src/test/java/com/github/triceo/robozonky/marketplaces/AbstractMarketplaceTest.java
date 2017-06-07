@@ -39,7 +39,7 @@ public class AbstractMarketplaceTest {
         return Arrays.asList(new Object[] {ZotifyMarketplace.class}, new Object[] {ZonkyMarketplace.class});
     }
 
-    private static final MarketplaceApis API_PROVIDER = new MarketplaceApis();
+    private static final MarketplaceApiProvider API_PROVIDER = new MarketplaceApiProvider();
     @Parameterized.Parameter
     public Class<? extends Marketplace> marketClass;
 

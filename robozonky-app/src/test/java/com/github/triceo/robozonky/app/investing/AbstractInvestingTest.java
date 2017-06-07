@@ -21,24 +21,23 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.notifications.Event;
-import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.api.remote.PortfolioApi;
-import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
 import org.junit.Before;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -76,27 +75,28 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
         return new LoanDescriptor(loan, captchaDelay);
     }
 
-    protected static WalletApi mockWallet(final int availableBalance) {
-        final WalletApi wa = Mockito.mock(WalletApi.class);
-        final BigDecimal balance = BigDecimal.valueOf(availableBalance);
-        Mockito.when(wa.wallet()).thenReturn(new Wallet(1, 2, balance, balance));
-        Mockito.when(wa.items()).thenReturn(Collections.emptyList());
-        return wa;
-    }
-
-    protected static Apis harmlessApi() {
+    protected static ApiProvider harmlessApi() {
         return AbstractInvestingTest.harmlessApi(10_000);
     }
 
-    protected static Apis harmlessApi(final int availableBalance) {
-        final Apis p = Mockito.spy(new Apis());
-        Mockito.doReturn(new Apis.Wrapper<>(Mockito.mock(ZonkyOAuthApi.class))).when(p).oauth();
-        Mockito.doReturn(new Apis.Wrapper<>(Mockito.mock(LoanApi.class))).when(p).loans();
-        Mockito.doReturn(new Apis.Wrapper<>(Mockito.mock(LoanApi.class))).when(p).loans(ArgumentMatchers.any());
-        Mockito.doReturn(new Apis.Wrapper<>(Mockito.mock(ControlApi.class))).when(p).control(ArgumentMatchers.any());
-        Mockito.doReturn(new Apis.Wrapper<>(AbstractInvestingTest.mockWallet(availableBalance))).when(p).wallet(ArgumentMatchers.any());
-        Mockito.doReturn(new Apis.Wrapper<>(Mockito.mock(PortfolioApi.class))).when(p).portfolio(ArgumentMatchers.any());
+    protected static ApiProvider harmlessApi(final int availableBalance) {
+        return harmlessApi(AbstractInvestingTest.harmlessZonky(availableBalance));
+    }
+
+    protected static ApiProvider harmlessApi(final AuthenticatedZonky zonky) {
+        final ApiProvider p = Mockito.spy(new ApiProvider());
+        Mockito.doReturn(new Api<>(Mockito.mock(ZonkyOAuthApi.class))).when(p).oauth();
+        Mockito.doReturn(new Api<>(Mockito.mock(LoanApi.class))).when(p).marketplace();
+        Mockito.doReturn(zonky).when(p).authenticated(ArgumentMatchers.any());
         return p;
+    }
+
+    protected static AuthenticatedZonky harmlessZonky(final int availableBalance) {
+        final AuthenticatedZonky zonky = Mockito.mock(AuthenticatedZonky.class);
+        final BigDecimal balance = BigDecimal.valueOf(availableBalance);
+        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
+        Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
+        return zonky;
     }
 
 

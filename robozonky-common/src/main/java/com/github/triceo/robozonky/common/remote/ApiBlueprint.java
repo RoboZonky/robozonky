@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
+package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.common.remote.Api;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-class ZonkyMarketplace extends AbstractMarketplace {
+interface ApiBlueprint<T> {
 
-    @Override
-    protected Api<LoanApi> newApi(final MarketplaceApiProvider apis) {
-        return apis.marketplace();
+    <S> S execute(final Function<T, S> function);
+
+    default void execute(final Consumer<T> consumer) {
+        final Function<T, Void> wrapper = t -> {
+            consumer.accept(t);
+            return null;
+        };
+        execute(wrapper);
     }
 
 }

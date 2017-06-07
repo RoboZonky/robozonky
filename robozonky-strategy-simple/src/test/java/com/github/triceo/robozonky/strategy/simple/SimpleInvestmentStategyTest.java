@@ -245,7 +245,7 @@ public class SimpleInvestmentStategyTest {
                 SimpleInvestmentStategyTest.prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
 
-        // prepare some loans
+        // prepare some marketplace
         final LoanDescriptor a1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
                 (1, 200, 3, Rating.A));
         final LoanDescriptor b1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
@@ -278,7 +278,7 @@ public class SimpleInvestmentStategyTest {
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(Integer.MAX_VALUE);
         Mockito.when(portfolio.getCzkInvested()).thenReturn(0);
 
-        // prepare some loans
+        // prepare some marketplace
         final int aTerm = 3, bTerm = 4;
         final LoanDescriptor a1 = SimpleInvestmentStategyTest.getLoanDescriptor(SimpleInvestmentStategyTest.mockLoan
                 (1, 200, aTerm, Rating.A));
@@ -290,7 +290,7 @@ public class SimpleInvestmentStategyTest {
                 (10, 1100, aTerm + 1, Rating.A));
         final List<LoanDescriptor> loans = Arrays.asList(a1, b1, a2, b2);
 
-        // make sure the loans are properly sorted according to their terms
+        // make sure the marketplace are properly sorted according to their terms
         final List<Recommendation> result = sis.recommend(loans, portfolio);
         Assertions.assertThat(result).hasSameSizeAs(loans);
         SoftAssertions.assertSoftly(softly -> {

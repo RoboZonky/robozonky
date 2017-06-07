@@ -16,18 +16,15 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import java.io.IOException;
 import java.util.Base64;
-import javax.ws.rs.client.ClientRequestContext;
 
 import com.github.triceo.robozonky.internal.api.Defaults;
 
-final class AuthenticationFilter extends RoboZonkyFilter {
+class AuthenticationFilter extends RoboZonkyFilter {
 
-    @Override
-    public void filter(final ClientRequestContext clientRequestContext) throws IOException {
+    public AuthenticationFilter() {
         final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes(Defaults.CHARSET));
-        clientRequestContext.getHeaders().add("Authorization", "Basic " + authCode);
-        super.filter(clientRequestContext);
+        this.setRequestHeader("Authorization", "Basic " + authCode);
     }
+
 }

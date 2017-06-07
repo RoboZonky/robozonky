@@ -32,7 +32,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
@@ -40,7 +40,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
     private final Marketplace marketplace;
     private final TemporalAmount maximumSleepPeriod;
 
-    public SingleShotInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+    public SingleShotInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                     final boolean isFaultTolerant, final Marketplace marketplace,
                                     final Refreshable<InvestmentStrategy> strategy,
                                     final TemporalAmount maximumSleepPeriod) {
@@ -53,15 +53,15 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
         this.maximumSleepPeriod = maximumSleepPeriod;
     }
 
-    public SingleShotInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+    public SingleShotInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                     final boolean isFaultTolerant, final Marketplace marketplace,
                                     final Refreshable<InvestmentStrategy> strategy) {
         this(auth, builder, isFaultTolerant, marketplace, strategy, Duration.ofMinutes(60));
     }
 
     @Override
-    protected Optional<Collection<Investment>> execute(final Apis apis) {
-        return execute(apis, new Semaphore(1));
+    protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
+        return execute(apiProvider, new Semaphore(1));
     }
 
     @Override
@@ -71,8 +71,8 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
     }
 
     @Override
-    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final Apis apis) {
-        return new StrategyExecution(apis, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
+    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
+        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
                 maximumSleepPeriod);
     }
 

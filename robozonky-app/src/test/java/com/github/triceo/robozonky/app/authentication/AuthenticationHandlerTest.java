@@ -31,7 +31,9 @@ import javax.xml.bind.JAXBException;
 import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
 import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
@@ -69,23 +71,22 @@ public class AuthenticationHandlerTest {
         final SecretProvider secrets = AuthenticationHandlerTest.getNewProvider();
         final AuthenticationHandler auth = AuthenticationHandler.passwordBased(secrets);
         Assertions.assertThat(auth.getSecretProvider()).isSameAs(secrets);
-        final ControlApi zonky = Mockito.mock(ControlApi.class);
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.doReturn(AuthenticatorTest.TOKEN).when(zonkyOauth)
                 .login(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
                         ArgumentMatchers.anyString());
-        final Apis apis = Mockito.spy(new Apis());
-        Mockito.doReturn(new Apis.Wrapper<>(zonky)).when(apis)
-                .control(Mockito.eq(AuthenticatorTest.TOKEN));
-        Mockito.doReturn(new Apis.Wrapper<>(zonkyOauth)).when(apis).oauth();
-        Assertions.assertThat(auth.execute(apis, (u, v, w, x) -> Collections.emptyList())).isEmpty();
+        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.doReturn(new Api<>(zonkyOauth)).when(apiProvider).oauth();
+        Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
+        Assertions.assertThat(auth.execute(apiProvider, (a) -> Collections.emptyList())).isEmpty();
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .login(ArgumentMatchers.eq(secrets.getUsername()),
                         ArgumentMatchers.eq(new String(secrets.getPassword())), ArgumentMatchers.any(),
                         ArgumentMatchers.any());
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
-        Mockito.verify(zonky, Mockito.times(1)).logout();
+        Mockito.verify(z, Mockito.times(1)).logout();
     }
 
     @Test
@@ -93,27 +94,30 @@ public class AuthenticationHandlerTest {
         final SecretProvider secrets = AuthenticationHandlerTest.getNewProvider();
         final AuthenticationHandler auth = AuthenticationHandler.passwordBased(secrets);
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
-        final Apis apis = Mockito.mock(Apis.class);
-        Mockito.when(apis.oauth()).thenReturn(new Apis.Wrapper<>(zonkyOauth));
+        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.doReturn(new Api<>(zonkyOauth)).when(apiProvider).oauth();
+        Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
         Assertions.assertThat(auth.getSecretProvider()).isSameAs(secrets);
-        Assertions.assertThat(auth.execute(apis, null)).isEmpty();
+        Assertions.assertThat(auth.execute(apiProvider, null)).isEmpty();
     }
 
     @Test
     public void simpleTokenBasedWithExistingToken() throws JAXBException {
         final SecretProvider secretProvider = AuthenticationHandlerTest.mockExistingProvider(OffsetDateTime.now());
         final AuthenticationHandler auth = AuthenticationHandler.tokenBased(secretProvider, Duration.ofSeconds(60));
-        final ControlApi zonky = Mockito.mock(ControlApi.class);
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
-        final Apis apis = Mockito.spy(new Apis());
-        Mockito.when(apis.oauth()).thenReturn(new Apis.Wrapper<>(zonkyOauth));
-        Assertions.assertThat(auth.execute(apis, (u, v, w, x) -> Collections.emptyList())).isEmpty();
+        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.doReturn(new Api<>(zonkyOauth)).when(apiProvider).oauth();
+        Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
+        Assertions.assertThat(auth.execute(apiProvider, (a) -> Collections.emptyList())).isEmpty();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(zonkyOauth, Mockito.never())
                 .login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyString(),
                         ArgumentMatchers.anyString());
-        Mockito.verify(zonky, Mockito.never()).logout();
+        Mockito.verify(z, Mockito.never()).logout();
     }
 
     @Test
@@ -121,31 +125,31 @@ public class AuthenticationHandlerTest {
         final SecretProvider secretProvider = AuthenticationHandlerTest.mockExistingProvider(OffsetDateTime.now());
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(secretProvider, Duration.ofSeconds(60));
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
-        final Apis apis = Mockito.mock(Apis.class);
-        Mockito.when(apis.oauth()).thenReturn(new Apis.Wrapper<>(zonkyOauth));
-        Assertions.assertThat(h.execute(apis, null)).isEmpty();
+        final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
+        Mockito.when(apiProvider.oauth()).thenReturn(new Api<>(zonkyOauth));
+        Assertions.assertThat(h.execute(apiProvider, null)).isEmpty();
     }
 
     @Test
     public void simpleTokenBasedWithoutToken() throws JAXBException, IOException, KeyStoreException {
-        final Apis apis = Mockito.spy(new Apis());
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.doReturn(AuthenticatorTest.TOKEN).when(zonkyOauth)
                 .login(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
                         ArgumentMatchers.anyString());
-        Mockito.doReturn(new Apis.Wrapper<>(zonkyOauth)).when(apis).oauth();
-        final ControlApi zonky = Mockito.mock(ControlApi.class);
-        Mockito.doReturn(new Apis.Wrapper<>(zonky)).when(apis).control(ArgumentMatchers.any());
+        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.doReturn(new Api<>(zonkyOauth)).when(apiProvider).oauth();
+        Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
         final SecretProvider secrets = AuthenticationHandlerTest.getNewProvider();
         final AuthenticationHandler auth = AuthenticationHandler.tokenBased(secrets, Duration.ofSeconds(60));
-        Assertions.assertThat(auth.execute(apis, (u, v, w, x) -> Collections.emptyList())).isEmpty();
+        Assertions.assertThat(auth.execute(apiProvider, (a) -> Collections.emptyList())).isEmpty();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .login(ArgumentMatchers.eq(secrets.getUsername()),
                         ArgumentMatchers.eq(new String(secrets.getPassword())), ArgumentMatchers.any(),
                         ArgumentMatchers.any());
-        Mockito.verify(zonky, Mockito.never()).logout();
+        Mockito.verify(z, Mockito.never()).logout();
     }
 
     @Test
@@ -153,19 +157,20 @@ public class AuthenticationHandlerTest {
         final OffsetDateTime expired = OffsetDateTime.now().minus(300, ChronoUnit.SECONDS);
         final SecretProvider secrets = AuthenticationHandlerTest.mockExistingProvider(expired);
         final AuthenticationHandler auth = AuthenticationHandler.tokenBased(secrets, Duration.ofSeconds(60));
-        final ControlApi zonky = Mockito.mock(ControlApi.class);
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
         Mockito.when(zonkyOauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenReturn(token);
-        final Apis apis = Mockito.spy(new Apis());
-        Mockito.when(apis.oauth()).thenReturn(new Apis.Wrapper<>(zonkyOauth));
-        Assertions.assertThat(auth.execute(apis, (u, v, w, x) -> Collections.emptyList())).isEmpty();
+        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.doReturn(new Api<>(zonkyOauth)).when(apiProvider).oauth();
+        Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
+        Assertions.assertThat(auth.execute(apiProvider, (a) -> Collections.emptyList())).isEmpty();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
-        Mockito.verify(zonky, Mockito.never()).logout();
+        Mockito.verify(z, Mockito.never()).logout();
     }
 
     @Test
@@ -173,19 +178,20 @@ public class AuthenticationHandlerTest {
         final OffsetDateTime expiring = OffsetDateTime.now().minus(250, ChronoUnit.SECONDS);
         final SecretProvider secrets = AuthenticationHandlerTest.mockExistingProvider(expiring);
         final AuthenticationHandler auth = AuthenticationHandler.tokenBased(secrets, Duration.ofSeconds(60));
-        final ControlApi zonky = Mockito.mock(ControlApi.class);
         final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
         Mockito.when(zonkyOauth.refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(token);
-        final Apis apis = Mockito.spy(new Apis());
-        Mockito.when(apis.oauth()).thenReturn(new Apis.Wrapper<>(zonkyOauth));
-        Assertions.assertThat(auth.execute(apis, (u, v, w, x) -> Collections.emptyList())).isEmpty();
+        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.doReturn(new Api<>(zonkyOauth)).when(apiProvider).oauth();
+        Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
+        Assertions.assertThat(auth.execute(apiProvider, (a) -> Collections.emptyList())).isEmpty();
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(zonkyOauth, Mockito.never())
                 .login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
-        Mockito.verify(zonky, Mockito.never()).logout();
+        Mockito.verify(z, Mockito.never()).logout();
     }
 
     @Test
@@ -198,14 +204,16 @@ public class AuthenticationHandlerTest {
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
         Mockito.when(zonkyOauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenReturn(token);
-        final Apis apis = Mockito.spy(new Apis());
-        Mockito.when(apis.oauth()).thenReturn(new Apis.Wrapper<>(zonkyOauth));
-        Assertions.assertThat(auth.execute(apis, (u, v, w, x) -> Collections.emptyList())).isEmpty();
+        final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
+        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.doReturn(new Api<>(zonkyOauth)).when(apiProvider).oauth();
+        Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
+        Assertions.assertThat(auth.execute(apiProvider, (a) -> Collections.emptyList())).isEmpty();
         Mockito.verify(zonkyOauth, Mockito.never())
                 .refresh(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
-        Mockito.verify(zonky, Mockito.never()).logout();
+        Mockito.verify(z, Mockito.never()).logout();
     }
 
     @Test

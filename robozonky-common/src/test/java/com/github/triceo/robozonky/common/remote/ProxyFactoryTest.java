@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
+package com.github.triceo.robozonky.common.remote;
 
 import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.common.remote.Api;
+import org.assertj.core.api.Assertions;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.junit.Test;
 
-class ZonkyMarketplace extends AbstractMarketplace {
+public class ProxyFactoryTest {
 
-    @Override
-    protected Api<LoanApi> newApi(final MarketplaceApiProvider apis) {
-        return apis.marketplace();
+    @Test
+    public void api() {
+        final ResteasyClient client = ProxyFactory.newResteasyClient();
+        Assertions.assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
     }
 
 }

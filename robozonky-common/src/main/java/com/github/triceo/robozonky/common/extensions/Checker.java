@@ -31,7 +31,8 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +44,9 @@ public class Checker {
     private static final Comparator<Loan> COMPARATOR =
             Comparator.comparing(Loan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
 
-    static Optional<Loan> getOneLoanFromMarketplace(final Supplier<Apis> apiProviderSupplier) {
-        try (final Apis p = apiProviderSupplier.get()) {
-            final Apis.Wrapper<LoanApi> oauth = p.loans();
+    static Optional<Loan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
+        try (final ApiProvider p = apiProviderSupplier.get()) {
+            final Api<LoanApi> oauth = p.marketplace();
             final Collection<Loan> loans = oauth.execute(LoanApi::items);
             /*
              * find a loan that is likely to stay on the marketplace for so long that the notification will
@@ -75,11 +76,11 @@ public class Checker {
 
     public static Optional<Boolean> confirmations(final ConfirmationProvider provider, final String username,
                                                   final char[] secret) {
-        return Checker.confirmations(provider, username, secret, Apis::new);
+        return Checker.confirmations(provider, username, secret, ApiProvider::new);
     }
 
     static Optional<Boolean> confirmations(final ConfirmationProvider provider, final String username,
-                                           final char[] secret, final Supplier<Apis> apiProviderSupplier) {
+                                           final char[] secret, final Supplier<ApiProvider> apiProviderSupplier) {
         return Checker.getOneLoanFromMarketplace(apiProviderSupplier)
                 .map(l -> Checker.notifyProvider(l, provider, username, secret))
                 .orElse(Optional.of(false));

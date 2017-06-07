@@ -25,10 +25,10 @@ import java.util.Optional;
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
-import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Test;
@@ -82,7 +82,7 @@ import org.mockito.Mockito;
  * This test aims to test all of these various states.
  */
 @RunWith(Parameterized.class)
-public class ZonkyProxyTest extends AbstractInvestingTest {
+public class InvestorTest extends AbstractInvestingTest {
 
     private enum ProxyType {
 
@@ -109,43 +109,43 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
     public static Collection<Object[]> generatePossibilities() {
         final Collection<Object[]> result = new ArrayList<>();
         // dry proxy
-        for (final ZonkyProxyTest.Captcha c1: ZonkyProxyTest.Captcha.values()) {
-            for (final ZonkyProxyTest.Remote c2: ZonkyProxyTest.Remote.values()) {
-                result.add(new Object[] {ZonkyProxyTest.ProxyType.DRY, c1, c2, null, ZonkyResponseType.INVESTED});
+        for (final InvestorTest.Captcha c1: InvestorTest.Captcha.values()) {
+            for (final InvestorTest.Remote c2: InvestorTest.Remote.values()) {
+                result.add(new Object[] {InvestorTest.ProxyType.DRY, c1, c2, null, ZonkyResponseType.INVESTED});
             }
         }
         // simple proxy
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, null, null});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.UNCONFIRMED, null, ZonkyResponseType.REJECTED});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, null, null});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.SIMPLE, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.UNCONFIRMED, null, ZonkyResponseType.INVESTED});
+        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
+                InvestorTest.Remote.CONFIRMED, null, null});
+        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
+                InvestorTest.Remote.UNCONFIRMED, null, ZonkyResponseType.REJECTED});
+        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
+                InvestorTest.Remote.CONFIRMED, null, null});
+        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
+                InvestorTest.Remote.UNCONFIRMED, null, ZonkyResponseType.INVESTED});
         // confirming proxy, response present
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
         // confirming proxy, network failure
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, null});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.PROTECTED,
-                ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, null});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.CONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, null});
-        result.add(new Object[] {ZonkyProxyTest.ProxyType.CONFIRMING, ZonkyProxyTest.Captcha.UNPROTECTED,
-                ZonkyProxyTest.Remote.UNCONFIRMED, ZonkyProxyTest.RemoteResponse.ABSENT, ZonkyResponseType.INVESTED});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
+        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ABSENT, ZonkyResponseType.INVESTED});
         return Collections.unmodifiableCollection(result);
     }
 
     private static final double LOAN_AMOUNT = 2000.0;
-    private static final int CONFIRMED_AMOUNT = (int) (ZonkyProxyTest.LOAN_AMOUNT / 2);
+    private static final int CONFIRMED_AMOUNT = (int) (InvestorTest.LOAN_AMOUNT / 2);
 
     private static LoanDescriptor mockLoanDescriptor(final boolean protectByCaptcha) {
         final Loan loan = AbstractInvestingTest.mockLoan();
@@ -153,38 +153,38 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
     }
 
     @Parameterized.Parameter
-    public ZonkyProxyTest.ProxyType proxyType;
+    public InvestorTest.ProxyType proxyType;
     @Parameterized.Parameter(1)
-    public ZonkyProxyTest.Captcha captcha;
+    public InvestorTest.Captcha captcha;
     @Parameterized.Parameter(2)
-    public ZonkyProxyTest.Remote confirmation;
+    public InvestorTest.Remote confirmation;
     @Parameterized.Parameter(3)
-    public ZonkyProxyTest.RemoteResponse confirmationResponse;
+    public InvestorTest.RemoteResponse confirmationResponse;
     @Parameterized.Parameter(4)
     public ZonkyResponseType responseType;
 
     private Recommendation getRecommendation() {
         final LoanDescriptor ld =
-                ZonkyProxyTest.mockLoanDescriptor(captcha == ZonkyProxyTest.Captcha.PROTECTED);
-        return ld.recommend(ZonkyProxyTest.CONFIRMED_AMOUNT,
-                confirmation == ZonkyProxyTest.Remote.CONFIRMED).get();
+                InvestorTest.mockLoanDescriptor(captcha == InvestorTest.Captcha.PROTECTED);
+        return ld.recommend(InvestorTest.CONFIRMED_AMOUNT,
+                confirmation == InvestorTest.Remote.CONFIRMED).get();
     }
 
-    private ZonkyProxy getZonkyProxy() {
-        final ControlApi api = Mockito.mock(ControlApi.class);
+    private Investor getZonkyProxy() {
+        final AuthenticatedZonky api = Mockito.mock(AuthenticatedZonky.class);
         switch (proxyType) {
             case DRY:
-                return new ZonkyProxy.Builder().asDryRun().build(api);
+                return new Investor.Builder().asDryRun().build(api);
             case SIMPLE:
-                return new ZonkyProxy.Builder().build(api);
+                return new Investor.Builder().build(api);
             case CONFIRMING:
                 final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
                 Mockito.when(cp.getId()).thenReturn("something");
                 switch (confirmationResponse) {
                     case PRESENT:
-                        final Confirmation c = (captcha == ZonkyProxyTest.Captcha.PROTECTED) ?
+                        final Confirmation c = (captcha == InvestorTest.Captcha.PROTECTED) ?
                                 new Confirmation(ConfirmationType.DELEGATED) :
-                                new Confirmation(ZonkyProxyTest.CONFIRMED_AMOUNT);
+                                new Confirmation(InvestorTest.CONFIRMED_AMOUNT);
                         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
                                 ArgumentMatchers.anyInt())).thenReturn(Optional.of(c));
                         break;
@@ -195,7 +195,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
                     default:
                             throw new IllegalStateException();
                 }
-                return new ZonkyProxy.Builder().usingConfirmation(cp).build(api);
+                return new Investor.Builder().usingConfirmation(cp).build(api);
             default:
                 throw new IllegalStateException();
         }
@@ -203,7 +203,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
 
     private void test(final boolean seenBefore) {
         final Recommendation r = this.getRecommendation();
-        final ZonkyProxy p = this.getZonkyProxy();
+        final Investor p = this.getZonkyProxy();
         ZonkyResponse result;
         try {
             result = p.invest(r, seenBefore);
@@ -213,7 +213,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
             }
             return;
         }
-        if (this.proxyType == ZonkyProxyTest.ProxyType.CONFIRMING) {
+        if (this.proxyType == InvestorTest.ProxyType.CONFIRMING) {
             Assertions.assertThat(p.getConfirmationProviderId()).isPresent();
         } else {
             Assertions.assertThat(p.getConfirmationProviderId()).isEmpty();
@@ -224,7 +224,7 @@ public class ZonkyProxyTest extends AbstractInvestingTest {
             Assertions.assertThat(result.getType()).isEqualTo(responseType);
         }
         if (result.getType() == ZonkyResponseType.INVESTED) {
-            Assertions.assertThat(result.getConfirmedAmount()).hasValue(ZonkyProxyTest.CONFIRMED_AMOUNT);
+            Assertions.assertThat(result.getConfirmedAmount()).hasValue(InvestorTest.CONFIRMED_AMOUNT);
         } else {
             Assertions.assertThat(result.getConfirmedAmount()).isEmpty();
         }

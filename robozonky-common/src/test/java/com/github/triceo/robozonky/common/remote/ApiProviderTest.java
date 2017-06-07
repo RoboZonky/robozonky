@@ -22,13 +22,13 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
-public class ApisTest {
+public class ApiProviderTest {
 
     @Test
     public void unathenticatedApis() {
-        try (final Apis provider = new Apis()) {
+        try (final ApiProvider provider = new ApiProvider()) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(provider.loans()).isNotNull();
+                softly.assertThat(provider.marketplace()).isNotNull();
                 Assertions.assertThat(provider.oauth()).isNotNull();
             });
         }
@@ -37,25 +37,20 @@ public class ApisTest {
     @Test
     public void athenticatedApis() {
         final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
-        try (final Apis provider = new Apis()) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(provider.loans(token)).isNotNull();
-                softly.assertThat(provider.wallet(token)).isNotNull();
-                softly.assertThat(provider.portfolio(token)).isNotNull();
-                softly.assertThat(provider.control(token)).isNotNull();
-            });
+        try (final ApiProvider provider = new ApiProvider()) {
+            Assertions.assertThat(provider.authenticated(token)).isNotNull();
         }
     }
 
     @Test
     public void obtainClosedThrows() {  // tests double-closing as a side-effect
-        try (final Apis provider = new Apis()) {
-            try (final Apis.Wrapper<LoanApi> w = provider.loans()) {
+        try (final ApiProvider provider = new ApiProvider()) {
+            try (final Api<LoanApi> w = provider.marketplace()) {
                 Assertions.assertThat(w.isClosed()).isFalse();
                 provider.close();
                 Assertions.assertThat(w.isClosed()).isTrue();
             }
-            Assertions.assertThatThrownBy(provider::loans).isInstanceOf(IllegalStateException.class);
+            Assertions.assertThatThrownBy(provider::marketplace).isInstanceOf(IllegalStateException.class);
         }
     }
 

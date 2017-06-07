@@ -16,8 +16,12 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import org.assertj.core.api.SoftAssertions;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import com.github.triceo.robozonky.api.remote.LoanApi;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -25,40 +29,22 @@ import org.mockito.Mockito;
 public class ApiTest {
 
     @Test
-    public void lifecycle() {
-        final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
-        final Apis apis = Mockito.spy(new Apis());
-        final Api collection = Mockito.spy(new Api(apis, token));
-        try (final Api c = collection) {
-            // make sure mock have been created
-            Mockito.verify(apis, Mockito.times(1)).loans(ArgumentMatchers.eq(token));
-            Mockito.verify(apis, Mockito.times(1)).wallet(ArgumentMatchers.eq(token));
-            Mockito.verify(apis, Mockito.times(1)).portfolio(ArgumentMatchers.eq(token));
-            Mockito.verify(apis, Mockito.times(1)).control(ArgumentMatchers.eq(token));
-            // make sure mock can be accessed
-            collection.execute((u, v, w, x) -> {
-                SoftAssertions.assertSoftly(softly -> {
-                    softly.assertThat(u).isNotNull();
-                    softly.assertThat(v).isNotNull();
-                    softly.assertThat(w).isNotNull();
-                    softly.assertThat(x).isNotNull();
-                });
-                return Void.TYPE;
-            });
-        }
-        // execute after closing will throw
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> collection.execute((control, x, y, z) -> {
-                control.logout();
-                return Void.TYPE;
-            })).isInstanceOf(IllegalStateException.class);
-            softly.assertThatThrownBy(() -> collection.execute((x, loans, y, z) -> loans.items()))
-                    .isInstanceOf(IllegalStateException.class);
-            softly.assertThatThrownBy(() -> collection.execute((x, y, wallet, z) -> wallet.items()))
-                    .isInstanceOf(IllegalStateException.class);
-            softly.assertThatThrownBy(() -> collection.execute((x, y, z, portfolio) -> portfolio.items()))
-                    .isInstanceOf(IllegalStateException.class);
-        });
+    public void executeFunction() {
+        final LoanApi mock = Mockito.mock(LoanApi.class);
+        final Api<LoanApi> api = new Api<>(mock);
+        final String expected = UUID.randomUUID().toString();
+        final Function<LoanApi, String> function = (a) -> expected;
+        final String result = api.execute(function);
+        Assertions.assertThat(result).isSameAs(expected);
+    }
+
+    @Test
+    public void executeProcedure() {
+        final LoanApi mock = Mockito.mock(LoanApi.class);
+        final Api<LoanApi> api = new Api<>(mock);
+        final Consumer<LoanApi> procedure = Mockito.mock(Consumer.class);
+        api.execute(procedure);
+        Mockito.verify(procedure, Mockito.times(1)).accept(ArgumentMatchers.eq(mock));
     }
 
 }

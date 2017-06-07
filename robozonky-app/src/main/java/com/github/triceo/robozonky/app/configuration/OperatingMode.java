@@ -21,7 +21,7 @@ import java.util.Optional;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
-import com.github.triceo.robozonky.app.investing.ZonkyProxy;
+import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
@@ -33,18 +33,18 @@ abstract class OperatingMode implements CommandLineFragment {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final Credentials credentials,
-                                                             final SecretProvider secrets,
-                                                             final ConfirmationProvider provider) {
+    Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials,
+                                                    final SecretProvider secrets,
+                                                    final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
         LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
         return credentials.getToken()
                 .map(token -> {
                     secrets.setSecret(svcId, token);
-                    return Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, token));
+                    return Optional.of(new Investor.Builder().usingConfirmation(provider, token));
                 }).orElseGet(() -> secrets.getSecret(svcId)
                         .map(token ->
-                                Optional.of(new ZonkyProxy.Builder().usingConfirmation(provider, token)))
+                                Optional.of(new Investor.Builder().usingConfirmation(provider, token)))
                         .orElseGet(() -> {
                             LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
                             return Optional.empty();
@@ -52,8 +52,8 @@ abstract class OperatingMode implements CommandLineFragment {
                 );
     }
 
-    Optional<ZonkyProxy.Builder> getZonkyProxyBuilder(final Credentials credentials,
-                                                             final SecretProvider secrets) {
+    Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials,
+                                                    final SecretProvider secrets) {
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
                 .map(provider -> this.getZonkyProxyBuilder(credentials, secrets, provider))
@@ -65,15 +65,15 @@ abstract class OperatingMode implements CommandLineFragment {
 
     protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
                                                                   final AuthenticationHandler auth,
-                                                                  final ZonkyProxy.Builder builder);
+                                                                  final Investor.Builder builder);
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final AuthenticationHandler auth) {
         final Optional<Credentials> cred = cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> Optional.of(new Credentials(value, auth.getSecretProvider())))
                 .orElse(Optional.empty());
-        final Optional<ZonkyProxy.Builder> optionalBuilder = cred
+        final Optional<Investor.Builder> optionalBuilder = cred
                 .map(credentials -> this.getZonkyProxyBuilder(credentials, auth.getSecretProvider()))
-                .orElse(Optional.of(new ZonkyProxy.Builder()));
+                .orElse(Optional.of(new Investor.Builder()));
         return optionalBuilder
                 .map(builder -> {
                     if (cli.getTweaksFragment().isDryRunEnabled()) {

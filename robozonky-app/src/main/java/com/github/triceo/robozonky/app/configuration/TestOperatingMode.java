@@ -24,7 +24,7 @@ import com.beust.jcommander.Parameters;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
-import com.github.triceo.robozonky.app.investing.ZonkyProxy;
+import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.Checker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ class TestOperatingMode extends OperatingMode {
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
                                                          final AuthenticationHandler auth,
-                                                         final ZonkyProxy.Builder builder) {
+                                                         final Investor.Builder builder) {
         return Optional.of(new InvestmentMode() {
 
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());

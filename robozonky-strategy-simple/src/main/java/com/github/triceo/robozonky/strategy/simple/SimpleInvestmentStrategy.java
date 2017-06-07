@@ -57,7 +57,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
      * Pick a loan ordering such that it, first, matches the strategy and, second, maximizes the chances the loan is
      * still available on the marketplace when the investment operation is triggered.
      * @param strategy Strategy to guide loan ordering.
-     * @return Ordered loans.
+     * @return Ordered marketplace.
      */
     private static Comparator<LoanDescriptor> getLoanComparator(final StrategyPerRating strategy) {
         final Comparator<LoanDescriptor> orderByTerm = strategy.isLongerTermPreferred() ?
@@ -155,14 +155,14 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         if (!this.isAcceptable(portfolio)) {
             return Collections.emptyList();
         }
-        // split available loans into buckets per rating
+        // split available marketplace into buckets per rating
         final Map<Rating, Collection<LoanDescriptor>> splitByRating =
                 SimpleInvestmentStrategy.sortLoansByRating(availableLoans);
-        // prepare map of ratings and their shares; we ignore ratings that have no loans available
+        // prepare map of ratings and their shares; we ignore ratings that have no marketplace available
         final Map<Rating, BigDecimal> relevantPortfolio = splitByRating.keySet().stream()
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
         final List<Recommendation> recommendations = this.rankRatingsByDemand(relevantPortfolio).stream()
-                .flatMap(rating -> { // prioritize loans by their ranking's demand
+                .flatMap(rating -> { // prioritize marketplace by their ranking's demand
                     final StrategyPerRating strategy = this.individualStrategies.get(rating);
                     final Comparator<LoanDescriptor> comparator = SimpleInvestmentStrategy.getLoanComparator(strategy);
                     return splitByRating.get(rating).stream()
@@ -174,7 +174,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
                     return l.recommend(recommendedAmount, this.needsConfirmation(l));
                 }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty())) // empty == not recommended
                 .collect(Collectors.toList());
-        SimpleInvestmentStrategy.LOGGER.debug("Strategy recommends the following loans: {}.", recommendations);
+        SimpleInvestmentStrategy.LOGGER.debug("Strategy recommends the following marketplace: {}.", recommendations);
         return Collections.unmodifiableList(recommendations);
     }
 

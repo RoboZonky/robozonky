@@ -27,7 +27,8 @@ import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public class AuthenticationHandler {
         return data;
     }
 
-    private Function<Apis, ZonkyApiToken> buildAuthenticatorWithPassword() {
+    private Function<ApiProvider, ZonkyApiToken> buildAuthenticatorWithPassword() {
         return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
     }
 
@@ -91,7 +92,7 @@ public class AuthenticationHandler {
      *
      * @return Authentication method matching user preferences.
      */
-    private Function<Apis, ZonkyApiToken> buildAuthenticator() {
+    private Function<ApiProvider, ZonkyApiToken> buildAuthenticator() {
         if (needsPassword) {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
             return this.buildAuthenticatorWithPassword();
@@ -159,8 +160,8 @@ public class AuthenticationHandler {
      * token (if necessary) and return empty.
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
-    public Collection<Investment> execute(final Apis provider,
-                                          final Apis.Executable<Collection<Investment>> op) {
+    public Collection<Investment> execute(final ApiProvider provider,
+                                          final Function<AuthenticatedZonky, Collection<Investment>> op) {
         final boolean hasOperation = op != null;
         if (needsPassword && !hasOperation) { // needs password, yet won't do anything = don't log in
             return Collections.emptyList();
@@ -170,21 +171,20 @@ public class AuthenticationHandler {
         if (!logoutRequired && !hasOperation) { // token created or refreshed, no operation to perform
             return Collections.emptyList();
         }
-        final Apis.Executable<Collection<Investment>> outerOp = (control, loans, wallet, portfolio) -> {
+        try (final AuthenticatedZonky zonky = provider.authenticated(token)) {
             try {
                 if (hasOperation) {
-                    return provider.execute(op, token);
+                    return op.apply(zonky);
                 } else {
                     return Collections.emptyList();
                 }
             } finally { // attempt to log out no matter what happens
                 if (logoutRequired) {
                     AuthenticationHandler.LOGGER.info("Logging out.");
-                    control.logout();
+                    zonky.logout();
                 }
             }
-        };
-        return provider.execute(outerOp, token);
+        }
     }
 
 }

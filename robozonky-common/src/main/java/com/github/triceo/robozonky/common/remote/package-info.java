@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
-
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.common.remote.Api;
-
-class ZonkyMarketplace extends AbstractMarketplace {
-
-    @Override
-    protected Api<LoanApi> newApi(final MarketplaceApiProvider apis) {
-        return apis.marketplace();
-    }
-
-}
+/**
+ * Implements a set of wrappers around the standard Zonky APIs that provide features such as result pagination. All
+ * standard APIs are encapsulated in {@link com.github.triceo.robozonky.common.remote.AuthenticatedZonky}, which may
+ * be obtained through
+ * {@link com.github.triceo.robozonky.common.remote.ApiProvider#authenticated(com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken)},
+ * following a successful authentication with {@link com.github.triceo.robozonky.common.remote.ApiProvider#oauth()}.
+ */
+package com.github.triceo.robozonky.common.remote;

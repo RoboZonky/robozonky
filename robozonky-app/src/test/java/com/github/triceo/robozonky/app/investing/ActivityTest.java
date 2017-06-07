@@ -45,7 +45,7 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
         final OffsetDateTime timestamp =
                 OffsetDateTime.now().minus(ActivityTest.SLEEP_PERIOD_MINUTES / 2, ChronoUnit.MINUTES);
         Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString());
-        // load API that has loans more recent than that, but makes sure not to come within the closed period
+        // load API that has marketplace more recent than that, but makes sure not to come within the closed period
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getDatePublished()).thenReturn(timestamp.plus(10, ChronoUnit.MINUTES));
         Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
@@ -67,7 +67,7 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp = OffsetDateTime.now();
         Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString());
-        // load API that has loans within the closed period
+        // load API that has marketplace within the closed period
         final Loan activeLoan = Mockito.mock(Loan.class);
         Mockito.when(activeLoan.getId()).thenReturn(1);
         Mockito.when(activeLoan.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
@@ -81,7 +81,7 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
                 new Activity(Arrays.asList(new LoanDescriptor(activeLoan), new LoanDescriptor(ignoredLoan)));
         Assertions.assertThat(activity.shouldSleep()).isFalse();
         activity.settle();
-        // ... but reconfigure the timestamp so that we treat the closed-season loans as new loans
+        // ... but reconfigure the timestamp so that we treat the closed-season marketplace as new marketplace
         final OffsetDateTime newTimestamp =
                 OffsetDateTime.parse(Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID).get());
         Assertions.assertThat(newTimestamp).isBefore(activeLoan.getDatePublished());

@@ -22,10 +22,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.ServerErrorException;
 
-import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
@@ -33,20 +34,20 @@ public class ZonkySettingsValidator implements DataValidator {
 
     private static final Logger LOGGER = Logger.getLogger(ZonkySettingsValidator.class.getCanonicalName());
 
-    private final Supplier<Apis> apiSupplier;
+    private final Supplier<ApiProvider> apiSupplier;
 
     /**
      * Default constructor for the IZPack.
      */
     public ZonkySettingsValidator() {
-        this(Apis::new);
+        this(ApiProvider::new);
     }
 
     /**
      * This constructor exists for testing purposes.
      * @param apiSupplier Will provide the APIs for this class.
      */
-    ZonkySettingsValidator(final Supplier<Apis> apiSupplier) {
+    ZonkySettingsValidator(final Supplier<ApiProvider> apiSupplier) {
         this.apiSupplier = apiSupplier;
     }
 
@@ -54,17 +55,19 @@ public class ZonkySettingsValidator implements DataValidator {
     public DataValidator.Status validateData(final InstallData installData) {
         final String username = Variables.ZONKY_USERNAME.getValue(installData);
         final String password = Variables.ZONKY_PASSWORD.getValue(installData);
-        try (final Apis p = apiSupplier.get()) { // test login with the credentials
-            final Apis.Wrapper<ZonkyOAuthApi> oauth = p.oauth();
-            ZonkySettingsValidator.LOGGER.info("Logging in.");
-            final ZonkyApiToken token = oauth.execute(api -> {
-                return api.login(username, password, "password", "SCOPE_APP_WEB");
-            });
-            ZonkySettingsValidator.LOGGER.info("Logging out.");
-            final Apis.Wrapper<ControlApi> z = p.control(token);
-            z.execute(ControlApi::logout);
+        try (final ApiProvider p = apiSupplier.get()) { // test login with the credentials
+            try (final Api<ZonkyOAuthApi> oauth = p.oauth()) {
+                ZonkySettingsValidator.LOGGER.info("Logging in.");
+                final ZonkyApiToken token = oauth.execute(api -> {
+                    return api.login(username, password, "password", "SCOPE_APP_WEB");
+                });
+                ZonkySettingsValidator.LOGGER.info("Logging out.");
+                try (final AuthenticatedZonky z = p.authenticated(token)) {
+                    z.logout();
+                }
+            }
             return DataValidator.Status.OK;
-        } catch (final Throwable t) {
+        } catch (final Exception t) {
             if (t instanceof SocketException | t instanceof ServerErrorException) {
                 ZonkySettingsValidator.LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
                 return DataValidator.Status.ERROR;

@@ -27,7 +27,8 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.Apis;
+import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -37,8 +38,8 @@ public class CheckerTest {
 
     @Test
     public void confirmationsMarketplaceFail() {
-        final Apis provider = Mockito.mock(Apis.class);
-        Mockito.doThrow(new IllegalStateException("Testing")).when(provider).loans();
+        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        Mockito.doThrow(new IllegalStateException("Testing")).when(provider).marketplace();
         final Optional<Boolean> result =
                 Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
         Assertions.assertThat(result).isPresent().hasValue(false);
@@ -48,19 +49,19 @@ public class CheckerTest {
     public void confirmationsMarketplaceWithoutLoans() {
         final LoanApi api = Mockito.mock(LoanApi.class);
         Mockito.when(api.items()).thenReturn(Collections.emptyList());
-        final Apis provider = Mockito.mock(Apis.class);
-        Mockito.when(provider.loans()).thenReturn(new Apis.Wrapper<>(api));
+        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        Mockito.when(provider.marketplace()).thenReturn(new Api<>(api));
         final Optional<Boolean> result =
                 Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
         Assertions.assertThat(result).isPresent().hasValue(false);
     }
 
-    private static Apis mockApiThatReturnsOneLoan() {
+    private static ApiProvider mockApiThatReturnsOneLoan() {
         final Loan l = Mockito.mock(Loan.class);
         final LoanApi api = Mockito.mock(LoanApi.class);
         Mockito.doReturn(Collections.singletonList(l)).when(api).items();
-        final Apis provider = Mockito.mock(Apis.class);
-        Mockito.doReturn(new Apis.Wrapper<>(api)).when(provider).loans();
+        final ApiProvider provider = Mockito.mock(ApiProvider.class);
+        Mockito.doReturn(new Api<>(api)).when(provider).marketplace();
         return provider;
     }
 

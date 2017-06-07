@@ -14,16 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
+package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.common.remote.Api;
+import java.util.Collection;
 
-class ZonkyMarketplace extends AbstractMarketplace {
+final class PaginatedResult<S> {
 
-    @Override
-    protected Api<LoanApi> newApi(final MarketplaceApiProvider apis) {
-        return apis.marketplace();
+    private final Collection<S> result;
+    private final int pageNo;
+    private final int totalSize;
+
+    public PaginatedResult(final Collection<S> result, final int pageNo, final int totalSize) {
+        this.result = result;
+        this.pageNo = pageNo;
+        this.totalSize = totalSize;
+    }
+
+    public Collection<S> getPage() {
+        return result;
+    }
+
+    public int getCurrentPageId() {
+        return pageNo;
+    }
+
+    public int getTotalResultCount() {
+        return totalSize;
     }
 
 }
