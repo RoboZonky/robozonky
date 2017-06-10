@@ -52,7 +52,7 @@ public class RuleBasedInvestmentStrategyServiceTest {
         final Optional<InvestmentStrategy> ois = s.parse(RuleBasedInvestmentStrategyServiceTest.FILE);
         Assertions.assertThat(ois).isPresent();
         final InvestmentStrategy is = ois.get();
-        // let's make up some loans; B will not be accepted, D will be prioritized over A
+        // let's make up some marketplace; B will not be accepted, D will be prioritized over A
         final Loan aaaaa = Mockito.mock(Loan.class); // will not be accepted since AAAAA are ignored
         Mockito.when(aaaaa.getId()).thenReturn(1);
         Mockito.when(aaaaa.getRemainingInvestment()).thenReturn(100000.0);

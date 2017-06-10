@@ -72,9 +72,9 @@ class Activity {
     }
 
     /**
-     * Retrieve all loans in the marketplace which have not yet been fully funded and which have been published past
+     * Retrieve all marketplace in the marketplace which have not yet been fully funded and which have been published past
      * a certain point in time.
-     * @param instant The earliest point in time for the loans to published on.
+     * @param instant The earliest point in time for the marketplace to published on.
      * @return Ordered by publishing time descending.
      */
     private Collection<LoanDescriptor> getLoansNewerThan(final OffsetDateTime instant) {
@@ -102,8 +102,8 @@ class Activity {
         boolean shouldSleep = true;
         final Collection<LoanDescriptor> newLoans = this.getLoansNewerThan(lastKnownAction);
         if (!newLoans.isEmpty()) {
-            // try investing since there are loans we haven't seen yet
-            Activity.LOGGER.debug("Will not sleep due to new loans: {}.", newLoans.stream()
+            // try investing since there are marketplace we haven't seen yet
+            Activity.LOGGER.debug("Will not sleep due to new marketplace: {}.", newLoans.stream()
                     .map(l -> String.valueOf(l.getLoan().getId()))
                     .sorted()
                     .collect(Collectors.joining(",")));
@@ -139,7 +139,7 @@ class Activity {
     }
 
     private void persist(final boolean hasUnactionableLoans) {
-        // make sure the unactionable loans are never included in the time the marketplace was last checked
+        // make sure the unactionable marketplace are never included in the time the marketplace was last checked
         final OffsetDateTime result = hasUnactionableLoans ?
                 OffsetDateTime.now().minus(Duration.from(ResultTracker.CAPTCHA_DELAY).plus(Duration.ofSeconds(30)))
                 : OffsetDateTime.now();

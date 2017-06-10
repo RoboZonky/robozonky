@@ -40,7 +40,8 @@ import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.remote.PortfolioApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
@@ -48,15 +49,16 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.app.Events;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
-import com.github.triceo.robozonky.internal.api.Settings;
 import com.github.triceo.robozonky.internal.api.Retriever;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
- * given loans.
+ * given marketplace.
  *
  * Instances of this class are supposed to be short-lived, as the marketplace and Zonky account balance can change
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
@@ -74,31 +76,36 @@ class Session implements AutoCloseable {
      * the sessions share state through a file, and therefore multiple concurrent sessions would interfere with one
      * another.
      *
-     * @param api Zonky API to use for investment operations.
+     * @param investor Confirmation layer around the investment API.
+     * @param api Authenticated access to Zonky for data retrieval.
      * @param marketplace Loans that are available in the marketplace.
      * @throws IllegalStateException When another {@link Session} instance was not {@link #close()}d.
      * @return
      */
-    public synchronized static Session create(final ZonkyProxy api, final Collection<LoanDescriptor> marketplace) {
+    public synchronized static Session create(final Investor.Builder investor, final Zonky api,
+                                              final Collection<LoanDescriptor> marketplace) {
         if (Session.INSTANCE.get() != null) {
             throw new IllegalStateException("Investment session already exists.");
         }
-        final Session s = new Session(new LinkedHashSet<>(marketplace), api);
+        final Session s = new Session(new LinkedHashSet<>(marketplace), investor, api);
         Session.INSTANCE.set(s);
         return s;
     }
 
-    static BigDecimal getAvailableBalance(final ZonkyProxy api) {
-        final int balance = Settings.INSTANCE.getDefaultDryRunBalance();
-        return (api.isDryRun() && balance > -1) ?
-                BigDecimal.valueOf(balance) :
-                api.execute(zonky -> zonky.getWallet().getAvailableBalance());
+    static BigDecimal getLiveBalance(final Zonky api) {
+        return api.getWallet().getAvailableBalance();
     }
 
-    static Collection<Investment> invest(final ZonkyProxy proxy, final InvestmentCommand command) {
-        try (final Session session = Session.create(proxy, command.getLoans())) {
+    static BigDecimal getDryRunBalance(final Zonky api) {
+        final int balance = Settings.INSTANCE.getDefaultDryRunBalance();
+        return (balance > -1) ? BigDecimal.valueOf(balance) : Session.getLiveBalance(api);
+    }
+
+    static Collection<Investment> invest(final Investor.Builder investor, final Zonky api,
+                                         final InvestmentCommand command) {
+        try (final Session session = Session.create(investor, api, command.getLoans())) {
             final int balance = session.getPortfolioOverview().getCzkAvailable();
-            Events.fire(new ExecutionStartedEvent(proxy.getUsername(), command.getLoans(), balance));
+            Events.fire(new ExecutionStartedEvent(investor.getUsername(), command.getLoans(), balance));
             if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailableLoans().isEmpty()) {
                 command.accept(session);
             }
@@ -108,13 +115,13 @@ class Session implements AutoCloseable {
                     portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
                     portfolio.getCzkExpectedYield());
             final Collection<Investment> result = session.getInvestmentsMade();
-            Events.fire(new ExecutionCompletedEvent(proxy.getUsername(), result, portfolio.getCzkAvailable()));
+            Events.fire(new ExecutionCompletedEvent(investor.getUsername(), result, portfolio.getCzkAvailable()));
             return Collections.unmodifiableCollection(result);
         }
     }
 
     /**
-     * Blocked amounts represent loans in various stages. Either the user has invested and the loan has not yet been
+     * Blocked amounts represent marketplace in various stages. Either the user has invested and the loan has not yet been
      * funded to 100 % ("na tržišti"), or the user invested and the loan has been funded ("na cestě"). In the latter
      * case, the loan has already disappeared from the marketplace, which means that it will not be available for
      * investing any more. As far as I know, the next stage is "v pořádku", the blocked amount is cleared and the loan
@@ -127,67 +134,69 @@ class Session implements AutoCloseable {
      * In case user has made repeated investments into a particular loan, this will show up as multiple blocked amounts.
      * The method needs to handle this as well.
      *
-     * @param api Authenticated API that will be used to retrieve the user's blocked amounts from the wallet.
+     * @param api Authenticated Zonky API to read data from.
      * @return Every blocked amount represents a future investment. This method returns such investments.
      */
-    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final ZonkyProxy api) {
+    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final Zonky api) {
         // first group all blocked amounts by the loan ID and sum them
         final Map<Integer, Integer> amountsBlockedByLoans =
-                api.execute(zonky -> zonky.getBlockedAmounts(Integer.MAX_VALUE, 0)).stream()
+                api.getBlockedAmounts()
                         .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
                         .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
                                 Collectors.summingInt(BlockedAmount::getAmount)));
-        // and then fetch all the loans in parallel, converting them into investments
+        // and then fetch all the marketplace in parallel, converting them into investments
         return amountsBlockedByLoans.entrySet().parallelStream()
                 .map(entry ->
-                        Retriever.retrieve(() -> Optional.of(api.execute(zonky -> zonky.getLoan(entry.getKey()))))
+                        Retriever.retrieve(() -> Optional.of(api.getLoan(entry.getKey())))
                                 .map(l -> new Investment(l, entry.getValue()))
                                 .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
                 ).collect(Collectors.toList());
     }
 
     /**
-     * Zonky API may return {@link ZonkyApi#getStatistics()} as null if the account has no previous investments.
+     * Zonky API may return {@link PortfolioApi#statistics()} as null if the account has no previous investments.
      *
      * @param api API to execute the operation.
      * @return Either what the API returns, or an empty object.
      */
-    private static Statistics retrieveStatistics(final ZonkyProxy api) {
-        final Statistics returned = api.execute(ZonkyApi::getStatistics);
+    private static Statistics retrieveStatistics(final Zonky api) {
+        final Statistics returned = api.getStatistics();
         return returned == null ? new Statistics() : returned;
     }
 
     private final List<LoanDescriptor> loansStillAvailable;
     private final Collection<Investment> allInvestments, investmentsMadeNow = new LinkedHashSet<>(0);
-    private final Refreshable<PortfolioOverview> portfolioOverview = new Refreshable<PortfolioOverview>() {
-
-        @Override
-        protected Supplier<Optional<String>> getLatestSource() {
-            return () -> Optional.of(investmentsMadeNow.toString());
-        }
-
-        @Override
-        protected Optional<PortfolioOverview> transform(final String source) {
-            final Statistics stats = Session.retrieveStatistics(api);
-            return Optional.of(PortfolioOverview.calculate(balance, stats, allInvestments));
-        }
-
-    };
-    private final ZonkyProxy api;
+    private final Refreshable<PortfolioOverview> portfolioOverview;
+    private Investor investor;
     private BigDecimal balance;
     private final SessionState state;
 
-    private Session(final Set<LoanDescriptor> marketplace, final ZonkyProxy proxy) {
-        api = proxy;
-        balance = Session.getAvailableBalance(proxy);
+    private Session(final Set<LoanDescriptor> marketplace, final Investor.Builder proxy, final Zonky zonky) {
+        this.investor = proxy.build(zonky);
+        balance = this.investor.isDryRun() ? Session.getDryRunBalance(zonky) : Session.getLiveBalance(zonky);
         Session.LOGGER.info("Starting account balance: {} CZK.", balance);
         state = new SessionState(marketplace);
-        allInvestments = Session.retrieveInvestmentsRepresentedByBlockedAmounts(api);
+        allInvestments = Session.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         loansStillAvailable = marketplace.stream()
                 .filter(l -> state.getDiscardedLoans().stream()
                         .noneMatch(l2 -> l.getLoan().getId() == l2.getLoan().getId()))
                 .filter(l -> allInvestments.stream().noneMatch(i -> l.getLoan().getId() == i.getLoanId()))
                 .collect(Collectors.toList());
+        portfolioOverview = new Refreshable<PortfolioOverview>() {
+
+            private final Statistics stats = Session.retrieveStatistics(zonky);
+
+            @Override
+            protected Supplier<Optional<String>> getLatestSource() {
+                return () -> Optional.of(investmentsMadeNow.toString());
+            }
+
+            @Override
+            protected Optional<PortfolioOverview> transform(final String source) {
+                return Optional.of(PortfolioOverview.calculate(balance, stats, allInvestments));
+            }
+
+        };
         portfolioOverview.run(); // load initial portfolio overview so that strategy can use it
     }
 
@@ -208,8 +217,8 @@ class Session implements AutoCloseable {
     }
 
     /**
-     * Get loans that are available to be evaluated by the strategy. These are loans that come from the marketplace,
-     * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
+     * Get marketplace that are available to be evaluated by the strategy. These are marketplace that come from the marketplace,
+     * minus marketplace that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
      *
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
@@ -227,7 +236,7 @@ class Session implements AutoCloseable {
     }
 
     /**
-     * Request {@link ZonkyApi} to invest in a given loan, leveraging the {@link ConfirmationProvider}.
+     * Request {@link ControlApi} to invest in a given loan, leveraging the {@link ConfirmationProvider}.
      *
      * @param recommendation Loan to invest into.
      * @return True if investment successful. The investment is reflected in {@link #getInvestmentsMade()}.
@@ -243,12 +252,12 @@ class Session implements AutoCloseable {
         }
         Events.fire(new InvestmentRequestedEvent(recommendation));
         final boolean seenBefore = state.getSeenLoans().stream().anyMatch(l -> l.getLoan().getId() == loanId);
-        final ZonkyResponse response = api.invest(recommendation, seenBefore);
+        final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         Session.LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        final String providerId = api.getConfirmationProviderId().orElse("-");
+        final String providerId = investor.getConfirmationProviderId().orElse("-");
         switch (response.getType()) {
             case REJECTED:
-                return api.getConfirmationProviderId().map(c -> {
+                return investor.getConfirmationProviderId().map(c -> {
                     Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(), providerId));
                     // rejected through a confirmation provider => forget
                     this.discard(loan);
@@ -274,7 +283,7 @@ class Session implements AutoCloseable {
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
                 final Investment i = new Investment(recommendation.getLoanDescriptor().getLoan(), confirmedAmount);
                 this.markSuccessfulInvestment(i);
-                Events.fire(new InvestmentMadeEvent(i, balance.intValue(), api.isDryRun()));
+                Events.fire(new InvestmentMadeEvent(i, balance.intValue(), investor.isDryRun()));
                 return true;
             case SEEN_BEFORE:
                 Events.fire(new InvestmentSkippedEvent(recommendation));

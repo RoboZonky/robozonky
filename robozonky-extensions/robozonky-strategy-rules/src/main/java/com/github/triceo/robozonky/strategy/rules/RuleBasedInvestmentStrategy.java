@@ -56,7 +56,7 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
 
     private Stream<ProcessedLoan> processloans(final Collection<LoanDescriptor> loans,
                                                final PortfolioOverview portfolio) {
-        RuleBasedInvestmentStrategy.LOGGER.trace("Started matching loans.");
+        RuleBasedInvestmentStrategy.LOGGER.trace("Started matching marketplace.");
         final KieSession session = this.kieContainer.newKieSession();
         try {
             // insert facts into session

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.remote;
+package com.github.triceo.robozonky.common.remote;
 
-import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+interface ApiBlueprint<T> {
 
-public interface Api {
+    <S> S execute(final Function<T, S> function);
 
-    List<Loan> getLoans();
+    default void execute(final Consumer<T> consumer) {
+        final Function<T, Void> wrapper = t -> {
+            consumer.accept(t);
+            return null;
+        };
+        execute(wrapper);
+    }
 
 }

@@ -23,13 +23,13 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class StaticZonkyProxyTest extends AbstractInvestingTest {
+public class StaticInvestorTest extends AbstractInvestingTest {
 
     @Test
     public void investmentFromNullConfirmation() {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final int recommended = 200;
-        final Investment i = ZonkyProxy.convertToInvestment(ld.recommend(recommended).get(), null);
+        final Investment i = Investor.convertToInvestment(ld.recommend(recommended).get(), null);
         Assertions.assertThat(i.getAmount()).isEqualTo(recommended);
     }
 
@@ -37,7 +37,7 @@ public class StaticZonkyProxyTest extends AbstractInvestingTest {
     public void investmentFromAmountlessConfirmation() {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final int recommended = 200;
-        final Investment i = ZonkyProxy.convertToInvestment(ld.recommend(recommended).get(),
+        final Investment i = Investor.convertToInvestment(ld.recommend(recommended).get(),
                 new Confirmation(ConfirmationType.DELEGATED));
         Assertions.assertThat(i.getAmount()).isEqualTo(recommended);
     }

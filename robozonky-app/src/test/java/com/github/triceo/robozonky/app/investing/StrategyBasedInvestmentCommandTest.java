@@ -23,12 +23,12 @@ import java.util.List;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class StrategyBasedInvestmentCommandTest extends AbstractInvestingTest {
@@ -36,13 +36,12 @@ public class StrategyBasedInvestmentCommandTest extends AbstractInvestingTest {
     @Test
     public void empty() {
         final Collection<LoanDescriptor> loans = Collections.emptyList();
-        final ZonkyApi a = AbstractInvestingTest.mockApi(10_000);
-        final ZonkyProxy p = Mockito.spy(new ZonkyProxy.Builder().build(a));
-        final Session sess = Mockito.spy(Session.create(p, loans));
+        final Session sess = Mockito.mock(Session.class);
         final InvestmentStrategy s = Mockito.mock(InvestmentStrategy.class);
         final InvestmentCommand c = new StrategyBasedInvestmentCommand(s, loans);
         c.accept(sess); // SUT
         Assertions.assertThat(sess.getInvestmentsMade()).isEmpty();
+        Mockito.verify(sess, Mockito.never()).invest(ArgumentMatchers.any());
         // verify events
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).hasSize(2);

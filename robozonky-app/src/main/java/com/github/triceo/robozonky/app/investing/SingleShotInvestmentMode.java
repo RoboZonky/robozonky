@@ -40,7 +40,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
     private final Marketplace marketplace;
     private final TemporalAmount maximumSleepPeriod;
 
-    public SingleShotInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+    public SingleShotInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                     final boolean isFaultTolerant, final Marketplace marketplace,
                                     final Refreshable<InvestmentStrategy> strategy,
                                     final TemporalAmount maximumSleepPeriod) {
@@ -53,7 +53,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
         this.maximumSleepPeriod = maximumSleepPeriod;
     }
 
-    public SingleShotInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+    public SingleShotInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                     final boolean isFaultTolerant, final Marketplace marketplace,
                                     final Refreshable<InvestmentStrategy> strategy) {
         this(auth, builder, isFaultTolerant, marketplace, strategy, Duration.ofMinutes(60));
@@ -72,7 +72,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
+        return new StrategyExecution(apiProvider, getInvestorBuilder(), refreshableStrategy, getAuthenticationHandler(),
                 maximumSleepPeriod);
     }
 

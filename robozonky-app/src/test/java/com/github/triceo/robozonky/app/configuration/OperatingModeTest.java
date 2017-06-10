@@ -24,7 +24,7 @@ import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
-import com.github.triceo.robozonky.app.investing.ZonkyProxy;
+import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -37,7 +37,7 @@ public class OperatingModeTest {
     public void defaultDirect() {
         final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
-        final ZonkyProxy.Builder builder = new ZonkyProxy.Builder();
+        final Investor.Builder builder = new Investor.Builder();
         final AuthenticationHandler auth =
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
         final OperatingMode mode = new DirectInvestmentOperatingMode();
@@ -49,7 +49,7 @@ public class OperatingModeTest {
     public void defaultTesting() {
         final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
-        final ZonkyProxy.Builder builder = new ZonkyProxy.Builder();
+        final Investor.Builder builder = new Investor.Builder();
         builder.usingConfirmation(Mockito.mock(ConfirmationProvider.class), new char[0]);
         final AuthenticationHandler auth =
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));

@@ -20,30 +20,30 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.remote.Api;
+import com.github.triceo.robozonky.api.remote.LoanApi;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ApiWrapperTest {
+public class ApiTest {
 
     @Test
     public void executeFunction() {
-        final Api mock = Mockito.mock(Api.class);
-        final ApiProvider.ApiWrapper<Api> wrapper = new ApiProvider.ApiWrapper<>(Api.class, mock);
+        final LoanApi mock = Mockito.mock(LoanApi.class);
+        final Api<LoanApi> api = new Api<>(mock);
         final String expected = UUID.randomUUID().toString();
-        final Function<Api, String> function = api -> expected;
-        final String result = wrapper.execute(function);
+        final Function<LoanApi, String> function = (a) -> expected;
+        final String result = api.execute(function);
         Assertions.assertThat(result).isSameAs(expected);
     }
 
     @Test
     public void executeProcedure() {
-        final Api mock = Mockito.mock(Api.class);
-        final ApiProvider.ApiWrapper<Api> wrapper = new ApiProvider.ApiWrapper<>(Api.class, mock);
-        final Consumer<Api> procedure = Mockito.mock(Consumer.class);
-        wrapper.execute(procedure);
+        final LoanApi mock = Mockito.mock(LoanApi.class);
+        final Api<LoanApi> api = new Api<>(mock);
+        final Consumer<LoanApi> procedure = Mockito.mock(Consumer.class);
+        api.execute(procedure);
         Mockito.verify(procedure, Mockito.times(1)).accept(ArgumentMatchers.eq(mock));
     }
 

@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
-import org.assertj.core.api.SoftAssertions;
+import com.github.triceo.robozonky.api.remote.LoanApi;
+import org.assertj.core.api.Assertions;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-public class ZonkyProxyBuilderTest {
+public class ProxyFactoryTest {
 
     @Test
-    public void build() {
-        final String username = "user";
-        final ZonkyProxy.Builder b = new ZonkyProxy.Builder();
-        b.asUser(username).asDryRun();
-        final ZonkyProxy p = b.build(Mockito.mock(ZonkyApi.class));
-        SoftAssertions.assertSoftly(softly -> {
-          softly.assertThat(p.getUsername()).isEqualTo(username);
-          softly.assertThat(p.isDryRun()).isTrue();
-        });
+    public void api() {
+        final ResteasyClient client = ProxyFactory.newResteasyClient();
+        Assertions.assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
     }
 
 }

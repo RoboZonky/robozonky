@@ -17,6 +17,10 @@
 package com.github.triceo.robozonky.common.remote;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
@@ -36,9 +40,24 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
     // not static, so that filters extending this one get the proper logger class
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private final Map<String, String> headersToSet = new LinkedHashMap<>();
+    private Map<String, String> responseHeaders = new LinkedHashMap<>(0);
+
+    public RoboZonkyFilter() {
+        this.setRequestHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT);
+    }
+
+    public void setRequestHeader(final String key, final String value) {
+        headersToSet.put(key, value);
+    }
+
+    public Optional<String> getLastResponseHeader(final String key) {
+        return Optional.ofNullable(responseHeaders.get(key));
+    }
+
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        clientRequestContext.getHeaders().putSingle("User-Agent", Defaults.ROBOZONKY_USER_AGENT);
+        headersToSet.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
         this.logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 
@@ -48,6 +67,9 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
         this.logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
                 clientRequestContext.getUri(), clientResponseContext.getStatus(),
                 clientResponseContext.getStatusInfo().getReasonPhrase());
+        responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
+                .filter(e -> e.getValue().size() > 0)
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
     }
 
 }

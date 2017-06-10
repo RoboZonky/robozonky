@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,17 +29,15 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
@@ -91,13 +88,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
 
     @Test
     public void standard() {
-        final Wallet w = new Wallet(1, 2, BigDecimal.TEN, BigDecimal.ZERO);
-        final ZonkyApi z = Mockito.mock(ZonkyApi.class);
-        Mockito.when(z.getWallet()).thenReturn(w);
-        final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, z));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
+        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
@@ -108,7 +100,7 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         s.run();
         try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                new ZonkyProxy.Builder().asDryRun(), true, m, s)) {
+                new Investor.Builder().asDryRun(), true, m, s)) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(exec.execute(p)).isPresent();
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
@@ -131,11 +123,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
 
     @Test
     public void empty() {
-        final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any()))
-                .thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
-        final TestMarketplace m = new TestMarketplace(Collections.emptyList());
+        final ApiProvider p = AbstractInvestingTest.harmlessApi();
+        final SingleShotInvestmentModeTest.TestMarketplace m = new SingleShotInvestmentModeTest.TestMarketplace(Collections.emptyList());
         try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(null, null, true, m, null)) {
             Assertions.assertThat(exec.execute(p)).isPresent();
         } catch (final Exception ex) {
@@ -150,23 +139,20 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
 
     @Test
     public void failingDuringInvest() {
-        final ZonkyApi z = Mockito.mock(ZonkyApi.class);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         Mockito.doThrow(IllegalStateException.class).when(z).getWallet();
-        final ApiProvider p = Mockito.mock(ApiProvider.class);
-        Mockito.when(p.authenticated(ArgumentMatchers.any()))
-                .thenReturn(new ApiProvider.ApiWrapper<>(ZonkyApi.class, z));
-        Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
         Mockito.when(l.getDatePublished()).thenReturn(OffsetDateTime.now());
         Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
-        final Marketplace m = new TestMarketplace(Collections.singletonList(l));
+        final Marketplace m = new SingleShotInvestmentModeTest.TestMarketplace(Collections.singletonList(l));
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(Mockito.mock(InvestmentStrategy.class));
         s.run();
         try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                new ZonkyProxy.Builder(), true, m, s)) {
+                AuthenticationHandler.passwordBased(SecretProvider.fallback("username")),
+                new Investor.Builder(), true, m, s)) {
             Assertions.assertThat(exec.execute(p)).isEmpty();
         } catch (final Exception ex) {
             Assertions.fail("Unexpected exception.", ex);
@@ -176,3 +162,4 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
     }
 
 }
+

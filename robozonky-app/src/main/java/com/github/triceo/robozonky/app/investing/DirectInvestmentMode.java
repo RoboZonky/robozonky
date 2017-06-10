@@ -28,12 +28,13 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Zonky;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
 
     private final int loanId, loanAmount;
 
-    public DirectInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+    public DirectInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                 final boolean isFaultTolerant, final int loanId, final int loanAmount) {
         super(auth, builder, isFaultTolerant);
         this.loanId = loanId;
@@ -47,14 +48,14 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return (loans) -> this.getAuthenticationHandler().execute(apiProvider, api -> {
-            final ZonkyProxy proxy = getProxyBuilder().build(api);
-            final Loan l = proxy.execute(z -> z.getLoan(loanId));
+        final Function<Zonky, Collection<Investment>> op = (zonky) -> {
+            final Loan l = zonky.getLoan(loanId);
             final LoanDescriptor d = new LoanDescriptor(l);
             return d.recommend(loanAmount, false)
-                    .map(r -> Session.invest(proxy, new DirectInvestmentCommand(r)))
+                    .map(r -> Session.invest(getInvestorBuilder(), zonky, new DirectInvestmentCommand(r)))
                     .orElse(Collections.emptyList());
-        });
+        };
+        return (marketplace) -> this.getAuthenticationHandler().execute(apiProvider, op);
     }
 
     @Override

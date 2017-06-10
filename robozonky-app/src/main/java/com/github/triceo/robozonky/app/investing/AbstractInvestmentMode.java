@@ -37,13 +37,13 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
 
     private final boolean isFaultTolerant;
     private final AuthenticationHandler authenticationHandler;
-    private final ZonkyProxy.Builder proxyBuilder;
+    private final Investor.Builder investorBuilder;
 
     protected AbstractInvestmentMode(final AuthenticationHandler authenticationHandler,
-                                     final ZonkyProxy.Builder builder,
+                                     final Investor.Builder builder,
                                      final boolean isFaultTolerant) {
         this.authenticationHandler = authenticationHandler;
-        this.proxyBuilder = builder;
+        this.investorBuilder = builder;
         this.isFaultTolerant = isFaultTolerant;
     }
 
@@ -54,11 +54,11 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
 
     @Override
     public boolean isDryRun() {
-        return this.proxyBuilder.isDryRun();
+        return this.investorBuilder.isDryRun();
     }
 
-    protected ZonkyProxy.Builder getProxyBuilder() {
-        return proxyBuilder;
+    protected Investor.Builder getInvestorBuilder() {
+        return investorBuilder;
     }
 
     protected AuthenticationHandler getAuthenticationHandler() {
@@ -82,9 +82,9 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
     }
 
     /**
-     * Start marketplace which will be putting loans into a given buffer.
+     * Start marketplace which will be putting marketplace into a given buffer.
      *
-     * @param target The buffer to start putting loans into.
+     * @param target The buffer to start putting marketplace into.
      */
     protected abstract void openMarketplace(Consumer<Collection<Loan>> target);
 

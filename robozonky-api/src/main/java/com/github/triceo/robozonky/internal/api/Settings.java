@@ -45,7 +45,8 @@ public enum Settings {
         DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
         DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
-        DEFAULTS_DRY_RUN_BALANCE("robozonky.default.dry_run_balance");
+        DEFAULTS_DRY_RUN_BALANCE("robozonky.default.dry_run_balance"),
+        DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size");
 
         private final String name;
 
@@ -152,6 +153,10 @@ public enum Settings {
 
     public int getDefaultDryRunBalance() {
         return get(Settings.Key.DEFAULTS_DRY_RUN_BALANCE, -1);
+    }
+
+    public int getDefaultApiPageSize() {
+        return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 100);
     }
 
 }

@@ -71,7 +71,7 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         } else {
             SimpleInvestmentStrategyService.LOGGER.debug("Acceptable shares of rating '{}' on total investments is " +
                     "between {} and {}.", r.getCode(), targetShare, maxShare);
-            SimpleInvestmentStrategyService.LOGGER.debug("Acceptable loans for rating '{}' are between {} and {} CZK on " +
+            SimpleInvestmentStrategyService.LOGGER.debug("Acceptable marketplace for rating '{}' are between {} and {} CZK on " +
                             "terms between {} and {} months, {} preferred.", r.getCode(), minAskAmount,
                     maxAskAmount < 0 ? "+inf" : maxAskAmount, minTerm == -1 ? 0 : minTerm,
                     maxTerm < 0 ? "+inf" : maxTerm + 1, preferLongerTerms ? "longer" : "shorter");

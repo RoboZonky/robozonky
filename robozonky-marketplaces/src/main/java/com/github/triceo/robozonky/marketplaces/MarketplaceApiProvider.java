@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.marketplaces;
 
+import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.RoboZonkyFilter;
 
@@ -30,7 +31,7 @@ class MarketplaceApiProvider extends ApiProvider {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ApiProvider.ApiWrapper<ZotifyApi> zotify() {
+    public Api<ZotifyApi> zotify() {
         return this.obtain(ZotifyApi.class, MarketplaceApiProvider.ZOTIFY_URL, MarketplaceApiProvider.FILTER);
     }
 

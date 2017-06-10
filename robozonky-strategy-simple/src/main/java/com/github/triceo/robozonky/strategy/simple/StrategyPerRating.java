@@ -87,11 +87,11 @@ class StrategyPerRating {
         if (loan.getRating() != this.rating) {
             throw new IllegalArgumentException("Loan " + loan + " should never have gotten here.");
         } else if (!isAcceptableTerm(loan)) {
-            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; looking for loans with terms in range <{}, {}>.", loan,
+            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; looking for marketplace with terms in range <{}, {}>.", loan,
                     this.minimumAcceptableTerm, this.maximumAcceptableTerm);
             return false;
         } else if (!isAcceptableAsk(loan)) {
-            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; looking for loans with amounts in range <{}, {}>.",
+            StrategyPerRating.LOGGER.debug("Loan '{}' rejected; looking for marketplace with amounts in range <{}, {}>.",
                     loan, this.minimumAskAmount, this.maximumAskAmount);
             return false;
         }

@@ -23,12 +23,10 @@ import javax.ws.rs.Path;
 
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 
+@Path("/oauth/token")
 public interface ZonkyOAuthApi {
 
-    String OAUTH = "/oauth/token";
-
     @POST
-    @Path(ZonkyOAuthApi.OAUTH)
     ZonkyApiToken login(
             @FormParam("username") String username,
             @FormParam("password") String password,
@@ -36,7 +34,6 @@ public interface ZonkyOAuthApi {
             @FormParam("scope") @DefaultValue("SCOPE_APP_WEB") String scope);
 
     @POST
-    @Path(ZonkyOAuthApi.OAUTH)
     ZonkyApiToken refresh(
             @FormParam("refresh_token") String refreshToken,
             @FormParam("grant_type") @DefaultValue("refresh_token") String grantType,

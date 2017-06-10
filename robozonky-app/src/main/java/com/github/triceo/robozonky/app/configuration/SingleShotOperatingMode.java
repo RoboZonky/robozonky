@@ -25,7 +25,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
-import com.github.triceo.robozonky.app.investing.ZonkyProxy;
+import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
 
@@ -41,7 +41,7 @@ class SingleShotOperatingMode extends OperatingMode {
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
                                                          final AuthenticationHandler auth,
-                                                         final ZonkyProxy.Builder builder) {
+                                                         final Investor.Builder builder) {
         final Refreshable<InvestmentStrategy> strategy =
                 RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
         final TweaksCommandLineFragment fragment = cli.getTweaksFragment();

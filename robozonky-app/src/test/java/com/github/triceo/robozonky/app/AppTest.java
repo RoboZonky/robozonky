@@ -31,8 +31,10 @@ import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
-import com.github.triceo.robozonky.app.investing.ZonkyProxy;
+import com.github.triceo.robozonky.app.investing.Investor;
+import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -67,11 +69,11 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(Api.class));
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         // and now test
-        final ReturnCode rc = App.execute(new DirectInvestmentMode(auth, new ZonkyProxy.Builder().asDryRun(),
+        final ReturnCode rc = App.execute(new DirectInvestmentMode(auth, new Investor.Builder().asDryRun(),
                 false, 1, 1000));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_SETUP);
     }
@@ -84,17 +86,17 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
         Mockito.when(auth.execute(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Collections.emptyList());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        Mockito.when(api.oauth()).thenReturn(Mockito.mock(Api.class));
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
+        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(Zonky.class));
         final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
         final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
         Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));
         final Marketplace marketplace = Mockito.mock(Marketplace.class);
         Mockito.when(marketplace.specifyExpectedTreatment()).thenReturn(ExpectedTreatment.POLLING);
         // and now test
-        final ReturnCode rc = App.execute(new SingleShotInvestmentMode(auth, new ZonkyProxy.Builder().asDryRun(),
+        final ReturnCode rc = App.execute(new SingleShotInvestmentMode(auth, new Investor.Builder().asDryRun(),
                 false, marketplace, refreshable));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.OK);
     }

@@ -16,22 +16,16 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import java.io.IOException;
-import javax.ws.rs.client.ClientRequestContext;
-
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 
-final class AuthenticatedFilter extends RoboZonkyFilter {
+class AuthenticatedFilter extends RoboZonkyFilter {
 
-    private final char[] accessToken; // treat the access token as if it were a password
+    public static final char[] EMPTY_TOKEN = new char[0];
 
     public AuthenticatedFilter(final ZonkyApiToken token) {
-        this.accessToken = token.getAccessToken();
+        // null token = no token
+        final char[] t = token == null ? AuthenticatedFilter.EMPTY_TOKEN : token.getAccessToken();
+        this.setRequestHeader("Authorization", "Bearer " + String.valueOf(t));
     }
 
-    @Override
-    public void filter(final ClientRequestContext clientRequestContext) throws IOException {
-        clientRequestContext.getHeaders().add("Authorization", "Bearer " + String.valueOf(accessToken));
-        super.filter(clientRequestContext);
-    }
 }

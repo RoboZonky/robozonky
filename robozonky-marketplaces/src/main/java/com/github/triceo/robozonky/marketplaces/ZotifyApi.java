@@ -23,7 +23,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.github.triceo.robozonky.api.remote.Api;
+import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 /**
@@ -32,12 +32,12 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
 @Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-interface ZotifyApi extends Api {
+interface ZotifyApi extends EntityCollectionApi<Loan> {
 
     @GET
     @Path("/json")
     @Override
-    List<Loan> getLoans();
+    List<Loan> items();
 
 }
 

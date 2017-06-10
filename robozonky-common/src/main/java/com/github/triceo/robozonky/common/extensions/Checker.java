@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,8 +29,9 @@ import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +46,8 @@ public class Checker {
 
     static Optional<Loan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
         try (final ApiProvider p = apiProviderSupplier.get()) {
-            final ApiProvider.ApiWrapper<ZonkyApi> oauth = p.anonymous();
-            final Collection<Loan> loans = oauth.execute((Function<ZonkyApi, List<Loan>>) ZonkyApi::getLoans);
+            final Api<LoanApi> oauth = p.marketplace();
+            final Collection<Loan> loans = oauth.execute(LoanApi::items);
             /*
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.

@@ -53,10 +53,10 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
             new SuddenDeathDetection(DaemonInvestmentMode.BLOCK_UNTIL_RELEASED, 300);
     public static final Semaphore BLOCK_UNTIL_RELEASED = new Semaphore(1);
 
-    public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+    public DaemonInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                 final boolean isFaultTolerant, final Marketplace marketplace,
-                                final Refreshable<InvestmentStrategy> strategy,
-                                final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
+                                final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod,
+                                final TemporalAmount periodBetweenChecks) {
         super(auth, builder, isFaultTolerant);
         this.refreshableStrategy = strategy;
         this.marketplace = marketplace;
@@ -72,7 +72,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         }));
     }
 
-    public DaemonInvestmentMode(final AuthenticationHandler auth, final ZonkyProxy.Builder builder,
+    public DaemonInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                 final boolean isFaultTolerant, final Marketplace marketplace,
                                 final Refreshable<InvestmentStrategy> strategy) {
         this(auth, builder, isFaultTolerant, marketplace, strategy, Duration.ofMinutes(60), Duration.ofSeconds(1));
@@ -119,7 +119,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
+        return new StrategyExecution(apiProvider, getInvestorBuilder(), refreshableStrategy, getAuthenticationHandler(),
                 maximumSleepPeriod);
     }
 

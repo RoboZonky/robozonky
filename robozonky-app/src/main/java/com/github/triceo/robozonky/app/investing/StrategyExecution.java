@@ -31,6 +31,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,28 +41,32 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
 
     private final ApiProvider apiProvider;
     private final AuthenticationHandler authenticationHandler;
-    private final ZonkyProxy.Builder proxyBuilder;
+    private final Investor.Builder investor;
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final TemporalAmount maximumSleepPeriod;
 
-    public StrategyExecution(final ApiProvider apiProvider, final ZonkyProxy.Builder proxyBuilder,
+    public StrategyExecution(final ApiProvider apiProvider, final Investor.Builder investor,
                              final Refreshable<InvestmentStrategy> strategy, final AuthenticationHandler auth,
                              final TemporalAmount maximumSleepPeriod) {
         this.apiProvider = apiProvider;
         this.authenticationHandler = auth;
-        this.proxyBuilder = proxyBuilder;
+        this.investor = investor;
         this.refreshableStrategy = strategy;
         this.maximumSleepPeriod = maximumSleepPeriod;
     }
 
-    public StrategyExecution(final ApiProvider apiProvider, final ZonkyProxy.Builder proxyBuilder,
+    public StrategyExecution(final ApiProvider apiProvider, final Investor.Builder investor,
                              final Refreshable<InvestmentStrategy> strategy, final AuthenticationHandler auth) {
-        this(apiProvider, proxyBuilder, strategy, auth, Duration.ofMinutes(60));
+        this(apiProvider, investor, strategy, auth, Duration.ofMinutes(60));
     }
 
-    private Collection<Investment> invest(final InvestmentStrategy strategy, final Collection<LoanDescriptor> loans) {
-        final InvestmentCommand c = new StrategyBasedInvestmentCommand(strategy, loans);
-        return authenticationHandler.execute(apiProvider, api -> Session.invest(proxyBuilder.build(api), c));
+    private Collection<Investment> invest(final InvestmentStrategy strategy,
+                                          final Collection<LoanDescriptor> marketplace) {
+        final Function<Zonky, Collection<Investment>> op = (zonky) -> {
+            final InvestmentCommand c = new StrategyBasedInvestmentCommand(strategy, marketplace);
+            return Session.invest(investor, zonky, c);
+        };
+        return authenticationHandler.execute(apiProvider, op);
     }
 
     private Collection<Investment> justReauth() {
@@ -82,7 +87,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                         StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
                         return empty;
                     } else {
-                        StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
+                        StrategyExecution.LOGGER.debug("Sending following marketplace to the investor: {}.", loans.stream()
                                 .peek(l -> Events.fire(new LoanArrivedEvent(l)))
                                 .map(l -> String.valueOf(l.getLoan().getId()))
                                 .collect(Collectors.joining(", ")));

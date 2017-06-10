@@ -17,113 +17,34 @@
 package com.github.triceo.robozonky.common.remote;
 
 import java.lang.ref.WeakReference;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.xml.ws.WebServiceClient;
 
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
+import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
+import com.github.triceo.robozonky.api.remote.LoanApi;
+import com.github.triceo.robozonky.api.remote.PortfolioApi;
+import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
+import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.internal.api.Settings;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
-import org.jboss.resteasy.client.jaxrs.internal.ClientInvocation;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Provides instances of APIs for the rest of RoboZonky to use. When no longer needed, the ApiProvider needs to be
  * {@link #close()}ed in order to not leak {@link WebServiceClient}s that weren't already closed by
- * {@link ApiProvider.ApiWrapper#close()}.
+ * {@link Api#close()}.
  */
 public class ApiProvider implements AutoCloseable {
 
-    static class RedirectingHttpClient extends ApacheHttpClient43Engine {
-
-        public RedirectingHttpClient(final HttpClient httpClient) {
-            super(httpClient);
-        }
-
-        @Override
-        protected void loadHttpMethod(final ClientInvocation request, final HttpRequestBase httpMethod)
-                throws Exception {
-            super.loadHttpMethod(request, httpMethod);
-            httpMethod.setConfig(RequestConfig.copy(httpMethod.getConfig()).setRedirectsEnabled(true).build());
-        }
-
-    }
-
-    /**
-     * Represents a close-able RESTEasy client proxy. Users should preferably call {@link #close()} after they're
-     * done with the API.
-     *
-     * @param <T> Type of the API to be handled.
-     */
-    public static class ApiWrapper<T> implements AutoCloseable {
-
-        private static final Logger LOGGER = LoggerFactory.getLogger(ApiProvider.ApiWrapper.class);
-
-        private final ResteasyClient client;
-        private final T api;
-
-        public ApiWrapper(final Class<T> apiClass, T api) {
-            this(apiClass, api, null);
-        }
-
-        public ApiWrapper(final Class<T> apiClass, final T api, final ResteasyClient client) {
-            this.client = client;
-            this.api = api;
-        }
-
-        public <S> S execute(final Function<T, S> function) {
-            return function.apply(api);
-        }
-
-        public void execute(final Consumer<T> function) {
-            function.accept(api);
-        }
-
-        boolean isClosed() {
-            return client == null || client.isClosed();
-        }
-
-        @Override
-        public synchronized void close() {
-            if (client != null && !client.isClosed()) {
-                client.close();
-            }
-        }
-    }
-
-    private static final ResteasyProviderFactory RESTEASY = ResteasyProviderFactory.getInstance();
-    static {
-        RegisterBuiltin.register(ApiProvider.RESTEASY);
-        final Class<?> jsonProvider = ResteasyJackson2Provider.class;
-        if (!ApiProvider.RESTEASY.isRegistered(jsonProvider)) {
-            ApiProvider.RESTEASY.registerProvider(jsonProvider);
-        }
-    }
-    private static final HttpClientConnectionManager CONNECTION_MANAGER = new PoolingHttpClientConnectionManager();
-    private static final String ZONKY_URL = "https://api.zonky.cz";
+    public static final String ZONKY_URL = "https://api.zonky.cz";
 
     /**
      * Use weak references so that the clients aren't kept around forever, with all the entities they carry.
@@ -131,25 +52,6 @@ public class ApiProvider implements AutoCloseable {
     private final Collection<WeakReference<AutoCloseable>> clients = new ArrayList<>();
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
-    private static ResteasyClient newResteasyClient() {
-        final int socketTimeout = (int)(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000;
-        final int connectionTimeout = (int)(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000;
-        final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-                .setConnectTimeout(connectionTimeout)
-                .setConnectionRequestTimeout(connectionTimeout)
-                .setSocketTimeout(socketTimeout)
-                .build();
-        final CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .setDefaultRequestConfig(requestConfig) // avoid "sudden death" (marketplace forever blocking on socket)
-                .setConnectionManager(ApiProvider.CONNECTION_MANAGER)
-                .build();
-        final ClientHttpEngine httpEngine = new ApiProvider.RedirectingHttpClient(httpClient);
-        return new ResteasyClientBuilder()
-                .httpEngine(httpEngine)
-                .providerFactory(ApiProvider.RESTEASY)
-                .build();
-    }
 
     /**
      * Instantiate an API as a RESTEasy client proxy.
@@ -160,18 +62,32 @@ public class ApiProvider implements AutoCloseable {
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
-    protected <T> ApiProvider.ApiWrapper<T> obtain(final Class<T> api, final String url, final RoboZonkyFilter filter) {
+    protected <T> Api<T> obtain(final Class<T> api, final String url, final RoboZonkyFilter filter) {
         if (this.isClosed.get()) {
             throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
         }
-        final ResteasyClient client = ApiProvider.newResteasyClient();
-        final T proxy = client.register(filter)
-                .target(url)
-                .register(new BrowserCacheFeature())
-                .proxy(api);
-        final ApiProvider.ApiWrapper<T> wrapper = new ApiProvider.ApiWrapper<>(api, proxy, client);
+        final ResteasyClient client = ProxyFactory.newResteasyClient(filter);
+        final T proxy = ProxyFactory.newProxy(client, api, url);
+        final Api<T> wrapper = new Api<>(proxy, client);
         this.clients.add(new WeakReference<>(wrapper));
         return wrapper;
+    }
+
+    /**
+     * Instantiate an API as a RESTEasy client proxy.
+     *
+     * @param api RESTEasy endpoint.
+     * @param url URL to the web API represented by the endpoint.
+     * @param <T> API type.
+     * @return RESTEasy client proxy for the API, ready to be called.
+     */
+    protected <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
+                                                                                       final String url,
+                                                                                       final ZonkyApiToken token) {
+        if (this.isClosed.get()) {
+            throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
+        }
+        return new PaginatedApi<>(api, url, token);
     }
 
     /**
@@ -180,7 +96,7 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ApiProvider.ApiWrapper<ZonkyOAuthApi> oauth() {
+    public Api<ZonkyOAuthApi> oauth() {
         return this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter());
     }
 
@@ -190,19 +106,57 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ApiProvider.ApiWrapper<ZonkyApi> anonymous() {
-        return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, new RoboZonkyFilter());
+    public Api<LoanApi> marketplace() {
+        return this.obtain(LoanApi.class, ApiProvider.ZONKY_URL, new RoboZonkyFilter());
+    }
+
+    public Zonky authenticated(final ZonkyApiToken token) {
+        return new Zonky(this.control(token), this.marketplace(token), this.portfolio(token),
+                this.wallet(token));
     }
 
     /**
-     * Retrieve user-specific Zonky API which requires authentication.
+     * Retrieve user-specific Zonky loan API which requires authentication.
      *
-     * @param token The Zonky API token, representing an authenticated user.
+     * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public ApiProvider.ApiWrapper<ZonkyApi> authenticated(final ZonkyApiToken token) {
-        return this.obtain(ZonkyApi.class, ApiProvider.ZONKY_URL, new AuthenticatedFilter(token));
+    private PaginatedApi<Loan, LoanApi> marketplace(final ZonkyApiToken token) {
+        return this.obtainPaginated(LoanApi.class, ApiProvider.ZONKY_URL, token);
+    }
+
+    /**
+     * Retrieve user-specific Zonky wallet API which requires authentication.
+     *
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     * @throws IllegalStateException If {@link #close()} already called.
+     */
+    private PaginatedApi<BlockedAmount, WalletApi> wallet(final ZonkyApiToken token) {
+        return this.obtainPaginated(WalletApi.class, ApiProvider.ZONKY_URL, token);
+    }
+
+    /**
+     * Retrieve user-specific Zonky portfolio API which requires authentication.
+     *
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     * @throws IllegalStateException If {@link #close()} already called.
+     */
+    private PaginatedApi<Investment, PortfolioApi> portfolio(final ZonkyApiToken token) {
+        return this.obtainPaginated(PortfolioApi.class, ApiProvider.ZONKY_URL, token);
+    }
+
+    /**
+     * Retrieve user-specific Zonky control API which requires authentication.
+     *
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     * @throws IllegalStateException If {@link #close()} already called.
+     */
+    private Api<ControlApi> control(final ZonkyApiToken token) {
+        return this.obtain(ControlApi.class, ApiProvider.ZONKY_URL, new AuthenticatedFilter(token));
     }
 
     @Override
@@ -220,8 +174,6 @@ public class ApiProvider implements AutoCloseable {
                     }
                 });
         this.isClosed.set(true);
-        ApiProvider.CONNECTION_MANAGER.closeExpiredConnections();
-        ApiProvider.CONNECTION_MANAGER.closeIdleConnections(5, TimeUnit.MINUTES);
     }
 
 }

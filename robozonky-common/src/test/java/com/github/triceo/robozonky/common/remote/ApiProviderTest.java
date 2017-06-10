@@ -16,52 +16,41 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import java.util.List;
-import java.util.function.Function;
-
-import com.github.triceo.robozonky.api.remote.ZonkyApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class ApiProviderTest {
 
     @Test
-    public void authenticated() {
-        ApiProvider.ApiWrapper<ZonkyApi> api;
+    public void unathenticatedApis() {
         try (final ApiProvider provider = new ApiProvider()) {
-            api = provider.authenticated(Mockito.mock(ZonkyApiToken.class));
-            Assertions.assertThat(api).isNotNull();
-        }
-        Assertions.assertThatThrownBy(() -> api.execute((Function<ZonkyApi, List<Loan>>) ZonkyApi::getLoans))
-                .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    public void standard() {
-        try (final ApiProvider provider = new ApiProvider()) {
-            Assertions.assertThat(provider.anonymous()).isNotNull();
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat(provider.marketplace()).isNotNull();
+                Assertions.assertThat(provider.oauth()).isNotNull();
+            });
         }
     }
 
     @Test
-    public void oauth() {
+    public void athenticatedApis() {
+        final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
         try (final ApiProvider provider = new ApiProvider()) {
-            Assertions.assertThat(provider.oauth()).isNotNull();
+            Assertions.assertThat(provider.authenticated(token)).isNotNull();
         }
     }
 
     @Test
     public void obtainClosedThrows() {  // tests double-closing as a side-effect
         try (final ApiProvider provider = new ApiProvider()) {
-            try (final ApiProvider.ApiWrapper<ZonkyApi> w = provider.anonymous()) {
+            try (final Api<LoanApi> w = provider.marketplace()) {
                 Assertions.assertThat(w.isClosed()).isFalse();
                 provider.close();
                 Assertions.assertThat(w.isClosed()).isTrue();
             }
-            Assertions.assertThatThrownBy(provider::anonymous).isInstanceOf(IllegalStateException.class);
+            Assertions.assertThatThrownBy(provider::marketplace).isInstanceOf(IllegalStateException.class);
         }
     }
 
