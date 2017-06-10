@@ -184,6 +184,8 @@ class Session implements AutoCloseable {
                 .collect(Collectors.toList());
         portfolioOverview = new Refreshable<PortfolioOverview>() {
 
+            private final Statistics stats = Session.retrieveStatistics(zonky);
+
             @Override
             protected Supplier<Optional<String>> getLatestSource() {
                 return () -> Optional.of(investmentsMadeNow.toString());
@@ -191,7 +193,6 @@ class Session implements AutoCloseable {
 
             @Override
             protected Optional<PortfolioOverview> transform(final String source) {
-                final Statistics stats = Session.retrieveStatistics(zonky);
                 return Optional.of(PortfolioOverview.calculate(balance, stats, allInvestments));
             }
 

@@ -20,7 +20,6 @@ import java.util.UUID;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
-import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.common.remote.Api;
@@ -62,12 +61,12 @@ public class ZonkySettingsValidatorTest {
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
         final ZonkyApiToken token = Mockito.mock(ZonkyApiToken.class);
         final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
-        final ControlApi api = Mockito.mock(ControlApi.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenReturn(token);
-        Mockito.when(provider.authenticated(ArgumentMatchers.eq(token)))
-                .thenReturn(Mockito.mock(AuthenticatedZonky.class));
         Mockito.when(provider.oauth()).thenReturn(new Api<>(oauth));
+        final AuthenticatedZonky zonky = Mockito.mock(AuthenticatedZonky.class);
+        Mockito.when(provider.authenticated(ArgumentMatchers.eq(token)))
+                .thenReturn(zonky);
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
@@ -78,7 +77,7 @@ public class ZonkySettingsValidatorTest {
                 .login(ArgumentMatchers.eq(ZonkySettingsValidatorTest.USERNAME),
                         ArgumentMatchers.eq(ZonkySettingsValidatorTest.PASSWORD), ArgumentMatchers.any(),
                         ArgumentMatchers.any());
-        Mockito.verify(api).logout();
+        Mockito.verify(zonky).logout();
     }
 
     @Test
