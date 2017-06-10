@@ -20,6 +20,7 @@ import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -31,7 +32,7 @@ public class PaginatedImplTest {
     @Test
     public void constructor() {
         final PaginatedApi<Loan, LoanApi> api = Mockito.mock(PaginatedApi.class);
-        final int pageSize = 20;
+        final int pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         // when execute is called with the right parameters, we pretend the API returned no results
         Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.eq(0), ArgumentMatchers.eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 0, 0));
