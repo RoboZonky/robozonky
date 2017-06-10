@@ -53,7 +53,7 @@ public class Checker {
              * successfully come through.
              */
             return loans.stream().sorted(Checker.COMPARATOR).findFirst();
-        } catch (final Throwable t) {
+        } catch (final Exception t) {
             LOGGER.warn("Failed obtaining a loan.", t);
             return Optional.empty();
         }

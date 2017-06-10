@@ -67,8 +67,13 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
             // will release the main thread and thus terminate the daemon
             DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
             // only allow to shut down after the daemon has been closed by the app
-            ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
-            LOGGER.debug("Shutdown allowed.");
+            try {
+                ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.tryAcquire(1, TimeUnit.MINUTES);
+            } catch (final InterruptedException ex) { // don't block shutdown indefinitely
+                LOGGER.warn("Timed out waiting for daemon to terminate cleanly.");
+            } finally {
+                LOGGER.debug("Shutdown allowed.");
+            }
         }));
     }
 
@@ -96,6 +101,10 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
             try {
                 marketplace.run();
             } catch (final Throwable t) {
+                /*
+                 * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
+                 * care of errors stopping the thread.
+                 */
                 new DaemonRuntimeExceptionHandler().handle(t);
             } finally {
                 suddenDeath.registerMarketplaceCheck(); // sudden death averted for now

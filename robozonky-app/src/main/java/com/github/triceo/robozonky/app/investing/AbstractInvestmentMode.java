@@ -129,7 +129,7 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
                 Stream.of(value).forEach(ste -> LOGGER.error("{}", ste));
             });
             throw new IllegalStateException(ex);
-        } catch (final Throwable ex) {
+        } catch (final Exception ex) {
             LOGGER.error("Failed executing investments.", ex);
             return Optional.empty();
         }

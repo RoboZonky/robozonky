@@ -98,8 +98,8 @@ public class App {
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try { // execute core code
             App.exit(App.execute(args, faultTolerant));
-        } catch (final Throwable throwable) {
-            new AppRuntimeExceptionHandler(faultTolerant.get()).handle(throwable);
+        } catch (final Exception ex) {
+            new AppRuntimeExceptionHandler(faultTolerant.get()).handle(ex);
         }
     }
 
