@@ -41,6 +41,7 @@ public class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout()).isNotNull();
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout()).isNotNull();
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isGreaterThan(0);
         });
     }
 

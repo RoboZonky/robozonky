@@ -34,7 +34,7 @@ public class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
 
-    public static final class Builder {
+    public static class Builder {
 
         private String username = "";
         private boolean isDryRun = false;
@@ -60,6 +60,10 @@ public class Investor {
         public Investor.Builder asUser(final String username) {
             this.username = username;
             return this;
+        }
+
+        public String getUsername() {
+            return username;
         }
 
         public Investor.Builder asDryRun() {

@@ -31,7 +31,7 @@ public class PaginatedImplTest {
     @Test
     public void constructor() {
         final PaginatedApi<Loan, LoanApi> api = Mockito.mock(PaginatedApi.class);
-        final int pageSize = PaginatedImpl.PAGE_SIZE;
+        final int pageSize = 20;
         // when execute is called with the right parameters, we pretend the API returned no results
         Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.eq(0), ArgumentMatchers.eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 0, 0));

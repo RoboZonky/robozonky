@@ -30,6 +30,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
+import com.github.triceo.robozonky.internal.api.Settings;
 
 public class AuthenticatedZonky implements AutoCloseable {
 
@@ -61,7 +62,12 @@ public class AuthenticatedZonky implements AutoCloseable {
     }
 
     private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api) {
-        final Paginated<T> p = new PaginatedImpl<>(api);
+        return AuthenticatedZonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize());
+    }
+
+    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
+                                                                             final int pageSize) {
+        final Paginated<T> p = new PaginatedImpl<>(api, pageSize);
         final Spliterator<T> s = new EntitySpliterator<>(p);
         return StreamSupport.stream(s, false);
     }

@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.common.remote;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.xml.ws.WebServiceClient;
@@ -175,9 +174,6 @@ public class ApiProvider implements AutoCloseable {
                     }
                 });
         this.isClosed.set(true);
-        // FIXME ugliness below
-        ProxyFactory.CONNECTION_MANAGER.closeExpiredConnections();
-        ProxyFactory.CONNECTION_MANAGER.closeIdleConnections(5, TimeUnit.MINUTES);
     }
 
 }

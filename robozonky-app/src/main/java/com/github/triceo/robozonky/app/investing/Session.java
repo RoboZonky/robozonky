@@ -76,34 +76,36 @@ class Session implements AutoCloseable {
      * the sessions share state through a file, and therefore multiple concurrent sessions would interfere with one
      * another.
      *
-     * @param proxy Zonky API to use for investment operations.
+     * @param investor Confirmation layer around the investment API.
      * @param api Authenticated access to Zonky for data retrieval.
      * @param marketplace Loans that are available in the marketplace.
      * @throws IllegalStateException When another {@link Session} instance was not {@link #close()}d.
      * @return
      */
-    public synchronized static Session create(final Investor proxy, final AuthenticatedZonky api,
+    public synchronized static Session create(final Investor.Builder investor, final AuthenticatedZonky api,
                                               final Collection<LoanDescriptor> marketplace) {
-        // FIXME only provide builder
         if (Session.INSTANCE.get() != null) {
             throw new IllegalStateException("Investment session already exists.");
         }
-        final Session s = new Session(new LinkedHashSet<>(marketplace), proxy, api);
+        final Session s = new Session(new LinkedHashSet<>(marketplace), investor, api);
         Session.INSTANCE.set(s);
         return s;
     }
 
-    // FIXME turn this into two methods - one for dry run, the other for real run
-    static BigDecimal getAvailableBalance(final Investor proxy, final AuthenticatedZonky api) {
-        final int balance = Settings.INSTANCE.getDefaultDryRunBalance();
-        return (proxy.isDryRun() && balance > -1) ? BigDecimal.valueOf(balance) : api.getWallet().getAvailableBalance();
+    static BigDecimal getLiveBalance(final AuthenticatedZonky api) {
+        return api.getWallet().getAvailableBalance();
     }
 
-    static Collection<Investment> invest(final Investor proxy, final AuthenticatedZonky api,
+    static BigDecimal getDryRunBalance(final AuthenticatedZonky api) {
+        final int balance = Settings.INSTANCE.getDefaultDryRunBalance();
+        return (balance > -1) ? BigDecimal.valueOf(balance) : Session.getLiveBalance(api);
+    }
+
+    static Collection<Investment> invest(final Investor.Builder investor, final AuthenticatedZonky api,
                                          final InvestmentCommand command) {
-        try (final Session session = Session.create(proxy, api, command.getLoans())) {
+        try (final Session session = Session.create(investor, api, command.getLoans())) {
             final int balance = session.getPortfolioOverview().getCzkAvailable();
-            Events.fire(new ExecutionStartedEvent(proxy.getUsername(), command.getLoans(), balance));
+            Events.fire(new ExecutionStartedEvent(investor.getUsername(), command.getLoans(), balance));
             if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailableLoans().isEmpty()) {
                 command.accept(session);
             }
@@ -113,7 +115,7 @@ class Session implements AutoCloseable {
                     portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
                     portfolio.getCzkExpectedYield());
             final Collection<Investment> result = session.getInvestmentsMade();
-            Events.fire(new ExecutionCompletedEvent(proxy.getUsername(), result, portfolio.getCzkAvailable()));
+            Events.fire(new ExecutionCompletedEvent(investor.getUsername(), result, portfolio.getCzkAvailable()));
             return Collections.unmodifiableCollection(result);
         }
     }
@@ -169,9 +171,9 @@ class Session implements AutoCloseable {
     private BigDecimal balance;
     private final SessionState state;
 
-    private Session(final Set<LoanDescriptor> marketplace, final Investor proxy, final AuthenticatedZonky zonky) {
-        this.investor = proxy;
-        balance = Session.getAvailableBalance(proxy, zonky);
+    private Session(final Set<LoanDescriptor> marketplace, final Investor.Builder proxy, final AuthenticatedZonky zonky) {
+        this.investor = proxy.build(zonky);
+        balance = this.investor.isDryRun() ? Session.getDryRunBalance(zonky) : Session.getLiveBalance(zonky);
         Session.LOGGER.info("Starting account balance: {} CZK.", balance);
         state = new SessionState(marketplace);
         allInvestments = Session.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);

@@ -19,18 +19,16 @@ package com.github.triceo.robozonky.common.remote;
 import java.util.Collection;
 
 import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
+import com.github.triceo.robozonky.internal.api.Settings;
 
 final class PaginatedImpl<T> implements Paginated<T> {
-
-    // FIXME make property
-    static final int PAGE_SIZE = 20;
 
     private final PaginatedApi<T, ? extends EntityCollectionApi<T>> api;
     private final int pageSize;
     private PaginatedResult<T> itemsOnPage;
 
-    public PaginatedImpl(final PaginatedApi<T, ? extends EntityCollectionApi<T>> api) {
-        this(api, PaginatedImpl.PAGE_SIZE);
+    PaginatedImpl(final PaginatedApi<T, ? extends EntityCollectionApi<T>> api) {
+        this(api, Settings.INSTANCE.getDefaultApiPageSize()); // for testing purposes
     }
 
     public PaginatedImpl(final PaginatedApi<T, ? extends EntityCollectionApi<T>> api, final int pageSize) {

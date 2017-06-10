@@ -37,13 +37,13 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
 
     private final boolean isFaultTolerant;
     private final AuthenticationHandler authenticationHandler;
-    private final Investor.Builder proxyBuilder;
+    private final Investor.Builder investorBuilder;
 
     protected AbstractInvestmentMode(final AuthenticationHandler authenticationHandler,
                                      final Investor.Builder builder,
                                      final boolean isFaultTolerant) {
         this.authenticationHandler = authenticationHandler;
-        this.proxyBuilder = builder;
+        this.investorBuilder = builder;
         this.isFaultTolerant = isFaultTolerant;
     }
 
@@ -54,11 +54,11 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
 
     @Override
     public boolean isDryRun() {
-        return this.proxyBuilder.isDryRun();
+        return this.investorBuilder.isDryRun();
     }
 
-    protected Investor.Builder getProxyBuilder() {
-        return proxyBuilder;
+    protected Investor.Builder getInvestorBuilder() {
+        return investorBuilder;
     }
 
     protected AuthenticationHandler getAuthenticationHandler() {

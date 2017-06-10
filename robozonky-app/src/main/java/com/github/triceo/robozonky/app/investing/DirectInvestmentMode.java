@@ -49,11 +49,10 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
         final Function<AuthenticatedZonky, Collection<Investment>> op = (zonky) -> {
-            final Investor proxy = getProxyBuilder().build(zonky);
             final Loan l = zonky.getLoan(loanId);
             final LoanDescriptor d = new LoanDescriptor(l);
             return d.recommend(loanAmount, false)
-                    .map(r -> Session.invest(proxy, zonky, new DirectInvestmentCommand(r)))
+                    .map(r -> Session.invest(getInvestorBuilder(), zonky, new DirectInvestmentCommand(r)))
                     .orElse(Collections.emptyList());
         };
         return (marketplace) -> this.getAuthenticationHandler().execute(apiProvider, op);

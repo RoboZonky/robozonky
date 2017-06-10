@@ -72,7 +72,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        return new StrategyExecution(apiProvider, getProxyBuilder(), refreshableStrategy, getAuthenticationHandler(),
+        return new StrategyExecution(apiProvider, getInvestorBuilder(), refreshableStrategy, getAuthenticationHandler(),
                 maximumSleepPeriod);
     }
 
