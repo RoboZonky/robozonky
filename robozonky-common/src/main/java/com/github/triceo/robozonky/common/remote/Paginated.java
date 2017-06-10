@@ -20,14 +20,36 @@ import java.util.Collection;
 
 interface Paginated<T> {
 
+    /**
+     * Load another page in, executing a query to the remote API.
+     *
+     * @return True if the next page has been retrieved and contains results.
+     */
     boolean nextPage();
 
+    /**
+     *
+     * @return Items retrieved via the last {@link #nextPage()} call.
+     */
     Collection<T> getItemsOnPage();
 
+    /**
+     * Number of the current page.
+     *
+     * @return 0 is first page. -1 when {@link #nextPage()} not yet called.
+     */
     int getPageId();
 
+    /**
+     *
+     * @return Maximum expected amount of items in {@link #getItemsOnPage()}.
+     */
     int getExpectedPageSize();
 
+    /**
+     *
+     * @return Total number of items available in all pages.
+     */
     int getTotalItemCount();
 
 }

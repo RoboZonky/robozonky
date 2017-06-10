@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.common.remote;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
 import com.github.triceo.robozonky.internal.api.Settings;
@@ -45,7 +46,7 @@ final class PaginatedImpl<T> implements Paginated<T> {
 
     @Override
     public Collection<T> getItemsOnPage() {
-        return this.itemsOnPage.getPage();
+        return this.itemsOnPage == null ? Collections.emptyList() : this.itemsOnPage.getPage();
     }
 
     @Override
