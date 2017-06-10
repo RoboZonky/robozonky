@@ -24,7 +24,7 @@ import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
@@ -64,7 +64,7 @@ public class ZonkySettingsValidatorTest {
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any())).thenReturn(token);
         Mockito.when(provider.oauth()).thenReturn(new Api<>(oauth));
-        final AuthenticatedZonky zonky = Mockito.mock(AuthenticatedZonky.class);
+        final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(provider.authenticated(ArgumentMatchers.eq(token)))
                 .thenReturn(zonky);
         // execute SUT

@@ -28,7 +28,7 @@ import javax.xml.bind.JAXBException;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,7 +161,7 @@ public class AuthenticationHandler {
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
     public Collection<Investment> execute(final ApiProvider provider,
-                                          final Function<AuthenticatedZonky, Collection<Investment>> op) {
+                                          final Function<Zonky, Collection<Investment>> op) {
         final boolean hasOperation = op != null;
         if (needsPassword && !hasOperation) { // needs password, yet won't do anything = don't log in
             return Collections.emptyList();
@@ -171,7 +171,7 @@ public class AuthenticationHandler {
         if (!logoutRequired && !hasOperation) { // token created or refreshed, no operation to perform
             return Collections.emptyList();
         }
-        try (final AuthenticatedZonky zonky = provider.authenticated(token)) {
+        try (final Zonky zonky = provider.authenticated(token)) {
             try {
                 if (hasOperation) {
                     return op.apply(zonky);

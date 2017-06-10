@@ -34,7 +34,7 @@ import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -89,7 +89,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(Api.class));
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(AuthenticatedZonky.class));
+        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(Zonky.class));
         final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
         final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
         Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));

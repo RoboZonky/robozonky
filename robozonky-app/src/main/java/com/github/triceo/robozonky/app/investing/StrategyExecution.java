@@ -31,7 +31,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
 
     private Collection<Investment> invest(final InvestmentStrategy strategy,
                                           final Collection<LoanDescriptor> marketplace) {
-        final Function<AuthenticatedZonky, Collection<Investment>> op = (zonky) -> {
+        final Function<Zonky, Collection<Investment>> op = (zonky) -> {
             final InvestmentCommand c = new StrategyBasedInvestmentCommand(strategy, marketplace);
             return Session.invest(investor, zonky, c);
         };

@@ -16,8 +16,7 @@
 
 /**
  * Implements a set of wrappers around the standard Zonky APIs that provide features such as result pagination. All
- * standard APIs are encapsulated in {@link com.github.triceo.robozonky.common.remote.AuthenticatedZonky}, which may
- * be obtained through
+ * standard APIs are encapsulated in {@link com.github.triceo.robozonky.common.remote.Zonky}, obtained via
  * {@link com.github.triceo.robozonky.common.remote.ApiProvider#authenticated(com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken)},
  * following a successful authentication with {@link com.github.triceo.robozonky.common.remote.ApiProvider#oauth()}.
  */

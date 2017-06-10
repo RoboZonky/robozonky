@@ -26,7 +26,7 @@ import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class Investor {
             return isDryRun;
         }
 
-        public Investor build(final AuthenticatedZonky zonky) {
+        public Investor build(final Zonky zonky) {
             return this.getConfirmationRequestUsed()
                     .map(r -> new Investor(r, provider, zonky, isDryRun))
                     .orElse(new Investor(username, zonky, isDryRun));
@@ -91,12 +91,12 @@ public class Investor {
     }
 
     private final String username;
-    private final AuthenticatedZonky zonky;
+    private final Zonky zonky;
     private final boolean isDryRun;
     private final RequestId requestId;
     private final ConfirmationProvider provider;
 
-    private Investor(final RequestId requestId, final ConfirmationProvider provider, final AuthenticatedZonky zonky,
+    private Investor(final RequestId requestId, final ConfirmationProvider provider, final Zonky zonky,
                      final boolean isDryRun) {
         this.username = requestId.getUserId();
         this.zonky = zonky;
@@ -109,7 +109,7 @@ public class Investor {
         return isDryRun;
     }
 
-    private Investor(final String username, final AuthenticatedZonky zonky, final boolean isDryRun) {
+    private Investor(final String username, final Zonky zonky, final boolean isDryRun) {
         this.username = username;
         this.zonky = zonky;
         this.isDryRun = isDryRun;

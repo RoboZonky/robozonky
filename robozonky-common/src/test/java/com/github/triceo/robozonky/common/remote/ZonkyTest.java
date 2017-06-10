@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class AuthenticatedZonkyTest {
+public class ZonkyTest {
 
     private <T, S extends EntityCollectionApi<T>> PaginatedApi<T, S> mockApi() {
         final PaginatedApi<T, S> api = Mockito.mock(PaginatedApi.class);
@@ -57,13 +57,13 @@ public class AuthenticatedZonkyTest {
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new AuthenticatedZonky(null, la, pa, wa))
+            softly.assertThatThrownBy(() -> new Zonky(null, la, pa, wa))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new AuthenticatedZonky(ca, null, pa, wa))
+            softly.assertThatThrownBy(() -> new Zonky(ca, null, pa, wa))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new AuthenticatedZonky(ca, la, null, wa))
+            softly.assertThatThrownBy(() -> new Zonky(ca, la, null, wa))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new AuthenticatedZonky(ca, la, pa, null))
+            softly.assertThatThrownBy(() -> new Zonky(ca, la, pa, null))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
@@ -74,7 +74,7 @@ public class AuthenticatedZonkyTest {
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
-        final AuthenticatedZonky z = new AuthenticatedZonky(ca, la, pa, wa);
+        final Zonky z = new Zonky(ca, la, pa, wa);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(z.getAvailableLoans()).isEmpty();
             softly.assertThat(z.getBlockedAmounts()).isEmpty();
@@ -92,7 +92,7 @@ public class AuthenticatedZonkyTest {
         Mockito.when(la.execute((Function<LoanApi, Loan>) ArgumentMatchers.any())).thenReturn(new Loan(loanId, 200));
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
-        try (final AuthenticatedZonky z = new AuthenticatedZonky(ca, la, pa, wa)) {
+        try (final Zonky z = new Zonky(ca, la, pa, wa)) {
             final Loan l = z.getLoan(loanId);
             final Investment i = new Investment(l, 200);
             z.invest(i);
@@ -113,7 +113,7 @@ public class AuthenticatedZonkyTest {
         Mockito.when(wa.execute((Function<WalletApi, Wallet>) ArgumentMatchers.any()))
                 .thenReturn(Mockito.mock(Wallet.class));
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
-        try (final AuthenticatedZonky z = new AuthenticatedZonky(ca, la, pa, wa)) {
+        try (final Zonky z = new Zonky(ca, la, pa, wa)) {
             final Wallet w = z.getWallet();
             Assertions.assertThat(w).isNotNull();
         }
@@ -129,7 +129,7 @@ public class AuthenticatedZonkyTest {
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         Mockito.when(pa.execute((Function<PortfolioApi, Statistics>) ArgumentMatchers.any()))
                 .thenReturn(Mockito.mock(Statistics.class));
-        try (final AuthenticatedZonky z = new AuthenticatedZonky(ca, la, pa, wa)) {
+        try (final Zonky z = new Zonky(ca, la, pa, wa)) {
             final Statistics s = z.getStatistics();
             Assertions.assertThat(s).isNotNull();
         }

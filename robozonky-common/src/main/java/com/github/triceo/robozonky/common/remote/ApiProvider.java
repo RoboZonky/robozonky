@@ -110,8 +110,8 @@ public class ApiProvider implements AutoCloseable {
         return this.obtain(LoanApi.class, ApiProvider.ZONKY_URL, new RoboZonkyFilter());
     }
 
-    public AuthenticatedZonky authenticated(final ZonkyApiToken token) {
-        return new AuthenticatedZonky(this.control(token), this.marketplace(token), this.portfolio(token),
+    public Zonky authenticated(final ZonkyApiToken token) {
+        return new Zonky(this.control(token), this.marketplace(token), this.portfolio(token),
                 this.wallet(token));
     }
 

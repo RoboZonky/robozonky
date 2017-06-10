@@ -37,7 +37,7 @@ import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import org.junit.Before;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -83,7 +83,7 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
         return harmlessApi(AbstractInvestingTest.harmlessZonky(availableBalance));
     }
 
-    protected static ApiProvider harmlessApi(final AuthenticatedZonky zonky) {
+    protected static ApiProvider harmlessApi(final Zonky zonky) {
         final ApiProvider p = Mockito.spy(new ApiProvider());
         Mockito.doReturn(new Api<>(Mockito.mock(ZonkyOAuthApi.class))).when(p).oauth();
         Mockito.doReturn(new Api<>(Mockito.mock(LoanApi.class))).when(p).marketplace();
@@ -91,8 +91,8 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
         return p;
     }
 
-    protected static AuthenticatedZonky harmlessZonky(final int availableBalance) {
-        final AuthenticatedZonky zonky = Mockito.mock(AuthenticatedZonky.class);
+    protected static Zonky harmlessZonky(final int availableBalance) {
+        final Zonky zonky = Mockito.mock(Zonky.class);
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         Mockito.when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
         Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());

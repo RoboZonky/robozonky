@@ -32,16 +32,20 @@ import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.internal.api.Settings;
 
-public class AuthenticatedZonky implements AutoCloseable {
+/**
+ * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
+ * user. Consider {@link #logout()} when done, followed by {@link #close()}.
+ */
+public class Zonky implements AutoCloseable {
 
     private final Api<ControlApi> controlApi;
     private final PaginatedApi<Loan, LoanApi> loanApi;
     private final PaginatedApi<Investment, PortfolioApi> portfolioApi;
     private final PaginatedApi<BlockedAmount, WalletApi> walletApi;
 
-    AuthenticatedZonky(final Api<ControlApi> control, final PaginatedApi<Loan, LoanApi> loans,
-                       final PaginatedApi<Investment, PortfolioApi> portfolio,
-                       final PaginatedApi<BlockedAmount, WalletApi> wallet) {
+    Zonky(final Api<ControlApi> control, final PaginatedApi<Loan, LoanApi> loans,
+          final PaginatedApi<Investment, PortfolioApi> portfolio,
+          final PaginatedApi<BlockedAmount, WalletApi> wallet) {
         if (control == null || loans == null || portfolio == null || wallet == null) {
             throw new IllegalArgumentException("No API may be null.");
         }
@@ -62,7 +66,7 @@ public class AuthenticatedZonky implements AutoCloseable {
     }
 
     private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api) {
-        return AuthenticatedZonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize());
+        return Zonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize());
     }
 
     private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
@@ -72,20 +76,35 @@ public class AuthenticatedZonky implements AutoCloseable {
         return StreamSupport.stream(s, false);
     }
 
+    /**
+     * Retrieve blocked amounts from user's wallet via {@link WalletApi}.
+     *
+     * @return All items from the remote API, lazy-loaded.
+     */
     public Stream<BlockedAmount> getBlockedAmounts() {
-        return AuthenticatedZonky.getStream(walletApi);
+        return Zonky.getStream(walletApi);
     }
 
     public Statistics getStatistics() {
         return portfolioApi.execute(PortfolioApi::statistics);
     }
 
+    /**
+     * Retrieve investments from user's portfolio via {@link PortfolioApi}.
+     *
+     * @return All items from the remote API, lazy-loaded. Does not include investments represented by blocked amounts.
+     */
     public Stream<Investment> getInvestments() {
-        return AuthenticatedZonky.getStream(portfolioApi);
+        return Zonky.getStream(portfolioApi);
     }
 
+    /**
+     * Retrieve loans from marketplace via {@link LoanApi}.
+     *
+     * @return All items from the remote API, lazy-loaded.
+     */
     public Stream<Loan> getAvailableLoans() {
-        return AuthenticatedZonky.getStream(loanApi);
+        return Zonky.getStream(loanApi);
     }
 
     public Loan getLoan(final int id) {

@@ -24,7 +24,7 @@ import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -38,7 +38,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
     public void standard() {
         final Loan l = new Loan(1, 1000);
         final Wallet w = new Wallet(1, 2, BigDecimal.TEN, BigDecimal.ZERO);
-        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getWallet()).thenReturn(w);
         Mockito.when(z.getLoan(ArgumentMatchers.anyInt())).thenReturn(l);
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.of(l));
@@ -62,7 +62,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
     public void failingDuringInvest() {
         final Loan l = new Loan(1, 1000);
         final Wallet w = new Wallet(1, 2, BigDecimal.TEN, BigDecimal.ZERO);
-        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getWallet()).thenReturn(w);
         Mockito.doThrow(IllegalStateException.class).when(z).getLoan(ArgumentMatchers.anyInt());
         final ApiProvider p = AbstractInvestingTest.harmlessApi(z);

@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class BlockedAmountsTest {
 
     @Test
     public void noBlockedAmounts() {
-        final AuthenticatedZonky zonky = Mockito.mock(AuthenticatedZonky.class);
+        final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
         final Collection<Investment> result = Session.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         Assertions.assertThat(result).isEmpty();
@@ -55,7 +55,7 @@ public class BlockedAmountsTest {
                 new BlockedAmount(loanId1, loan1amount2) // repeat loan we've already seen, simulating re-invest
         );
         // mock endpoints
-        final AuthenticatedZonky zonky = Mockito.mock(AuthenticatedZonky.class);
+        final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getBlockedAmounts()).thenReturn(blockedAmounts);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId1))).thenReturn(loan1);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId2))).thenReturn(loan2);

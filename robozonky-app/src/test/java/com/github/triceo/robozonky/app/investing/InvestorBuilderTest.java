@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -28,7 +28,7 @@ public class InvestorBuilderTest {
         final String username = "user";
         final Investor.Builder b = new Investor.Builder();
         b.asUser(username).asDryRun();
-        final Investor p = b.build(Mockito.mock(AuthenticatedZonky.class));
+        final Investor p = b.build(Mockito.mock(Zonky.class));
         SoftAssertions.assertSoftly(softly -> {
           softly.assertThat(p.getUsername()).isEqualTo(username);
           softly.assertThat(p.isDryRun()).isTrue();

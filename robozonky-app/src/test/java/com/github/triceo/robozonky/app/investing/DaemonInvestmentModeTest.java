@@ -38,7 +38,7 @@ import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -122,7 +122,7 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final InvestmentStrategy ms = Mockito.mock(InvestmentStrategy.class);
         Mockito.when(ms.recommend(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
                 .thenReturn(Collections.singletonList(r));
-        final AuthenticatedZonky z = Mockito.mock(AuthenticatedZonky.class);
+        final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.empty());
         final ApiProvider p = AbstractInvestingTest.harmlessApi(z);

@@ -36,7 +36,7 @@ import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -53,7 +53,7 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void constructor() {
-        final AuthenticatedZonky zonky = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky zonky = AbstractInvestingTest.harmlessZonky(10_000);
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         try (final Session it = Session.create(new Investor.Builder(), zonky, lds)) {
@@ -75,7 +75,7 @@ public class SessionTest extends AbstractInvestingTest {
         final SessionState sst = new SessionState(lds);
         sst.discard(ld);
         // setup APIs
-        final AuthenticatedZonky zonky = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky zonky = AbstractInvestingTest.harmlessZonky(10_000);
         // test that the loan is not available
         try (final Session it = Session.create(new Investor.Builder(), zonky, lds)) {
             SoftAssertions.assertSoftly(softly -> {
@@ -93,7 +93,7 @@ public class SessionTest extends AbstractInvestingTest {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(loanId);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
         // setup APIs
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final BlockedAmount ba = new BlockedAmount(loanId, Defaults.MINIMUM_INVESTMENT_IN_CZK);
         Mockito.when(z.getBlockedAmounts()).thenReturn(Stream.of(ba));
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.getLoan());
@@ -110,7 +110,7 @@ public class SessionTest extends AbstractInvestingTest {
     @Test
     public void makeInvestment() {
         // setup APIs
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         // run test
         final int amount = 200;
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(Duration.ZERO);
@@ -135,20 +135,20 @@ public class SessionTest extends AbstractInvestingTest {
     @Test
     public void getBalancePropertyIgnoredWhenNotDryRun() {
         System.setProperty("robozonky.default.dry_run_balance", "200");
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(0);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
         Assertions.assertThat(Session.getLiveBalance(z)).isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
     public void getRemoteBalanceInDryRun() {
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(0);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
         Assertions.assertThat(Session.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
     public void underBalance() {
         // setup APIs
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(0);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
         // run test
         try (final Session it = Session.create(new Investor.Builder(), z, Collections.emptyList())) {
             final Optional<Recommendation> recommendation =
@@ -163,7 +163,7 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void underAmount() {
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(0);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
         final Recommendation recommendation =
                 AbstractInvestingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
         try (final Session t = Session.create(new Investor.Builder(), z,
@@ -178,7 +178,7 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void investmentFailed() {
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = Mockito.mock(Investor.class);
@@ -192,7 +192,7 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void investmentRejected() {
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(200).get();
         final Investor p = Mockito.mock(Investor.class);
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
@@ -217,7 +217,7 @@ public class SessionTest extends AbstractInvestingTest {
     public void investmentDelegated() {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Recommendation r = ld.recommend(200).get();
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final Investor p = Mockito.mock(Investor.class);
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
@@ -243,7 +243,7 @@ public class SessionTest extends AbstractInvestingTest {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Recommendation r = ld.recommend(200, true).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final Investor p = Mockito.mock(Investor.class);
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
@@ -269,7 +269,7 @@ public class SessionTest extends AbstractInvestingTest {
         final Recommendation r = ld.recommend(200).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         // setup APIs
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final Investor p = Mockito.mock(Investor.class);
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
@@ -294,7 +294,7 @@ public class SessionTest extends AbstractInvestingTest {
         final int oldBalance = 10_000;
         final int amountToInvest = 200;
         final Recommendation r = AbstractInvestingTest.mockLoanDescriptor().recommend(amountToInvest).get();
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(oldBalance);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(oldBalance);
         final Investor p = Mockito.mock(Investor.class);
         Mockito.doReturn(new ZonkyResponse(amountToInvest))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
@@ -323,7 +323,7 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void exclusivity() {
-        final AuthenticatedZonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final Investor.Builder b = new Investor.Builder();
         try (final Session t = Session.create(b, z, Collections.emptyList())) {
             Assertions.assertThat(t).isNotNull();

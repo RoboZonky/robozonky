@@ -28,7 +28,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
 
@@ -48,7 +48,7 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
-        final Function<AuthenticatedZonky, Collection<Investment>> op = (zonky) -> {
+        final Function<Zonky, Collection<Investment>> op = (zonky) -> {
             final Loan l = zonky.getLoan(loanId);
             final LoanDescriptor d = new LoanDescriptor(l);
             return d.recommend(loanAmount, false)

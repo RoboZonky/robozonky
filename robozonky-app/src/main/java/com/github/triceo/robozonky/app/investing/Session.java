@@ -49,7 +49,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.app.Events;
-import com.github.triceo.robozonky.common.remote.AuthenticatedZonky;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.internal.api.Retriever;
 import com.github.triceo.robozonky.internal.api.Settings;
@@ -82,7 +82,7 @@ class Session implements AutoCloseable {
      * @throws IllegalStateException When another {@link Session} instance was not {@link #close()}d.
      * @return
      */
-    public synchronized static Session create(final Investor.Builder investor, final AuthenticatedZonky api,
+    public synchronized static Session create(final Investor.Builder investor, final Zonky api,
                                               final Collection<LoanDescriptor> marketplace) {
         if (Session.INSTANCE.get() != null) {
             throw new IllegalStateException("Investment session already exists.");
@@ -92,16 +92,16 @@ class Session implements AutoCloseable {
         return s;
     }
 
-    static BigDecimal getLiveBalance(final AuthenticatedZonky api) {
+    static BigDecimal getLiveBalance(final Zonky api) {
         return api.getWallet().getAvailableBalance();
     }
 
-    static BigDecimal getDryRunBalance(final AuthenticatedZonky api) {
+    static BigDecimal getDryRunBalance(final Zonky api) {
         final int balance = Settings.INSTANCE.getDefaultDryRunBalance();
         return (balance > -1) ? BigDecimal.valueOf(balance) : Session.getLiveBalance(api);
     }
 
-    static Collection<Investment> invest(final Investor.Builder investor, final AuthenticatedZonky api,
+    static Collection<Investment> invest(final Investor.Builder investor, final Zonky api,
                                          final InvestmentCommand command) {
         try (final Session session = Session.create(investor, api, command.getLoans())) {
             final int balance = session.getPortfolioOverview().getCzkAvailable();
@@ -137,7 +137,7 @@ class Session implements AutoCloseable {
      * @param api Authenticated Zonky API to read data from.
      * @return Every blocked amount represents a future investment. This method returns such investments.
      */
-    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final AuthenticatedZonky api) {
+    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final Zonky api) {
         // first group all blocked amounts by the loan ID and sum them
         final Map<Integer, Integer> amountsBlockedByLoans =
                 api.getBlockedAmounts()
@@ -159,7 +159,7 @@ class Session implements AutoCloseable {
      * @param api API to execute the operation.
      * @return Either what the API returns, or an empty object.
      */
-    private static Statistics retrieveStatistics(final AuthenticatedZonky api) {
+    private static Statistics retrieveStatistics(final Zonky api) {
         final Statistics returned = api.getStatistics();
         return returned == null ? new Statistics() : returned;
     }
@@ -171,7 +171,7 @@ class Session implements AutoCloseable {
     private BigDecimal balance;
     private final SessionState state;
 
-    private Session(final Set<LoanDescriptor> marketplace, final Investor.Builder proxy, final AuthenticatedZonky zonky) {
+    private Session(final Set<LoanDescriptor> marketplace, final Investor.Builder proxy, final Zonky zonky) {
         this.investor = proxy.build(zonky);
         balance = this.investor.isDryRun() ? Session.getDryRunBalance(zonky) : Session.getLiveBalance(zonky);
         Session.LOGGER.info("Starting account balance: {} CZK.", balance);
