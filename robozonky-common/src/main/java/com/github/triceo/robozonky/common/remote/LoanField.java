@@ -16,21 +16,35 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
 
-// FIXME will fail when Zonky API is down
-public class PaginatedApiTest {
+public enum LoanField implements Field<Loan> {
 
-    @Test
-    public void redirectAndLiveQuery() {
-        final RoboZonkyFilter f = new RoboZonkyFilter();
-        final PaginatedApi<Loan, LoanApi> pa = new PaginatedApi<>(LoanApi.class, "http://api.zonky.cz", null);
-        final PaginatedResult<Loan> loans = pa.execute(LoanApi::items, Sort.unspecified(), 0, 10, f);
-        Assertions.assertThat(loans.getCurrentPageId()).isEqualTo(0);
-        Assertions.assertThat(loans.getTotalResultCount()).isGreaterThanOrEqualTo(0);
+    ID("id"),
+    TERM_IN_MONTHS("termInMonths"),
+    INVESTMENTS_COUNT("investmentsCount"),
+    QUESTIONS_COUNT("questionsCount"),
+    USER_ID ("userId"), AMOUNT("amount"),
+    REMAINING_INVESTMENT("remainingInvestment"),
+    NAME("name"),
+    NICK_NAME("nickName"),
+    INTEREST_RATE("interestRate"),
+    DATE_PUBLISHED("datePublished"),
+    DEADLINE("deadline"),
+    RATING("rating"),
+    INVESTMENT_RATE("investmentRate"),
+    MAIN_INCOME_TYPE("mainIncomeType"),
+    REGION("region"),
+    PURPOSE("purpose");
+
+    private final String id;
+
+    LoanField(final String id) {
+        this.id = id;
+    }
+
+    public String id() {
+        return this.id;
     }
 
 }

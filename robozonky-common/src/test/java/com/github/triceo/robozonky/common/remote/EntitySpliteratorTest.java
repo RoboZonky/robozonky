@@ -65,11 +65,12 @@ public class EntitySpliteratorTest {
         final Loan loan2 = new Loan(2, 300);
         final Loan loan3 = new Loan(3, 400);
         final PaginatedApi<Loan, LoanApi> api = Mockito.mock(PaginatedApi.class);
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.eq(0), ArgumentMatchers.eq(pageSize)))
+        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(0),
+                ArgumentMatchers.eq(pageSize)))
                 .thenReturn(EntitySpliteratorTest.getResult(Arrays.asList(loan1, loan2), 0, totalResultCount));
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.eq(1), ArgumentMatchers.eq(pageSize)))
+        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(1), ArgumentMatchers.eq(pageSize)))
                 .thenReturn(EntitySpliteratorTest.getResult(Collections.singleton(loan3), 1, totalResultCount));
-        final Paginated<Loan> p = new PaginatedImpl<>(api,2);
+        final Paginated<Loan> p = new PaginatedImpl<>(api, Sort.unspecified(),2);
         final EntitySpliterator<Loan> e = new EntitySpliterator<>(p);
         Assertions.assertThat(e.getExactSizeIfKnown()).isEqualTo(totalResultCount);
         final Stream<Loan> s = StreamSupport.stream(e, false);
