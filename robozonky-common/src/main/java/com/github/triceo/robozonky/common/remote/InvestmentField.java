@@ -16,22 +16,17 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 
-public enum LoanField implements Field<Loan> {
+public enum InvestmentField implements Field<Investment> {
 
-    COVERED("covered"),
-    DATE_PUBLISHED("datePublished"),
-    INTEREST_RATE("interestRate"),
-    PURPOSE("purpose"),
-    RATING("rating"),
-    REMAINING_INVESTMENT("remainingInvestment"),
-    TERM_IN_MONTHS("termInMonths"),
-    TOPPED("topped");
+    ID("id"),
+    TIME_CREATED("timeCreated"),
+    LOAN_STATUS("loan.status");
 
     private final String id;
 
-    LoanField(final String id) {
+    InvestmentField(final String id) {
         this.id = id;
     }
 

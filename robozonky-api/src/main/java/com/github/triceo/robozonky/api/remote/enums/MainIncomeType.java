@@ -34,7 +34,8 @@ public enum MainIncomeType {
     STUDENT, // "student"
     UNEMPLOYED, // "bez zaměstnání"
     LIBERAL_PROFESSION, // "svobodné povolání"
-    OTHERS_MAIN; // "ostatní"
+    OTHERS_MAIN, // "ostatní"
+    NEXT_WORK; // there is one loan in the API with this value; the value is not documented and has no translation
 
     static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
 

@@ -92,16 +92,6 @@ public class Zonky implements AutoCloseable {
         return Zonky.getStream(walletApi);
     }
 
-    /**
-     * Retrieve blocked amounts from user's wallet via {@link WalletApi}, in a given order.
-     *
-     * @param ordering Ordering in which the results should be returned.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<BlockedAmount> getBlockedAmounts(final Sort<BlockedAmount> ordering) {
-        return Zonky.getStream(walletApi, ordering);
-    }
-
     public Statistics getStatistics() {
         return portfolioApi.execute(PortfolioApi::statistics);
     }
