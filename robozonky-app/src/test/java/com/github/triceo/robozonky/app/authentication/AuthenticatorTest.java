@@ -23,8 +23,8 @@ import java.util.function.Function;
 import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.OAuth;
 import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -86,7 +86,7 @@ public class AuthenticatorTest {
         final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy();
         final ZonkyOAuthApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyOAuthApi.class);
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.when(provider.oauth()).thenReturn(new Api<>(apiMock));
+        Mockito.when(provider.oauth()).thenReturn(Mockito.mock(OAuth.class));
         final Function<ApiProvider, ZonkyApiToken> a = Authenticator.withCredentials(AuthenticatorTest.DUMMY_USER,
                 AuthenticatorTest.DUMMY_PWD.toCharArray());
         final ZonkyApiToken auth = a.apply(provider);
@@ -102,7 +102,7 @@ public class AuthenticatorTest {
         final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy();
         final ZonkyOAuthApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyOAuthApi.class);
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.when(provider.oauth()).thenReturn(new Api<>(apiMock));
+        Mockito.when(provider.oauth()).thenReturn(Mockito.mock(OAuth.class));
         final Function<ApiProvider, ZonkyApiToken> a =
                 Authenticator.withAccessToken(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.TOKEN, Duration.ZERO);
         final ZonkyApiToken auth = a.apply(provider);
@@ -118,7 +118,7 @@ public class AuthenticatorTest {
         final ResteasyClientBuilder mock = AuthenticatorTest.mockResteasy();
         final ZonkyOAuthApi apiMock = mock.build().target(AuthenticatorTest.DUMMY_URL).proxy(ZonkyOAuthApi.class);
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.when(provider.oauth()).thenReturn(new Api<>(apiMock));
+        Mockito.when(provider.oauth()).thenReturn(Mockito.mock(OAuth.class));
         final ZonkyApiToken result =
                 Authenticator.withAccessToken(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.TOKEN,
                         Duration.ofSeconds(AuthenticatorTest.TOKEN.getExpiresIn())).apply(provider);

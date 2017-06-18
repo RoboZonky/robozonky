@@ -96,8 +96,8 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public Api<ZonkyOAuthApi> oauth() {
-        return this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter());
+    public OAuth oauth() {
+        return new OAuth(this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter()));
     }
 
     /**

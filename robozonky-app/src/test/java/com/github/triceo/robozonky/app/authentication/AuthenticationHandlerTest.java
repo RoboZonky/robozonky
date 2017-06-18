@@ -33,6 +33,7 @@ import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.OAuth;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
@@ -124,9 +125,8 @@ public class AuthenticationHandlerTest {
     public void simpleTokenBasedWithExistingTokenNoop() throws JAXBException {
         final SecretProvider secretProvider = AuthenticationHandlerTest.mockExistingProvider(OffsetDateTime.now());
         final AuthenticationHandler h = AuthenticationHandler.tokenBased(secretProvider, Duration.ofSeconds(60));
-        final ZonkyOAuthApi zonkyOauth = Mockito.mock(ZonkyOAuthApi.class);
         final ApiProvider apiProvider = Mockito.mock(ApiProvider.class);
-        Mockito.when(apiProvider.oauth()).thenReturn(new Api<>(zonkyOauth));
+        Mockito.when(apiProvider.oauth()).thenReturn(Mockito.mock(OAuth.class));
         Assertions.assertThat(h.execute(apiProvider, null)).isEmpty();
     }
 
