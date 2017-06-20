@@ -100,14 +100,22 @@ public class ApiProvider implements AutoCloseable {
         return new OAuth(this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter()));
     }
 
+    protected <T> Collection<T> marketplace(final Class<? extends EntityCollectionApi<T>> target, final String url) {
+        try (final Api<? extends EntityCollectionApi<T>> api = this.obtain(target, url, new RoboZonkyFilter())) {
+            return api.execute(a -> {
+                return a.items();
+            });
+        }
+    }
+
     /**
-     * Retrieve user-specific Zonky API which does not require authentication.
+     * Retrieve available loans from Zonky marketplace cache, which requires no authentication.
      *
-     * @return New API instance.
+     * @return Loans existing in the marketplace at the time this method was called.
      * @throws IllegalStateException If {@link #close()} already called.
      */
-    public Api<LoanApi> marketplace() {
-        return this.obtain(LoanApi.class, ApiProvider.ZONKY_URL, new RoboZonkyFilter());
+    public Collection<Loan> marketplace() {
+        return this.marketplace(LoanApi.class, ApiProvider.ZONKY_URL);
     }
 
     public Zonky authenticated(final ZonkyApiToken token) {

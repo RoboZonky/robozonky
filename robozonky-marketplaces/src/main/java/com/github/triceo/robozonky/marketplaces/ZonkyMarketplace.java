@@ -16,14 +16,13 @@
 
 package com.github.triceo.robozonky.marketplaces;
 
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 class ZonkyMarketplace extends AbstractMarketplace {
 
     @Override
-    protected Api<LoanApi> newApi(final MarketplaceApiProvider apis) {
-        return apis.marketplace();
+    protected ApiProvider api() {
+        return new ApiProvider();
     }
 
 }

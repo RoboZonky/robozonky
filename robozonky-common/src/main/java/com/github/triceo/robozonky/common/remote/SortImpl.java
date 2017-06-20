@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SortImpl<S> implements Sort<S> {
+class SortImpl<S> implements Sort<S> {
 
     private final Map<Field<S>, Boolean> ordering = new LinkedHashMap<>(1);
 

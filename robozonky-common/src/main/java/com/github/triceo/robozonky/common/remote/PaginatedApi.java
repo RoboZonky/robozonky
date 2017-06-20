@@ -23,7 +23,7 @@ import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-public class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
+class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
 
     private final ZonkyApiToken token;
     private final Class<T> api;

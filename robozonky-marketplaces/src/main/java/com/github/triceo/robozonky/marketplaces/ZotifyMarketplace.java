@@ -16,15 +16,13 @@
 
 package com.github.triceo.robozonky.marketplaces;
 
-import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.Api;
+import com.github.triceo.robozonky.common.remote.ApiProvider;
 
 class ZotifyMarketplace extends AbstractMarketplace {
 
     @Override
-    protected Api<? extends EntityCollectionApi<Loan>> newApi(final MarketplaceApiProvider apis) {
-        return apis.zotify();
+    protected ApiProvider api() {
+        return new MarketplaceApiProvider();
     }
 
 }

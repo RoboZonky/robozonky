@@ -16,29 +16,28 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
-public class ApiProviderTest {
+public class FieldTest {
 
-    @Test
-    public void unathenticatedApis() {
-        try (final ApiProvider provider = new ApiProvider()) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(provider.marketplace()).isNotNull();
-                Assertions.assertThat(provider.oauth()).isNotNull();
-            });
-        }
+    private <T> void unique(final Field<T>... values) {
+        final Set<String> uniqueValues = Stream.of(values).map(Field::id).collect(Collectors.toSet());
+        Assertions.assertThat(uniqueValues).hasSize(values.length);
     }
 
     @Test
-    public void athenticatedApis() {
-        final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
-        try (final ApiProvider provider = new ApiProvider()) {
-            Assertions.assertThat(provider.authenticated(token)).isNotNull();
-        }
+    public void uniqueInvestmentFields() {
+        unique(InvestmentField.values());
+    }
+
+    @Test
+    public void uniqueLoanFields() {
+        unique(LoanField.values());
     }
 
 }
