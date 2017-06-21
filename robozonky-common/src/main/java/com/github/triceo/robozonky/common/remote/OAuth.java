@@ -16,8 +16,6 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import java.util.Arrays;
-
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 
@@ -31,13 +29,13 @@ public class OAuth implements AutoCloseable {
 
     public ZonkyApiToken login(final String username, final char[] password) {
         return api.execute(a -> {
-            return a.login(username, Arrays.toString(password), "password", "SCOPE_APP_WEB");
+            return a.login(username, String.valueOf(password), "password", "SCOPE_APP_WEB");
         });
     }
 
     public ZonkyApiToken refresh(final ZonkyApiToken token) {
         return api.execute(a -> {
-            return a.refresh(Arrays.toString(token.getRefreshToken()), token.getType(), token.getScope());
+            return a.refresh(String.valueOf(token.getRefreshToken()), token.getType(), token.getScope());
         });
     }
 
