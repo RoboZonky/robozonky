@@ -25,20 +25,18 @@ public class ApiProviderTest {
 
     @Test
     public void unathenticatedApis() {
-        try (final ApiProvider provider = new ApiProvider()) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(provider.marketplace()).isNotNull();
-                Assertions.assertThat(provider.oauth()).isNotNull();
-            });
-        }
+        final ApiProvider provider = new ApiProvider();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(provider.marketplace()).isNotNull();
+            Assertions.assertThat(provider.oauth()).isNotNull();
+        });
     }
 
     @Test
     public void athenticatedApis() {
         final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
-        try (final ApiProvider provider = new ApiProvider()) {
-            Assertions.assertThat(provider.authenticated(token)).isNotNull();
-        }
+        final ApiProvider provider = new ApiProvider();
+        Assertions.assertThat(provider.authenticated(token)).isNotNull();
     }
 
 }

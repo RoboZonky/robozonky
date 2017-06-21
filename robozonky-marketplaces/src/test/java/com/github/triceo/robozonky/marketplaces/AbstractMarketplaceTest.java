@@ -24,7 +24,6 @@ import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,7 +38,6 @@ public class AbstractMarketplaceTest {
         return Arrays.asList(new Object[] {ZotifyMarketplace.class}, new Object[] {ZonkyMarketplace.class});
     }
 
-    private static final MarketplaceApiProvider API_PROVIDER = new MarketplaceApiProvider();
     @Parameterized.Parameter
     public Class<? extends Marketplace> marketClass;
 
@@ -57,11 +55,5 @@ public class AbstractMarketplaceTest {
                     .accept(ArgumentMatchers.argThat(argument -> argument != null && !argument.isEmpty()));
         }
     }
-
-    @AfterClass
-    public static void close() {
-        AbstractMarketplaceTest.API_PROVIDER.close();
-    }
-
 
 }

@@ -69,12 +69,7 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
 
     @Override
     public Optional<Collection<Investment>> get() {
-        try (final ApiProvider api = new ApiProvider()) {
-            LOGGER.trace("Executing.");
-            return this.execute(api);
-        } finally {
-            LOGGER.trace("Finished.");
-        }
+        return this.execute(new ApiProvider());
     }
 
     protected boolean wasSuddenDeath() {

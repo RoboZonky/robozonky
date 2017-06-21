@@ -43,7 +43,8 @@ public class Checker {
             Comparator.comparing(Loan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
 
     static Optional<Loan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
-        try (final ApiProvider p = apiProviderSupplier.get()) {
+        try {
+            final ApiProvider p = apiProviderSupplier.get();
             final Collection<Loan> loans = p.marketplace();
             /*
              * find a loan that is likely to stay on the marketplace for so long that the notification will

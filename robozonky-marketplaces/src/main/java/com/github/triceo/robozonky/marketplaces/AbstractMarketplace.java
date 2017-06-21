@@ -48,8 +48,4 @@ abstract class AbstractMarketplace implements Marketplace {
         loanListeners.forEach(l -> l.accept(loans));
     }
 
-    @Override
-    public void close() {
-        apis.close();
-    }
 }

@@ -16,12 +16,7 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
-import javax.xml.ws.WebServiceClient;
 
 import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
@@ -38,19 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides instances of APIs for the rest of RoboZonky to use. When no longer needed, the ApiProvider needs to be
- * {@link #close()}ed in order to not leak {@link WebServiceClient}s that weren't already closed by
- * {@link Api#close()}.
+ * Provides instances of APIs for the rest of RoboZonky to use.
  */
-public class ApiProvider implements AutoCloseable {
+public class ApiProvider {
 
-    public static final String ZONKY_URL = "https://api.zonky.cz";
-
-    /**
-     * Use weak references so that the clients aren't kept around forever, with all the entities they carry.
-     */
-    private final Collection<WeakReference<AutoCloseable>> clients = new ArrayList<>();
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private static final String ZONKY_URL = "https://api.zonky.cz";
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     /**
@@ -63,14 +50,9 @@ public class ApiProvider implements AutoCloseable {
      * @return RESTEasy client proxy for the API, ready to be called.
      */
     protected <T> Api<T> obtain(final Class<T> api, final String url, final RoboZonkyFilter filter) {
-        if (this.isClosed.get()) {
-            throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
-        }
         final ResteasyClient client = ProxyFactory.newResteasyClient(filter);
         final T proxy = ProxyFactory.newProxy(client, api, url);
-        final Api<T> wrapper = new Api<>(proxy, client);
-        this.clients.add(new WeakReference<>(wrapper));
-        return wrapper;
+        return new Api<>(proxy, client);
     }
 
     /**
@@ -84,9 +66,6 @@ public class ApiProvider implements AutoCloseable {
     protected <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
                                                                                        final String url,
                                                                                        final ZonkyApiToken token) {
-        if (this.isClosed.get()) {
-            throw new IllegalStateException("Attempting to use an already destroyed ApiProvider.");
-        }
         return new PaginatedApi<>(api, url, token);
     }
 
@@ -94,7 +73,6 @@ public class ApiProvider implements AutoCloseable {
      * Retrieve Zonky's OAuth endpoint.
      *
      * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
      */
     public OAuth oauth() {
         return new OAuth(this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter()));
@@ -112,7 +90,6 @@ public class ApiProvider implements AutoCloseable {
      * Retrieve available loans from Zonky marketplace cache, which requires no authentication.
      *
      * @return Loans existing in the marketplace at the time this method was called.
-     * @throws IllegalStateException If {@link #close()} already called.
      */
     public Collection<Loan> marketplace() {
         return this.marketplace(LoanApi.class, ApiProvider.ZONKY_URL);
@@ -128,7 +105,6 @@ public class ApiProvider implements AutoCloseable {
      *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
      */
     private PaginatedApi<Loan, LoanApi> marketplace(final ZonkyApiToken token) {
         return this.obtainPaginated(LoanApi.class, ApiProvider.ZONKY_URL, token);
@@ -139,7 +115,6 @@ public class ApiProvider implements AutoCloseable {
      *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
      */
     private PaginatedApi<BlockedAmount, WalletApi> wallet(final ZonkyApiToken token) {
         return this.obtainPaginated(WalletApi.class, ApiProvider.ZONKY_URL, token);
@@ -150,7 +125,6 @@ public class ApiProvider implements AutoCloseable {
      *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
      */
     private PaginatedApi<Investment, PortfolioApi> portfolio(final ZonkyApiToken token) {
         return this.obtainPaginated(PortfolioApi.class, ApiProvider.ZONKY_URL, token);
@@ -161,27 +135,9 @@ public class ApiProvider implements AutoCloseable {
      *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
      */
     private Api<ControlApi> control(final ZonkyApiToken token) {
         return this.obtain(ControlApi.class, ApiProvider.ZONKY_URL, new AuthenticatedFilter(token));
-    }
-
-    @Override
-    public synchronized void close() {
-        if (this.isClosed.get()) {
-            return;
-        }
-        this.clients.stream()
-                .flatMap(w -> w.get() == null ? Stream.empty() : Stream.of(w.get()))
-                .forEach(c -> {
-                    try {
-                        c.close();
-                    } catch (final Exception ex) {
-                        LOGGER.trace("Failed closing client: {}.", c, ex);
-                    }
-                });
-        this.isClosed.set(true);
     }
 
 }

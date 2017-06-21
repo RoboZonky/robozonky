@@ -54,14 +54,13 @@ public class ZonkySettingsValidator implements DataValidator {
     public DataValidator.Status validateData(final InstallData installData) {
         final String username = Variables.ZONKY_USERNAME.getValue(installData);
         final String password = Variables.ZONKY_PASSWORD.getValue(installData);
-        try (final ApiProvider p = apiSupplier.get()) { // test login with the credentials
-            try (final OAuth oauth = p.oauth()) {
-                ZonkySettingsValidator.LOGGER.info("Logging in.");
-                final ZonkyApiToken token = oauth.login(username, password.toCharArray());
-                ZonkySettingsValidator.LOGGER.info("Logging out.");
-                try (final Zonky z = p.authenticated(token)) {
-                    z.logout();
-                }
+        final ApiProvider p = apiSupplier.get();
+        try (final OAuth oauth = p.oauth()) {
+            ZonkySettingsValidator.LOGGER.info("Logging in.");
+            final ZonkyApiToken token = oauth.login(username, password.toCharArray());
+            ZonkySettingsValidator.LOGGER.info("Logging out.");
+            try (final Zonky z = p.authenticated(token)) {
+                z.logout();
             }
             return DataValidator.Status.OK;
         } catch (final Exception t) {
