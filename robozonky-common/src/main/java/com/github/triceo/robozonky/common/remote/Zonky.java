@@ -66,12 +66,19 @@ public class Zonky implements AutoCloseable {
     }
 
     private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api) {
-        return Zonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize());
+        return Zonky.getStream(api, Sort.unspecified());
     }
 
     private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
-                                                                             final int pageSize) {
-        final Paginated<T> p = new PaginatedImpl<>(api, pageSize);
+                                                                             final Sort<T> ordering) {
+        return Zonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize(), ordering);
+    }
+
+
+    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
+                                                                             final int pageSize,
+                                                                             final Sort<T> ordering) {
+        final Paginated<T> p = new PaginatedImpl<>(api, ordering, pageSize);
         final Spliterator<T> s = new EntitySpliterator<>(p);
         return StreamSupport.stream(s, false);
     }
@@ -99,6 +106,22 @@ public class Zonky implements AutoCloseable {
     }
 
     /**
+     * Retrieve investments from user's portfolio via {@link PortfolioApi}, in a given order.
+     *
+     * @param ordering Ordering in which the results should be returned.
+     * @return All items from the remote API, lazy-loaded. Does not include investments represented by blocked amounts.
+     */
+    public Stream<Investment> getInvestments(final Sort<Investment> ordering) {
+        return Zonky.getStream(portfolioApi, ordering);
+    }
+
+    public Loan getLoan(final int id) {
+        return loanApi.execute(api -> {
+            return api.item(id);
+        });
+    }
+
+    /**
      * Retrieve loans from marketplace via {@link LoanApi}.
      *
      * @return All items from the remote API, lazy-loaded.
@@ -107,10 +130,14 @@ public class Zonky implements AutoCloseable {
         return Zonky.getStream(loanApi);
     }
 
-    public Loan getLoan(final int id) {
-        return loanApi.execute(api -> {
-            return api.item(id);
-        });
+    /**
+     * Retrieve loans from marketplace via {@link LoanApi}, in a given order.
+     *
+     * @param ordering Ordering in which the results should be returned.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Loan> getAvailableLoans(final Sort<Loan> ordering) {
+        return Zonky.getStream(loanApi, ordering);
     }
 
     public void logout() {

@@ -59,4 +59,9 @@ public interface Marketplace extends AutoCloseable, Runnable {
     @Override
     void run();
 
+    @Override
+    default void close() throws Exception {
+        // don't force implementations to override
+    }
+
 }

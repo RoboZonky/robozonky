@@ -21,10 +21,9 @@ import java.util.function.Function;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 
-import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.common.remote.OAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Authenticator.class);
-    private static final String TARGET_SCOPE = "SCOPE_APP_WEB";
 
     /**
      * Prepare for authentication using username and password.
@@ -47,9 +45,9 @@ abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
     public static Function<ApiProvider, ZonkyApiToken> withCredentials(final String username, final char... password) {
         return new Authenticator() {
             @Override
-            protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
+            protected ZonkyApiToken authenticate(final OAuth api) {
                 Authenticator.LOGGER.info("Authenticating as '{}' using password.", username);
-                return api.login(username, new String(password), "password", Authenticator.TARGET_SCOPE);
+                return api.login(username, password);
             }
         };
     }
@@ -68,10 +66,9 @@ abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
         if (token.willExpireIn(refreshBeforeExpiration)) {
             return new Authenticator() {
                 @Override
-                protected ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api) {
+                protected ZonkyApiToken authenticate(final OAuth api) {
                     Authenticator.LOGGER.info("Authenticating as '{}', refreshing existing access token.", username);
-                    final String tokenId = String.valueOf(token.getRefreshToken());
-                    return api.refresh(tokenId, "refresh_token", Authenticator.TARGET_SCOPE);
+                    return api.refresh(token);
                 }
             };
         } else { // auth token is still up to date; don't even create the API endpoint
@@ -79,7 +76,7 @@ abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
         }
     }
 
-    protected abstract ZonkyApiToken getAuthenticationMethod(final ZonkyOAuthApi api);
+    protected abstract ZonkyApiToken authenticate(final OAuth api);
 
     /**
      * Perform the actual authentication. Will throw an unchecked exception in case authentication failed.
@@ -88,8 +85,8 @@ abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
      */
     @Override
     public ZonkyApiToken apply(final ApiProvider provider) {
-        try (final Api<ZonkyOAuthApi> api = provider.oauth()) {
-            return api.execute(this::getAuthenticationMethod);
+        try (final OAuth api = provider.oauth()) {
+            return this.authenticate(api);
         } catch (final BadRequestException ex) {
             throw new WebApplicationException("Failed authenticating with Zonky, check your password.", ex);
         }

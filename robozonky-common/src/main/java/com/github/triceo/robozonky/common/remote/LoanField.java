@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
-
-import java.util.Collection;
+package com.github.triceo.robozonky.common.remote;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
 
-class MarketplaceApiProvider extends ApiProvider {
+public enum LoanField implements Field<Loan> {
 
-    private static final String ZOTIFY_URL = "https://zotify.cz";
+    COVERED("covered"),
+    DATE_PUBLISHED("datePublished"),
+    INTEREST_RATE("interestRate"),
+    PURPOSE("purpose"),
+    RATING("rating"),
+    REMAINING_INVESTMENT("remainingInvestment"),
+    TERM_IN_MONTHS("termInMonths"),
+    TOPPED("topped");
 
-    /**
-     * Retrieve Zotify's marketplace cache.
-     *
-     * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
-     */
-    @Override
-    public Collection<Loan> marketplace() {
-        return this.marketplace(ZotifyApi.class, MarketplaceApiProvider.ZOTIFY_URL);
+    private final String id;
+
+    LoanField(final String id) {
+        this.id = id;
+    }
+
+    public String id() {
+        return this.id;
     }
 
 }

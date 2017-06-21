@@ -23,7 +23,7 @@ import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-public class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
+class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
 
     private final ZonkyApiToken token;
     private final Class<T> api;
@@ -38,10 +38,11 @@ public class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlu
     @Override
     public <Q> Q execute(final Function<T, Q> function) {
         final AuthenticatedFilter filter = new AuthenticatedFilter(this.token);
-        return this.execute(function, filter);
+        return this.execute(function, Sort.unspecified(), filter);
     }
 
-    <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter) {
+    <Q> Q execute(final Function<T, Q> function, final Sort<S> sort, final RoboZonkyFilter filter) {
+        sort.apply(filter);
         final ResteasyClient client = ProxyFactory.newResteasyClient(filter);
         try {
             final T proxy = ProxyFactory.newProxy(client, api, url);
@@ -51,15 +52,16 @@ public class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlu
         }
     }
 
-    public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final int pageNo, final int pageSize) {
-        return this.execute(function, pageNo, pageSize, new AuthenticatedFilter(this.token));
+    public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Sort<S> sort,
+                                      final int pageNo, final int pageSize) {
+        return this.execute(function, sort, pageNo, pageSize, new AuthenticatedFilter(this.token));
     }
 
-    PaginatedResult<S> execute(final Function<T, Collection<S>> function, final int pageNo, final int pageSize,
-                               final RoboZonkyFilter filter) {
+    PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Sort<S> sort,
+                               final int pageNo, final int pageSize, final RoboZonkyFilter filter) {
         filter.setRequestHeader("X-Page", String.valueOf(pageNo));
         filter.setRequestHeader("X-Size", String.valueOf(pageSize));
-        final Collection<S> result = this.execute(function, filter);
+        final Collection<S> result = this.execute(function, sort, filter);
         final int totalSize = filter.getLastResponseHeader("X-Total")
                 .map(Integer::parseInt)
                 .orElse(-1);

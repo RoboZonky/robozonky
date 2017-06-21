@@ -29,9 +29,7 @@ import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +43,14 @@ public class Checker {
             Comparator.comparing(Loan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
 
     static Optional<Loan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
-        try (final ApiProvider p = apiProviderSupplier.get()) {
-            final Api<LoanApi> oauth = p.marketplace();
-            final Collection<Loan> loans = oauth.execute(LoanApi::items);
+        try {
+            final ApiProvider p = apiProviderSupplier.get();
+            final Collection<Loan> loans = p.marketplace();
             /*
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.
+             *
+             * // FIXME what happens in installer when there is no loans?
              */
             return loans.stream().sorted(Checker.COMPARATOR).findFirst();
         } catch (final Exception t) {

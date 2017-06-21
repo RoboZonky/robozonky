@@ -27,7 +27,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
  *
  * @param <T> Type of the API to be handled.
  */
-public class Api<T> implements ApiBlueprint<T>, AutoCloseable {
+class Api<T> implements ApiBlueprint<T>, AutoCloseable {
 
     private final AtomicReference<ResteasyClient> client;
     private final T api;

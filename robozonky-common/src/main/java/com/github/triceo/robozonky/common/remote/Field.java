@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
+package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+public interface Field<S> {
 
-class ZonkyMarketplace extends AbstractMarketplace {
-
-    @Override
-    protected ApiProvider api() {
-        return new ApiProvider();
-    }
+    String id();
 
 }

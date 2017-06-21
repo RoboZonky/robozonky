@@ -25,9 +25,7 @@ import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.triceo.robozonky.api.remote.LoanApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.common.remote.Api;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -47,10 +45,8 @@ public class CheckerTest {
 
     @Test
     public void confirmationsMarketplaceWithoutLoans() {
-        final LoanApi api = Mockito.mock(LoanApi.class);
-        Mockito.when(api.items()).thenReturn(Collections.emptyList());
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.when(provider.marketplace()).thenReturn(new Api<>(api));
+        Mockito.when(provider.marketplace()).thenReturn(Collections.emptyList());
         final Optional<Boolean> result =
                 Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
         Assertions.assertThat(result).isPresent().hasValue(false);
@@ -58,10 +54,8 @@ public class CheckerTest {
 
     private static ApiProvider mockApiThatReturnsOneLoan() {
         final Loan l = Mockito.mock(Loan.class);
-        final LoanApi api = Mockito.mock(LoanApi.class);
-        Mockito.doReturn(Collections.singletonList(l)).when(api).items();
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        Mockito.doReturn(new Api<>(api)).when(provider).marketplace();
+        Mockito.doReturn(Collections.singletonList(l)).when(provider).marketplace();
         return provider;
     }
 

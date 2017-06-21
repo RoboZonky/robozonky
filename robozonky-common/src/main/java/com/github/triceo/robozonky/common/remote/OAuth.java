@@ -16,27 +16,31 @@
 
 package com.github.triceo.robozonky.common.remote;
 
+import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
 
-public class ApiProviderTest {
+public class OAuth implements AutoCloseable {
 
-    @Test
-    public void unathenticatedApis() {
-        final ApiProvider provider = new ApiProvider();
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(provider.marketplace()).isNotNull();
-            Assertions.assertThat(provider.oauth()).isNotNull();
+    private final Api<ZonkyOAuthApi> api;
+
+    OAuth(final Api<ZonkyOAuthApi> api) {
+        this.api = api;
+    }
+
+    public ZonkyApiToken login(final String username, final char[] password) {
+        return api.execute(a -> {
+            return a.login(username, String.valueOf(password), "password", "SCOPE_APP_WEB");
         });
     }
 
-    @Test
-    public void athenticatedApis() {
-        final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
-        final ApiProvider provider = new ApiProvider();
-        Assertions.assertThat(provider.authenticated(token)).isNotNull();
+    public ZonkyApiToken refresh(final ZonkyApiToken token) {
+        return api.execute(a -> {
+            return a.refresh(String.valueOf(token.getRefreshToken()), token.getType(), token.getScope());
+        });
     }
 
+    @Override
+    public void close() {
+        this.api.close();
+    }
 }

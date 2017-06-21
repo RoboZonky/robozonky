@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.marketplaces;
+package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.common.remote.ApiProvider;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 
-class ZonkyMarketplace extends AbstractMarketplace {
+public enum InvestmentField implements Field<Investment> {
 
-    @Override
-    protected ApiProvider api() {
-        return new ApiProvider();
+    ID("id"),
+    TIME_CREATED("timeCreated"),
+    LOAN_STATUS("loan.status");
+
+    private final String id;
+
+    InvestmentField(final String id) {
+        this.id = id;
+    }
+
+    public String id() {
+        return this.id;
     }
 
 }

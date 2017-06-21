@@ -16,21 +16,28 @@
 
 package com.github.triceo.robozonky.common.remote;
 
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-// FIXME will fail when Zonky API is down
-public class PaginatedApiTest {
+public class FieldTest {
+
+    private <T> void unique(final Field<T>... values) {
+        final Set<String> uniqueValues = Stream.of(values).map(Field::id).collect(Collectors.toSet());
+        Assertions.assertThat(uniqueValues).hasSize(values.length);
+    }
 
     @Test
-    public void redirectAndLiveQuery() {
-        final RoboZonkyFilter f = new RoboZonkyFilter();
-        final PaginatedApi<Loan, LoanApi> pa = new PaginatedApi<>(LoanApi.class, "http://api.zonky.cz", null);
-        final PaginatedResult<Loan> loans = pa.execute(LoanApi::items, Sort.unspecified(), 0, 10, f);
-        Assertions.assertThat(loans.getCurrentPageId()).isEqualTo(0);
-        Assertions.assertThat(loans.getTotalResultCount()).isGreaterThanOrEqualTo(0);
+    public void uniqueInvestmentFields() {
+        unique(InvestmentField.values());
+    }
+
+    @Test
+    public void uniqueLoanFields() {
+        unique(LoanField.values());
     }
 
 }

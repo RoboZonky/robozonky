@@ -41,7 +41,8 @@ public class ZonkyTest {
     private <T, S extends EntityCollectionApi<T>> PaginatedApi<T, S> mockApi() {
         final PaginatedApi<T, S> api = Mockito.mock(PaginatedApi.class);
         final PaginatedResult<T> apiReturn = new PaginatedResult<>(Collections.emptyList(), 0, 0);
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt()))
+        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
+                ArgumentMatchers.anyInt()))
                 .thenReturn(apiReturn);
         return api;
     }
