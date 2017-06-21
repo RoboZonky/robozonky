@@ -50,8 +50,14 @@ abstract class AbstractValidator implements DataValidator {
         }
     }
 
-        @Override
+    @Override
+    public String getWarningMessageId() {
+        return "";
+    }
+
+    @Override
     public boolean getDefaultAnswer() {
         return false;
     }
+
 }
