@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -67,6 +68,14 @@ class Util {
         p.setProperty("roboZonkyUpdateDetected.maxHourlyEmails", "1");
         p.setProperty("hourlyMaxEmails", "20");
         return p;
+    }
+
+    public static void copyFile(final File from, final File to) throws IOException {
+        Files.copy(from.toPath(), to.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
+        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[v.size()])));
     }
 
 }

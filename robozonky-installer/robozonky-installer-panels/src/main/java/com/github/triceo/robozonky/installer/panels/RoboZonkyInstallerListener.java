@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -51,14 +50,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
             CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
-
-    private static void copyFile(final File from, final File to) throws IOException {
-        Files.copy(from.toPath(), to.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    private static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
-        source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[v.size()])));
-    }
 
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
@@ -100,7 +91,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         if (Objects.equals(Variables.STRATEGY_TYPE.getValue(DATA), "file")) {
             final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
             try {
-                RoboZonkyInstallerListener.copyFile(new File(content), strategyFile);
+                Util.copyFile(new File(content), strategyFile);
                 return new CommandLinePart().setOption("-s", strategyFile.getName());
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed copying strategy file.", ex);
@@ -200,9 +191,9 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private File assembleCliFile(final CommandLinePart credentials, final CommandLinePart strategy) throws IOException {
         // assemble the CLI
         final CommandLinePart cli = new CommandLinePart();
-        copyOptions(credentials, cli);
+        Util.copyOptions(credentials, cli);
         cli.setOption("daemon");
-        copyOptions(strategy, cli);
+        Util.copyOptions(strategy, cli);
         // store it to a file
         cli.storeOptions(CLI_CONFIG_FILE);
         return CLI_CONFIG_FILE.getAbsoluteFile();
@@ -303,7 +294,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     CommandLinePart prepareLogging() {
         try {
-            RoboZonkyInstallerListener.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
+            Util.copyFile(new File(DIST_PATH, "logback.xml"), LOGBACK_CONFIG_FILE);
             return new CommandLinePart()
                     .setProperty("logback.configurationFile", LOGBACK_CONFIG_FILE.getAbsolutePath());
         } catch (final IOException ex) {
@@ -313,21 +304,26 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
-        progressListener.startAction("Konfigurace RoboZonky", 7);
-        progressListener.nextStep("Příprava strategie.", 1, 1);
-        final CommandLinePart strategyConfig = prepareStrategy();
-        progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
-        final CommandLinePart emailConfig = prepareEmailConfiguration();
-        progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
-        final CommandLinePart jmx = prepareJmx();
-        progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
-        final CommandLinePart credentials = prepareCore();
-        progressListener.nextStep("Příprava nastavení logování.", 5, 1);
-        final CommandLinePart logging = prepareLogging();
-        progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
-        final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials, logging);
-        progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
-        prepareRunScript(result);
-        progressListener.stopAction();
+        try {
+            progressListener.startAction("Konfigurace RoboZonky", 7);
+            progressListener.nextStep("Příprava strategie.", 1, 1);
+            final CommandLinePart strategyConfig = prepareStrategy();
+            progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
+            final CommandLinePart emailConfig = prepareEmailConfiguration();
+            progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
+            final CommandLinePart jmx = prepareJmx();
+            progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
+            final CommandLinePart credentials = prepareCore();
+            progressListener.nextStep("Příprava nastavení logování.", 5, 1);
+            final CommandLinePart logging = prepareLogging();
+            progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
+            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials, logging);
+            progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
+            prepareRunScript(result);
+            progressListener.stopAction();
+        } catch (final Exception ex) {
+            LOGGER.log(Level.SEVERE, "Uncaught exception.", ex);
+            throw new IllegalStateException("Uncaught exception.", ex);
+        }
     }
 }

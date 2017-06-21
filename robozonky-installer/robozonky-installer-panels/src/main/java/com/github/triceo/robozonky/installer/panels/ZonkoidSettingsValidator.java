@@ -25,7 +25,7 @@ import com.github.triceo.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
-public class ZonkoidSettingsValidator implements DataValidator {
+public class ZonkoidSettingsValidator extends AbstractValidator {
 
     private final Supplier<Optional<ConfirmationProvider>> zonkoidSupplier;
 
@@ -42,7 +42,7 @@ public class ZonkoidSettingsValidator implements DataValidator {
     }
 
     @Override
-    public DataValidator.Status validateData(final InstallData installData) {
+    public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
         return zonkoidSupplier.get()
                 .map(zonkoid -> {
                     final String username = Variables.ZONKY_USERNAME.getValue(installData);
@@ -65,8 +65,4 @@ public class ZonkoidSettingsValidator implements DataValidator {
                 "Budete-li pokračovat, mobilní notifikace nemusí fungovat správně.";
     }
 
-    @Override
-    public boolean getDefaultAnswer() {
-        return false;
-    }
 }
