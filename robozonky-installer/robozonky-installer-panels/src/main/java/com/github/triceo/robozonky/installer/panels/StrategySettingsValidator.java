@@ -21,17 +21,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
-public class StrategySettingsValidator implements DataValidator {
-
-    private static final Logger LOGGER = Logger.getLogger(StrategySettingsValidator.class.getCanonicalName());
+public class StrategySettingsValidator extends AbstractValidator {
 
     @Override
-    public DataValidator.Status validateData(final InstallData installData) {
+    public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
         RoboZonkyInstallerListener.setInstallData(installData);
         final String type = Variables.STRATEGY_TYPE.getValue(installData);
         final String strategySource = Variables.STRATEGY_SOURCE.getValue(installData);
@@ -50,7 +47,7 @@ public class StrategySettingsValidator implements DataValidator {
                     return DataValidator.Status.WARNING;
                 }
             } catch (final Exception ex) {
-                StrategySettingsValidator.LOGGER.log(Level.WARNING, "Cannot read URL.", ex);
+                LOGGER.log(Level.WARNING, "Cannot read URL.", ex);
                 return DataValidator.Status.WARNING;
             }
         } else {
@@ -68,8 +65,4 @@ public class StrategySettingsValidator implements DataValidator {
         return "Zadaná strategie neexistuje. RoboZonky nemusí fungovat správně.";
     }
 
-    @Override
-    public boolean getDefaultAnswer() {
-        return false;
-    }
 }

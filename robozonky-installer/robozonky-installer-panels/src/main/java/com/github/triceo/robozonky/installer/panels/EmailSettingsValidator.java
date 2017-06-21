@@ -19,19 +19,16 @@ package com.github.triceo.robozonky.installer.panels;
 import java.io.File;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.github.triceo.robozonky.common.extensions.Checker;
 import com.github.triceo.robozonky.notifications.email.RefreshableEmailNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
-public class EmailSettingsValidator implements DataValidator {
-
-    private static final Logger LOGGER = Logger.getLogger(EmailSettingsValidator.class.getCanonicalName());
+public class EmailSettingsValidator extends AbstractValidator {
 
     @Override
-    public DataValidator.Status validateData(final InstallData installData) {
+    protected DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
         try {
             // configure e-mail notification properties
             final Properties emailConfig = Util.configureEmailNotifications(installData);
@@ -41,7 +38,7 @@ public class EmailSettingsValidator implements DataValidator {
                     emailConfigTarget.toURI().toURL().toExternalForm());
             return Checker.notifications() ? DataValidator.Status.OK : DataValidator.Status.ERROR;
         } catch (final Exception ex) {
-            EmailSettingsValidator.LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
+            LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
             return DataValidator.Status.WARNING;
         } finally {
             System.clearProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
@@ -59,8 +56,4 @@ public class EmailSettingsValidator implements DataValidator {
                 "E-mailové notifikace nemusí fungovat správně.";
     }
 
-    @Override
-    public boolean getDefaultAnswer() {
-        return false;
-    }
 }

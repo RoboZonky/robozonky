@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.installer.panels;
 import java.net.SocketException;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.ServerErrorException;
 
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
@@ -29,9 +28,8 @@ import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
-public class ZonkySettingsValidator implements DataValidator {
+public class ZonkySettingsValidator extends AbstractValidator {
 
-    private static final Logger LOGGER = Logger.getLogger(ZonkySettingsValidator.class.getCanonicalName());
 
     private final Supplier<ApiProvider> apiSupplier;
 
@@ -51,25 +49,25 @@ public class ZonkySettingsValidator implements DataValidator {
     }
 
     @Override
-    public DataValidator.Status validateData(final InstallData installData) {
+    public DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
         final String username = Variables.ZONKY_USERNAME.getValue(installData);
         final String password = Variables.ZONKY_PASSWORD.getValue(installData);
         try (final ApiProvider p = apiSupplier.get()) { // test login with the credentials
             final ApiProvider.ApiWrapper<ZonkyOAuthApi> oauth = p.oauth();
-            ZonkySettingsValidator.LOGGER.info("Logging in.");
+            LOGGER.info("Logging in.");
             final ZonkyApiToken token = oauth.execute(api -> {
                 return api.login(username, password, "password", "SCOPE_APP_WEB");
             });
-            ZonkySettingsValidator.LOGGER.info("Logging out.");
+            LOGGER.info("Logging out.");
             final ApiProvider.ApiWrapper<ZonkyApi> z = p.authenticated(token);
             z.execute(ZonkyApi::logout);
             return DataValidator.Status.OK;
         } catch (final Throwable t) {
             if (t instanceof SocketException | t instanceof ServerErrorException) {
-                ZonkySettingsValidator.LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
+                LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
                 return DataValidator.Status.ERROR;
             } else {
-                ZonkySettingsValidator.LOGGER.log(Level.WARNING, "Failed logging in.", t);
+                LOGGER.log(Level.WARNING, "Failed logging in.", t);
                 return DataValidator.Status.WARNING;
             }
         }
@@ -88,8 +86,4 @@ public class ZonkySettingsValidator implements DataValidator {
                 "Budete-li pokračovat, RoboZonky nemusí fungovat správně.";
     }
 
-    @Override
-    public boolean getDefaultAnswer() {
-        return false;
-    }
 }
