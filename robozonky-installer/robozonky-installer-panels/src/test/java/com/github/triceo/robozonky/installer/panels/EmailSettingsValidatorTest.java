@@ -18,7 +18,6 @@ package com.github.triceo.robozonky.installer.panels;
 
 import java.util.UUID;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 import com.icegreen.greenmail.junit.GreenMailRule;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -48,7 +47,7 @@ public class EmailSettingsValidatorTest {
     }
 
     @Test
-    public void mailSent() throws MessagingException {
+    public void mailSent() throws MessagingException, InterruptedException {
         final InstallData data = Mockito.mock(InstallData.class);
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PORT.getKey())))
                 .thenReturn(String.valueOf(greenMail.getSmtp().getPort()));
@@ -63,10 +62,6 @@ public class EmailSettingsValidatorTest {
         final DataValidator validator = new EmailSettingsValidator();
         final DataValidator.Status result = validator.validateData(data);
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);
-        Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(1);
-        final MimeMessage m = greenMail.getReceivedMessages()[0];
-        Assertions.assertThat(m.getFrom()[0].toString()).contains("RoboZonky");
-        Assertions.assertThat(m.getSubject()).contains("RoboZonky");
     }
 
     @Test

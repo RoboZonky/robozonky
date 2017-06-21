@@ -16,6 +16,11 @@
 
 package com.github.triceo.robozonky.installer.panels;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,11 +35,18 @@ abstract class AbstractValidator implements DataValidator {
 
     @Override
     public DataValidator.Status validateData(final InstallData installData) {
+        final ExecutorService e = Executors.newCachedThreadPool();
         try {
-            return this.validateDataPossiblyThrowingException(installData);
-        } catch (final Exception ex) { // the installer will never ever throw an exception (= neverending spinner)
+            LOGGER.log(Level.INFO, "Starting validation.");
+            final Callable<DataValidator.Status> c = () -> this.validateDataPossiblyThrowingException(installData);
+            final Future<DataValidator.Status> f = e.submit(c);
+            return f.get(15, TimeUnit.SECONDS); // don't wait for result indefinitely
+        } catch (final Exception ex) { // the installer must never ever throw an exception (= neverending spinner)
             LOGGER.log(Level.SEVERE, "Uncaught exception.", ex);
             return DataValidator.Status.ERROR;
+        } finally {
+            e.shutdownNow();
+            LOGGER.log(Level.INFO, "Finished validation.");
         }
     }
 
