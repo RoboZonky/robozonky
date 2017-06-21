@@ -16,36 +16,24 @@
 
 package com.github.triceo.robozonky.installer.panels;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
-abstract class AbstractValidator implements DataValidator {
-
-    protected final Logger LOGGER = Logger.getLogger(this.getClass().getCanonicalName());
-
-    protected abstract DataValidator.Status validateDataPossiblyThrowingException(InstallData installData);
+public class InstallDirValidator extends AbstractValidator {
 
     @Override
-    public DataValidator.Status validateData(final InstallData installData) {
-        try {
-            return this.validateDataPossiblyThrowingException(installData);
-        } catch (final Exception ex) { // the installer will never ever throw an exception (= neverending spinner)
-            LOGGER.log(Level.SEVERE, "Uncaught exception.", ex);
+    protected DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
+        final String installPath = Variables.INSTALL_PATH.getValue(installData);
+        if (installPath.contains(" ")) { // RoboZonky batch file on Windows would not start
             return DataValidator.Status.ERROR;
+        } else {
+            return DataValidator.Status.OK;
         }
     }
 
     @Override
-    public String getWarningMessageId() {
-        return "";
-    }
-
-    @Override
-    public boolean getDefaultAnswer() {
-        return false;
+    public String getErrorMessageId() {
+        return "Název instalačního adresáře nesmí obsahovat mezery a jiné speciální znaky.";
     }
 
 }

@@ -28,6 +28,11 @@
     <uninstaller write="no" />
   </info>
 
+  <variables>
+    <variable name="TargetPanel.dir.windows" value="C:/RoboZonky/@{info.appversion}"/>
+    <variable name="TargetPanel.dir.unix" value="$USER_HOME/RoboZonky/@{info.appversion}"/>
+  </variables>
+
   <logging level="ALL">
     <log-file pattern="robozonky-installer.log" append="false" level="ALL" />
   </logging>
@@ -83,7 +88,9 @@
         <param name="console-text-wordwrap" value="false" />
       </configuration>
     </panel>
-    <panel classname="TargetPanel"/>
+    <panel classname="TargetPanel">
+      <validator classname="com.github.triceo.robozonky.installer.panels.InstallDirValidator"/>
+    </panel>
     <panel classname="PacksPanel"/>
     <panel classname="UserInputPanel" id="zonkyUserInput">
       <validator classname="com.github.triceo.robozonky.installer.panels.ZonkySettingsValidator" />
