@@ -16,3 +16,5 @@ build_script:
   - mvn post-integration-test -DskipTests --batch-mode
 test_script:
   - mvn test --batch-mode
+cache:
+  - C:\Users\appveyor\.m2
