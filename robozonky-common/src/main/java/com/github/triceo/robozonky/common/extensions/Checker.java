@@ -49,8 +49,6 @@ public class Checker {
             /*
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.
-             *
-             * // FIXME what happens in installer when there is no loans?
              */
             return loans.stream().sorted(Checker.COMPARATOR).findFirst();
         } catch (final Exception t) {
