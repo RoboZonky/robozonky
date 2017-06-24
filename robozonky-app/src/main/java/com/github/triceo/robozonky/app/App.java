@@ -27,7 +27,6 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.configuration.CommandLine;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.version.UpdateMonitor;
-import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +72,7 @@ public class App {
     static ReturnCode execute(final InvestmentMode mode, final AtomicBoolean faultTolerant) {
         App.SHUTDOWN_HOOKS.register(new ShutdownEnabler());
         App.SHUTDOWN_HOOKS.register(new Management());
-        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
+        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier(mode.getUsername()));
         faultTolerant.set(mode.isFaultTolerant());
         return App.execute(mode);
     }
@@ -86,7 +85,7 @@ public class App {
 
     public static void main(final String... args) {
         App.LOGGER.debug("Current working directory is '{}'.", System.getProperty("user.dir"));
-        Events.fire(new RoboZonkyStartingEvent(Defaults.ROBOZONKY_VERSION));
+        Events.fire(new RoboZonkyStartingEvent());
         App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
                 System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version"),
                 System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),

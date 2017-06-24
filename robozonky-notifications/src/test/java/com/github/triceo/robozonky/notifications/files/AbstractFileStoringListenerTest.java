@@ -36,6 +36,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
@@ -87,7 +88,7 @@ public class AbstractFileStoringListenerTest {
         Mockito.when(l.getDatePublished()).thenReturn(OffsetDateTime.now());
         final FileNotificationProperties p = AbstractFileStoringListenerTest.getNotificationProperties();
         final Investment i = new Investment(l, 300);
-        final InvestmentMadeEvent ime = new InvestmentMadeEvent(i, 0);
+        final InvestmentMadeEvent ime = new InvestmentMadeEvent(i, 0, false);
         final EventListener l1 = SupportedFileListener.INVESTMENT_MADE.getListener(p);
         result.add(new Object[] {l1, ime, i.getLoanId(), i.getAmount(), "invested"} );
         final Recommendation recommendation = new LoanDescriptor(l).recommend(300).get();
@@ -127,7 +128,7 @@ public class AbstractFileStoringListenerTest {
     public void checkInvestmentReported() throws IOException {
         // run class under test
         final Collection<Path> oldFiles = AbstractFileStoringListenerTest.getFilesInWorkingDirectory();
-        listener.handle(event);
+        listener.handle(event, new SessionInfo(""));
         final List<Path> newFiles = AbstractFileStoringListenerTest.getNewFilesInWorkingDirectory(oldFiles);
         // check existence and contents of new file
         final SoftAssertions softly = new SoftAssertions();

@@ -32,6 +32,10 @@ public interface InvestmentMode extends Supplier<Optional<Collection<Investment>
         return false;
     }
 
+    default String getUsername() {
+        return "";
+    }
+
     @Override
     default void close() throws Exception {
         // no need to do anything

@@ -158,6 +158,96 @@
                     "new": "class com.github.triceo.robozonky.api.remote.ZonkyOAuthApi",
                     "annotationType": "javax.ws.rs.Path",
                     "justification": "No longer necessary."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.EventListener<E extends com.github.triceo.robozonky.api.notifications.Event>::handle(E)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.EventListener<E extends com.github.triceo.robozonky.api.notifications.Event>::handle(E, com.github.triceo.robozonky.api.notifications.SessionInfo)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "EventListener",
+                    "methodName": "handle",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>(java.lang.String)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyEndingEvent",
+                    "methodName": "<init>",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::getVersion()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyEndingEvent",
+                    "methodName": "getVersion",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::<init>(java.lang.String)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::<init>()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyInitializedEvent",
+                    "methodName": "<init>",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::getVersion()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyInitializedEvent",
+                    "methodName": "getVersion",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::<init>(java.lang.String)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::<init>()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyStartingEvent",
+                    "methodName": "<init>",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::getVersion()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "RoboZonkyStartingEvent",
+                    "methodName": "getVersion",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::<init>(java.lang.String, java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, int)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::<init>(java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, int)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "ExecutionCompletedEvent",
+                    "methodName": "<init>",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::getUsername()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "ExecutionCompletedEvent",
+                    "methodName": "getUsername",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::<init>(java.lang.String, java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, int)",
+                    "new": "method void com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::<init>(java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, int)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "ExecutionStartedEvent",
+                    "methodName": "<init>",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::getUsername()",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "ExecutionStartedEvent",
+                    "methodName": "getUsername",
+                    "justification": "SessionInfo is now part of EventListener."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent::<init>(com.github.triceo.robozonky.api.remote.entities.Investment, int)",
+                    "package": "com.github.triceo.robozonky.api.notifications",
+                    "classSimpleName": "InvestmentMadeEvent",
+                    "methodName": "<init>",
+                    "justification": "Deprecated since 3.2.0"
                   }
                 ]
               }

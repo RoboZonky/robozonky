@@ -86,13 +86,13 @@ public abstract class AbstractListenerTest {
         events.put(SupportedEmailListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200, true));
         events.put(SupportedEmailListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
         events.put(SupportedEmailListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, 200, "random"));
-        events.put(SupportedEmailListener.BALANCE_ON_TARGET, new ExecutionStartedEvent("", Collections.emptyList(), 200));
-        events.put(SupportedEmailListener.BALANCE_UNDER_MINIMUM, new ExecutionStartedEvent("", Collections.emptyList(), 199));
+        events.put(SupportedEmailListener.BALANCE_ON_TARGET, new ExecutionStartedEvent(Collections.emptyList(), 200));
+        events.put(SupportedEmailListener.BALANCE_UNDER_MINIMUM, new ExecutionStartedEvent(Collections.emptyList(), 199));
         events.put(SupportedEmailListener.CRASHED, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
         events.put(SupportedEmailListener.REMOTE_OPERATION_FAILED, new RemoteOperationFailedEvent(new RuntimeException()));
         events.put(SupportedEmailListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException()));
-        events.put(SupportedEmailListener.INITIALIZED, new RoboZonkyInitializedEvent(""));
-        events.put(SupportedEmailListener.ENDING, new RoboZonkyEndingEvent(""));
+        events.put(SupportedEmailListener.INITIALIZED, new RoboZonkyInitializedEvent());
+        events.put(SupportedEmailListener.ENDING, new RoboZonkyEndingEvent());
         events.put(SupportedEmailListener.TESTING, new RoboZonkyTestingEvent());
         events.put(SupportedEmailListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3"));
         events.put(SupportedEmailListener.EXPERIMENTAL_UPDATE_DETECTED, new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));

@@ -31,7 +31,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
-import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -48,19 +48,20 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class JmxListenerServiceTest {
 
-    private static final Investments INVESTMENTS = (Investments)MBean.INVESTMENTS.getImplementation();
-    private static final Runtime RUNTIME = (Runtime)MBean.RUNTIME.getImplementation();
+    private static final String USERNAME = "someone@somewhere.cz";
+    private static final InvestmentsMBean INVESTMENTS = (Investments)MBean.INVESTMENTS.getImplementation();
+    private static final RuntimeMBean RUNTIME = (Runtime)MBean.RUNTIME.getImplementation();
     private static final Portfolio PORTFOLIO = (Portfolio) MBean.PORTFOLIO.getImplementation();
 
     private static Object[] getParametersForExecutionCompleted() {
-        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent("user", Collections.emptyList(), 0);
+        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), 0);
         final Consumer<SoftAssertions> before = (softly) -> {
             softly.assertThat(INVESTMENTS.getLatestUpdatedDateTime()).isNull();
             softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo("");
         };
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(INVESTMENTS.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
-            softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo(evt.getUsername());
+            softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo(USERNAME);
         };
         return new Object[] {evt.getClass(), evt, before, after};
     }
@@ -95,7 +96,7 @@ public class JmxListenerServiceTest {
 
     private static Object[] getParametersForInvestmentMade() {
         final Loan l = new Loan(1, 1000);
-        final Event evt = new InvestmentMadeEvent(new Investment(l, 200), 1000);
+        final Event evt = new InvestmentMadeEvent(new Investment(l, 200), 1000, false);
         final Consumer<SoftAssertions> before = (softly) -> {
             softly.assertThat(INVESTMENTS.getSuccessfulInvestments()).isEmpty();
         };
@@ -133,24 +134,12 @@ public class JmxListenerServiceTest {
         return new Object[] {evt.getClass(), evt, before, after};
     }
 
-    private static Object[] getParametersForRoboZonkyInitialized() {
-        final RoboZonkyInitializedEvent evt = new RoboZonkyInitializedEvent("version");
-        final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(RUNTIME.getVersion()).isEqualTo("");
-        };
-        final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(RUNTIME.getVersion()).isEqualTo(evt.getVersion());
-        };
-        return new Object[] {evt.getClass(), evt, before, after};
-    }
-
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
         return Arrays.asList(JmxListenerServiceTest.getParametersForExecutionCompleted(),
                 JmxListenerServiceTest.getParametersForInvestmentDelegated(),
                 JmxListenerServiceTest.getParametersForInvestmentMade(),
                 JmxListenerServiceTest.getParametersForInvestmentRejected(),
-                JmxListenerServiceTest.getParametersForRoboZonkyInitialized(),
                 JmxListenerServiceTest.getParametersForStrategyStarted(),
                 JmxListenerServiceTest.getParametersForStrategyCompleted());
     }
@@ -178,7 +167,7 @@ public class JmxListenerServiceTest {
         final Refreshable<EventListener<T>> r = service.findListener((Class<T>)event.getClass());
         r.run();
         final EventListener<T> listener = r.getLatest().get();
-        listener.handle(event);
+        listener.handle(event, new SessionInfo(USERNAME));
     }
 
     @Test

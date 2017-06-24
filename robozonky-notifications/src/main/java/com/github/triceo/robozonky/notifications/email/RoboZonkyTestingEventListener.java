@@ -38,7 +38,7 @@ class RoboZonkyTestingEventListener extends AbstractEmailingListener<RoboZonkyTe
     }
 
     @Override
-    Map<String, Object> getData(final RoboZonkyTestingEvent event) {
+    protected Map<String, Object> getData(final RoboZonkyTestingEvent event) {
         return Collections.emptyMap();
     }
 }

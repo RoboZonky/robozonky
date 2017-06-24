@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,7 +30,9 @@ public class MBeanTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getMBeans() {
-        return Stream.of(MBean.values()).map(m -> new Object[] {m}).collect(Collectors.toList());
+        return Stream.of(MBean.values())
+                .map(m -> new Object[] {m})
+                .collect(Collectors.toList());
     }
 
     @Parameterized.Parameter
@@ -38,10 +40,7 @@ public class MBeanTest {
 
     @Test
     public void isValid() {
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(mbean.getImplementation().getLatestUpdatedDateTime()).isNull();
-            softly.assertThat(mbean.getObjectName()).isNotNull();
-        });
+        Assertions.assertThat(mbean.getImplementation().getLatestUpdatedDateTime()).isNull();
     }
 
 }

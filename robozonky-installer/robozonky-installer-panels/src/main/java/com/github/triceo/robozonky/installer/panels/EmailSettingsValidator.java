@@ -36,7 +36,8 @@ public class EmailSettingsValidator extends AbstractValidator {
             Util.writeOutProperties(emailConfig, emailConfigTarget);
             System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                     emailConfigTarget.toURI().toURL().toExternalForm());
-            return Checker.notifications() ? DataValidator.Status.OK : DataValidator.Status.ERROR;
+            return Checker.notifications(Variables.ZONKY_USERNAME.getValue(installData))
+                    ? DataValidator.Status.OK : DataValidator.Status.ERROR;
         } catch (final Exception ex) {
             LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
             return DataValidator.Status.WARNING;

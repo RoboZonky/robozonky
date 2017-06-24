@@ -31,7 +31,8 @@ public interface EventListener<E extends Event> extends java.util.EventListener 
      * block on the result.
      *
      * @param event Event that is being listened to.
+     * @param sessionInfo Information about the user firing the event.
      */
-    void handle(E event);
+    void handle(E event, SessionInfo sessionInfo);
 
 }

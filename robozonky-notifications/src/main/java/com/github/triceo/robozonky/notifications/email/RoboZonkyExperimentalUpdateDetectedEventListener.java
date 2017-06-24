@@ -38,7 +38,7 @@ final class RoboZonkyExperimentalUpdateDetectedEventListener extends AbstractEma
     }
 
     @Override
-    Map<String, Object> getData(final RoboZonkyExperimentalUpdateDetectedEvent event) {
+    protected Map<String, Object> getData(final RoboZonkyExperimentalUpdateDetectedEvent event) {
         return Collections.singletonMap("newVersion", event.getNewVersion());
     }
 

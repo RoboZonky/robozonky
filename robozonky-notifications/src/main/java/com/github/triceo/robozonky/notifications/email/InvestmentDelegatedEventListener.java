@@ -40,7 +40,7 @@ final class InvestmentDelegatedEventListener extends AbstractEmailingListener<In
     }
 
     @Override
-    Map<String, Object> getData(final InvestmentDelegatedEvent event) {
+    protected Map<String, Object> getData(final InvestmentDelegatedEvent event) {
         final Loan loan = event.getRecommendation().getLoanDescriptor().getLoan();
         final Map<String, Object> result = new HashMap<>();
         result.put("loanId", loan.getId());

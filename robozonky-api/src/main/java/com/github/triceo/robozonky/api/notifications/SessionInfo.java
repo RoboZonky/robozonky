@@ -16,9 +16,22 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-/**
- * Fired before the application shuts down cleanly, provided {@link RoboZonkyInitializedEvent} was fired before.
- */
-public final class RoboZonkyEndingEvent extends Event {
+import com.github.triceo.robozonky.internal.api.Defaults;
+
+public class SessionInfo {
+
+    private final String userName;
+
+    public SessionInfo(final String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserAgent() {
+        return Defaults.ROBOZONKY_USER_AGENT;
+    }
 
 }

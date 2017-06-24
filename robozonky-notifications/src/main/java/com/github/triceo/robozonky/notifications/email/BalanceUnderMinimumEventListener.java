@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.OptionalInt;
 
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 
 public class BalanceUnderMinimumEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {
 
@@ -48,7 +49,7 @@ public class BalanceUnderMinimumEventListener extends AbstractEmailingListener<E
     }
 
     @Override
-    Map<String, Object> getData(final ExecutionStartedEvent event) {
+    protected Map<String, Object> getData(final ExecutionStartedEvent event) {
         final Map<String, Object> result = new HashMap<>();
         result.put("newBalance", event.getBalance());
         result.put("minimumBalance", minimumBalance);
@@ -56,7 +57,7 @@ public class BalanceUnderMinimumEventListener extends AbstractEmailingListener<E
     }
 
     @Override
-    public void handle(final ExecutionStartedEvent event) {
+    public void handle(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
         // figure out whether or not the balance is over the threshold
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance();
         final int newBalance = event.getBalance();
@@ -68,6 +69,6 @@ public class BalanceUnderMinimumEventListener extends AbstractEmailingListener<E
         // set the new threshold
         BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
         // and continue with event-processing, possibly eventually sending the e-mail
-        super.handle(event);
+        super.handle(event, sessionInfo);
     }
 }

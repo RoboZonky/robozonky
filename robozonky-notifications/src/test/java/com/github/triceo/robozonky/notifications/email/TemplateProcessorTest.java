@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.Objects;
 
 import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -47,7 +48,8 @@ public class TemplateProcessorTest extends AbstractEmailingListenerTest {
     @Test
     public void processingWithoutErrors() throws IOException, TemplateException {
         final AbstractEmailingListener<Event> l = this.getEmailingListener();
-        final String s = TemplateProcessor.INSTANCE.process(l.getTemplateFileName(), l.getData(event));
+        final String s = TemplateProcessor.INSTANCE.process(l.getTemplateFileName(),
+                l.getData(event, new SessionInfo("someone@somewhere.net")));
         Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 

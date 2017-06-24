@@ -38,7 +38,7 @@ class RoboZonkyDaemonFailedEventListener extends AbstractEmailingListener<RoboZo
     }
 
     @Override
-    Map<String, Object> getData(final RoboZonkyDaemonFailedEvent event) {
+    protected Map<String, Object> getData(final RoboZonkyDaemonFailedEvent event) {
         return Collections.singletonMap("cause", AbstractEmailingListener.stackTraceToString(event.getCause()));
     }
 }

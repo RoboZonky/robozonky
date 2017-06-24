@@ -38,7 +38,7 @@ class RemoteOperationFailedEventListener extends AbstractEmailingListener<Remote
     }
 
     @Override
-    Map<String, Object> getData(final RemoteOperationFailedEvent event) {
+    protected Map<String, Object> getData(final RemoteOperationFailedEvent event) {
         return Collections.singletonMap("cause", AbstractEmailingListener.stackTraceToString(event.getCause()));
     }
 }

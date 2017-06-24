@@ -29,6 +29,7 @@ import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
@@ -85,17 +86,19 @@ public class Checker {
     }
 
 
-    public static boolean notifications() {
-        return Checker.notifications(ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
+    public static boolean notifications(final String username) {
+        return Checker.notifications(username, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
 
-    public static boolean notifications(final List<Refreshable<EventListener<RoboZonkyTestingEvent>>> refreshables) {
+    public static boolean notifications(final String username,
+                                        final List<Refreshable<EventListener<RoboZonkyTestingEvent>>> refreshables) {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
                         .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
                         .collect(Collectors.toSet());
         if (listeners.size() > 0) {
+            final SessionInfo sessionInfo = new SessionInfo(username);
             final RoboZonkyTestingEvent evt = new RoboZonkyTestingEvent();
-            listeners.forEach(l -> l.handle(evt));
+            listeners.forEach(l -> l.handle(evt, sessionInfo));
             return true;
         } else {
             return false;

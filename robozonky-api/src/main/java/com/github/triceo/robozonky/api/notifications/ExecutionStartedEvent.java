@@ -27,19 +27,12 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
  */
 public final class ExecutionStartedEvent extends Event {
 
-    private final String username;
     private final Collection<LoanDescriptor> loanDescriptors;
     private final int balance;
 
-    public ExecutionStartedEvent(final String username, final Collection<LoanDescriptor> loanDescriptors,
-                                 final int balance) {
-        this.username = username;
+    public ExecutionStartedEvent(final Collection<LoanDescriptor> loanDescriptors, final int balance) {
         this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
         this.balance = balance;
-    }
-
-    public String getUsername() {
-        return this.username;
     }
 
     /**

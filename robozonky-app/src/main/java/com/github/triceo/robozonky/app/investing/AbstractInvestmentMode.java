@@ -53,6 +53,11 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
     }
 
     @Override
+    public String getUsername() {
+        return this.authenticationHandler.getSecretProvider().getUsername();
+    }
+
+    @Override
     public boolean isDryRun() {
         return this.investorBuilder.isDryRun();
     }

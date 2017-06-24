@@ -30,7 +30,8 @@ public class RobozonkyStartupNotifierTest extends AbstractEventsAndStateLeveragi
 
     @Test
     public void properEventsFired() {
-        final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier();
+        final String username = "username";
+        final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier(username);
         final Optional<Consumer<ShutdownHook.Result>> result = rzsn.get();
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);

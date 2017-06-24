@@ -4,7 +4,7 @@ POZOR: RoboZonky běží ve zkušebním režimu. Následující informace slouž
 ===============================================================================
 </#if>
 
-RoboZonky Vás tímto informuje o následujícím:
+RoboZonky pro Zonky účet ${data.session.userName} Vás tímto informuje o následující operaci:
 
 <#include embed>
 
@@ -14,4 +14,4 @@ Tuto zprávu dostáváte, protože je tak Váš robot nakonfigurován. Neodpoví
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users
 
-Vygeneroval ${robozonky} dne ${timestamp?date} v ${timestamp?time}.
+Vygeneroval ${data.session.userAgent} dne ${timestamp?date} v ${timestamp?time}.

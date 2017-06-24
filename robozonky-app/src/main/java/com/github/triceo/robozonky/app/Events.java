@@ -30,6 +30,7 @@ import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ public enum Events {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Events.class);
     private static final List<Event> EVENTS_FIRED = new ArrayList<>();
+    private static SessionInfo SESSION_INFO = null;
 
     private static class EventSpecific<E extends Event> {
 
@@ -64,9 +66,9 @@ public enum Events {
 
     }
 
-    private static <E extends Event> void fire(final E event, final EventListener<E> listener) {
+    private static <E extends Event> void fire(final E event, final EventListener<E> listener, final SessionInfo info) {
         try {
-            listener.handle(event);
+            listener.handle(event, info);
         } catch (final RuntimeException ex) {
             Events.LOGGER.warn("Listener failed: {}.", listener, ex);
         }
@@ -103,22 +105,44 @@ public enum Events {
     /**
      * Distribute a particular event to all listeners that have been added and not yet removed for that particular
      * event. This MUST NOT be called by users and is not part of the public API.
-     * <p>
+     *
      * The listeners may be executed in parallel, no execution order guarantees are given. When this method returns,
-     * all listeners' {@link EventListener#handle(Event)} method will have returned.
+     * all listeners' {@link EventListener#handle(Event, SessionInfo)} method will have returned. Will use the
+     * internal {@link SessionInfo} instance for that.
+     *
+     * @param event Event to distribute.
+     * @param sessionInfo If not null, internal {@link SessionInfo} instance will be updated.
+     * @param <E> Event type to distribute.
+     */
+    public static <E extends Event> void fire(final E event, final SessionInfo sessionInfo) {
+        if (sessionInfo != null) {
+            SESSION_INFO = sessionInfo;
+        }
+        final Class<E> eventClass = (Class<E>) event.getClass();
+        Events.LOGGER.debug("Firing {}.", eventClass);
+        Events.INSTANCE.getListeners(eventClass).parallel()
+                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
+                .forEach(l -> Events.fire(event, l, Events.SESSION_INFO));
+        if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
+            Events.EVENTS_FIRED.add(event);
+        }
+    }
+
+    /**
+     * Distribute a particular event to all listeners that have been added and not yet removed for that particular
+     * event. This MUST NOT be called by users and is not part of the public API.
+     *
+     * The listeners may be executed in parallel, no execution order guarantees are given. When this method returns,
+     * all listeners' {@link EventListener#handle(Event, SessionInfo)} method will have returned.
+     *
+     * This method will not update the internal {@link SessionInfo} instance.
+     *
      * @param event Event to distribute.
      * @param <E> Event type to distribute.
      */
     @SuppressWarnings("unchecked")
     public static <E extends Event> void fire(final E event) {
-        final Class<E> eventClass = (Class<E>) event.getClass();
-        Events.LOGGER.debug("Firing {}.", eventClass);
-        Events.INSTANCE.getListeners(eventClass).parallel()
-                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
-                .forEach(l -> Events.fire(event, l));
-        if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
-            Events.EVENTS_FIRED.add(event);
-        }
+        Events.fire(event, null);
     }
 
     /**

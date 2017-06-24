@@ -19,12 +19,13 @@ package com.github.triceo.robozonky.app.management;
 import java.time.OffsetDateTime;
 
 import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
 class Runtime implements RuntimeMBean {
 
-    private String zonkyUsername = "", version = "";
+    private String zonkyUsername = "";
     private OffsetDateTime lastUpdatedDateTime;
 
     @Override
@@ -37,24 +38,14 @@ class Runtime implements RuntimeMBean {
         return this.zonkyUsername;
     }
 
-    @Override
-    public String getVersion() {
-        return this.version;
-    }
-
-    void registerInitialization(final RoboZonkyInitializedEvent event) {
-        this.version = event.getVersion();
-    }
-
-    void registerInvestmentRun(final ExecutionCompletedEvent event) {
-        this.zonkyUsername = event.getUsername();
+    void registerInvestmentRun(final ExecutionCompletedEvent event, final SessionInfo sessionInfo) {
         this.lastUpdatedDateTime = event.getCreatedOn();
+        this.zonkyUsername = sessionInfo.getUserName();
     }
 
     @Override
     public void reset() {
         this.zonkyUsername = "";
-        this.version = "";
         this.lastUpdatedDateTime = null;
     }
 
@@ -62,4 +53,10 @@ class Runtime implements RuntimeMBean {
     public OffsetDateTime getLatestUpdatedDateTime() {
         return this.lastUpdatedDateTime;
     }
+
+    @Override
+    public String getVersion() {
+        return Defaults.ROBOZONKY_VERSION;
+    }
+
 }

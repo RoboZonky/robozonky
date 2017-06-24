@@ -57,7 +57,6 @@ enum TemplateProcessor {
             throws IOException, TemplateException {
         final Map<String, Object> data = new HashMap<>();
         data.put("timestamp", Date.from(Instant.now()));
-        data.put("robozonky", Defaults.ROBOZONKY_USER_AGENT);
         data.put("robozonkyUrl", Defaults.ROBOZONKY_URL);
         data.put("embed", embeddedTemplate);
         data.put("data", embeddedData);

@@ -88,14 +88,14 @@ public class CheckerTest {
 
     @Test
     public void notificationsEmptyOnInput() {
-        Assertions.assertThat(Checker.notifications(Collections.emptyList())).isFalse();
+        Assertions.assertThat(Checker.notifications("", Collections.emptyList())).isFalse();
     }
 
     @Test
     public void notificationsEmptyWhenRefreshed() {
         final Refreshable<EventListener<RoboZonkyTestingEvent>> r = Refreshable.createImmutable(null);
         r.run();
-        Assertions.assertThat(Checker.notifications(Collections.singletonList(r))).isFalse();
+        Assertions.assertThat(Checker.notifications("", Collections.singletonList(r))).isFalse();
     }
 
     @Test
@@ -103,8 +103,8 @@ public class CheckerTest {
         final EventListener<RoboZonkyTestingEvent> l = Mockito.mock(EventListener.class);
         final Refreshable<EventListener<RoboZonkyTestingEvent>> r = Refreshable.createImmutable(l);
         r.run();
-        Assertions.assertThat(Checker.notifications(Collections.singletonList(r))).isTrue();
-        Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class));
+        Assertions.assertThat(Checker.notifications("", Collections.singletonList(r))).isTrue();
+        Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
     }
 
 }

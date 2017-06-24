@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.notifications.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,7 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
     abstract String getSuffix(final T event);
 
     @Override
-    public void handle(final T event) {
+    public void handle(final T event, final SessionInfo sessionInfo) {
         if (!this.shouldStoreFile(event)) {
             LOGGER.debug("Will not store file.");
             return;

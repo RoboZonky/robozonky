@@ -21,15 +21,4 @@ package com.github.triceo.robozonky.api.notifications;
  */
 public final class RoboZonkyInitializedEvent extends Event {
 
-    private final String version;
-
-    public RoboZonkyInitializedEvent(final String version) {
-        this.version = version;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-
 }

@@ -39,7 +39,7 @@ final class InvestmentSkippedEventListener extends AbstractEmailingListener<Inve
     }
 
     @Override
-    Map<String, Object> getData(final InvestmentSkippedEvent event) {
+    protected Map<String, Object> getData(final InvestmentSkippedEvent event) {
         final Loan loan = event.getRecommendation().getLoanDescriptor().getLoan();
         final Map<String, Object> result = new HashMap<>();
         result.put("loanId", loan.getId());

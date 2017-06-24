@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.notifications.email;
 import javax.mail.internet.MimeMessage;
 
 import com.github.triceo.robozonky.api.notifications.Event;
+import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.icegreen.greenmail.junit.GreenMailRule;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -35,7 +36,7 @@ public class EmailingListenerTest extends AbstractEmailingListenerTest {
     public void testMailSent() throws Exception {
         final AbstractEmailingListener<Event> l = this.getEmailingListener();
         Assertions.assertThat(this.event).isInstanceOf(this.listenerType.getEventType());
-        l.handle(this.event);
+        l.handle(this.event, new SessionInfo("someone@somewhere.net"));
         Assertions.assertThat(l.getData(this.event)).isNotNull();
         Assertions.assertThat(l.shouldSendEmail(this.event)).isTrue();
         Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(1);

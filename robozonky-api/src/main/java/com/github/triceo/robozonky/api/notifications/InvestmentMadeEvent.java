@@ -33,11 +33,6 @@ public final class InvestmentMadeEvent extends Event {
         this.dryRun = isDryRun;
     }
 
-    @Deprecated
-    public InvestmentMadeEvent(final Investment investment, final int finalBalance) {
-        this(investment, finalBalance, false);
-    }
-
     /**
      * @return The investment that was made.
      */

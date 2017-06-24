@@ -42,7 +42,7 @@ class TestOperatingMode extends OperatingMode {
 
             @Override
             public Optional<Collection<Investment>> get() {
-                if (!Checker.notifications()) {
+                if (!Checker.notifications(auth.getSecretProvider().getUsername())) {
                     LOGGER.warn("No e-mail notifications sent. Perhaps they were never enabled?");
                 } else {
                     LOGGER.info("E-mail notification successfully sent, check your inbox.");

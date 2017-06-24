@@ -17,19 +17,8 @@
 package com.github.triceo.robozonky.api.notifications;
 
 /**
- * Fired immediately after RoboZonky's acquired exclusive lock and is going to initialize.
+ * Fired immediately after RoboZonky's started and is going to initialize.
  */
 public final class RoboZonkyStartingEvent extends Event {
-
-    private final String version;
-
-    public RoboZonkyStartingEvent(final String version) {
-        this.version = version;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
 
 }
