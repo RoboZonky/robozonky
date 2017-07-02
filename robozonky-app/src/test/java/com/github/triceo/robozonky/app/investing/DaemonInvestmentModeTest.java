@@ -37,7 +37,6 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
@@ -125,19 +124,20 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.empty());
-        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
+        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
+                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
+                AbstractInvestingTest.harmlessApi(z));
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(ms);
         s.run();
-        try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                new Investor.Builder().asDryRun(), false, m, s)) {
+        try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(auth, new Investor.Builder().asDryRun(),
+                false, m, s)) {
             final Future<Boolean> wasLockedByUser = Executors.newScheduledThreadPool(1).schedule(() -> {
                 LoggerFactory.getLogger(DaemonInvestmentModeTest.class).info("Sending request to terminate.");
                 final boolean result = DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.hasQueuedThreads();
                 DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
                 return result;
             }, 1, TimeUnit.SECONDS);
-            final Optional<Collection<Investment>> result = mode.execute(p);
+            final Optional<Collection<Investment>> result = mode.get();
             Assertions.assertThat(wasLockedByUser.get()).isTrue();
             Assertions.assertThat(result).matches(o -> o.map(c -> c.size() == 1).orElse(false));
         } finally {

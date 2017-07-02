@@ -30,7 +30,6 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,25 +38,22 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecution.class);
 
-    private final ApiProvider apiProvider;
     private final AuthenticationHandler authenticationHandler;
     private final Investor.Builder investor;
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final TemporalAmount maximumSleepPeriod;
 
-    public StrategyExecution(final ApiProvider apiProvider, final Investor.Builder investor,
-                             final Refreshable<InvestmentStrategy> strategy, final AuthenticationHandler auth,
-                             final TemporalAmount maximumSleepPeriod) {
-        this.apiProvider = apiProvider;
+    public StrategyExecution(final Investor.Builder investor, final Refreshable<InvestmentStrategy> strategy,
+                             final AuthenticationHandler auth, final TemporalAmount maximumSleepPeriod) {
         this.authenticationHandler = auth;
         this.investor = investor;
         this.refreshableStrategy = strategy;
         this.maximumSleepPeriod = maximumSleepPeriod;
     }
 
-    public StrategyExecution(final ApiProvider apiProvider, final Investor.Builder investor,
-                             final Refreshable<InvestmentStrategy> strategy, final AuthenticationHandler auth) {
-        this(apiProvider, investor, strategy, auth, Duration.ofMinutes(60));
+    public StrategyExecution(final Investor.Builder investor, final Refreshable<InvestmentStrategy> strategy,
+                             final AuthenticationHandler auth) {
+        this(investor, strategy, auth, Duration.ofMinutes(60));
     }
 
     private Collection<Investment> invest(final InvestmentStrategy strategy,
@@ -66,11 +62,11 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
             final InvestmentCommand c = new StrategyBasedInvestmentCommand(strategy, marketplace);
             return Session.invest(investor, zonky, c);
         };
-        return authenticationHandler.execute(apiProvider, op);
+        return authenticationHandler.execute(op);
     }
 
     private Collection<Investment> justReauth() {
-        return authenticationHandler.execute(apiProvider, null);
+        return authenticationHandler.execute(null);
     }
 
     @Override

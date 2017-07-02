@@ -27,7 +27,6 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
@@ -43,11 +42,11 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected void openMarketplace(final Consumer<Collection<Loan>> target) {
-        target.accept(Collections.emptyList()); // marketplace is abstracted away since we're only using the one loan
+        target.accept(Collections.emptyList());
     }
 
     @Override
-    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(final ApiProvider apiProvider) {
+    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
         final Function<Zonky, Collection<Investment>> op = (zonky) -> {
             final Loan l = zonky.getLoan(loanId);
             final LoanDescriptor d = new LoanDescriptor(l);
@@ -55,12 +54,12 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
                     .map(r -> Session.invest(getInvestorBuilder(), zonky, new DirectInvestmentCommand(r)))
                     .orElse(Collections.emptyList());
         };
-        return (marketplace) -> this.getAuthenticationHandler().execute(apiProvider, op);
+        return (marketplace) -> this.getAuthenticationHandler().execute(op);
     }
 
     @Override
-    protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider) {
-        return this.execute(apiProvider, new Semaphore(1));
+    public Optional<Collection<Investment>> get() {
+        return this.execute(new Semaphore(1));
     }
 
 }

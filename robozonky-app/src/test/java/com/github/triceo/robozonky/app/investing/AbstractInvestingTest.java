@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,6 +35,7 @@ import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
+import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.OAuth;
 import com.github.triceo.robozonky.common.remote.Zonky;
@@ -98,6 +100,12 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
         return zonky;
     }
 
+    protected static AuthenticationHandler newAuthenticationHandler(final Supplier<AuthenticationHandler> supplier,
+                                                                    final ApiProvider api) {
+        final AuthenticationHandler a = supplier.get();
+        a.setApiProvider(api);
+        return a;
+    }
 
     protected List<Event> getNewEvents() {
         return Events.getFired().stream()

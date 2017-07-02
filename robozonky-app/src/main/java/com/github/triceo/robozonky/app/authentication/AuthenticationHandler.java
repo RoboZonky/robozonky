@@ -67,6 +67,7 @@ public class AuthenticationHandler {
     private final boolean needsPassword;
     private final SecretProvider data;
     private final TemporalAmount tokenRefreshBeforeExpiration;
+    private ApiProvider apiProvider;
 
     private AuthenticationHandler(final SecretProvider data) {
         this(data, false, Duration.ZERO);
@@ -77,6 +78,18 @@ public class AuthenticationHandler {
         this.data = data;
         this.tokenRefreshBeforeExpiration = tokenRefreshBeforeExpiration;
         this.needsPassword = !tokenBased;
+    }
+
+    /**
+     * Set {@link ApiProvider} instance to be used during {@link #execute(Function)}. If not called, fresh provider
+     * will be used every time.
+     *
+     * This method is mostly used for mocking the Zonky API during testing.
+     *
+     * @param provider
+     */
+    public void setApiProvider(final ApiProvider provider) {
+        this.apiProvider = provider;
     }
 
     public SecretProvider getSecretProvider() {
@@ -152,15 +165,28 @@ public class AuthenticationHandler {
     }
 
     /**
-     * Execute investment operation over control API.
+     * Execute investment operation over Zonky.
      *
-     * @param provider API provider to be used for constructing the control API.
      * @param op Operation to execute over the API.
      * @return Investments newly made through the API. If operation null and {@link #needsPassword} true, will only refresh
      * token (if necessary) and return empty.
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
-    public Collection<Investment> execute(final ApiProvider provider,
+    public Collection<Investment> execute(final Function<Zonky, Collection<Investment>> op) {
+        final ApiProvider provider = this.apiProvider == null ? new ApiProvider() : this.apiProvider;
+        return execute(provider, op);
+    }
+
+    /**
+     * Execute investment operation over Zonky.
+     *
+     * @param provider API provider to be used for constructing the Zonky API.
+     * @param op Operation to execute over the API.
+     * @return Investments newly made through the API. If operation null and {@link #needsPassword} true, will only refresh
+     * token (if necessary) and return empty.
+     * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
+     */
+    private Collection<Investment> execute(final ApiProvider provider,
                                           final Function<Zonky, Collection<Investment>> op) {
         final boolean hasOperation = op != null;
         if (needsPassword && !hasOperation) { // needs password, yet won't do anything = don't log in

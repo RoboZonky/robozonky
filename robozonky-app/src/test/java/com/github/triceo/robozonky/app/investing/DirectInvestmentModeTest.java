@@ -44,12 +44,15 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.of(l));
         Mockito.when(z.getStatistics()).thenReturn(Mockito.mock(Statistics.class));
         Mockito.when(z.getInvestments()).thenReturn(Stream.empty());
-        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
-        try (final DirectInvestmentMode exec = new DirectInvestmentMode(
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                new Investor.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {
+        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
+                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
+                AbstractInvestingTest.harmlessApi(z)
+        );
+        final Investor.Builder b = new Investor.Builder().asDryRun();
+        try (final DirectInvestmentMode exec =
+                     new DirectInvestmentMode(auth, b, true, l.getId(), (int)l.getAmount())) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(exec.execute(p)).isPresent();
+                softly.assertThat(exec.get()).isPresent();
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
                 softly.assertThat(exec.isDryRun()).isTrue();
             });
@@ -69,7 +72,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest{
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
                 new Investor.Builder().asDryRun(), true, l.getId(), (int)l.getAmount())) {
-            Assertions.assertThat(exec.execute(p)).isEmpty();
+            Assertions.assertThat(exec.get()).isEmpty();
         } catch (final Exception ex) {
             Assertions.fail("Unexpected exception.", ex);
         }

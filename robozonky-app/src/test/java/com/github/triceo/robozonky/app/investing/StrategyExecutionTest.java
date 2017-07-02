@@ -25,15 +25,13 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.Assertions;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
 public class StrategyExecutionTest extends AbstractInvestingTest {
 
     @Test
     public void empty() {
-        final StrategyExecution exec = new StrategyExecution(null, null, null, null);
+        final StrategyExecution exec = new StrategyExecution(null, null, null);
         Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
@@ -46,7 +44,7 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Refreshable<InvestmentStrategy> r = Refreshable.createImmutable(null);
         r.run();
-        final StrategyExecution exec = new StrategyExecution(null, null, r, null);
+        final StrategyExecution exec = new StrategyExecution(null, r, null);
         Assertions.assertThat(exec.apply(Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();

@@ -27,7 +27,6 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +38,7 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
     private final AuthenticationHandler authenticationHandler;
     private final Investor.Builder investorBuilder;
 
-    protected AbstractInvestmentMode(final AuthenticationHandler authenticationHandler,
-                                     final Investor.Builder builder,
+    protected AbstractInvestmentMode(final AuthenticationHandler authenticationHandler, final Investor.Builder builder,
                                      final boolean isFaultTolerant) {
         this.authenticationHandler = authenticationHandler;
         this.investorBuilder = builder;
@@ -70,13 +68,6 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
         return authenticationHandler;
     }
 
-    protected abstract Optional<Collection<Investment>> execute(final ApiProvider apiProvider);
-
-    @Override
-    public Optional<Collection<Investment>> get() {
-        return this.execute(new ApiProvider());
-    }
-
     protected boolean wasSuddenDeath() {
         return false; // only daemon can suddenly die
     }
@@ -91,26 +82,24 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
     /**
      * Provide the investing algorithm.
      *
-     * @param apiProvider API provider to use when constructing the investing mechanism.
      * @return Investments made by the algorithm.
      */
-    protected abstract Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor(ApiProvider apiProvider);
+    protected abstract Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor();
 
     /**
      * Execute the algorithm and give it a circuit breaker which, when turning true, tells the orchestration to
      * finish the operation and terminate.
      *
-     * @param apiProvider The API provider to use when constructing the investing mechanism.
      * @param circuitBreaker Release in order to have this method stop and return.
      * @return Investments made while this method was running, or empty if failure.
      */
-    protected Optional<Collection<Investment>> execute(final ApiProvider apiProvider, final Semaphore circuitBreaker) {
+    protected Optional<Collection<Investment>> execute(final Semaphore circuitBreaker) {
         LOGGER.trace("Executing.");
         try {
             final ResultTracker buffer = new ResultTracker();
             final Consumer<Collection<Loan>> investor = (loans) -> {
                 final Collection<LoanDescriptor> descriptors = buffer.acceptLoansFromMarketplace(loans);
-                final Collection<Investment> result = getInvestor(apiProvider).apply(descriptors);
+                final Collection<Investment> result = getInvestor().apply(descriptors);
                 buffer.acceptInvestmentsFromRobot(result);
             };
             openMarketplace(investor);

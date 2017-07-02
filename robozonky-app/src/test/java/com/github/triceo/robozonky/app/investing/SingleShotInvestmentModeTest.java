@@ -32,7 +32,6 @@ import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
@@ -89,7 +88,9 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
     @Test
     public void standard() {
         final Zonky z = AbstractInvestingTest.harmlessZonky(0);
-        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
+        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
+                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
+                AbstractInvestingTest.harmlessApi(z));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
@@ -98,11 +99,10 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final TestMarketplace m = new TestMarketplace(Collections.singletonList(l));
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(Mockito.mock(InvestmentStrategy.class));
         s.run();
-        try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                new Investor.Builder().asDryRun(), true, m, s)) {
+        try (final SingleShotInvestmentMode exec =
+                     new SingleShotInvestmentMode(auth, new Investor.Builder().asDryRun(), true, m, s)) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(exec.execute(p)).isPresent();
+                softly.assertThat(exec.get()).isPresent();
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
                 softly.assertThat(exec.isDryRun()).isTrue();
             });
@@ -123,10 +123,9 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
 
     @Test
     public void empty() {
-        final ApiProvider p = AbstractInvestingTest.harmlessApi();
         final SingleShotInvestmentModeTest.TestMarketplace m = new SingleShotInvestmentModeTest.TestMarketplace(Collections.emptyList());
         try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(null, null, true, m, null)) {
-            Assertions.assertThat(exec.execute(p)).isPresent();
+            Assertions.assertThat(exec.get()).isPresent();
         } catch (final Exception ex) {
             Assertions.fail("Unexpected exception.", ex);
         } finally {
@@ -141,7 +140,9 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
     public void failingDuringInvest() {
         final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         Mockito.doThrow(IllegalStateException.class).when(z).getWallet();
-        final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
+        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
+                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username")),
+                AbstractInvestingTest.harmlessApi(z));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
@@ -150,10 +151,9 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final Marketplace m = new SingleShotInvestmentModeTest.TestMarketplace(Collections.singletonList(l));
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(Mockito.mock(InvestmentStrategy.class));
         s.run();
-        try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("username")),
-                new Investor.Builder(), true, m, s)) {
-            Assertions.assertThat(exec.execute(p)).isEmpty();
+        try (final SingleShotInvestmentMode exec =
+                     new SingleShotInvestmentMode(auth, new Investor.Builder(), true, m, s)) {
+            Assertions.assertThat(exec.get()).isEmpty();
         } catch (final Exception ex) {
             Assertions.fail("Unexpected exception.", ex);
         }
