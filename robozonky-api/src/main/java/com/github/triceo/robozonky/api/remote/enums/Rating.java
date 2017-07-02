@@ -17,6 +17,8 @@
 package com.github.triceo.robozonky.api.remote.enums;
 
 import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public enum Rating {
 
@@ -29,6 +31,12 @@ public enum Rating {
         C("C",   new BigDecimal("0.099")),
         D("D",   new BigDecimal("0.119"));
 
+    public static Rating findByCode(final String code) {
+        return Stream.of(Rating.values())
+                .filter(r -> Objects.equals(r.code, code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Unknown rating: " + code));
+    }
 
     private final String code;
     private final BigDecimal expectedYield;

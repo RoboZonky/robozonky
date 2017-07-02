@@ -30,6 +30,7 @@
     <module>robozonky-marketplaces</module>
     <module>robozonky-installer</module>
     <module>robozonky-common</module>
+    <module>robozonky-strategy-natural</module>
   </modules>
   <packaging>pom</packaging>
   <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -43,6 +44,7 @@
     <surefire.version>2.20</surefire.version>
     <version.org.jboss.resteasy>3.1.3.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.25</version.org.slf4j>
+    <version.org.antlr>4.7</version.org.antlr>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -71,6 +73,11 @@
       <dependency>
         <groupId>com.github.triceo.robozonky</groupId>
         <artifactId>robozonky-strategy-simple</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.triceo.robozonky</groupId>
+        <artifactId>robozonky-strategy-natural</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -178,6 +185,11 @@
         <scope>test</scope>
       </dependency>
       <!-- Misc -->
+      <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>${version.org.antlr}</version>
+      </dependency>
       <dependency> <!-- RoboZonky version comparisons -->
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-artifact</artifactId>
@@ -305,6 +317,19 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.antlr</groupId>
+          <artifactId>antlr4-maven-plugin</artifactId>
+          <version>${version.org.antlr}</version>
+          <executions>
+            <execution>
+              <id>antlr</id>
+              <goals>
+                <goal>antlr4</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.0.2</version>
