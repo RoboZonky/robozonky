@@ -49,6 +49,8 @@ public class EmailSettingsValidatorTest {
     @Test
     public void mailSent() throws MessagingException, InterruptedException {
         final InstallData data = Mockito.mock(InstallData.class);
+        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.ZONKY_USERNAME.getKey())))
+                .thenReturn("someone@somewhere.cz");
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PORT.getKey())))
                 .thenReturn(String.valueOf(greenMail.getSmtp().getPort()));
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_HOSTNAME.getKey())))
