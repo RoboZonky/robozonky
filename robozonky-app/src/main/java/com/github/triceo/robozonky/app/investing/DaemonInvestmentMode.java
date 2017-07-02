@@ -41,7 +41,7 @@ import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 
 public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzMarketplace"));
+    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
 
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;

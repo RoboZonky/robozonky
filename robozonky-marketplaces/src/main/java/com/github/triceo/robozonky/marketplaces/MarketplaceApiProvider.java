@@ -29,7 +29,6 @@ class MarketplaceApiProvider extends ApiProvider {
      * Retrieve Zotify's marketplace cache.
      *
      * @return New API instance.
-     * @throws IllegalStateException If {@link #close()} already called.
      */
     @Override
     public Collection<Loan> marketplace() {

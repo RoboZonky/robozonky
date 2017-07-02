@@ -39,7 +39,11 @@ public class Scheduler {
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
     private static final TemporalAmount REFRESH =
             Duration.ofMinutes(Settings.INSTANCE.getRemoteResourceRefreshIntervalInMinutes());
-    public static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(1);
+    /*
+     * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
+     * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
+     */
+    public static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(2);
 
     private final Supplier<ScheduledExecutorService> executorProvider;
     private ScheduledExecutorService executor;
