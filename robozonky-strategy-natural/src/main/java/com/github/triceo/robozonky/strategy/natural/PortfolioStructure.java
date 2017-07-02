@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.math.BigInteger;
 import java.util.EnumMap;
+import java.util.Map;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.slf4j.Logger;
@@ -27,11 +28,21 @@ public class PortfolioStructure {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioStructure.class);
 
-    private final EnumMap<Rating, BigInteger> minimumShares = new EnumMap<>(Rating.class),
+    private final Map<Rating, BigInteger> minimumShares = new EnumMap<>(Rating.class),
             maximumShares = new EnumMap<>(Rating.class);
+    private BigInteger targetPortfolioSize = BigInteger.ZERO;
 
     private int sumMinimumShares() {
         return minimumShares.values().stream().reduce(BigInteger.ZERO, BigInteger::add).intValue();
+    }
+
+    public void setTargetPortfolioSize(final BigInteger size) {
+        PortfolioStructure.LOGGER.debug("Target portfolio size is {},- CZK.", size);
+        this.targetPortfolioSize = size;
+    }
+
+    public BigInteger getTargetPortfolioSize() {
+        return targetPortfolioSize;
     }
 
     public void addItem(final PortfolioStructureItem item) {

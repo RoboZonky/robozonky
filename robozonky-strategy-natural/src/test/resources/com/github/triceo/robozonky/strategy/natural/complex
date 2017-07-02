@@ -1,10 +1,19 @@
 # Testovací strategie pro RoboZonky
+# =================================
+# První dvě sekce se vztahují na všechny investice s výjimkou těch, které odpovídají pravidlům ve třetí sekci.
 
+# Neuvedené ratingy budou investovány rovnou měrou.
 1. Struktura portfolia
-Rating A** může představovat až 15 % portfolia.
-Rating A++ může představovat 10 až 30 % portfolia.
-Rating D může představovat 30 až 20 % portfolia.
+Cílová zůstatková částka je 100000,- Kč.
+Prostředky v ratingu A** mohou tvořit až 15 % aktuální zůstatkové částky.
+Prostředky v ratingu A++ musí tvořit 10 až 30 % aktuální zůstatkové částky.
+Prostředky v ratingu D musí tvořit 30 až 20 % aktuální zůstatkové částky.
 
+# Neuvedené ratingy budou investovány v běžné výši.
 2. Velikost investice
+Běžná výše investice je 200,- Kč.
+Do půjček v ratingu B investovat 200,- až 600,- Kč.
+Do půjček v ratingu C investovat 800,- až 400,- Kč.
+Do půjček v ratingu A* investovat až 1000,- Kč.
 
 3. Výjimky
