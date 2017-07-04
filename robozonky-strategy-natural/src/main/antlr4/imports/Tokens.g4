@@ -1,30 +1,93 @@
 grammar Tokens;
 
+@header {
+    import java.math.BigInteger;
+    import com.github.triceo.robozonky.api.remote.enums.*;
+    import com.github.triceo.robozonky.api.remote.entities.*;
+    import com.github.triceo.robozonky.strategy.natural.*;
+}
+
 ratingExpression returns [Rating result] :
-    r=(AAAAA | AAAA | AAA | AA | A | B | C | D) { $result = Rating.findByCode($r.getText()); }
+    r=(RATING_AAAAA | RATING_AAAA | RATING_AAA | RATING_AA | RATING_A | RATING_B | RATING_C | RATING_D)
+    { $result = Rating.findByCode($r.getText()); }
 ;
 
+regionExpression returns [Region result] :
+    r=(REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P |
+        REGION_S | REGION_T | REGION_U | REGION_Z)
+    { $result = Region.findByCode($r.getText()); }
+;
+
+incomeExpression returns [MainIncomeType result] :
+    r=(INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION | INCOME_MATERNITY_LEAVE
+        | INCOME_STUDENT | INCOME_UNEMPLOYED | INCOME_LIBERAL_PROFESSION | INCOME_OTHER )
+    { $result = MainIncomeType.findByCode($r.getText()); }
+;
+
+purposeExpression returns [Purpose result] :
+    r=(PURPOSE_AUTO_MOTO | PURPOSE_CESTOVANI | PURPOSE_DOMACNOST | PURPOSE_ELEKTRONIKA | PURPOSE_REFINANCOVANI_PUJCEK
+        | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI | PURPOSE_ZDRAVI | PURPOSE_JINE)
+    { $result = Purpose.findByCode($r.getText()); }
+;
+
+// shared strings
+KC: 'Kč';
+DOT: '.';
+
+// regions
+REGION_A : 'Praha';
+REGION_B : 'Jihomoravský';
+REGION_C : 'Jihočeský';
+REGION_E : 'Pardubický';
+REGION_H : 'Královéhradecký';
+REGION_J : 'Vysočina';
+REGION_K : 'Karlovarský';
+REGION_L : 'Liberecký';
+REGION_M : 'Olomoucký';
+REGION_P : 'Plzeňský';
+REGION_S : 'Středočeský';
+REGION_T : 'Moravskoslezský';
+REGION_U : 'Ústecký';
+REGION_Z : 'Zlínský';
+
 // ratings
-AAAAA : 'A**';
-AAAA  : 'A*';
-AAA   : 'A++';
-AA    : 'A+';
-A     : 'A';
-B     : 'B';
-C     : 'C';
-D     : 'D';
+RATING_AAAAA : 'A**';
+RATING_AAAA  : 'A*';
+RATING_AAA   : 'A++';
+RATING_AA    : 'A+';
+RATING_A     : 'A';
+RATING_B     : 'B';
+RATING_C     : 'C';
+RATING_D     : 'D';
+
+// main income types
+INCOME_EMPLOYMENT           : 'zaměstnanec';
+INCOME_ENTREPRENEUR         : 'podnikatel';
+INCOME_LIBERAL_PROFESSION   : 'svobodné povolání';
+INCOME_MATERNITY_LEAVE      : 'na rodičovské dovolené';
+INCOME_PENSION              : 'důchodce';
+INCOME_SELF_EMPLOYMENT      : 'OSVČ';
+INCOME_STUDENT              : 'student';
+INCOME_UNEMPLOYED           : 'bez zaměstnání';
+INCOME_OTHER                : 'ostatní';
+
+// loan purpose types
+PURPOSE_AUTO_MOTO               : 'auto-moto';
+PURPOSE_CESTOVANI               : 'cestování';
+PURPOSE_DOMACNOST               : 'domácnost';
+PURPOSE_ELEKTRONIKA             : 'elektronika';
+PURPOSE_REFINANCOVANI_PUJCEK    : 'refinancování půjček';
+PURPOSE_VLASTNI_PROJEKT         : 'vlastní projekt';
+PURPOSE_VZDELANI                : 'vzdělání';
+PURPOSE_ZDRAVI                  : 'zdraví';
+PURPOSE_JINE                    : 'jiné';
 
 // basic types
-INTEGER_ZERO_TO_HUNDRED: '0' | '100' | [0-9] | [1-9][0-9];
-INTEGER_ALLOWED_INVESTMENTS: '200' | '400' | '600' | '800' | '1000' |
-    '1200' | '1400' | '1600' | '1800' | '2000' |
-    '2200' | '2400' | '2600' | '2800' | '3000' |
-    '3200' | '3400' | '3600' | '3800' | '4000' |
-    '4200' | '4400' | '4600' | '4800' | '5000';
-INTEGER : [1-9][0-9]* ;
-DOUBLE  : INTEGER ',' [0-9]*[1-9];
+INTEGER : DIGIT+ ;
 
 // skip whitespace and comments
-COMMENT : ('#' ~( '\r' | '\n' )*) -> skip;
-NL      : ( [\r\n]+ ) -> skip;
+COMMENT     : ('#' ~( '\r' | '\n' )*) -> skip;
+WHITESPACE  : (' '|'\r'|'\n'|'\t') -> channel(HIDDEN);
+
+fragment DIGIT: [0-9];
 

@@ -1,19 +1,43 @@
 # Testovací strategie pro RoboZonky
 # =================================
 # První dvě sekce se vztahují na všechny investice s výjimkou těch, které odpovídají pravidlům ve třetí sekci.
+# Řádky začínající na '#' jsou vysvětlující komentáře a nejsou povinné. Strategie bude fungovat i bez nich.
 
+# Povinná sekce.
 # Neuvedené ratingy budou investovány rovnou měrou.
 1. Struktura portfolia
-Cílová zůstatková částka je 100000,- Kč.
+Cílová zůstatková částka je 100000 Kč.
 Prostředky v ratingu A** mohou tvořit až 15 % aktuální zůstatkové částky.
 Prostředky v ratingu A++ musí tvořit 10 až 30 % aktuální zůstatkové částky.
 Prostředky v ratingu D musí tvořit 30 až 20 % aktuální zůstatkové částky.
 
+# Povinná sekce.
 # Neuvedené ratingy budou investovány v běžné výši.
 2. Velikost investice
-Běžná výše investice je 200,- Kč.
-Do půjček v ratingu B investovat 200,- až 600,- Kč.
-Do půjček v ratingu C investovat 800,- až 400,- Kč.
-Do půjček v ratingu A* investovat až 1000,- Kč.
+Běžná výše investice je 200 Kč.
+Do půjček v ratingu B investovat 200 až 600 Kč.
+Do půjček v ratingu C investovat 800 až 400 Kč.
+Do půjček v ratingu A* investovat až 1000 Kč.
 
-3. Výjimky
+# Volitelná sekce.
+# Jednotlivé řádky představují vzájemně nezávislé filtry.
+3. Filtrování tržiště
+
+# Takhle vypadají výčty; ty lze použít u ratingu a účelu úvěru, příjmu a kraji žadatele.
+Ignorovat úvěr, kde: kraj klienta je Ústecký.
+Ignorovat úvěr, kde: účel je cestování nebo jiné.
+Ignorovat úvěr, kde: klient je bez zaměstnání, důchodce nebo student.
+
+# Rating lze uvést buď jako výčet, nebo jako interval.
+Ignorovat úvěr, kde: rating je C nebo D.
+Ignorovat úvěr, kde: rating je horší než A.
+Ignorovat úvěr, kde: rating je lepší než A+.
+
+# Stručně prozkoumat lze i příběh.
+Ignorovat úvěr, kde: příběh je velmi krátký.
+
+# Výše a délka úvěru je určena intervalem.
+Ignorovat úvěr, kde: délka nedosahuje 36 měsíců.
+Ignorovat úvěr, kde: délka je 20 až 40 měsíců.
+Ignorovat úvěr, kde: výše je 100000 až 150000 Kč.
+Ignorovat úvěr, kde: výše přesahuje 200000 Kč.

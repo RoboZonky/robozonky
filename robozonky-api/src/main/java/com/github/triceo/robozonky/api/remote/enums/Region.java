@@ -17,6 +17,8 @@
 package com.github.triceo.robozonky.api.remote.enums;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -28,10 +30,30 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * its integer ID after all other values already got one.
  */
 @JsonDeserialize(using = Region.RegionDeserializer.class)
-public enum Region {
+public enum Region implements BaseEnum  {
 
-    PRAHA, STREDOCESKY, JIHOCESKY, PLZENSKY, KARLOVARSKY, USTECKY, LIBERECKY, KRALOVEHRADECKY, PARDUBICKY, VYSOCINA,
-    JIHOMORAVSKY, OLOMOUCKY, MORAVSKOSLEZSKY, ZLINSKY, UNKNOWN;
+    PRAHA("Praha"),
+    STREDOCESKY("Středočeský"),
+    JIHOCESKY("Jihočeský"),
+    PLZENSKY("Plzeňský"),
+    KARLOVARSKY("Karlovarský"),
+    USTECKY("Ústecký"),
+    LIBERECKY("Liberecký"),
+    KRALOVEHRADECKY("Královéhradecký"),
+    PARDUBICKY("Pardubický"),
+    VYSOCINA("Vysočina"),
+    JIHOMORAVSKY("Jihomoravský"),
+    OLOMOUCKY("Olomoucký"),
+    MORAVSKOSLEZSKY("Moravskoslezský"),
+    ZLINSKY("Zlínský"),
+    UNKNOWN("N/A");
+
+    public static Region findByCode(final String code) {
+        return Stream.of(Region.values())
+                .filter(r -> Objects.equals(r.code, code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Unknown region: " + code));
+    }
 
     static class RegionDeserializer extends JsonDeserializer<Region> {
 
@@ -43,6 +65,17 @@ public enum Region {
             return Region.values()[actualId];
         }
 
+    }
+
+    private final String code;
+
+    Region(final String code) {
+        this.code = code;
+    }
+
+    @Override
+    public String getCode() {
+        return code;
     }
 
 }

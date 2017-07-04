@@ -17,6 +17,8 @@
 package com.github.triceo.robozonky.api.remote.enums;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -24,9 +26,17 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = Purpose.PurposeDeserializer.class)
-public enum Purpose {
+public enum Purpose implements BaseEnum {
 
-    AUTO_MOTO, VZDELANI, CESTOVANI, ELEKTRONIKA, ZDRAVI, REFINANCOVANI_PUJCEK, DOMACNOST, VLASTNI_PROJEKT, JINE;
+    AUTO_MOTO("auto-moto"),
+    VZDELANI("vzdělání"),
+    CESTOVANI("cestování"),
+    ELEKTRONIKA("elektronika"),
+    ZDRAVI("zdraví"),
+    REFINANCOVANI_PUJCEK("refinancování půjček"),
+    DOMACNOST("domácnost"),
+    VLASTNI_PROJEKT("vlastní projekt"),
+    JINE("jiné");
 
     static class PurposeDeserializer extends JsonDeserializer<Purpose> {
 
@@ -40,5 +50,22 @@ public enum Purpose {
 
     }
 
+    public static Purpose findByCode(final String code) {
+        return Stream.of(Purpose.values())
+                .filter(r -> Objects.equals(r.code, code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Unknown loan purpose: " + code));
+    }
+
+    private final String code;
+
+    Purpose(final String code) {
+        this.code = code;
+    }
+
+    @Override
+    public String getCode() {
+        return code;
+    }
 
 }

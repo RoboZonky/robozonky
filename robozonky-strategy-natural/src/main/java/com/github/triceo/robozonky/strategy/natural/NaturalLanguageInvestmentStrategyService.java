@@ -45,7 +45,8 @@ public class NaturalLanguageInvestmentStrategyService implements InvestmentStrat
             if (!sourceName.isEmpty()) {
                 sourceName = String.format("%s:%d:%d: ", sourceName, line, charPositionInLine);
             }
-            final String error = sourceName + "line " + line + ":" + charPositionInLine + " " + msg;
+            final String error = sourceName + "line " + line + ":" + charPositionInLine + " " + msg
+                    + ", offending symbol: " + offendingSymbol;
             throw new IllegalStateException("Syntax error: " + error, e);
         }
 

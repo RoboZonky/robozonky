@@ -16,26 +16,30 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import java.math.BigInteger;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
 public class DefaultInvestmentSize {
 
-    private final BigInteger minimumInvestmentInCzk, maximumInvestmentInCzk;
+    private final int minimumInvestmentInCzk, maximumInvestmentInCzk;
 
-    public DefaultInvestmentSize(final BigInteger maximumInvestmentInCzk) {
-        this(BigInteger.valueOf(200), maximumInvestmentInCzk);
+    public DefaultInvestmentSize() {
+        this(Defaults.MINIMUM_INVESTMENT_IN_CZK);
     }
 
-    public DefaultInvestmentSize(final BigInteger minimumInvestmentInCzk, final BigInteger maximumInvestmentInCzk) {
-        this.minimumInvestmentInCzk = minimumInvestmentInCzk.min(maximumInvestmentInCzk);
-        this.maximumInvestmentInCzk = maximumInvestmentInCzk.max(minimumInvestmentInCzk);
+    public DefaultInvestmentSize(final int maximumInvestmentInCzk) {
+        this(Defaults.MINIMUM_INVESTMENT_IN_CZK, maximumInvestmentInCzk);
     }
 
-    public BigInteger getMinimumInvestmentInCzk() {
+    public DefaultInvestmentSize(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
+        this.minimumInvestmentInCzk = Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk);
+        this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
+    }
+
+    public int getMinimumInvestmentInCzk() {
         return minimumInvestmentInCzk;
     }
 
-    public BigInteger getMaximumInvestmentInCzk() {
+    public int getMaximumInvestmentInCzk() {
         return maximumInvestmentInCzk;
     }
 }

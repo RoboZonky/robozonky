@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import java.math.BigInteger;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -28,8 +27,8 @@ public class InvestmentSize {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentSize.class);
 
-    private DefaultInvestmentSize defaultInvestmentSize = new DefaultInvestmentSize(BigInteger.valueOf(200));
-    private final Map<Rating, BigInteger> minimumInvestments = new EnumMap<>(Rating.class),
+    private DefaultInvestmentSize defaultInvestmentSize = new DefaultInvestmentSize();
+    private final Map<Rating, Integer> minimumInvestments = new EnumMap<>(Rating.class),
             maximumInvestments = new EnumMap<>(Rating.class);
 
     public void setDefaultInvestmentSize(final DefaultInvestmentSize size) {
@@ -45,7 +44,7 @@ public class InvestmentSize {
                 item.getRating(), item.getMininumInvestmentInCzk(), item.getMaximumInvestmentInCzk());
     }
 
-    public BigInteger getMinimumInvestmentSizeInCzk(final Rating rating) {
+    public int getMinimumInvestmentSizeInCzk(final Rating rating) {
         if (minimumInvestments.containsKey(rating)) {
             return minimumInvestments.get(rating);
         } else { // no minimum share specified; use default
@@ -53,7 +52,7 @@ public class InvestmentSize {
         }
     }
 
-    public BigInteger getMaximumInvestmentSizeInCzk(final Rating rating) {
+    public int getMaximumInvestmentSizeInCzk(final Rating rating) {
         if (maximumInvestments.containsKey(rating)) {
             return maximumInvestments.get(rating);
         } else { // no maximum share specified; use default

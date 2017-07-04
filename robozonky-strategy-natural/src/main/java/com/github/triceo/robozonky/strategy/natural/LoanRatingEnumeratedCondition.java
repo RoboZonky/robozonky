@@ -18,31 +18,6 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-public class PortfolioStructureItem {
-
-    private final int mininumShareInPercent, maximumShareInPercent;
-    private final Rating rating;
-
-    public PortfolioStructureItem(final Rating r, final int min, final int max) {
-        this.rating = r;
-        this.mininumShareInPercent = Math.min(min, max);
-        this.maximumShareInPercent = Math.max(min, max);
-    }
-
-    public PortfolioStructureItem(final Rating r, final int max) {
-        this(r, 0, max);
-    }
-
-    public int getMininumShareInPercent() {
-        return mininumShareInPercent;
-    }
-
-    public int getMaximumShareInPercent() {
-        return maximumShareInPercent;
-    }
-
-    public Rating getRating() {
-        return rating;
-    }
+public class LoanRatingEnumeratedCondition extends EnumeratedCondition<Rating> {
 
 }

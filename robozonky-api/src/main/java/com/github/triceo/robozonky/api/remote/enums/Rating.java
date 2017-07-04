@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public enum Rating {
+public enum Rating implements BaseEnum {
 
     AAAAA("A**", new BigDecimal("0.025")),
      AAAA("A*",  new BigDecimal("0.034")),
@@ -46,6 +46,7 @@ public enum Rating {
         this.expectedYield = expectedYield;
     }
 
+    @Override
     public String getCode() {
         return code;
     }

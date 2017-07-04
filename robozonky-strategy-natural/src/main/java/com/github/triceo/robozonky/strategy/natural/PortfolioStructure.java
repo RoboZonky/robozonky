@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import java.math.BigInteger;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -28,20 +27,20 @@ public class PortfolioStructure {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioStructure.class);
 
-    private final Map<Rating, BigInteger> minimumShares = new EnumMap<>(Rating.class),
+    private final Map<Rating, Integer> minimumShares = new EnumMap<>(Rating.class),
             maximumShares = new EnumMap<>(Rating.class);
-    private BigInteger targetPortfolioSize = BigInteger.ZERO;
+    private int targetPortfolioSize = 0;
 
     private int sumMinimumShares() {
-        return minimumShares.values().stream().reduce(BigInteger.ZERO, BigInteger::add).intValue();
+        return minimumShares.values().stream().reduce(0, (a, b) -> a + b);
     }
 
-    public void setTargetPortfolioSize(final BigInteger size) {
+    public void setTargetPortfolioSize(final int size) {
         PortfolioStructure.LOGGER.debug("Target portfolio size is {},- CZK.", size);
         this.targetPortfolioSize = size;
     }
 
-    public BigInteger getTargetPortfolioSize() {
+    public int getTargetPortfolioSize() {
         return targetPortfolioSize;
     }
 
@@ -55,17 +54,17 @@ public class PortfolioStructure {
         }
     }
 
-    public BigInteger getMinimumShare(final Rating rating) {
+    public int getMinimumShare(final Rating rating) {
         if (minimumShares.containsKey(rating)) {
             return minimumShares.get(rating);
         } else { // no minimum share specified; average the minimum share based on number of all unspecified ratings
             final int providedRatingCount = minimumShares.size();
             final int remainingShare = 100 - this.sumMinimumShares();
-            return BigInteger.valueOf(remainingShare / providedRatingCount);
+            return remainingShare / providedRatingCount;
         }
     }
 
-    public BigInteger getMaximumShare(final Rating rating) {
+    public int getMaximumShare(final Rating rating) {
         if (maximumShares.containsKey(rating)) {
             return maximumShares.get(rating);
         } else { // no maximum share specified; calculate minimum share and use it as maximum too

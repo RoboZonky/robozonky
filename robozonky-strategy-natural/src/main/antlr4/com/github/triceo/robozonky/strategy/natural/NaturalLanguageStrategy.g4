@@ -1,6 +1,6 @@
 grammar NaturalLanguageStrategy;
 
-import InvestmentSize, PortfolioStructure;
+import InvestmentSize, PortfolioStructure, MarketplaceFilters;
 
 @header {
     import java.math.BigDecimal;
@@ -11,15 +11,18 @@ import InvestmentSize, PortfolioStructure;
 }
 
 primaryExpression returns [ParsedStrategy result] :
-    '1. Struktura portfolia'
 
+    '1. Struktura portfolia'
     portfolioStructureExpression
 
     '2. Velikost investice'
-
     investmentSizeExpression
 
-    '3. Výjimky'
+    (
+        '3. Filtrování tržiště'
+        marketplaceFilterExpression
+    )?
+
     EOF
     {$result = new ParsedStrategy();}
 ;
