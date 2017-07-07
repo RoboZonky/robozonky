@@ -14,6 +14,7 @@ portfolioExpression returns [DefaultPortfolio result] :
         ( 'konzervativní' { $result = DefaultPortfolio.CONSERVATIVE; } )
         | ( 'balancované' { $result = DefaultPortfolio.BALANCED; } )
         | ( 'progresivní' { $result = DefaultPortfolio.PROGRESSIVE; } )
+        | ( 'prázdné' { $result = DefaultPortfolio.EMPTY; } )
     ) ' portfolio' DOT
 ;
 

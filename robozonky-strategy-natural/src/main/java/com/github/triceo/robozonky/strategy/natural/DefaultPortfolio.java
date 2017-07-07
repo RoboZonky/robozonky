@@ -24,7 +24,8 @@ enum DefaultPortfolio {
 
     CONSERVATIVE(3, 6, 16, 25, 20, 15, 15, 0),
     BALANCED(1, 3, 17, 20, 25, 20, 12, 2),
-    PROGRESSIVE(0, 2, 13, 15, 20, 25, 20, 5);
+    PROGRESSIVE(0, 2, 13, 15, 20, 25, 20, 5),
+    EMPTY(0, 0, 0, 0, 0, 0, 0, 0);
 
     private final EnumMap<Rating, Integer> shares = new EnumMap<>(Rating.class);
 
