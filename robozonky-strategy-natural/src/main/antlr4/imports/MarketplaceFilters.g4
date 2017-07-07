@@ -45,25 +45,6 @@ regionCondition returns [BorrowerRegionCondition result]:
     r3=regionExpression { $result.add($r3.result); }
 ;
 
-ratingCondition returns [MarketplaceFilterCondition result]:
-    'rating je ' (
-        ( r1=ratingEnumeratedCondition { $result = $r1.result; })
-        | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterOrEqualCondition($r2.result); })
-        | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseOrEqualCondition($r3.result); })
-    )
-;
-
-ratingEnumeratedCondition returns [LoanRatingEnumeratedCondition result]:
-    { $result = new LoanRatingEnumeratedCondition(); }
-    (
-        (
-            r1=ratingExpression ', ' { $result.add($r1.result); }
-        )*
-        r2=ratingExpression ' nebo ' { $result.add($r2.result); }
-    )?
-    r3=ratingExpression { $result.add($r3.result); }
-;
-
 incomeCondition returns [BorrowerIncomeCondition result]:
     { $result = new BorrowerIncomeCondition(); }
     'klient je ' (

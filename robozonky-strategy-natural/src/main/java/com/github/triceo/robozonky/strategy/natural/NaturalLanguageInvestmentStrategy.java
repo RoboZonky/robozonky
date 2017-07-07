@@ -111,7 +111,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     }
 
     private boolean needsConfirmation(final LoanDescriptor loanDescriptor) {
-        return false; // FIXME implement
+        return strategy.needsConfirmation(loanDescriptor);
     }
 
     @Override

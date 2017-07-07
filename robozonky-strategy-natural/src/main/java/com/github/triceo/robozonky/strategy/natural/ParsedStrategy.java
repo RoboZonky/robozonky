@@ -36,6 +36,10 @@ class ParsedStrategy {
         this.marketplaceFilters = new LinkedHashSet<>(marketplaceFilters);
     }
 
+    public boolean needsConfirmation(final LoanDescriptor loan) {
+        return this.portfolioStructure.needsConfirmation(loan.getLoan());
+    }
+
     public int getInvestmentCeiling() {
         return this.portfolioStructure.getTargetPortfolioSize();
     }

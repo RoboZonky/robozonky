@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.strategy.natural;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,23 @@ class PortfolioStructure {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioStructure.class);
 
+    private MarketplaceFilterCondition confirmationCondition = new MarketplaceFilterCondition() {
+        // never confirm anything
+    };
     private final Map<Rating, Integer> minimumShares = new EnumMap<>(Rating.class),
             maximumShares = new EnumMap<>(Rating.class);
     private int targetPortfolioSize = 0;
 
     private int sumMinimumShares() {
         return minimumShares.values().stream().reduce(0, (a, b) -> a + b);
+    }
+
+    public void setConfirmationCondition(final MarketplaceFilterCondition confirmationCondition) {
+        this.confirmationCondition = confirmationCondition;
+    }
+
+    public boolean needsConfirmation(final Loan loan) {
+        return this.confirmationCondition.test(loan);
     }
 
     public void setTargetPortfolioSize(final int size) {

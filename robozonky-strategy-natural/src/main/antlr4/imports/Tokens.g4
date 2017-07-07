@@ -2,14 +2,35 @@ grammar Tokens;
 
 @header {
     import java.math.BigInteger;
+    import java.util.Collection;
+    import java.util.LinkedHashSet;
     import com.github.triceo.robozonky.api.remote.enums.*;
     import com.github.triceo.robozonky.api.remote.entities.*;
     import com.github.triceo.robozonky.strategy.natural.*;
 }
 
+ratingCondition returns [MarketplaceFilterCondition result]:
+    'rating je ' (
+        ( r1=ratingEnumeratedExpression { $result = new LoanRatingEnumeratedCondition($r1.result); })
+        | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterOrEqualCondition($r2.result); })
+        | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseOrEqualCondition($r3.result); })
+    )
+;
+
 ratingExpression returns [Rating result] :
     r=(RATING_AAAAA | RATING_AAAA | RATING_AAA | RATING_AA | RATING_A | RATING_B | RATING_C | RATING_D)
     { $result = Rating.findByCode($r.getText()); }
+;
+
+ratingEnumeratedExpression returns [Collection<Rating> result]:
+    { $result = new LinkedHashSet<Rating>(); }
+    (
+        (
+            r1=ratingExpression ', ' { $result.add($r1.result); }
+        )*
+        r2=ratingExpression ' nebo ' { $result.add($r2.result); }
+    )?
+    r3=ratingExpression { $result.add($r3.result); }
 ;
 
 regionExpression returns [Region result] :
