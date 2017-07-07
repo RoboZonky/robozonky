@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.strategy.rules;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -77,20 +76,23 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Recommendation> recommend(final Collection<LoanDescriptor> availableLoans,
-                                          final PortfolioOverview portfolio) {
+    public Stream<Recommendation> evaluate(final Collection<LoanDescriptor> availableLoans,
+                                           final PortfolioOverview portfolio) {
         final Stream<ProcessedLoan> processedLoanStream = processloans(availableLoans, portfolio);
         final Map<ProcessedLoan, LoanDescriptor> map = processedLoanStream.collect(Collectors.toMap(Function.identity(),
                 l -> RuleBasedInvestmentStrategy.matchLoan(l, availableLoans)));
-        final List<Recommendation> recommendations = map.entrySet().stream()
+        return map.entrySet().stream()
                 .sorted(Comparator.comparing(Map.Entry::getKey)) // maintain rule-based loan priority
                 .map(e -> {
                     final ProcessedLoan ruleBasedLoan = e.getKey();
                     return e.getValue().recommend(ruleBasedLoan.getAmount(), ruleBasedLoan.isConfirmationRequired());
-                }).flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
-                .collect(Collectors.toList());
-        RuleBasedInvestmentStrategy.LOGGER.trace("Loans matched.");
-        return Collections.unmodifiableList(recommendations);
+                }).flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+    }
+
+    @Override
+    public List<Recommendation> recommend(final Collection<LoanDescriptor> availableLoans,
+                                          final PortfolioOverview portfolio) {
+        return evaluate(availableLoans, portfolio).collect(Collectors.toList());
     }
 
 }
