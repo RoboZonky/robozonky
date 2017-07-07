@@ -20,12 +20,20 @@ import com.github.triceo.robozonky.api.remote.enums.Rating;
 
 class PortfolioShare {
 
+    private static void assertIsInRange(final int percentage) {
+        if ((percentage < 0) || (percentage > 100)) {
+            throw new IllegalArgumentException("Portfolio share must be in range of <0; 100>.");
+        }
+    }
+
     private final int mininumShareInPercent, maximumShareInPercent;
     private final Rating rating;
 
     public PortfolioShare(final Rating r, final int min, final int max) {
         this.rating = r;
+        PortfolioShare.assertIsInRange(min);
         this.mininumShareInPercent = Math.min(min, max);
+        PortfolioShare.assertIsInRange(max);
         this.maximumShareInPercent = Math.max(min, max);
     }
 

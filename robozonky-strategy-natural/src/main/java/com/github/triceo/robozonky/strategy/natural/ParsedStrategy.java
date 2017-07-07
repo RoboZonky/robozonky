@@ -39,10 +39,11 @@ class ParsedStrategy {
     private final Collection<MarketplaceFilter> marketplaceFilters;
 
     public ParsedStrategy(final DefaultPortfolio portfolio) {
-        this(new DefaultValues(portfolio),
-                Collections.emptyList(),
-                Collections.emptyList(),
-                Collections.emptyList());
+        this(portfolio, Collections.emptyList());
+    }
+
+    ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> filters) {
+        this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyList(), filters);
     }
 
     public ParsedStrategy(final DefaultValues defaults,

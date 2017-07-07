@@ -29,11 +29,11 @@ class MarketplaceFilter extends MarketplaceFilterCondition {
         butNotWhen = Collections.emptySet();
 
     public void when(final Collection<MarketplaceFilterCondition> conditions) {
-        this.when = new LinkedHashSet<>(conditions);
+        when = new LinkedHashSet<>(conditions);
     }
 
     public void butNotWhen(final Collection<MarketplaceFilterCondition> conditions) {
-        this.butNotWhen = new LinkedHashSet<>(conditions);
+        butNotWhen = new LinkedHashSet<>(conditions);
     }
 
     @Override
