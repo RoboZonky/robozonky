@@ -38,4 +38,11 @@ public class ParserTest {
         Assertions.assertThat(service.parse(s)).isPresent();
     }
 
+    @Test
+    public void simplest() {
+        final InputStream s = ParserTest.class.getResourceAsStream("simplest");
+        final InvestmentStrategyService service = new NaturalLanguageInvestmentStrategyService();
+        Assertions.assertThat(service.parse(s)).isPresent();
+    }
+
 }

@@ -25,11 +25,20 @@ class DefaultValues {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultValues.class);
 
+    private final DefaultPortfolio portfolio;
     private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
     private DefaultInvestmentSize investmentSize = new DefaultInvestmentSize();
     private MarketplaceFilterCondition confirmationCondition = new MarketplaceFilterCondition() {
         // by default, do not confirm anything ever
     };
+
+    public DefaultValues(final DefaultPortfolio portfolio) {
+        this.portfolio = portfolio;
+    }
+
+    public DefaultPortfolio getPortfolio() {
+        return portfolio;
+    }
 
     public int getMinimumBalance() {
         return minimumBalance;

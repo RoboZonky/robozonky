@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.function.Function;
@@ -29,16 +30,23 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 class ParsedStrategy {
 
     private final DefaultValues defaults;
-    private final Map<Rating, PortfolioStructureItem> portfolioStructureItems;
+    private final Map<Rating, PortfolioStructureItem> portfolio;
     private final Map<Rating, InvestmentSizeItem> investmentSizes;
     private final Collection<MarketplaceFilter> marketplaceFilters;
 
+    public ParsedStrategy(final DefaultPortfolio portfolio) {
+        this(new DefaultValues(portfolio),
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList());
+    }
+
     public ParsedStrategy(final DefaultValues defaults,
-                          final Collection<PortfolioStructureItem> portfolioStructureItems,
+                          final Collection<PortfolioStructureItem> portfolio,
                           final Collection<InvestmentSizeItem> investmentSizeItems,
                           final Collection<MarketplaceFilter> marketplaceFilters) {
         this.defaults = defaults;
-        this.portfolioStructureItems = portfolioStructureItems.stream()
+        this.portfolio = portfolio.stream()
                 .collect(Collectors.toMap(PortfolioStructureItem::getRating, Function.identity()));
         this.investmentSizes = investmentSizeItems.stream()
                 .collect(Collectors.toMap(InvestmentSizeItem::getRating, Function.identity()));
@@ -58,20 +66,16 @@ class ParsedStrategy {
     }
 
     public int getMinimumShare(final Rating rating) {
-        if (portfolioStructureItems.containsKey(rating)) {
-            return portfolioStructureItems.get(rating).getMininumShareInPercent();
-        } else { // no minimum share specified; average the minimum share based on number of all unspecified ratings
-            final int providedRatingCount = portfolioStructureItems.size();
-            final int remainingShare = 100 - portfolioStructureItems.values().stream()
-                    .mapToInt(PortfolioStructureItem::getMininumShareInPercent)
-                    .sum();
-            return remainingShare / providedRatingCount;
+        if (portfolio.containsKey(rating)) {
+            return portfolio.get(rating).getMininumShareInPercent();
+        } else { // no minimum share specified; use the one from default portfolio
+            return defaults.getPortfolio().getDefaultShare(rating);
         }
     }
 
     public int getMaximumShare(final Rating rating) {
-        if (portfolioStructureItems.containsKey(rating)) {
-            return portfolioStructureItems.get(rating).getMaximumShareInPercent();
+        if (portfolio.containsKey(rating)) {
+            return portfolio.get(rating).getMaximumShareInPercent();
         } else { // no maximum share specified; calculate minimum share and use it as maximum too
             return this.getMinimumShare(rating);
         }

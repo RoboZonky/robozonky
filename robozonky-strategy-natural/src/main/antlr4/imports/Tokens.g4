@@ -9,6 +9,14 @@ grammar Tokens;
     import com.github.triceo.robozonky.strategy.natural.*;
 }
 
+portfolioExpression returns [DefaultPortfolio result] :
+    'Robot má udržovat ' (
+        ( 'konzervativní' { $result = DefaultPortfolio.CONSERVATIVE; } )
+        | ( 'balancované' { $result = DefaultPortfolio.BALANCED; } )
+        | ( 'progresivní' { $result = DefaultPortfolio.PROGRESSIVE; } )
+    ) ' portfolio' DOT
+;
+
 ratingCondition returns [MarketplaceFilterCondition result]:
     'rating je ' (
         ( r1=ratingEnumeratedExpression { $result = new LoanRatingEnumeratedCondition($r1.result); })

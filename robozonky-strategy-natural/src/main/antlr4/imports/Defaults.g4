@@ -7,7 +7,8 @@ import Tokens;
 }
 
 defaultExpression returns [DefaultValues result]:
- { $result = new DefaultValues(); }
+ r=portfolioExpression
+ { $result = new DefaultValues($r.result); }
  (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
  (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
  (b=targetBalanceExpression { $result.setMinimumBalance($b.result); })?

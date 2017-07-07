@@ -13,13 +13,18 @@ import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters;
 }
 
 primaryExpression returns [ParsedStrategy result] :
+    ( s=portfolioExpression { $result = new ParsedStrategy($s.result); })
+    | ( c=complexExpression { $result = $c.result; })
+;
+
+complexExpression returns [ParsedStrategy result] :
 
     DELIM 'Obecná nastavení'
     d=defaultExpression
 
     { Collection<PortfolioStructureItem> portfolioStructures = Collections.emptyList(); }
     (
-        DELIM 'Struktura portfolia'
+        DELIM 'Úprava struktury portfolia'
         p=portfolioStructureExpression
         { portfolioStructures = $p.result; }
     )?
