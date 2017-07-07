@@ -16,12 +16,20 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
 public class LoanRatingBetterOrEqualCondition extends MarketplaceFilterCondition {
 
-    public LoanRatingBetterOrEqualCondition(final Rating r) {
+    private final Rating worstPossibleRating;
 
+    public LoanRatingBetterOrEqualCondition(final Rating r) {
+        this.worstPossibleRating = r;
+    }
+
+    @Override
+    public boolean test(final Loan loan) {
+        return loan.getRating().compareTo(worstPossibleRating) <= 0;
     }
 
 }
