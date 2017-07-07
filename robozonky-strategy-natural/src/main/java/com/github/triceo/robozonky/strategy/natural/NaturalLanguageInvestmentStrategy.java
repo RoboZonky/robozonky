@@ -76,7 +76,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {
-            final BigDecimal maximumAllowedShare = BigDecimal.valueOf(strategy.getRatingShareCeiling(r))
+            final BigDecimal maximumAllowedShare = BigDecimal.valueOf(strategy.getMaximumShare(r))
                     .divide(BigDecimal.valueOf(100), RoundingMode.HALF_EVEN);
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
             if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
@@ -101,7 +101,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             return false;
         }
         final int invested = portfolio.getCzkInvested();
-        final int investmentCeiling = strategy.getInvestmentCeiling();
+        final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
         if (invested > investmentCeiling) {
             NaturalLanguageInvestmentStrategy.LOGGER.debug("{} CZK total investment over {} CZK ceiling. Ending.",
                     invested, investmentCeiling);
@@ -144,8 +144,8 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     Optional<int[]> recommendInvestmentAmount(final Loan loan) {
         final Rating rating = loan.getRating();
-        final int minimumInvestment = strategy.getInvestmentFloor(rating);
-        final int maximumInvestment = strategy.getInvestmentCeiling(rating);
+        final int minimumInvestment = strategy.getMinimumInvestmentSizeInCzk(rating);
+        final int maximumInvestment = strategy.getMaximumInvestmentSizeInCzk(rating);
         if (maximumInvestment < minimumInvestment) {
             return Optional.empty();
         }

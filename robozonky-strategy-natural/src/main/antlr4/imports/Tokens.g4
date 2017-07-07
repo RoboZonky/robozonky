@@ -52,8 +52,9 @@ purposeExpression returns [Purpose result] :
 ;
 
 // shared strings
-KC: 'Kč';
-DOT: '.';
+KC   : 'Kč' ;
+DOT  : '.' ;
+DELIM: '- ' ;
 
 // regions
 REGION_A : 'Praha';

@@ -7,21 +7,10 @@ import Tokens;
     import com.github.triceo.robozonky.strategy.natural.*;
 }
 
-portfolioStructureExpression returns [PortfolioStructure result]:
- { $result = new PortfolioStructure(); }
- (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })
- (i=portfolioStructureRatingExpression { $result.addItem($i.result); })*
- (c=confirmationExpression { $result.setConfirmationCondition($c.result); })?
-;
-
-confirmationExpression returns [MarketplaceFilterCondition result] :
-    'Potvrzovat mobilem investice do úvěrů, kde ' r=ratingCondition DOT
-    {$result = $r.result;}
-;
-
-targetPortfolioSizeExpression returns [int result] :
-    'Cílová zůstatková částka je ' maximumInvestmentInCzk=INTEGER ' ' KC DOT
-    {$result = Integer.parseInt($maximumInvestmentInCzk.getText());}
+portfolioStructureExpression returns [Collection<PortfolioStructureItem> result]:
+ { Collection<PortfolioStructureItem> result = new LinkedHashSet<>(); }
+ (i=portfolioStructureRatingExpression { result.add($i.result); })+
+ { $result = result; }
 ;
 
 portfolioStructureRatingExpression returns [PortfolioStructureItem result] :

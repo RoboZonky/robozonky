@@ -1,28 +1,31 @@
 # Testovací strategie pro RoboZonky
 # =================================
-# První dvě sekce se vztahují na všechny investice s výjimkou těch, které odpovídají pravidlům ve třetí sekci.
+# První tři sekce se vztahují na všechny investice s výjimkou těch, které odpovídají pravidlům ve čtvrté sekci.
 # Řádky začínající na '#' jsou vysvětlující komentáře a nejsou povinné. Strategie bude fungovat i bez nich.
 
 # Povinná sekce.
-# Neuvedené ratingy budou investovány rovnou měrou.
-1. Struktura portfolia
+- Obecná nastavení
 Cílová zůstatková částka je 100000 Kč.
+Běžná výše investice je 200 Kč.
+Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
+
+# Volitelná sekce.
+# Neuvedené ratingy budou investovány rovnou měrou.
+- Struktura portfolia
 Prostředky v ratingu A** mohou tvořit až 15 % aktuální zůstatkové částky.
 Prostředky v ratingu A++ musí tvořit 10 až 30 % aktuální zůstatkové částky.
 Prostředky v ratingu D musí tvořit 30 až 20 % aktuální zůstatkové částky.
-Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
 
-# Povinná sekce.
+# Volitelná sekce.
 # Neuvedené ratingy budou investovány v běžné výši.
-2. Velikost investice
-Běžná výše investice je 200 Kč.
-Do půjček v ratingu B investovat 200 až 600 Kč.
-Do půjček v ratingu C investovat 800 až 400 Kč.
-Do půjček v ratingu A* investovat až 1000 Kč.
+- Velikost investice
+Do úvěrů v ratingu B investovat 200 až 600 Kč.
+Do úvěrů v ratingu C investovat 800 až 400 Kč.
+Do úvěrů v ratingu A* investovat až 1000 Kč.
 
 # Volitelná sekce.
 # Jednotlivé řádky představují vzájemně nezávislé filtry.
-3. Filtrování tržiště
+- Filtrování tržiště
 
 # Takhle vypadají výčty; ty lze použít u ratingu a účelu úvěru, příjmu a kraji žadatele.
 Ignorovat úvěr, kde: kraj klienta je Ústecký.

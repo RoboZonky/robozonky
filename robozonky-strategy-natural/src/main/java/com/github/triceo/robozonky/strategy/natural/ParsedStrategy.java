@@ -18,6 +18,9 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
@@ -25,35 +28,65 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 
 class ParsedStrategy {
 
-    private final PortfolioStructure portfolioStructure;
-    private final InvestmentSize investmentSize;
+    private final DefaultValues defaults;
+    private final Map<Rating, PortfolioStructureItem> portfolioStructureItems;
+    private final Map<Rating, InvestmentSizeItem> investmentSizes;
     private final Collection<MarketplaceFilter> marketplaceFilters;
 
-    public ParsedStrategy(final PortfolioStructure portfolioStructure, final InvestmentSize investmentSize,
+    public ParsedStrategy(final DefaultValues defaults,
+                          final Collection<PortfolioStructureItem> portfolioStructureItems,
+                          final Collection<InvestmentSizeItem> investmentSizeItems,
                           final Collection<MarketplaceFilter> marketplaceFilters) {
-        this.portfolioStructure = portfolioStructure;
-        this.investmentSize = investmentSize;
+        this.defaults = defaults;
+        this.portfolioStructureItems = portfolioStructureItems.stream()
+                .collect(Collectors.toMap(PortfolioStructureItem::getRating, Function.identity()));
+        this.investmentSizes = investmentSizeItems.stream()
+                .collect(Collectors.toMap(InvestmentSizeItem::getRating, Function.identity()));
         this.marketplaceFilters = new LinkedHashSet<>(marketplaceFilters);
     }
 
     public boolean needsConfirmation(final LoanDescriptor loan) {
-        return this.portfolioStructure.needsConfirmation(loan.getLoan());
+        return defaults.needsConfirmation(loan.getLoan());
     }
 
-    public int getInvestmentCeiling() {
-        return this.portfolioStructure.getTargetPortfolioSize();
+    public int getMaximumInvestmentSizeInCzk() {
+        return defaults.getTargetPortfolioSize();
     }
 
-    public int getInvestmentCeiling(final Rating r) {
-        return this.investmentSize.getMaximumInvestmentSizeInCzk(r);
+    public int getMinimumShare(final Rating rating) {
+        if (portfolioStructureItems.containsKey(rating)) {
+            return portfolioStructureItems.get(rating).getMininumShareInPercent();
+        } else { // no minimum share specified; average the minimum share based on number of all unspecified ratings
+            final int providedRatingCount = portfolioStructureItems.size();
+            final int remainingShare = 100 - portfolioStructureItems.values().stream()
+                    .mapToInt(PortfolioStructureItem::getMininumShareInPercent)
+                    .sum();
+            return remainingShare / providedRatingCount;
+        }
     }
 
-    public int getInvestmentFloor(final Rating r) {
-        return this.investmentSize.getMinimumInvestmentSizeInCzk(r);
+    public int getMaximumShare(final Rating rating) {
+        if (portfolioStructureItems.containsKey(rating)) {
+            return portfolioStructureItems.get(rating).getMaximumShareInPercent();
+        } else { // no maximum share specified; calculate minimum share and use it as maximum too
+            return this.getMinimumShare(rating);
+        }
     }
 
-    public int getRatingShareCeiling(final Rating rating) {
-        return this.portfolioStructure.getMaximumShare(rating);
+    public int getMinimumInvestmentSizeInCzk(final Rating rating) {
+        if (investmentSizes.containsKey(rating)) {
+            return investmentSizes.get(rating).getMininumInvestmentInCzk();
+        } else { // no minimum share specified; use default
+            return defaults.getInvestmentSize().getMinimumInvestmentInCzk();
+        }
+    }
+
+    public int getMaximumInvestmentSizeInCzk(final Rating rating) {
+        if (investmentSizes.containsKey(rating)) {
+            return investmentSizes.get(rating).getMaximumInvestmentInCzk();
+        } else { // no maximum share specified; use default
+            return defaults.getInvestmentSize().getMaximumInvestmentInCzk();
+        }
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> loans) {

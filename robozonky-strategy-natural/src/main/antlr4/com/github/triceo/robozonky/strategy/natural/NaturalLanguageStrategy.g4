@@ -1,6 +1,6 @@
 grammar NaturalLanguageStrategy;
 
-import InvestmentSize, PortfolioStructure, MarketplaceFilters;
+import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters;
 
 @header {
     import java.math.BigDecimal;
@@ -14,19 +14,30 @@ import InvestmentSize, PortfolioStructure, MarketplaceFilters;
 
 primaryExpression returns [ParsedStrategy result] :
 
-    '1. Struktura portfolia'
-    p=portfolioStructureExpression
+    DELIM 'Obecná nastavení'
+    d=defaultExpression
 
-    '2. Velikost investice'
-    i=investmentSizeExpression
+    { Collection<PortfolioStructureItem> portfolioStructures = Collections.emptyList(); }
+    (
+        DELIM 'Struktura portfolia'
+        p=portfolioStructureExpression
+        { portfolioStructures = $p.result; }
+    )?
+
+    { Collection<InvestmentSizeItem> investmentSizes = Collections.emptyList(); }
+    (
+        DELIM 'Velikost investice'
+        i=investmentSizeExpression
+        { investmentSizes = $i.result; }
+    )?
 
     { Collection<MarketplaceFilter> filters = Collections.emptyList(); }
     (
-        '3. Filtrování tržiště'
+        DELIM 'Filtrování tržiště'
         m=marketplaceFilterExpression
         { filters = $m.result; }
     )?
 
     EOF
-    {$result = new ParsedStrategy($p.result, $i.result, filters);}
+    {$result = new ParsedStrategy($d.result, portfolioStructures, investmentSizes, filters);}
 ;
