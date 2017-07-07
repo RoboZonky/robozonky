@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class LongStoryCondition extends AbstractStoryCondition {
+class LongStoryCondition extends AbstractStoryCondition {
 
     public LongStoryCondition() {
         super((story) -> {

@@ -23,7 +23,7 @@ import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PortfolioStructure {
+class PortfolioStructure {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioStructure.class);
 

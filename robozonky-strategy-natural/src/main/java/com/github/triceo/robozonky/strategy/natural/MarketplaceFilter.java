@@ -16,14 +16,24 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class MarketplaceFilter {
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+
+class MarketplaceFilter extends MarketplaceFilterCondition {
+
+    private MarketplaceFilterConditions when = new MarketplaceFilterConditions(),
+        butNotWhen = new MarketplaceFilterConditions();
 
     public void when(final MarketplaceFilterConditions conditions) {
-
+        this.when = conditions;
     }
 
     public void butNotWhen(final MarketplaceFilterConditions conditions) {
+        this.butNotWhen = conditions;
+    }
 
+    @Override
+    public boolean test(final Loan loan) {
+        return when.test(loan) && !butNotWhen.test(loan);
     }
 
 }

@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.strategy.natural;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Region;
 
-public class BorrowerRegionCondition extends AbstractEnumeratedCondition<Region> {
+class BorrowerRegionCondition extends AbstractEnumeratedCondition<Region> {
 
     public BorrowerRegionCondition() {
         super(Loan::getRegion);

@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.strategy.natural;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.internal.api.Defaults;
 
-public class InvestmentSizeItem {
+class InvestmentSizeItem {
 
     private final int mininumInvestmentInCzk, maximumInvestmentInCzk;
     private final Rating rating;

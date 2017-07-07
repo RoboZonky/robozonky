@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class LoanAmountCondition extends MarketplaceFilterCondition {
+class LoanAmountCondition extends MarketplaceFilterCondition {
 
     public LoanAmountCondition(final int fromInclusive, final int toInclusive) {
 

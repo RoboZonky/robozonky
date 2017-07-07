@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 public enum Rating implements BaseEnum {
 
+    // it is imperative for proper functioning of strategy algorithms that ratings here be ordered best to worst
     AAAAA("A**", new BigDecimal("0.025")),
      AAAA("A*",  new BigDecimal("0.034")),
       AAA("A++", new BigDecimal("0.042")),
@@ -41,6 +42,7 @@ public enum Rating implements BaseEnum {
     private final String code;
     private final BigDecimal expectedYield;
 
+    // TODO somehow reflect change on expected yield post-August 2017
     Rating(final String code, final BigDecimal expectedYield) {
         this.code = code;
         this.expectedYield = expectedYield;

@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class AverageStoryCondition extends AbstractStoryCondition {
+class AverageStoryCondition extends AbstractStoryCondition {
 
     public AverageStoryCondition() {
         super((story) -> {

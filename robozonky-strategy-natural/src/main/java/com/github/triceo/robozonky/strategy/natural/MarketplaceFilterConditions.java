@@ -16,10 +16,22 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class MarketplaceFilterConditions extends MarketplaceFilterCondition {
+import java.util.Collection;
+import java.util.LinkedHashSet;
+
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+
+class MarketplaceFilterConditions extends MarketplaceFilterCondition {
+
+    private final Collection<MarketplaceFilterCondition> conditions = new LinkedHashSet<>(0);
 
     public void add(final MarketplaceFilterCondition condition) {
+        conditions.add(condition);
+    }
 
+    @Override
+    public boolean test(final Loan loan) {
+        return conditions.stream().allMatch(condition -> condition.test(loan));
     }
 
 }

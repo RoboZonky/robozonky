@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-public class PortfolioStructureItem {
+class PortfolioStructureItem {
 
     private final int mininumShareInPercent, maximumShareInPercent;
     private final Rating rating;

@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.internal.api.Defaults;
 
-public class DefaultInvestmentSize {
+class DefaultInvestmentSize {
 
     private final int minimumInvestmentInCzk, maximumInvestmentInCzk;
 
