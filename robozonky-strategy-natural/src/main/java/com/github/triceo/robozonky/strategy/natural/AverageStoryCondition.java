@@ -21,8 +21,8 @@ class AverageStoryCondition extends AbstractStoryCondition {
     public AverageStoryCondition() {
         super((story) -> {
             final int length = story.length();
-            return length > AbstractStoryCondition.SHORT_STORY_THRESHOLD
-                    && length < AbstractStoryCondition.LONG_STORY_THRESHOLD;
+            return length >= AbstractStoryCondition.SHORT_STORY_THRESHOLD
+                    && length <= AbstractStoryCondition.LONG_STORY_THRESHOLD;
         });
     }
 

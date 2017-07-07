@@ -21,7 +21,7 @@ class LongStoryCondition extends AbstractStoryCondition {
     public LongStoryCondition() {
         super((story) -> {
             final int length = story.length();
-            return length >= AbstractStoryCondition.LONG_STORY_THRESHOLD;
+            return length > AbstractStoryCondition.LONG_STORY_THRESHOLD;
         });
     }
 

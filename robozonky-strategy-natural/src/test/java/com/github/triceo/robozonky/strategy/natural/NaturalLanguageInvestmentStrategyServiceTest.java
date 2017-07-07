@@ -22,25 +22,25 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class ParserTest {
+public class NaturalLanguageInvestmentStrategyServiceTest {
 
     @Test
     public void test() {
-        final InputStream s = ParserTest.class.getResourceAsStream("only-whitespace");
+        final InputStream s = NaturalLanguageInvestmentStrategyServiceTest.class.getResourceAsStream("only-whitespace");
         final InvestmentStrategyService service = new NaturalLanguageInvestmentStrategyService();
         Assertions.assertThat(service.parse(s)).isEmpty();
     }
 
     @Test
     public void complex() {
-        final InputStream s = ParserTest.class.getResourceAsStream("complex");
+        final InputStream s = NaturalLanguageInvestmentStrategyServiceTest.class.getResourceAsStream("complex");
         final InvestmentStrategyService service = new NaturalLanguageInvestmentStrategyService();
         Assertions.assertThat(service.parse(s)).isPresent();
     }
 
     @Test
     public void simplest() {
-        final InputStream s = ParserTest.class.getResourceAsStream("simplest");
+        final InputStream s = NaturalLanguageInvestmentStrategyServiceTest.class.getResourceAsStream("simplest");
         final InvestmentStrategyService service = new NaturalLanguageInvestmentStrategyService();
         Assertions.assertThat(service.parse(s)).isPresent();
     }
