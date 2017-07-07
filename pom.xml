@@ -422,10 +422,14 @@
             <excludedMethods>
               <param>toString</param>
             </excludedMethods>
-            <excludedClasses> <!-- Mostly getters; messing up stats -->
+            <excludedClasses>
+              <!-- Mostly getters; messing up stats -->
               <param>com.github.triceo.robozonky.api.remote.entities.*</param>
               <param>com.github.triceo.robozonky.api.notifications.*</param>
               <param>com.github.triceo.robozonky.strategy.rules.facts.*</param>
+              <!-- Generated code; out of our control -->
+              <param>com.github.triceo.robozonky.strategy.natural.*Lexer*</param>
+              <param>com.github.triceo.robozonky.strategy.natural.*Parser*</param>
             </excludedClasses>
             <avoidCallsTo>
               <avoidCallsTo>java.util.logging</avoidCallsTo>
