@@ -7,6 +7,7 @@
 - Obecná nastavení
 Cílová zůstatková částka je 100000 Kč.
 Běžná výše investice je 200 Kč.
+Investovat pouze pokud disponibilní zůstatek přesáhne 1000 Kč.
 Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
 
 # Volitelná sekce.

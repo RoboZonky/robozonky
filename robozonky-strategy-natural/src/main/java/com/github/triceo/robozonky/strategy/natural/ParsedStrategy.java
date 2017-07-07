@@ -49,6 +49,10 @@ class ParsedStrategy {
         return defaults.needsConfirmation(loan.getLoan());
     }
 
+    public int getMinimumBalance() {
+        return defaults.getMinimumBalance();
+    }
+
     public int getMaximumInvestmentSizeInCzk() {
         return defaults.getTargetPortfolioSize();
     }

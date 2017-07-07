@@ -95,9 +95,9 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private boolean isAcceptable(final PortfolioOverview portfolio) {
         final int balance = portfolio.getCzkAvailable();
-        if (balance < Defaults.MINIMUM_INVESTMENT_IN_CZK) { // FIXME implement
+        if (balance < strategy.getMinimumBalance()) { // FIXME implement
             NaturalLanguageInvestmentStrategy.LOGGER.debug("{} CZK balance is less than minimum {} CZK. Ending.",
-                    balance, Defaults.MINIMUM_INVESTMENT_IN_CZK);
+                    balance, strategy.getMinimumBalance());
             return false;
         }
         final int invested = portfolio.getCzkInvested();

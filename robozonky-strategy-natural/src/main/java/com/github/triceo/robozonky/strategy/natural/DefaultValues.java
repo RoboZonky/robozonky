@@ -17,12 +17,31 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.internal.api.Defaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DefaultValues {
+class DefaultValues {
 
-    private int targetPortfolioSize;
-    private DefaultInvestmentSize investmentSize;
-    private MarketplaceFilterCondition confirmationCondition;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultValues.class);
+
+    private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
+    private DefaultInvestmentSize investmentSize = new DefaultInvestmentSize();
+    private MarketplaceFilterCondition confirmationCondition = new MarketplaceFilterCondition() {
+        // by default, do not confirm anything ever
+    };
+
+    public int getMinimumBalance() {
+        return minimumBalance;
+    }
+
+    public void setMinimumBalance(final int minimumBalance) {
+        if (minimumBalance < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
+            throw new IllegalArgumentException("Minimum balance must be at least "
+                    + Defaults.MINIMUM_INVESTMENT_IN_CZK + "CZK.");
+        }
+        this.minimumBalance = minimumBalance;
+    }
 
     public int getTargetPortfolioSize() {
         return targetPortfolioSize;
@@ -32,6 +51,7 @@ public class DefaultValues {
         if (targetPortfolioSize <= 0) {
             throw new IllegalArgumentException("Target portfolio size must be a positive number.");
         }
+        DefaultValues.LOGGER.debug("Target portfolio size set to {} CZK.", targetPortfolioSize);
         this.targetPortfolioSize = targetPortfolioSize;
     }
 
@@ -43,6 +63,8 @@ public class DefaultValues {
         if (investmentSize == null) {
             throw new IllegalArgumentException("Default investment size must be provided.");
         }
+        DefaultValues.LOGGER.debug("Investment size set between {} and {} CZK.",
+                investmentSize.getMinimumInvestmentInCzk(), investmentSize.getMaximumInvestmentInCzk());
         this.investmentSize = investmentSize;
     }
 
