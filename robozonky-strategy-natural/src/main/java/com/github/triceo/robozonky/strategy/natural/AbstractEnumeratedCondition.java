@@ -16,8 +16,8 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -25,7 +25,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 class AbstractEnumeratedCondition<T> extends MarketplaceFilterCondition {
 
     private final Function<Loan, T> fieldRetriever;
-    private final Set<T> possibleValues = new LinkedHashSet<>(0);
+    private final Collection<T> possibleValues = new LinkedHashSet<>(0);
 
     protected AbstractEnumeratedCondition(final Function<Loan, T> fieldRetriever) {
         this.fieldRetriever = fieldRetriever;

@@ -16,6 +16,44 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.stream.Stream;
+
+import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+
 class ParsedStrategy {
+
+    private final PortfolioStructure portfolioStructure;
+    private final InvestmentSize investmentSize;
+    private final Collection<MarketplaceFilter> marketplaceFilters;
+
+    public ParsedStrategy(final PortfolioStructure portfolioStructure, final InvestmentSize investmentSize,
+                          final Collection<MarketplaceFilter> marketplaceFilters) {
+        this.portfolioStructure = portfolioStructure;
+        this.investmentSize = investmentSize;
+        this.marketplaceFilters = new LinkedHashSet<>(marketplaceFilters);
+    }
+
+    public int getInvestmentCeiling() {
+        return this.portfolioStructure.getTargetPortfolioSize();
+    }
+
+    public int getInvestmentCeiling(final Rating r) {
+        return this.investmentSize.getMaximumInvestmentSizeInCzk(r);
+    }
+
+    public int getInvestmentFloor(final Rating r) {
+        return this.investmentSize.getMinimumInvestmentSizeInCzk(r);
+    }
+
+    public int getRatingShareCeiling(final Rating rating) {
+        return this.portfolioStructure.getMaximumShare(rating);
+    }
+
+    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> loans) {
+        return loans.stream().filter(l -> marketplaceFilters.stream().allMatch(f -> f.test(l.getLoan())));
+    }
 
 }
