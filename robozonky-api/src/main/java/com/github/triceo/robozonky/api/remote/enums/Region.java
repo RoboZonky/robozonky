@@ -48,13 +48,6 @@ public enum Region implements BaseEnum  {
     ZLINSKY("Zlínský"),
     UNKNOWN("N/A");
 
-    public static Region findByCode(final String code) {
-        return Stream.of(Region.values())
-                .filter(r -> Objects.equals(r.code, code))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Unknown region: " + code));
-    }
-
     static class RegionDeserializer extends JsonDeserializer<Region> {
 
         @Override
@@ -65,6 +58,13 @@ public enum Region implements BaseEnum  {
             return Region.values()[actualId];
         }
 
+    }
+
+    public static Region findByCode(final String code) {
+        return Stream.of(Region.values())
+                .filter(r -> Objects.equals(r.code, code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown region: " + code));
     }
 
     private final String code;

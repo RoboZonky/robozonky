@@ -55,7 +55,7 @@ public enum MainIncomeType implements BaseEnum {
         return Stream.of(MainIncomeType.values())
                 .filter(r -> Objects.equals(r.code, code))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Unknown main income type: " + code));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown main income type: " + code));
     }
 
     private final String code;

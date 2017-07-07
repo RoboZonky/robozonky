@@ -36,7 +36,7 @@ public enum Rating implements BaseEnum {
         return Stream.of(Rating.values())
                 .filter(r -> Objects.equals(r.code, code))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Unknown rating: " + code));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
     }
 
     private final String code;

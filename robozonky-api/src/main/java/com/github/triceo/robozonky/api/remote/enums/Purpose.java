@@ -54,7 +54,7 @@ public enum Purpose implements BaseEnum {
         return Stream.of(Purpose.values())
                 .filter(r -> Objects.equals(r.code, code))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Unknown loan purpose: " + code));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown loan purpose: " + code));
     }
 
     private final String code;
