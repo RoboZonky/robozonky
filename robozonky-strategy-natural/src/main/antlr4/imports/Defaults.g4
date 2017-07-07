@@ -19,7 +19,7 @@ defaultInvestmentSizeExpression returns [DefaultInvestmentSize result] :
     'Běžná výše investice je ' (
         (maximumInvestmentInCzk=INTEGER
             { $result = new DefaultInvestmentSize(Integer.parseInt($maximumInvestmentInCzk.getText())); })
-        | (minimumInvestmentInCzk=INTEGER ' až ' maximumInvestmentInCzk=INTEGER
+        | (minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
         { $result = new DefaultInvestmentSize(Integer.parseInt($minimumInvestmentInCzk.getText()),
             Integer.parseInt($maximumInvestmentInCzk.getText())); })
     ) ' ' KC DOT

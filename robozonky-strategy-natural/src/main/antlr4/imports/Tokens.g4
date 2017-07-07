@@ -35,9 +35,9 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
     { $result = new LinkedHashSet<Rating>(); }
     (
         (
-            r1=ratingExpression ', ' { $result.add($r1.result); }
+            r1=ratingExpression COMMA { $result.add($r1.result); }
         )*
-        r2=ratingExpression ' nebo ' { $result.add($r2.result); }
+        r2=ratingExpression OR { $result.add($r2.result); }
     )?
     r3=ratingExpression { $result.add($r3.result); }
 ;
@@ -64,6 +64,9 @@ purposeExpression returns [Purpose result] :
 KC   : 'Kč' ;
 DOT  : '.' ;
 DELIM: '- ' ;
+UP_TO: ' až ';
+OR   : ' nebo ';
+COMMA: ', ';
 
 // regions
 REGION_A : 'Praha';

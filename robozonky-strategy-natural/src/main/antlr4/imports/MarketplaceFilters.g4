@@ -39,9 +39,9 @@ regionCondition returns [BorrowerRegionCondition result]:
     { $result = new BorrowerRegionCondition(); }
     'kraj klienta je ' (
         (
-            r1=regionExpression ', ' { $result.add($r1.result); }
+            r1=regionExpression COMMA { $result.add($r1.result); }
         )*
-        r2=regionExpression ' nebo ' { $result.add($r2.result); }
+        r2=regionExpression OR { $result.add($r2.result); }
     )?
     r3=regionExpression { $result.add($r3.result); }
 ;
@@ -58,9 +58,9 @@ incomeCondition returns [BorrowerIncomeCondition result]:
     { $result = new BorrowerIncomeCondition(); }
     'klient je ' (
         (
-            i1=incomeExpression ', ' { $result.add($i1.result); }
+            i1=incomeExpression COMMA { $result.add($i1.result); }
         )*
-        i2=incomeExpression ' nebo ' { $result.add($i2.result); }
+        i2=incomeExpression OR { $result.add($i2.result); }
     )?
     i3=incomeExpression { $result.add($i3.result); }
 ;
@@ -69,9 +69,9 @@ purposeCondition returns [LoanPurposeCondition result]:
     { $result = new LoanPurposeCondition(); }
     'účel je ' (
         (
-            p1=purposeExpression ', ' { $result.add($p1.result); }
+            p1=purposeExpression COMMA { $result.add($p1.result); }
         )*
-        p2=purposeExpression ' nebo ' { $result.add($p2.result); }
+        p2=purposeExpression OR { $result.add($p2.result); }
     )?
     p3=purposeExpression { $result.add($p3.result); }
 ;
@@ -93,7 +93,7 @@ termCondition returns [MarketplaceFilterCondition result]:
 ;
 
 termConditionRangeOpen returns [MarketplaceFilterCondition result]:
-    'je ' min=INTEGER ' až ' max=INTEGER
+    'je ' min=INTEGER UP_TO max=INTEGER
     { $result = new LoanTermCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
 ;
 
@@ -116,7 +116,7 @@ amountCondition returns [MarketplaceFilterCondition result]:
 ;
 
 amountConditionRangeOpen returns [MarketplaceFilterCondition result]:
-    'je ' min=INTEGER ' až ' max=INTEGER
+    'je ' min=INTEGER UP_TO max=INTEGER
     { $result = new LoanAmountCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
 ;
 
