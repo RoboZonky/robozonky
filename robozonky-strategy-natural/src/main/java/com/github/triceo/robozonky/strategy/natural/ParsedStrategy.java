@@ -26,8 +26,12 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ParsedStrategy {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParsedStrategy.class);
 
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioStructureItem> portfolio;
@@ -51,6 +55,16 @@ class ParsedStrategy {
         this.investmentSizes = investmentSizeItems.stream()
                 .collect(Collectors.toMap(InvestmentSizeItem::getRating, Function.identity()));
         this.marketplaceFilters = new LinkedHashSet<>(marketplaceFilters);
+        final int shareSum = sumMinimalShares();
+        if (shareSum > 100) {
+            throw new IllegalArgumentException("Sum of minimal rating shares in portfolio is over 100 %.");
+        } else if (shareSum < 100) {
+            ParsedStrategy.LOGGER.info("Sum of minimal rating shares in the portfolio is less than 100 %.");
+        }
+    }
+
+    private int sumMinimalShares() {
+        return Stream.of(Rating.values()).mapToInt(this::getMinimumShare).sum();
     }
 
     public boolean needsConfirmation(final LoanDescriptor loan) {

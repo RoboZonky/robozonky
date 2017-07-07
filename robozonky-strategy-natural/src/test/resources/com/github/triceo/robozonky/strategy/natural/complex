@@ -14,9 +14,9 @@ Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
 # Volitelná sekce.
 # Neuvedené ratingy budou investovány tak, jak to odpovídá výše zvolenému portfoliu.
 - Úprava struktury portfolia
-Prostředky v ratingu A** mohou tvořit až 15 % aktuální zůstatkové částky.
-Prostředky v ratingu A++ musí tvořit 10 až 30 % aktuální zůstatkové částky.
-Prostředky v ratingu D musí tvořit 30 až 20 % aktuální zůstatkové částky.
+Prostředky v ratingu A** tvoří až 15 % aktuální zůstatkové částky.
+Prostředky v ratingu A++ tvoří 5 až 10 % aktuální zůstatkové částky.
+Prostředky v ratingu D tvoří 1 až 2 % aktuální zůstatkové částky.
 
 # Volitelná sekce.
 # Neuvedené ratingy budou investovány v běžné výši.
