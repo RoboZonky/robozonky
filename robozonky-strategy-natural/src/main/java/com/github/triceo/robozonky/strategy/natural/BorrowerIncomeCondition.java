@@ -16,8 +16,13 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
 
-public class BorrowerIncomeCondition extends EnumeratedCondition<MainIncomeType> {
+public class BorrowerIncomeCondition extends AbstractEnumeratedCondition<MainIncomeType> {
+
+    public BorrowerIncomeCondition() {
+        super(Loan::getMainIncomeType);
+    }
 
 }

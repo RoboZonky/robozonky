@@ -16,8 +16,13 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-public class LoanRatingEnumeratedCondition extends EnumeratedCondition<Rating> {
+public class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Rating> {
+
+    public LoanRatingEnumeratedCondition() {
+        super(Loan::getRating);
+    }
 
 }

@@ -16,13 +16,30 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Function;
+
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.enums.Region;
 
-public class BorrowerRegionCondition extends AbstractEnumeratedCondition<Region> {
+class AbstractEnumeratedCondition<T> extends MarketplaceFilterCondition {
 
-    public BorrowerRegionCondition() {
-        super(Loan::getRegion);
+    private final Function<Loan, T> fieldRetriever;
+    private final Set<T> possibleValues = new LinkedHashSet<>(0);
+
+    protected AbstractEnumeratedCondition(final Function<Loan, T> fieldRetriever) {
+        this.fieldRetriever = fieldRetriever;
+    }
+
+    public void add(final T item) {
+        LOGGER.debug("Added possible value: {}.", item);
+        this.possibleValues.add(item);
+    }
+
+    @Override
+    public boolean test(final Loan loan) {
+        final T match = fieldRetriever.apply(loan);
+        return possibleValues.contains(match);
     }
 
 }
