@@ -51,6 +51,8 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
     private final KieContainer kieContainer;
 
     RuleBasedInvestmentStrategy(final KieContainer kieContainer) {
+        RuleBasedInvestmentStrategy.LOGGER.warn("You are using a deprecated Strategy implementation.");
+        RuleBasedInvestmentStrategy.LOGGER.info("Please migrate to robozonky-strategy-natural.");
         this.kieContainer = kieContainer;
     }
 

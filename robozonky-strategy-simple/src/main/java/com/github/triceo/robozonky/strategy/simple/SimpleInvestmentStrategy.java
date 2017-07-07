@@ -117,6 +117,8 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
 
     SimpleInvestmentStrategy(final int minimumBalance, final int investmentCeiling,
                              final Map<Rating, StrategyPerRating> individualStrategies) {
+        SimpleInvestmentStrategy.LOGGER.warn("You are using a deprecated Strategy implementation.");
+        SimpleInvestmentStrategy.LOGGER.info("Please migrate to robozonky-strategy-natural.");
         this.minimumBalance = minimumBalance;
         this.investmentCeiling = investmentCeiling;
         for (final Rating r: Rating.values()) {
