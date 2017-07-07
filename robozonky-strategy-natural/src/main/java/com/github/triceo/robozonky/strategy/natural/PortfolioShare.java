@@ -18,18 +18,27 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-class InvestmentSizeItem extends DefaultInvestmentSize {
+class PortfolioShare {
 
+    private final int mininumShareInPercent, maximumShareInPercent;
     private final Rating rating;
 
-    public InvestmentSizeItem(final Rating r, final int min, final int max) {
-        super(min, max);
+    public PortfolioShare(final Rating r, final int min, final int max) {
         this.rating = r;
+        this.mininumShareInPercent = Math.min(min, max);
+        this.maximumShareInPercent = Math.max(min, max);
     }
 
-    public InvestmentSizeItem(final Rating r, final int max) {
-        super(max);
-        this.rating = r;
+    public PortfolioShare(final Rating r, final int max) {
+        this(r, 0, max);
+    }
+
+    public int getMininumShareInPercent() {
+        return mininumShareInPercent;
+    }
+
+    public int getMaximumShareInPercent() {
+        return maximumShareInPercent;
     }
 
     public Rating getRating() {

@@ -22,14 +22,14 @@ complexExpression returns [ParsedStrategy result] :
     DELIM 'Obecná nastavení'
     d=defaultExpression
 
-    { Collection<PortfolioStructureItem> portfolioStructures = Collections.emptyList(); }
+    { Collection<PortfolioShare> portfolioStructures = Collections.emptyList(); }
     (
         DELIM 'Úprava struktury portfolia'
         p=portfolioStructureExpression
         { portfolioStructures = $p.result; }
     )?
 
-    { Collection<InvestmentSizeItem> investmentSizes = Collections.emptyList(); }
+    { Collection<InvestmentSize> investmentSizes = Collections.emptyList(); }
     (
         DELIM 'Velikost investice'
         i=investmentSizeExpression

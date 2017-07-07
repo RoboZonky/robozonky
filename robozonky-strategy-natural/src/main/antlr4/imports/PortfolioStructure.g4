@@ -7,18 +7,18 @@ import Tokens;
     import com.github.triceo.robozonky.strategy.natural.*;
 }
 
-portfolioStructureExpression returns [Collection<PortfolioStructureItem> result]:
- { Collection<PortfolioStructureItem> result = new LinkedHashSet<>(); }
+portfolioStructureExpression returns [Collection<PortfolioShare> result]:
+ { Collection<PortfolioShare> result = new LinkedHashSet<>(); }
  (i=portfolioStructureRatingExpression { result.add($i.result); })+
  { $result = result; }
 ;
 
-portfolioStructureRatingExpression returns [PortfolioStructureItem result] :
+portfolioStructureRatingExpression returns [PortfolioShare result] :
     'Prostředky v ratingu ' r=ratingExpression ' tvoří' (
         (UP_TO maximumInvestmentInCzk=INTEGER
-            { $result = new PortfolioStructureItem($r.result, Integer.parseInt($maximumInvestmentInCzk.getText())); })
+            { $result = new PortfolioShare($r.result, Integer.parseInt($maximumInvestmentInCzk.getText())); })
         | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
-            { $result = new PortfolioStructureItem($r.result, Integer.parseInt($minimumInvestmentInCzk.getText()),
+            { $result = new PortfolioShare($r.result, Integer.parseInt($minimumInvestmentInCzk.getText()),
                 Integer.parseInt($maximumInvestmentInCzk.getText())); })
     ) ' % aktuální zůstatkové částky' DOT
 ;

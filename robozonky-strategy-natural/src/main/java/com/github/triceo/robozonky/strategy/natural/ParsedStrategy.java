@@ -34,8 +34,8 @@ class ParsedStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParsedStrategy.class);
 
     private final DefaultValues defaults;
-    private final Map<Rating, PortfolioStructureItem> portfolio;
-    private final Map<Rating, InvestmentSizeItem> investmentSizes;
+    private final Map<Rating, PortfolioShare> portfolio;
+    private final Map<Rating, InvestmentSize> investmentSizes;
     private final Collection<MarketplaceFilter> marketplaceFilters;
 
     public ParsedStrategy(final DefaultPortfolio portfolio) {
@@ -46,14 +46,14 @@ class ParsedStrategy {
     }
 
     public ParsedStrategy(final DefaultValues defaults,
-                          final Collection<PortfolioStructureItem> portfolio,
-                          final Collection<InvestmentSizeItem> investmentSizeItems,
+                          final Collection<PortfolioShare> portfolio,
+                          final Collection<InvestmentSize> investmentSizes,
                           final Collection<MarketplaceFilter> marketplaceFilters) {
         this.defaults = defaults;
         this.portfolio = portfolio.stream()
-                .collect(Collectors.toMap(PortfolioStructureItem::getRating, Function.identity()));
-        this.investmentSizes = investmentSizeItems.stream()
-                .collect(Collectors.toMap(InvestmentSizeItem::getRating, Function.identity()));
+                .collect(Collectors.toMap(PortfolioShare::getRating, Function.identity()));
+        this.investmentSizes = investmentSizes.stream()
+                .collect(Collectors.toMap(InvestmentSize::getRating, Function.identity()));
         this.marketplaceFilters = new LinkedHashSet<>(marketplaceFilters);
         final int shareSum = sumMinimalShares();
         if (shareSum > 100) {

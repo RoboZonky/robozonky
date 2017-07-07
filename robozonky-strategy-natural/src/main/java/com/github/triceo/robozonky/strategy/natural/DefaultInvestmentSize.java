@@ -35,8 +35,10 @@ class DefaultInvestmentSize {
         this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
         if (this.minimumInvestmentInCzk < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
             throw new IllegalArgumentException("Minimum investment less than actual Zonky minimum.");
-        } else if (this.maximumInvestmentInCzk < this.minimumInvestmentInCzk) {
-            throw new IllegalArgumentException("Maximum investment smaller than provided minimum.");
+        } else if (minimumInvestmentInCzk % 200 != 0) {
+            throw new IllegalArgumentException("Minimum investment must be a multiple of 200.");
+        } else if (maximumInvestmentInCzk % 200 != 0) {
+            throw new IllegalArgumentException("Maximum investment must be a multiple of 200.");
         }
     }
 

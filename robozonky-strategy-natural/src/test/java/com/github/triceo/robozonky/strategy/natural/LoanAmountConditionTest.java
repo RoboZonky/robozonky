@@ -39,8 +39,8 @@ public class LoanAmountConditionTest {
     @Test
     public void boundaryCorrect() {
         final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getAmount()).thenReturn(1.0);
-        final MarketplaceFilterCondition condition = new LoanAmountCondition(1, 1);
+        Mockito.when(l.getAmount()).thenReturn(0.0);
+        final MarketplaceFilterCondition condition = new LoanAmountCondition(0, 0);
         Assertions.assertThat(condition.test(l)).isTrue();
     }
 
