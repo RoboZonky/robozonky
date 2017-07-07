@@ -16,10 +16,12 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-class LoanTermCondition extends MarketplaceFilterCondition {
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+
+class LoanTermCondition extends AbstractRangeCondition {
 
     public LoanTermCondition(final int fromInclusive, final int toInclusive) {
-
+        super(Loan::getTermInMonths, fromInclusive, toInclusive);
     }
 
 }
