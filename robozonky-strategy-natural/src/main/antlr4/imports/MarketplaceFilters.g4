@@ -99,7 +99,7 @@ termConditionRangeOpen returns [MarketplaceFilterCondition result]:
 
 termConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
     'přesahuje ' min=INTEGER
-    { $result = new LoanTermCondition(Integer.parseInt($min.getText()) + 1, Integer.MAX_VALUE); }
+    { $result = new LoanTermCondition(Integer.parseInt($min.getText()) + 1, 84); }
 ;
 
 termConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
