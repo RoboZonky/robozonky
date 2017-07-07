@@ -16,13 +16,27 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.util.Collections;
+
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.enums.Rating;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
 
-class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Rating> {
+public abstract class AbstractEnumeratedConditionTest<T> {
 
-    public LoanRatingEnumeratedCondition() {
-        super(Loan::getRating);
+    protected abstract AbstractEnumeratedCondition<T> getSUT();
+
+    protected abstract Loan getMockedLoan();
+
+    protected abstract T getTriggerItem();
+
+    @Test
+    public void proper() {
+        final Loan l = this.getMockedLoan();
+        final AbstractEnumeratedCondition<T> sut = this.getSUT();
+        Assertions.assertThat(sut.test(l)).isFalse();
+        sut.add(Collections.singleton(this.getTriggerItem()));
+        Assertions.assertThat(sut.test(l)).isTrue();
     }
 
 }

@@ -27,9 +27,11 @@ public class LoanAmountConditionTest {
     @Test
     public void leftBoundWrong() {
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new LoanAmountCondition(-1, 10000))
+            softly.assertThatThrownBy(() -> new LoanAmountCondition(-1, 0))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new LoanAmountCondition(10000, -1))
+            softly.assertThatThrownBy(() -> new LoanAmountCondition(0, -1))
+                    .isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> new LoanAmountCondition(-1, -1))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }

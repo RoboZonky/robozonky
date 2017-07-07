@@ -17,12 +17,26 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
+import org.mockito.Mockito;
 
-class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Rating> {
+public class BorrowerIncomeConditionTest extends AbstractEnumeratedConditionTest<MainIncomeType> {
 
-    public LoanRatingEnumeratedCondition() {
-        super(Loan::getRating);
+    @Override
+    protected AbstractEnumeratedCondition<MainIncomeType> getSUT() {
+        return new BorrowerIncomeCondition();
+    }
+
+    @Override
+    protected Loan getMockedLoan() {
+        final Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getMainIncomeType()).thenReturn(this.getTriggerItem());
+        return loan;
+    }
+
+    @Override
+    protected MainIncomeType getTriggerItem() {
+        return MainIncomeType.EMPLOYMENT;
     }
 
 }

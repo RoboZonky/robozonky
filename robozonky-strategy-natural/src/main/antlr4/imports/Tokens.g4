@@ -20,7 +20,12 @@ portfolioExpression returns [DefaultPortfolio result] :
 
 ratingCondition returns [MarketplaceFilterCondition result]:
     'rating je ' (
-        ( r1=ratingEnumeratedExpression { $result = new LoanRatingEnumeratedCondition($r1.result); })
+        ( r1=ratingEnumeratedExpression
+            {
+                AbstractEnumeratedCondition<Rating> c = new LoanRatingEnumeratedCondition();
+                c.add($r1.result);
+                $result = c;
+            })
         | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterOrEqualCondition($r2.result); })
         | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseOrEqualCondition($r3.result); })
     )

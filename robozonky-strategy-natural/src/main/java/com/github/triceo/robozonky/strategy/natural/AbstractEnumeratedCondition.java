@@ -36,6 +36,10 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterCondition {
         this.possibleValues.add(item);
     }
 
+    public void add(final Collection<T> items) {
+        items.forEach(this::add);
+    }
+
     @Override
     public boolean test(final Loan loan) {
         final T match = fieldRetriever.apply(loan);

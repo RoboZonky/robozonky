@@ -48,7 +48,11 @@ regionCondition returns [BorrowerRegionCondition result]:
 
 ratingCondition returns [MarketplaceFilterCondition result]:
     'rating je ' (
-        ( r1=ratingEnumeratedExpression { $result = new LoanRatingEnumeratedCondition($r1.result); })
+        ( r1=ratingEnumeratedExpression
+            {
+                $result = new LoanRatingEnumeratedCondition();
+                $result.add($r1.result);
+            })
         | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterOrEqualCondition($r2.result); })
         | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseOrEqualCondition($r3.result); })
     )

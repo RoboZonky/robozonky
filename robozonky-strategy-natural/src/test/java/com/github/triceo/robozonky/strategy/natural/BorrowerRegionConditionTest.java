@@ -17,12 +17,26 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.remote.enums.Region;
+import org.mockito.Mockito;
 
-class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Rating> {
+public class BorrowerRegionConditionTest extends AbstractEnumeratedConditionTest<Region> {
 
-    public LoanRatingEnumeratedCondition() {
-        super(Loan::getRating);
+    @Override
+    protected AbstractEnumeratedCondition<Region> getSUT() {
+        return new BorrowerRegionCondition();
+    }
+
+    @Override
+    protected Loan getMockedLoan() {
+        final Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getRegion()).thenReturn(this.getTriggerItem());
+        return loan;
+    }
+
+    @Override
+    protected Region getTriggerItem() {
+        return Region.JIHOCESKY;
     }
 
 }
