@@ -75,7 +75,7 @@ class ParsedStrategy {
 
     public int getMinimumInvestmentSizeInCzk(final Rating rating) {
         if (investmentSizes.containsKey(rating)) {
-            return investmentSizes.get(rating).getMininumInvestmentInCzk();
+            return investmentSizes.get(rating).getMinimumInvestmentInCzk();
         } else { // no minimum share specified; use default
             return defaults.getInvestmentSize().getMinimumInvestmentInCzk();
         }

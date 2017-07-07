@@ -16,24 +16,30 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.function.Predicate;
+
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 class MarketplaceFilter extends MarketplaceFilterCondition {
 
-    private MarketplaceFilterConditions when = new MarketplaceFilterConditions(),
-        butNotWhen = new MarketplaceFilterConditions();
+    private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
+        butNotWhen = Collections.emptySet();
 
-    public void when(final MarketplaceFilterConditions conditions) {
-        this.when = conditions;
+    public void when(final Collection<MarketplaceFilterCondition> conditions) {
+        this.when = new LinkedHashSet<>(conditions);
     }
 
-    public void butNotWhen(final MarketplaceFilterConditions conditions) {
-        this.butNotWhen = conditions;
+    public void butNotWhen(final Collection<MarketplaceFilterCondition> conditions) {
+        this.butNotWhen = new LinkedHashSet<>(conditions);
     }
 
     @Override
     public boolean test(final Loan loan) {
-        return when.test(loan) && !butNotWhen.test(loan);
+        final Predicate<MarketplaceFilterCondition> f = c -> c.test(loan);
+        return when.stream().allMatch(f) && butNotWhen.stream().noneMatch(f);
     }
 
 }

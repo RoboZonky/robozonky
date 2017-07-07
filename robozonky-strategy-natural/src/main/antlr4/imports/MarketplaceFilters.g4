@@ -18,10 +18,11 @@ marketplaceFilter returns [MarketplaceFilter result]:
     ('(Ale ne když: ' s=marketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
-marketplaceFilterConditions returns [MarketplaceFilterConditions result]:
-    { $result = new MarketplaceFilterConditions(); }
-    (c1=marketplaceFilterCondition { $result.add($c1.result); } '; ')*
-    c2=marketplaceFilterCondition { $result.add($c2.result); } DOT
+marketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
+    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+    (c1=marketplaceFilterCondition { result.add($c1.result); } '; ')*
+    c2=marketplaceFilterCondition { result.add($c2.result); } DOT
+    { $result = result; }
 ;
 
 marketplaceFilterCondition returns [MarketplaceFilterCondition result]:

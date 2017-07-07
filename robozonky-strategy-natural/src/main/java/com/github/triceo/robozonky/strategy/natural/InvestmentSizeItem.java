@@ -17,29 +17,19 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
-import com.github.triceo.robozonky.internal.api.Defaults;
 
-class InvestmentSizeItem {
+class InvestmentSizeItem extends DefaultInvestmentSize {
 
-    private final int mininumInvestmentInCzk, maximumInvestmentInCzk;
     private final Rating rating;
 
     public InvestmentSizeItem(final Rating r, final int min, final int max) {
+        super(min, max);
         this.rating = r;
-        this.mininumInvestmentInCzk = Math.min(min, max);
-        this.maximumInvestmentInCzk = Math.max(max, max);
     }
 
     public InvestmentSizeItem(final Rating r, final int max) {
-        this(r, Defaults.MINIMUM_INVESTMENT_IN_CZK, max);
-    }
-
-    public int getMininumInvestmentInCzk() {
-        return mininumInvestmentInCzk;
-    }
-
-    public int getMaximumInvestmentInCzk() {
-        return maximumInvestmentInCzk;
+        super(max);
+        this.rating = r;
     }
 
     public Rating getRating() {

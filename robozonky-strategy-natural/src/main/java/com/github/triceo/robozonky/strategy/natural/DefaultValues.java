@@ -29,6 +29,9 @@ public class DefaultValues {
     }
 
     public void setTargetPortfolioSize(final int targetPortfolioSize) {
+        if (targetPortfolioSize <= 0) {
+            throw new IllegalArgumentException("Target portfolio size must be a positive number.");
+        }
         this.targetPortfolioSize = targetPortfolioSize;
     }
 
@@ -37,6 +40,9 @@ public class DefaultValues {
     }
 
     public void setInvestmentSize(final DefaultInvestmentSize investmentSize) {
+        if (investmentSize == null) {
+            throw new IllegalArgumentException("Default investment size must be provided.");
+        }
         this.investmentSize = investmentSize;
     }
 
@@ -45,6 +51,9 @@ public class DefaultValues {
     }
 
     public void setConfirmationCondition(final MarketplaceFilterCondition confirmationCondition) {
+        if (confirmationCondition == null) {
+            throw new IllegalArgumentException("Confirmation condition must be provided.");
+        }
         this.confirmationCondition = confirmationCondition;
     }
 }

@@ -20,8 +20,19 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 class LoanTermCondition extends AbstractRangeCondition {
 
+    private static final int MIN_TERM = 0, MAX_TERM = 84;
+
+    private static void assertIsInRange(final int months) {
+        if ((months < LoanTermCondition.MIN_TERM) || (months > LoanTermCondition.MAX_TERM)) {
+            throw new IllegalArgumentException("Loan terms must be in range of <" + LoanTermCondition.MIN_TERM + "; "
+                    + LoanTermCondition.MAX_TERM + ">.");
+        }
+    }
+
     public LoanTermCondition(final int fromInclusive, final int toInclusive) {
         super(Loan::getTermInMonths, fromInclusive, toInclusive);
+        LoanTermCondition.assertIsInRange(fromInclusive);
+        LoanTermCondition.assertIsInRange(toInclusive);
     }
 
 }

@@ -33,6 +33,11 @@ class DefaultInvestmentSize {
     public DefaultInvestmentSize(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
         this.minimumInvestmentInCzk = Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk);
         this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
+        if (this.minimumInvestmentInCzk < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
+            throw new IllegalArgumentException("Minimum investment less than actual Zonky minimum.");
+        } else if (this.maximumInvestmentInCzk < this.minimumInvestmentInCzk) {
+            throw new IllegalArgumentException("Maximum investment smaller than provided minimum.");
+        }
     }
 
     public int getMinimumInvestmentInCzk() {

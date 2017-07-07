@@ -33,8 +33,13 @@ abstract class AbstractRangeCondition extends MarketplaceFilterCondition {
     protected AbstractRangeCondition(final Function<Loan, Number> targetAccessor, final Number minValueInclusive,
                                      final Number maxValueInclusive) {
         this.targetAccessor = targetAccessor;
-        this.minInclusive = AbstractRangeCondition.toBigDecimal(minValueInclusive);
-        this.maxInclusive = AbstractRangeCondition.toBigDecimal(maxValueInclusive);
+        final BigDecimal min = AbstractRangeCondition.toBigDecimal(minValueInclusive);
+        final BigDecimal max = AbstractRangeCondition.toBigDecimal(maxValueInclusive);
+        this.minInclusive = min.min(max);
+        this.maxInclusive = min.max(max);
+        if (this.maxInclusive.compareTo(this.minInclusive) < 0) {
+            throw new IllegalArgumentException("Minimum must be smaller than maximum.");
+        }
     }
 
     public boolean test(final Loan loan) {

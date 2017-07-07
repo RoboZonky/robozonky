@@ -24,6 +24,9 @@ class LoanRatingBetterOrEqualCondition extends MarketplaceFilterCondition {
     private final Rating worstPossibleRating;
 
     public LoanRatingBetterOrEqualCondition(final Rating r) {
+        if (r == null) {
+            throw new IllegalArgumentException("Rating must be provided.");
+        }
         this.worstPossibleRating = r;
     }
 
