@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class EnumeratedCondition<T> implements MarketplaceFilterCondition {
+public class EnumeratedCondition<T> extends MarketplaceFilterCondition {
 
     public void add(final T item) {
 

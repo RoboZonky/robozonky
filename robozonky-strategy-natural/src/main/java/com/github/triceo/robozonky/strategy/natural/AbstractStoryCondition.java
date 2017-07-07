@@ -19,17 +19,24 @@ package com.github.triceo.robozonky.strategy.natural;
 import java.util.function.Predicate;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-abstract class MarketplaceFilterCondition implements Predicate<Loan> {
+abstract class AbstractStoryCondition extends MarketplaceFilterCondition {
 
-    // not static as we want to have the specific impl class in the logs
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    // these values were the first and third quartile of story length in all loans between 2016-10-01 and 2017-05-20
+    protected static final int SHORT_STORY_THRESHOLD = 200, LONG_STORY_THRESHOLD = 600;
 
+    private final Predicate<String> storyLength;
+
+    protected AbstractStoryCondition(final Predicate<String> storyLength) {
+        LOGGER.debug("Story length condition registered.");
+        this.storyLength = storyLength;
+    }
+
+    @Override
     public boolean test(final Loan loan) {
-        LOGGER.warn("Default condition implementation always fails.");
-        return false;
+        final String story = loan.getStory();
+        final boolean isStoryProvided = (story == null);
+        return storyLength.test(isStoryProvided ? "" : loan.getStory().trim());
     }
 
 }

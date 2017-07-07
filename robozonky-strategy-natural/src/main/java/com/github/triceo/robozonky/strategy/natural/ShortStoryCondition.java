@@ -16,6 +16,13 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class ShortStoryCondition implements MarketplaceFilterCondition {
+public class ShortStoryCondition extends AbstractStoryCondition {
+
+    public ShortStoryCondition() {
+        super((story) -> {
+            final int length = story.length();
+            return length <= AbstractStoryCondition.SHORT_STORY_THRESHOLD;
+        });
+    }
 
 }

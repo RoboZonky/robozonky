@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-public class LoanRatingBetterOrEqualCondition implements MarketplaceFilterCondition {
+public class LoanRatingBetterOrEqualCondition extends MarketplaceFilterCondition {
 
     public LoanRatingBetterOrEqualCondition(final Rating r) {
 

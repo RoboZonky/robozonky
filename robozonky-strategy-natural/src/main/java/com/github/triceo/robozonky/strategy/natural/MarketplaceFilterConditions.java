@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class MarketplaceFilterConditions {
+public class MarketplaceFilterConditions extends MarketplaceFilterCondition {
 
     public void add(final MarketplaceFilterCondition condition) {
 
