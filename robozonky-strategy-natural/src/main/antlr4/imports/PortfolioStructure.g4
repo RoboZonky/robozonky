@@ -14,10 +14,10 @@ portfolioStructureExpression returns [Collection<PortfolioShare> result]:
 ;
 
 portfolioStructureRatingExpression returns [PortfolioShare result] :
-    'Prostředky v ratingu ' r=ratingExpression ' tvoří' (
-        (UP_TO maximumInvestmentInCzk=INTEGER
+    'Prostředky v ratingu ' r=ratingExpression ' tvoří ' (
+        ( maximumInvestmentInCzk=INTEGER
             { $result = new PortfolioShare($r.result, Integer.parseInt($maximumInvestmentInCzk.getText())); })
-        | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
+        | ( minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
             { $result = new PortfolioShare($r.result, Integer.parseInt($minimumInvestmentInCzk.getText()),
                 Integer.parseInt($maximumInvestmentInCzk.getText())); })
     ) ' % aktuální zůstatkové částky' DOT

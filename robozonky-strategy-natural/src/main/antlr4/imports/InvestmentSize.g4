@@ -14,7 +14,10 @@ investmentSizeExpression returns [Collection<InvestmentSize> result]:
 
 investmentSizeRatingExpression returns [InvestmentSize result] :
     'Do úvěrů v ratingu ' r=ratingExpression ' investovat' (
-        (UP_TO maximumInvestmentInCzk=INTEGER
+        (' ' amount=INTEGER
+            { $result = new InvestmentSize($r.result, Integer.parseInt($amount.getText()),
+                Integer.parseInt($amount.getText())); })
+        | (UP_TO maximumInvestmentInCzk=INTEGER
             { $result = new InvestmentSize($r.result, Integer.parseInt($maximumInvestmentInCzk.getText())); })
         | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
             { $result = new InvestmentSize($r.result, Integer.parseInt($minimumInvestmentInCzk.getText()),

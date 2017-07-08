@@ -31,7 +31,7 @@ complexExpression returns [ParsedStrategy result] :
 
     { Collection<InvestmentSize> investmentSizes = Collections.emptyList(); }
     (
-        DELIM 'Velikost investice'
+        DELIM 'Výše investice'
         i=investmentSizeExpression
         { investmentSizes = $i.result; }
     )?

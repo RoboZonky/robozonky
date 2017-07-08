@@ -38,7 +38,7 @@ class PortfolioShare {
     }
 
     public PortfolioShare(final Rating r, final int max) {
-        this(r, 0, max);
+        this(r, max, max);
     }
 
     public int getMininumShareInPercent() {
