@@ -52,11 +52,6 @@
       <classifier>dist</classifier>
       <type>zip</type>
     </dependency>
-    <dependency>
-      <groupId>com.github.triceo.robozonky.extensions</groupId>
-      <artifactId>robozonky-strategy-rules</artifactId>
-      <classifier>jar-with-dependencies</classifier>
-    </dependency>
   </dependencies>
 
   <build>

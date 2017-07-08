@@ -91,7 +91,6 @@
     <panel classname="TargetPanel">
       <validator classname="com.github.triceo.robozonky.installer.panels.InstallDirValidator"/>
     </panel>
-    <panel classname="PacksPanel"/>
     <panel classname="UserInputPanel" id="zonkyUserInput">
       <validator classname="com.github.triceo.robozonky.installer.panels.ZonkySettingsValidator" />
     </panel>
@@ -116,13 +115,6 @@
             targetdir="${INSTALL_PATH}/Dist"
             override="true"
             unpack="true" />
-    </pack>
-    <pack name="RoboZonky rozšíření: Na pravidlech založená investiční strategie" required="no" preselected="no">
-      <description>Podpora pro investiční strategii, která umožnuje deklarativně definovat investiční pravidla.
-        Implementována s pomocí nástroje Drools.</description>
-      <file src="@{staging.dir}/tmp/robozonky-strategy-rules-jar-with-dependencies.jar"
-            targetdir="${INSTALL_PATH}/Dist/extensions"
-            override="true" />
     </pack>
   </packs>
 
