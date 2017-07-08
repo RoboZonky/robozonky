@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Parses and loads a Drools-based decision table. Supports XLS and XLSX as decision table file formats.
  */
+@Deprecated
 public class RuleBasedInvestmentStrategyService implements InvestmentStrategyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleBasedInvestmentStrategyService.class);

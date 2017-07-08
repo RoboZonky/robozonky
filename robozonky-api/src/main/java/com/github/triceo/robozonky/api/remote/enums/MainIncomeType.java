@@ -17,6 +17,8 @@
 package com.github.triceo.robozonky.api.remote.enums;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -24,18 +26,18 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = MainIncomeType.MainIncomeTypeDeserializer.class)
-public enum MainIncomeType {
+public enum MainIncomeType implements BaseEnum {
 
-    EMPLOYMENT, // "zaměstnanec"
-    ENTREPRENEUR, // "podnikatel"
-    SELF_EMPLOYMENT, // "OSVČ"
-    PENSION, // "důchodce"
-    MATERNITY_LEAVE, // "na rodičovské dovolené"
-    STUDENT, // "student"
-    UNEMPLOYED, // "bez zaměstnání"
-    LIBERAL_PROFESSION, // "svobodné povolání"
-    OTHERS_MAIN, // "ostatní"
-    NEXT_WORK; // there is one loan in the API with this value; the value is not documented and has no translation
+    EMPLOYMENT("zaměstnanec"),
+    ENTREPRENEUR("podnikatel"),
+    SELF_EMPLOYMENT("OSVČ"),
+    PENSION("důchodce"),
+    MATERNITY_LEAVE("na rodičovské dovolené"),
+    STUDENT("student"),
+    UNEMPLOYED("bez zaměstnání"),
+    LIBERAL_PROFESSION("svobodné povolání"),
+    OTHERS_MAIN("ostatní"),
+    NEXT_WORK("N/A"); // there is one loan in the API with this value; it is not documented and has no translation
 
     static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {
 
@@ -47,6 +49,24 @@ public enum MainIncomeType {
             return MainIncomeType.valueOf(id);
         }
 
+    }
+
+    public static MainIncomeType findByCode(final String code) {
+        return Stream.of(MainIncomeType.values())
+                .filter(r -> Objects.equals(r.code, code))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown main income type: " + code));
+    }
+
+    private final String code;
+
+    MainIncomeType(final String code) {
+        this.code = code;
+    }
+
+    @Override
+    public String getCode() {
+        return code;
     }
 
 }

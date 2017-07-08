@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import com.github.triceo.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
@@ -46,12 +47,11 @@ final class StrategyBasedInvestmentCommand implements InvestmentCommand {
     public void accept(final Session s) {
         Events.fire(new StrategyStartedEvent(strategy, s.getAvailableLoans(), s.getPortfolioOverview()));
         do {
-            final Collection<Recommendation> recommendations =
-                    strategy.recommend(s.getAvailableLoans(), s.getPortfolioOverview());
-            final boolean investmentWasMade = recommendations.stream()
+            final Optional<Recommendation> invested = strategy.evaluate(s.getAvailableLoans(), s.getPortfolioOverview())
                     .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
-                    .anyMatch(s::invest);
-            if (!investmentWasMade) { // there is nothing to invest into; RoboZonky is finished now
+                    .filter(s::invest)
+                    .findFirst();
+            if (!invested.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
                 break;
             }
         } while (s.getPortfolioOverview().getCzkAvailable() >= 0);

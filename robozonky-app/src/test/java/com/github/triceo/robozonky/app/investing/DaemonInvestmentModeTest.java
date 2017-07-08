@@ -119,8 +119,8 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final DaemonInvestmentModeTest.TestMarketplace m =
                 new DaemonInvestmentModeTest.TestMarketplace(Collections.singletonList(l), treatment);
         final InvestmentStrategy ms = Mockito.mock(InvestmentStrategy.class);
-        Mockito.when(ms.recommend(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
-                .thenReturn(Collections.singletonList(r));
+        Mockito.when(ms.evaluate(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
+                .thenAnswer(invocation -> Stream.of(r));
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.empty());

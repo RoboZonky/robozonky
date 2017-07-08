@@ -117,6 +117,8 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
 
     SimpleInvestmentStrategy(final int minimumBalance, final int investmentCeiling,
                              final Map<Rating, StrategyPerRating> individualStrategies) {
+        SimpleInvestmentStrategy.LOGGER.warn("You are using a deprecated Strategy implementation.");
+        SimpleInvestmentStrategy.LOGGER.info("Please migrate to robozonky-strategy-natural.");
         this.minimumBalance = minimumBalance;
         this.investmentCeiling = investmentCeiling;
         for (final Rating r: Rating.values()) {
@@ -149,11 +151,18 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         return this.individualStrategies.get(r).isConfirmationRequired();
     }
 
+
     @Override
     public List<Recommendation> recommend(final Collection<LoanDescriptor> availableLoans,
                                           final PortfolioOverview portfolio) {
+        return evaluate(availableLoans, portfolio).collect(Collectors.toList());
+    }
+
+    @Override
+    public Stream<Recommendation> evaluate(final Collection<LoanDescriptor> availableLoans,
+                                           final PortfolioOverview portfolio) {
         if (!this.isAcceptable(portfolio)) {
-            return Collections.emptyList();
+            return Stream.empty();
         }
         // split available marketplace into buckets per rating
         final Map<Rating, Collection<LoanDescriptor>> splitByRating =
@@ -161,7 +170,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
         // prepare map of ratings and their shares; we ignore ratings that have no marketplace available
         final Map<Rating, BigDecimal> relevantPortfolio = splitByRating.keySet().stream()
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
-        final List<Recommendation> recommendations = this.rankRatingsByDemand(relevantPortfolio).stream()
+        return this.rankRatingsByDemand(relevantPortfolio).stream()
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
                     final StrategyPerRating strategy = this.individualStrategies.get(rating);
                     final Comparator<LoanDescriptor> comparator = SimpleInvestmentStrategy.getLoanComparator(strategy);
@@ -172,10 +181,7 @@ class SimpleInvestmentStrategy implements InvestmentStrategy {
                     final int balance = portfolio.getCzkAvailable();
                     final int recommendedAmount = this.recommendInvestmentAmount(l.getLoan(), balance);
                     return l.recommend(recommendedAmount, this.needsConfirmation(l));
-                }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty())) // empty == not recommended
-                .collect(Collectors.toList());
-        SimpleInvestmentStrategy.LOGGER.debug("Strategy recommends the following marketplace: {}.", recommendations);
-        return Collections.unmodifiableList(recommendations);
+                }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty())); // empty == not recommended
     }
 
     int recommendInvestmentAmount(final Loan loan, final int balance) {
