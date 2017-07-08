@@ -48,8 +48,8 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             BY_RECENCY = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getDatePublished()).reversed(),
             BY_REMAINING = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getRemainingInvestment()).reversed();
 
-    static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Collection<LoanDescriptor> loans) {
-        return Collections.unmodifiableMap(loans.stream().distinct()
+    static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
+        return Collections.unmodifiableMap(loans.distinct()
                 .collect(Collectors.groupingBy(l -> l.getLoan().getRating())));
     }
 
@@ -71,12 +71,13 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         this.strategy = p;
     }
 
-    private Collection<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
+    Stream<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
         final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {
-            final BigDecimal maximumAllowedShare = BigDecimal.valueOf(strategy.getMaximumShare(r))
-                    .divide(BigDecimal.valueOf(100), RoundingMode.HALF_EVEN);
+            final int fromStrategy = strategy.getMaximumShare(r);
+            final BigDecimal maximumAllowedShare = BigDecimal.valueOf(fromStrategy)
+                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_EVEN);
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
             if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
                 return;
@@ -89,7 +90,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 return v;
             });
         });
-        return mostWantedRatings.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return mostWantedRatings.values().stream().flatMap(Collection::stream);
     }
 
     private boolean isAcceptable(final PortfolioOverview portfolio) {
@@ -118,24 +119,19 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         if (!this.isAcceptable(portfolio)) {
             return Stream.empty();
         }
-        final Collection<LoanDescriptor> availableLoans = strategy.getApplicableLoans(loans)
-                .collect(Collectors.toList());
-        if (availableLoans.isEmpty()) {
-            NaturalLanguageInvestmentStrategy.LOGGER.debug("No loans are applicable.");
-            return Stream.empty();
-        }
         // split available marketplace into buckets per rating
         final Map<Rating, Collection<LoanDescriptor>> splitByRating =
-                NaturalLanguageInvestmentStrategy.sortLoansByRating(availableLoans);
-        // prepare map of ratings and their shares; we ignore ratings that have no loans available
+                NaturalLanguageInvestmentStrategy.sortLoansByRating(strategy.getApplicableLoans(loans));
+        // prepare map of ratings and their shares
         final Map<Rating, BigDecimal> relevantPortfolio = splitByRating.keySet().stream()
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
-        return this.rankRatingsByDemand(relevantPortfolio).stream()
+        // and now return recommendations in the order in which investment should be attempted
+        final int balance = portfolio.getCzkAvailable();
+        return this.rankRatingsByDemand(relevantPortfolio)
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
-                    final Comparator<LoanDescriptor> comparator = NaturalLanguageInvestmentStrategy.getLoanComparator();
-                    return splitByRating.get(rating).stream().sorted(comparator);
+                    return splitByRating.get(rating).stream()
+                            .sorted(NaturalLanguageInvestmentStrategy.getLoanComparator());
                 }).map(l -> { // recommend amount to invest per strategy
-                    final int balance = portfolio.getCzkAvailable();
                     final int recommendedAmount = this.recommendInvestmentAmount(l.getLoan(), balance);
                     return l.recommend(recommendedAmount, this.needsConfirmation(l));
                 }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
