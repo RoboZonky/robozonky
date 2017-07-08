@@ -27,7 +27,7 @@ public class ShortStoryConditionTest {
     @Test
     public void longerNotOk() {
         final Loan l = Mockito.mock(Loan.class);
-        final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD, '*');
+        final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD + 1, '*');
         Mockito.when(l.getStory()).thenReturn(story);
         Assertions.assertThat(new ShortStoryCondition().test(l)).isFalse();
     }
@@ -35,7 +35,7 @@ public class ShortStoryConditionTest {
     @Test
     public void shorterOk() {
         final Loan l = Mockito.mock(Loan.class);
-        final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD - 1, '*');
+        final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD, '*');
         Mockito.when(l.getStory()).thenReturn(story);
         Assertions.assertThat(new ShortStoryCondition().test(l)).isTrue();
     }
