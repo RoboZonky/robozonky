@@ -22,38 +22,22 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class AverageStoryConditionTest {
+public class VeryShortStoryConditionTest {
 
     @Test
     public void longerNotOk() {
         final Loan l = Mockito.mock(Loan.class);
-        final String story = StringUtils.leftPad("", AbstractStoryCondition.LONG_STORY_THRESHOLD + 1, '*');
+        final String story = StringUtils.leftPad("", AbstractStoryCondition.VERY_SHORT_STORY_THRESHOLD, '*');
         Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new AverageStoryCondition().test(l)).isFalse();
+        Assertions.assertThat(new VeryShortStoryCondition().test(l)).isFalse();
     }
 
     @Test
-    public void leftBoundOk() {
+    public void shorterOk() {
         final Loan l = Mockito.mock(Loan.class);
-        final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD + 1, '*');
+        final String story = StringUtils.leftPad("", AbstractStoryCondition.VERY_SHORT_STORY_THRESHOLD - 1, '*');
         Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new AverageStoryCondition().test(l)).isTrue();
-    }
-
-    @Test
-    public void rightBoundOk() {
-        final Loan l = Mockito.mock(Loan.class);
-        final String story = StringUtils.leftPad("", AbstractStoryCondition.LONG_STORY_THRESHOLD, '*');
-        Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new AverageStoryCondition().test(l)).isTrue();
-    }
-
-    @Test
-    public void shorterNotOk() {
-        final Loan l = Mockito.mock(Loan.class);
-        final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD - 1, '*');
-        Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new AverageStoryCondition().test(l)).isFalse();
+        Assertions.assertThat(new VeryShortStoryCondition().test(l)).isTrue();
     }
 
 }

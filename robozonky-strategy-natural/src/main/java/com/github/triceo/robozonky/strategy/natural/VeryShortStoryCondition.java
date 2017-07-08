@@ -16,12 +16,12 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-class ShortStoryCondition extends AbstractStoryCondition {
+class VeryShortStoryCondition extends AbstractStoryCondition {
 
-    public ShortStoryCondition() {
+    public VeryShortStoryCondition() {
         super((story) -> {
             final int length = story.length();
-            return length <= AbstractStoryCondition.SHORT_STORY_THRESHOLD;
+            return length < AbstractStoryCondition.VERY_SHORT_STORY_THRESHOLD;
         });
     }
 

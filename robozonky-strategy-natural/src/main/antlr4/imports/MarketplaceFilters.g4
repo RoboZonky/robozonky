@@ -82,7 +82,8 @@ purposeCondition returns [LoanPurposeCondition result]:
 
 storyCondition returns [MarketplaceFilterCondition result]:
     'příběh je ' (
-        'velmi krátký' { $result = new ShortStoryCondition(); }
+        'velmi krátký' { $result = new VeryShortStoryCondition(); }
+        | 'kratší než průměrný' { $result = new ShortStoryCondition(); }
         | 'průměrně dlouhý' { $result = new AverageStoryCondition(); }
         | 'delší než průměrný' { $result = new LongStoryCondition(); }
     )
