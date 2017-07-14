@@ -75,8 +75,7 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
 
     public AuthenticationHandler createAuthenticationHandler(final SecretProvider secrets) {
         if (refreshTokenEnabled) {
-            final TemporalAmount duration =
-                    Duration.ofSeconds(Settings.INSTANCE.getTokenRefreshBeforeExpirationInSeconds());
+            final TemporalAmount duration = Settings.INSTANCE.getTokenRefreshBeforeExpiration();
             return AuthenticationHandler.tokenBased(secrets, duration);
         } else {
             return AuthenticationHandler.passwordBased(secrets);

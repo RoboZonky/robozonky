@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
@@ -76,14 +77,6 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
         return new LoanDescriptor(loan, captchaDelay);
     }
 
-    protected static ApiProvider harmlessApi() {
-        return AbstractInvestingTest.harmlessApi(10_000);
-    }
-
-    protected static ApiProvider harmlessApi(final int availableBalance) {
-        return harmlessApi(AbstractInvestingTest.harmlessZonky(availableBalance));
-    }
-
     protected static ApiProvider harmlessApi(final Zonky zonky) {
         final ApiProvider p = Mockito.spy(new ApiProvider());
         Mockito.doReturn(Mockito.mock(OAuth.class)).when(p).oauth();
@@ -97,6 +90,7 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         Mockito.when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
         Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
+        Mockito.when(zonky.getStatistics()).thenReturn(new Statistics());
         return zonky;
     }
 

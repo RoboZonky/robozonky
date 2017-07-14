@@ -38,18 +38,13 @@ abstract class OperatingMode implements CommandLineFragment {
                                                     final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
         LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
-        return credentials.getToken()
-                .map(token -> {
-                    secrets.setSecret(svcId, token);
-                    return Optional.of(new Investor.Builder().usingConfirmation(provider, token));
-                }).orElseGet(() -> secrets.getSecret(svcId)
-                        .map(token ->
-                                Optional.of(new Investor.Builder().usingConfirmation(provider, token)))
-                        .orElseGet(() -> {
-                            LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
-                            return Optional.empty();
-                        })
-                );
+        credentials.getToken().ifPresent(t -> secrets.setSecret(svcId, t));
+        return secrets.getSecret(svcId)
+                .map(token -> Optional.of(new Investor.Builder().usingConfirmation(provider, token)))
+                .orElseGet(() -> {
+                    LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
+                    return Optional.empty();
+                });
     }
 
     Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials,

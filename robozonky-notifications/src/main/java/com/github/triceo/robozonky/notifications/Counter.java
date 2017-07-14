@@ -36,43 +36,49 @@ public final class Counter {
     private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Counter.class);
     private static final String SEPARATOR = ";";
 
-    private static void store(final String id, final Set<OffsetDateTime> timestamps) {
+    private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
         final String result = timestamps.stream()
                 .map(OffsetDateTime::toString)
                 .collect(Collectors.joining(Counter.SEPARATOR));
-        Counter.STATE.setValue(id, result);
+        return Counter.STATE.setValue(id, result);
     }
 
     private static Collection<OffsetDateTime> load(final String id) {
         return Counter.STATE.getValue(id)
-                .map(value -> {
-                    final String[] split = value.split(Counter.SEPARATOR);
-                    return Stream.of(split)
-                            .filter(s -> !s.trim().isEmpty())
-                            .map(OffsetDateTime::parse)
-                            .collect(Collectors.toSet());
-                }).orElse(Collections.emptySet());
+                .map(value -> Stream.of(value.split(Counter.SEPARATOR))
+                        .map(String::trim)
+                        .map(OffsetDateTime::parse)
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
     }
 
     private final String id;
     private final int maxItems;
     private final TemporalAmount period;
-    private final Set<OffsetDateTime> timestamps = new LinkedHashSet<>();
+    private final Set<OffsetDateTime> timestamps;
 
-    public Counter(final String id, final int maxItemsPerHour) {
-        this(id, maxItemsPerHour, Duration.ofHours(1));
+    public Counter(final String id, final int maxItems) {
+        this(id, maxItems, Duration.ofHours(1));
     }
 
-    Counter(final String id, final int maxItems, final TemporalAmount period) {
+    public Counter(final String id, final int maxItems, final TemporalAmount period) {
         this.id = id;
         this.maxItems = maxItems;
         this.period = period;
-        this.timestamps.addAll(Counter.load(id));
+        this.timestamps = new LinkedHashSet<>(Counter.load(id));
     }
 
-    public synchronized void increase() {
+    public synchronized int getCount() {
+        return this.timestamps.size();
+    }
+
+    /**
+     *
+     * @return True when the counter increase was properly persisted.
+     */
+    public synchronized boolean increase() {
         timestamps.add(OffsetDateTime.now());
-        Counter.store(id, timestamps);
+        return Counter.store(id, timestamps);
     }
 
     public synchronized boolean allow() {

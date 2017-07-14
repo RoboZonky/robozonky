@@ -63,6 +63,11 @@ public class RatingsTest {
     }
 
     @Test
+    public void invalidValueOf2() {
+        Assertions.assertThatThrownBy(() -> Ratings.valueOf("]")).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     public void unquotedValueOf() {
         Assertions.assertThatThrownBy(() -> Ratings.valueOf("[A]")).isInstanceOf(IllegalArgumentException.class);
     }
@@ -76,11 +81,15 @@ public class RatingsTest {
     @Test
     public void equality() {
         final Ratings r1 = Ratings.of(Rating.A, Rating.B);
-        Assertions.assertThat(r1).isEqualTo(r1);
+        Assertions.assertThat(r1)
+                .isSameAs(r1)
+                .isEqualTo(r1)
+                .isNotEqualTo(null)
+                .isNotEqualTo(this.getClass());
         final Ratings r2 = Ratings.of(Rating.A, Rating.B);
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(r1).isNotSameAs(r2).isEqualTo(r2);
-        softly.assertThat(r2).isEqualTo(r1);
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r1).isNotSameAs(r2).isEqualTo(r2);
+            softly.assertThat(r2).isEqualTo(r1);
+        });
     }
 }

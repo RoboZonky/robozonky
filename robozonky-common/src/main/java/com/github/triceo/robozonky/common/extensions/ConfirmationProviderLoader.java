@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.common.extensions;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProviderService;
@@ -32,15 +31,20 @@ public final class ConfirmationProviderLoader {
     private static final ServiceLoader<ConfirmationProviderService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ConfirmationProviderService.class);
 
-    public static Optional<ConfirmationProvider> load(final String providerId) {
+    static Optional<ConfirmationProvider> load(final String providerId,
+                                               final Iterable<ConfirmationProviderService> loader) {
         ConfirmationProviderLoader.LOGGER.trace("Looking up confirmation provider '{}'.", providerId);
-        return StreamSupport.stream(ConfirmationProviderLoader.LOADER.spliterator(), false)
+        return Util.toStream(loader)
                 .peek(cp ->
                         ConfirmationProviderLoader.LOGGER.debug("Evaluating confirmation provider '{}' with '{}'.",
                                 providerId, cp.getClass()))
                 .map(cp -> cp.find(providerId))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
+    }
+
+    public static Optional<ConfirmationProvider> load(final String providerId) {
+        return ConfirmationProviderLoader.load(providerId, ConfirmationProviderLoader.LOADER);
     }
 
 }

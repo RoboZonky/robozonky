@@ -24,6 +24,7 @@ import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 class Activity {
 
+    private static final Runnable DO_NOTHING = () -> {};
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
     private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
     static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Activity.class);
@@ -49,7 +51,7 @@ class Activity {
 
     private final TemporalAmount sleepInterval;
     private final Collection<LoanDescriptor> recentLoansDescending;
-    private Runnable settler = null;
+    private final AtomicReference<Runnable> settler = new AtomicReference<>(DO_NOTHING);
 
     Activity(final Collection<LoanDescriptor> loans) {
         this(loans, Duration.ofMinutes(60));
@@ -84,9 +86,10 @@ class Activity {
     }
 
     private List<LoanDescriptor> getUnactionableLoans() {
+        final OffsetDateTime now = OffsetDateTime.now();
         return this.recentLoansDescending.stream()
                 .filter(l -> l.getLoanCaptchaProtectionEndDateTime()
-                        .map(captchaEnds -> captchaEnds.isAfter(OffsetDateTime.now()))
+                        .map(captchaEnds -> captchaEnds.isAfter(now))
                         .orElse(false))
                 .collect(Collectors.toList());
     }
@@ -99,43 +102,25 @@ class Activity {
     public boolean shouldSleep() {
         final OffsetDateTime lastKnownAction = Activity.getLatestMarketplaceAction();
         final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
-        boolean shouldSleep = true;
-        final Collection<LoanDescriptor> newLoans = this.getLoansNewerThan(lastKnownAction);
-        if (!newLoans.isEmpty()) {
-            // try investing since there are marketplace we haven't seen yet
-            Activity.LOGGER.debug("Will not sleep due to new marketplace: {}.", newLoans.stream()
-                    .map(l -> String.valueOf(l.getLoan().getId()))
-                    .sorted()
-                    .collect(Collectors.joining(",")));
-            shouldSleep = false;
-        } else if (lastKnownAction.plus(this.sleepInterval).isBefore(OffsetDateTime.now())) {
+        final boolean shouldSleep;
+        if (lastKnownAction.plus(this.sleepInterval).isBefore(OffsetDateTime.now())) {
             // try investing since we haven't tried in a while; maybe we have some more funds now
-            Activity.LOGGER.debug("Will not sleep due to already sleeping too much.");
             shouldSleep = false;
+        } else {
+            // try investing if we have some unseen loans
+            final boolean hasUnseenLoans = !this.getLoansNewerThan(lastKnownAction).isEmpty();
+            shouldSleep = !(hasUnseenLoans || hasUnactionableLoans);
         }
-        synchronized (this) { // do not allow concurrent modification of the settler variable
-            if (!shouldSleep || hasUnactionableLoans) {
-                /*
-                 * only persist (= change marketplace check timestamp) when we're intending to execute some actual
-                 * investing.
-                 */
-                this.settler = () -> this.persist(hasUnactionableLoans);
-            } else {
-                this.settler = null;
-            }
-        }
+        // only change marketplace check timestamp when we're intending to execute some actual investing.
+        this.settler.set(shouldSleep ? null : () -> this.persist(hasUnactionableLoans));
         return shouldSleep;
     }
 
     /**
      * Persists the new marketplace state following a {@link #shouldSleep()} call.
      */
-    public synchronized void settle() {
-        if (this.settler == null) {
-            return;
-        }
-        this.settler.run();
-        this.settler = null;
+    public void settle() {
+        this.settler.getAndSet(Activity.DO_NOTHING).run();
     }
 
     private void persist(final boolean hasUnactionableLoans) {
@@ -143,12 +128,7 @@ class Activity {
         final OffsetDateTime result = hasUnactionableLoans ?
                 OffsetDateTime.now().minus(Duration.from(ResultTracker.CAPTCHA_DELAY).plus(Duration.ofSeconds(30)))
                 : OffsetDateTime.now();
-        if (hasUnactionableLoans) {
-            Activity.LOGGER.debug("New marketplace last checked time placed before beginning of closed season: {}.",
-                    result);
-        } else {
-            Activity.LOGGER.debug("New marketplace last checked time is {}.", result);
-        }
         Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, result.toString());
+        Activity.LOGGER.debug("New marketplace last checked time is {}.", result);
     }
 }

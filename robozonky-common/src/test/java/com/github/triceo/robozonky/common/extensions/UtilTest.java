@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.common.extensions;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class RuntimeMBeanTest {
+public class UtilTest {
 
     @Test
-    public void unblock() {
-        final CountDownLatch s = DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get();
-        ((Runtime)MBean.RUNTIME.getImplementation()).stopDaemon();
-        Assertions.assertThat(s.getCount()).isEqualTo(0);
+    public void notParallel() {
+        final Collection<String> c = Collections.emptyList();
+        final Stream<String> s = Util.toStream(c);
+        Assertions.assertThat(s.isParallel()).isFalse();
     }
 
 }
-
-

@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.investing;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,21 +31,12 @@ import org.junit.Test;
 public class StrategyExecutionTest extends AbstractInvestingTest {
 
     @Test
-    public void empty() {
-        final StrategyExecution exec = new StrategyExecution(null, null, null);
-        Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
-        // check events
-        final List<Event> events = this.getNewEvents();
-        Assertions.assertThat(events).isEmpty();
-    }
-
-    @Test
     public void noStrategy() {
         final Loan loan = new Loan(1, 2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Refreshable<InvestmentStrategy> r = Refreshable.createImmutable(null);
         r.run();
-        final StrategyExecution exec = new StrategyExecution(null, r, null);
+        final StrategyExecution exec = new StrategyExecution(null, r, null, Duration.ofMinutes(60));
         Assertions.assertThat(exec.apply(Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();

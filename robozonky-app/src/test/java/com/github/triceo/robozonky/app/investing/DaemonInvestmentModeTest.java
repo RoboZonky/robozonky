@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.investing;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,12 +36,10 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -104,12 +103,6 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
     @Parameterized.Parameter
     public ExpectedTreatment treatment;
 
-    @Before
-    public void setupApp() {
-        ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.release(); // make sure the daemon is allowed to quit
-        DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
-    }
-
     @Test(timeout = 10000)
     public void standardDryRun() throws Exception {
         System.setProperty("robozonky.default.dry_run_balance", String.valueOf(1000)); // no need to mock wallet
@@ -121,7 +114,7 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final InvestmentStrategy ms = Mockito.mock(InvestmentStrategy.class);
         Mockito.when(ms.evaluate(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
                 .thenAnswer(invocation -> Stream.of(r));
-        final Zonky z = Mockito.mock(Zonky.class);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(1000);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.empty());
         final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
@@ -130,11 +123,11 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(ms);
         s.run();
         try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(auth, new Investor.Builder().asDryRun(),
-                false, m, s)) {
+                false, m, s, Duration.ofMinutes(60), Duration.ofSeconds(1))) {
             final Future<Boolean> wasLockedByUser = Executors.newScheduledThreadPool(1).schedule(() -> {
+                final boolean result = DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().getCount() > 0;
                 LoggerFactory.getLogger(DaemonInvestmentModeTest.class).info("Sending request to terminate.");
-                final boolean result = DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.hasQueuedThreads();
-                DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
+                DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().countDown();
                 return result;
             }, 1, TimeUnit.SECONDS);
             final Optional<Collection<Investment>> result = mode.get();
@@ -142,6 +135,14 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
             Assertions.assertThat(result).matches(o -> o.map(c -> c.size() == 1).orElse(false));
         } finally {
             Assertions.assertThat(m.isClosed()).isTrue();
+        }
+    }
+
+    @Test
+    public void shutdownHookRegistered() throws Exception {
+        try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(null, new Investor.Builder().asDryRun(),
+                false, Mockito.mock(Marketplace.class), null, Duration.ofMinutes(60), Duration.ofSeconds(1))) {
+            Assertions.assertThat(Runtime.getRuntime().removeShutdownHook(mode.getShutdownHook())).isTrue();
         }
     }
 

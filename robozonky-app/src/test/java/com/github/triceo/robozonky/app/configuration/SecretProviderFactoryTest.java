@@ -39,24 +39,7 @@ public class SecretProviderFactoryTest {
     public void wrongFormatKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
         final CommandLine cli = SecretProviderFactoryTest.mockCli(null, tmp, "password".toCharArray());
-        Assertions.assertThat(SecretProviderFactory.newSecretProvider(cli, null)).isEmpty();
-    }
-
-    @Test
-    public void failedDeletingKeyStore() throws Exception {
-        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, null);
-        final File f = Mockito.mock(File.class);
-        Mockito.when(f.canRead()).thenReturn(true);
-        Mockito.when(f.delete()).thenReturn(false);
-        Assertions.assertThat(SecretProviderFactory.newSecretProvider(cli, f)).isEmpty();
-    }
-
-    @Test
-    public void noKeyStoreNoUsername() throws Exception {
-        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, null);
-        final File f = Mockito.mock(File.class);
-        Mockito.when(f.canRead()).thenReturn(false);
-        Assertions.assertThat(SecretProviderFactory.newSecretProvider(cli, f)).isEmpty();
+        Assertions.assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
     }
 
     @Test

@@ -55,7 +55,7 @@ public interface SecretProvider {
 
     /**
      * For cases where there is no KeyStore support available in JDK, this secret provider stores all secrets in plain
-     * text.
+     * text. This is also very useful for testing, as it has no extra dependencies such as keystore files etc.
      *
      * @param username Zonky username.
      * @param password Zonky password.

@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.assertj.core.api.Assertions;
@@ -43,8 +44,20 @@ public class FileUtilsTest {
     }
 
     @Test
+    public void someUrls() throws IOException {
+        File f = File.createTempFile("robozonky-", ".testing");
+        Assertions.assertThat(FileUtils.filesToUrls(f)).contains(f.toURI().toURL());
+    }
+
+    @Test
     public void nullUrls() {
-        Assertions.assertThat(FileUtils.filesToUrls((File[]) null)).isEmpty();
+        Assertions.assertThatThrownBy(() -> FileUtils.filesToUrls((File[]) null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void emptyUrls() {
+        Assertions.assertThat(FileUtils.filesToUrls(new File[0])).isEmpty();
     }
 
 }

@@ -21,11 +21,12 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -35,51 +36,48 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.ShutdownEnabler;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 
 public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
+    public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO =
+            new AtomicReference<>(new CountDownLatch(1));
+
+    private static TemporalAmount getSuddenDeathTimeout(final TemporalAmount periodBetweenChecks) {
+        final long secondBetweenChecks = periodBetweenChecks.get(ChronoUnit.SECONDS);
+        return Duration.ofMinutes(secondBetweenChecks); // multiply by 60
+    }
 
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor =
             Executors.newScheduledThreadPool(2, DaemonInvestmentMode.THREAD_FACTORY);
     private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
-    private final SuddenDeathDetection suddenDeath =
-            new SuddenDeathDetection(DaemonInvestmentMode.BLOCK_UNTIL_RELEASED, 300);
-    public static final Semaphore BLOCK_UNTIL_RELEASED = new Semaphore(1);
+    private final SuddenDeathDetection suddenDeath;
+    private final CountDownLatch blockUntilZero;
+    private final Thread shutdownHook;
 
     public DaemonInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
                                 final boolean isFaultTolerant, final Marketplace marketplace,
                                 final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod,
                                 final TemporalAmount periodBetweenChecks) {
         super(auth, builder, isFaultTolerant);
+        this.blockUntilZero =
+                DaemonInvestmentMode.BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
+        this.shutdownHook = new DaemonShutdownHook(blockUntilZero);
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
         this.refreshableStrategy = strategy;
         this.marketplace = marketplace;
         this.maximumSleepPeriod = maximumSleepPeriod;
         this.periodBetweenChecks = periodBetweenChecks;
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            LOGGER.debug("Shutdown requested.");
-            // will release the main thread and thus terminate the daemon
-            DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
-            // only allow to shut down after the daemon has been closed by the app
-            try {
-                ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.tryAcquire(1, TimeUnit.MINUTES);
-            } catch (final InterruptedException ex) { // don't block shutdown indefinitely
-                LOGGER.warn("Timed out waiting for daemon to terminate cleanly.");
-            } finally {
-                LOGGER.debug("Shutdown allowed.");
-            }
-        }));
+        this.suddenDeath = new SuddenDeathDetection(blockUntilZero,
+                DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
     }
 
-    public DaemonInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
-                                final boolean isFaultTolerant, final Marketplace marketplace,
-                                final Refreshable<InvestmentStrategy> strategy) {
-        this(auth, builder, isFaultTolerant, marketplace, strategy, Duration.ofMinutes(60), Duration.ofSeconds(1));
+    Thread getShutdownHook() {
+        return shutdownHook;
     }
 
     @Override
@@ -88,9 +86,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
          * in tests, the number of available permits may get over 1 as the semaphore is released multiple times.
          * let's make sure we always acquire all the available permits, no matter what the actual number is.
          */
-        final int permitCount = Math.max(1, DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.availablePermits());
-        DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.acquireUninterruptibly(permitCount);
-        return execute(DaemonInvestmentMode.BLOCK_UNTIL_RELEASED);
+        return execute(blockUntilZero);
     }
 
     @Override
@@ -114,7 +110,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
                 final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
                 LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
                 executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
-                executor.scheduleWithFixedDelay(this.suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
+                executor.scheduleAtFixedRate(this.suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
                 break;
             case LISTENING:
                 LOGGER.debug("Starting marketplace listener.");
@@ -138,10 +134,10 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     public void close() throws Exception {
-        DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release(); // just in case
         LOGGER.trace("Shutting down executor.");
         this.executor.shutdownNow();
         LOGGER.trace("Closing marketplace.");
         this.marketplace.close();
+        // reinitialize so that new daemons don't end right away
     }
 }

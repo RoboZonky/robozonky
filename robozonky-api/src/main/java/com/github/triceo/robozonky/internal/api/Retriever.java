@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> The return type of the operation.
  */
-public final class Retriever<T> implements ForkJoinPool.ManagedBlocker {
+public class Retriever<T> implements ForkJoinPool.ManagedBlocker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Retriever.class);
 
@@ -44,7 +44,7 @@ public final class Retriever<T> implements ForkJoinPool.ManagedBlocker {
      * @param <T> Return type of the blocking operation.
      * @return Empty if interrupted, or if the operation result was empty.
      */
-    public static <T> Optional<T> retrieve(final Retriever<T> retriever) {
+    static <T> Optional<T> retrieve(final Retriever<T> retriever) {
         try {
             ForkJoinPool.managedBlock(retriever);
             return retriever.getValue();
@@ -57,6 +57,7 @@ public final class Retriever<T> implements ForkJoinPool.ManagedBlocker {
     /**
      * Block until the the blocking operation is finished, calling it repeatedly until it either succeeds or
      * throws {@link InterruptedException}.
+     *
      * @param toExecute Blocking operation in question.
      * @param <T> Return type of the blocking operation.
      * @return Empty if interrupted, or if the operation result was empty.
@@ -68,7 +69,7 @@ public final class Retriever<T> implements ForkJoinPool.ManagedBlocker {
     private final Supplier<Optional<T>> toExecute;
     private final AtomicReference<Optional<T>> value = new AtomicReference<>();
 
-    private Retriever(final Supplier<Optional<T>> toExecute) {
+    Retriever(final Supplier<Optional<T>> toExecute) {
         this.toExecute = toExecute;
     }
 

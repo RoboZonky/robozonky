@@ -32,7 +32,7 @@ public class ExtensionsManagerTest {
     @Test
     public void retrieveDefaultClassLoader() {
         final ClassLoader result = ExtensionsManager.INSTANCE.retrieveExtensionClassLoader("");
-        Assertions.assertThat(result).isSameAs(CLASSLOADER);
+        Assertions.assertThat(result).isSameAs(ExtensionsManagerTest.CLASSLOADER);
     }
 
     @Test
@@ -49,16 +49,24 @@ public class ExtensionsManagerTest {
         Assertions.assertThat(result).isNotNull();
     }
 
+    private static File getFolder(final String pathname) {
+        final File f = new File(pathname);
+        if (!f.exists()) {
+            return new File("..", pathname);
+        }
+        return f;
+    }
+
     @Test
     public void loadJarsFromFolderWithJars() {
-        final File f = new File("target");
+        final File f = ExtensionsManagerTest.getFolder("target");
         Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
                 .isInstanceOf(URLClassLoader.class);
     }
 
     @Test
     public void loadJarsFromFolderWithNoJars() {
-        final File f = new File("src");
+        final File f = ExtensionsManagerTest.getFolder("src");
         Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
                 .isInstanceOf(URLClassLoader.class);
     }

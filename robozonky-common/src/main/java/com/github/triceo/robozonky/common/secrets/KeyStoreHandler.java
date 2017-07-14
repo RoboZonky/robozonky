@@ -66,7 +66,7 @@ public class KeyStoreHandler {
      * @throws IOException If file already exists or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
-    public static KeyStoreHandler create(final File keyStoreFile, final char[] password)
+    public static KeyStoreHandler create(final File keyStoreFile, final char... password)
             throws IOException, KeyStoreException {
         if (keyStoreFile == null) {
             throw new FileNotFoundException(null);
@@ -77,12 +77,12 @@ public class KeyStoreHandler {
         // get user password and file input stream
         try {
             ks.load(null, password);
-        } catch (final NoSuchAlgorithmException | CertificateException ex) {
+        } catch (final Exception ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
         // store the newly created key store
         final SecretKeyFactory skf = KeyStoreHandler.getSecretKeyFactory();
-        final KeyStoreHandler ksh = new KeyStoreHandler(ks, password, keyStoreFile, skf, true);
+        final KeyStoreHandler ksh = new KeyStoreHandler(ks, password, keyStoreFile, skf);
         ksh.save();
         return ksh;
     }
@@ -96,17 +96,19 @@ public class KeyStoreHandler {
      * @throws IOException If file does not exist or there is a problem writing the file.
      * @throws KeyStoreException If something's happened to the key store.
      */
-    public static KeyStoreHandler open(final File keyStoreFile, final char[] password)
+    public static KeyStoreHandler open(final File keyStoreFile, final char... password)
             throws IOException, KeyStoreException {
-        if (!keyStoreFile.exists()) {
+        if (keyStoreFile == null) {
+            throw new FileNotFoundException(null);
+        } else if (!keyStoreFile.exists()) {
             throw new FileNotFoundException(keyStoreFile.getAbsolutePath());
         }
         final KeyStore ks = KeyStore.getInstance(KeyStoreHandler.KEYSTORE_TYPE);
         // get user password and file input stream
         try (final FileInputStream fis = new FileInputStream(keyStoreFile)) {
             ks.load(fis, password);
-            return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory());
-        } catch (final NoSuchAlgorithmException | CertificateException ex) {
+            return new KeyStoreHandler(ks, password, keyStoreFile, KeyStoreHandler.getSecretKeyFactory(), false);
+        } catch (final CertificateException | NoSuchAlgorithmException ex) {
             throw new IllegalStateException("Should not happen.", ex);
         }
     }
@@ -128,7 +130,7 @@ public class KeyStoreHandler {
      */
     private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,
                             final SecretKeyFactory keyFactory) {
-        this(keyStore, password, keyStoreFile, keyFactory, false);
+        this(keyStore, password, keyStoreFile, keyFactory, true);
     }
 
     private KeyStoreHandler(final KeyStore keyStore, final char[] password, final File keyStoreFile,

@@ -30,7 +30,7 @@ class Runtime implements RuntimeMBean {
 
     @Override
     public void stopDaemon() {
-        DaemonInvestmentMode.BLOCK_UNTIL_RELEASED.release();
+        DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().countDown();
     }
 
     @Override

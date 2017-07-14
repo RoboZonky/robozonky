@@ -16,32 +16,99 @@
 
 package com.github.triceo.robozonky.internal.api;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.util.Properties;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.SoftAssertions;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
 public class SettingsTest {
 
+    private static final class TemporalPredicate implements Predicate<TemporalAmount> {
+
+        private final int seconds;
+
+        public TemporalPredicate(final int seconds) {
+            this.seconds = seconds;
+        }
+
+        @Override
+        public boolean test(final TemporalAmount o) {
+            return o.get(ChronoUnit.SECONDS) == seconds;
+        }
+
+        @Override
+        public String toString() {
+            return "seconds = " + seconds;
+        }
+    }
+
     @Rule
     public final RestoreSystemProperties propertiesRestorer = new RestoreSystemProperties();
 
+    @After
+    public void reinit() {
+        Settings.INSTANCE.reinit();
+    }
+
     @Test
-    public void properties() {
+    public void defaultProperties() {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(Settings.INSTANCE.get("user.dir", "")).isNotEqualTo("");
             softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
                     .isEqualTo("");
             softly.assertThat(Settings.INSTANCE.isDebugEventStorageEnabled()).isFalse();
-            softly.assertThat(Settings.INSTANCE.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
-            softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(5);
-            softly.assertThat(Settings.INSTANCE.getCaptchaDelayInSeconds()).isEqualTo(120);
+            softly.assertThat(Settings.INSTANCE.getTokenRefreshBeforeExpiration())
+                    .matches(new SettingsTest.TemporalPredicate(60));
+            softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
+                    .matches(new SettingsTest.TemporalPredicate(5 * 60));
+            softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
+                    .matches(new SettingsTest.TemporalPredicate(2 * 60));
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
-            softly.assertThat(Settings.INSTANCE.getSocketTimeout()).isNotNull();
-            softly.assertThat(Settings.INSTANCE.getConnectionTimeout()).isNotNull();
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isGreaterThan(0);
+            softly.assertThat(Settings.INSTANCE.getSocketTimeout())
+                    .matches(new SettingsTest.TemporalPredicate(5));
+            softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
+                    .matches(new SettingsTest.TemporalPredicate(5));
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
+
+        });
+    }
+
+    @Test
+    public void setProperties() throws IOException {
+        final Properties p = new Properties();
+        Stream.of(Settings.Key.values()).forEach(v -> p.setProperty(v.getName(), "1000"));
+        final File f = File.createTempFile("robozonky-", ".properties");
+        p.store(new FileWriter(f), "Testing properties");
+        System.setProperty(Settings.FILE_LOCATION_PROPERTY, f.getAbsolutePath());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(Settings.INSTANCE.get("user.dir", "")).isNotEqualTo("");
+            softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
+                    .isEqualTo("");
+            softly.assertThat(Settings.INSTANCE.isDebugEventStorageEnabled()).isFalse();
+            softly.assertThat(Settings.INSTANCE.getTokenRefreshBeforeExpiration())
+                    .matches(new SettingsTest.TemporalPredicate(1000));
+            softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
+                    .matches(new SettingsTest.TemporalPredicate(1000 * 60));
+            softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
+                    .matches(new SettingsTest.TemporalPredicate(1000));
+            softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getSocketTimeout())
+                    .matches(new SettingsTest.TemporalPredicate(1000));
+            softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
+                    .matches(new SettingsTest.TemporalPredicate(1000));
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(1000);
+
         });
     }
 

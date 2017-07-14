@@ -16,9 +16,16 @@
 
 package com.github.triceo.robozonky.common.extensions;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
+import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
+import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.marketplaces.MarketplaceService;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.common.secrets.Credentials;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
@@ -40,6 +47,29 @@ public class MarketplaceLoaderTest {
         final Credentials c = new Credentials(UUID.randomUUID().toString(), MarketplaceLoaderTest.SECRETS);
         Assertions.assertThat(MarketplaceLoader.processMarketplace(Mockito.mock(MarketplaceService.class), c))
                 .isEmpty();
-
     }
+
+    @Test
+    public void loading() {
+        final Marketplace m = new Marketplace() {
+            @Override
+            public boolean registerListener(Consumer<Collection<Loan>> listener) {
+                return false;
+            }
+
+            @Override
+            public ExpectedTreatment specifyExpectedTreatment() {
+                return null;
+            }
+
+            @Override
+            public void run() {
+
+            }
+        };
+        final MarketplaceService ms = (marketplaceId, secret) -> Optional.of(m);
+        final Credentials c = new Credentials("", SecretProvider.fallback(""));
+        Assertions.assertThat(MarketplaceLoader.load(c, Collections.singleton(ms))).contains(m);
+    }
+
 }

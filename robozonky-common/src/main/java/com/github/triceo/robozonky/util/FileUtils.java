@@ -23,7 +23,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,10 +36,6 @@ public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
     public static Optional<File> findFolder(final String folderName) {
-        final File rootFolder = new File(folderName);
-        if (rootFolder.isDirectory()) {
-            return Optional.of(rootFolder);
-        }
         try {
             return Files.walk(new File(System.getProperty("user.dir")).toPath())
                     .map(Path::toFile)
@@ -55,7 +50,7 @@ public class FileUtils {
 
     public static Collection<URL> filesToUrls(final File... jars) {
         if (jars == null) {
-            return Collections.emptySet();
+            throw new IllegalArgumentException("Null");
         }
         return Stream.of(jars)
                 .map(f -> {

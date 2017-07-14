@@ -63,6 +63,9 @@ public class SessionTest extends AbstractInvestingTest {
                         .containsExactly(ld);
                 softly.assertThat(it.getInvestmentsMade()).isEmpty();
             });
+            // no new sessions should be allowed before the current one is disposed of
+            Assertions.assertThatThrownBy(() -> Session.create(new Investor.Builder(), zonky, lds))
+                    .isInstanceOf(IllegalStateException.class);
         }
     }
 
@@ -110,7 +113,7 @@ public class SessionTest extends AbstractInvestingTest {
     @Test
     public void makeInvestment() {
         // setup APIs
-        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(200);
         // run test
         final int amount = 200;
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(Duration.ZERO);
@@ -127,9 +130,17 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void getBalancePropertyInDryRun() {
-        final int value = 200;
+        final int value = 0;
         System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
         Assertions.assertThat(Session.getDryRunBalance(null).intValue()).isEqualTo(value);
+    }
+
+    @Test
+    public void getLiveBalanceInDryRun() {
+        final int value = -1;
+        System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
+        Assertions.assertThat(Session.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -148,7 +159,7 @@ public class SessionTest extends AbstractInvestingTest {
     @Test
     public void underBalance() {
         // setup APIs
-        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
+        final Zonky z = AbstractInvestingTest.harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
         // run test
         try (final Session it = Session.create(new Investor.Builder(), z, Collections.emptyList())) {
             final Optional<Recommendation> recommendation =

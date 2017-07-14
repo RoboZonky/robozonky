@@ -25,7 +25,7 @@
 
   <groupId>com.github.triceo.robozonky.extensions</groupId>
   <artifactId>robozonky-strategy-rules</artifactId>
-  <name>RoboZonky Extension: Rule-based investment strategy</name>
+  <name>DEPRECATED RoboZonky Extension: Rule-based investment strategy</name>
 
   <properties>
     <version.org.drools>7.0.0.Beta8</version.org.drools>

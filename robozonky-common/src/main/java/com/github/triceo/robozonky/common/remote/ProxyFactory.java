@@ -41,9 +41,22 @@ final class ProxyFactory {
     static {
         RegisterBuiltin.register(ProxyFactory.RESTEASY);
         final Class<?> jsonProvider = ResteasyJackson2Provider.class;
-        if (!ProxyFactory.RESTEASY.isRegistered(jsonProvider)) RESTEASY.registerProvider(jsonProvider);
+        if (!ProxyFactory.RESTEASY.isRegistered(jsonProvider)) {
+            ProxyFactory.RESTEASY.registerProvider(jsonProvider);
+        }
     }
-    static final HttpClientConnectionManager CONNECTION_MANAGER = new PoolingHttpClientConnectionManager();
+    private static final HttpClientConnectionManager CONNECTION_MANAGER = new PoolingHttpClientConnectionManager();
+    private static final RequestConfig REQUEST_CONFIG = RequestConfig.copy(RequestConfig.DEFAULT)
+            .setRedirectsEnabled(true)
+            .setRelativeRedirectsAllowed(true)
+            .setConnectTimeout((int)(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .setConnectionRequestTimeout((int)(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .setSocketTimeout((int)(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .build();
+    private static final HttpClientBuilder CLIENT_BUILDER = HttpClientBuilder.create()
+            .setRedirectStrategy(LaxRedirectStrategy.INSTANCE) // be tolerant of unexpected situations
+            .setDefaultRequestConfig(ProxyFactory.REQUEST_CONFIG) // no "sudden death" (marketplace blocking on socket)
+            .setConnectionManager(ProxyFactory.CONNECTION_MANAGER);
 
     public static ResteasyClient newResteasyClient(final RoboZonkyFilter filter) {
         final ResteasyClient client = ProxyFactory.newResteasyClient();
@@ -52,20 +65,7 @@ final class ProxyFactory {
     }
 
     public static ResteasyClient newResteasyClient() {
-        final int socketTimeout = (int)(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000;
-        final int connectionTimeout = (int)(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000;
-        final RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-                .setRedirectsEnabled(true)
-                .setRelativeRedirectsAllowed(true)
-                .setConnectTimeout(connectionTimeout)
-                .setConnectionRequestTimeout(connectionTimeout)
-                .setSocketTimeout(socketTimeout)
-                .build();
-        final CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .setRedirectStrategy(LaxRedirectStrategy.INSTANCE) // be tolerant of unexpected situations
-                .setDefaultRequestConfig(requestConfig) // avoid "sudden death" (marketplace forever blocking on socket)
-                .setConnectionManager(ProxyFactory.CONNECTION_MANAGER)
-                .build();
+        final CloseableHttpClient httpClient = ProxyFactory.CLIENT_BUILDER.build();
         // FYI the redirecting properties above will be ignored; see RedirectingHttpClient's Javadoc
         final ClientHttpEngine httpEngine = new RedirectingHttpClient(httpClient);
         return new ResteasyClientBuilder()

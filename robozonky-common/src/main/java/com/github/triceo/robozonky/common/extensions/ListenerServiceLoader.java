@@ -19,8 +19,6 @@ package com.github.triceo.robozonky.common.extensions;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
@@ -36,15 +34,10 @@ public final class ListenerServiceLoader {
     private static final ServiceLoader<ListenerService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
 
-    private static <T> Stream<T> iteratorToStream(final Iterable<T> iterable) {
-        return StreamSupport.stream(iterable.spliterator(), false);
-    }
-
     static <T extends Event> List<Refreshable<EventListener<T>>> load(final Class<T> eventType,
                                                                       final Iterable<ListenerService> loader,
                                                                       final Scheduler scheduler) {
-        return ListenerServiceLoader.iteratorToStream(loader)
-                .parallel()
+        return Util.toStream(loader)
                 .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
                 .map(s -> s.findListener(eventType))
                 .peek(scheduler::submit)

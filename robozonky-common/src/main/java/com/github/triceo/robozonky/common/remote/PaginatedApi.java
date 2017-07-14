@@ -25,19 +25,18 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
 
-    private final ZonkyApiToken token;
+    private final AuthenticatedFilter filter;
     private final Class<T> api;
     private final String url;
 
     PaginatedApi(final Class<T> api, final String url, final ZonkyApiToken token) {
         this.api = api;
         this.url = url;
-        this.token = token;
+        this.filter = new AuthenticatedFilter(token);
     }
 
     @Override
     public <Q> Q execute(final Function<T, Q> function) {
-        final AuthenticatedFilter filter = new AuthenticatedFilter(this.token);
         return this.execute(function, Sort.unspecified(), filter);
     }
 
@@ -45,16 +44,20 @@ class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<
         sort.apply(filter);
         final ResteasyClient client = ProxyFactory.newResteasyClient(filter);
         try {
-            final T proxy = ProxyFactory.newProxy(client, api, url);
-            return function.apply(proxy);
+            return execute(function, client);
         } finally {
             client.close();
         }
     }
 
-    public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Sort<S> sort,
-                                      final int pageNo, final int pageSize) {
-        return this.execute(function, sort, pageNo, pageSize, new AuthenticatedFilter(this.token));
+    <Q> Q execute(final Function<T, Q> function, final ResteasyClient client) {
+        final T proxy = ProxyFactory.newProxy(client, api, url);
+        return function.apply(proxy);
+    }
+
+    public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Sort<S> sort, final int pageNo,
+                                      final int pageSize) {
+        return this.execute(function, sort, pageNo, pageSize, filter);
     }
 
     PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Sort<S> sort,
@@ -66,6 +69,10 @@ class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<
                 .map(Integer::parseInt)
                 .orElse(-1);
         return new PaginatedResult<>(result, pageNo, totalSize);
+    }
+
+    public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final int pageNo, final int pageSize) {
+        return this.execute(function, Sort.unspecified(), pageNo, pageSize, filter);
     }
 
 }

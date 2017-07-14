@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.common.extensions;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.marketplaces.MarketplaceService;
@@ -40,12 +39,16 @@ public final class MarketplaceLoader {
         return service.find(providerId, secret);
     }
 
-    public static Optional<Marketplace> load(final Credentials credentials) {
+    static Optional<Marketplace> load(final Credentials credentials, final Iterable<MarketplaceService> loader) {
         MarketplaceLoader.LOGGER.trace("Looking up marketplace '{}'.", credentials.getToolId());
-        return StreamSupport.stream(MarketplaceLoader.LOADER.spliterator(), false)
+        return Util.toStream(loader)
                 .map(service -> MarketplaceLoader.processMarketplace(service, credentials))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
+    }
+
+    public static Optional<Marketplace> load(final Credentials credentials) {
+        return MarketplaceLoader.load(credentials, MarketplaceLoader.LOADER);
     }
 
 }

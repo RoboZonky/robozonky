@@ -122,21 +122,6 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
     }
 
     @Test
-    public void empty() {
-        final SingleShotInvestmentModeTest.TestMarketplace m = new SingleShotInvestmentModeTest.TestMarketplace(Collections.emptyList());
-        try (final SingleShotInvestmentMode exec = new SingleShotInvestmentMode(null, null, true, m, null)) {
-            Assertions.assertThat(exec.get()).isPresent();
-        } catch (final Exception ex) {
-            Assertions.fail("Unexpected exception.", ex);
-        } finally {
-            Assertions.assertThat(m.isClosed()).isTrue();
-        }
-        // validate events
-        final List<Event> events = this.getNewEvents();
-        Assertions.assertThat(events).hasSize(0);
-    }
-
-    @Test
     public void failingDuringInvest() {
         final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         Mockito.doThrow(IllegalStateException.class).when(z).getWallet();

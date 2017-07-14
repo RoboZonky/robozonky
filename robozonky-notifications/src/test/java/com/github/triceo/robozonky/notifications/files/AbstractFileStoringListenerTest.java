@@ -41,7 +41,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,7 +108,7 @@ public class AbstractFileStoringListenerTest {
     }
 
     @Parameterized.Parameter
-    public EventListener listener;
+    public AbstractFileStoringListener listener;
     @Parameterized.Parameter(1)
     public Event event;
     @Parameterized.Parameter(2)
@@ -126,18 +126,20 @@ public class AbstractFileStoringListenerTest {
 
     @Test
     public void checkInvestmentReported() throws IOException {
+        final int preCounter1 = listener.getFilesOfThisType().getCount();
+        final int preCounter2 = listener.getProperties().getGlobalCounter().getCount();
         // run class under test
         final Collection<Path> oldFiles = AbstractFileStoringListenerTest.getFilesInWorkingDirectory();
         listener.handle(event, new SessionInfo(""));
         final List<Path> newFiles = AbstractFileStoringListenerTest.getNewFilesInWorkingDirectory(oldFiles);
         // check existence and contents of new file
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(newFiles).hasSize(1);
+        Assertions.assertThat(newFiles).hasSize(1);
         final Path p = newFiles.get(0);
-        softly.assertThat(p.toString()).endsWith(this.suffix);
+        Assertions.assertThat(p.toString()).endsWith(this.suffix);
         final String expectedResult = "#" + this.loanId + ": " + this.loanAmount + " CZK";
-        softly.assertThat(Files.lines(p)).containsExactly(expectedResult);
-        softly.assertAll();
+        Assertions.assertThat(Files.lines(p)).containsExactly(expectedResult);
+        Assertions.assertThat(listener.getFilesOfThisType().getCount()).isGreaterThan(preCounter1);
+        Assertions.assertThat(listener.getProperties().getGlobalCounter().getCount()).isGreaterThan(preCounter2);
     }
 
     @After

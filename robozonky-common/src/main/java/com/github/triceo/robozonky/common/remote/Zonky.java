@@ -92,8 +92,9 @@ public class Zonky implements AutoCloseable {
         return Zonky.getStream(walletApi);
     }
 
-    public Statistics getStatistics() {
-        return portfolioApi.execute(PortfolioApi::statistics);
+    public Statistics getStatistics() { // may be null when the user has a fresh Zonky account
+        final Statistics s = portfolioApi.execute(PortfolioApi::statistics);
+        return (s == null) ? new Statistics() : s;
     }
 
     /**

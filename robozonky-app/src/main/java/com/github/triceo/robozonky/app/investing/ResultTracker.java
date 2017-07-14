@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,8 +33,7 @@ import org.slf4j.LoggerFactory;
 class ResultTracker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultTracker.class);
-    static final TemporalAmount CAPTCHA_DELAY =
-            Duration.ofSeconds(Settings.INSTANCE.getCaptchaDelayInSeconds());
+    static final TemporalAmount CAPTCHA_DELAY = Settings.INSTANCE.getCaptchaDelay();
 
     /**
      * We are using volatile so that the write operation is guaranteed to be atomic.

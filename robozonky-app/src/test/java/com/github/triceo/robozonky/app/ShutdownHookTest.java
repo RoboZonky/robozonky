@@ -46,6 +46,12 @@ public class ShutdownHookTest {
     }
 
     @Test
+    public void nullHandler() {
+        Assertions.assertThatThrownBy(() -> new ShutdownHook().register(null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     public void exceptionHandlingOnShutdown() {
         final ShutdownHook.Handler h = Mockito.mock(ShutdownHook.Handler.class);
         Mockito.when(h.get()).thenReturn(Optional.of(code -> {

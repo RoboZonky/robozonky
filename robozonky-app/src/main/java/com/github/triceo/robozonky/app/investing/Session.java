@@ -41,7 +41,6 @@ import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.remote.ControlApi;
-import com.github.triceo.robozonky.api.remote.PortfolioApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
@@ -153,21 +152,10 @@ class Session implements AutoCloseable {
                 ).collect(Collectors.toList());
     }
 
-    /**
-     * Zonky API may return {@link PortfolioApi#statistics()} as null if the account has no previous investments.
-     *
-     * @param api API to execute the operation.
-     * @return Either what the API returns, or an empty object.
-     */
-    private static Statistics retrieveStatistics(final Zonky api) {
-        final Statistics returned = api.getStatistics();
-        return returned == null ? new Statistics() : returned;
-    }
-
     private final List<LoanDescriptor> loansStillAvailable;
-    private final Collection<Investment> allInvestments, investmentsMadeNow = new LinkedHashSet<>(0);
+    private final Collection<Investment> allInvestments, investmentsMadeNow = new LinkedHashSet<>();
     private final Refreshable<PortfolioOverview> portfolioOverview;
-    private Investor investor;
+    private final Investor investor;
     private BigDecimal balance;
     private final SessionState state;
 
@@ -184,7 +172,7 @@ class Session implements AutoCloseable {
                 .collect(Collectors.toList());
         portfolioOverview = new Refreshable<PortfolioOverview>() {
 
-            private final Statistics stats = Session.retrieveStatistics(zonky);
+            private final Statistics stats = zonky.getStatistics();
 
             @Override
             protected Supplier<Optional<String>> getLatestSource() {
@@ -202,7 +190,7 @@ class Session implements AutoCloseable {
 
     private synchronized void ensureOpen() {
         final Session s = Session.INSTANCE.get();
-        if (s != null && !Objects.equals(s, this)) {
+        if (!Objects.equals(s, this)) {
             throw new IllegalStateException("Session already closed.");
         }
     }

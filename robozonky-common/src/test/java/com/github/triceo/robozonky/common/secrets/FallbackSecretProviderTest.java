@@ -31,7 +31,7 @@ public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
 
     @Test
     public void setUsernameAndPassword() {
-        final SecretProvider p = new FallbackSecretProvider(FallbackSecretProviderTest.USR,
+        final SecretProvider p = SecretProvider.fallback(FallbackSecretProviderTest.USR,
                 FallbackSecretProviderTest.PWD.toCharArray());
         // make sure original values were set
         Assertions.assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
@@ -46,7 +46,7 @@ public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
 
     @Test
     public void tokenManipulation() {
-        final SecretProvider p = new FallbackSecretProvider(FallbackSecretProviderTest.USR,
+        final SecretProvider p = SecretProvider.fallback(FallbackSecretProviderTest.USR,
                 FallbackSecretProviderTest.PWD.toCharArray());
         final String token = UUID.randomUUID().toString();
         // create token

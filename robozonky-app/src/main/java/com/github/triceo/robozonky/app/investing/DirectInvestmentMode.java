@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app.investing;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -59,7 +58,7 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     public Optional<Collection<Investment>> get() {
-        return this.execute(new Semaphore(1));
+        return this.execute(null);
     }
 
 }

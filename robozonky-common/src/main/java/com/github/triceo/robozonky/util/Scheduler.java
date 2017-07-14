@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.util;
 
-import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashSet;
@@ -37,8 +36,7 @@ public class Scheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
-    private static final TemporalAmount REFRESH =
-            Duration.ofMinutes(Settings.INSTANCE.getRemoteResourceRefreshIntervalInMinutes());
+    private static final TemporalAmount REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     /*
      * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
      * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.

@@ -42,12 +42,8 @@ class FileNotificationProperties extends NotificationProperties {
 
     @Override
     public int getGlobalHourlyLimit() {
-        final int val = this.getIntValue(FileNotificationProperties.HOURLY_LIMIT).orElse(Integer.MAX_VALUE);
-        if (val < 0) {
-            return Integer.MAX_VALUE;
-        } else {
-            return val;
-        }
+        final int val = this.getIntValue(FileNotificationProperties.HOURLY_LIMIT, Integer.MAX_VALUE);
+        return (val < 0) ? Integer.MAX_VALUE : val;
     }
 
 }

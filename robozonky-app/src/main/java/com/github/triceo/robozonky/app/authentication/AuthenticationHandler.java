@@ -18,10 +18,10 @@ package com.github.triceo.robozonky.app.authentication;
 
 import java.io.StringReader;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Function;
 import javax.xml.bind.JAXBException;
 
@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 public class AuthenticationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandler.class);
+    private static final TemporalAmount SAFETY_PRE_EXPIRATION_INTERVAL = Duration.ofSeconds(5);
 
     /**
      * Build authentication mechanism that will keep the session alive via the use of session token. The mechanism will
@@ -100,6 +101,16 @@ public class AuthenticationHandler {
         return Authenticator.withCredentials(this.data.getUsername(), this.data.getPassword());
     }
 
+    private Optional<ZonkyApiToken> getToken() {
+        return this.data.getToken().map(r -> {
+            try {
+                return ZonkyApiToken.unmarshal(r);
+            } catch (final JAXBException ex) {
+                AuthenticationHandler.LOGGER.warn("Failed parsing token, using password.", ex);
+                return null;
+            }});
+    }
+
     /**
      * Based on information received until this point, decide on the proper authentication method.
      *
@@ -110,24 +121,13 @@ public class AuthenticationHandler {
             AuthenticationHandler.LOGGER.debug("Password-based authentication requested.");
             return this.buildAuthenticatorWithPassword();
         }
-        return this.data.getToken().map(r -> {
-            try {
-                final long refreshIntervalInSeconds = tokenRefreshBeforeExpiration.get(ChronoUnit.SECONDS);
-                final ZonkyApiToken token = ZonkyApiToken.unmarshal(r);
-                final int safetyRefreshIntervalInSeconds = 5;
-                if (token.willExpireIn(Duration.ofSeconds(safetyRefreshIntervalInSeconds))) {
-                    if (safetyRefreshIntervalInSeconds > refreshIntervalInSeconds) {
-                        AuthenticationHandler.LOGGER.info("Ignoring pre-set token refresh time.");
-                    }
-                    // may not be enough time for token refresh; rather disregard than risk auth exception
-                    AuthenticationHandler.LOGGER.debug("Token expired or expiring too soon, using password.");
-                    return this.buildAuthenticatorWithPassword();
-                } else {
-                    return Authenticator.withAccessToken(this.data.getUsername(), token, tokenRefreshBeforeExpiration);
-                }
-            } catch (final Exception ex) {
-                AuthenticationHandler.LOGGER.warn("Failed parsing token, using password.", ex);
+        return this.getToken().map(token -> {
+            if (token.willExpireIn(AuthenticationHandler.SAFETY_PRE_EXPIRATION_INTERVAL)) {
+                // may not be enough time for token refresh; rather disregard than risk auth exception
+                AuthenticationHandler.LOGGER.debug("Token expired or expiring too soon, using password.");
                 return this.buildAuthenticatorWithPassword();
+            } else {
+                return Authenticator.withAccessToken(this.data.getUsername(), token, tokenRefreshBeforeExpiration);
             }
         }).orElseGet(() -> {  // no token available, also using password-based
             AuthenticationHandler.LOGGER.debug("Token not available, using password.");
@@ -187,7 +187,8 @@ public class AuthenticationHandler {
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
     private Collection<Investment> execute(final ApiProvider provider,
-                                          final Function<Zonky, Collection<Investment>> op) {
+                                           final Function<Zonky, Collection<Investment>> op) {
+        int i = 0;
         final boolean hasOperation = op != null;
         if (needsPassword && !hasOperation) { // needs password, yet won't do anything = don't log in
             return Collections.emptyList();

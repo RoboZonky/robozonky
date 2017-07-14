@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.notifications;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 

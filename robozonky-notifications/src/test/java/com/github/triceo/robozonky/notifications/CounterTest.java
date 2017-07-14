@@ -19,20 +19,32 @@ package com.github.triceo.robozonky.notifications;
 import java.time.Duration;
 import java.util.UUID;
 
+import com.github.triceo.robozonky.common.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class CounterTest {
+public class CounterTest extends AbstractStateLeveragingTest {
 
     @Test
     public void testTiming() throws InterruptedException {
         final int seconds = 1;
         final Counter c = new Counter(UUID.randomUUID().toString(), 1, Duration.ofSeconds(seconds));
         Assertions.assertThat(c.allow()).isTrue();
-        c.increase();
+        Assertions.assertThat(c.increase()).isTrue();
         Assertions.assertThat(c.allow()).isFalse();
-        Thread.sleep(seconds * 5 * 1000);
-        Assertions.assertThat(c.allow()).isTrue();
+        int millis = 0;
+        boolean isAllowed = false;
+        while (millis < seconds * 5 * 1000) { // spend the absolute minimum time waiting
+            Thread.sleep(1);
+            millis += 1;
+            isAllowed = c.allow();
+            if (isAllowed) {
+                break;
+            }
+        }
+        if (!isAllowed) {
+            Assertions.fail("Did not reset counter in time.");
+        }
     }
 
 }

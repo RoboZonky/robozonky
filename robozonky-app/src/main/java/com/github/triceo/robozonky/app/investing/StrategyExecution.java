@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,11 +50,6 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
         this.maximumSleepPeriod = maximumSleepPeriod;
     }
 
-    public StrategyExecution(final Investor.Builder investor, final Refreshable<InvestmentStrategy> strategy,
-                             final AuthenticationHandler auth) {
-        this(investor, strategy, auth, Duration.ofMinutes(60));
-    }
-
     private Collection<Investment> invest(final InvestmentStrategy strategy,
                                           final Collection<LoanDescriptor> marketplace) {
         final Function<Zonky, Collection<Investment>> op = (zonky) -> {
@@ -65,32 +59,23 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
         return authenticationHandler.execute(op);
     }
 
-    private Collection<Investment> justReauth() {
-        return authenticationHandler.execute(null);
-    }
-
     @Override
     public Collection<Investment> apply(final Collection<LoanDescriptor> loans) {
-        if (loans.isEmpty()) {
-            return Collections.emptyList();
-        }
         return refreshableStrategy.getLatest()
                 .map(strategy -> {
                     final Activity activity = new Activity(loans, maximumSleepPeriod);
-                    final boolean shouldSleep = activity.shouldSleep();
-                    if (shouldSleep) {
-                        final Collection<Investment> empty = justReauth();
+                    if (activity.shouldSleep()) {
+                        authenticationHandler.execute(null); // just reauth to make sure token does not expire
                         StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
-                        return empty;
-                    } else {
-                        StrategyExecution.LOGGER.debug("Sending following marketplace to the investor: {}.", loans.stream()
-                                .peek(l -> Events.fire(new LoanArrivedEvent(l)))
-                                .map(l -> String.valueOf(l.getLoan().getId()))
-                                .collect(Collectors.joining(", ")));
-                        final Collection<Investment> investments = invest(strategy, loans);
-                        activity.settle();
-                        return investments;
+                        return Collections.<Investment>emptyList();
                     }
+                    StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
+                            .peek(l -> Events.fire(new LoanArrivedEvent(l)))
+                            .map(l -> String.valueOf(l.getLoan().getId()))
+                            .collect(Collectors.joining(", ")));
+                    final Collection<Investment> investments = invest(strategy, loans);
+                    activity.settle();
+                    return investments;
                 }).orElseGet(() -> {
                     StrategyExecution.LOGGER.info("RoboZonky is asleep as there is no investment strategy.");
                     return Collections.emptyList();

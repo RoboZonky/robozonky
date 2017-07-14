@@ -75,6 +75,9 @@ class ShutdownHook {
      * @return True if the handler was registered and will be executed during execute.
      */
     public boolean register(final ShutdownHook.Handler handler) {
+        if (handler == null) {
+            throw new IllegalArgumentException("Handler may not be null.");
+        }
         try {
             final Optional<Consumer<ShutdownHook.Result>> end = handler.get();
             if (end.isPresent()) {

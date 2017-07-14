@@ -16,9 +16,11 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.util.concurrent.Semaphore;
+import java.time.OffsetDateTime;
+import java.time.temporal.TemporalAmount;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +37,18 @@ class SuddenDeathDetection implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SuddenDeathDetection.class);
 
-    private final Semaphore daemonStopsIfReleased;
-    private final AtomicInteger missedChecks = new AtomicInteger(0);
+    private final CountDownLatch daemonStopsIfReleased;
+    private final AtomicReference<OffsetDateTime> lastMarketplaceCheck = new AtomicReference<>(OffsetDateTime.now());
     private final AtomicBoolean suddenDeath = new AtomicBoolean(false);
-    private final int missedChecksThreshold;
+    private final TemporalAmount inactivityThreshold;
 
-    public SuddenDeathDetection(final Semaphore daemonStopsIfReleased, final int missedChecksThreshold) {
+    public SuddenDeathDetection(final CountDownLatch daemonStopsIfReleased, final TemporalAmount inactivityThreshold) {
         this.daemonStopsIfReleased = daemonStopsIfReleased;
-        this.missedChecksThreshold = missedChecksThreshold;
+        this.inactivityThreshold = inactivityThreshold;
     }
 
     public void registerMarketplaceCheck() {
-        missedChecks.set(0);
+        lastMarketplaceCheck.set(OffsetDateTime.now());
     }
 
     public boolean isSuddenDeath() {
@@ -56,16 +58,11 @@ class SuddenDeathDetection implements Runnable {
     @Override
     public void run() {
         try {
-            if (isSuddenDeath()) { // nothing to do
-                return;
-            }
-            final int missing = missedChecks.incrementAndGet();
-            if (missing > missedChecksThreshold) {
+            final OffsetDateTime now = OffsetDateTime.now();
+            if (lastMarketplaceCheck.get().plus(inactivityThreshold).isBefore(now)) {
                 SuddenDeathDetection.LOGGER.error("Sudden death is here.");
                 suddenDeath.set(true); // make the rest of the code notice the sudden death
-                daemonStopsIfReleased.release(); // kill daemon and report
-            } else if (missing == ((missedChecksThreshold / 10) * 9)) {
-                SuddenDeathDetection.LOGGER.warn("Sudden death is just around the corner.");
+                daemonStopsIfReleased.countDown(); // kill daemon and report
             }
         } catch (final Throwable t) { // not catching here would stop the thread, disabling sudden death detection
             SuddenDeathDetection.LOGGER.warn("Sudden death workaround error.", t);

@@ -90,13 +90,8 @@ class EmailNotificationProperties extends NotificationProperties {
 
     @Override
     protected int getGlobalHourlyLimit() {
-        final int val = this.getIntValue(EmailNotificationProperties.HOURLY_LIMIT)
-                .orElse(Integer.MAX_VALUE);
-        if (val < 0) {
-            return Integer.MAX_VALUE;
-        } else {
-            return val;
-        }
+        final int val = this.getIntValue(EmailNotificationProperties.HOURLY_LIMIT, Integer.MAX_VALUE);
+        return (val < 0) ? Integer.MAX_VALUE : val;
     }
 
 }

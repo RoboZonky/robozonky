@@ -53,7 +53,7 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
 
     static String md5(final String secret) throws NoSuchAlgorithmException {
         final MessageDigest mdEnc = MessageDigest.getInstance("MD5");
-        mdEnc.update(secret.getBytes(Defaults.CHARSET), 0, secret.length());
+        mdEnc.update(secret.getBytes(Defaults.CHARSET));
         return new BigInteger(1, mdEnc.digest()).toString(16);
     }
 
@@ -71,7 +71,7 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         }
     }
 
-    static HttpEntity getFormData(final RequestId requestId, final int loanId, final int amount)
+    private static HttpEntity getFormData(final RequestId requestId, final int loanId, final int amount)
             throws UnsupportedEncodingException {
         final List<NameValuePair> nvps = Arrays.asList(
             new BasicNameValuePair("clientApp", ZonkoidConfirmationProvider.CLIENT_APP),

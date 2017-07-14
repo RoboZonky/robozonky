@@ -16,10 +16,14 @@
 
 package com.github.triceo.robozonky.common.extensions;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
+import com.github.triceo.robozonky.api.confirmations.ConfirmationProviderService;
+import com.github.triceo.robozonky.api.confirmations.RequestId;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -29,6 +33,25 @@ public class ConfirmationProviderLoaderTest {
     public void unknown() {
         final Optional<ConfirmationProvider> result = ConfirmationProviderLoader.load(UUID.randomUUID().toString());
         Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void loading() {
+        final String id = UUID.randomUUID().toString();
+        final ConfirmationProvider cp = new ConfirmationProvider() {
+            @Override
+            public Optional<Confirmation> requestConfirmation(final RequestId auth, final int loanId,
+                                                              final int amount) {
+                return Optional.empty();
+            }
+
+            @Override
+            public String getId() {
+                return id;
+            }
+        };
+        final ConfirmationProviderService cps = strategy -> Optional.of(cp);
+        Assertions.assertThat(ConfirmationProviderLoader.load(id, Collections.singleton(cps))).contains(cp);
     }
 
 }

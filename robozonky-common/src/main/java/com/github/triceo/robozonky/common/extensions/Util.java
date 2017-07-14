@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.common.extensions;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+class Util {
 
-public class RuntimeMBeanTest {
-
-    @Test
-    public void unblock() {
-        final CountDownLatch s = DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get();
-        ((Runtime)MBean.RUNTIME.getImplementation()).stopDaemon();
-        Assertions.assertThat(s.getCount()).isEqualTo(0);
+    public static <T> Stream<T> toStream(final Iterable<T> loader) {
+        return StreamSupport.stream(loader.spliterator(), false);
     }
 
 }
-
-

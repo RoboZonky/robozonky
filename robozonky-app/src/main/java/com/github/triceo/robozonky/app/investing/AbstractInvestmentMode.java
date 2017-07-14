@@ -18,9 +18,10 @@ package com.github.triceo.robozonky.app.investing;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -90,10 +91,11 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
      * Execute the algorithm and give it a circuit breaker which, when turning true, tells the orchestration to
      * finish the operation and terminate.
      *
-     * @param circuitBreaker Release in order to have this method stop and return.
+     * @param circuitBreaker Count to 0 in order to have this method stop and return. If null, stops and returns
+     * without waiting for anything.
      * @return Investments made while this method was running, or empty if failure.
      */
-    protected Optional<Collection<Investment>> execute(final Semaphore circuitBreaker) {
+    protected Optional<Collection<Investment>> execute(final CountDownLatch circuitBreaker) {
         LOGGER.trace("Executing.");
         try {
             final ResultTracker buffer = new ResultTracker();
@@ -103,20 +105,22 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
                 buffer.acceptInvestmentsFromRobot(result);
             };
             openMarketplace(investor);
-            LOGGER.trace("Will wait for request to stop.");
-            circuitBreaker.acquireUninterruptibly(Math.max(1, circuitBreaker.availablePermits()));
-            LOGGER.trace("Request to stop received.");
-            circuitBreaker.release();
-            if (this.wasSuddenDeath()) {
-                throw new SuddenDeathException();
+            if (circuitBreaker != null) { // daemon mode requires special handling
+                LOGGER.trace("Will wait for request to stop.");
+                circuitBreaker.await();
+                LOGGER.trace("Request to stop received.");
+                if (this.wasSuddenDeath()) {
+                    throw new SuddenDeathException();
+                }
             }
             return Optional.of(buffer.getInvestmentsMade());
         } catch (final SuddenDeathException ex) {
             LOGGER.error("Thread stack traces:");
-            Thread.getAllStackTraces().forEach((key, value) -> {
-                LOGGER.error("Stack trace for thread {}:", key);
-                Stream.of(value).forEach(ste -> LOGGER.error("{}", ste));
-            });
+            Thread.getAllStackTraces().forEach((key, value) ->
+                    LOGGER.error("Stack trace for thread {}: {}", key,
+                            Stream.of(value)
+                                    .map(StackTraceElement::toString)
+                                    .collect(Collectors.joining(System.lineSeparator()))));
             throw new IllegalStateException(ex);
         } catch (final Exception ex) {
             LOGGER.error("Failed executing investments.", ex);

@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
@@ -39,15 +39,9 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
-    Optional<File> storeInvestmentMade(final File target, final int loanId, final int amount) {
+    void storeInvestmentMade(final File target, final int loanId, final int amount) throws IOException {
         final Collection<String> output = Collections.singletonList("#" + loanId + ": " + amount + " CZK");
-        try {
-            Files.write(target.toPath(), output);
-            return Optional.of(target);
-        } catch (final IOException ex) {
-            LOGGER.warn("Failed writing out {}.", target, ex);
-            return Optional.empty();
-        }
+        Files.write(target.toPath(), output);
     }
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -56,11 +50,20 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
 
     protected AbstractFileStoringListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
-        this.filesOfThisType = new Counter(this.getClass().getSimpleName(), properties.getListenerSpecificHourlyLimit());
+        this.filesOfThisType = new Counter(this.getClass().getSimpleName(),
+                properties.getListenerSpecificHourlyLimit());
     }
 
-    boolean shouldStoreFile(final T event) {
-        return this.properties.getGlobalCounter().allow() && this.filesOfThisType.allow();
+    public Counter getFilesOfThisType() {
+        return filesOfThisType;
+    }
+
+    public ListenerSpecificNotificationProperties getProperties() {
+        return properties;
+    }
+
+    private Stream<Counter> getCounters() {
+        return Stream.of(this.properties.getGlobalCounter(), this.filesOfThisType);
     }
 
     abstract int getLoanId(final T event);
@@ -71,17 +74,19 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
 
     @Override
     public void handle(final T event, final SessionInfo sessionInfo) {
-        if (!this.shouldStoreFile(event)) {
+        if (!this.getCounters().allMatch(Counter::allow)) { // hourly limit triggered
             LOGGER.debug("Will not store file.");
             return;
         }
         final Temporal now = event.getCreatedOn();
-        final String filename = "robozonky." + AbstractFileStoringListener.FORMATTER.format(now) + '.'
-                + this.getSuffix(event);
-        this.storeInvestmentMade(new File(filename), this.getLoanId(event), this.getAmount(event)).ifPresent(f -> {
-            this.properties.getGlobalCounter().increase();
-            this.filesOfThisType.increase();
-        });
+        final String filename =
+                "robozonky." + AbstractFileStoringListener.FORMATTER.format(now) + '.' + this.getSuffix(event);
+        try {
+            this.storeInvestmentMade(new File(filename), this.getLoanId(event), this.getAmount(event));
+            this.getCounters().forEach(Counter::increase);
+        } catch (final IOException ex) { // notification not written; nothing much to do about it
+            LOGGER.warn("Failed writing out {}.", filename, ex);
+        }
     }
 
 }

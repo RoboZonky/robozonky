@@ -42,21 +42,13 @@ class TestOperatingMode extends OperatingMode {
 
             @Override
             public Optional<Collection<Investment>> get() {
-                if (!Checker.notifications(auth.getSecretProvider().getUsername())) {
-                    LOGGER.warn("No e-mail notifications sent. Perhaps they were never enabled?");
-                } else {
-                    LOGGER.info("E-mail notification successfully sent, check your inbox.");
-                }
+                LOGGER.info("Notification sent: {}.", Checker.notifications(auth.getSecretProvider().getUsername()));
                 builder.getConfirmationUsed().ifPresent(c ->
-                        builder.getConfirmationRequestUsed().ifPresent(r -> {
-                            final Optional<Boolean> result =
-                                    Checker.confirmations(c, r.getUserId(),r.getPassword());
-                            if (result.isPresent() && result.get()) {
-                                LOGGER.info("Confirmation from '{}' received.", c.getId());
-                            } else {
-                                LOGGER.warn("Did not receive remote confirmation. Perhaps service misconfigured?");
-                            }
-                        }));
+                        builder.getConfirmationRequestUsed().ifPresent(r ->
+                                LOGGER.info("Confirmation received: {}.",
+                                        Checker.confirmations(c, r.getUserId(),r.getPassword()))
+                        )
+                );
                 return Optional.of(Collections.emptyList());
             }
 

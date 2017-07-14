@@ -22,38 +22,37 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Ratings {
 
+    private static final Pattern WHITESPACE = Pattern.compile("\\s");
+    private static final Pattern COMMA = Pattern.compile("\\Q,\\E");
+
     public static Ratings valueOf(final String ratings) {
         // trim the surrounding []
-        final String trimmed = ratings.trim();
+        final String trimmed = Ratings.WHITESPACE.matcher(ratings).replaceAll("");
         if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
-            throw new IllegalArgumentException("Expecting string in the format of [\"A\", \"B\"], got " + ratings);
+            throw new IllegalArgumentException("Expecting string in the format of [\"A\",\"B\"], got " + ratings);
         } else if (trimmed.length() == 2) { // only contains []
             return Ratings.of();
         }
-        final String[] parts = trimmed.substring(1, trimmed.length() - 1).split("\\Q,\\E");
-        if (parts.length == 1 && parts[0].trim().length() == 0) { // only contains whitespace
-            return Ratings.of();
-        }
+        final String[] parts = Ratings.COMMA.split(trimmed.substring(1, trimmed.length() - 1));
         // get the list of ratings represented by the parts of the string
-        return of(Arrays.stream(parts)
-                .map(String::trim)
+        return Ratings.of(Arrays.stream(parts)
                 .filter(part -> {
                     if (!part.startsWith("\"") && !part.endsWith("\"") && part.length() < 3) {
                         throw new IllegalArgumentException("Expecting part of string to be quoted, got " + part);
                     }
                     return true;
-                })
-                .map(part -> part.substring(1, part.length() - 1)) // remove surrounding quotes
+                }).map(part -> part.substring(1, part.length() - 1)) // remove surrounding quotes
                 .map(Rating::valueOf) // convert string representations to actual instances
-                .collect(Collectors.toList()));
+                .toArray(Rating[]::new));
     }
 
     public static Ratings of(final Rating... ratings) {
-        return of(Arrays.asList(ratings));
+        return Ratings.of(Arrays.asList(ratings));
     }
 
     public static Ratings of(final Collection<Rating> ratings) {
@@ -61,7 +60,7 @@ public class Ratings {
     }
 
     public static Ratings all() {
-        return of(Rating.values());
+        return Ratings.of(Rating.values());
     }
 
     private final Set<Rating> ratings;

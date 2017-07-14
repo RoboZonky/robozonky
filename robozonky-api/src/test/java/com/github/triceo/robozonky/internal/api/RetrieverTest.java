@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 public class RetrieverTest {
@@ -28,6 +29,18 @@ public class RetrieverTest {
     public void proper() {
         final Supplier<Optional<String>> s = () -> Optional.of("");
         Assertions.assertThat(Retriever.retrieve(s)).isPresent().contains("");
+    }
+
+    @Test
+    public void internal() {
+        final Supplier<Optional<String>> s = () -> Optional.of("");
+        final Retriever<String> r = new Retriever<>(s);
+        Assertions.assertThat(r.isReleasable()).isFalse();
+        final Optional<String> result = Retriever.retrieve(r);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result).contains("");
+            softly.assertThat(r.isReleasable()).isTrue();
+        });
     }
 
 }

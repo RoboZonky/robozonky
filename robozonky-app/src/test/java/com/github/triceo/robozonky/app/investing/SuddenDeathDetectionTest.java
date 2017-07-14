@@ -16,43 +16,29 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.util.concurrent.Semaphore;
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Assume;
 import org.junit.Test;
 
 public class SuddenDeathDetectionTest {
 
     @Test
     public void detection() throws InterruptedException {
-        final Semaphore semaphore = new Semaphore(1);
-        semaphore.acquire();
-        Assume.assumeTrue(semaphore.availablePermits() == 0);
-        final SuddenDeathDetection workaround = new SuddenDeathDetection(semaphore, 1);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final int seconds = 2;
+        final SuddenDeathDetection workaround = new SuddenDeathDetection(latch, Duration.ofSeconds(seconds));
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
         workaround.run();
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
+        Thread.sleep(seconds * 2 * 1000);
         workaround.run();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(workaround.isSuddenDeath()).isTrue();
-            softly.assertThat(semaphore.availablePermits()).isGreaterThan(0);
+            softly.assertThat(latch.getCount()).isEqualTo(0);
         });
-    }
-
-    @Test
-    public void reset() throws InterruptedException {
-        final Semaphore semaphore = new Semaphore(1);
-        semaphore.acquire();
-        Assume.assumeTrue(semaphore.availablePermits() == 0);
-        final SuddenDeathDetection workaround = new SuddenDeathDetection(semaphore, 1);
-        Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
-        workaround.run();
-        Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
-        workaround.registerMarketplaceCheck();
-        workaround.run();
-        Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
     }
 
 }

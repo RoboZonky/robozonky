@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -82,9 +83,23 @@ public enum Settings {
         }
     }
 
-    private final Properties properties = this.getProperties();
+    private final AtomicReference<Properties> properties = new AtomicReference<>();
+
+    /**
+     * To be used purely for testing purposes.
+     */
+    void reinit() {
+        this.properties.set(null);
+    }
 
     public <T> T get(final String key, final Function<String, T> adapter) {
+        final Properties properties = this.properties.updateAndGet(p -> { // lazy initialization to allow for reinit
+            if (p == null) {
+                return this.getProperties();
+            } else {
+                return p;
+            }
+        });
         final String val = properties.containsKey(key) ? properties.getProperty(key) : System.getProperty(key);
         return adapter.apply(val);
     }
@@ -131,12 +146,12 @@ public enum Settings {
         return get(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE);
     }
 
-    public int getTokenRefreshBeforeExpirationInSeconds() {
-        return get(Settings.Key.DEFAULTS_TOKEN_REFRESH, 60);
+    public TemporalAmount getTokenRefreshBeforeExpiration() {
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_TOKEN_REFRESH, 60));
     }
 
-    public int getRemoteResourceRefreshIntervalInMinutes() {
-        return get(Settings.Key.DEFAULTS_RESOURCE_REFRESH, 5);
+    public TemporalAmount getRemoteResourceRefreshInterval() {
+        return Duration.ofMinutes(get(Settings.Key.DEFAULTS_RESOURCE_REFRESH, 5));
     }
 
     public TemporalAmount getSocketTimeout() {
@@ -147,8 +162,8 @@ public enum Settings {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 5));
     }
 
-    public int getCaptchaDelayInSeconds() {
-        return get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 120);
+    public TemporalAmount getCaptchaDelay() {
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 120));
     }
 
     public int getDefaultDryRunBalance() {

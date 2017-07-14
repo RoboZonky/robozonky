@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.notifications;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -39,7 +40,7 @@ public abstract class NotificationProperties {
 
     protected NotificationProperties(final Properties source) {
         this.properties = source;
-        this.globalCounter = new Counter("global", this.getGlobalHourlyLimit());
+        this.globalCounter = new Counter("global", this.getGlobalHourlyLimit(), Duration.ofHours(1));
     }
 
     protected boolean getBooleanValue(final String propertyName, final boolean defaultValue) {

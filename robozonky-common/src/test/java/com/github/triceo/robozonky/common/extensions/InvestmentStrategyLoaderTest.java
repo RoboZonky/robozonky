@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.common.extensions;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,11 +42,19 @@ public class InvestmentStrategyLoaderTest {
         Assertions.assertThat(InvestmentStrategyLoader.processInvestmentStrategyService(iss, "")).isEmpty();
     }
 
+
     @Test
     public void standardProcessing() {
         final InvestmentStrategyService iss = Mockito.mock(InvestmentStrategyService.class);
         Mockito.when(iss.parse(ArgumentMatchers.any())).thenReturn(Optional.of(Mockito.mock(InvestmentStrategy.class)));
         Assertions.assertThat(InvestmentStrategyLoader.processInvestmentStrategyService(iss, "")).isPresent();
+    }
+
+    @Test
+    public void loading() {
+        final InvestmentStrategy is = (availableLoans, portfolio) -> Collections.emptyList();
+        final InvestmentStrategyService iss = strategy -> Optional.of(is);
+        Assertions.assertThat(InvestmentStrategyLoader.load("", Collections.singleton(iss))).contains(is);
     }
 
 }

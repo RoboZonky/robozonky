@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -60,7 +59,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     public Optional<Collection<Investment>> get() {
-        return execute(new Semaphore(1));
+        return execute(null);
     }
 
     @Override

@@ -17,7 +17,9 @@
 package com.github.triceo.robozonky.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStoreException;
 
 import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
@@ -39,6 +41,32 @@ public class KeyStoreHandlerTest {
         } catch (final IOException e) {
             Assertions.fail("Could not create temp file.", e);
         }
+    }
+
+    @Test
+    public void nullFileOnCreate() {
+        Assertions.assertThatThrownBy(() -> KeyStoreHandler.create(null))
+                .isInstanceOf(FileNotFoundException.class);
+    }
+
+    @Test
+    public void nullFileOnOpen() {
+        Assertions.assertThatThrownBy(() -> KeyStoreHandler.open(null))
+                .isInstanceOf(FileNotFoundException.class);
+    }
+
+    @Test
+    public void preexistingFileOnCreate() throws IOException {
+        File f = File.createTempFile("robozonky-", ".keystore");
+        Assertions.assertThatThrownBy(() -> KeyStoreHandler.create(f))
+                .isInstanceOf(FileAlreadyExistsException.class);
+    }
+
+    @Test
+    public void noneexistentFileOnOpen() throws IOException {
+        File f = File.createTempFile("robozonky-", ".keystore");
+        f.delete();
+        Assertions.assertThatThrownBy(() -> KeyStoreHandler.open(f)).isInstanceOf(FileNotFoundException.class);
     }
 
     @Test

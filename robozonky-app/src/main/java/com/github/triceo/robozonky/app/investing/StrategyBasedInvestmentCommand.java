@@ -17,14 +17,12 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import com.github.triceo.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.app.Events;
 
 final class StrategyBasedInvestmentCommand implements InvestmentCommand {
@@ -46,15 +44,12 @@ final class StrategyBasedInvestmentCommand implements InvestmentCommand {
     @Override
     public void accept(final Session s) {
         Events.fire(new StrategyStartedEvent(strategy, s.getAvailableLoans(), s.getPortfolioOverview()));
+        boolean invested;
         do {
-            final Optional<Recommendation> invested = strategy.evaluate(s.getAvailableLoans(), s.getPortfolioOverview())
+            invested = strategy.evaluate(s.getAvailableLoans(), s.getPortfolioOverview())
                     .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
-                    .filter(s::invest)
-                    .findFirst();
-            if (!invested.isPresent()) { // there is nothing to invest into; RoboZonky is finished now
-                break;
-            }
-        } while (s.getPortfolioOverview().getCzkAvailable() >= 0);
+                    .anyMatch(s::invest); // keep trying until investment opportunities are exhausted
+        } while (invested);
         Events.fire(new StrategyCompletedEvent(strategy, s.getInvestmentsMade(), s.getPortfolioOverview()));
     }
 

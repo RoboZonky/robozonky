@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky.app;
 
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 /**
@@ -25,18 +25,17 @@ import java.util.function.Consumer;
  */
 public class ShutdownEnabler implements ShutdownHook.Handler {
 
-    public static final Semaphore DAEMON_ALLOWED_TO_TERMINATE = new Semaphore(1);
+    public static CountDownLatch DAEMON_ALLOWED_TO_TERMINATE = new CountDownLatch(1);
 
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
-        // will be acquired immediately after RoboZonky startup
-        ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.acquireUninterruptibly();
         return Optional.of((returnCode -> {
             /*
              * when the code gets here during shutdown, control is handed over to the daemon, which is already
              * waiting to acquire; application will relinquish control and the JVM will shut down.
              */
-            ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.release();
+            ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.countDown();
+            ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE = new CountDownLatch(1);
         }));
     }
 }

@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public final class InvestmentStrategyLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentStrategyLoader.class);
-    private static final ServiceLoader<InvestmentStrategyService> STRATEGY_LOADER =
+    private static final ServiceLoader<InvestmentStrategyService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(InvestmentStrategyService.class);
 
     static Optional<InvestmentStrategy> processInvestmentStrategyService(final InvestmentStrategyService service,
@@ -49,11 +48,15 @@ public final class InvestmentStrategyLoader {
         }
     }
 
-    public static Optional<InvestmentStrategy> load(final String strategy) {
-        return StreamSupport.stream(InvestmentStrategyLoader.STRATEGY_LOADER.spliterator(), true)
+    static Optional<InvestmentStrategy> load(final String strategy, Iterable<InvestmentStrategyService> loader) {
+        return Util.toStream(loader)
                 .map(iss -> InvestmentStrategyLoader.processInvestmentStrategyService(iss, strategy))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
+    }
+
+    public static Optional<InvestmentStrategy> load(final String strategy) {
+        return InvestmentStrategyLoader.load(strategy, InvestmentStrategyLoader.LOADER);
     }
 
 }
