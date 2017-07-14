@@ -16,8 +16,6 @@
 
 package com.github.triceo.robozonky.notifications;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -99,14 +97,4 @@ public abstract class NotificationProperties {
         return properties.hashCode();
     }
 
-    @Override
-    public String toString() {
-        try (final StringWriter sw = new StringWriter()) {
-            properties.store(sw, "");
-            return sw.toString();
-        } catch (final IOException ex) {
-            NotificationProperties.LOGGER.warn("Failed converting properties to string.", ex);
-            return "";
-        }
-    }
 }
