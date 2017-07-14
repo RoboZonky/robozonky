@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Optional;
@@ -37,11 +36,11 @@ final class SecretProviderFactory {
      * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
      */
     public static Optional<SecretProvider> getSecretProvider(final CommandLine cli) {
-        final Optional<File> keyStoreLocation = cli.getAuthenticationFragment().getKeystore();
-        final char[] password = cli.getAuthenticationFragment().getPassword();
-        return keyStoreLocation.map(keystore -> {
+        final AuthenticationCommandLineFragment cliAuth = cli.getAuthenticationFragment();
+        final char[] password = cliAuth.getPassword();
+        return cliAuth.getKeystore().map(keystore -> {
             try {
-                final KeyStoreHandler ksh = KeyStoreHandler.open(keyStoreLocation.get(), password);
+                final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
                 return Optional.of(SecretProvider.keyStoreBased(ksh));
             } catch (final IOException ex) {
                 SecretProviderFactory.LOGGER.error("Failed opening guarded storage.", ex);
@@ -50,7 +49,7 @@ final class SecretProviderFactory {
                 SecretProviderFactory.LOGGER.info("Can not use keystore.", ex);
                 return SecretProviderFactory.getFallbackSecretProvider(cli);
             }
-        }).orElse(SecretProviderFactory.getFallbackSecretProvider(cli));
+        }).orElseGet(() -> SecretProviderFactory.getFallbackSecretProvider(cli));
     }
 
     static Optional<SecretProvider> getFallbackSecretProvider(final CommandLine cli) {
