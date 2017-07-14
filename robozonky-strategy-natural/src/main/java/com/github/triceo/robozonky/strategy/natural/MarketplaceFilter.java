@@ -19,17 +19,25 @@ package com.github.triceo.robozonky.strategy.natural;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 class MarketplaceFilter extends MarketplaceFilterCondition {
 
-    private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
+    private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
+        return conditions.stream()
+                .map(MarketplaceFilterCondition::toString)
+                .collect(Collectors.joining(" and "));
+    }
+
+    private Collection<MarketplaceFilterCondition> ignoreWhen = Collections.emptySet(),
         butNotWhen = Collections.emptySet();
 
-    public void when(final Collection<MarketplaceFilterCondition> conditions) {
-        when = new LinkedHashSet<>(conditions);
+    public void ignoreWhen(final Collection<MarketplaceFilterCondition> conditions) {
+        ignoreWhen = new LinkedHashSet<>(conditions);
     }
 
     public void butNotWhen(final Collection<MarketplaceFilterCondition> conditions) {
@@ -37,9 +45,20 @@ class MarketplaceFilter extends MarketplaceFilterCondition {
     }
 
     @Override
+    protected Optional<String> getDescription() {
+        return Optional.of("When [" + toString(ignoreWhen) + "] but not when [" + toString(butNotWhen) + "].");
+    }
+
+    /**
+     * Whether or not the loan should be filtered out.
+     *
+     * @param loan Loan in question.
+     * @return True when all the initial conditions return true AND when one or more secondary conditions don't.
+     */
+    @Override
     public boolean test(final Loan loan) {
         final Predicate<MarketplaceFilterCondition> f = c -> c.test(loan);
-        return when.stream().allMatch(f) && butNotWhen.stream().noneMatch(f);
+        return ignoreWhen.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
     }
 
 }

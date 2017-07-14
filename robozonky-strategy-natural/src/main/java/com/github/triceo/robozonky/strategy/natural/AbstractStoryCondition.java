@@ -29,7 +29,6 @@ class AbstractStoryCondition extends MarketplaceFilterCondition {
     private final Predicate<String> storyLength;
 
     protected AbstractStoryCondition(final Predicate<String> storyLength) {
-        LOGGER.debug("Story length condition registered.");
         this.storyLength = storyLength;
     }
 

@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 
 public class MarketplaceFilterTest {
 
-    private static final Supplier<MarketplaceFilterCondition> ACCEPTING = () -> new MarketplaceFilterCondition() {
+    private static final Supplier<MarketplaceFilterCondition> MATCHING = () -> new MarketplaceFilterCondition() {
 
         @Override
         public boolean test(final Loan loan) {
@@ -35,11 +35,8 @@ public class MarketplaceFilterTest {
         }
 
     };
-
-    private static final Supplier<MarketplaceFilterCondition> REJECTING = () -> new MarketplaceFilterCondition() {
-
+    private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = () -> new MarketplaceFilterCondition() {
         // this is the default
-
     };
 
     @Test
@@ -49,31 +46,31 @@ public class MarketplaceFilterTest {
     }
 
     @Test
-    public void oneAccepting() {
+    public void oneMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.when(Collections.singletonList(MarketplaceFilterTest.ACCEPTING.get()));
+        f.ignoreWhen(Collections.singletonList(MarketplaceFilterTest.MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isTrue();
     }
 
     @Test
-    public void oneRejecting() {
+    public void notAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.when(Arrays.asList(MarketplaceFilterTest.ACCEPTING.get(), MarketplaceFilterTest.REJECTING.get(),
-                MarketplaceFilterTest.ACCEPTING.get()));
+        f.ignoreWhen(Arrays.asList(MarketplaceFilterTest.MATCHING.get(), MarketplaceFilterTest.NOT_MATCHING.get(),
+                MarketplaceFilterTest.MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isFalse();
     }
 
     @Test
-    public void oneInButRejecting() {
+    public void secondaryOneNotMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.butNotWhen(Collections.singleton(MarketplaceFilterTest.REJECTING.get()));
+        f.butNotWhen(Collections.singleton(MarketplaceFilterTest.NOT_MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isTrue();
     }
 
     @Test
-    public void oneInButAccepting() {
+    public void secondaryAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.butNotWhen(Arrays.asList(MarketplaceFilterTest.REJECTING.get(), MarketplaceFilterTest.ACCEPTING.get()));
+        f.butNotWhen(Arrays.asList(MarketplaceFilterTest.MATCHING.get(), MarketplaceFilterTest.MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isFalse();
     }
 

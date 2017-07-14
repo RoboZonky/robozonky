@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -32,12 +33,16 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterCondition {
     }
 
     public void add(final T item) {
-        LOGGER.debug("Added possible value: {}.", item);
         this.possibleValues.add(item);
     }
 
     public void add(final Collection<T> items) {
         items.forEach(this::add);
+    }
+
+    @Override
+    protected Optional<String> getDescription() {
+        return Optional.of("Possible values: " + possibleValues + '.');
     }
 
     @Override

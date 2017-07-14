@@ -18,12 +18,8 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.internal.api.Defaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class DefaultValues {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultValues.class);
 
     private final DefaultPortfolio portfolio;
     private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
@@ -60,7 +56,6 @@ class DefaultValues {
         if (targetPortfolioSize <= 0) {
             throw new IllegalArgumentException("Target portfolio size must be a positive number.");
         }
-        DefaultValues.LOGGER.debug("Target portfolio size set to {} CZK.", targetPortfolioSize);
         this.targetPortfolioSize = targetPortfolioSize;
     }
 
@@ -72,8 +67,6 @@ class DefaultValues {
         if (investmentSize == null) {
             throw new IllegalArgumentException("Default investment size must be provided.");
         }
-        DefaultValues.LOGGER.debug("Investment size set between {} and {} CZK.",
-                investmentSize.getMinimumInvestmentInCzk(), investmentSize.getMaximumInvestmentInCzk());
         this.investmentSize = investmentSize;
     }
 

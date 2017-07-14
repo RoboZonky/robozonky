@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.slf4j.Logger;
@@ -112,8 +113,16 @@ class ParsedStrategy {
         }
     }
 
+    private boolean matchesNoFilter(final Loan loan) {
+        return !marketplaceFilters.stream()
+                .filter(f -> f.test(loan))
+                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", loan.getId(), f))
+                .findFirst()
+                .isPresent();
+    }
+
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> loans) {
-        return loans.stream().filter(l -> marketplaceFilters.stream().allMatch(f -> f.test(l.getLoan())));
+        return loans.stream().filter(l -> matchesNoFilter(l.getLoan()));
     }
 
 }

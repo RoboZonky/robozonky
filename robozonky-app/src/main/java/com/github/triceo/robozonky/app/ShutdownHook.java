@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to specify
- * such actions and {@link #execute(ShutdownHook.Result)} when it's time to shut the app down.
+ * such actions and {@link #execute(ShutdownHook.Result)} ignoreWhen it's time to shut the app down.
  */
 class ShutdownHook {
 

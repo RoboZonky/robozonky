@@ -70,8 +70,11 @@ public class NaturalLanguageInvestmentStrategyTest {
     @Test
     public void noLoansApplicable() {
         final MarketplaceFilter filter = new MarketplaceFilter();
-        filter.when(Collections.singleton(new MarketplaceFilterCondition() {
-            // reject
+        filter.ignoreWhen(Collections.singleton(new MarketplaceFilterCondition() {
+            @Override
+            public boolean test(final Loan loan) {
+                return true;
+            }
         }));
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);

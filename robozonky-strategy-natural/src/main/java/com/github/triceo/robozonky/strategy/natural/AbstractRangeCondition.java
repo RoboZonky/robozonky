@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -39,6 +40,12 @@ abstract class AbstractRangeCondition extends MarketplaceFilterCondition {
         this.maxInclusive = min.max(max);
     }
 
+    @Override
+    protected Optional<String> getDescription() {
+        return Optional.of("Range: <" + minInclusive + "; " + maxInclusive + ">.");
+    }
+
+    @Override
     public boolean test(final Loan loan) {
         final BigDecimal target = AbstractRangeCondition.toBigDecimal(targetAccessor.apply(loan));
         return target.compareTo(minInclusive) >= 0 && target.compareTo(maxInclusive) <= 0;

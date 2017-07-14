@@ -14,7 +14,7 @@ marketplaceFilterExpression returns [Collection<MarketplaceFilter> result]:
 
 marketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
-    'Ignorovat úvěr, kde: ' r=marketplaceFilterConditions { $result.when($r.result); }
+    'Ignorovat úvěr, kde: ' r=marketplaceFilterConditions { $result.ignoreWhen($r.result); }
     ('(Ale ne když: ' s=marketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 

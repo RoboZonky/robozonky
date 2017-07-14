@@ -16,6 +16,8 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.util.Optional;
+
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
@@ -28,6 +30,11 @@ class LoanRatingBetterOrEqualCondition extends MarketplaceFilterCondition {
             throw new IllegalArgumentException("Rating must be provided.");
         }
         this.worstPossibleRating = r;
+    }
+
+    @Override
+    protected Optional<String> getDescription() {
+        return Optional.of("Threshold: " + worstPossibleRating + ".");
     }
 
     @Override
