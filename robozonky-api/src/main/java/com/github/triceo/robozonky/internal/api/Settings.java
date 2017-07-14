@@ -41,6 +41,7 @@ public enum Settings {
     public enum Key {
 
         DEBUG_ENABLE_EVENT_STORAGE("robozonky.debug.enable_event_storage"),
+        DEBUG_ENABLE_HTTP_RESPONSE_LOGGING("robozonky.debug.enable_http_response_logging"),
         DEFAULTS_TOKEN_REFRESH("robozonky.default.token_refresh_seconds"),
         DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),
         DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
@@ -144,6 +145,10 @@ public enum Settings {
      */
     public boolean isDebugEventStorageEnabled() {
         return get(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE);
+    }
+
+    public boolean isDebugHttpResponseLoggingEnabled() {
+        return get(Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING);
     }
 
     public TemporalAmount getTokenRefreshBeforeExpiration() {

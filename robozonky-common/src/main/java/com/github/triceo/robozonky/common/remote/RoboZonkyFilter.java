@@ -16,7 +16,9 @@
 
 package com.github.triceo.robozonky.common.remote;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +29,7 @@ import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +58,20 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
         return Optional.ofNullable(responseHeaders.get(key));
     }
 
+    private static InputStream logInboundEntity(final StringBuilder b, final InputStream source) throws IOException {
+        final InputStream stream = source.markSupported() ? source : new BufferedInputStream(source);
+        final int maxEntitySize = 1024;
+        stream.mark(maxEntitySize + 1);
+        final byte[] entity = new byte[maxEntitySize + 1];
+        final int entitySize = stream.read(entity);
+        b.append(new String(entity, 0, Math.min(entitySize, maxEntitySize), Defaults.CHARSET));
+        if (entitySize > maxEntitySize) {
+            b.append("...more...");
+        }
+        stream.reset();
+        return stream;
+    }
+
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
         headersToSet.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
@@ -67,6 +84,12 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
         this.logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
                 clientRequestContext.getUri(), clientResponseContext.getStatus(),
                 clientResponseContext.getStatusInfo().getReasonPhrase());
+        if (Settings.INSTANCE.isDebugHttpResponseLoggingEnabled() && clientResponseContext.hasEntity()) {
+            final StringBuilder b = new StringBuilder();
+            final InputStream s = RoboZonkyFilter.logInboundEntity(b, clientResponseContext.getEntityStream());
+            clientResponseContext.setEntityStream(s);
+            logger.debug("Response body is: {}", b);
+        }
         responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
                 .filter(e -> e.getValue().size() > 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));

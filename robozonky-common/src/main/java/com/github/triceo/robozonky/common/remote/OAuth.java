@@ -35,7 +35,7 @@ public class OAuth implements AutoCloseable {
 
     public ZonkyApiToken refresh(final ZonkyApiToken token) {
         return api.execute(a -> {
-            return a.refresh(String.valueOf(token.getRefreshToken()), token.getType(), token.getScope());
+            return a.refresh(String.valueOf(token.getRefreshToken()), "refresh_token", token.getScope());
         });
     }
 
