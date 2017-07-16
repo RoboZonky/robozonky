@@ -66,7 +66,7 @@ public class NaturalLanguageInvestmentStrategyService implements InvestmentStrat
             final ParsedStrategy s = NaturalLanguageInvestmentStrategyService.parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguageInvestmentStrategy(s));
         } catch (final Exception ex) {
-            NaturalLanguageInvestmentStrategyService.LOGGER.info("Failed parsing strategy.", ex);
+            NaturalLanguageInvestmentStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
             return Optional.empty();
         }
     }
