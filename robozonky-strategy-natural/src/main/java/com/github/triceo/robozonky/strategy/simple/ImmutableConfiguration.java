@@ -31,8 +31,7 @@ import java.util.Properties;
 import com.github.triceo.robozonky.internal.api.Defaults;
 
 /**
- * Simple wrapper around a property file that replaces the unnecessarily complex commons-configuration2 which was being
- * used before.
+ * Simple wrapper around a property file.
  */
 class ImmutableConfiguration {
 

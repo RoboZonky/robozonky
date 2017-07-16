@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-class DefaultInvestmentShare {
+public class DefaultInvestmentShare {
 
     private final int minimumShareInPercent = 0;
     private final int maximumShareInPercent;

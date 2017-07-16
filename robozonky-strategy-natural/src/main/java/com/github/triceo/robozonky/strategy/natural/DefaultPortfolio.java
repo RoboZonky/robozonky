@@ -20,7 +20,7 @@ import java.util.EnumMap;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-enum DefaultPortfolio {
+public enum DefaultPortfolio {
 
     CONSERVATIVE(3, 6, 16, 25, 20, 15, 15, 0),
     BALANCED(1, 3, 17, 20, 25, 20, 12, 2),

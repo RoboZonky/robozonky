@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-class PortfolioShare {
+public class PortfolioShare {
 
     private static void assertIsInRange(final int percentage) {
         if ((percentage < 0) || (percentage > 100)) {

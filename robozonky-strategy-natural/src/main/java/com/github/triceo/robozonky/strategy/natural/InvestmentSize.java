@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-class InvestmentSize extends DefaultInvestmentSize {
+public class InvestmentSize extends DefaultInvestmentSize {
 
     private final Rating rating;
 

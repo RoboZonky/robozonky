@@ -67,6 +67,10 @@ enum StrategyFileProperty {
         return supplier.apply(propertyName);
     }
 
+    private static String join(final String key, final String suffix) {
+        return key + "." + suffix;
+    }
+
     private final String key;
 
     StrategyFileProperty(final String key) {
@@ -83,9 +87,9 @@ enum StrategyFileProperty {
 
     public <T> T getValue(final Rating r, final Function<String, Optional<T>> supplier) {
         final String key = this.key;
-        final String propertyName = Util.join(key, r.name());
+        final String propertyName = StrategyFileProperty.join(key, r.name());
         return StrategyFileProperty.getValue(propertyName, supplier).orElseGet(() -> {
-            final String fallbackPropertyName = Util.join(key, "default");
+            final String fallbackPropertyName = StrategyFileProperty.join(key, "default");
             return StrategyFileProperty.getValue(fallbackPropertyName, supplier)
                     .orElseThrow(() -> new IllegalStateException("Investment strategy is incomplete. " +
                             "Missing value for '" + key + "' and rating '" + r + '\''));

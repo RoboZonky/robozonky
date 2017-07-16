@@ -18,13 +18,17 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-class LoanAmountCondition extends AbstractRangeCondition {
+public class LoanAmountCondition extends AbstractRangeCondition {
 
     public LoanAmountCondition(final int fromInclusive, final int toInclusive) {
         super(Loan::getAmount, fromInclusive, toInclusive);
         if (fromInclusive < 0 || toInclusive < 0) {
             throw new IllegalArgumentException("Either values need to be 0 or more.");
         }
+    }
+
+    public LoanAmountCondition(final int fromInclusive) {
+        this(fromInclusive, Integer.MAX_VALUE);
     }
 
 }

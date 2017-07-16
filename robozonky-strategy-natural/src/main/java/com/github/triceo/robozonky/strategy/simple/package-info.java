@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * This package holds a reimplementation of robozonky-strategy-simple (pre RoboZonky 4.0.0) via the means of
+ * {@link com.github.triceo.robozonky.strategy.natural.NaturalLanguageInvestmentStrategyService}.
+ *
+ * This implementation should be considered deprecated and will be removed at some future point in time.
+ */
 package com.github.triceo.robozonky.strategy.simple;
-
-import java.math.BigDecimal;
-import java.util.StringJoiner;
-
-class Util {
-
-    public static boolean isBetweenZeroAndOne(final BigDecimal target) {
-        return Util.isBetweenAAndB(target, BigDecimal.ZERO, BigDecimal.ONE);
-    }
-
-    public static boolean isBetweenAAndB(final BigDecimal target, final BigDecimal a, final BigDecimal b) {
-        return !(target.compareTo(a) < 0 || target.compareTo(b) > 0);
-    }
-
-    public static String join(final String left, final String right) {
-        return new StringJoiner(".").add(left).add(right).toString();
-    }
-
-}

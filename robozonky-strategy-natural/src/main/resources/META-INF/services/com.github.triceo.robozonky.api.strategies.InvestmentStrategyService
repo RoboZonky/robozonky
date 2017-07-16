@@ -15,3 +15,5 @@
 #
 
 com.github.triceo.robozonky.strategy.natural.NaturalLanguageInvestmentStrategyService
+com.github.triceo.robozonky.strategy.simple.SimpleInvestmentStrategyService
+

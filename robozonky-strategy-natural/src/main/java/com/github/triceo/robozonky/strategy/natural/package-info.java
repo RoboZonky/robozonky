@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * The only public members of this package are the ones directly necessary for implementing
+ * {@link com.github.triceo.robozonky.strategy.simple.SimpleInvestmentStrategyService}. They may be hidden after this
+ * is removed.
+ */
 package com.github.triceo.robozonky.strategy.natural;
-
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.enums.Rating;
-
-public class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Rating> {
-
-    public LoanRatingEnumeratedCondition() {
-        super(Loan::getRating);
-    }
-
-}

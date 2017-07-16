@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-class MarketplaceFilter extends MarketplaceFilterCondition {
+public class MarketplaceFilter extends MarketplaceFilterCondition {
 
     private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
         return conditions.stream()

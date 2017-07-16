@@ -23,7 +23,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class MarketplaceFilterCondition implements Predicate<Loan> {
+public abstract class MarketplaceFilterCondition implements Predicate<Loan> {
 
     // not static as we want to have the specific impl class in the logs
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());

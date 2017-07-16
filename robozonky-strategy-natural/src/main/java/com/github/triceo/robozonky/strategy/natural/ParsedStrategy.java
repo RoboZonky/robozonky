@@ -30,7 +30,7 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ParsedStrategy {
+public class ParsedStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParsedStrategy.class);
 

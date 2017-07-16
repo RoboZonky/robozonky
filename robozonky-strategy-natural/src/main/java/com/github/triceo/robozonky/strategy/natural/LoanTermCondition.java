@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-class LoanTermCondition extends AbstractRangeCondition {
+public class LoanTermCondition extends AbstractRangeCondition {
 
     private static final int MIN_TERM = 0, MAX_TERM = 84;
 
@@ -33,6 +33,10 @@ class LoanTermCondition extends AbstractRangeCondition {
         super(Loan::getTermInMonths, fromInclusive, toInclusive);
         LoanTermCondition.assertIsInRange(fromInclusive);
         LoanTermCondition.assertIsInRange(toInclusive);
+    }
+
+    public LoanTermCondition(final int fromInclusive) {
+        this(fromInclusive, LoanTermCondition.MAX_TERM);
     }
 
 }

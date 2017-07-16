@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.strategy.natural;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.internal.api.Defaults;
 
-class DefaultValues {
+public class DefaultValues {
 
     private final DefaultPortfolio portfolio;
     private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;

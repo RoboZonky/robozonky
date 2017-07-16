@@ -46,11 +46,6 @@
     </dependency>
     <dependency>
       <groupId>com.github.triceo.robozonky</groupId>
-      <artifactId>robozonky-strategy-simple</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
       <artifactId>robozonky-strategy-natural</artifactId>
       <scope>runtime</scope>
     </dependency>

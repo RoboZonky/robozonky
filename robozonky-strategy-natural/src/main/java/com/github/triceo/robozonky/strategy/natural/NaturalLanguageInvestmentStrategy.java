@@ -41,7 +41,7 @@ import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
+public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageInvestmentStrategy.class);
     private static final Comparator<LoanDescriptor>
