@@ -77,6 +77,14 @@ class ParsedStrategy {
         return defaults.getMinimumBalance();
     }
 
+    public int getMinimumInvestmentShareInPercent() {
+        return defaults.getInvestmentShare().getMinimumShareInPercent();
+    }
+
+    public int getMaximumInvestmentShareInPercent() {
+        return defaults.getInvestmentShare().getMaximumShareInPercent();
+    }
+
     public int getMaximumInvestmentSizeInCzk() {
         return defaults.getTargetPortfolioSize();
     }

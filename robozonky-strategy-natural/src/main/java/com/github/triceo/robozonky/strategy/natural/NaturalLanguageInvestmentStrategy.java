@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -149,26 +150,58 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         return new int[] {minimumInvestment, maximumInvestment};
     }
 
+    private static int getPercentage(final double original, final int percentage) {
+        return BigDecimal.valueOf(original)
+                .multiply(BigDecimal.valueOf(percentage))
+                .divide(BigDecimal.valueOf(100), BigDecimal.ROUND_HALF_EVEN)
+                .intValue();
+    }
+
     int recommendInvestmentAmount(final Loan loan, final int balance) {
+        return recommendInvestmentAmount(loan).map(recommended -> {
+            final int minimumRecommendation = recommended[0];
+            final int maximumRecommendation = recommended[1];
+            NaturalLanguageInvestmentStrategy.LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.",
+                    loan.getId(), minimumRecommendation, maximumRecommendation);
+            // round to nearest lower increment
+            final int loanRemaining = (int)loan.getRemainingInvestment();
+            if (minimumRecommendation > balance) {
+                return 0;
+            } else if (minimumRecommendation > loanRemaining) {
+                return 0;
+            }
+            final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
+            final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
+            final int r = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
+            if (r < minimumRecommendation) {
+                return 0;
+            } else {
+                NaturalLanguageInvestmentStrategy.LOGGER.debug("Final recommendation for loan #{} is {} CZK.",
+                        loan.getId(), r);
+                return r;
+            }
+        }).orElse(0); // not recommended
+    }
+
+    private Optional<int[]> recommendInvestmentAmount(final Loan loan) {
         final int[] recommended = getRecommendationBoundaries(loan);
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
         final int loanId = loan.getId();
         NaturalLanguageInvestmentStrategy.LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.",
                 loanId, minimumRecommendation, maximumRecommendation);
-        // round to nearest lower increment
-        final int loanRemaining = (int)loan.getRemainingInvestment();
-        if (minimumRecommendation > balance || minimumRecommendation > loanRemaining) {
-            return 0;
+        final int minimumInvestmentByShare = NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
+                strategy.getMinimumInvestmentShareInPercent());
+        final int minimumInvestment =
+                Math.max(minimumInvestmentByShare, strategy.getMinimumInvestmentSizeInCzk(loan.getRating()));
+        final int maximumInvestmentByShare = NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
+                        strategy.getMaximumInvestmentShareInPercent());
+        final int maximumInvestment =
+                Math.min(maximumInvestmentByShare, strategy.getMaximumInvestmentSizeInCzk(loan.getRating()));
+        if (maximumInvestment < minimumInvestment) {
+            return Optional.empty();
         }
-        final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
-        final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
-        final int result = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
-        if (result < minimumRecommendation) {
-            return 0;
-        }
-        NaturalLanguageInvestmentStrategy.LOGGER.debug("Final recommendation for loan #{} is {} CZK.", loanId, result);
-        return result;
+        return Optional.of(new int[] {minimumInvestment, maximumInvestment});
     }
 
 }

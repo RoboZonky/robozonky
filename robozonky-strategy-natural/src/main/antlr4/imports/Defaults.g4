@@ -11,6 +11,7 @@ defaultExpression returns [DefaultValues result]:
  { $result = new DefaultValues($r.result); }
  (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
  (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
+ (s=defaultInvestmentShareExpression { $result.setInvestmentShare($s.result); })?
  (b=targetBalanceExpression { $result.setMinimumBalance($b.result); })?
  (c=confirmationExpression { $result.setConfirmationCondition($c.result); })?
 ;
@@ -23,6 +24,13 @@ defaultInvestmentSizeExpression returns [DefaultInvestmentSize result] :
         { $result = new DefaultInvestmentSize(Integer.parseInt($minimumInvestmentInCzk.getText()),
             Integer.parseInt($maximumInvestmentInCzk.getText())); })
     ) ' ' KC DOT
+;
+
+defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
+    'Investovat maximálně '
+        maximumInvestmentInCzk=INTEGER
+        { $result = new DefaultInvestmentShare(Integer.parseInt($maximumInvestmentInCzk.getText())); }
+    ' % výše úvěru' DOT
 ;
 
 targetPortfolioSizeExpression returns [int result] :

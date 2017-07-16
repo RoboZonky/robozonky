@@ -24,6 +24,7 @@ class DefaultValues {
     private final DefaultPortfolio portfolio;
     private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
     private DefaultInvestmentSize investmentSize = new DefaultInvestmentSize();
+    private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private MarketplaceFilterCondition confirmationCondition = new MarketplaceFilterCondition() {
         // by default, do not confirm anything ever
     };
@@ -57,6 +58,18 @@ class DefaultValues {
             throw new IllegalArgumentException("Target portfolio size must be a positive number.");
         }
         this.targetPortfolioSize = targetPortfolioSize;
+    }
+
+    public DefaultInvestmentShare getInvestmentShare() {
+        return investmentShare;
+    }
+
+    public void setInvestmentShare(final DefaultInvestmentShare investmentShare) {
+        this.investmentShare = investmentShare;
+    }
+
+    public MarketplaceFilterCondition getConfirmationCondition() {
+        return confirmationCondition;
     }
 
     public DefaultInvestmentSize getInvestmentSize() {
