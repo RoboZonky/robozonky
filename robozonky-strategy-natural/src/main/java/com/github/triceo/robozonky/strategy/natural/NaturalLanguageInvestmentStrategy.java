@@ -153,7 +153,7 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     private static int getPercentage(final double original, final int percentage) {
         return BigDecimal.valueOf(original)
                 .multiply(BigDecimal.valueOf(percentage))
-                .divide(BigDecimal.valueOf(100), BigDecimal.ROUND_HALF_EVEN)
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_EVEN)
                 .intValue();
     }
 
@@ -188,7 +188,7 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
         final int loanId = loan.getId();
-        NaturalLanguageInvestmentStrategy.LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.",
+        NaturalLanguageInvestmentStrategy.LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.",
                 loanId, minimumRecommendation, maximumRecommendation);
         final int minimumInvestmentByShare = NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
                 strategy.getMinimumInvestmentShareInPercent());
