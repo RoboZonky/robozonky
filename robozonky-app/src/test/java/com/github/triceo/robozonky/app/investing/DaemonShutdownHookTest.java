@@ -36,7 +36,7 @@ public class DaemonShutdownHookTest {
         final CountDownLatch l = new CountDownLatch(1);
         final Future<?> f = EXECUTOR.submit(new DaemonShutdownHook(l));
         l.await();
-        ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.countDown();
+        ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get().countDown();
         f.get();
         Assertions.assertThat(f).isDone();
     }
@@ -44,7 +44,7 @@ public class DaemonShutdownHookTest {
     @After
     public void cleanup() {
         EXECUTOR.shutdownNow();
-        ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE = new CountDownLatch(1);
+        ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.set(new CountDownLatch(1));
     }
 
 }

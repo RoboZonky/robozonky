@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import com.github.triceo.robozonky.app.ShutdownEnabler;
 import org.slf4j.Logger;
@@ -33,12 +34,14 @@ class DaemonShutdownHook extends Thread {
     }
 
     public void run() {
-        LOGGER.debug("Shutdown requested.");
+        LOGGER.debug("Shutdown requested through {}.", blockUntilZero);
         // will release the main thread and thus terminate the daemon
+        final CountDownLatch shutdownEnabler = ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get();
         blockUntilZero.countDown();
         // only allow to shut down after the daemon has been closed by the app
         try {
-            ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.await();
+            LOGGER.debug("Waiting for shutdown on {}.", shutdownEnabler);
+            shutdownEnabler.await(1, TimeUnit.MINUTES);
         } catch (final InterruptedException ex) { // don't block shutdown indefinitely
             LOGGER.warn("Timed out waiting for daemon to terminate cleanly.");
         } finally {

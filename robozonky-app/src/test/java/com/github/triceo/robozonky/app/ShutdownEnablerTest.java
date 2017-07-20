@@ -29,15 +29,15 @@ public class ShutdownEnablerTest {
 
     @Test
     public void proper() {
-        Assertions.assertThat(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.getCount()).isEqualTo(1);
+        final CountDownLatch l = ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get();
+        Assertions.assertThat(l.getCount()).isEqualTo(1);
         final ShutdownEnabler e = new ShutdownEnabler();
         final Optional<Consumer<ShutdownHook.Result>> result = e.get();
-        final CountDownLatch l = ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE;
         Assertions.assertThat(l.getCount()).isEqualTo(1);
         result.get().accept(new ShutdownHook.Result(ReturnCode.OK, null));
         SoftAssertions.assertSoftly(softly -> { // test latch is used and properly reset
             softly.assertThat(l.getCount()).isEqualTo(0);
-            Assertions.assertThat(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.getCount()).isEqualTo(1);
+            softly.assertThat(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get()).isNotEqualTo(l);
         });
     }
 

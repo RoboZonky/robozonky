@@ -106,7 +106,7 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
             };
             openMarketplace(investor);
             if (circuitBreaker != null) { // daemon mode requires special handling
-                LOGGER.trace("Will wait for request to stop.");
+                LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
                 circuitBreaker.await();
                 LOGGER.trace("Request to stop received.");
                 if (this.wasSuddenDeath()) {
