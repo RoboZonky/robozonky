@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.notifications.Counter;
+import com.github.triceo.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -72,7 +74,9 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         email.setStartTLSRequired(properties.isStartTlsRequired());
         email.setSSLOnConnect(properties.isSslOnConnectRequired());
         email.setAuthentication(properties.getSmtpUsername(), properties.getSmtpPassword());
-        email.setFrom(properties.getSender(), "RoboZonky @ " + properties.getLocalHostAddress());
+        final String localhostAddress =
+                LocalhostAddress.INSTANCE.getLatest(Duration.ofSeconds(1)).orElse("unknown host");
+        email.setFrom(properties.getSender(), "RoboZonky @ " + localhostAddress);
         email.addTo(properties.getRecipient());
         return email;
     }

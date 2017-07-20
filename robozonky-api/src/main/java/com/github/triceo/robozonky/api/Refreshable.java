@@ -16,6 +16,8 @@
 
 package com.github.triceo.robozonky.api;
 
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -184,6 +187,25 @@ public abstract class Refreshable<T> implements Runnable {
             return cachedResult.get();
         } finally {
             valueIsMissing.release();
+        }
+    }
+
+    /**
+     * Will block until {@link #run()} has finished at least once or until time runs out.
+     * @param waitFor How long to wait for.
+     * @return Empty if the source could not be parsed, if wait timed out or if the wait operation was interrupted.
+     */
+    public Optional<T> getLatest(final TemporalAmount waitFor) {
+        try {
+            if (completionAssurance.await(waitFor.get(ChronoUnit.SECONDS), TimeUnit.SECONDS)) {
+                return Optional.ofNullable(cachedResult.get());
+            } else {
+                LOGGER.debug("Acquire failed.");
+                return Optional.empty();
+            }
+        } catch (final InterruptedException ex) {
+            LOGGER.debug("Wait interrupted.", ex);
+            return Optional.empty();
         }
     }
 

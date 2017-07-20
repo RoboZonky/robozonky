@@ -56,14 +56,6 @@ public class EmailNotificationPropertiesTest {
     }
 
     @Test
-    public void localHostAddress() {
-        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                EmailNotificationPropertiesTest.WINDOWS_ENCODED.toString());
-        final EmailNotificationProperties np = EmailNotificationPropertiesTest.getProperties().get();
-        Assertions.assertThat(np.getLocalHostAddress()).isNotEmpty();
-    }
-
-    @Test
     public void wrongPropertiesUrlReadsPropertyFile() {
         System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "wrongprotocol://somewhere");
         final Optional<EmailNotificationProperties> np = EmailNotificationPropertiesTest.getProperties();

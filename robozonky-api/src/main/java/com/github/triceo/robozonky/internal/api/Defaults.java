@@ -46,20 +46,4 @@ public final class Defaults {
     public static final String ROBOZONKY_USER_AGENT =
             "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" + Defaults.ROBOZONKY_URL + ")";
 
-    /**
-     * Will execute call to a remote web service which will return the external IP address of this machine.
-     *
-     * @return Whatever the web service returned as the address, or "localhost" if the remote call failed.
-     */
-    public static String getHostAddress() {
-        final String url = "http://checkip.amazonaws.com";
-        try (final BufferedReader in =
-                     new BufferedReader(new InputStreamReader(new URL(url).openStream(), Defaults.CHARSET))) {
-            return in.readLine();
-        } catch (final Exception ex) {
-            Defaults.LOGGER.debug("Failed retrieving local host address.", ex);
-            return "localhost";
-        }
-    }
-
 }

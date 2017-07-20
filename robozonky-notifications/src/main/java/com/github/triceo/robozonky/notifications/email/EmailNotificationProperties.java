@@ -18,7 +18,6 @@ package com.github.triceo.robozonky.notifications.email;
 
 import java.util.Properties;
 
-import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.notifications.NotificationProperties;
 
 class EmailNotificationProperties extends NotificationProperties {
@@ -29,22 +28,12 @@ class EmailNotificationProperties extends NotificationProperties {
         return listener.getLabel() + "." + property;
     }
 
-    private String localHostAddress;
-
     EmailNotificationProperties(final EmailNotificationProperties source) {
         this(source.getProperties());
     }
 
     EmailNotificationProperties(final Properties source) {
         super(source);
-    }
-
-    public synchronized String getLocalHostAddress() {
-        if (localHostAddress == null) {
-            // lazy init so that the remote request penalty is not incurred needlessly
-            localHostAddress = Defaults.getHostAddress();
-        }
-        return localHostAddress;
     }
 
     public String getSender() {
