@@ -27,7 +27,9 @@ public class RuntimeMBeanTest {
     @Test
     public void unblock() {
         final CountDownLatch s = DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get();
-        ((Runtime)MBean.RUNTIME.getImplementation()).stopDaemon();
+        final Runtime bean = (Runtime)MBean.RUNTIME.getImplementation();
+        bean.reset();
+        bean.stopDaemon();
         Assertions.assertThat(s.getCount()).isEqualTo(0);
     }
 
