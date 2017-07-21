@@ -17,10 +17,8 @@
 package com.github.triceo.robozonky.app;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,14 +52,14 @@ public enum Events {
 
     private static class EventSpecific<E extends Event> {
 
-        private final Set<Refreshable<EventListener<E>>> listeners = new HashSet<>();
+        private final Set<Refreshable<EventListener<E>>> listeners = new LinkedHashSet<>();
 
         public void addListener(final Refreshable<EventListener<E>> eventListener) {
             listeners.add(eventListener);
         }
 
-        public Collection<Refreshable<EventListener<E>>> getListeners() {
-            return Collections.unmodifiableSet(new HashSet<>(this.listeners)); // defensive copy
+        public Stream<Refreshable<EventListener<E>>> getListeners() {
+            return this.listeners.stream();
         }
     }
 
@@ -75,30 +73,46 @@ public enum Events {
 
     final Map<Class<? extends Event>, Events.EventSpecific<? extends Event>> registries = new HashMap<>();
 
+    /**
+     * Retrieve all listeners registered for a given event type. During the first call of this method, it will use the
+     * {@link ListenerService} to register all available listeners. Subsequent calls will only retrieve this
+     * information, without querying the service again.
+     * @param eventClass Class of event for which to look up listeners.
+     * @param <E> Ditto.
+     * @return Listeners available for the event type in question.
+     */
     @SuppressWarnings("unchecked")
-    private <E extends Event> void loadListeners(final Class<E> eventClass) {
-        this.loadListeners(eventClass, null);
+    private synchronized <E extends Event> Events.EventSpecific<E> loadListeners(final Class<E> eventClass) {
+        return (Events.EventSpecific<E>) this.registries.computeIfAbsent(eventClass, key -> {
+            Events.LOGGER.trace("Registering event listeners for {}.", key);
+            final Events.EventSpecific<E> eventSpecific = new Events.EventSpecific<>();
+            ListenerServiceLoader.load(eventClass).forEach(eventSpecific::addListener);
+            return eventSpecific;
+        });
     }
 
+    /**
+     * Exists purely for testing purposes. Will call {@link #loadListeners(Class)}, but also add one extra listener.
+     *
+     * @param eventClass Will be used as argument to the {@link #loadListeners(Class)} call.
+     * @param listener The additional listener to register.
+     * @param <E> Type of event to register listeners for.
+     * @return Registered listeners.
+     */
     @SuppressWarnings("unchecked")
-    synchronized <E extends Event> void loadListeners(final Class<E> eventClass,
-                                                      final Refreshable<EventListener<E>> listener) {
-        if (this.registries.containsKey(eventClass)) {
-            return;
+    <E extends Event> Events.EventSpecific<E> loadListeners(final Class<E> eventClass,
+                                                            final Refreshable<EventListener<E>> listener) {
+        final Events.EventSpecific<E> eventSpecific = loadListeners(eventClass);
+        if (listener != null) {
+            eventSpecific.addListener(listener);
         }
-        Events.LOGGER.trace("Registering event listeners for {}.", eventClass);
-        this.registries.put(eventClass, new Events.EventSpecific<E>());
-        final Stream<Refreshable<EventListener<E>>> listeners = Stream.concat(
-                ListenerServiceLoader.load(eventClass).stream(),
-                listener == null ? Stream.empty() : Stream.of(listener)
-        );
-        listeners.forEach(l -> ((Events.EventSpecific<E>) this.registries.get(eventClass)).addListener(l));
+        return eventSpecific;
     }
 
     @SuppressWarnings("unchecked")
-    synchronized <E extends Event> Stream<Refreshable<EventListener<E>>> getListeners(final Class<E> eventClass) {
-        this.loadListeners(eventClass);
-        return ((Events.EventSpecific<E>) this.registries.get(eventClass)).getListeners().stream();
+    <E extends Event> Stream<EventListener<E>> getListeners(final Class<E> eventClass) {
+        return this.loadListeners(eventClass).getListeners()
+                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()));
     }
 
     /**
@@ -118,9 +132,7 @@ public enum Events {
         }
         final Class<E> eventClass = (Class<E>) event.getClass();
         Events.LOGGER.debug("Firing {}.", eventClass);
-        Events.INSTANCE.getListeners(eventClass).parallel()
-                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
-                .forEach(l -> Events.fire(event, l, Events.SESSION_INFO));
+        Events.INSTANCE.getListeners(eventClass).parallel().forEach(l -> Events.fire(event, l, Events.SESSION_INFO));
         if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
             Events.EVENTS_FIRED.add(event);
         }
