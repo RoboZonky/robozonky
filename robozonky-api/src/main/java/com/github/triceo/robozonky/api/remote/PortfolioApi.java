@@ -38,5 +38,4 @@ public interface PortfolioApi extends EntityCollectionApi<Investment> {
     @GET
     @Override
     List<Investment> items();
-
 }

@@ -35,5 +35,4 @@ class TweaksCommandLineFragment extends AbstractCommandLineFragment {
     public boolean isFaultTolerant() {
         return faultTolerant;
     }
-
 }

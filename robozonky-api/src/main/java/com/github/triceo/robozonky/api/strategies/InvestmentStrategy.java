@@ -30,10 +30,9 @@ public interface InvestmentStrategy {
      * Retrieve a list of loans that are acceptable by the strategy, in the order in which they are to be evaluated.
      * After an investment has been made into any single one of these loans, the strategy should be called again to
      * re-evaluate the resulting situation.
-     *
+     * <p>
      * This method is deprecated, to be removed in some future version. Override
      * {@link #evaluate(Collection, PortfolioOverview)} instead.
-     *
      * @param availableLoans Loans to be evaluated for acceptability.
      * @param portfolio Aggregation of information as to the user's current portfolio.
      * @return Acceptable loans, in the iteration order of their decreasing priority, mapped to the recommended
@@ -46,7 +45,6 @@ public interface InvestmentStrategy {
      * Retrieve loans that are acceptable by the strategy, in the order in which they are to be evaluated. After an
      * investment has been made into any single one of these loans, the strategy should be called again to re-evaluate
      * the resulting situation.
-     *
      * @param availableLoans Loans to be evaluated for acceptability.
      * @param portfolio Aggregation of information as to the user's current portfolio.
      * @return Acceptable loans, in the order of their decreasing priority, mapped to the recommended investment
@@ -56,5 +54,4 @@ public interface InvestmentStrategy {
                                             final PortfolioOverview portfolio) {
         return recommend(availableLoans, portfolio).stream();
     }
-
 }

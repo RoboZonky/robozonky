@@ -50,6 +50,5 @@ public final class MarketplaceLoader {
     public static Optional<Marketplace> load(final Credentials credentials) {
         return MarketplaceLoader.load(credentials, MarketplaceLoader.LOADER);
     }
-
 }
 

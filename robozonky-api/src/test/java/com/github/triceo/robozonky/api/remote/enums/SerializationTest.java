@@ -41,15 +41,15 @@ public class SerializationTest {
     public static Collection<Object[]> getParameters() {
         final Collection<Object[]> result = new ArrayList<>();
         // process main income type
-        for (final MainIncomeType mit: MainIncomeType.values()) {
+        for (final MainIncomeType mit : MainIncomeType.values()) {
             result.add(new Object[]{mit, SerializationTest.escape(mit.name())});
         }
         // process purpose
-        for (final Purpose p: Purpose.values()) {
+        for (final Purpose p : Purpose.values()) {
             result.add(new Object[]{p, SerializationTest.escape(p.ordinal() + 1)});
         }
         // process region
-        for (final Region r: Region.values()) {
+        for (final Region r : Region.values()) {
             result.add(new Object[]{r, SerializationTest.escape(r.ordinal() + 1)});
         }
         return result;
@@ -73,5 +73,4 @@ public class SerializationTest {
         Assertions.assertThatThrownBy(() -> mapper.readValue(String.valueOf(Integer.MAX_VALUE), value.getClass()))
                 .isInstanceOf(RuntimeException.class);
     }
-
 }

@@ -55,7 +55,7 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
         return Stream.of(ExpectedTreatment.values())
-                .map(v -> new Object[] {v})
+                .map(v -> new Object[]{v})
                 .collect(Collectors.toList());
     }
 
@@ -123,7 +123,8 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(ms);
         s.run();
         try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(auth, new Investor.Builder().asDryRun(),
-                false, m, s, Duration.ofMinutes(60), Duration.ofSeconds(1))) {
+                                                                        false, m, s, Duration.ofMinutes(60),
+                                                                        Duration.ofSeconds(1))) {
             final Future<Boolean> wasLockedByUser = Executors.newScheduledThreadPool(1).schedule(() -> {
                 final boolean result = DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().getCount() > 0;
                 LoggerFactory.getLogger(DaemonInvestmentModeTest.class).info("Sending request to terminate.");
@@ -141,9 +142,10 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
     @Test
     public void shutdownHookRegistered() throws Exception {
         try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(null, new Investor.Builder().asDryRun(),
-                false, Mockito.mock(Marketplace.class), null, Duration.ofMinutes(60), Duration.ofSeconds(1))) {
+                                                                        false, Mockito.mock(Marketplace.class), null,
+                                                                        Duration.ofMinutes(60),
+                                                                        Duration.ofSeconds(1))) {
             Assertions.assertThat(Runtime.getRuntime().removeShutdownHook(mode.getShutdownHook())).isTrue();
         }
     }
-
 }

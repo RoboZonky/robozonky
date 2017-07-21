@@ -42,7 +42,6 @@ public class InvestmentStrategyLoaderTest {
         Assertions.assertThat(InvestmentStrategyLoader.processInvestmentStrategyService(iss, "")).isEmpty();
     }
 
-
     @Test
     public void standardProcessing() {
         final InvestmentStrategyService iss = Mockito.mock(InvestmentStrategyService.class);
@@ -56,5 +55,4 @@ public class InvestmentStrategyLoaderTest {
         final InvestmentStrategyService iss = strategy -> Optional.of(is);
         Assertions.assertThat(InvestmentStrategyLoader.load("", Collections.singleton(iss))).contains(is);
     }
-
 }

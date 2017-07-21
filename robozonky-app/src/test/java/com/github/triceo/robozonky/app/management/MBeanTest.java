@@ -31,7 +31,7 @@ public class MBeanTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getMBeans() {
         return Stream.of(MBean.values())
-                .map(m -> new Object[] {m})
+                .map(m -> new Object[]{m})
                 .collect(Collectors.toList());
     }
 
@@ -42,5 +42,4 @@ public class MBeanTest {
     public void isValid() {
         Assertions.assertThat(mbean.getImplementation().getLatestUpdatedDateTime()).isNull();
     }
-
 }

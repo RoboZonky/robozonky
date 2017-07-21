@@ -23,5 +23,4 @@ public interface BaseMBean {
     OffsetDateTime getLatestUpdatedDateTime();
 
     void reset();
-
 }

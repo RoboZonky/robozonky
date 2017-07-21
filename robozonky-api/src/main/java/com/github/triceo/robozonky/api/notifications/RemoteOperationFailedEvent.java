@@ -30,5 +30,4 @@ public final class RemoteOperationFailedEvent extends Event {
     public Throwable getCause() {
         return cause;
     }
-
 }

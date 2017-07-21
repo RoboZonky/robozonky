@@ -25,5 +25,4 @@ class AverageStoryCondition extends AbstractStoryCondition {
                     && length <= AbstractStoryCondition.LONG_STORY_THRESHOLD;
         });
     }
-
 }

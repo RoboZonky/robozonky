@@ -61,5 +61,4 @@ public class RuleBasedInvestmentStrategyService implements InvestmentStrategySer
         final KieContainer container = kieServices.newKieContainer(RuleBasedInvestmentStrategyService.RELEASE_ID);
         return Optional.of(new RuleBasedInvestmentStrategy(container));
     }
-
 }

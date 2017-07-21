@@ -40,45 +40,45 @@ import org.mockito.Mockito;
 /**
  * There are the following kinds of proxies:
  * <ul>
- *     <li>DRY: One in a dry run.</li>
- *     <li>SIMPLE: One that has no way of obtaining external investing input.</li>
- *     <li>CONFIRMING: One that knows to obtain external investing input.</li>
+ * <li>DRY: One in a dry run.</li>
+ * <li>SIMPLE: One that has no way of obtaining external investing input.</li>
+ * <li>CONFIRMING: One that knows to obtain external investing input.</li>
  * </ul>
- *
+ * <p>
  * There are following kinds of investments:
  * <ul>
- *     <li>CONFIRMED: Require confirmation, and therefore requiring a CONFIRMING proxy. In case of
- *     positive confirmation, we can invest locally.</li>
- *     <li>UNCONFIRMED: Not requiring confirmation and not CAPTCHA-protected, these can be invested locally.</li>
+ * <li>CONFIRMED: Require confirmation, and therefore requiring a CONFIRMING proxy. In case of
+ * positive confirmation, we can invest locally.</li>
+ * <li>UNCONFIRMED: Not requiring confirmation and not CAPTCHA-protected, these can be invested locally.</li>
  * </ul>
- *
+ * <p>
  * Further, investments can be protected by CAPTCHA:
  * <ul>
- *     <li>PROTECTED: Can not invest locally, require delegation and therefore a CONFIRMING proxy.</li>
- *     <li>UNPROTECTED: Can invest locally, SIMPLE proxy will be enough provided that investment is not CONFIRMED.</li>
+ * <li>PROTECTED: Can not invest locally, require delegation and therefore a CONFIRMING proxy.</li>
+ * <li>UNPROTECTED: Can invest locally, SIMPLE proxy will be enough provided that investment is not CONFIRMED.</li>
  * </ul>
- *
+ * <p>
  * Based on that, these are the possible states that need to be tested:
  * <ul>
- *     <li>DRY proxy, any investment, regardless of captcha. Always accepted</li>
- *     <li>SIMPLE proxy:
- *         <ul>
- *             <li>Rejects PROTECTED investments since we cannot bypass CAPTCHA.</li>
- *             <li>Fails on CONFIRMED investments since we cannot reach confirmation.</li>
- *             <li>Fails on network issues.</li>
- *             <li>Otherwise invests locally.</li>
- *         </ul>
- *     </li>
- *     <li>CONFIRMING proxy:
- *         <ul>
- *             <li>Delegates PROTECTED investments.</li>
- *             <li>Invests UNPROTECTED CONFIRMED investments locally or rejects them.</li>
- *             <li>Invests UNPROTECTED UNCONFIRMED investments locally.</li>
- *             <li>Fails on network issues.</li>
- *         </ul>
- *     </li>
+ * <li>DRY proxy, any investment, regardless of captcha. Always accepted</li>
+ * <li>SIMPLE proxy:
+ * <ul>
+ * <li>Rejects PROTECTED investments since we cannot bypass CAPTCHA.</li>
+ * <li>Fails on CONFIRMED investments since we cannot reach confirmation.</li>
+ * <li>Fails on network issues.</li>
+ * <li>Otherwise invests locally.</li>
  * </ul>
- *
+ * </li>
+ * <li>CONFIRMING proxy:
+ * <ul>
+ * <li>Delegates PROTECTED investments.</li>
+ * <li>Invests UNPROTECTED CONFIRMED investments locally or rejects them.</li>
+ * <li>Invests UNPROTECTED UNCONFIRMED investments locally.</li>
+ * <li>Fails on network issues.</li>
+ * </ul>
+ * </li>
+ * </ul>
+ * <p>
  * This test aims to test all of these various states.
  */
 @RunWith(Parameterized.class)
@@ -86,60 +86,65 @@ public class InvestorTest extends AbstractInvestingTest {
 
     private enum ProxyType {
 
-        DRY, SIMPLE, CONFIRMING
+        DRY,
+        SIMPLE,
+        CONFIRMING
 
     }
 
     private enum Captcha {
 
-        PROTECTED, UNPROTECTED
+        PROTECTED,
+        UNPROTECTED
     }
 
     private enum Remote {
 
-        CONFIRMED, UNCONFIRMED
+        CONFIRMED,
+        UNCONFIRMED
     }
 
     private enum RemoteResponse {
 
-        PRESENT, ABSENT
+        PRESENT,
+        ABSENT
     }
 
     @Parameterized.Parameters(name = "{0}+{1}+{2}({3})={4}")
     public static Collection<Object[]> generatePossibilities() {
         final Collection<Object[]> result = new ArrayList<>();
         // dry proxy
-        for (final InvestorTest.Captcha c1: InvestorTest.Captcha.values()) {
-            for (final InvestorTest.Remote c2: InvestorTest.Remote.values()) {
-                result.add(new Object[] {InvestorTest.ProxyType.DRY, c1, c2, null, ZonkyResponseType.INVESTED});
+        for (final InvestorTest.Captcha c1 : InvestorTest.Captcha.values()) {
+            for (final InvestorTest.Remote c2 : InvestorTest.Remote.values()) {
+                result.add(new Object[]{InvestorTest.ProxyType.DRY, c1, c2, null, ZonkyResponseType.INVESTED});
             }
         }
         // simple proxy
-        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
                 InvestorTest.Remote.CONFIRMED, null, null});
-        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
                 InvestorTest.Remote.UNCONFIRMED, null, ZonkyResponseType.REJECTED});
-        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
                 InvestorTest.Remote.CONFIRMED, null, null});
-        result.add(new Object[] {InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
                 InvestorTest.Remote.UNCONFIRMED, null, ZonkyResponseType.INVESTED});
         // confirming proxy, response present
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                 InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                 InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                 InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                 InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
         // confirming proxy, network failure
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                 InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
                 InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                 InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
-        result.add(new Object[] {InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
+        result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
                 InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ABSENT, ZonkyResponseType.INVESTED});
         return Collections.unmodifiableCollection(result);
     }
@@ -167,7 +172,7 @@ public class InvestorTest extends AbstractInvestingTest {
         final LoanDescriptor ld =
                 InvestorTest.mockLoanDescriptor(captcha == InvestorTest.Captcha.PROTECTED);
         return ld.recommend(InvestorTest.CONFIRMED_AMOUNT,
-                confirmation == InvestorTest.Remote.CONFIRMED).get();
+                            confirmation == InvestorTest.Remote.CONFIRMED).get();
     }
 
     private Investor getZonkyProxy() {
@@ -186,14 +191,14 @@ public class InvestorTest extends AbstractInvestingTest {
                                 new Confirmation(ConfirmationType.DELEGATED) :
                                 new Confirmation(InvestorTest.CONFIRMED_AMOUNT);
                         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                ArgumentMatchers.anyInt())).thenReturn(Optional.of(c));
+                                                            ArgumentMatchers.anyInt())).thenReturn(Optional.of(c));
                         break;
                     case ABSENT:
                         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
+                                                            ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
                         break;
                     default:
-                            throw new IllegalStateException();
+                        throw new IllegalStateException();
                 }
                 return new Investor.Builder().usingConfirmation(cp).build(api);
             default:
@@ -245,5 +250,4 @@ public class InvestorTest extends AbstractInvestingTest {
         Assume.assumeTrue(this.isValidForLoansSeenBefore());
         test(true);
     }
-
 }

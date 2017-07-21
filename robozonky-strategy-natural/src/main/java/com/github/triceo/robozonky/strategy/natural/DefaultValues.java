@@ -44,7 +44,7 @@ public class DefaultValues {
     public void setMinimumBalance(final int minimumBalance) {
         if (minimumBalance < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
             throw new IllegalArgumentException("Minimum balance must be at least "
-                    + Defaults.MINIMUM_INVESTMENT_IN_CZK + "CZK.");
+                                                       + Defaults.MINIMUM_INVESTMENT_IN_CZK + "CZK.");
         }
         this.minimumBalance = minimumBalance;
     }

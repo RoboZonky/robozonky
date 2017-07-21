@@ -37,5 +37,4 @@ public class VersionIdentifierTest {
         Assertions.assertThat(v.getLatestStable()).isEqualTo(version);
         Assertions.assertThat(v.getLatestUnstable()).isPresent().contains(version2);
     }
-
 }

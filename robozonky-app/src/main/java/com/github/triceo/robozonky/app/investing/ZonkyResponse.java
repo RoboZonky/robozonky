@@ -34,7 +34,6 @@ public class ZonkyResponse {
     }
 
     /**
-     *
      * @return The type of response received from the investment routine.
      */
     public ZonkyResponseType getType() {
@@ -42,7 +41,6 @@ public class ZonkyResponse {
     }
 
     /**
-     *
      * @return Will contain the confirmed invested amount if and only if {@link #getType()} returns
      * {@link ZonkyResponseType#INVESTED}.
      */
@@ -57,5 +55,4 @@ public class ZonkyResponse {
                 ", confirmedAmount=" + confirmedAmount +
                 '}';
     }
-
 }

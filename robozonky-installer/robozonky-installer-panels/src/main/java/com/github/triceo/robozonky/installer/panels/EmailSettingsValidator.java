@@ -35,7 +35,7 @@ public class EmailSettingsValidator extends AbstractValidator {
             final File emailConfigTarget = File.createTempFile("robozonky-", ".cfg");
             Util.writeOutProperties(emailConfig, emailConfigTarget);
             System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                    emailConfigTarget.toURI().toURL().toExternalForm());
+                               emailConfigTarget.toURI().toURL().toExternalForm());
             return Checker.notifications(Variables.ZONKY_USERNAME.getValue(installData))
                     ? DataValidator.Status.OK : DataValidator.Status.ERROR;
         } catch (final Exception ex) {
@@ -56,5 +56,4 @@ public class EmailSettingsValidator extends AbstractValidator {
         return "Došlo k chybě při komunikaci s SMTP " +
                 "E-mailové notifikace nemusí fungovat správně.";
     }
-
 }

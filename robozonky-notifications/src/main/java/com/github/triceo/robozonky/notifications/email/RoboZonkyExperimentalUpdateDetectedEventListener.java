@@ -21,7 +21,8 @@ import java.util.Map;
 
 import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 
-final class RoboZonkyExperimentalUpdateDetectedEventListener extends AbstractEmailingListener<RoboZonkyExperimentalUpdateDetectedEvent> {
+final class RoboZonkyExperimentalUpdateDetectedEventListener extends
+                                                             AbstractEmailingListener<RoboZonkyExperimentalUpdateDetectedEvent> {
 
     public RoboZonkyExperimentalUpdateDetectedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
@@ -41,5 +42,4 @@ final class RoboZonkyExperimentalUpdateDetectedEventListener extends AbstractEma
     protected Map<String, Object> getData(final RoboZonkyExperimentalUpdateDetectedEvent event) {
         return Collections.singletonMap("newVersion", event.getNewVersion());
     }
-
 }

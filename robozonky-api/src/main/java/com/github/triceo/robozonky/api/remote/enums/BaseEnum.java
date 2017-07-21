@@ -19,5 +19,4 @@ package com.github.triceo.robozonky.api.remote.enums;
 public interface BaseEnum {
 
     String getCode();
-
 }

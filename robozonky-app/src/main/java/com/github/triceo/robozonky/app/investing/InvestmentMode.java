@@ -22,7 +22,8 @@ import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 
-public interface InvestmentMode extends Supplier<Optional<Collection<Investment>>>, AutoCloseable {
+public interface InvestmentMode extends Supplier<Optional<Collection<Investment>>>,
+                                        AutoCloseable {
 
     default boolean isFaultTolerant() {
         return false;
@@ -40,5 +41,4 @@ public interface InvestmentMode extends Supplier<Optional<Collection<Investment>
     default void close() throws Exception {
         // no need to do anything
     }
-
 }

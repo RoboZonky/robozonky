@@ -71,7 +71,7 @@ public class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         final PortfolioShare share = new PortfolioShare(Rating.D, 50, 100);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
-                Collections.emptyList(), Collections.emptyList());
+                                                           Collections.emptyList(), Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(50);
             softly.assertThat(strategy.getMaximumShare(Rating.D)).isEqualTo(100);
@@ -84,11 +84,10 @@ public class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         final InvestmentSize size = new InvestmentSize(Rating.D, 600, 1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(),
-                Collections.singleton(size), Collections.emptyList());
+                                                           Collections.singleton(size), Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.D)).isEqualTo(600);
             softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(1000);
         });
     }
-
 }

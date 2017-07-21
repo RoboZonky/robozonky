@@ -105,7 +105,6 @@ public class RuleBasedInvestmentStrategyServiceTest {
                 .collect(Collectors.toMap(Function.identity(), l -> new LoanDescriptor(l, Duration.ofSeconds(100))));
         final List<Recommendation> result = is.recommend(loans.values(), portfolio);
         Assertions.assertThat(result).containsOnly(loans.get(d).recommend(200).get(),
-                loans.get(aaaa).recommend(400).get());
+                                                   loans.get(aaaa).recommend(400).get());
     }
-
 }

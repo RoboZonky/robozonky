@@ -64,14 +64,15 @@ public class Portfolio implements PortfolioMBean {
     public Map<String, Integer> getInvestedAmountPerRating() {
         return Portfolio.getRatingStream()
                 .collect(Collectors.toMap(Rating::getCode,
-                        r -> get(p -> p.getCzkInvested(r), 0), (r1, r2) -> r2, LinkedHashMap::new));
+                                          r -> get(p -> p.getCzkInvested(r), 0), (r1, r2) -> r2, LinkedHashMap::new));
     }
 
     @Override
     public Map<String, BigDecimal> getRatingShare() {
         return Portfolio.getRatingStream()
                 .collect(Collectors.toMap(Rating::getCode,
-                        r -> get(p -> p.getShareOnInvestment(r), BigDecimal.ZERO), (r1, r2) -> r2, LinkedHashMap::new));
+                                          r -> get(p -> p.getShareOnInvestment(r), BigDecimal.ZERO), (r1, r2) -> r2,
+                                          LinkedHashMap::new));
     }
 
     @Override
@@ -104,5 +105,4 @@ public class Portfolio implements PortfolioMBean {
         this.latestPortfolioOverview = event.getPortfolioOverview();
         this.latestUpdatedDateTime = event.getCreatedOn();
     }
-
 }

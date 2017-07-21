@@ -27,12 +27,12 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
  * become active when the {@link #run()} method has been called, and will cease all operations when {@link #close()}
  * is called.
  */
-public interface Marketplace extends AutoCloseable, Runnable {
+public interface Marketplace extends AutoCloseable,
+                                     Runnable {
 
     /**
      * Tell the marketplace to send all new loans to a particular endpoint. The runtime promises to execute this
      * method before any calls to {@link #run()} are made and never after that.
-     *
      * @param listener The endpoint to send loans to.
      * @return True if the listener has been set up to receive new loans, false if already registered before.
      */
@@ -40,7 +40,6 @@ public interface Marketplace extends AutoCloseable, Runnable {
 
     /**
      * Allows the implementation to specify how it should be treated by the runtime.
-     *
      * @return Treatment expected by the marketplace provider.
      */
     ExpectedTreatment specifyExpectedTreatment();
@@ -48,11 +47,11 @@ public interface Marketplace extends AutoCloseable, Runnable {
     /**
      * If {@link #specifyExpectedTreatment()} is {@link ExpectedTreatment#POLLING}, this method is supposed to check
      * the marketplace once and terminate.
-     *
+     * <p>
      * If {@link ExpectedTreatment#LISTENING}, this method is expected to open a connection and listen for incoming
      * loans - it may be interrupted at any time, after which {@link #close()} will be called to clean up any lasting
      * resources.
-     *
+     * <p>
      * If any endless loops are created, implementors must check for {@link Thread#currentThread()}'s
      * {@link Thread#isInterrupted()} method in order to know when to terminate them.
      */
@@ -63,5 +62,4 @@ public interface Marketplace extends AutoCloseable, Runnable {
     default void close() throws Exception {
         // don't force implementations to override
     }
-
 }

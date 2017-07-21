@@ -29,5 +29,4 @@ public abstract class AbstractEmailingListenerTest extends AbstractListenerTest 
     protected AbstractEmailingListener<Event> getEmailingListener() {
         return (AbstractEmailingListener<Event>) this.listener;
     }
-
 }

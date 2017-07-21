@@ -74,10 +74,10 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     private static HttpEntity getFormData(final RequestId requestId, final int loanId, final int amount)
             throws UnsupportedEncodingException {
         final List<NameValuePair> nvps = Arrays.asList(
-            new BasicNameValuePair("clientApp", ZonkoidConfirmationProvider.CLIENT_APP),
-            new BasicNameValuePair("username", requestId.getUserId()),
-            new BasicNameValuePair("loanId", String.valueOf(loanId)),
-            new BasicNameValuePair("preferredAmount", String.valueOf(amount))
+                new BasicNameValuePair("clientApp", ZonkoidConfirmationProvider.CLIENT_APP),
+                new BasicNameValuePair("username", requestId.getUserId()),
+                new BasicNameValuePair("loanId", String.valueOf(loanId)),
+                new BasicNameValuePair("preferredAmount", String.valueOf(amount))
         );
         return new UrlEncodedFormEntity(nvps);
     }
@@ -100,7 +100,7 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
             case ZonkoidConfirmationProvider.PROTOCOL_MAIN:
                 ZonkoidConfirmationProvider.LOGGER.warn("HTTPS communication with Zonkoid failed, trying HTTP.");
                 return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, domain,
-                        ZonkoidConfirmationProvider.PROTOCOL_FALLBACK);
+                                                                       ZonkoidConfirmationProvider.PROTOCOL_FALLBACK);
             case ZonkoidConfirmationProvider.PROTOCOL_FALLBACK:
                 ZonkoidConfirmationProvider.LOGGER.error("Communication with Zonkoid failed.", ex);
                 return Optional.empty();
@@ -133,8 +133,9 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     static Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId, final int amount,
                                                       final String domain) {
         return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, domain,
-                ZonkoidConfirmationProvider.PROTOCOL_MAIN);
+                                                               ZonkoidConfirmationProvider.PROTOCOL_MAIN);
     }
+
     @Override
     public Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId, final int amount) {
         return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, "urbancoders.eu");
@@ -144,5 +145,4 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
     public String getId() {
         return "Zonkoid / Zonkios";
     }
-
 }

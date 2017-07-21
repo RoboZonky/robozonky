@@ -24,8 +24,8 @@ import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
-import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
+import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
 
@@ -46,11 +46,13 @@ class SingleShotOperatingMode extends OperatingMode {
                 RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
         final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
         final Credentials cred = new Credentials(marketplaceFragment.getMarketplaceCredentials(),
-                auth.getSecretProvider());
+                                                 auth.getSecretProvider());
         return MarketplaceLoader.load(cred)
                 .map(marketplace -> {
                     final InvestmentMode m = new SingleShotInvestmentMode(auth, builder, fragment.isFaultTolerant(),
-                            marketplace, strategy, marketplaceFragment.getMaximumSleepDuration());
+                                                                          marketplace, strategy,
+                                                                          marketplaceFragment.getMaximumSleepDuration
+                                                                                  ());
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }

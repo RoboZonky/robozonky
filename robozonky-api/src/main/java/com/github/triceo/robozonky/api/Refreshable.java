@@ -35,25 +35,23 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents a resource that can be periodically checked for new results.
- *
+ * <p>
  * The aim of this class is to be scheduled using a {@link ScheduledExecutorService}, while another thread is calling
  * {@link #getLatest()} to retrieve the latest version of the resource.
- *
  * @param <T> Type of the resource.
  */
 public abstract class Refreshable<T> implements Runnable {
 
     /**
-     * Listener for changes to the original resource. Use {@link #registerListener(Refreshable.RefreshListener)} to enable.
+     * Listener for changes to the original resource. Use {@link #registerListener(Refreshable.RefreshListener)} to
+     * enable.
      * Implementations of methods in this interface must not throw exceptions.
-     *
      * @param <T> Target {@link Refreshable}'s generic type.
      */
     public interface RefreshListener<T> {
 
         /**
          * Resource now has a value where there was none before.
-         *
          * @param newValue New value for the resource.
          */
         default void valueSet(final T newValue) {
@@ -62,7 +60,6 @@ public abstract class Refreshable<T> implements Runnable {
 
         /**
          * Resource used to have a value but no longer has one.
-         *
          * @param oldValue Former value of the resource.
          */
         default void valueUnset(final T oldValue) {
@@ -71,19 +68,16 @@ public abstract class Refreshable<T> implements Runnable {
 
         /**
          * Resource continues to have a value, and that value has changed.
-         *
          * @param oldValue Former value of the resource.
          * @param newValue New value of the resource.
          */
         default void valueChanged(final T oldValue, final T newValue) {
             // do nothing
         }
-
     }
 
     /**
      * Create an instance of this class that will always return empty resource.
-     *
      * @return The returned instance's {@link #getLatest()} will always return {@link Optional#empty()}.
      */
     public static Refreshable<Void> createImmutable() {
@@ -92,7 +86,6 @@ public abstract class Refreshable<T> implements Runnable {
 
     /**
      * Create an instance of this class that will never refresh the given resource.
-     *
      * @param toReturn Instance will always return this object.
      * @param <I> Type of object to return.
      * @return The returned instance will never change it's {@link #getLatest()}.
@@ -109,7 +102,6 @@ public abstract class Refreshable<T> implements Runnable {
             protected Optional<I> transform(final String source) {
                 return Optional.ofNullable(toReturn);
             }
-
         };
     }
 
@@ -143,7 +135,6 @@ public abstract class Refreshable<T> implements Runnable {
             public void valueChanged(final T oldValue, final T newValue) {
                 this.valueSet(newValue);
             }
-
         });
     }
 
@@ -160,9 +151,8 @@ public abstract class Refreshable<T> implements Runnable {
      * Result of this method will be used to fetch the latest resource state. While {@link #run()} is being
      * executed, if the result of the call no longer {@link #equals(Object)} its value from previous call,
      * {@link #transform(String)} will be called, resulting in {@link #getLatest()} changing its return value.
-     *
+     * <p>
      * The result of this method will be treated as a blocking operation, assuming it contains I/O calls.
-     *
      * @return Method to retrieve identifier for the content. If empty, {@link #transform(String)} will not be called
      * and {@link #getLatest()} will become empty.
      */
@@ -171,7 +161,6 @@ public abstract class Refreshable<T> implements Runnable {
     /**
      * Transform resource source into a new version of the resource. This method will be called when a fresh resource
      * is being requested.
-     *
      * @param source The source to use when creating fresh instance of the resource.
      * @return The fresh version of the resource. Empty if source could not be parsed.
      */
@@ -211,7 +200,6 @@ public abstract class Refreshable<T> implements Runnable {
 
     /**
      * Latest version of the resource. Will block until {@link #run()} has finished at least once.
-     *
      * @return Empty if the source could not be parsed or if the wait operation was interrupted.
      */
     public Optional<T> getLatest() {
@@ -225,7 +213,6 @@ public abstract class Refreshable<T> implements Runnable {
 
     /**
      * Register an object to listen for changes to {@link #getLatest()}.
-     *
      * @param listener Listener to register.
      * @return False if already registered.
      */
@@ -235,7 +222,6 @@ public abstract class Refreshable<T> implements Runnable {
 
     /**
      * Unregister a listener previously registered through {@link #registerListener(Refreshable.RefreshListener)}.
-     *
      * @param listener Listener to unregister.
      * @return False if not registered before.
      */
@@ -293,5 +279,4 @@ public abstract class Refreshable<T> implements Runnable {
             completionAssurance.countDown();
         }
     }
-
 }

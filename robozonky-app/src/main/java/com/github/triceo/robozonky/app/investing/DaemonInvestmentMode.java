@@ -73,7 +73,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         this.maximumSleepPeriod = maximumSleepPeriod;
         this.periodBetweenChecks = periodBetweenChecks;
         this.suddenDeath = new SuddenDeathDetection(blockUntilZero,
-                DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
+                                                    DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
     }
 
     Thread getShutdownHook() {
@@ -124,7 +124,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
         return new StrategyExecution(getInvestorBuilder(), refreshableStrategy, getAuthenticationHandler(),
-                maximumSleepPeriod);
+                                     maximumSleepPeriod);
     }
 
     @Override

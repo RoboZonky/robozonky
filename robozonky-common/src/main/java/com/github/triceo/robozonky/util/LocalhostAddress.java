@@ -53,5 +53,4 @@ public class LocalhostAddress extends Refreshable<String> {
     protected Optional<String> transform(final String source) {
         return Optional.of(source);
     }
-
 }

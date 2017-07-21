@@ -61,5 +61,4 @@ public class CurrentOverview extends BaseOverview {
     public int getInterestLeftDue() {
         return interestLeftDue;
     }
-
 }

@@ -20,11 +20,9 @@ import java.util.List;
 
 /**
  * The use of this API signifies that the resource in question supports pagination as defined by the Zonky API.
- *
  * @param <T> The type of resource.
  */
 public interface EntityCollectionApi<T> {
 
     List<T> items();
-
 }

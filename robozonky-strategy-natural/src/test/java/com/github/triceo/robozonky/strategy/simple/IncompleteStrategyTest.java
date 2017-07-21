@@ -48,7 +48,7 @@ public class IncompleteStrategyTest {
             final String line = newLines.remove(i);
             final File tmp = File.createTempFile("robozonky-", ".cfg");
             Files.write(tmp.toPath(), newLines);
-            files.add(new Object[] {line, tmp});
+            files.add(new Object[]{line, tmp});
         }
         return files;
     }
@@ -65,5 +65,4 @@ public class IncompleteStrategyTest {
                 new SimpleInvestmentStrategyService().parse(this.strategyFile.toURI().toURL().openStream());
         Assertions.assertThat(result).isEmpty();
     }
-
 }

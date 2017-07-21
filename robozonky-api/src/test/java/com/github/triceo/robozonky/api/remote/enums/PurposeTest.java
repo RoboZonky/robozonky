@@ -21,5 +21,4 @@ public class PurposeTest extends AbstractBaseEnumTest {
     public PurposeTest() {
         super(Purpose::values, Purpose::findByCode);
     }
-
 }

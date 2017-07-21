@@ -44,5 +44,4 @@ public class RiskPortfolio extends OverallPortfolio {
     public Rating getRating() {
         return rating;
     }
-
 }

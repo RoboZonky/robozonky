@@ -19,5 +19,4 @@ package com.github.triceo.robozonky.common.remote;
 public interface Field<S> {
 
     String id();
-
 }

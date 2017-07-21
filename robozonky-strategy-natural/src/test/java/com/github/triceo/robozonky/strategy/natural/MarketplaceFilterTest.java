@@ -33,7 +33,6 @@ public class MarketplaceFilterTest {
         public boolean test(final Loan loan) {
             return true;
         }
-
     };
     private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = () -> new MarketplaceFilterCondition() {
         // this is the default
@@ -56,7 +55,7 @@ public class MarketplaceFilterTest {
     public void notAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.ignoreWhen(Arrays.asList(MarketplaceFilterTest.MATCHING.get(), MarketplaceFilterTest.NOT_MATCHING.get(),
-                MarketplaceFilterTest.MATCHING.get()));
+                                   MarketplaceFilterTest.MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isFalse();
     }
 
@@ -73,5 +72,4 @@ public class MarketplaceFilterTest {
         f.butNotWhen(Arrays.asList(MarketplaceFilterTest.MATCHING.get(), MarketplaceFilterTest.MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isFalse();
     }
-
 }

@@ -77,5 +77,4 @@ class Runtime implements RuntimeMBean {
     public String getVersion() {
         return Defaults.ROBOZONKY_VERSION;
     }
-
 }

@@ -42,11 +42,12 @@ public class AuthenticatorTest {
         final OAuth oauth = Mockito.mock(OAuth.class);
         Mockito.when(provider.oauth()).thenReturn(oauth);
         final Function<ApiProvider, ZonkyApiToken> a = Authenticator.withCredentials(AuthenticatorTest.DUMMY_USER,
-                AuthenticatorTest.DUMMY_PWD.toCharArray());
+                                                                                     AuthenticatorTest.DUMMY_PWD
+                                                                                             .toCharArray());
         a.apply(provider);
         Mockito.verify(oauth, Mockito.times(1))
                 .login(ArgumentMatchers.eq(AuthenticatorTest.DUMMY_USER),
-                        ArgumentMatchers.eq(AuthenticatorTest.DUMMY_PWD.toCharArray()));
+                       ArgumentMatchers.eq(AuthenticatorTest.DUMMY_PWD.toCharArray()));
     }
 
     @Test
@@ -68,9 +69,8 @@ public class AuthenticatorTest {
         final OAuth oauth = Mockito.mock(OAuth.class);
         Mockito.when(provider.oauth()).thenReturn(oauth);
         Authenticator.withAccessToken(AuthenticatorTest.DUMMY_USER, AuthenticatorTest.TOKEN,
-                Duration.ofSeconds(AuthenticatorTest.TOKEN.getExpiresIn())).apply(provider);
+                                      Duration.ofSeconds(AuthenticatorTest.TOKEN.getExpiresIn())).apply(provider);
         Mockito.verify(oauth, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(oauth, Mockito.times(1)).refresh(ArgumentMatchers.any());
     }
-
 }

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * For whatever reason, if the marketplace stops being repeatedly checked, the robot is effectively dead. And we can
  * not get any reasonable logs, since we usually find out days after this has happened.
- *
+ * <p>
  * This little piece of code is designed to detect such a situation. Surrounding code will then take this and kill
  * the robot, sending a warning e-mail. When that happens, we will have up-to-date logs and will be able to identify
  * the culprit.

@@ -61,7 +61,7 @@ public class RecommendationTest {
     @Test
     public void constructorSmallAmount() {
         Assertions.assertThatThrownBy(() -> new Recommendation(RecommendationTest.mockLoanDescriptor(),
-                Defaults.MINIMUM_INVESTMENT_IN_CZK - 1, true))
+                                                               Defaults.MINIMUM_INVESTMENT_IN_CZK - 1, true))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -81,9 +81,9 @@ public class RecommendationTest {
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final boolean confirmationRequired = true;
         final Recommendation r1 = new Recommendation(RecommendationTest.mockLoanDescriptor(), amount,
-                confirmationRequired);
+                                                     confirmationRequired);
         final Recommendation r2 = new Recommendation(RecommendationTest.mockLoanDescriptor(), amount,
-                confirmationRequired);
+                                                     confirmationRequired);
         Assertions.assertThat(r1).isNotEqualTo(r2);
     }
 
@@ -109,7 +109,7 @@ public class RecommendationTest {
     @Test
     public void notEqualsDifferentJavaType() {
         final Recommendation r1 = new Recommendation(RecommendationTest.mockLoanDescriptor(),
-                Defaults.MINIMUM_INVESTMENT_IN_CZK, true);
+                                                     Defaults.MINIMUM_INVESTMENT_IN_CZK, true);
         Assertions.assertThat(r1).isNotEqualTo(r1.toString());
     }
 }

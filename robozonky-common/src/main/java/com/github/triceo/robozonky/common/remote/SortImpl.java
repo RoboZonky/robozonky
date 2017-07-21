@@ -52,5 +52,4 @@ class SortImpl<S> implements Sort<S> {
             filter.setRequestHeader("X-Order", ordering);
         }
     }
-
 }

@@ -62,7 +62,8 @@ final class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
         return () -> {
-            try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
+            try (final BufferedReader r = new BufferedReader(
+                    new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
                 return Optional.of(r.lines().collect(Collectors.joining(System.lineSeparator())));
             } catch (final IOException ex) {
                 LOGGER.warn("Failed reading strategy.", ex);

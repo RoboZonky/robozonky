@@ -32,5 +32,4 @@ public interface PortfolioMBean extends BaseMBean {
     int getExpectedYield();
 
     BigDecimal getRelativeExpectedYield();
-
 }

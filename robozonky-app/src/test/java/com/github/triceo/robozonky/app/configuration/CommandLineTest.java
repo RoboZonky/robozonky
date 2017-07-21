@@ -61,7 +61,7 @@ public class CommandLineTest {
     public void invalidFragmentCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-g", "somewhere",
-                "-p", "password", "single", "-s", "somewhere");
+                                                               "-p", "password", "single", "-s", "somewhere");
         Assertions.assertThat(cfg).isEmpty();
         Assertions.assertThat(systemOutRule.getLog()).contains(CommandLine.getScriptIdentifier());
     }
@@ -70,7 +70,7 @@ public class CommandLineTest {
     public void validDaemonCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
-                "daemon", "-s", "somewhere");
+                                                               "daemon", "-s", "somewhere");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
     }
 
@@ -78,7 +78,7 @@ public class CommandLineTest {
     public void validSingleShotCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
-                "single", "-s", "somewhere");
+                                                               "single", "-s", "somewhere");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(SingleShotInvestmentMode.class);
     }
 
@@ -86,8 +86,7 @@ public class CommandLineTest {
     public void validDirectCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
-                "direct", "-l", "1", "-a", "200");
+                                                               "direct", "-l", "1", "-a", "200");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(DirectInvestmentMode.class);
     }
-
 }

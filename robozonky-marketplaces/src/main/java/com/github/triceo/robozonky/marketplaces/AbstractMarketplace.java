@@ -47,5 +47,4 @@ abstract class AbstractMarketplace implements Marketplace {
         final Collection<Loan> loans = apis.marketplace();
         loanListeners.forEach(l -> l.accept(loans));
     }
-
 }

@@ -74,7 +74,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         // and now test
         final ReturnCode rc = App.execute(new DirectInvestmentMode(auth, new Investor.Builder().asDryRun(),
-                false, 1, 1000));
+                                                                   false, 1, 1000));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_SETUP);
     }
 
@@ -97,7 +97,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         Mockito.when(marketplace.specifyExpectedTreatment()).thenReturn(ExpectedTreatment.POLLING);
         // and now test
         final ReturnCode rc = App.execute(new SingleShotInvestmentMode(auth, new Investor.Builder().asDryRun(),
-                false, marketplace, refreshable));
+                                                                       false, marketplace, refreshable));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.OK);
     }
 
@@ -114,5 +114,4 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         });
         Mockito.verify(mode).close();
     }
-
 }

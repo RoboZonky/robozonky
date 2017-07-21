@@ -74,5 +74,4 @@ class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<
     public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final int pageNo, final int pageSize) {
         return this.execute(function, Sort.unspecified(), pageNo, pageSize, filter);
     }
-
 }

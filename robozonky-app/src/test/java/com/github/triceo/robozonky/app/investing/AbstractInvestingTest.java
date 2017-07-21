@@ -113,5 +113,4 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
     public void readPreexistingEvents() {
         previouslyExistingEvents.addAll(Events.getFired());
     }
-
 }

@@ -53,5 +53,4 @@ public class ConfirmationProviderLoaderTest {
         final ConfirmationProviderService cps = strategy -> Optional.of(cp);
         Assertions.assertThat(ConfirmationProviderLoader.load(id, Collections.singleton(cps))).contains(cp);
     }
-
 }

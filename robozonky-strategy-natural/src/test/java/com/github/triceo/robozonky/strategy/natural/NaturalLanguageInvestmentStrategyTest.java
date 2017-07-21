@@ -57,7 +57,7 @@ public class NaturalLanguageInvestmentStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyList(),
-                Collections.emptyList());
+                                                    Collections.emptyList());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
@@ -158,7 +158,7 @@ public class NaturalLanguageInvestmentStrategyTest {
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(map);
         map.forEach((key, value) ->
-                Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.eq(key))).thenReturn(value));
+                            Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.eq(key))).thenReturn(value));
         return portfolio;
     }
 
@@ -191,10 +191,15 @@ public class NaturalLanguageInvestmentStrategyTest {
         final int targetShareC = targetShareB * 5;
 
         final ParsedStrategy parsedStrategy = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
-                Arrays.asList(new PortfolioShare(Rating.A, targetShareA, targetShareA),
-                        new PortfolioShare(Rating.B, targetShareB, targetShareB),
-                        new PortfolioShare(Rating.C, targetShareC, targetShareC)), Collections.emptyList(),
-                Collections.emptyList());
+                                                                 Arrays.asList(
+                                                                         new PortfolioShare(Rating.A, targetShareA,
+                                                                                            targetShareA),
+                                                                         new PortfolioShare(Rating.B, targetShareB,
+                                                                                            targetShareB),
+                                                                         new PortfolioShare(Rating.C, targetShareC,
+                                                                                            targetShareC)),
+                                                                 Collections.emptyList(),
+                                                                 Collections.emptyList());
         final NaturalLanguageInvestmentStrategy sis = new NaturalLanguageInvestmentStrategy(parsedStrategy);
 
         // all ratings have zero share; C > B > A
@@ -209,6 +214,4 @@ public class NaturalLanguageInvestmentStrategyTest {
         portfolio = prepareShareMap(BigDecimal.valueOf(0.0099), BigDecimal.ZERO, BigDecimal.valueOf(0.249));
         assertOrder(sis.rankRatingsByDemand(portfolio.getSharesOnInvestment()), Rating.B, Rating.C, Rating.A);
     }
-
-
 }

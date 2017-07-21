@@ -35,5 +35,4 @@ public final class InvestmentRequestedEvent extends Event {
     public Recommendation getRecommendation() {
         return recommendation;
     }
-
 }

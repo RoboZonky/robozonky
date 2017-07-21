@@ -126,5 +126,4 @@ public class CommandLinePartTest {
         final List<String> result = Files.readAllLines(target.toPath());
         Assertions.assertThat(result).containsExactly("-noarg", "-onearg", "\"a1\"", "-twoarg", "\"a2\"", "\"a3\"");
     }
-
 }

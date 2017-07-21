@@ -31,18 +31,21 @@ abstract class BaseEntity {
     @JsonAnyGetter
     void handleUnknownGetter(final String key) {
         LoggerFactory.getLogger(this.getClass()).debug("Trying to get value of unknown property '{}'."
-                + " Indicates an unexpected API change, RoboZonky may misbehave.", key);
+                                                               + " Indicates an unexpected API change, RoboZonky may " +
+                                                               "misbehave.",
+                                                       key);
     }
 
     @JsonAnySetter
     void handleUnknownSetter(final String key, final Object value) {
         LoggerFactory.getLogger(this.getClass()).debug("Trying to set value '{}' to an unknown property '{}'."
-                + " Indicates an unexpected API change, RoboZonky may misbehave.", value, key);
+                                                               + " Indicates an unexpected API change, RoboZonky may " +
+                                                               "misbehave.",
+                                                       value, key);
     }
 
     @Override
     public final String toString() {
         return new ToStringBuilder(this).toString();
     }
-
 }

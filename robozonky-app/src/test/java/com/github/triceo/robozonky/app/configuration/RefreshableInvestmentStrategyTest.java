@@ -38,11 +38,11 @@ public class RefreshableInvestmentStrategyTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static Object[][] getParameters() {
-        final String[] files = new String[] {
+        final String[] files = new String[]{
                 "robozonky-balanced.cfg", "robozonky-conservative.cfg", "robozonky-dynamic.cfg"
         };
         return Stream.of(files)
-                .map(f -> new File[] {new File(RefreshableInvestmentStrategyTest.getRoot(), f)})
+                .map(f -> new File[]{new File(RefreshableInvestmentStrategyTest.getRoot(), f)})
                 .collect(Collectors.toList())
                 .toArray(new Object[files.length][1]);
     }
@@ -62,5 +62,4 @@ public class RefreshableInvestmentStrategyTest {
         final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(url);
         Assertions.assertThat(r.getLatest()).isPresent();
     }
-
 }

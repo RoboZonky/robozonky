@@ -35,7 +35,7 @@ public class PaginatedImplTest {
         final int pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         // when execute is called with the right parameters, we pretend the API returned no results
         Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(0),
-                ArgumentMatchers.eq(pageSize)))
+                                 ArgumentMatchers.eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 0, 0));
         final Paginated<Loan> p = new PaginatedImpl<>(api);
         SoftAssertions.assertSoftly(softly -> {
@@ -52,10 +52,12 @@ public class PaginatedImplTest {
         final PaginatedApi<Loan, LoanApi> api = Mockito.mock(PaginatedApi.class);
         final int pageSize = 1;
         // when execute calls for first page, we pretend the API returned 1 result
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(0), ArgumentMatchers.eq(pageSize)))
+        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(0),
+                                 ArgumentMatchers.eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.singleton(new Loan(1, 200)), 0, 1));
         // when execute calls for second page, we pretend the API returned no results
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(1), ArgumentMatchers.eq(pageSize)))
+        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(1),
+                                 ArgumentMatchers.eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 1, 1));
         final Paginated<Loan> p = new PaginatedImpl<>(api, Sort.unspecified(), pageSize);
         SoftAssertions.assertSoftly(softly -> {
@@ -72,5 +74,4 @@ public class PaginatedImplTest {
             softly.assertThat(p.getItemsOnPage()).hasSize(0);
         });
     }
-
 }

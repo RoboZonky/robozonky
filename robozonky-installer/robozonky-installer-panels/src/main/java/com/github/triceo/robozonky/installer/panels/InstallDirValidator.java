@@ -35,5 +35,4 @@ public class InstallDirValidator extends AbstractValidator {
     public String getErrorMessageId() {
         return "Název instalačního adresáře nesmí obsahovat mezery a jiné speciální znaky.";
     }
-
 }

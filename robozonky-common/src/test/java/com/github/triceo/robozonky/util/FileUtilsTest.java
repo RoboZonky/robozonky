@@ -59,5 +59,4 @@ public class FileUtilsTest {
     public void emptyUrls() {
         Assertions.assertThat(FileUtils.filesToUrls(new File[0])).isEmpty();
     }
-
 }

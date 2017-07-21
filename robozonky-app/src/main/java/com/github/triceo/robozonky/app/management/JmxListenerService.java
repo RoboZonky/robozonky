@@ -34,18 +34,18 @@ public class JmxListenerService implements ListenerService {
     private static <T extends Event> EventListener<T> newListener(final Class<T> eventType) {
         if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
             return (event, sessionInfo) -> {
-                final ExecutionCompletedEvent evt = (ExecutionCompletedEvent)event;
-                ((Runtime)MBean.RUNTIME.getImplementation()).registerInvestmentRun(evt, sessionInfo);
-                ((Investments)MBean.INVESTMENTS.getImplementation()).registerInvestmentRun(evt);
+                final ExecutionCompletedEvent evt = (ExecutionCompletedEvent) event;
+                ((Runtime) MBean.RUNTIME.getImplementation()).registerInvestmentRun(evt, sessionInfo);
+                ((Investments) MBean.INVESTMENTS.getImplementation()).registerInvestmentRun(evt);
             };
         } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
-            final Investments bean = (Investments)MBean.INVESTMENTS.getImplementation();
-            return (event, sessionInfo) -> bean.addDelegatedInvestment((InvestmentDelegatedEvent)event);
+            final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
+            return (event, sessionInfo) -> bean.addDelegatedInvestment((InvestmentDelegatedEvent) event);
         } else if (Objects.equals(eventType, InvestmentRejectedEvent.class)) {
-            final Investments bean = (Investments)MBean.INVESTMENTS.getImplementation();
-            return (event, sessionInfo) -> bean.addRejectedInvestment((InvestmentRejectedEvent)event);
+            final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
+            return (event, sessionInfo) -> bean.addRejectedInvestment((InvestmentRejectedEvent) event);
         } else if (Objects.equals(eventType, InvestmentMadeEvent.class)) {
-            final Investments bean = (Investments)MBean.INVESTMENTS.getImplementation();
+            final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
             return (event, sessionInfo) -> bean.addSuccessfulInvestment((InvestmentMadeEvent) event);
         } else if (Objects.equals(eventType, StrategyStartedEvent.class)) {
             final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
@@ -62,5 +62,4 @@ public class JmxListenerService implements ListenerService {
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
         return Refreshable.createImmutable(JmxListenerService.newListener(eventType));
     }
-
 }

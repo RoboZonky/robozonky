@@ -27,5 +27,4 @@ interface CommandLineFragment {
 
     @Override
     String toString();
-
 }

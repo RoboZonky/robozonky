@@ -29,5 +29,4 @@ public class TweaksCommandLineFragmentTest {
             softly.assertThat(fragment.isDryRunEnabled()).isFalse();
         });
     }
-
 }

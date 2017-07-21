@@ -80,7 +80,6 @@ public class Investor {
                     .map(r -> new Investor(r, provider, zonky, isDryRun))
                     .orElse(new Investor(username, zonky, isDryRun));
         }
-
     }
 
     static Investment convertToInvestment(final Recommendation r, final Confirmation confirmation) {
@@ -161,7 +160,8 @@ public class Investor {
         }
     }
 
-    private ZonkyResponse investLocallyFailingOnCaptcha(final Recommendation recommendation, final Confirmation confirmation) {
+    private ZonkyResponse investLocallyFailingOnCaptcha(final Recommendation recommendation,
+                                                        final Confirmation confirmation) {
         Investor.LOGGER.debug("Executing investment: {}, confirmation: {}.", recommendation, confirmation);
         final Investment i = Investor.convertToInvestment(recommendation, confirmation);
         this.zonky.invest(i);
@@ -191,8 +191,11 @@ public class Investor {
     ZonkyResponse approveOrDelegate(final Recommendation recommendation) {
         Investor.LOGGER.debug("Asking to confirm investment: {}.", recommendation);
         final Optional<Confirmation> confirmation = this.provider.requestConfirmation(this.requestId,
-                recommendation.getLoanDescriptor().getLoan().getId(),
-                recommendation.getRecommendedInvestmentAmount());
+                                                                                      recommendation
+                                                                                              .getLoanDescriptor()
+                                                                                              .getLoan().getId(),
+                                                                                      recommendation
+                                                                                              .getRecommendedInvestmentAmount());
         return confirmation.map(result -> {
             switch (result.getType()) {
                 case REJECTED:
@@ -205,14 +208,18 @@ public class Investor {
                     return this.investLocallyFailingOnCaptcha(recommendation, confirmation.get());
                 default:
                     throw new IllegalStateException("No way how this could happen.");
-            }}).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond."));
+            }
+        }).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond."));
     }
 
     private ZonkyResponse delegateOrReject(final Recommendation recommendation) {
         Investor.LOGGER.debug("Asking to confirm investment: {}.", recommendation);
         final Optional<Confirmation> confirmation = this.provider.requestConfirmation(this.requestId,
-                recommendation.getLoanDescriptor().getLoan().getId(),
-                recommendation.getRecommendedInvestmentAmount());
+                                                                                      recommendation
+                                                                                              .getLoanDescriptor()
+                                                                                              .getLoan().getId(),
+                                                                                      recommendation
+                                                                                              .getRecommendedInvestmentAmount());
         return confirmation.map(result -> {
             switch (result.getType()) {
                 case DELEGATED:
@@ -221,7 +228,7 @@ public class Investor {
                 default:
                     Investor.LOGGER.warn("Investment not delegated, not investing: {}.", recommendation);
                     return new ZonkyResponse(ZonkyResponseType.REJECTED);
-            }}).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond"));
+            }
+        }).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond"));
     }
-
 }

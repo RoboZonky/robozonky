@@ -40,5 +40,4 @@ public class OverallOverview extends BaseOverview {
     public int getPrincipalLost() {
         return principalLost;
     }
-
 }

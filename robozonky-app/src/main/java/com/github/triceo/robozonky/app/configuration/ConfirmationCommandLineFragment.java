@@ -29,5 +29,4 @@ class ConfirmationCommandLineFragment extends AbstractCommandLineFragment {
     public Optional<String> getConfirmationCredentials() {
         return Optional.ofNullable(confirmationCredentials);
     }
-
 }

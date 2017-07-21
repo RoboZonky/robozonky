@@ -32,7 +32,7 @@ public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
     @Test
     public void setUsernameAndPassword() {
         final SecretProvider p = SecretProvider.fallback(FallbackSecretProviderTest.USR,
-                FallbackSecretProviderTest.PWD.toCharArray());
+                                                         FallbackSecretProviderTest.PWD.toCharArray());
         // make sure original values were set
         Assertions.assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
         Assertions.assertThat(p.getPassword()).isEqualTo(FallbackSecretProviderTest.PWD.toCharArray());
@@ -47,7 +47,7 @@ public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
     @Test
     public void tokenManipulation() {
         final SecretProvider p = SecretProvider.fallback(FallbackSecretProviderTest.USR,
-                FallbackSecretProviderTest.PWD.toCharArray());
+                                                         FallbackSecretProviderTest.PWD.toCharArray());
         final String token = UUID.randomUUID().toString();
         // create token
         SoftAssertions softly = new SoftAssertions();
@@ -59,5 +59,4 @@ public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
         softly.assertThat(p.deleteToken()).isTrue();
         softly.assertAll();
     }
-
 }

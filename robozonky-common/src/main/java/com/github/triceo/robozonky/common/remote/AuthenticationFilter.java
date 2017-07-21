@@ -26,5 +26,4 @@ class AuthenticationFilter extends RoboZonkyFilter {
         final String authCode = Base64.getEncoder().encodeToString("web:web".getBytes(Defaults.CHARSET));
         this.setRequestHeader("Authorization", "Basic " + authCode);
     }
-
 }

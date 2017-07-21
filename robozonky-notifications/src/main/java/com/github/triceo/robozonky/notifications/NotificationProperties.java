@@ -96,5 +96,4 @@ public abstract class NotificationProperties {
     public int hashCode() {
         return properties.hashCode();
     }
-
 }

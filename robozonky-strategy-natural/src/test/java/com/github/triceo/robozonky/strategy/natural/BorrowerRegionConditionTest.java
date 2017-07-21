@@ -38,5 +38,4 @@ public class BorrowerRegionConditionTest extends AbstractEnumeratedConditionTest
     protected Region getTriggerItem() {
         return Region.JIHOCESKY;
     }
-
 }

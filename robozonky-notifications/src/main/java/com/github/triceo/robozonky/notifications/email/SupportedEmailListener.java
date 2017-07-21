@@ -45,7 +45,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentMadeEventListener(properties);
         }
-    }, INVESTMENT_SKIPPED {
+    },
+    INVESTMENT_SKIPPED {
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentSkippedEvent.class;
@@ -55,7 +56,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentSkippedEventListener(properties);
         }
-    }, INVESTMENT_DELEGATED {
+    },
+    INVESTMENT_DELEGATED {
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentDelegatedEvent.class;
@@ -65,7 +67,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentDelegatedEventListener(properties);
         }
-    }, INVESTMENT_REJECTED {
+    },
+    INVESTMENT_REJECTED {
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentRejectedEvent.class;
@@ -75,7 +78,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentRejectedEventListener(properties);
         }
-    }, BALANCE_ON_TARGET {
+    },
+    BALANCE_ON_TARGET {
         @Override
         public String getLabel() {
             return "balanceTracker";
@@ -90,7 +94,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new BalanceOnTargetEventListener(properties);
         }
-    }, BALANCE_UNDER_MINIMUM {
+    },
+    BALANCE_UNDER_MINIMUM {
         @Override
         public String getLabel() {
             return "balanceTracker";
@@ -105,7 +110,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new BalanceUnderMinimumEventListener(properties);
         }
-    }, CRASHED {
+    },
+    CRASHED {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyCrashedEvent.class;
@@ -115,7 +121,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyCrashedEventListener(properties);
         }
-    }, DAEMON_FAILED {
+    },
+    DAEMON_FAILED {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyDaemonFailedEvent.class;
@@ -125,7 +132,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyDaemonFailedEventListener(properties);
         }
-    }, REMOTE_OPERATION_FAILED {
+    },
+    REMOTE_OPERATION_FAILED {
         @Override
         public Class<? extends Event> getEventType() {
             return RemoteOperationFailedEvent.class;
@@ -135,7 +143,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RemoteOperationFailedEventListener(properties);
         }
-    }, INITIALIZED {
+    },
+    INITIALIZED {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyInitializedEvent.class;
@@ -145,7 +154,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyInitializedEventListener(properties);
         }
-    }, ENDING {
+    },
+    ENDING {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyEndingEvent.class;
@@ -155,7 +165,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyEndingEventListener(properties);
         }
-    }, TESTING {
+    },
+    TESTING {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyTestingEvent.class;
@@ -165,7 +176,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyTestingEventListener(properties);
         }
-    }, UPDATE_DETECTED {
+    },
+    UPDATE_DETECTED {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyUpdateDetectedEvent.class;
@@ -175,7 +187,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyUpdateDetectedEventListener(properties);
         }
-    }, EXPERIMENTAL_UPDATE_DETECTED {
+    },
+    EXPERIMENTAL_UPDATE_DETECTED {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyExperimentalUpdateDetectedEvent.class;
@@ -187,7 +200,8 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
         }
     };
 
-    protected abstract EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties);
+    protected abstract EventListener<? extends Event> newListener(
+            final ListenerSpecificNotificationProperties properties);
 
     @Override
     public EventListener<? extends Event> getListener(final EmailNotificationProperties properties) {

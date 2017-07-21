@@ -63,5 +63,4 @@ public class LoanTermConditionTest {
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         Assertions.assertThat(condition.test(l)).isFalse();
     }
-
 }

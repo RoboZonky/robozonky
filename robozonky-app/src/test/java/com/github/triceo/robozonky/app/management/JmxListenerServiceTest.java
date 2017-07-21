@@ -49,8 +49,8 @@ import org.junit.runners.Parameterized;
 public class JmxListenerServiceTest {
 
     private static final String USERNAME = "someone@somewhere.cz";
-    private static final InvestmentsMBean INVESTMENTS = (Investments)MBean.INVESTMENTS.getImplementation();
-    private static final RuntimeMBean RUNTIME = (Runtime)MBean.RUNTIME.getImplementation();
+    private static final InvestmentsMBean INVESTMENTS = (Investments) MBean.INVESTMENTS.getImplementation();
+    private static final RuntimeMBean RUNTIME = (Runtime) MBean.RUNTIME.getImplementation();
     private static final Portfolio PORTFOLIO = (Portfolio) MBean.PORTFOLIO.getImplementation();
 
     private static Object[] getParametersForExecutionCompleted() {
@@ -63,7 +63,7 @@ public class JmxListenerServiceTest {
             softly.assertThat(INVESTMENTS.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
             softly.assertThat(RUNTIME.getZonkyUsername()).isEqualTo(USERNAME);
         };
-        return new Object[] {evt.getClass(), evt, before, after};
+        return new Object[]{evt.getClass(), evt, before, after};
     }
 
     private static Object[] getParametersForInvestmentDelegated() {
@@ -77,7 +77,7 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(INVESTMENTS.getDelegatedInvestments()).containsOnlyKeys(l.getId());
         };
-        return new Object[] {evt.getClass(), evt, before, after};
+        return new Object[]{evt.getClass(), evt, before, after};
     }
 
     private static Object[] getParametersForInvestmentRejected() {
@@ -91,7 +91,7 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(INVESTMENTS.getRejectedInvestments()).containsOnlyKeys(l.getId());
         };
-        return new Object[] {evt.getClass(), evt, before, after};
+        return new Object[]{evt.getClass(), evt, before, after};
     }
 
     private static Object[] getParametersForInvestmentMade() {
@@ -103,7 +103,7 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(INVESTMENTS.getSuccessfulInvestments()).containsOnlyKeys(l.getId());
         };
-        return new Object[] {evt.getClass(), evt, before, after};
+        return new Object[]{evt.getClass(), evt, before, after};
     }
 
     private static Object[] getParametersForStrategyStarted() {
@@ -120,7 +120,7 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(PORTFOLIO.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[] {evt.getClass(), evt, before, after};
+        return new Object[]{evt.getClass(), evt, before, after};
     }
 
     private static Object[] getParametersForStrategyCompleted() {
@@ -131,17 +131,17 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(PORTFOLIO.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[] {evt.getClass(), evt, before, after};
+        return new Object[]{evt.getClass(), evt, before, after};
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
         return Arrays.asList(JmxListenerServiceTest.getParametersForExecutionCompleted(),
-                JmxListenerServiceTest.getParametersForInvestmentDelegated(),
-                JmxListenerServiceTest.getParametersForInvestmentMade(),
-                JmxListenerServiceTest.getParametersForInvestmentRejected(),
-                JmxListenerServiceTest.getParametersForStrategyStarted(),
-                JmxListenerServiceTest.getParametersForStrategyCompleted());
+                             JmxListenerServiceTest.getParametersForInvestmentDelegated(),
+                             JmxListenerServiceTest.getParametersForInvestmentMade(),
+                             JmxListenerServiceTest.getParametersForInvestmentRejected(),
+                             JmxListenerServiceTest.getParametersForStrategyStarted(),
+                             JmxListenerServiceTest.getParametersForStrategyCompleted());
     }
 
     @Before
@@ -164,7 +164,7 @@ public class JmxListenerServiceTest {
 
     public <T extends Event> void handleEvent(final T event) {
         final JmxListenerService service = new JmxListenerService();
-        final Refreshable<EventListener<T>> r = service.findListener((Class<T>)event.getClass());
+        final Refreshable<EventListener<T>> r = service.findListener((Class<T>) event.getClass());
         r.run();
         final EventListener<T> listener = r.getLatest().get();
         listener.handle(event, new SessionInfo(USERNAME));
@@ -186,5 +186,4 @@ public class JmxListenerServiceTest {
         r.run();
         Assertions.assertThat(r.getLatest()).isEmpty();
     }
-
 }

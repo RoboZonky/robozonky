@@ -33,5 +33,4 @@ public class SessionInfo {
     public String getUserAgent() {
         return Defaults.ROBOZONKY_USER_AGENT;
     }
-
 }

@@ -52,5 +52,4 @@ public class PortfolioShare {
     public Rating getRating() {
         return rating;
     }
-
 }

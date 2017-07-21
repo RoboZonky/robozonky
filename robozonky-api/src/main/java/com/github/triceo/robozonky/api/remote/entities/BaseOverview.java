@@ -41,5 +41,4 @@ abstract class BaseOverview extends BaseEntity {
     public int getInvestmentCount() {
         return investmentCount;
     }
-
 }

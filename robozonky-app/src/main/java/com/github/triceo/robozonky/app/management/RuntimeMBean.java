@@ -23,5 +23,4 @@ public interface RuntimeMBean extends BaseMBean {
     String getZonkyUsername();
 
     String getVersion();
-
 }

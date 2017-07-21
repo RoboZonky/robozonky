@@ -33,7 +33,6 @@ public class RefreshableTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshableTest.class);
     private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
 
-
     private static String transform(final String original) {
         return "Transformed " + original;
     }
@@ -148,5 +147,4 @@ public class RefreshableTest {
         Assertions.assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
         Assertions.assertThat(r.registerListener(l)).isTrue(); // re-registration
     }
-
 }

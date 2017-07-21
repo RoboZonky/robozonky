@@ -58,5 +58,4 @@ public class BlockedAmount extends BaseEntity {
     public OffsetDateTime getDateStart() {
         return dateStart;
     }
-
 }

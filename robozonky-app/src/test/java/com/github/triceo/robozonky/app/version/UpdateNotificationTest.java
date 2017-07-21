@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.Objects;
 
 import com.github.triceo.robozonky.api.notifications.Event;
-import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
 import org.assertj.core.api.Assertions;
@@ -75,7 +75,8 @@ public class UpdateNotificationTest extends AbstractEventsAndStateLeveragingTest
         // check that the event has the proper version
         Assertions.assertThat(eventsOriginallyFired)
                 .first()
-                .matches(e -> Objects.equals(((RoboZonkyExperimentalUpdateDetectedEvent) e).getNewVersion(), newVersion));
+                .matches(e -> Objects.equals(((RoboZonkyExperimentalUpdateDetectedEvent) e).getNewVersion(),
+                                             newVersion));
         // check that the event is not fired again since there is no change in new version
         n.valueSet(newVersionIdentifier);
         Assertions.assertThat(Events.getFired()).hasSize(1);
@@ -95,5 +96,4 @@ public class UpdateNotificationTest extends AbstractEventsAndStateLeveragingTest
         n.valueSet(new VersionIdentifier(currentVersion));
         Assertions.assertThat(Events.getFired()).isEmpty();
     }
-
 }

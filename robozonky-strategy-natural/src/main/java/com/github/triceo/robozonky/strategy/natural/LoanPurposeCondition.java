@@ -24,5 +24,4 @@ class LoanPurposeCondition extends AbstractEnumeratedCondition<Purpose> {
     public LoanPurposeCondition() {
         super(Loan::getPurpose);
     }
-
 }

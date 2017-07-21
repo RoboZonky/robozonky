@@ -29,5 +29,4 @@ public final class FileStoringListenerService implements ListenerService {
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
         return new RefreshableFileEventListener<>(properties, eventType);
     }
-
 }

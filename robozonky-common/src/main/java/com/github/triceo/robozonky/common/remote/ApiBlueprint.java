@@ -30,5 +30,4 @@ interface ApiBlueprint<T> {
         };
         execute(wrapper);
     }
-
 }

@@ -53,5 +53,4 @@ public abstract class RefreshableEventListener<T extends Event, N extends Notifi
     }
 
     abstract protected Optional<EventListener<T>> transform(final String source);
-
 }

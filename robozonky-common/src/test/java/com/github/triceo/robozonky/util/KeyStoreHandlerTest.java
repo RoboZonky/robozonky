@@ -97,5 +97,4 @@ public class KeyStoreHandlerTest {
         Assertions.assertThat(ksh2.isDirty()).isTrue();
         Assertions.assertThat(ksh2.get(key)).isEmpty();
     }
-
 }

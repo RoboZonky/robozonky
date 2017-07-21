@@ -28,5 +28,4 @@ public class ProxyFactoryTest {
         final ResteasyClient client = ProxyFactory.newResteasyClient();
         Assertions.assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
     }
-
 }

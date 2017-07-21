@@ -59,5 +59,4 @@ public class LoanAmountConditionTest {
         final MarketplaceFilterCondition condition = new LoanAmountCondition(1, 1);
         Assertions.assertThat(condition.test(l)).isFalse();
     }
-
 }

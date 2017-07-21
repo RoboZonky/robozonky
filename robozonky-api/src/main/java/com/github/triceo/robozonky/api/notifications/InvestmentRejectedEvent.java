@@ -46,5 +46,4 @@ public final class InvestmentRejectedEvent extends Event {
     public String getConfirmationProviderId() {
         return confirmationProviderId;
     }
-
 }

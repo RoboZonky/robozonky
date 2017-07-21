@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.app.management;
 
 import java.util.Map;
 
-public interface InvestmentsMBean  extends BaseMBean {
+public interface InvestmentsMBean extends BaseMBean {
 
     void reset();
 
@@ -27,5 +27,4 @@ public interface InvestmentsMBean  extends BaseMBean {
     Map<Integer, Integer> getDelegatedInvestments();
 
     Map<Integer, Integer> getRejectedInvestments();
-
 }

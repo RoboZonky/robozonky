@@ -54,14 +54,12 @@ public class SortTest {
                 .apply(filter);
         Mockito.verify(filter, Mockito.times(1))
                 .setRequestHeader(ArgumentMatchers.eq("X-Order"),
-                        ArgumentMatchers.eq("covered,datePublished,-interestRate"));
+                                  ArgumentMatchers.eq("covered,datePublished,-interestRate"));
     }
 
     @Test
     public void orderTwiceOnSameField() {
         Assertions.assertThatThrownBy(() -> Sort.by(LoanField.COVERED).thenBy(LoanField.COVERED))
                 .isInstanceOf(IllegalArgumentException.class);
-
     }
-
 }

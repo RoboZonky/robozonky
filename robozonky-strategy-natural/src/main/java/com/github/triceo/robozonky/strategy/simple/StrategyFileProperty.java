@@ -92,9 +92,9 @@ enum StrategyFileProperty {
             final String fallbackPropertyName = StrategyFileProperty.join(key, "default");
             return StrategyFileProperty.getValue(fallbackPropertyName, supplier)
                     .orElseThrow(() -> new IllegalStateException("Investment strategy is incomplete. " +
-                            "Missing value for '" + key + "' and rating '" + r + '\''));
+                                                                         "Missing value for '" + key + "' and rating " +
+                                                                         "'" + r + '\''));
         });
     }
-
 
 }

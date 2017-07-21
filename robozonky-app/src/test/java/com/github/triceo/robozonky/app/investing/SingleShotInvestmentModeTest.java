@@ -145,6 +145,5 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         // validate execution not started
         Assertions.assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanArrivedEvent.class);
     }
-
 }
 

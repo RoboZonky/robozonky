@@ -24,5 +24,4 @@ class VeryShortStoryCondition extends AbstractStoryCondition {
             return length < AbstractStoryCondition.VERY_SHORT_STORY_THRESHOLD;
         });
     }
-
 }

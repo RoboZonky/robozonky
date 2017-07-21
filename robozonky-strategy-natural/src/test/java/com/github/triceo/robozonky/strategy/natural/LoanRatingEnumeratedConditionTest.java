@@ -38,5 +38,4 @@ public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditi
     protected Rating getTriggerItem() {
         return Rating.A;
     }
-
 }

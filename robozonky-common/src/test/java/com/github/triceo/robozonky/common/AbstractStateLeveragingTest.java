@@ -37,5 +37,4 @@ public abstract class AbstractStateLeveragingTest {
         final File f = new File("robozonky.state");
         AbstractStateLeveragingTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
     }
-
 }

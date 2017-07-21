@@ -90,8 +90,8 @@ public class SimpleInvestmentStrategyServiceTest {
     @Test
     public void whitespace() throws IOException {
         // my IDE keeps removing whitespace at the end of lines in files, so let's generate a file on the run
-        final String[] lines = new String[] {
-            "minimumBalance                = 200 ", "maximumInvestment             = 20000\t",
+        final String[] lines = new String[]{
+                "minimumBalance                = 200 ", "maximumInvestment             = 20000\t",
                 "   maximumShare.default          = 1", "targetShare.default           = 0.125   ",
                 "minimumTerm.default           = \t0  ", "maximumTerm.default           = -1",
                 "minimumAsk.default            = 0", "maximumAsk.default            = -1   ",

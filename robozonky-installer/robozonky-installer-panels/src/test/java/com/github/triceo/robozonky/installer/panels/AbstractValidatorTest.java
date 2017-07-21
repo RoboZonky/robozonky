@@ -39,7 +39,6 @@ public class AbstractValidatorTest {
         protected DataValidator.Status validateDataPossiblyThrowingException(final InstallData installData) {
             throw new IllegalStateException();
         }
-
     }
 
     @Test
@@ -47,5 +46,4 @@ public class AbstractValidatorTest {
         final AbstractValidator v = new TestValidator();
         Assertions.assertThat(v.validateData(null)).isEqualTo(DataValidator.Status.ERROR);
     }
-
 }

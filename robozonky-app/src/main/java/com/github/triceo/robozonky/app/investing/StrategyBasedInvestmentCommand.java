@@ -52,5 +52,4 @@ final class StrategyBasedInvestmentCommand implements InvestmentCommand {
         } while (invested);
         Events.fire(new StrategyCompletedEvent(strategy, s.getInvestmentsMade(), s.getPortfolioOverview()));
     }
-
 }

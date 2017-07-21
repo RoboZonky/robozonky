@@ -48,5 +48,4 @@ public class MyInvestment extends BaseInvestment {
     public OffsetDateTime getTimeCreated() {
         return timeCreated;
     }
-
 }

@@ -64,5 +64,4 @@ public class ZonkoidSettingsValidator extends AbstractValidator {
         return "Došlo k chybě při kontaktování serveru Zonkoid. " +
                 "Budete-li pokračovat, mobilní notifikace nemusí fungovat správně.";
     }
-
 }

@@ -28,7 +28,6 @@ public class IOUtils {
 
     /**
      * Convert a Reader to a String.
-     *
      * @param reader Reader to convert. Will be closed by the end.
      * @return Contents of the Reader. Newlines will be replaced by {@link System#lineSeparator()}.
      */
@@ -39,5 +38,4 @@ public class IOUtils {
             throw new IllegalStateException("Failed converting Reader to String.", ex);
         }
     }
-
 }

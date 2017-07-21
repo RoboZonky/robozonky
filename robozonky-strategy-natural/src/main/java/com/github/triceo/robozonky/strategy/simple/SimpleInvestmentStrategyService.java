@@ -60,7 +60,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     private static int getInvestmentShare(final ImmutableConfiguration config) {
         return Stream.of(Rating.values())
                 .mapToInt(r ->
-                        SimpleInvestmentStrategyService.getShare(config, StrategyFileProperty.MAXIMUM_LOAN_SHARE, r))
+                                  SimpleInvestmentStrategyService.getShare(config,
+                                                                           StrategyFileProperty.MAXIMUM_LOAN_SHARE, r))
                 .distinct()
                 .min() // natural strategy only allows for one such value; let's pick the smallest available for safety
                 .orElseThrow(() -> new IllegalStateException("Maximum loan share is missing"));
@@ -105,19 +106,19 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
                     final int min = StrategyFileProperty.MINIMUM_TERM.getValue(r, config::getInt);
                     return new LoanTermCondition(0, Math.max(0, min - 1)); // <0; 0> is not a problem
                 }).map(condition -> {
-                    final MarketplaceFilter f = new MarketplaceFilter();
-                    f.ignoreWhen(Collections.singleton(condition));
-                    return f;
-                }).forEach(filters::add);
+            final MarketplaceFilter f = new MarketplaceFilter();
+            f.ignoreWhen(Collections.singleton(condition));
+            return f;
+        }).forEach(filters::add);
         Stream.of(Rating.values()) // filter loans with more than maximum term
                 .map(r -> {
                     final int max = StrategyFileProperty.MAXIMUM_TERM.getValue(r, config::getInt);
                     return new LoanTermCondition(max + 1);
                 }).map(condition -> {
-                    final MarketplaceFilter f = new MarketplaceFilter();
-                    f.ignoreWhen(Collections.singleton(condition));
-                    return f;
-                }).forEach(filters::add);
+            final MarketplaceFilter f = new MarketplaceFilter();
+            f.ignoreWhen(Collections.singleton(condition));
+            return f;
+        }).forEach(filters::add);
         Stream.of(Rating.values()) // filter loans with ask for less than minimum
                 .map(r -> {
                     final int min = StrategyFileProperty.MINIMUM_ASK.getValue(r, config::getInt);

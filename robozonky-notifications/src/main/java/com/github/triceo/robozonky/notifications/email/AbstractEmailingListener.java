@@ -88,7 +88,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
         this.emailsOfThisType = new Counter(this.getClass().getSimpleName(),
-                properties.getListenerSpecificHourlyEmailLimit());
+                                            properties.getListenerSpecificHourlyEmailLimit());
     }
 
     boolean shouldSendEmail(final T event) {
@@ -119,20 +119,22 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         if (!this.shouldSendEmail(event)) {
             LOGGER.debug("Will not send e-mail.");
             return;
-        } else try {
-            final Email email = AbstractEmailingListener.createNewEmail(properties);
-            email.setSubject(this.getSubject(event));
-            email.setMsg(TemplateProcessor.INSTANCE.process(this.getTemplateFileName(), this.getData(event, sessionInfo)));
-            LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.",
-                    email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
-                    email.getSmtpPort(), properties.getSmtpUsername());
-            email.send();
-            emailsOfThisType.increase();
-            this.properties.getGlobalCounter().increase();
-        } catch (final Exception ex) {
-            throw new RuntimeException("Failed processing event.", ex);
+        } else {
+            try {
+                final Email email = AbstractEmailingListener.createNewEmail(properties);
+                email.setSubject(this.getSubject(event));
+                email.setMsg(
+                        TemplateProcessor.INSTANCE.process(this.getTemplateFileName(),
+                                                           this.getData(event, sessionInfo)));
+                LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.",
+                             email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
+                             email.getSmtpPort(), properties.getSmtpUsername());
+                email.send();
+                emailsOfThisType.increase();
+                this.properties.getGlobalCounter().increase();
+            } catch (final Exception ex) {
+                throw new RuntimeException("Failed processing event.", ex);
+            }
         }
-
     }
-
 }

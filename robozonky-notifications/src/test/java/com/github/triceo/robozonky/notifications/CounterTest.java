@@ -46,5 +46,4 @@ public class CounterTest extends AbstractStateLeveragingTest {
             Assertions.fail("Did not reset counter in time.");
         }
     }
-
 }

@@ -30,5 +30,4 @@ class DaemonModeMarketplaceCommandLineFragment extends MarketplaceCommandLineFra
     public TemporalAmount getDelayBetweenChecks() {
         return Duration.ofSeconds(delayBetweenChecks);
     }
-
 }

@@ -39,5 +39,4 @@ public class VeryShortStoryConditionTest {
         Mockito.when(l.getStory()).thenReturn(story);
         Assertions.assertThat(new VeryShortStoryCondition().test(l)).isTrue();
     }
-
 }

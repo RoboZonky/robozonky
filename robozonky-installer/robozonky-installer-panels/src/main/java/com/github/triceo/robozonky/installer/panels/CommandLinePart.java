@@ -37,7 +37,6 @@ public class CommandLinePart {
     private final Map<String, String> environmentVariables = new LinkedHashMap<>();
     private final Map<String, Optional<String>> jvmArguments = new LinkedHashMap<>();
 
-
     public CommandLinePart setOption(final String key, final String... value) {
         this.options.put(key, Collections.unmodifiableCollection(Arrays.asList(value)));
         return this;

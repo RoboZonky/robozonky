@@ -59,7 +59,6 @@ public class KeyStoreHandler {
 
     /**
      * Create brand new key store protected by a given password, and store it in a file.
-     *
      * @param keyStoreFile The file where the key store should be.
      * @param password Password to protect the key store.
      * @return Freshly instantiated key store, in a newly created file.
@@ -89,7 +88,6 @@ public class KeyStoreHandler {
 
     /**
      * Open an existing key store, protected by a given password.
-     *
      * @param keyStoreFile The file where the key store is.
      * @param password Password that protects the key store.
      * @return Key store that previously existed.
@@ -122,7 +120,6 @@ public class KeyStoreHandler {
 
     /**
      * Create a new instance, where {@link #isDirty()} will be false.
-     *
      * @param keyStore KeyStore to use as the backend.
      * @param password Password to protect the keys.
      * @param keyStoreFile File that will represent the keystore.
@@ -145,7 +142,6 @@ public class KeyStoreHandler {
 
     /**
      * Set a key in the key store. Uses {@link SecretKey} as the implementation. Overwrites previous contents, if any.
-     *
      * @param alias Alias to store the key under.
      * @param value The value to be stored.
      * @return True if stored in the key store.
@@ -165,18 +161,18 @@ public class KeyStoreHandler {
 
     /**
      * Retrieve a previously stored key.
-     *
      * @param alias The alias under which the key will be looked up.
      * @return Present if the alias is present in the key store.
      */
     public Optional<char[]> get(final String alias) {
         try {
             final KeyStore.SecretKeyEntry skEntry =
-                    (KeyStore.SecretKeyEntry)this.keyStore.getEntry(alias, this.protectionParameter);
+                    (KeyStore.SecretKeyEntry) this.keyStore.getEntry(alias, this.protectionParameter);
             if (skEntry == null) {
                 return Optional.empty();
             }
-            final PBEKeySpec keySpec = (PBEKeySpec)this.keyFactory.getKeySpec(skEntry.getSecretKey(), PBEKeySpec.class);
+            final PBEKeySpec keySpec = (PBEKeySpec) this.keyFactory.getKeySpec(skEntry.getSecretKey(),
+                                                                               PBEKeySpec.class);
             return Optional.of(keySpec.getPassword());
         } catch (final NoSuchAlgorithmException | KeyStoreException | InvalidKeySpecException ex) {
             throw new IllegalStateException("Should not happen.", ex);
@@ -188,7 +184,6 @@ public class KeyStoreHandler {
 
     /**
      * Remove an entry from the key store.
-     *
      * @param alias The alias to locate the entry.
      * @return True if there is now no entry with a given key.
      */
@@ -214,7 +209,6 @@ public class KeyStoreHandler {
     /**
      * Persist whatever operations that have been made using this API. Unless this method is called, no other methods
      * have effect.
-     *
      * @throws IOException If saving the key store failed.
      */
     public void save() throws IOException {
@@ -227,5 +221,4 @@ public class KeyStoreHandler {
             }
         }
     }
-
 }

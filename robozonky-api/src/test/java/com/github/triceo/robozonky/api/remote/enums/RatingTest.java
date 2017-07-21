@@ -21,5 +21,4 @@ public class RatingTest extends AbstractBaseEnumTest {
     public RatingTest() {
         super(Rating::values, Rating::findByCode);
     }
-
 }

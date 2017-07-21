@@ -85,7 +85,6 @@ public class Checker {
                 .orElse(Optional.of(false));
     }
 
-
     public static boolean notifications(final String username) {
         return Checker.notifications(username, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
@@ -93,8 +92,8 @@ public class Checker {
     public static boolean notifications(final String username,
                                         final List<Refreshable<EventListener<RoboZonkyTestingEvent>>> refreshables) {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
-                        .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
-                        .collect(Collectors.toSet());
+                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
+                .collect(Collectors.toSet());
         if (listeners.size() > 0) {
             final SessionInfo sessionInfo = new SessionInfo(username);
             final RoboZonkyTestingEvent evt = new RoboZonkyTestingEvent();
@@ -104,5 +103,4 @@ public class Checker {
             return false;
         }
     }
-
 }

@@ -64,5 +64,4 @@ public class StrategySettingsValidator extends AbstractValidator {
     public String getWarningMessageId() {
         return "Zadaná strategie neexistuje. RoboZonky nemusí fungovat správně.";
     }
-
 }

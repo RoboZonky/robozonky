@@ -72,7 +72,7 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
         final StringJoiner joiner = new StringJoiner(UpdateMonitor.URL_SEPARATOR);
         joiner.add("https://repo1.maven.org/maven2");
         joiner.add(Arrays.stream(UpdateMonitor.PATTERN_DOT.split(groupId))
-                .collect(Collectors.joining(UpdateMonitor.URL_SEPARATOR)));
+                           .collect(Collectors.joining(UpdateMonitor.URL_SEPARATOR)));
         joiner.add(artifactId);
         joiner.add("maven-metadata.xml");
         return new URL(joiner.toString()).openStream();
@@ -125,7 +125,7 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
         final XPathFactory xPathfactory = XPathFactory.newInstance();
         final XPath xpath = xPathfactory.newXPath();
         final XPathExpression expr = xpath.compile("/metadata/versioning/versions/version");
-        return UpdateMonitor.parseNodeList((NodeList)expr.evaluate(doc, XPathConstants.NODESET));
+        return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
     }
 
     private final String groupId, artifactId;
@@ -164,5 +164,4 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
             return Optional.empty();
         }
     }
-
 }

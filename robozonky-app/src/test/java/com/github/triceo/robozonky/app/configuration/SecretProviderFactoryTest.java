@@ -53,5 +53,4 @@ public class SecretProviderFactoryTest {
         final CommandLine cli = SecretProviderFactoryTest.mockCli("user", null, "pass".toCharArray());
         Assertions.assertThat(SecretProviderFactory.getFallbackSecretProvider(cli)).isNotEmpty();
     }
-
 }

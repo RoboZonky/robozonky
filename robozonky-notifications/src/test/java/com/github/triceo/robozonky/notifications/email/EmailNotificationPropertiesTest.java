@@ -47,7 +47,8 @@ public class EmailNotificationPropertiesTest {
 
     @Before
     public void prepareBackupConfig() throws Exception {
-        Files.write(RefreshableEmailNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath(), "enabled = false".getBytes());
+        Files.write(RefreshableEmailNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath(),
+                    "enabled = false".getBytes());
     }
 
     @After
@@ -57,7 +58,8 @@ public class EmailNotificationPropertiesTest {
 
     @Test
     public void wrongPropertiesUrlReadsPropertyFile() {
-        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "wrongprotocol://somewhere");
+        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                           "wrongprotocol://somewhere");
         final Optional<EmailNotificationProperties> np = EmailNotificationPropertiesTest.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isFalse();
@@ -66,7 +68,7 @@ public class EmailNotificationPropertiesTest {
     @Test
     public void correctUrlIgnoresPropertyFile() {
         System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                EmailNotificationPropertiesTest.CONFIG_ENABLED.toString());
+                           EmailNotificationPropertiesTest.CONFIG_ENABLED.toString());
         final Optional<EmailNotificationProperties> np = EmailNotificationPropertiesTest.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isTrue();
@@ -75,10 +77,9 @@ public class EmailNotificationPropertiesTest {
     @Test
     public void windowsEncoding() {
         System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                EmailNotificationPropertiesTest.WINDOWS_ENCODED.toString());
+                           EmailNotificationPropertiesTest.WINDOWS_ENCODED.toString());
         final Optional<EmailNotificationProperties> np = EmailNotificationPropertiesTest.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isTrue();
     }
-
 }

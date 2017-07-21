@@ -54,11 +54,10 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
      * accept {@link InstallData}, Picocontainer would have thrown some weird exception.
-     *
+     * <p>
      * Therefore we share the data this way - through the last panel before the actual installation starts.
-     *
+     * <p>
      * See more at https://izpack.atlassian.net/browse/IZPACK-1403.
-     *
      * @param data Installer data to store.
      */
     static void setInstallData(final InstallData data) {
@@ -71,7 +70,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         SETTINGS_FILE = new File(INSTALL_PATH, "robozonky.properties");
         CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
         LOGBACK_CONFIG_FILE = new File(INSTALL_PATH, "logback.xml");
-
     }
 
     static void resetInstallData() {
@@ -141,7 +139,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final String port = Variables.JMX_PORT.getValue(DATA);
         final Properties props = new Properties();
         props.setProperty("com.sun.management.jmxremote.authenticate",
-                Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA));
+                          Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA));
         props.setProperty("com.sun.management.jmxremote.ssl", "false");
         props.setProperty("com.sun.management.jmxremote.rmi.port", port);
         props.setProperty("com.sun.management.jmxremote.port", port);
@@ -264,14 +262,14 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     private Collection<String> getWindowsScript(final CommandLinePart commandLine) {
         return this.getCommonScript(commandLine, (s, s2) -> "set \"" + s + "=" + s2 + "\"",
-                "set \"JAVA_OPTS=%JAVA_OPTS% ", "robozonky.bat");
+                                    "set \"JAVA_OPTS=%JAVA_OPTS% ", "robozonky.bat");
     }
 
     private Collection<String> getUnixScript(final CommandLinePart commandLine) {
         final Collection<String> result = new ArrayList<>();
         result.add("#!/bin/bash");
         result.addAll(this.getCommonScript(commandLine, (s, s2) -> s + "=\"" + s2 + "\"", "JAVA_OPTS=\"$JAVA_OPTS ",
-                "robozonky.sh"));
+                                           "robozonky.sh"));
         return result;
     }
 

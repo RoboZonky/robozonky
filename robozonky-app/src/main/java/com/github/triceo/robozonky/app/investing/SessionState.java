@@ -107,7 +107,4 @@ class SessionState {
         this.seenLoans.add(loan);
         SessionState.writeSeenInvestments(this.seenLoans);
     }
-
-
-
 }

@@ -38,6 +38,7 @@ final class ProxyFactory {
 
     private static final Feature CACHE = new BrowserCacheFeature();
     private static final ResteasyProviderFactory RESTEASY = ResteasyProviderFactory.getInstance();
+
     static {
         RegisterBuiltin.register(ProxyFactory.RESTEASY);
         final Class<?> jsonProvider = ResteasyJackson2Provider.class;
@@ -45,13 +46,15 @@ final class ProxyFactory {
             ProxyFactory.RESTEASY.registerProvider(jsonProvider);
         }
     }
+
     private static final HttpClientConnectionManager CONNECTION_MANAGER = new PoolingHttpClientConnectionManager();
     private static final RequestConfig REQUEST_CONFIG = RequestConfig.copy(RequestConfig.DEFAULT)
             .setRedirectsEnabled(true)
             .setRelativeRedirectsAllowed(true)
-            .setConnectTimeout((int)(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
-            .setConnectionRequestTimeout((int)(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
-            .setSocketTimeout((int)(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .setConnectTimeout((int) (Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .setConnectionRequestTimeout(
+                    (int) (Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .setSocketTimeout((int) (Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000)
             .build();
     private static final HttpClientBuilder CLIENT_BUILDER = HttpClientBuilder.create()
             .setRedirectStrategy(LaxRedirectStrategy.INSTANCE) // be tolerant of unexpected situations
@@ -77,5 +80,4 @@ final class ProxyFactory {
     public static <T> T newProxy(final ResteasyClient client, final Class<T> api, final String url) {
         return client.target(url).register(ProxyFactory.CACHE).proxy(api);
     }
-
 }

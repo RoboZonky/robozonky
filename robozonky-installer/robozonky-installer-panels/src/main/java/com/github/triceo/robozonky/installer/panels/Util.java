@@ -77,5 +77,4 @@ class Util {
     public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
         source.getOptions().forEach((k, v) -> target.setOption(k, v.toArray(new String[v.size()])));
     }
-
 }

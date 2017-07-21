@@ -50,5 +50,4 @@ public class StrategyBasedInvestmentCommandTest extends AbstractInvestingTest {
             softly.assertThat(events.get(1)).isInstanceOf(StrategyCompletedEvent.class);
         });
     }
-
 }

@@ -84,5 +84,4 @@ abstract class OperatingMode implements CommandLineFragment {
     public String toString() {
         return new ToStringBuilder(this).toString();
     }
-
 }

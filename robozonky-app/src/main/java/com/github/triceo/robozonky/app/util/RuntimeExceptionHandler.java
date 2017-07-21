@@ -42,5 +42,4 @@ public abstract class RuntimeExceptionHandler {
     public void handle(final Throwable t) {
         getHandler(t).accept(t);
     }
-
 }

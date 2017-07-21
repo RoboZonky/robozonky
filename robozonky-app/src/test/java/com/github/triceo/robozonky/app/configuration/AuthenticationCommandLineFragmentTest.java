@@ -78,5 +78,4 @@ public class AuthenticationCommandLineFragmentTest {
         Assertions.assertThat(fragment.createAuthenticationHandler(SecretProvider.fallback("username", new char[0])))
                 .isNotNull();
     }
-
 }

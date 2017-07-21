@@ -24,5 +24,4 @@ abstract class AbstractCommandLineFragment implements CommandLineFragment {
     public final String toString() {
         return new ToStringBuilder(this).toString();
     }
-
 }

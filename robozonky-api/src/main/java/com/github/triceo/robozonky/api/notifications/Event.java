@@ -22,7 +22,7 @@ import com.github.triceo.robozonky.internal.api.ToStringBuilder;
 
 /**
  * Mandatory parent for any event that may be fired any time during RoboZonky's runtime.
- *
+ * <p>
  * Subclasses must make sure that their class name ends with "Event", or else the default constructor of this class
  * will throw an exception.
  */
@@ -44,5 +44,4 @@ public abstract class Event {
     public final String toString() {
         return new ToStringBuilder(this).toString();
     }
-
 }

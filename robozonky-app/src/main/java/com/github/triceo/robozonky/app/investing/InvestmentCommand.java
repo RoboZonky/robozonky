@@ -24,5 +24,4 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 interface InvestmentCommand extends Consumer<Session> {
 
     Collection<LoanDescriptor> getLoans();
-
 }

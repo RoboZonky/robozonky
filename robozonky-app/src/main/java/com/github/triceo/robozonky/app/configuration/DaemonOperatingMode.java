@@ -46,14 +46,14 @@ class DaemonOperatingMode extends OperatingMode {
                 RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
         final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
         final Credentials cred = new Credentials(marketplaceFragment.getMarketplaceCredentials(),
-                auth.getSecretProvider());
+                                                 auth.getSecretProvider());
         return MarketplaceLoader.load(cred)
                 .map(marketplace -> {
                     final InvestmentMode m = new DaemonInvestmentMode(auth, builder, fragment.isFaultTolerant(),
-                            marketplace, strategy, marketplaceFragment.getMaximumSleepDuration(),
-                            marketplaceFragment.getDelayBetweenChecks());
+                                                                      marketplace, strategy,
+                                                                      marketplaceFragment.getMaximumSleepDuration(),
+                                                                      marketplaceFragment.getDelayBetweenChecks());
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }
-
 }

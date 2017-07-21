@@ -59,7 +59,6 @@ public final class Recommendation {
     }
 
     /**
-     *
      * @return The amount recommended to invest.
      */
     public int getRecommendedInvestmentAmount() {

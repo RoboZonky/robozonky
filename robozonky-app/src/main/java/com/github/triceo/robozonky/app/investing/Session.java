@@ -58,10 +58,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
  * given marketplace.
- *
+ * <p>
  * Instances of this class are supposed to be short-lived, as the marketplace and Zonky account balance can change
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
- *
  */
 class Session implements AutoCloseable {
 
@@ -70,16 +69,15 @@ class Session implements AutoCloseable {
 
     /**
      * Create a new instance of this class. Only one instance is expected to exist at a time.
-     *
+     * <p>
      * At any given time, there may only be 1 instance of this class that is being used. This is due to the fact that
      * the sessions share state through a file, and therefore multiple concurrent sessions would interfere with one
      * another.
-     *
      * @param investor Confirmation layer around the investment API.
      * @param api Authenticated access to Zonky for data retrieval.
      * @param marketplace Loans that are available in the marketplace.
-     * @throws IllegalStateException When another {@link Session} instance was not {@link #close()}d.
      * @return
+     * @throws IllegalStateException When another {@link Session} instance was not {@link #close()}d.
      */
     public synchronized static Session create(final Investor.Builder investor, final Zonky api,
                                               final Collection<LoanDescriptor> marketplace) {
@@ -110,9 +108,11 @@ class Session implements AutoCloseable {
             }
             final PortfolioOverview portfolio = session.getPortfolioOverview();
             Session.LOGGER.info("Current value of portfolio is {} CZK, annual expected yield is {} % ({} CZK).",
-                    portfolio.getCzkInvested(),
-                    portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2, RoundingMode.HALF_EVEN),
-                    portfolio.getCzkExpectedYield());
+                                portfolio.getCzkInvested(),
+                                portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2,
+                                                                                                   RoundingMode
+                                                                                                           .HALF_EVEN),
+                                portfolio.getCzkExpectedYield());
             final Collection<Investment> result = session.getInvestmentsMade();
             Events.fire(new ExecutionCompletedEvent(result, portfolio.getCzkAvailable()));
             return Collections.unmodifiableCollection(result);
@@ -120,19 +120,19 @@ class Session implements AutoCloseable {
     }
 
     /**
-     * Blocked amounts represent marketplace in various stages. Either the user has invested and the loan has not yet been
+     * Blocked amounts represent marketplace in various stages. Either the user has invested and the loan has not yet
+     * been
      * funded to 100 % ("na tržišti"), or the user invested and the loan has been funded ("na cestě"). In the latter
      * case, the loan has already disappeared from the marketplace, which means that it will not be available for
      * investing any more. As far as I know, the next stage is "v pořádku", the blocked amount is cleared and the loan
      * becomes an active investment.
-     *
+     * <p>
      * Based on that, this method deals with the first case - when the loan is still available for investing, but we've
      * already invested as evidenced by the blocked amount. It also unnecessarily deals with the second case, since
      * that is represented by a blocked amount as well. But that does no harm.
-     *
+     * <p>
      * In case user has made repeated investments into a particular loan, this will show up as multiple blocked amounts.
      * The method needs to handle this as well.
-     *
      * @param api Authenticated Zonky API to read data from.
      * @return Every blocked amount represents a future investment. This method returns such investments.
      */
@@ -142,13 +142,13 @@ class Session implements AutoCloseable {
                 api.getBlockedAmounts()
                         .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
                         .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
-                                Collectors.summingInt(BlockedAmount::getAmount)));
+                                                       Collectors.summingInt(BlockedAmount::getAmount)));
         // and then fetch all the marketplace in parallel, converting them into investments
         return amountsBlockedByLoans.entrySet().parallelStream()
                 .map(entry ->
-                        Retriever.retrieve(() -> Optional.of(api.getLoan(entry.getKey())))
-                                .map(l -> new Investment(l, entry.getValue()))
-                                .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
+                             Retriever.retrieve(() -> Optional.of(api.getLoan(entry.getKey())))
+                                     .map(l -> new Investment(l, entry.getValue()))
+                                     .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
                 ).collect(Collectors.toList());
     }
 
@@ -183,7 +183,6 @@ class Session implements AutoCloseable {
             protected Optional<PortfolioOverview> transform(final String source) {
                 return Optional.of(PortfolioOverview.calculate(balance, stats, allInvestments));
             }
-
         };
         portfolioOverview.run(); // load initial portfolio overview so that strategy can use it
     }
@@ -197,7 +196,6 @@ class Session implements AutoCloseable {
 
     /**
      * Get information about the portfolio, which is up to date relative to the current point in the session.
-     *
      * @return Portfolio.
      */
     public synchronized PortfolioOverview getPortfolioOverview() {
@@ -205,9 +203,9 @@ class Session implements AutoCloseable {
     }
 
     /**
-     * Get marketplace that are available to be evaluated by the strategy. These are marketplace that come from the marketplace,
+     * Get marketplace that are available to be evaluated by the strategy. These are marketplace that come from the
+     * marketplace,
      * minus marketplace that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
-     *
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
     public synchronized Collection<LoanDescriptor> getAvailableLoans() {
@@ -216,7 +214,6 @@ class Session implements AutoCloseable {
 
     /**
      * Get investments made during this session.
-     *
      * @return Investments made so far during this session. Unmodifiable.
      */
     public synchronized List<Investment> getInvestmentsMade() {
@@ -225,7 +222,6 @@ class Session implements AutoCloseable {
 
     /**
      * Request {@link ControlApi} to invest in a given loan, leveraging the {@link ConfirmationProvider}.
-     *
      * @param recommendation Loan to invest into.
      * @return True if investment successful. The investment is reflected in {@link #getInvestmentsMade()}.
      * @throws IllegalStateException When already {@link #close()}d.
@@ -303,5 +299,4 @@ class Session implements AutoCloseable {
     public synchronized void close() {
         Session.INSTANCE.set(null); // the session can no longer be used
     }
-
 }

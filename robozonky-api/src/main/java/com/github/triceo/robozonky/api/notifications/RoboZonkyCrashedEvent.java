@@ -40,5 +40,4 @@ public final class RoboZonkyCrashedEvent extends Event {
     public Optional<Throwable> getCause() {
         return Optional.ofNullable(this.cause);
     }
-
 }

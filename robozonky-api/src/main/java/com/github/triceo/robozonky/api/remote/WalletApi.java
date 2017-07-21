@@ -36,7 +36,6 @@ public interface WalletApi extends EntityCollectionApi<BlockedAmount> {
 
     /**
      * Retrieve blocked amounts from user's wallet.
-     *
      * @return Zonky API will only return the first page of results. (20 items?) Use pagination API to retrieve more
      * than that.
      */
@@ -44,5 +43,4 @@ public interface WalletApi extends EntityCollectionApi<BlockedAmount> {
     @Path("blocked-amounts")
     @Override
     List<BlockedAmount> items();
-
 }

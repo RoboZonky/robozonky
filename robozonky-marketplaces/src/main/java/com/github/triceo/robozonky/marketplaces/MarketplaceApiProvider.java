@@ -27,12 +27,10 @@ class MarketplaceApiProvider extends ApiProvider {
 
     /**
      * Retrieve Zotify's marketplace cache.
-     *
      * @return New API instance.
      */
     @Override
     public Collection<Loan> marketplace() {
         return this.marketplace(ZotifyApi.class, MarketplaceApiProvider.ZOTIFY_URL);
     }
-
 }

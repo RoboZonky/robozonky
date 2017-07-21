@@ -50,5 +50,4 @@ abstract class AbstractRangeCondition extends MarketplaceFilterCondition {
         final BigDecimal target = AbstractRangeCondition.toBigDecimal(targetAccessor.apply(loan));
         return target.compareTo(minInclusive) >= 0 && target.compareTo(maxInclusive) <= 0;
     }
-
 }

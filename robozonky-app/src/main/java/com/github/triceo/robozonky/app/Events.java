@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Used for registering distributing events to listener registered through {@link ListenerService}.
- *
+ * <p>
  * No guarantees are given as to the order in which the listeners will be executed.
  */
 public enum Events {
@@ -63,7 +63,6 @@ public enum Events {
         public Collection<Refreshable<EventListener<E>>> getListeners() {
             return Collections.unmodifiableSet(new HashSet<>(this.listeners)); // defensive copy
         }
-
     }
 
     private static <E extends Event> void fire(final E event, final EventListener<E> listener, final SessionInfo info) {
@@ -105,11 +104,10 @@ public enum Events {
     /**
      * Distribute a particular event to all listeners that have been added and not yet removed for that particular
      * event. This MUST NOT be called by users and is not part of the public API.
-     *
+     * <p>
      * The listeners may be executed in parallel, no execution order guarantees are given. When this method returns,
      * all listeners' {@link EventListener#handle(Event, SessionInfo)} method will have returned. Will use the
      * internal {@link SessionInfo} instance for that.
-     *
      * @param event Event to distribute.
      * @param sessionInfo If not null, internal {@link SessionInfo} instance will be updated.
      * @param <E> Event type to distribute.
@@ -131,12 +129,11 @@ public enum Events {
     /**
      * Distribute a particular event to all listeners that have been added and not yet removed for that particular
      * event. This MUST NOT be called by users and is not part of the public API.
-     *
+     * <p>
      * The listeners may be executed in parallel, no execution order guarantees are given. When this method returns,
      * all listeners' {@link EventListener#handle(Event, SessionInfo)} method will have returned.
-     *
+     * <p>
      * This method will not update the internal {@link SessionInfo} instance.
-     *
      * @param event Event to distribute.
      * @param <E> Event type to distribute.
      */
@@ -147,7 +144,6 @@ public enum Events {
 
     /**
      * This only exists for testing purposes. Also see {@link Settings#isDebugEventStorageEnabled()}.
-     *
      * @return Events that were stored, if any. Returns the storage directly, any mutation operations will mutate the
      * storage.
      */

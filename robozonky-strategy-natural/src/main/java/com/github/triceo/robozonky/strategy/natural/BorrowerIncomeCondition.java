@@ -24,5 +24,4 @@ class BorrowerIncomeCondition extends AbstractEnumeratedCondition<MainIncomeType
     public BorrowerIncomeCondition() {
         super(Loan::getMainIncomeType);
     }
-
 }

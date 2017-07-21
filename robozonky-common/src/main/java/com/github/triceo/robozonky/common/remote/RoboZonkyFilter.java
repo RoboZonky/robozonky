@@ -35,10 +35,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Decorates the request with User-Agent and adds some simple request logging.
- *
+ * <p>
  * If ever a filter is needed for JAX-RS communication, this class should serve as the base class for that filter.
  */
-public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilter {
+public class RoboZonkyFilter implements ClientRequestFilter,
+                                        ClientResponseFilter {
 
     // not static, so that filters extending this one get the proper logger class
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -82,8 +83,8 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
     public void filter(final ClientRequestContext clientRequestContext,
                        final ClientResponseContext clientResponseContext) throws IOException {
         this.logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
-                clientRequestContext.getUri(), clientResponseContext.getStatus(),
-                clientResponseContext.getStatusInfo().getReasonPhrase());
+                          clientRequestContext.getUri(), clientResponseContext.getStatus(),
+                          clientResponseContext.getStatusInfo().getReasonPhrase());
         if (Settings.INSTANCE.isDebugHttpResponseLoggingEnabled() && clientResponseContext.hasEntity()) {
             final StringBuilder b = new StringBuilder();
             final InputStream s = RoboZonkyFilter.logInboundEntity(b, clientResponseContext.getEntityStream());
@@ -94,5 +95,4 @@ public class RoboZonkyFilter implements ClientRequestFilter, ClientResponseFilte
                 .filter(e -> e.getValue().size() > 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
     }
-
 }

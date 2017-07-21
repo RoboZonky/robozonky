@@ -50,5 +50,4 @@ public class EmailListenerServiceTest extends AbstractListenerTest {
     public void reportingEnabledHaveListeners() {
         Assertions.assertThat(getListener(this.event.getClass()).getLatest()).isPresent();
     }
-
 }

@@ -78,5 +78,4 @@ class Investments implements InvestmentsMBean {
         this.successfulInvestments.clear();
         this.lastInvestmentRunTimestamp = null;
     }
-
 }

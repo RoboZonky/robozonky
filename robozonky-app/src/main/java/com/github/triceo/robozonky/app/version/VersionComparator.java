@@ -24,7 +24,8 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 /**
  * Uses Maven's {@link ComparableVersion} to ensure 100 % compatibility with Maven versioning scheme.
  */
-class VersionComparator implements Comparator<String>, Serializable {
+class VersionComparator implements Comparator<String>,
+                                   Serializable {
 
     private static final long serialVersionUID = -4138266839888566436L;
 
@@ -39,5 +40,4 @@ class VersionComparator implements Comparator<String>, Serializable {
     public int compare(final String s1, final String s2) {
         return new ComparableVersion(s1).compareTo(new ComparableVersion(s2));
     }
-
 }

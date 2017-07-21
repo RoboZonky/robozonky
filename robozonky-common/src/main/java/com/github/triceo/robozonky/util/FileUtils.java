@@ -60,9 +60,7 @@ public class FileUtils {
                         FileUtils.LOGGER.debug("Skipping file: '{}'.", f, e);
                         return Optional.empty();
                     }
-                }).flatMap(o -> o.map(u -> Stream.of((URL)u)).orElse(Stream.empty()))
+                }).flatMap(o -> o.map(u -> Stream.of((URL) u)).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
     }
-
-
 }

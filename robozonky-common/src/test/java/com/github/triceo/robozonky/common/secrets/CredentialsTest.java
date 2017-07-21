@@ -50,5 +50,4 @@ public class CredentialsTest {
         final String wrong = "zonkoid:password:extra";
         Assertions.assertThatThrownBy(() -> new Credentials(wrong, null)).isInstanceOf(IllegalArgumentException.class);
     }
-
 }

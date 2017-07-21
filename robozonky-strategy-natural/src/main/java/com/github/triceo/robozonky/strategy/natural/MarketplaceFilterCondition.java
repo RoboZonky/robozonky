@@ -30,7 +30,6 @@ public abstract class MarketplaceFilterCondition implements Predicate<Loan> {
 
     /**
      * Describe the condition using eg. range boundaries.
-     *
      * @return If present, is a whole sentence. (Starting with capital letter, ending with a full stop.)
      */
     protected Optional<String> getDescription() {
@@ -39,7 +38,6 @@ public abstract class MarketplaceFilterCondition implements Predicate<Loan> {
 
     /**
      * Determine whether or not the loan in question matches the condition represented by this class.
-     *
      * @param loan Loan in question.
      * @return True if loan matches the condition.
      */
@@ -53,5 +51,4 @@ public abstract class MarketplaceFilterCondition implements Predicate<Loan> {
         final String description = getDescription().orElse("N/A.");
         return this.getClass().getSimpleName() + " (" + description + ")";
     }
-
 }

@@ -33,5 +33,4 @@ class RoboZonkyEndingEventListener extends AbstractEmailingListener<RoboZonkyEnd
     String getTemplateFileName() {
         return "ending.ftl";
     }
-
 }

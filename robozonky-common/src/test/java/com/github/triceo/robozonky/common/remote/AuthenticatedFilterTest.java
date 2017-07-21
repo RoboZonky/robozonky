@@ -29,7 +29,7 @@ import org.mockito.Mockito;
 public class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
     static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(), 300);
+                                                         UUID.randomUUID().toString(), 300);
 
     @Override
     protected RoboZonkyFilter getTestedFilter() {
@@ -44,5 +44,4 @@ public class AuthenticatedFilterTest extends AbstractCommonFilterTest {
         Assertions.assertThat(crc.getHeaders().getFirst("Authorization"))
                 .isEqualTo("Bearer " + String.valueOf(AuthenticatedFilterTest.TOKEN.getAccessToken()));
     }
-
 }

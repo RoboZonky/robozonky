@@ -48,11 +48,9 @@ public final class InvestmentMadeEvent extends Event {
     }
 
     /**
-     *
      * @return True if investment was only simulated.
      */
     public boolean isDryRun() {
         return dryRun;
     }
-
 }

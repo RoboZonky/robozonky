@@ -67,7 +67,7 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
             RuleBasedInvestmentStrategy.LOGGER.trace("Facts inserted into session.");
             session.fireAllRules();
             RuleBasedInvestmentStrategy.LOGGER.trace("Drools finished.");
-            return session.getObjects(o -> o instanceof ProcessedLoan).stream().map(o -> (ProcessedLoan)o);
+            return session.getObjects(o -> o instanceof ProcessedLoan).stream().map(o -> (ProcessedLoan) o);
         } finally { // prevent session leaks in case anything goes wrong
             session.dispose();
             RuleBasedInvestmentStrategy.LOGGER.trace("Session disposed.");
@@ -80,7 +80,9 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
                                            final PortfolioOverview portfolio) {
         final Stream<ProcessedLoan> processedLoanStream = processloans(availableLoans, portfolio);
         final Map<ProcessedLoan, LoanDescriptor> map = processedLoanStream.collect(Collectors.toMap(Function.identity(),
-                l -> RuleBasedInvestmentStrategy.matchLoan(l, availableLoans)));
+                                                                                                    l -> RuleBasedInvestmentStrategy.matchLoan(
+                                                                                                            l,
+                                                                                                            availableLoans)));
         return map.entrySet().stream()
                 .sorted(Comparator.comparing(Map.Entry::getKey)) // maintain rule-based loan priority
                 .map(e -> {
@@ -94,5 +96,4 @@ class RuleBasedInvestmentStrategy implements InvestmentStrategy {
                                           final PortfolioOverview portfolio) {
         return evaluate(availableLoans, portfolio).collect(Collectors.toList());
     }
-
 }

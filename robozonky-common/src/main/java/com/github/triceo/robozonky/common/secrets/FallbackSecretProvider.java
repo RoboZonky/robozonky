@@ -61,7 +61,7 @@ final class FallbackSecretProvider implements SecretProvider {
     @Override
     public Optional<Reader> getToken() {
         return FallbackSecretProvider.STATE.getValue(FallbackSecretProvider.TOKEN_STATE_ID)
-                .map(o -> Optional.of((Reader)new StringReader(o)))
+                .map(o -> Optional.of((Reader) new StringReader(o)))
                 .orElse(Optional.empty());
     }
 
@@ -96,5 +96,4 @@ final class FallbackSecretProvider implements SecretProvider {
     public boolean isPersistent() {
         return false;
     }
-
 }

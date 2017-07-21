@@ -35,5 +35,4 @@ class ListenerSpecificNotificationProperties extends FileNotificationProperties 
     public OptionalInt getListenerSpecificIntProperty(final String property) {
         return this.getIntValue(FileNotificationProperties.getCompositePropertyName(this.listener, property));
     }
-
 }

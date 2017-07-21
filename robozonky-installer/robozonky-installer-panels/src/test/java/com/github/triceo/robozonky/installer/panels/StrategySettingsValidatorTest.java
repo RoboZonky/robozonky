@@ -139,5 +139,4 @@ public class StrategySettingsValidatorTest {
         // execute test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
     }
-
 }

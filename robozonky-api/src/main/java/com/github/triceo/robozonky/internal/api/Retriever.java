@@ -27,9 +27,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Use this to perform blocking operations inside {@link ForkJoinPool}s. All such operations will properly block,
  * spawning a new thread, instead of occupying the thread pool fully with operations that do nothing bug wait on I/O.
- *
+ * <p>
  * It will cache the first successful result of the operation, to be returned by all following calls.
- *
  * @param <T> The return type of the operation.
  */
 public class Retriever<T> implements ForkJoinPool.ManagedBlocker {
@@ -39,7 +38,6 @@ public class Retriever<T> implements ForkJoinPool.ManagedBlocker {
     /**
      * Block until the retriever finishes the blocking operation, calling it repeatedly until it either succeeds or
      * throws {@link InterruptedException}.
-     *
      * @param retriever Retriever in question.
      * @param <T> Return type of the blocking operation.
      * @return Empty if interrupted, or if the operation result was empty.
@@ -57,7 +55,6 @@ public class Retriever<T> implements ForkJoinPool.ManagedBlocker {
     /**
      * Block until the the blocking operation is finished, calling it repeatedly until it either succeeds or
      * throws {@link InterruptedException}.
-     *
      * @param toExecute Blocking operation in question.
      * @param <T> Return type of the blocking operation.
      * @return Empty if interrupted, or if the operation result was empty.

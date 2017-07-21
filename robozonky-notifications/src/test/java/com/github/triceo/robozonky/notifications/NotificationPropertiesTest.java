@@ -34,7 +34,6 @@ public class NotificationPropertiesTest {
         protected int getGlobalHourlyLimit() {
             return Integer.MAX_VALUE;
         }
-
     }
 
     @Test
@@ -63,5 +62,4 @@ public class NotificationPropertiesTest {
             softly.assertThat(tp).isNotEqualTo("");
         });
     }
-
 }

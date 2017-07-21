@@ -59,5 +59,4 @@ abstract class AbstractValidator implements DataValidator {
     public boolean getDefaultAnswer() {
         return false;
     }
-
 }

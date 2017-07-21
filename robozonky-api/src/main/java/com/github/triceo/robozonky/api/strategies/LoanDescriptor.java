@@ -53,7 +53,6 @@ public final class LoanDescriptor {
 
     /**
      * If protected by CAPTCHA, gives the first instant when the CAPTCHA protection is over.
-     *
      * @return Present if loan protected by CAPTCHA (= currently always), otherwise empty.
      */
     public Optional<OffsetDateTime> getLoanCaptchaProtectionEndDateTime() {
@@ -72,7 +71,7 @@ public final class LoanDescriptor {
             return Optional.of(new Recommendation(this, amount, confirmationRequired));
         } else {
             LoanDescriptor.LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
-                    loan.getRemainingInvestment(), loan.getId());
+                                       loan.getRemainingInvestment(), loan.getId());
             return Optional.empty();
         }
     }
@@ -110,5 +109,4 @@ public final class LoanDescriptor {
     public int hashCode() {
         return Objects.hash(loan);
     }
-
 }

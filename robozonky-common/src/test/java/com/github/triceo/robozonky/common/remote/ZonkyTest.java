@@ -42,7 +42,7 @@ public class ZonkyTest {
         final PaginatedApi<T, S> api = Mockito.mock(PaginatedApi.class);
         final PaginatedResult<T> apiReturn = new PaginatedResult<>(Collections.emptyList(), 0, 0);
         Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt()))
+                                 ArgumentMatchers.anyInt()))
                 .thenReturn(apiReturn);
         return api;
     }
@@ -135,5 +135,4 @@ public class ZonkyTest {
             Assertions.assertThat(s).isNotNull();
         }
     }
-
 }

@@ -42,5 +42,4 @@ public class RetrieverTest {
             softly.assertThat(r.isReleasable()).isTrue();
         });
     }
-
 }

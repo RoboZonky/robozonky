@@ -35,7 +35,7 @@ public class AbstractMarketplaceTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getMarketplaces() {
-        return Arrays.asList(new Object[] {ZotifyMarketplace.class}, new Object[] {ZonkyMarketplace.class});
+        return Arrays.asList(new Object[]{ZotifyMarketplace.class}, new Object[]{ZonkyMarketplace.class});
     }
 
     @Parameterized.Parameter
@@ -55,5 +55,4 @@ public class AbstractMarketplaceTest {
                     .accept(ArgumentMatchers.argThat(argument -> argument != null && !argument.isEmpty()));
         }
     }
-
 }

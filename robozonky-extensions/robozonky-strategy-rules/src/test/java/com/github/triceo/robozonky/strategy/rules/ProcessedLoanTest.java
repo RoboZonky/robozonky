@@ -47,5 +47,4 @@ public class ProcessedLoanTest {
         Assertions.assertThat(p1).isGreaterThan(p2);
         Assertions.assertThat(p2).isLessThan(p1);
     }
-
 }

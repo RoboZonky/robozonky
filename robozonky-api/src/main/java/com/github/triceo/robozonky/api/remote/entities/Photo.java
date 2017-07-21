@@ -32,5 +32,4 @@ public class Photo extends BaseEntity {
     public String getUrl() {
         return url;
     }
-
 }

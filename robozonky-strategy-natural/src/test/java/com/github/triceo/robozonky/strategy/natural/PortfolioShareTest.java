@@ -61,5 +61,4 @@ public class PortfolioShareTest {
             softly.assertThat(p.getRating()).isEqualTo(Rating.D);
         });
     }
-
 }

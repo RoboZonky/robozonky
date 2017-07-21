@@ -39,5 +39,4 @@ public class FieldTest {
     public void uniqueLoanFields() {
         unique(LoanField.values());
     }
-
 }

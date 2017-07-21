@@ -54,5 +54,4 @@ public class SessionStateTest extends AbstractInvestingTest {
         Assertions.assertThat(it.getDiscardedLoans()).isEmpty();
         Assertions.assertThat(it2.getSeenLoans()).isNotEmpty().contains(ld);
     }
-
 }

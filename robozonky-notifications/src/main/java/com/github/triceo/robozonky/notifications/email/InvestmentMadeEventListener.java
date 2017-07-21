@@ -67,5 +67,4 @@ final class InvestmentMadeEventListener extends AbstractEmailingListener<Investm
         BalanceTracker.INSTANCE.setLastKnownBalance(event.getFinalBalance());
         super.handle(event, sessionInfo);
     }
-
 }

@@ -35,9 +35,9 @@ import org.junit.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.socket.PortFactory;
 
-import static org.mockserver.model.HttpRequest.*;
-import static org.mockserver.model.HttpResponse.*;
-import static org.mockserver.verify.VerificationTimes.*;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.verify.VerificationTimes.once;
 
 public class ZonkoidConfirmationProviderTest {
 
@@ -61,18 +61,19 @@ public class ZonkoidConfirmationProviderTest {
 
     private void verifyClientRequest() {
         server.verify(request()
-                .withPath(ZonkoidConfirmationProvider.PATH)
-                .withHeader("Accept", "text/plain")
-                .withHeader("Authorization")
-                .withHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT),
-                once());
+                              .withPath(ZonkoidConfirmationProvider.PATH)
+                              .withHeader("Accept", "text/plain")
+                              .withHeader("Authorization")
+                              .withHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT),
+                      once());
     }
 
     private Optional<Confirmation> execute(final int code) {
         this.mockServerResponse(code);
         final Optional<Confirmation> result =
                 ZonkoidConfirmationProvider.requestConfirmation(new RequestId("user@somewhere.cz",
-                        "apitest".toCharArray()), 1, 200, serverUrl);
+                                                                              "apitest".toCharArray()), 1, 200,
+                                                                serverUrl);
         this.verifyClientRequest();
         return result;
     }
@@ -112,21 +113,24 @@ public class ZonkoidConfirmationProviderTest {
     @Test
     public void errorOverHttps() throws NoSuchAlgorithmException {
         final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
-                "https", new RuntimeException());
+                                                                                      "https", new RuntimeException());
         Assertions.assertThat(result).isEmpty();
     }
 
     @Test
     public void errorOverHttp() throws NoSuchAlgorithmException {
         final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
-                "http", new RuntimeException());
+                                                                                      "http", new RuntimeException());
         Assertions.assertThat(result).isEmpty();
     }
 
     @Test
     public void errorOverUnknown() {
         Assertions.assertThatThrownBy(() -> ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
-                UUID.randomUUID().toString(), new RuntimeException())).isInstanceOf(IllegalStateException.class);
+                                                                                    UUID.randomUUID().toString(),
+                                                                                    new RuntimeException()))
+                .isInstanceOf(
+                        IllegalStateException.class);
     }
 
     @Test
@@ -135,7 +139,8 @@ public class ZonkoidConfirmationProviderTest {
         final RequestId r = new RequestId("user@somewhere.cz", "apitest".toCharArray());
         final HttpPost post = ZonkoidConfirmationProvider.getRequest(r, loanId, 200, "https", "somewhere");
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(post.getFirstHeader("Content-Type").getValue()).isEqualTo("application/x-www-form-urlencoded");
+        softly.assertThat(post.getFirstHeader("Content-Type").getValue()).isEqualTo(
+                "application/x-www-form-urlencoded");
         softly.assertThat(post.getFirstHeader("Authorization").getValue())
                 .isEqualTo(ZonkoidConfirmationProvider.getAuthenticationString(r, loanId));
         softly.assertThat(post.getEntity()).isInstanceOf(UrlEncodedFormEntity.class);
@@ -147,5 +152,4 @@ public class ZonkoidConfirmationProviderTest {
         final ZonkoidConfirmationProvider p = new ZonkoidConfirmationProvider();
         Assertions.assertThat(p.getId()).contains("Zonkoid").contains("Zonkios");
     }
-
 }

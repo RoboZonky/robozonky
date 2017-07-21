@@ -46,5 +46,4 @@ public class ApiTest {
         api.execute(procedure);
         Mockito.verify(procedure, Mockito.times(1)).accept(ArgumentMatchers.eq(mock));
     }
-
 }

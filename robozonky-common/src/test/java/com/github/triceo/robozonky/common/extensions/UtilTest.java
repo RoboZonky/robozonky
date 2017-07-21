@@ -31,5 +31,4 @@ public class UtilTest {
         final Stream<String> s = Util.toStream(c);
         Assertions.assertThat(s.isParallel()).isFalse();
     }
-
 }

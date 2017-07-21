@@ -36,7 +36,8 @@ enum SupportedFileListener implements SupportedListener<FileNotificationProperti
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentMadeEventListener(properties);
         }
-    }, INVESTMENT_SKIPPED {
+    },
+    INVESTMENT_SKIPPED {
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentSkippedEvent.class;
@@ -46,7 +47,8 @@ enum SupportedFileListener implements SupportedListener<FileNotificationProperti
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentSkippedEventListener(properties);
         }
-    }, INVESTMENT_DELEGATED {
+    },
+    INVESTMENT_DELEGATED {
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentDelegatedEvent.class;
@@ -56,7 +58,8 @@ enum SupportedFileListener implements SupportedListener<FileNotificationProperti
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentDelegatedEventListener(properties);
         }
-    }, INVESTMENT_REJECTED {
+    },
+    INVESTMENT_REJECTED {
         @Override
         public Class<? extends Event> getEventType() {
             return InvestmentRejectedEvent.class;
@@ -68,7 +71,8 @@ enum SupportedFileListener implements SupportedListener<FileNotificationProperti
         }
     };
 
-    protected abstract EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties);
+    protected abstract EventListener<? extends Event> newListener(
+            final ListenerSpecificNotificationProperties properties);
 
     public EventListener<? extends Event> getListener(final FileNotificationProperties properties) {
         return this.newListener(new ListenerSpecificNotificationProperties(this, properties));

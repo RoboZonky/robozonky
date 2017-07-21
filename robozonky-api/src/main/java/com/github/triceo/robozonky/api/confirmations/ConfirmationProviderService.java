@@ -26,11 +26,9 @@ public interface ConfirmationProviderService {
 
     /**
      * Prepare the confirmation for being used by the app.
-     *
      * @param providerId ID of the confirmation provider.
      * @return Instance of the confirmation provider, ready for accepting confirmation requests, if the service
      * supports it.
      */
     Optional<ConfirmationProvider> find(String providerId);
-
 }

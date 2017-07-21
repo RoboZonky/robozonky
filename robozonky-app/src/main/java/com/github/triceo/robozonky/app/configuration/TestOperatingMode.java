@@ -44,15 +44,17 @@ class TestOperatingMode extends OperatingMode {
             public Optional<Collection<Investment>> get() {
                 LOGGER.info("Notification sent: {}.", Checker.notifications(auth.getSecretProvider().getUsername()));
                 builder.getConfirmationUsed().ifPresent(c ->
-                        builder.getConfirmationRequestUsed().ifPresent(r ->
-                                LOGGER.info("Confirmation received: {}.",
-                                        Checker.confirmations(c, r.getUserId(),r.getPassword()))
-                        )
+                                                                builder.getConfirmationRequestUsed().ifPresent(r ->
+                                                                                                                       LOGGER.info(
+                                                                                                                               "Confirmation received: {}.",
+                                                                                                                               Checker.confirmations(
+                                                                                                                                       c,
+                                                                                                                                       r.getUserId(),
+                                                                                                                                       r.getPassword()))
+                                                                )
                 );
                 return Optional.of(Collections.emptyList());
             }
-
         });
     }
-
 }

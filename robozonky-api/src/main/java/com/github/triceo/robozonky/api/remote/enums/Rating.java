@@ -24,13 +24,13 @@ public enum Rating implements BaseEnum {
 
     // it is imperative for proper functioning of strategy algorithms that ratings here be ordered best to worst
     AAAAA("A**", new BigDecimal("0.025")),
-     AAAA("A*",  new BigDecimal("0.034")),
-      AAA("A++", new BigDecimal("0.042")),
-       AA("A+",  new BigDecimal("0.058")),
-        A("A",   new BigDecimal("0.074")),
-        B("B",   new BigDecimal("0.089")),
-        C("C",   new BigDecimal("0.099")),
-        D("D",   new BigDecimal("0.119"));
+    AAAA("A*", new BigDecimal("0.034")),
+    AAA("A++", new BigDecimal("0.042")),
+    AA("A+", new BigDecimal("0.058")),
+    A("A", new BigDecimal("0.074")),
+    B("B", new BigDecimal("0.089")),
+    C("C", new BigDecimal("0.099")),
+    D("D", new BigDecimal("0.119"));
 
     public static Rating findByCode(final String code) {
         return Stream.of(Rating.values())

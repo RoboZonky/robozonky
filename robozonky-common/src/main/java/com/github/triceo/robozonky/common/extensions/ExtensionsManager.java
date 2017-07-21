@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Ensures that all extensions, available in the current working directory's "extensions/" subdirectory, will be on
  * the classpath.
- *
+ * <p>
  * All extension points implementing {@link ServiceLoader} must call this class to retrieve the instance.
  */
 enum ExtensionsManager {

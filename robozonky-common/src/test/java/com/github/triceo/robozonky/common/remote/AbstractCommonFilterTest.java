@@ -37,5 +37,4 @@ abstract class AbstractCommonFilterTest {
         this.getTestedFilter().filter(crc);
         Assertions.assertThat(crc.getHeaders().getFirst("User-Agent")).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
     }
-
 }

@@ -26,12 +26,11 @@ public class UtilTest {
     @Test
     public void testCopyOptions() {
         final String key = UUID.randomUUID().toString();
-        final String[] values = new String[] {"a", "b", "c"};
+        final String[] values = new String[]{"a", "b", "c"};
         final CommandLinePart source = new CommandLinePart();
         source.setOption(key, values);
         final CommandLinePart target = new CommandLinePart();
         Util.copyOptions(source, target);
         Assertions.assertThat(target.getOptions().get(key)).containsExactly(values);
     }
-
 }

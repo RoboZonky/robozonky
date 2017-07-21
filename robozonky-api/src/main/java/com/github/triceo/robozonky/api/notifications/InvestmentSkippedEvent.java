@@ -33,5 +33,4 @@ public final class InvestmentSkippedEvent extends Event {
     public Recommendation getRecommendation() {
         return recommendation;
     }
-
 }

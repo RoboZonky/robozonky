@@ -34,7 +34,7 @@ public class MarketplaceFilter extends MarketplaceFilterCondition {
     }
 
     private Collection<MarketplaceFilterCondition> ignoreWhen = Collections.emptySet(),
-        butNotWhen = Collections.emptySet();
+            butNotWhen = Collections.emptySet();
 
     public void ignoreWhen(final Collection<MarketplaceFilterCondition> conditions) {
         ignoreWhen = new LinkedHashSet<>(conditions);
@@ -51,7 +51,6 @@ public class MarketplaceFilter extends MarketplaceFilterCondition {
 
     /**
      * Whether or not the loan should be filtered out.
-     *
      * @param loan Loan in question.
      * @return True when all the initial conditions return true AND when one or more secondary conditions don't.
      */
@@ -60,5 +59,4 @@ public class MarketplaceFilter extends MarketplaceFilterCondition {
         final Predicate<MarketplaceFilterCondition> f = c -> c.test(loan);
         return ignoreWhen.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
     }
-
 }

@@ -82,5 +82,4 @@ class EmailNotificationProperties extends NotificationProperties {
         final int val = this.getIntValue(EmailNotificationProperties.HOURLY_LIMIT, Integer.MAX_VALUE);
         return (val < 0) ? Integer.MAX_VALUE : val;
     }
-
 }

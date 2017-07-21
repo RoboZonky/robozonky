@@ -40,5 +40,4 @@ public class ShutdownEnablerTest {
             softly.assertThat(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get()).isNotEqualTo(l);
         });
     }
-
 }

@@ -32,7 +32,6 @@ final class EntitySpliterator<T> implements Spliterator<T> {
 
     /**
      * This spliterator will never query another page.
-     *
      * @param lastPage The last page of results.
      */
     EntitySpliterator(final Collection<T> lastPage) {
@@ -66,7 +65,6 @@ final class EntitySpliterator<T> implements Spliterator<T> {
 
     /**
      * This spliterator will eventually read all items.
-     *
      * @param paginated Individual entities are retrieved from here.
      */
     EntitySpliterator(final Paginated<T> paginated) {
@@ -96,7 +94,6 @@ final class EntitySpliterator<T> implements Spliterator<T> {
 
     /**
      * Read a new page into the spliterator.
-     *
      * @return Old page.
      */
     private synchronized Collection<T> readNewPage() {
@@ -130,5 +127,4 @@ final class EntitySpliterator<T> implements Spliterator<T> {
     public int characteristics() {
         return Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.SIZED;
     }
-
 }

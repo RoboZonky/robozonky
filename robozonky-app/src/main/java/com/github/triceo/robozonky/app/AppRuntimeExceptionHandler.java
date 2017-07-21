@@ -52,9 +52,11 @@ final class AppRuntimeExceptionHandler extends RuntimeExceptionHandler {
     }
 
     private static void handleZonkyMaintenanceError(final Throwable ex, final boolean faultTolerant) {
-        AppRuntimeExceptionHandler.LOGGER.warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
+        AppRuntimeExceptionHandler.LOGGER.warn(
+                "Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
         if (faultTolerant) {
-            AppRuntimeExceptionHandler.LOGGER.info("RoboZonky is in fault-tolerant mode. The above will not be reported as error.");
+            AppRuntimeExceptionHandler.LOGGER.info(
+                    "RoboZonky is in fault-tolerant mode. The above will not be reported as error.");
             App.exit(new ShutdownHook.Result(ReturnCode.OK, ex));
         } else {
             App.exit(new ShutdownHook.Result(ReturnCode.ERROR_DOWN, ex));
@@ -81,5 +83,4 @@ final class AppRuntimeExceptionHandler extends RuntimeExceptionHandler {
     protected Consumer<Throwable> getOtherFailureHandler() {
         return AppRuntimeExceptionHandler::handleUnexpectedException;
     }
-
 }

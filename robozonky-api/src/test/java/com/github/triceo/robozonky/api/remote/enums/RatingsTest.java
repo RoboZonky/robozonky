@@ -31,7 +31,8 @@ public class RatingsTest {
     @Test
     public void ratingsAreProperlyEnumerated() {
         Assertions.assertThat(Ratings.of(Rating.AAA).getRatings()).containsExactly(Rating.AAA);
-        Assertions.assertThat(Ratings.of(Rating.B, Rating.C, Rating.B).getRatings()).containsExactly(Rating.B, Rating.C);
+        Assertions.assertThat(Ratings.of(Rating.B, Rating.C, Rating.B).getRatings()).containsExactly(Rating.B,
+                                                                                                     Rating.C);
     }
 
     @Test

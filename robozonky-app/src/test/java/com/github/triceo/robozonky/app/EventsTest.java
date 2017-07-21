@@ -38,5 +38,4 @@ public class EventsTest extends AbstractEventsAndStateLeveragingTest {
         Assertions.assertThat(Events.getFired()).contains(e);
         Mockito.verify(listener).handle(ArgumentMatchers.eq(e), ArgumentMatchers.any());
     }
-
 }

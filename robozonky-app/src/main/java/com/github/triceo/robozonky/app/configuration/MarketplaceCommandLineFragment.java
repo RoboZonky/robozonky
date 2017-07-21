@@ -37,5 +37,4 @@ class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
     public TemporalAmount getMaximumSleepDuration() {
         return Duration.ofMinutes(maximumSleepDuration);
     }
-
 }

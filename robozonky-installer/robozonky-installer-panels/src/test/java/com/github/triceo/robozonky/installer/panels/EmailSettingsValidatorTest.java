@@ -82,5 +82,4 @@ public class EmailSettingsValidatorTest {
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
         Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(0);
     }
-
 }

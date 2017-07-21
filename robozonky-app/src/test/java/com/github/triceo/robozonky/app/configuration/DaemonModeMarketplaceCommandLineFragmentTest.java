@@ -37,5 +37,4 @@ public class DaemonModeMarketplaceCommandLineFragmentTest {
         final TemporalAmount a = f.getMaximumSleepDuration();
         Assertions.assertThat(a.get(ChronoUnit.SECONDS)).isEqualTo(f.maximumSleepDuration * 60);
     }
-
 }

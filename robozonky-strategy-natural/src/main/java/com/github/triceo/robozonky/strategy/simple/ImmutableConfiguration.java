@@ -96,7 +96,6 @@ class ImmutableConfiguration {
 
     /**
      * Retrieve a given configuration value and convert it to an int.
-     *
      * @param key Key to look up.
      * @return The value for the key.
      */
@@ -110,7 +109,6 @@ class ImmutableConfiguration {
 
     /**
      * Retrieve a given configuration value and convert it to {@link String}.
-     *
      * @param key Key to look up.
      * @return The value for the key.
      */
@@ -124,7 +122,6 @@ class ImmutableConfiguration {
 
     /**
      * Retrieve a given configuration value and convert it to {@link BigDecimal}.
-     *
      * @param key Key to look up.
      * @return The value for the key.
      */
@@ -139,5 +136,4 @@ class ImmutableConfiguration {
             throw new IllegalStateException("Invalid value for property '" + key + "': '" + value + "'", ex);
         }
     }
-
 }

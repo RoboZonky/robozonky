@@ -41,5 +41,4 @@ final class PaginatedResult<S> {
     public int getTotalResultCount() {
         return totalSize;
     }
-
 }

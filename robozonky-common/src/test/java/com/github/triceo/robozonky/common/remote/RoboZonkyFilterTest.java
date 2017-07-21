@@ -61,5 +61,4 @@ public class RoboZonkyFilterTest {
             softly.assertThat(filter.getLastResponseHeader(key2)).isEmpty();
         });
     }
-
 }

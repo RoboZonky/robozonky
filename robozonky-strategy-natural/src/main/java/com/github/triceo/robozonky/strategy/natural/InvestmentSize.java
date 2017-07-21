@@ -35,5 +35,4 @@ public class InvestmentSize extends DefaultInvestmentSize {
     public Rating getRating() {
         return rating;
     }
-
 }

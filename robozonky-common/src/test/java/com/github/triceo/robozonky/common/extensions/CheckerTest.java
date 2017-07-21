@@ -63,7 +63,7 @@ public class CheckerTest {
     public void confirmationsNotConfirming() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
+                                            ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
         final Optional<Boolean> result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
         Assertions.assertThat(result).isEmpty();
     }
@@ -72,7 +72,8 @@ public class CheckerTest {
     public void confirmationsRejecting() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt())).thenReturn(Optional.of(new Confirmation(ConfirmationType.REJECTED)));
+                                            ArgumentMatchers.anyInt())).thenReturn(
+                Optional.of(new Confirmation(ConfirmationType.REJECTED)));
         final Optional<Boolean> result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
         Assertions.assertThat(result).isPresent().hasValue(false);
     }
@@ -81,7 +82,8 @@ public class CheckerTest {
     public void confirmationsProper() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt())).thenReturn(Optional.of(new Confirmation(ConfirmationType.DELEGATED)));
+                                            ArgumentMatchers.anyInt())).thenReturn(
+                Optional.of(new Confirmation(ConfirmationType.DELEGATED)));
         final Optional<Boolean> result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
         Assertions.assertThat(result).isPresent().hasValue(true);
     }
@@ -106,6 +108,5 @@ public class CheckerTest {
         Assertions.assertThat(Checker.notifications("", Collections.singletonList(r))).isTrue();
         Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
     }
-
 }
 

@@ -46,5 +46,4 @@ class DirectInvestmentOperatingMode extends OperatingMode {
         final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
         return Optional.of(new DirectInvestmentMode(auth, builder, fragment.isFaultTolerant(), loanId, loanAmount));
     }
-
 }

@@ -42,10 +42,9 @@ public class AuthenticationHandler {
      * Build authentication mechanism that will keep the session alive via the use of session token. The mechanism will
      * never log out, but the session may expire if not refresh regularly. This is potentially unsafe, as it will
      * eventually store a plain-text access token on the hard drive, for everyone to see.
-     *
+     * <p>
      * The token will only be refreshed if RoboZonky is launched between token expiration and X second before token
      * expiration, where X comes from the arguments of this method.
-     *
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param refreshAfter Access token will be refreshed after expiration minus this.
      * @return This.
@@ -57,7 +56,6 @@ public class AuthenticationHandler {
     /**
      * Build authentication mechanism that will log out at the end of RoboZonky's operations. This will ignore the
      * access tokens.
-     *
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @return The desired authentication method.
      */
@@ -84,9 +82,8 @@ public class AuthenticationHandler {
     /**
      * Set {@link ApiProvider} instance to be used during {@link #execute(Function)}. If not called, fresh provider
      * will be used every time.
-     *
+     * <p>
      * This method is mostly used for mocking the Zonky API during testing.
-     *
      * @param provider
      */
     public void setApiProvider(final ApiProvider provider) {
@@ -108,12 +105,12 @@ public class AuthenticationHandler {
             } catch (final JAXBException ex) {
                 AuthenticationHandler.LOGGER.warn("Failed parsing token, using password.", ex);
                 return null;
-            }});
+            }
+        });
     }
 
     /**
      * Based on information received until this point, decide on the proper authentication method.
-     *
      * @return Authentication method matching user preferences.
      */
     private Function<ApiProvider, ZonkyApiToken> buildAuthenticator() {
@@ -147,7 +144,6 @@ public class AuthenticationHandler {
 
     /**
      * Decide whether or not to log out, based on user preferences.
-     *
      * @param token The token to use for the next login, if enabled.
      * @return True if RoboZonky should log out, false otherwise.
      */
@@ -166,9 +162,9 @@ public class AuthenticationHandler {
 
     /**
      * Execute investment operation over Zonky.
-     *
      * @param op Operation to execute over the API.
-     * @return Investments newly made through the API. If operation null and {@link #needsPassword} true, will only refresh
+     * @return Investments newly made through the API. If operation null and {@link #needsPassword} true, will only
+     * refresh
      * token (if necessary) and return empty.
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
@@ -179,10 +175,10 @@ public class AuthenticationHandler {
 
     /**
      * Execute investment operation over Zonky.
-     *
      * @param provider API provider to be used for constructing the Zonky API.
      * @param op Operation to execute over the API.
-     * @return Investments newly made through the API. If operation null and {@link #needsPassword} true, will only refresh
+     * @return Investments newly made through the API. If operation null and {@link #needsPassword} true, will only
+     * refresh
      * token (if necessary) and return empty.
      * @throws RuntimeException Some exception from RESTEasy when Zonky login fails.
      */
@@ -213,5 +209,4 @@ public class AuthenticationHandler {
             }
         }
     }
-
 }

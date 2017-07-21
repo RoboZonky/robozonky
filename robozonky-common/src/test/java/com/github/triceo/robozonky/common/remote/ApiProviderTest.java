@@ -38,5 +38,4 @@ public class ApiProviderTest {
         final ApiProvider provider = new ApiProvider();
         Assertions.assertThat(provider.authenticated(token)).isNotNull();
     }
-
 }

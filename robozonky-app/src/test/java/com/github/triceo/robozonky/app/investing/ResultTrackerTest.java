@@ -69,5 +69,4 @@ public class ResultTrackerTest {
         Assertions.assertThat(result).hasSize(1);
         Assertions.assertThat(result.get(0)).matches(ld -> ld.getLoan().getId() == usefulLoan.getId());
     }
-
 }

@@ -38,5 +38,4 @@ public class BorrowerIncomeConditionTest extends AbstractEnumeratedConditionTest
     protected MainIncomeType getTriggerItem() {
         return MainIncomeType.EMPLOYMENT;
     }
-
 }

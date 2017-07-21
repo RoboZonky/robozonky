@@ -28,8 +28,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.internal.api.Settings;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,7 @@ public abstract class RefreshableNotificationProperties<N extends NotificationPr
     }
 
     private Optional<String> getPropertiesContents() {
-        final String propValue = Settings.INSTANCE.get(this.getConfigFileLocationPropertyName(), (String)null);
+        final String propValue = Settings.INSTANCE.get(this.getConfigFileLocationPropertyName(), (String) null);
         if (propValue != null) { // attempt to read from the URL specified by the property
             LOGGER.debug("Reading notification configuration from {}.", propValue);
             try {
@@ -93,5 +93,4 @@ public abstract class RefreshableNotificationProperties<N extends NotificationPr
             return Optional.empty();
         }
     }
-
 }

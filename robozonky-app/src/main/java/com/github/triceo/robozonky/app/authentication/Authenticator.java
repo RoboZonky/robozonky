@@ -37,7 +37,6 @@ abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
 
     /**
      * Prepare for authentication using username and password.
-     *
      * @param username Zonky username.
      * @param password Zonky password.
      * @return Instance ready for authentication.
@@ -54,7 +53,6 @@ abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
 
     /**
      * Prepare for authentication using the Zonky OAuth token which will also refresh the token.
-     *
      * @param username Zonky username.
      * @param token OAuth token.
      * @param refreshBeforeExpiration How long before token expiration to refresh the token.
@@ -91,5 +89,4 @@ abstract class Authenticator implements Function<ApiProvider, ZonkyApiToken> {
             throw new WebApplicationException("Failed authenticating with Zonky, check your password.", ex);
         }
     }
-
 }

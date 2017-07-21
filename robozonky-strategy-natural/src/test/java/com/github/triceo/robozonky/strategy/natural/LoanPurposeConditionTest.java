@@ -38,5 +38,4 @@ public class LoanPurposeConditionTest extends AbstractEnumeratedConditionTest<Pu
     protected Purpose getTriggerItem() {
         return Purpose.AUTO_MOTO;
     }
-
 }

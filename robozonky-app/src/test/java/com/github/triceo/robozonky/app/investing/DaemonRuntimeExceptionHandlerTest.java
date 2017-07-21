@@ -62,7 +62,5 @@ public class DaemonRuntimeExceptionHandlerTest extends AbstractEventsAndStateLev
     public void webApplicationException() {
         handler.handle(new WebApplicationException("Testing exception"));
         Assertions.assertThat(Events.getFired()).first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
-
     }
-
 }

@@ -38,5 +38,4 @@ class AbstractStoryCondition extends MarketplaceFilterCondition {
         final boolean isStoryProvided = (story == null);
         return storyLength.test(isStoryProvided ? "" : loan.getStory().trim());
     }
-
 }

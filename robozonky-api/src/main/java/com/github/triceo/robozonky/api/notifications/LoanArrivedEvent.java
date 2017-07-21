@@ -35,5 +35,4 @@ public final class LoanArrivedEvent extends Event {
     public LoanDescriptor getLoanDescriptor() {
         return this.loanDescriptor;
     }
-
 }

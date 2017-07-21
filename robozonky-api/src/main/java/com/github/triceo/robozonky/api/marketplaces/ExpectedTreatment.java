@@ -35,7 +35,7 @@ public enum ExpectedTreatment {
      * execution sending new data to registered listener. (See {@link Marketplace#registerListener(Consumer)}.)
      * In this case, {@link Marketplace#close()}  will be called after the user decides to terminate the application.
      * Useful for periodical checks of some remote marketplace, such as Zotify.
-     *
+     * <p>
      * Please note that this treatment may also result in the {@link Marketplace#run} method being only run once,
      * followed immediately by {@link Marketplace#close()}. The implementor should not expect that this method will
      * be called any more than once.

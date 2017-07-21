@@ -50,5 +50,4 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterCondition {
         final T match = fieldRetriever.apply(loan);
         return possibleValues.contains(match);
     }
-
 }

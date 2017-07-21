@@ -38,6 +38,5 @@ interface ZotifyApi extends EntityCollectionApi<Loan> {
     @Path("/json")
     @Override
     List<Loan> items();
-
 }
 

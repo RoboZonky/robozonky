@@ -31,5 +31,4 @@ public class RatingTest {
         final Set<String> codes = Stream.of(Rating.values()).map(Rating::getCode).collect(Collectors.toSet());
         Assertions.assertThat(codes).hasSize(Rating.values().length);
     }
-
 }

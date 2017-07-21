@@ -44,7 +44,6 @@ public class SchedulerTest {
         protected Optional<String> transform(final String source) {
             return Optional.of(source);
         }
-
     };
 
     @Test
@@ -83,5 +82,4 @@ public class SchedulerTest {
             softly.assertThat(s.isShutdown()).isFalse();
         });
     }
-
 }

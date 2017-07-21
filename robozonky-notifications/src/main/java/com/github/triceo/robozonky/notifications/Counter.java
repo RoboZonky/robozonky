@@ -73,7 +73,6 @@ public final class Counter {
     }
 
     /**
-     *
      * @return True when the counter increase was properly persisted.
      */
     public synchronized boolean increase() {
@@ -90,5 +89,4 @@ public final class Counter {
         }
         return timestamps.size() < maxItems;
     }
-
 }

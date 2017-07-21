@@ -38,5 +38,4 @@ public abstract class AbstractEnumeratedConditionTest<T> {
         sut.add(Collections.singleton(this.getTriggerItem()));
         Assertions.assertThat(sut.test(l)).isTrue();
     }
-
 }

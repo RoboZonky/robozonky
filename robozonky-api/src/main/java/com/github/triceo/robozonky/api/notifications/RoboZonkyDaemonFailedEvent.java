@@ -30,5 +30,4 @@ public final class RoboZonkyDaemonFailedEvent extends Event {
     public Throwable getCause() {
         return cause;
     }
-
 }

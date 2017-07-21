@@ -62,9 +62,10 @@ public class InvestmentSizeTest {
     @Test
     public void notMultipleOf200() {
         Assertions.assertThatThrownBy(() -> new InvestmentSize(Rating.A, Defaults.MINIMUM_INVESTMENT_IN_CZK,
-                Defaults.MINIMUM_INVESTMENT_IN_CZK + 1)).isInstanceOf(IllegalArgumentException.class);
+                                                               Defaults.MINIMUM_INVESTMENT_IN_CZK + 1)).isInstanceOf(
+                IllegalArgumentException.class);
         Assertions.assertThatThrownBy(() -> new InvestmentSize(Rating.A, Defaults.MINIMUM_INVESTMENT_IN_CZK + 1,
-                Defaults.MINIMUM_INVESTMENT_IN_CZK)).isInstanceOf(IllegalArgumentException.class);
+                                                               Defaults.MINIMUM_INVESTMENT_IN_CZK)).isInstanceOf(
+                IllegalArgumentException.class);
     }
-
 }

@@ -38,10 +38,10 @@ import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
@@ -56,7 +56,7 @@ public abstract class AbstractListenerTest {
 
     private static EmailNotificationProperties getNotificationProperties() {
         System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                EmailNotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
+                           EmailNotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
         final Refreshable<EmailNotificationProperties> r = new RefreshableEmailNotificationProperties();
         r.run();
         final Optional<EmailNotificationProperties> p = r.getLatest();
@@ -82,23 +82,28 @@ public abstract class AbstractListenerTest {
         // create events for listeners
         final Map<SupportedEmailListener, Event> events = new HashMap<>(SupportedEmailListener.values().length);
         events.put(SupportedEmailListener.INVESTMENT_DELEGATED,
-                new InvestmentDelegatedEvent(recommendation, 200, "random"));
+                   new InvestmentDelegatedEvent(recommendation, 200, "random"));
         events.put(SupportedEmailListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200, true));
         events.put(SupportedEmailListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
-        events.put(SupportedEmailListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, 200, "random"));
+        events.put(SupportedEmailListener.INVESTMENT_REJECTED,
+                   new InvestmentRejectedEvent(recommendation, 200, "random"));
         events.put(SupportedEmailListener.BALANCE_ON_TARGET, new ExecutionStartedEvent(Collections.emptyList(), 200));
-        events.put(SupportedEmailListener.BALANCE_UNDER_MINIMUM, new ExecutionStartedEvent(Collections.emptyList(), 199));
-        events.put(SupportedEmailListener.CRASHED, new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
-        events.put(SupportedEmailListener.REMOTE_OPERATION_FAILED, new RemoteOperationFailedEvent(new RuntimeException()));
+        events.put(SupportedEmailListener.BALANCE_UNDER_MINIMUM,
+                   new ExecutionStartedEvent(Collections.emptyList(), 199));
+        events.put(SupportedEmailListener.CRASHED,
+                   new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
+        events.put(SupportedEmailListener.REMOTE_OPERATION_FAILED,
+                   new RemoteOperationFailedEvent(new RuntimeException()));
         events.put(SupportedEmailListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException()));
         events.put(SupportedEmailListener.INITIALIZED, new RoboZonkyInitializedEvent());
         events.put(SupportedEmailListener.ENDING, new RoboZonkyEndingEvent());
         events.put(SupportedEmailListener.TESTING, new RoboZonkyTestingEvent());
         events.put(SupportedEmailListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3"));
-        events.put(SupportedEmailListener.EXPERIMENTAL_UPDATE_DETECTED, new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
+        events.put(SupportedEmailListener.EXPERIMENTAL_UPDATE_DETECTED,
+                   new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
         // create the listeners
         return Stream.of(SupportedEmailListener.values())
-                .map(s -> new Object[] {s, s.getListener(properties), events.get(s)})
+                .map(s -> new Object[]{s, s.getListener(properties), events.get(s)})
                 .collect(Collectors.toList());
     }
 
@@ -109,5 +114,4 @@ public abstract class AbstractListenerTest {
     // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
     @Parameterized.Parameter
     public SupportedEmailListener listenerType;
-
 }

@@ -42,11 +42,9 @@ public final class ExecutionCompletedEvent extends Event {
     }
 
     /**
-     *
      * @return Account balance at the end of the investing algorithm.
      */
     public int getNewBalance() {
         return this.newBalance;
     }
-
 }

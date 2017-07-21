@@ -74,7 +74,6 @@ public class Zonky implements AutoCloseable {
         return Zonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize(), ordering);
     }
 
-
     private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
                                                                              final int pageSize,
                                                                              final Sort<T> ordering) {
@@ -85,7 +84,6 @@ public class Zonky implements AutoCloseable {
 
     /**
      * Retrieve blocked amounts from user's wallet via {@link WalletApi}.
-     *
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<BlockedAmount> getBlockedAmounts() {
@@ -99,7 +97,6 @@ public class Zonky implements AutoCloseable {
 
     /**
      * Retrieve investments from user's portfolio via {@link PortfolioApi}.
-     *
      * @return All items from the remote API, lazy-loaded. Does not include investments represented by blocked amounts.
      */
     public Stream<Investment> getInvestments() {
@@ -108,7 +105,6 @@ public class Zonky implements AutoCloseable {
 
     /**
      * Retrieve investments from user's portfolio via {@link PortfolioApi}, in a given order.
-     *
      * @param ordering Ordering in which the results should be returned.
      * @return All items from the remote API, lazy-loaded. Does not include investments represented by blocked amounts.
      */
@@ -124,7 +120,6 @@ public class Zonky implements AutoCloseable {
 
     /**
      * Retrieve loans from marketplace via {@link LoanApi}.
-     *
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Loan> getAvailableLoans() {
@@ -133,7 +128,6 @@ public class Zonky implements AutoCloseable {
 
     /**
      * Retrieve loans from marketplace via {@link LoanApi}, in a given order.
-     *
      * @param ordering Ordering in which the results should be returned.
      * @return All items from the remote API, lazy-loaded.
      */
@@ -149,5 +143,4 @@ public class Zonky implements AutoCloseable {
     public void close() {
         this.controlApi.close();
     }
-
 }

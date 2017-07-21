@@ -30,7 +30,6 @@ import com.izforge.izpack.api.installer.DataValidator;
 
 public class ZonkySettingsValidator extends AbstractValidator {
 
-
     private final Supplier<ApiProvider> apiSupplier;
 
     /**
@@ -76,7 +75,6 @@ public class ZonkySettingsValidator extends AbstractValidator {
     public String getErrorMessageId() {
         return "Došlo k chybě při komunikaci se Zonky. " +
                 "Přihlašovací udaje nebylo možné ověřit.";
-
     }
 
     @Override
@@ -84,5 +82,4 @@ public class ZonkySettingsValidator extends AbstractValidator {
         return "Došlo k chybě při ověřování přihlašovacích udajů Zonky. " +
                 "Budete-li pokračovat, RoboZonky nemusí fungovat správně.";
     }
-
 }

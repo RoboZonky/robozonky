@@ -35,5 +35,4 @@ public class ZonkoidConfirmationProviderServiceTest {
     public void wrongId() {
         Assertions.assertThat(new ZonkoidConfirmationProviderService().find("random")).isEmpty();
     }
-
 }

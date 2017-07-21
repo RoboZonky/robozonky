@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
+import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
@@ -48,7 +48,6 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
 
     /**
      * This constructor only exists for testing purposes.
-     *
      * @param currentVersion The version to compare against.
      */
     UpdateNotification(final String currentVersion) {
@@ -57,7 +56,6 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
 
     /**
      * Execute an action when a new version is detected.
-     *
      * @param newVersion New version that has just been detected.
      * @param lastKnownVersion The version that was last known to exist. Will be updated.
      * @param handler Action to execute.
@@ -78,7 +76,7 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
     private void updateStableVersion(final String newVersion) {
         updateVersion(newVersion, lastKnownStableVersion, (v) -> {
             UpdateNotification.LOGGER.info("You are using an obsolete version of RoboZonky. Please upgrade to {}.",
-                    newVersion);
+                                           newVersion);
             Events.fire(new RoboZonkyUpdateDetectedEvent(newVersion));
         });
     }
@@ -86,7 +84,7 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
     private void updateUnstableVersion(final String newVersion) {
         updateVersion(newVersion, lastKnownUnstableVersion, (v) -> {
             UpdateNotification.LOGGER.info("Experimental version of RoboZonky is available. Try {} at your own risk.",
-                    newVersion);
+                                           newVersion);
             Events.fire(new RoboZonkyExperimentalUpdateDetectedEvent(newVersion));
         });
     }
@@ -102,5 +100,4 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
     public void valueChanged(final VersionIdentifier oldVersion, final VersionIdentifier newVersion) {
         valueSet(newVersion);
     }
-
 }

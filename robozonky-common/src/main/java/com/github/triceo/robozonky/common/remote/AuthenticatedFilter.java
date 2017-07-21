@@ -27,5 +27,4 @@ class AuthenticatedFilter extends RoboZonkyFilter {
         final char[] t = token == null ? AuthenticatedFilter.EMPTY_TOKEN : token.getAccessToken();
         this.setRequestHeader("Authorization", "Bearer " + String.valueOf(t));
     }
-
 }

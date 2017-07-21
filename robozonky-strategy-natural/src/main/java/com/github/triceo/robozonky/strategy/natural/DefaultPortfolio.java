@@ -29,7 +29,8 @@ public enum DefaultPortfolio {
 
     private final EnumMap<Rating, Integer> shares = new EnumMap<>(Rating.class);
 
-    DefaultPortfolio(final int aaaaa, final int aaaa, final int aaa, final int aa, final int a, final int b, final int c,
+    DefaultPortfolio(final int aaaaa, final int aaaa, final int aaa, final int aa, final int a, final int b,
+                     final int c,
                      final int d) {
         shares.put(Rating.AAAAA, aaaaa);
         shares.put(Rating.AAAA, aaaa);

@@ -44,9 +44,9 @@ public class InvestmentStatuses {
         }
         // and finally convert
         return of(Stream.of(parts)
-                .map(String::trim)
-                .map(InvestmentStatus::valueOf)
-                .collect(Collectors.toList()));
+                          .map(String::trim)
+                          .map(InvestmentStatus::valueOf)
+                          .collect(Collectors.toList()));
     }
 
     public static InvestmentStatuses of(final InvestmentStatus... statuses) {

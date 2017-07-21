@@ -47,7 +47,6 @@ public enum Purpose implements BaseEnum {
             final int actualId = Integer.parseInt(id) - 1; // purposes in Zonky API are indexed from 1
             return Purpose.values()[actualId];
         }
-
     }
 
     public static Purpose findByCode(final String code) {

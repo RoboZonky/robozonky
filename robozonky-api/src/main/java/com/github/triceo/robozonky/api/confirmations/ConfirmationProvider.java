@@ -38,5 +38,4 @@ public interface ConfirmationProvider {
      * @return Unique string identifying the service.
      */
     String getId();
-
 }

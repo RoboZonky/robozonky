@@ -178,7 +178,7 @@ public class SessionTest extends AbstractInvestingTest {
         final Recommendation recommendation =
                 AbstractInvestingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
         try (final Session t = Session.create(new Investor.Builder(), z,
-                Collections.singletonList(recommendation.getLoanDescriptor()))) {
+                                              Collections.singletonList(recommendation.getLoanDescriptor()))) {
             final boolean result = t.invest(recommendation);
             // verify result
             Assertions.assertThat(result).isFalse();
@@ -327,7 +327,7 @@ public class SessionTest extends AbstractInvestingTest {
             softly.assertThat(newEvents.get(1)).isInstanceOf(InvestmentMadeEvent.class);
         });
         // validate event contents
-        final InvestmentMadeEvent e = (InvestmentMadeEvent)newEvents.get(1);
+        final InvestmentMadeEvent e = (InvestmentMadeEvent) newEvents.get(1);
         Assertions.assertThat(e.getFinalBalance())
                 .isEqualTo(oldBalance - amountToInvest);
     }
@@ -347,5 +347,4 @@ public class SessionTest extends AbstractInvestingTest {
             Assertions.assertThat(t2).isNotNull();
         }
     }
-
 }

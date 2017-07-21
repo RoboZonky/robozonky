@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * Sometimes some part of the app needs to write out a variable somewhere, to store as state for the next time the
  * app is run. This class can be used for that. It is backed by a single file, all write operations are immediately
  * stored.
- *
+ * <p>
  * Using this class, only store transient information that, if deleted by a system restart or a similar occasion, would
  * not cause a crash of the application.
  */
@@ -49,7 +49,6 @@ public enum State {
 
         /**
          * Retrieve a value from this class-specific state storage.
-         *
          * @param key Key under which the value was previously stored.
          * @return Present if the storage contains a value for the key.
          */
@@ -59,7 +58,6 @@ public enum State {
 
         /**
          * Store a value in this class-specific state storage, overwriting any value previously stored under this key.
-         *
          * @param key Key to store the value under.
          * @param value The value to store.
          */
@@ -78,13 +76,11 @@ public enum State {
 
         /**
          * Remove all values for this class-specific state storage.
-         *
          * @return True if removed.
          */
         public boolean reset() {
             return State.INSTANCE.unsetValues(classIdentifier);
         }
-
     }
 
     static File getStateLocation() {

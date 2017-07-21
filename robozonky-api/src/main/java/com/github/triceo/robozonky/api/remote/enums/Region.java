@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * its integer ID after all other values already got one.
  */
 @JsonDeserialize(using = Region.RegionDeserializer.class)
-public enum Region implements BaseEnum  {
+public enum Region implements BaseEnum {
 
     PRAHA("Praha"),
     STREDOCESKY("Středočeský"),
@@ -57,7 +57,6 @@ public enum Region implements BaseEnum  {
             final int actualId = Integer.parseInt(id) - 1; // regions in Zonky API are indexed from 1
             return Region.values()[actualId];
         }
-
     }
 
     public static Region findByCode(final String code) {

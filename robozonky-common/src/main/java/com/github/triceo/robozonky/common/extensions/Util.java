@@ -24,5 +24,4 @@ class Util {
     public static <T> Stream<T> toStream(final Iterable<T> loader) {
         return StreamSupport.stream(loader.spliterator(), false);
     }
-
 }

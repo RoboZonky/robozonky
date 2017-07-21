@@ -39,5 +39,4 @@ final class DirectInvestmentCommand implements InvestmentCommand {
     public void accept(final Session s) {
         s.invest(recommendation);
     }
-
 }

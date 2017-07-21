@@ -52,7 +52,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
 
     /**
      * Set a key in the key store.
-     *
      * @param alias Alias to store the key under.
      * @param valueStream Will be converted to a {@link String} and stored.
      * @return True if success.
@@ -63,7 +62,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
 
     /**
      * Set a key in the key store.
-     *
      * @param alias Alias to store the key under.
      * @param value Will be stored.
      * @return True if success.
@@ -74,7 +72,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
 
     /**
      * Set a key in the key store.
-     *
      * @param alias Alias to store the key under.
      * @param value Will be stored.
      * @return True if success.
@@ -99,7 +96,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
     @Override
     public String getUsername() {
         return new String(this.ksh.get(KeyStoreSecretProvider.ALIAS_USERNAME)
-                .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore.")));
+                                  .orElseThrow(() -> new IllegalStateException("Username not present in KeyStore.")));
     }
 
     public boolean setPassword(final char[] password) {
@@ -124,7 +121,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
     public boolean setToken(final Reader token) {
         final boolean firstSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN, token);
         final boolean secondSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN_DATE,
-                OffsetDateTime.now().toString());
+                                                  OffsetDateTime.now().toString());
         return firstSuccessful && secondSuccessful;
     }
 
@@ -155,5 +152,4 @@ final class KeyStoreSecretProvider implements SecretProvider {
     public boolean isPersistent() {
         return true;
     }
-
 }

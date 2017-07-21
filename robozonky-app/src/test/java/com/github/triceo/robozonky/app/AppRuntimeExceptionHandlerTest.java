@@ -120,5 +120,4 @@ public class AppRuntimeExceptionHandlerTest extends AbstractEventsAndStateLevera
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_REMOTE.getCode());
         faultTolerant.handle(new WebApplicationException("Testing exception"));
     }
-
 }

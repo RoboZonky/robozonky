@@ -30,5 +30,4 @@ public class ReturnCodeTest {
         final Set<Integer> codes = Stream.of(ReturnCode.values()).map(ReturnCode::getCode).collect(Collectors.toSet());
         Assertions.assertThat(codes).hasSize(ReturnCode.values().length);
     }
-
 }

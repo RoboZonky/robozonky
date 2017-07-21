@@ -50,5 +50,4 @@ abstract class AbstractBaseEnumTest {
         Assertions.assertThatThrownBy(() -> valueConverter.apply(UUID.randomUUID().toString()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-
 }

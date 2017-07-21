@@ -38,8 +38,7 @@ public class StaticInvestorTest extends AbstractInvestingTest {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final int recommended = 200;
         final Investment i = Investor.convertToInvestment(ld.recommend(recommended).get(),
-                new Confirmation(ConfirmationType.DELEGATED));
+                                                          new Confirmation(ConfirmationType.DELEGATED));
         Assertions.assertThat(i.getAmount()).isEqualTo(recommended);
     }
-
 }

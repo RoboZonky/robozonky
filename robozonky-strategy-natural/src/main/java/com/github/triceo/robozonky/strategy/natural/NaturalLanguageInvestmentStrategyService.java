@@ -49,7 +49,6 @@ public class NaturalLanguageInvestmentStrategyService implements InvestmentStrat
                     + ", offending symbol: " + offendingSymbol;
             throw new IllegalStateException("Syntax error: " + error, e);
         }
-
     };
 
     private static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {

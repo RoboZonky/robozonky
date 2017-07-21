@@ -48,5 +48,4 @@ public interface Sort<S> {
     Sort<S> thenBy(Field<S> field, boolean ascending);
 
     void apply(RoboZonkyFilter filter);
-
 }

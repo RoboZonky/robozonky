@@ -39,5 +39,4 @@ public class LongStoryConditionTest {
         Mockito.when(l.getStory()).thenReturn(story);
         Assertions.assertThat(new LongStoryCondition().test(l)).isFalse();
     }
-
 }

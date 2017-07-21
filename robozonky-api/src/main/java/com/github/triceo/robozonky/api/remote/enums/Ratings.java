@@ -41,14 +41,15 @@ public class Ratings {
         final String[] parts = Ratings.COMMA.split(trimmed.substring(1, trimmed.length() - 1));
         // get the list of ratings represented by the parts of the string
         return Ratings.of(Arrays.stream(parts)
-                .filter(part -> {
-                    if (!part.startsWith("\"") && !part.endsWith("\"") && part.length() < 3) {
-                        throw new IllegalArgumentException("Expecting part of string to be quoted, got " + part);
-                    }
-                    return true;
-                }).map(part -> part.substring(1, part.length() - 1)) // remove surrounding quotes
-                .map(Rating::valueOf) // convert string representations to actual instances
-                .toArray(Rating[]::new));
+                                  .filter(part -> {
+                                      if (!part.startsWith("\"") && !part.endsWith("\"") && part.length() < 3) {
+                                          throw new IllegalArgumentException(
+                                                  "Expecting part of string to be quoted, got " + part);
+                                      }
+                                      return true;
+                                  }).map(part -> part.substring(1, part.length() - 1)) // remove surrounding quotes
+                                  .map(Rating::valueOf) // convert string representations to actual instances
+                                  .toArray(Rating[]::new));
     }
 
     public static Ratings of(final Rating... ratings) {
@@ -80,8 +81,12 @@ public class Ratings {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final Ratings ratings1 = (Ratings) o;
         return Objects.equals(ratings, ratings1.ratings);
     }

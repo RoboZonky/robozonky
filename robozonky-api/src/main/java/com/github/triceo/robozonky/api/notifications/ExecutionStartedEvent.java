@@ -43,11 +43,9 @@ public final class ExecutionStartedEvent extends Event {
     }
 
     /**
-     *
      * @return Account balance at the beginning of the investment algorithm.
      */
     public int getBalance() {
         return this.balance;
     }
-
 }

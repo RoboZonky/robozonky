@@ -24,5 +24,4 @@ class ZonkyMarketplace extends AbstractMarketplace {
     protected ApiProvider api() {
         return new ApiProvider();
     }
-
 }

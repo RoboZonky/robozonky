@@ -42,7 +42,6 @@ public class ApiProvider {
 
     /**
      * Instantiate an API as a RESTEasy client proxy.
-     *
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
      * @param filter Filter to use when communicating with the endpoint.
@@ -57,7 +56,6 @@ public class ApiProvider {
 
     /**
      * Instantiate an API as a RESTEasy client proxy.
-     *
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
      * @param <T> API type.
@@ -71,7 +69,6 @@ public class ApiProvider {
 
     /**
      * Retrieve Zonky's OAuth endpoint.
-     *
      * @return New API instance.
      */
     public OAuth oauth() {
@@ -88,7 +85,6 @@ public class ApiProvider {
 
     /**
      * Retrieve available loans from Zonky marketplace cache, which requires no authentication.
-     *
      * @return Loans existing in the marketplace at the time this method was called.
      */
     public Collection<Loan> marketplace() {
@@ -97,12 +93,11 @@ public class ApiProvider {
 
     public Zonky authenticated(final ZonkyApiToken token) {
         return new Zonky(this.control(token), this.marketplace(token), this.portfolio(token),
-                this.wallet(token));
+                         this.wallet(token));
     }
 
     /**
      * Retrieve user-specific Zonky loan API which requires authentication.
-     *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      */
@@ -112,7 +107,6 @@ public class ApiProvider {
 
     /**
      * Retrieve user-specific Zonky wallet API which requires authentication.
-     *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      */
@@ -122,7 +116,6 @@ public class ApiProvider {
 
     /**
      * Retrieve user-specific Zonky portfolio API which requires authentication.
-     *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      */
@@ -132,12 +125,10 @@ public class ApiProvider {
 
     /**
      * Retrieve user-specific Zonky control API which requires authentication.
-     *
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      */
     private Api<ControlApi> control(final ZonkyApiToken token) {
         return this.obtain(ControlApi.class, ApiProvider.ZONKY_URL, new AuthenticatedFilter(token));
     }
-
 }

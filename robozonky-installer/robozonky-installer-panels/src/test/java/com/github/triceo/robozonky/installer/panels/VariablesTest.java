@@ -38,7 +38,7 @@ public class VariablesTest {
 
     @Test
     public void readValue() {
-        for (final Variables variable: Variables.values()) {
+        for (final Variables variable : Variables.values()) {
             final String key = variable.getKey();
             final String value = UUID.randomUUID().toString();
             final InstallData data = Mockito.mock(InstallData.class);
@@ -46,5 +46,4 @@ public class VariablesTest {
             Assertions.assertThat(variable.getValue(data)).isSameAs(value);
         }
     }
-
 }

@@ -51,7 +51,7 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
     protected AbstractFileStoringListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
         this.filesOfThisType = new Counter(this.getClass().getSimpleName(),
-                properties.getListenerSpecificHourlyLimit());
+                                           properties.getListenerSpecificHourlyLimit());
     }
 
     public Counter getFilesOfThisType() {
@@ -88,5 +88,4 @@ abstract class AbstractFileStoringListener<T extends Event> implements EventList
             LOGGER.warn("Failed writing out {}.", filename, ex);
         }
     }
-
 }

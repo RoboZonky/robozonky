@@ -28,8 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.internal.api.State;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +37,14 @@ import org.slf4j.LoggerFactory;
  * Decides whether or not the application should fall asleep because of general marketplace inactivity. Uses two sources
  * of data to make the decision: the marketplace, and the app's internal state concerning the last time the marketplace
  * was checked.
- *
+ * <p>
  * In order for the state to be persisted, the App needs to eventually call {@link #settle()} after calling
  * {@link #shouldSleep()}.
  */
 class Activity {
 
-    private static final Runnable DO_NOTHING = () -> {};
+    private static final Runnable DO_NOTHING = () -> {
+    };
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
     private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
     static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Activity.class);
@@ -74,7 +75,8 @@ class Activity {
     }
 
     /**
-     * Retrieve all marketplace in the marketplace which have not yet been fully funded and which have been published past
+     * Retrieve all marketplace in the marketplace which have not yet been fully funded and which have been published
+     * past
      * a certain point in time.
      * @param instant The earliest point in time for the marketplace to published on.
      * @return Ordered by publishing time descending.
@@ -96,7 +98,6 @@ class Activity {
 
     /**
      * Whether or not the application should fall asleep and not make any further contact with API.
-     *
      * @return True if no further contact should be made during this run of the app.
      */
     public boolean shouldSleep() {

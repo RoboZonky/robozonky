@@ -50,7 +50,7 @@ public class BlockedAmountsTest {
         final Loan loan2 = Mockito.mock(Loan.class);
         Mockito.when(loan2.getId()).thenReturn(loanId2);
         final Stream<BlockedAmount> blockedAmounts = Stream.of(
-            new BlockedAmount(investorsFee, 200), new BlockedAmount(loanId1, loan1amount1),
+                new BlockedAmount(investorsFee, 200), new BlockedAmount(loanId1, loan1amount1),
                 new BlockedAmount(investorsFee, 300), new BlockedAmount(loanId2, loan2amount),
                 new BlockedAmount(loanId1, loan1amount2) // repeat loan we've already seen, simulating re-invest
         );
@@ -67,5 +67,4 @@ public class BlockedAmountsTest {
             softly.assertThat(result.get(1).getAmount()).isEqualTo(loan2amount);
         });
     }
-
 }

@@ -46,5 +46,4 @@ public class OverallPortfolio extends BaseEntity {
     public int getDue() {
         return due;
     }
-
 }

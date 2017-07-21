@@ -30,7 +30,6 @@ public class ToStringBuilder {
                 .setExcludeFieldNames(excludeFields);
     }
 
-
     public ToStringBuilder(final Object o) {
         this(o, "password");
     }
@@ -57,7 +56,7 @@ public class ToStringBuilder {
         protected Object getValue(final Field field) throws IllegalAccessException {
             final Object value = super.getValue(field);
             if (value != null && Objects.equals(field.getType(), String.class)) { // long strings will get truncated
-                final String stringValue = (String)value;
+                final String stringValue = (String) value;
                 final int length = ToStringBuilder.CustomReflectionToStringBuilder.MAX_STRING_LENGTH;
                 if (stringValue.length() > length) {
                     return stringValue.substring(0, length) + "...";
@@ -65,6 +64,5 @@ public class ToStringBuilder {
             }
             return value;
         }
-
     }
 }

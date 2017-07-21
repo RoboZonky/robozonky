@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * OAuth access token for Zonky API.
- *
+ * <p>
  * Knowledge of this token will allow anyone to access the service as if they were the authenticated user. This is
  * therefore highly sensitive information and should never be kept in memory for longer than necessary.
  */
@@ -45,7 +45,7 @@ public class ZonkyApiToken extends BaseEntity {
     public static ZonkyApiToken unmarshal(final Reader token) throws JAXBException {
         final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
         final Unmarshaller u = ctx.createUnmarshaller();
-        return (ZonkyApiToken)u.unmarshal(token);
+        return (ZonkyApiToken) u.unmarshal(token);
     }
 
     public static String marshal(final ZonkyApiToken token) throws JAXBException {
@@ -56,9 +56,9 @@ public class ZonkyApiToken extends BaseEntity {
         return w.toString();
     }
 
-    @XmlElement(name="access_token")
+    @XmlElement(name = "access_token")
     private char[] accessToken;
-    @XmlElement(name="refresh_token")
+    @XmlElement(name = "refresh_token")
     private char[] refreshToken;
     @XmlElement(name = "token_type")
     private String type;
@@ -138,8 +138,12 @@ public class ZonkyApiToken extends BaseEntity {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final ZonkyApiToken that = (ZonkyApiToken) o;
         if (Arrays.equals(accessToken, that.accessToken)) {
             if (Arrays.equals(refreshToken, that.refreshToken)) {
@@ -155,5 +159,4 @@ public class ZonkyApiToken extends BaseEntity {
     public int hashCode() {
         return Objects.hash(accessToken, refreshToken, scope);
     }
-
 }

@@ -40,5 +40,4 @@ class RefreshableFileNotificationProperties extends RefreshableNotificationPrope
     protected File getDefaultConfigFileLocation() {
         return RefreshableFileNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION;
     }
-
 }

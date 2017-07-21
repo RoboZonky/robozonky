@@ -29,6 +29,5 @@ class OffsetDateTimeAdapter extends XmlAdapter<String, OffsetDateTime> {
     @Override
     public String marshal(final OffsetDateTime offsetDateTime) throws Exception {
         return offsetDateTime.toString();
-
     }
 }

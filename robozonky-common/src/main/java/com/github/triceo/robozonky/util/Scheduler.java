@@ -69,7 +69,7 @@ public class Scheduler {
 
     public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
         if (toSchedule instanceof Refreshable) {
-            final Optional<Refreshable<?>> maybeDependedOn = ((Refreshable<?>)toSchedule).getDependedOn();
+            final Optional<Refreshable<?>> maybeDependedOn = ((Refreshable<?>) toSchedule).getDependedOn();
             maybeDependedOn.ifPresent(dependedOn -> {
                 this.submit(dependedOn, delayInBetween); // make sure the parent's parent is also submitted
             });

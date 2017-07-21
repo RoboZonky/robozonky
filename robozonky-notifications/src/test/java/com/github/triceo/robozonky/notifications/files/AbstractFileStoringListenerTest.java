@@ -71,7 +71,7 @@ public class AbstractFileStoringListenerTest {
 
     private static FileNotificationProperties getNotificationProperties() {
         System.setProperty(RefreshableFileNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                AbstractFileStoringListener.class.getResource("notifications-enabled.cfg").toString());
+                           AbstractFileStoringListener.class.getResource("notifications-enabled.cfg").toString());
         final Refreshable<FileNotificationProperties> r = new RefreshableFileNotificationProperties();
         r.run();
         final Optional<FileNotificationProperties> p = r.getLatest();
@@ -90,20 +90,20 @@ public class AbstractFileStoringListenerTest {
         final Investment i = new Investment(l, 300);
         final InvestmentMadeEvent ime = new InvestmentMadeEvent(i, 0, false);
         final EventListener l1 = SupportedFileListener.INVESTMENT_MADE.getListener(p);
-        result.add(new Object[] {l1, ime, i.getLoanId(), i.getAmount(), "invested"} );
+        result.add(new Object[]{l1, ime, i.getLoanId(), i.getAmount(), "invested"});
         final Recommendation recommendation = new LoanDescriptor(l).recommend(300).get();
         final InvestmentRejectedEvent ire = new InvestmentRejectedEvent(recommendation, Integer.MAX_VALUE, "random");
         final EventListener l2 = SupportedFileListener.INVESTMENT_REJECTED.getListener(p);
-        result.add(new Object[] {l2, ire, recommendation.getLoanDescriptor().getLoan().getId(),
-                recommendation.getRecommendedInvestmentAmount(), "rejected"} );
+        result.add(new Object[]{l2, ire, recommendation.getLoanDescriptor().getLoan().getId(),
+                recommendation.getRecommendedInvestmentAmount(), "rejected"});
         final InvestmentDelegatedEvent ide = new InvestmentDelegatedEvent(recommendation, 0, "random");
         final EventListener l3 = SupportedFileListener.INVESTMENT_DELEGATED.getListener(p);
-        result.add(new Object[] {l3, ide, recommendation.getLoanDescriptor().getLoan().getId(),
-                recommendation.getRecommendedInvestmentAmount(), "delegated"} );
+        result.add(new Object[]{l3, ide, recommendation.getLoanDescriptor().getLoan().getId(),
+                recommendation.getRecommendedInvestmentAmount(), "delegated"});
         final InvestmentSkippedEvent ise = new InvestmentSkippedEvent(recommendation);
         final EventListener l4 = SupportedFileListener.INVESTMENT_SKIPPED.getListener(p);
-        result.add(new Object[] {l4, ise, recommendation.getLoanDescriptor().getLoan().getId(),
-                recommendation.getRecommendedInvestmentAmount(), "skipped"} );
+        result.add(new Object[]{l4, ise, recommendation.getLoanDescriptor().getLoan().getId(),
+                recommendation.getRecommendedInvestmentAmount(), "skipped"});
         return result;
     }
 
@@ -148,5 +148,4 @@ public class AbstractFileStoringListenerTest {
                 AbstractFileStoringListenerTest.getNewFilesInWorkingDirectory(this.availableFilesBeforeTestStart);
         files.forEach(p -> p.toFile().delete());
     }
-
 }

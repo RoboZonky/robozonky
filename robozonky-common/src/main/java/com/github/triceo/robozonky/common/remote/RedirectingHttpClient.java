@@ -37,5 +37,4 @@ final class RedirectingHttpClient extends ApacheHttpClient43Engine {
         super.loadHttpMethod(request, httpMethod);
         httpMethod.setConfig(RequestConfig.copy(httpMethod.getConfig()).setRedirectsEnabled(true).build());
     }
-
 }

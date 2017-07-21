@@ -27,7 +27,8 @@ public class Investment extends BaseInvestment {
     private int dpd, loanTermInMonth, currentTerm;
     private String loanName, nickname, firstName, surname, paymentStatus;
     private OffsetDateTime investmentDate, nextPaymentDate;
-    private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal, expectedInterest;
+    private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal,
+            expectedInterest;
     private Rating rating;
 
     Investment() {
@@ -153,5 +154,4 @@ public class Investment extends BaseInvestment {
     public BigDecimal getExpectedInterest() {
         return expectedInterest;
     }
-
 }

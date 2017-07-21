@@ -32,5 +32,4 @@ public class PositiveIntegerValueValidatorTest {
         Assertions.assertThatThrownBy(() -> new PositiveIntegerValueValidator().validate("something", -1))
                 .isInstanceOf(ParameterException.class);
     }
-
 }

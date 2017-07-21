@@ -16,9 +16,6 @@
 
 package com.github.triceo.robozonky.internal.api;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
@@ -45,5 +42,4 @@ public final class Defaults {
     public static final String ROBOZONKY_URL = "http://www.robozonky.cz";
     public static final String ROBOZONKY_USER_AGENT =
             "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " (" + Defaults.ROBOZONKY_URL + ")";
-
 }

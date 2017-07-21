@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to specify
+ * Used for things that need to be executed at app start and shutdown. Use {@link #register(ShutdownHook.Handler)} to
+ * specify
  * such actions and {@link #execute(ShutdownHook.Result)} ignoreWhen it's time to shut the app down.
  */
 class ShutdownHook {
@@ -57,11 +58,9 @@ class ShutdownHook {
         /**
          * You are allowed to do whatever initialization is required. Optionally return some code to be executed during
          * {@link ShutdownHook#execute(ShutdownHook.Result)}.
-         *
          * @return Will be called during app shutdown, if present.
          */
         Optional<Consumer<ShutdownHook.Result>> get();
-
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownHook.class);
@@ -70,7 +69,6 @@ class ShutdownHook {
 
     /**
      * Register a handler to call arbitrary code during execute.
-     *
      * @param handler Needs to return the execute handler and optionally perform other things.
      * @return True if the handler was registered and will be executed during execute.
      */
@@ -101,9 +99,9 @@ class ShutdownHook {
     }
 
     /**
-     * Execute and remove all handlers that were previously {@link #register(ShutdownHook.Handler)}ed, in the reverse order of
+     * Execute and remove all handlers that were previously {@link #register(ShutdownHook.Handler)}ed, in the reverse
+     * order of
      * their registration. If any handler throws an exception, it will be ignored.
-     *
      * @param result The terminating state of the appliation.
      */
     public void execute(final ShutdownHook.Result result) {
@@ -116,5 +114,4 @@ class ShutdownHook {
             }
         }
     }
-
 }

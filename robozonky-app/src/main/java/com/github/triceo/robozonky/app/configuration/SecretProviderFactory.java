@@ -31,7 +31,6 @@ final class SecretProviderFactory {
 
     /**
      * Obtain keystore-based secret provider if possible.
-     *
      * @param cli Command line interface coming from the application.
      * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
      */
@@ -57,10 +56,9 @@ final class SecretProviderFactory {
         return cliAuth.getKeystore().map(keyStore -> { // keystore is demanded but apparently unsupported, fail
             SecretProviderFactory.LOGGER.error("No KeyStore support detected, yet it is demanded.");
             return Optional.<SecretProvider>empty();
-        }).orElseGet(() ->  { // keystore is optional, fall back to other means
+        }).orElseGet(() -> { // keystore is optional, fall back to other means
             SecretProviderFactory.LOGGER.warn("Keystore not being used, storing password insecurely.");
             return Optional.of(SecretProvider.fallback(cliAuth.getUsername().get(), cliAuth.getPassword()));
         });
     }
-
 }

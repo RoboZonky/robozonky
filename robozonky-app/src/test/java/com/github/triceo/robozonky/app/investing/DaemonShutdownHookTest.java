@@ -46,5 +46,4 @@ public class DaemonShutdownHookTest {
         EXECUTOR.shutdownNow();
         ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.set(new CountDownLatch(1));
     }
-
 }

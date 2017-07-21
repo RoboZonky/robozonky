@@ -74,7 +74,7 @@ public class AuthenticationHandlerTest extends AbstractStateLeveragingTest {
         Assertions.assertThat(auth.execute((a) -> Collections.emptyList())).isEmpty();
         Mockito.verify(zonkyOauth, Mockito.times(1))
                 .login(ArgumentMatchers.eq(secrets.getUsername()),
-                        ArgumentMatchers.eq(secrets.getPassword()));
+                       ArgumentMatchers.eq(secrets.getPassword()));
         Mockito.verify(zonkyOauth, Mockito.never()).refresh(ArgumentMatchers.any());
         Mockito.verify(z, Mockito.times(1)).logout();
     }
@@ -166,7 +166,8 @@ public class AuthenticationHandlerTest extends AbstractStateLeveragingTest {
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
         Mockito.when(zonkyOauth.refresh(ArgumentMatchers.any())).thenReturn(token);
         final ApiProvider apiProvider = Mockito.spy(new ApiProvider());
-        auth.setApiProvider(apiProvider);;
+        auth.setApiProvider(apiProvider);
+        ;
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.doReturn(zonkyOauth).when(apiProvider).oauth();
         Mockito.doReturn(z).when(apiProvider).authenticated(Mockito.eq(AuthenticatorTest.TOKEN));
@@ -204,6 +205,5 @@ public class AuthenticationHandlerTest extends AbstractStateLeveragingTest {
         final ZonkyApiToken t = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
         Assertions.assertThat(auth.storeToken(t)).isFalse();
     }
-
 }
 

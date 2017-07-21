@@ -27,10 +27,8 @@ public interface InvestmentStrategyService {
 
     /**
      * Prepare the investment strategy for being used by the app.
-     *
      * @param strategy Investment strategy in question.
      * @return Processed instance of the investment strategy provided by the user, if the file format is supported.
      */
     Optional<InvestmentStrategy> parse(InputStream strategy);
-
 }

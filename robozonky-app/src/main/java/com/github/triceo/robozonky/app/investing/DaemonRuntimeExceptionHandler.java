@@ -52,5 +52,4 @@ final class DaemonRuntimeExceptionHandler extends RuntimeExceptionHandler {
             Events.fire(new RoboZonkyDaemonFailedEvent(in));
         };
     }
-
 }

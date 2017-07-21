@@ -41,5 +41,4 @@ final class RoboZonkyUpdateDetectedEventListener extends AbstractEmailingListene
     protected Map<String, Object> getData(final RoboZonkyUpdateDetectedEvent event) {
         return Collections.singletonMap("newVersion", event.getNewVersion());
     }
-
 }

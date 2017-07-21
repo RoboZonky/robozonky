@@ -70,5 +70,4 @@ public class ExtensionsManagerTest {
         Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
                 .isInstanceOf(URLClassLoader.class);
     }
-
 }

@@ -79,5 +79,4 @@ public class PaginatedApiTest {
         Mockito.verify(filter).setRequestHeader(ArgumentMatchers.eq("X-Page"), ArgumentMatchers.eq("1"));
         Mockito.verify(p).execute(ArgumentMatchers.eq(f), ArgumentMatchers.notNull(), ArgumentMatchers.eq(filter));
     }
-
 }

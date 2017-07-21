@@ -71,7 +71,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
         return new StrategyExecution(getInvestorBuilder(), refreshableStrategy, getAuthenticationHandler(),
-                maximumSleepPeriod);
+                                     maximumSleepPeriod);
     }
 
     @Override

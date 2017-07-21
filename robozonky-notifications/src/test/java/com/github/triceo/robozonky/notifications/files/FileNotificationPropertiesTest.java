@@ -30,8 +30,10 @@ public class FileNotificationPropertiesTest {
         final Properties p = new Properties();
         final FileNotificationProperties properties = new FileNotificationProperties(p);
         SoftAssertions.assertSoftly(softly ->
-                Stream.of(SupportedFileListener.values()).forEach(l ->
-                        softly.assertThat(properties.isListenerEnabled(l)).isFalse()));
+                                            Stream.of(SupportedFileListener.values()).forEach(l ->
+                                                                                                      softly.assertThat(
+                                                                                                              properties.isListenerEnabled(
+                                                                                                                      l)).isFalse()));
     }
 
     @Test
@@ -40,8 +42,10 @@ public class FileNotificationPropertiesTest {
         Stream.of(SupportedFileListener.values()).forEach(l -> p.setProperty(l.getLabel() + ".enabled", "true"));
         final FileNotificationProperties properties = new FileNotificationProperties(p);
         SoftAssertions.assertSoftly(softly ->
-                Stream.of(SupportedFileListener.values()).forEach(l ->
-                        softly.assertThat(properties.isListenerEnabled(l)).isTrue()));
+                                            Stream.of(SupportedFileListener.values()).forEach(l ->
+                                                                                                      softly.assertThat(
+                                                                                                              properties.isListenerEnabled(
+                                                                                                                      l)).isTrue()));
     }
 
     @Test
@@ -66,5 +70,4 @@ public class FileNotificationPropertiesTest {
         final FileNotificationProperties properties = new FileNotificationProperties(p);
         Assertions.assertThat(properties.getGlobalHourlyLimit()).isEqualTo(0);
     }
-
 }

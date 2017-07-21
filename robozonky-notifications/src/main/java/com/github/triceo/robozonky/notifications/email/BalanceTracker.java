@@ -36,12 +36,14 @@ enum BalanceTracker {
         if (!lastKnownBalance.isPresent()) {
             BalanceTracker.LOGGER.debug("No last known balance.");
             return OptionalInt.empty();
-        } else try {
-            return OptionalInt.of(Integer.parseInt(lastKnownBalance.get()));
-        } catch (final Exception ex) {
-            BalanceTracker.LOGGER.debug("Failed initializing balance.", ex);
-            this.reset();
-            return OptionalInt.empty();
+        } else {
+            try {
+                return OptionalInt.of(Integer.parseInt(lastKnownBalance.get()));
+            } catch (final Exception ex) {
+                BalanceTracker.LOGGER.debug("Failed initializing balance.", ex);
+                this.reset();
+                return OptionalInt.empty();
+            }
         }
     }
 

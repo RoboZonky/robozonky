@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import static org.mockito.internal.verification.VerificationModeFactory.*;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class RoboZonkyInstallerListenerTest {
 
@@ -295,5 +295,4 @@ public class RoboZonkyInstallerListenerTest {
                 .nextStep(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), ArgumentMatchers.eq(1));
         Mockito.verify(progress, times(1)).stopAction();
     }
-
 }

@@ -60,5 +60,4 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
     public Optional<Collection<Investment>> get() {
         return this.execute(null);
     }
-
 }

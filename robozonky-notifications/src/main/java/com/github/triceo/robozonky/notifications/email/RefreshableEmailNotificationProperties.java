@@ -21,7 +21,8 @@ import java.util.Properties;
 
 import com.github.triceo.robozonky.notifications.RefreshableNotificationProperties;
 
-public class RefreshableEmailNotificationProperties extends RefreshableNotificationProperties<EmailNotificationProperties> {
+public class RefreshableEmailNotificationProperties extends
+                                                    RefreshableNotificationProperties<EmailNotificationProperties> {
 
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
     public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";

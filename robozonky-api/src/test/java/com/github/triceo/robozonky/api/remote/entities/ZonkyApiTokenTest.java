@@ -33,7 +33,7 @@ public class ZonkyApiTokenTest {
         final OffsetDateTime obtainedOn = OffsetDateTime.MIN;
         final int expirationInSeconds = 60;
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                expirationInSeconds, obtainedOn);
+                                                      expirationInSeconds, obtainedOn);
         final String marshalled = ZonkyApiToken.marshal(token);
         final ZonkyApiToken unmarshalled = ZonkyApiToken.unmarshal(new StringReader(marshalled));
         SoftAssertions.assertSoftly(softly -> {
@@ -79,5 +79,4 @@ public class ZonkyApiTokenTest {
         final OffsetDateTime earlyEnough = OffsetDateTime.now().minus(5, ChronoUnit.SECONDS);
         Assertions.assertThat(unmarshalled.getObtainedOn()).isAfter(earlyEnough);
     }
-
 }

@@ -75,5 +75,4 @@ public class StateTest {
         this.deleteState();
         Assertions.assertThat(first.setValue("bbbb", "cccc")).isTrue();
     }
-
 }

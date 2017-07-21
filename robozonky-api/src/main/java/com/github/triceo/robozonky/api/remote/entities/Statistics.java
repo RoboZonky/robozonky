@@ -65,7 +65,6 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public OverallOverview getOverallOverview() {
         return Statistics.getOrDefault(this.overallOverview, OverallOverview::new);
-
     }
 
     @XmlElement
@@ -74,7 +73,6 @@ public class Statistics extends BaseEntity {
     }
 
     /**
-     *
      * @return Expected cashflows for 8 previous months, the current month, and three future months. Current month is
      * on index 8, the next month after that is on index 9.
      */
@@ -87,5 +85,4 @@ public class Statistics extends BaseEntity {
     public Collection<RiskPortfolio> getRiskPortfolio() {
         return Statistics.getOrDefault(this.riskPortfolio);
     }
-
 }

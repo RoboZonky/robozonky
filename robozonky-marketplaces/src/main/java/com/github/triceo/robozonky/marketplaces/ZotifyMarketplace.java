@@ -24,5 +24,4 @@ class ZotifyMarketplace extends AbstractMarketplace {
     protected ApiProvider api() {
         return new MarketplaceApiProvider();
     }
-
 }

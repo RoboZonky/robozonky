@@ -58,6 +58,5 @@ public final class InvestmentStrategyLoader {
     public static Optional<InvestmentStrategy> load(final String strategy) {
         return InvestmentStrategyLoader.load(strategy, InvestmentStrategyLoader.LOADER);
     }
-
 }
 

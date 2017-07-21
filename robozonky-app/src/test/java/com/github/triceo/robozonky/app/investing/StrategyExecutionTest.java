@@ -42,5 +42,4 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).isEmpty();
     }
-
 }

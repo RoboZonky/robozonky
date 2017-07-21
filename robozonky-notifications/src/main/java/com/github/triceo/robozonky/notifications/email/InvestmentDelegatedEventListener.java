@@ -53,7 +53,4 @@ final class InvestmentDelegatedEventListener extends AbstractEmailingListener<In
         result.put("newBalance", event.getBalance());
         return result;
     }
-
-
-
 }

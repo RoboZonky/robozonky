@@ -39,8 +39,8 @@ public class OAuthTest {
         }
         Mockito.verify(api, Mockito.times(1))
                 .login(ArgumentMatchers.eq(USERNAME), ArgumentMatchers.eq(PASSWORD),
-                        ArgumentMatchers.eq("password"),
-                        ArgumentMatchers.eq("SCOPE_APP_WEB"));
+                       ArgumentMatchers.eq("password"),
+                       ArgumentMatchers.eq("SCOPE_APP_WEB"));
         Assertions.assertThat(wrapper.isClosed()).isTrue();
     }
 
@@ -48,11 +48,11 @@ public class OAuthTest {
     public void refresh() {
         final String originalTokenId = UUID.randomUUID().toString();
         final ZonkyApiToken originToken = new ZonkyApiToken(UUID.randomUUID().toString(), originalTokenId,
-                OffsetDateTime.now());
+                                                            OffsetDateTime.now());
         final ZonkyApiToken resultToken = Mockito.mock(ZonkyApiToken.class);
         final ZonkyOAuthApi api = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.when(api.refresh(ArgumentMatchers.eq(originalTokenId),
-                ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(resultToken);
+                                 ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(resultToken);
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         try (final OAuth oauth = new OAuth(wrapper)) {
             final ZonkyApiToken returnedToken = oauth.refresh(originToken);
@@ -60,5 +60,4 @@ public class OAuthTest {
         }
         Assertions.assertThat(wrapper.isClosed()).isTrue();
     }
-
 }

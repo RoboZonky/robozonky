@@ -25,5 +25,4 @@ public class DefaultsTest {
     public void userAgent() {
         Assertions.assertThat(Defaults.ROBOZONKY_USER_AGENT).contains(Defaults.ROBOZONKY_URL);
     }
-
 }

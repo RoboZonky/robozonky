@@ -34,7 +34,7 @@ public class RobozonkyMarketplaceService implements MarketplaceService {
         if (Objects.equals("zotify", marketplaceId)) {
             return Optional.of(new ZotifyMarketplace());
         } else if (Objects.equals("zonky", marketplaceId)) {
-                return Optional.of(new ZonkyMarketplace());
+            return Optional.of(new ZonkyMarketplace());
         } else {
             return Optional.empty();
         }

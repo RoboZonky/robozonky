@@ -43,7 +43,7 @@ final class PaginatedImpl<T> implements Paginated<T> {
 
     @Override
     public boolean nextPage() {
-        this.itemsOnPage = api.execute(EntityCollectionApi::items, this.ordering,this.getPageId() + 1, this.pageSize);
+        this.itemsOnPage = api.execute(EntityCollectionApi::items, this.ordering, this.getPageId() + 1, this.pageSize);
         return this.itemsOnPage != null && !this.itemsOnPage.getPage().isEmpty();
     }
 

@@ -45,7 +45,6 @@ public class Loan extends BaseEntity {
     /**
      * Zonky's API documentation states that {@link #getUrl()} is optional. Therefore the only safe use of that
      * attribute is through this method.
-     *
      * @return URL to a loan on Zonky's website. Guessed if not present.
      */
     public static String getUrlSafe(final Loan l) {
@@ -203,6 +202,7 @@ public class Loan extends BaseEntity {
      * @return Zonky URL as provided by the API.
      */
     @XmlElement
-    public String getUrl() { return url; }
-
+    public String getUrl() {
+        return url;
+    }
 }

@@ -120,5 +120,4 @@ public class OperatingModeTest {
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
         Assertions.assertThat(config).isPresent();
     }
-
 }

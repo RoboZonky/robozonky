@@ -54,5 +54,4 @@ public class InstallDirValidatorTest {
         Assertions.assertThat(v.validateData(d)).isEqualTo(DataValidator.Status.ERROR);
         Assertions.assertThat(v.getErrorMessageId()).isNotEmpty();
     }
-
 }

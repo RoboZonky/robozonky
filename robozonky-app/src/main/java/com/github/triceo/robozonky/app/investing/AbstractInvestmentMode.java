@@ -75,14 +75,12 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
 
     /**
      * Start marketplace which will be putting marketplace into a given buffer.
-     *
      * @param target The buffer to start putting marketplace into.
      */
     protected abstract void openMarketplace(Consumer<Collection<Loan>> target);
 
     /**
      * Provide the investing algorithm.
-     *
      * @return Investments made by the algorithm.
      */
     protected abstract Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor();
@@ -90,7 +88,6 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
     /**
      * Execute the algorithm and give it a circuit breaker which, when turning true, tells the orchestration to
      * finish the operation and terminate.
-     *
      * @param circuitBreaker Count to 0 in order to have this method stop and return. If null, stops and returns
      * without waiting for anything.
      * @return Investments made while this method was running, or empty if failure.
@@ -117,15 +114,15 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
         } catch (final SuddenDeathException ex) {
             LOGGER.error("Thread stack traces:");
             Thread.getAllStackTraces().forEach((key, value) ->
-                    LOGGER.error("Stack trace for thread {}: {}", key,
-                            Stream.of(value)
-                                    .map(StackTraceElement::toString)
-                                    .collect(Collectors.joining(System.lineSeparator()))));
+                                                       LOGGER.error("Stack trace for thread {}: {}", key,
+                                                                    Stream.of(value)
+                                                                            .map(StackTraceElement::toString)
+                                                                            .collect(Collectors.joining(
+                                                                                    System.lineSeparator()))));
             throw new IllegalStateException(ex);
         } catch (final Exception ex) {
             LOGGER.error("Failed executing investments.", ex);
             return Optional.empty();
         }
     }
-
 }

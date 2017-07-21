@@ -27,11 +27,9 @@ public interface MarketplaceService {
 
     /**
      * Find a marketplace of a given ID that is able to serve loans using a given secret.
-     *
      * @param marketplaceId Type of the marketplace to serve, such as "zonky" or "zotify".
      * @param secret Whatever secret that the {@link Marketplace} needs to authenticate with the data source.
      * @return The instance to serve the loans, if one is found.
      */
     Optional<Marketplace> find(String marketplaceId, char[] secret);
-
 }

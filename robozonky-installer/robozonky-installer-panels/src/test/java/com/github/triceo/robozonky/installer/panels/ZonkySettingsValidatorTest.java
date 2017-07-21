@@ -74,7 +74,7 @@ public class ZonkySettingsValidatorTest {
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);
         Mockito.verify(oauth)
                 .login(ArgumentMatchers.eq(ZonkySettingsValidatorTest.USERNAME),
-                        ArgumentMatchers.eq(ZonkySettingsValidatorTest.PASSWORD.toCharArray()));
+                       ArgumentMatchers.eq(ZonkySettingsValidatorTest.PASSWORD.toCharArray()));
         Mockito.verify(zonky).logout();
     }
 
@@ -84,7 +84,7 @@ public class ZonkySettingsValidatorTest {
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
         final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
-                ArgumentMatchers.any())).thenThrow(new IllegalStateException());
+                                 ArgumentMatchers.any())).thenThrow(new IllegalStateException());
         Mockito.when(provider.oauth()).thenReturn(Mockito.mock(OAuth.class));
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT
@@ -109,5 +109,4 @@ public class ZonkySettingsValidatorTest {
         // test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.ERROR);
     }
-
 }

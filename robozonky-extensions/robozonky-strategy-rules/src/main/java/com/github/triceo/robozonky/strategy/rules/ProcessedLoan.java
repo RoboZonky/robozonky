@@ -58,5 +58,4 @@ public class ProcessedLoan implements Comparable<ProcessedLoan> {
     public int compareTo(final ProcessedLoan other) {
         return new ProcessedLoanComparator().compare(this, other);
     }
-
 }

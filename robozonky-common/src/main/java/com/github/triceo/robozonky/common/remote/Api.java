@@ -24,10 +24,10 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 /**
  * Represents a close-able RESTEasy client proxy. Users should preferably call {@link #close()} after they're
  * done with the API.
- *
  * @param <T> Type of the API to be handled.
  */
-class Api<T> implements ApiBlueprint<T>, AutoCloseable {
+class Api<T> implements ApiBlueprint<T>,
+                        AutoCloseable {
 
     private final AtomicReference<ResteasyClient> client;
     private final T api;

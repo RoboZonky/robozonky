@@ -21,5 +21,4 @@ public class MainIncomeTypeTest extends AbstractBaseEnumTest {
     public MainIncomeTypeTest() {
         super(MainIncomeType::values, MainIncomeType::findByCode);
     }
-
 }

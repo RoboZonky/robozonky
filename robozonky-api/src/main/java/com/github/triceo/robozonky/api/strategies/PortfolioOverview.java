@@ -43,7 +43,6 @@ public class PortfolioOverview {
 
     /**
      * Prepare an immutable portfolio overview, based on the provided information.
-     *
      * @param balance Current available balance in the wallet.
      * @param stats Statistics retrieved from the Zonky API.
      * @param investments Investments not yet reflected in the Zonky API.
@@ -134,7 +133,6 @@ public class PortfolioOverview {
     }
 
     /**
-     *
      * @return Amount in CZK of the expected yield in the next 12 months.
      */
     public int getCzkExpectedYield() {
@@ -142,7 +140,6 @@ public class PortfolioOverview {
     }
 
     /**
-     *
      * @return Expected yield in the next 12 months, as a percentage.
      */
     public BigDecimal getRelativeExpectedYield() {

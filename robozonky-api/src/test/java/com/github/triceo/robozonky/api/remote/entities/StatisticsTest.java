@@ -33,5 +33,4 @@ public class StatisticsTest {
                 (Statistics) um.unmarshal(StatisticsTest.class.getResourceAsStream("statistics-no-risk.xml"));
         Assertions.assertThat(result.getRiskPortfolio()).isNotNull(); // null happens if the user never invested yet
     }
-
 }

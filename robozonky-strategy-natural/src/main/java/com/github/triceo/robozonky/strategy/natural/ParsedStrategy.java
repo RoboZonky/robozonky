@@ -132,5 +132,4 @@ public class ParsedStrategy {
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> loans) {
         return loans.stream().filter(l -> matchesNoFilter(l.getLoan()));
     }
-
 }

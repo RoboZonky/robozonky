@@ -31,7 +31,7 @@ import org.mockito.Mockito;
 
 public class ZonkoidSettingsValidatorTest {
 
-    private static final String USER = "someone@somewhere.cz", TOKEN = String.valueOf((int)(Math.random() * 100_000));
+    private static final String USER = "someone@somewhere.cz", TOKEN = String.valueOf((int) (Math.random() * 100_000));
 
     @Test
     public void messages() {
@@ -65,7 +65,7 @@ public class ZonkoidSettingsValidatorTest {
     public void zonkoidPresentButNotConfirming() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
+                                            ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
         final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
@@ -78,7 +78,8 @@ public class ZonkoidSettingsValidatorTest {
     public void zonkoidPresentButRejecting() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt())).thenReturn(Optional.of(new Confirmation(ConfirmationType.REJECTED)));
+                                            ArgumentMatchers.anyInt())).thenReturn(
+                Optional.of(new Confirmation(ConfirmationType.REJECTED)));
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
         final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
@@ -91,7 +92,8 @@ public class ZonkoidSettingsValidatorTest {
     public void zonkoidProper() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt())).thenReturn(Optional.of(new Confirmation(ConfirmationType.DELEGATED)));
+                                            ArgumentMatchers.anyInt())).thenReturn(
+                Optional.of(new Confirmation(ConfirmationType.DELEGATED)));
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
         final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
@@ -99,5 +101,4 @@ public class ZonkoidSettingsValidatorTest {
         // run test
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);
     }
-
 }

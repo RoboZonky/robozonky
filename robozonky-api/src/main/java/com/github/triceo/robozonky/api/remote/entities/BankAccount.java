@@ -46,5 +46,4 @@ public class BankAccount extends BaseEntity {
     public int getId() {
         return id;
     }
-
 }

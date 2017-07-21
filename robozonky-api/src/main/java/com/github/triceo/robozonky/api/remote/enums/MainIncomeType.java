@@ -48,7 +48,6 @@ public enum MainIncomeType implements BaseEnum {
             final String id = jsonParser.getText();
             return MainIncomeType.valueOf(id);
         }
-
     }
 
     public static MainIncomeType findByCode(final String code) {

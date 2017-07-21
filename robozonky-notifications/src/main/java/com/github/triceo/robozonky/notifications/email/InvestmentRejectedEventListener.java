@@ -52,5 +52,4 @@ final class InvestmentRejectedEventListener extends AbstractEmailingListener<Inv
         result.put("newBalance", event.getBalance());
         return result;
     }
-
 }

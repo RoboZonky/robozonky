@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.configuration;
 
 import java.io.File;
-import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 

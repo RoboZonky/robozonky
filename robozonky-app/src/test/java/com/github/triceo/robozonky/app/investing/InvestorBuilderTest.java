@@ -30,9 +30,8 @@ public class InvestorBuilderTest {
         b.asUser(username).asDryRun();
         final Investor p = b.build(Mockito.mock(Zonky.class));
         SoftAssertions.assertSoftly(softly -> {
-          softly.assertThat(p.getUsername()).isEqualTo(username);
-          softly.assertThat(p.isDryRun()).isTrue();
+            softly.assertThat(p.getUsername()).isEqualTo(username);
+            softly.assertThat(p.isDryRun()).isTrue();
         });
     }
-
 }

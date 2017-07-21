@@ -33,5 +33,4 @@ class RoboZonkyInitializedEventListener extends AbstractEmailingListener<RoboZon
     String getTemplateFileName() {
         return "initialized.ftl";
     }
-
 }

@@ -39,5 +39,4 @@ public class RoboZonkyMarketplaceServiceTest {
     public void nonexistent() {
         Assertions.assertThat(new RobozonkyMarketplaceService().find(UUID.randomUUID().toString())).isEmpty();
     }
-
 }

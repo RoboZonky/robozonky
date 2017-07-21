@@ -36,8 +36,9 @@ public final class ConfirmationProviderLoader {
         ConfirmationProviderLoader.LOGGER.trace("Looking up confirmation provider '{}'.", providerId);
         return Util.toStream(loader)
                 .peek(cp ->
-                        ConfirmationProviderLoader.LOGGER.debug("Evaluating confirmation provider '{}' with '{}'.",
-                                providerId, cp.getClass()))
+                              ConfirmationProviderLoader.LOGGER.debug(
+                                      "Evaluating confirmation provider '{}' with '{}'.",
+                                      providerId, cp.getClass()))
                 .map(cp -> cp.find(providerId))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();
@@ -46,6 +47,5 @@ public final class ConfirmationProviderLoader {
     public static Optional<ConfirmationProvider> load(final String providerId) {
         return ConfirmationProviderLoader.load(providerId, ConfirmationProviderLoader.LOADER);
     }
-
 }
 

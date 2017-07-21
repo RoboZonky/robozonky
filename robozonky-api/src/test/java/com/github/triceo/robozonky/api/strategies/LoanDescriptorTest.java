@@ -83,5 +83,4 @@ public class LoanDescriptorTest {
         final Optional<Recommendation> r = ld.recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
         Assertions.assertThat(r).isEmpty();
     }
-
 }

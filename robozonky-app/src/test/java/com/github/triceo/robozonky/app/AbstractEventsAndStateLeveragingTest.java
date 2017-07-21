@@ -33,5 +33,4 @@ public abstract class AbstractEventsAndStateLeveragingTest extends AbstractState
         Events.getFired().clear();
         Events.INSTANCE.registries.clear();
     }
-
 }

@@ -24,5 +24,4 @@ public class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<R
     public LoanRatingEnumeratedCondition() {
         super(Loan::getRating);
     }
-
 }

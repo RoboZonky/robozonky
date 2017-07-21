@@ -24,5 +24,4 @@ class BorrowerRegionCondition extends AbstractEnumeratedCondition<Region> {
     public BorrowerRegionCondition() {
         super(Loan::getRegion);
     }
-
 }

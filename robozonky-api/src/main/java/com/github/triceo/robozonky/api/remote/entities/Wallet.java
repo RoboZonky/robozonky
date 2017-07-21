@@ -79,5 +79,4 @@ public class Wallet extends BaseEntity {
     public BankAccount getAccount() {
         return account;
     }
-
 }

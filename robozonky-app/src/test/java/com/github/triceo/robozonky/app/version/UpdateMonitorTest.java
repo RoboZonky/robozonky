@@ -80,5 +80,4 @@ public class UpdateMonitorTest {
             softly.assertThat(actual.getLatestUnstable()).contains(version2);
         });
     }
-
 }

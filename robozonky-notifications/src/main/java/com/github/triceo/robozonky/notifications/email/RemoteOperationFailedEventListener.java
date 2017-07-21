@@ -28,7 +28,7 @@ class RemoteOperationFailedEventListener extends AbstractEmailingListener<Remote
     }
 
     @Override
-    String getSubject(final RemoteOperationFailedEvent  event) {
+    String getSubject(final RemoteOperationFailedEvent event) {
         return "Vyskytla se chyba v sítové komunikaci!";
     }
 

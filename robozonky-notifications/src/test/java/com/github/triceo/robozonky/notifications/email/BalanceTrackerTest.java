@@ -63,5 +63,4 @@ public class BalanceTrackerTest {
         state.setValue(BalanceTracker.BALANCE_KEY, UUID.randomUUID().toString());
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
     }
-
 }

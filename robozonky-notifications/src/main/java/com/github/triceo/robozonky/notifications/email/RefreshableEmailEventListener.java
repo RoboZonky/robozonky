@@ -27,7 +27,8 @@ import com.github.triceo.robozonky.notifications.RefreshableEventListener;
 
 class RefreshableEmailEventListener<T extends Event> extends RefreshableEventListener<T, EmailNotificationProperties> {
 
-    public RefreshableEmailEventListener(final Refreshable<EmailNotificationProperties> properties, final Class<T> eventType) {
+    public RefreshableEmailEventListener(final Refreshable<EmailNotificationProperties> properties,
+                                         final Class<T> eventType) {
         super(properties, eventType);
     }
 
@@ -35,13 +36,13 @@ class RefreshableEmailEventListener<T extends Event> extends RefreshableEventLis
     protected Optional<EventListener<T>> transform(final String source) {
         final Optional<EmailNotificationProperties> optionalProps = this.getProperties().getLatest();
         return optionalProps.map(props ->
-                Stream.of(SupportedEmailListener.values())
-                        .filter(l -> Objects.equals(this.getEventType(), l.getEventType()))
-                        .filter(l -> props.isEnabled())
-                        .filter(props::isListenerEnabled)
-                        .findFirst()
-                        .map(l -> Optional.of((EventListener<T>)l.getListener(props)))
-                        .orElse(Optional.empty()))
+                                         Stream.of(SupportedEmailListener.values())
+                                                 .filter(l -> Objects.equals(this.getEventType(), l.getEventType()))
+                                                 .filter(l -> props.isEnabled())
+                                                 .filter(props::isListenerEnabled)
+                                                 .findFirst()
+                                                 .map(l -> Optional.of((EventListener<T>) l.getListener(props)))
+                                                 .orElse(Optional.empty()))
                 .orElse(Optional.empty());
     }
 }

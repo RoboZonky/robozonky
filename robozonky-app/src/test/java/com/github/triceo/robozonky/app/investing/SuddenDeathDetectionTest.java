@@ -40,5 +40,4 @@ public class SuddenDeathDetectionTest {
             softly.assertThat(latch.getCount()).isEqualTo(0);
         });
     }
-
 }

@@ -156,5 +156,4 @@ public class KeyStoreSecretProviderTest {
         Assertions.assertThatThrownBy(() -> new KeyStoreSecretProvider(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-
 }

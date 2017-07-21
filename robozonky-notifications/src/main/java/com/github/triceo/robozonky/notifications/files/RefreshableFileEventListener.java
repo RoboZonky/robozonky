@@ -27,7 +27,8 @@ import com.github.triceo.robozonky.notifications.RefreshableEventListener;
 
 class RefreshableFileEventListener<T extends Event> extends RefreshableEventListener<T, FileNotificationProperties> {
 
-    public RefreshableFileEventListener(final Refreshable<FileNotificationProperties> properties, final Class<T> eventType) {
+    public RefreshableFileEventListener(final Refreshable<FileNotificationProperties> properties,
+                                        final Class<T> eventType) {
         super(properties, eventType);
     }
 
@@ -35,13 +36,13 @@ class RefreshableFileEventListener<T extends Event> extends RefreshableEventList
     protected Optional<EventListener<T>> transform(final String source) {
         final Optional<FileNotificationProperties> optionalProps = this.getProperties().getLatest();
         return optionalProps.map(props ->
-                Stream.of(SupportedFileListener.values())
-                        .filter(l -> Objects.equals(this.getEventType(), l.getEventType()))
-                        .filter(l -> props.isEnabled())
-                        .filter(props::isListenerEnabled)
-                        .findFirst()
-                        .map(l -> Optional.of((EventListener<T>)l.getListener(props)))
-                        .orElse(Optional.empty()))
+                                         Stream.of(SupportedFileListener.values())
+                                                 .filter(l -> Objects.equals(this.getEventType(), l.getEventType()))
+                                                 .filter(l -> props.isEnabled())
+                                                 .filter(props::isListenerEnabled)
+                                                 .findFirst()
+                                                 .map(l -> Optional.of((EventListener<T>) l.getListener(props)))
+                                                 .orElse(Optional.empty()))
                 .orElse(Optional.empty());
     }
 }

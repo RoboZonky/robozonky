@@ -60,7 +60,6 @@ public class CommandLine {
     /**
      * Takes command-line arguments and converts them into an application configuration, printing command line usage
      * information in case the arguments are somehow invalid.
-     *
      * @param args Command-line arguments, coming from the main() method.
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
@@ -100,7 +99,7 @@ public class CommandLine {
         }
         final JCommander command = jc.getCommands().get(parsedCommand);
         final List<Object> objects = command.getObjects();
-        final OperatingMode mode = (OperatingMode)objects.get(0);
+        final OperatingMode mode = (OperatingMode) objects.get(0);
         Stream.of(authenticationFragment, confirmationFragment, tweaksFragment, mode)
                 .forEach(commandLineFragment -> commandLineFragment.validate(jc));
         return mode;
@@ -129,5 +128,4 @@ public class CommandLine {
     static String getScriptIdentifier() {
         return System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
     }
-
 }

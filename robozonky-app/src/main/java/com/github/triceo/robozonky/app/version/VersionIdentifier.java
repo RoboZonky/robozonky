@@ -24,7 +24,6 @@ class VersionIdentifier {
 
     /**
      * Represents a stable version that has no available follow-up unstable versions.
-     *
      * @param stable The stable version string.
      */
     VersionIdentifier(final String stable) {

@@ -42,5 +42,4 @@ public class RobozonkyStartupNotifierTest extends AbstractEventsAndStateLeveragi
         result.get().accept(r2);
         Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyCrashedEvent.class);
     }
-
 }

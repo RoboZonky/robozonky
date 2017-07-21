@@ -49,11 +49,9 @@ public class ListenerServiceLoaderTest {
         Assertions.assertThat(r)
                 .first()
                 .has(new Condition<>(result -> result.getLatest().isPresent() && result.getLatest().get() == l,
-                        "Exists"));
+                                     "Exists"));
         Assertions.assertThat(r)
                 .last()
                 .has(new Condition<>(result -> !result.getLatest().isPresent(), "Does not exist"));
-
     }
-
 }

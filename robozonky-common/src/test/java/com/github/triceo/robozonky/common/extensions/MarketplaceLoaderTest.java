@@ -71,5 +71,4 @@ public class MarketplaceLoaderTest {
         final Credentials c = new Credentials("", SecretProvider.fallback(""));
         Assertions.assertThat(MarketplaceLoader.load(c, Collections.singleton(ms))).contains(m);
     }
-
 }

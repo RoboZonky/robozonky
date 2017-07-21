@@ -48,5 +48,4 @@ public class Instalment extends BaseEntity {
     public OffsetDateTime getMonth() {
         return month;
     }
-
 }

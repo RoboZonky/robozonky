@@ -23,7 +23,7 @@ public class InvestmentStatusesTest {
 
     @Test
     public void ofArrayOfInvestmentStatuses() {
-        final InvestmentStatus[] statuses = new InvestmentStatus[] {InvestmentStatus.ACTIVE, InvestmentStatus.COVERED};
+        final InvestmentStatus[] statuses = new InvestmentStatus[]{InvestmentStatus.ACTIVE, InvestmentStatus.COVERED};
         final InvestmentStatuses result = InvestmentStatuses.of(statuses);
         Assertions.assertThat(result.getInvestmentStatuses()).containsOnly(statuses);
     }
@@ -37,7 +37,7 @@ public class InvestmentStatusesTest {
     @Test
     public void correctToString() {
         // test no items
-        Assertions.assertThat(InvestmentStatuses.of(new InvestmentStatus[] {}).toString()).isEqualTo("[]");
+        Assertions.assertThat(InvestmentStatuses.of(new InvestmentStatus[]{}).toString()).isEqualTo("[]");
         // test one item
         Assertions.assertThat(InvestmentStatuses.of(InvestmentStatus.ACTIVE).toString()).isEqualTo("[ACTIVE]");
         // test multiple items
@@ -73,5 +73,4 @@ public class InvestmentStatusesTest {
         Assertions.assertThatThrownBy(() -> InvestmentStatuses.valueOf("[SOME_UNKNOWN_VALUE]"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-
 }

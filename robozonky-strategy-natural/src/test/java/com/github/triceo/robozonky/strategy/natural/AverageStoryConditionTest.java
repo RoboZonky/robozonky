@@ -55,5 +55,4 @@ public class AverageStoryConditionTest {
         Mockito.when(l.getStory()).thenReturn(story);
         Assertions.assertThat(new AverageStoryCondition().test(l)).isFalse();
     }
-
 }

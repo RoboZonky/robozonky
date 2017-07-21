@@ -32,7 +32,7 @@ public class DefaultPortfolioTest {
     @Parameterized.Parameters(name = "{0} + {1}")
     public static Collection<Object[]> parameters() {
         final Collection<Object[]> result = new ArrayList<>(Rating.values().length);
-        Stream.of(Rating.values()).forEach(r -> result.add(new Object[] {DefaultPortfolio.EMPTY, r}));
+        Stream.of(Rating.values()).forEach(r -> result.add(new Object[]{DefaultPortfolio.EMPTY, r}));
         return result;
     }
 
@@ -50,5 +50,4 @@ public class DefaultPortfolioTest {
     public void unknownValue() {
         Assertions.assertThatThrownBy(() -> p.getDefaultShare(null)).isInstanceOf(IllegalStateException.class);
     }
-
 }

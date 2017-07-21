@@ -42,7 +42,7 @@ public class EqualityConditionTest {
             final Rating current = all.get(i);
             final Collection<Rating> betterThan = i == 0 ? Collections.emptyList() : all.subList(0, i);
             final Collection<Rating> worseThan = i == total - 1 ? Collections.emptyList() : all.subList(i + 1, total);
-            result.add(new Object[] {current, betterThan, worseThan});
+            result.add(new Object[]{current, betterThan, worseThan});
         }
         return result;
     }
@@ -80,5 +80,4 @@ public class EqualityConditionTest {
             worseThanCurrent.forEach(r -> softly.assertThat(c.test(mockLoan(r))).isTrue());
         });
     }
-
 }

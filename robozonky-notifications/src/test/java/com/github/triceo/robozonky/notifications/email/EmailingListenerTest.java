@@ -45,5 +45,4 @@ public class EmailingListenerTest extends AbstractEmailingListenerTest {
         Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(l.getSubject(this.event));
         Assertions.assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
     }
-
 }

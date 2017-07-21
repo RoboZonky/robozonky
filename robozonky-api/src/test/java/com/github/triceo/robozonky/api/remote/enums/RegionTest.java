@@ -21,5 +21,4 @@ public class RegionTest extends AbstractBaseEnumTest {
     public RegionTest() {
         super(Region::values, Region::findByCode);
     }
-
 }

@@ -50,5 +50,4 @@ final class InvestmentSkippedEventListener extends AbstractEmailingListener<Inve
         result.put("loanUrl", Loan.getUrlSafe(loan));
         return result;
     }
-
 }

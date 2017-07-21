@@ -39,5 +39,4 @@ class ListenerSpecificNotificationProperties extends EmailNotificationProperties
     public OptionalInt getListenerSpecificIntProperty(final String property) {
         return this.getIntValue(EmailNotificationProperties.getCompositePropertyName(this.listener, property));
     }
-
 }

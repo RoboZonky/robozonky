@@ -39,5 +39,4 @@ public class AuthenticationFilterTest extends AbstractCommonFilterTest {
         this.getTestedFilter().filter(crc);
         Assertions.assertThat(crc.getHeaders()).containsKey("Authorization");
     }
-
 }

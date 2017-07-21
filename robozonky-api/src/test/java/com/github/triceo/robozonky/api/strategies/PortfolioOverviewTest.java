@@ -53,7 +53,7 @@ public class PortfolioOverviewTest {
         final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), s, Collections.emptyList
                 ());
         SoftAssertions.assertSoftly(softly -> {
-            for (final Rating r: Rating.values()) {
+            for (final Rating r : Rating.values()) {
                 softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
             }
             softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
@@ -96,12 +96,11 @@ public class PortfolioOverviewTest {
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.D, amountD, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAAA, 0, newTotalPie); // test other ratings included
+        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAAA, 0,
+                                                      newTotalPie); // test other ratings included
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAA, 0, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAA, 0, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.A, increment, newTotalPie);
         PortfolioOverviewTest.assertProperRatingShare(result, Rating.C, 0, newTotalPie);
     }
-
-
 }

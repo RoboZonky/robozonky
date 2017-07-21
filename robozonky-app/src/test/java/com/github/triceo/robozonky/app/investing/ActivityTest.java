@@ -86,5 +86,4 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
                 OffsetDateTime.parse(Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID).get());
         Assertions.assertThat(newTimestamp).isBefore(activeLoan.getDatePublished());
     }
-
 }

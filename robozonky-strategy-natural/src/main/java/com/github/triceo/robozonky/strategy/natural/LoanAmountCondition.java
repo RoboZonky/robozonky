@@ -30,5 +30,4 @@ public class LoanAmountCondition extends AbstractRangeCondition {
     public LoanAmountCondition(final int fromInclusive) {
         this(fromInclusive, Integer.MAX_VALUE);
     }
-
 }

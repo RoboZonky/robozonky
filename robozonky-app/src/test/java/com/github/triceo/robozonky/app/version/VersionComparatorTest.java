@@ -30,17 +30,16 @@ public class VersionComparatorTest {
     @Parameterized.Parameters(name = "compare({0}, {1}) == {2}")
     public static Collection<Object[]> parameters() {
         return Arrays.asList(
-                new Object[]{"1.0.0",  "1.0.1",   -1},
-                new Object[]{"1.1.0",  "1.0.1",    1},
-                new Object[]{"1.11.0", "1.1.1",    1},
-                new Object[]{"1.1.3",  "1.1.21",  -1},
-                new Object[]{"1.1.4",  "1.1.4-CR1",  1},
-                new Object[]{"1.1.3-CR1",  "1.1.3-BETA1",  1},
-                new Object[]{"1.1.2-BETA1",  "1.1.2-ALPHA1",  1},
-                new Object[]{"1.0.0",  "01.0.00",  0}
-                );
+                new Object[]{"1.0.0", "1.0.1", -1},
+                new Object[]{"1.1.0", "1.0.1", 1},
+                new Object[]{"1.11.0", "1.1.1", 1},
+                new Object[]{"1.1.3", "1.1.21", -1},
+                new Object[]{"1.1.4", "1.1.4-CR1", 1},
+                new Object[]{"1.1.3-CR1", "1.1.3-BETA1", 1},
+                new Object[]{"1.1.2-BETA1", "1.1.2-ALPHA1", 1},
+                new Object[]{"1.0.0", "01.0.00", 0}
+        );
     }
-
 
     @Parameterized.Parameter
     public String left;
@@ -75,5 +74,4 @@ public class VersionComparatorTest {
     public void compareNulls() throws Exception {
         Assertions.assertThat(VersionComparator.isSmallerThan(null, null)).isFalse();
     }
-
 }

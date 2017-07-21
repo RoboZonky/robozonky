@@ -41,5 +41,4 @@ public class DefaultInvestmentShare {
     public int getMaximumShareInPercent() {
         return maximumShareInPercent;
     }
-
 }

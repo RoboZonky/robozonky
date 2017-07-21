@@ -44,5 +44,4 @@ public class NaturalLanguageInvestmentStrategyServiceTest {
         final InvestmentStrategyService service = new NaturalLanguageInvestmentStrategyService();
         Assertions.assertThat(service.parse(s)).isPresent();
     }
-
 }

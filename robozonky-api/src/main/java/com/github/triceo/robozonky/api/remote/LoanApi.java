@@ -39,5 +39,4 @@ public interface LoanApi extends EntityCollectionApi<Loan> {
     @GET
     @Path("{loanId}")
     Loan item(@PathParam("loanId") int id);
-
 }

@@ -24,7 +24,6 @@ public interface SupportedListener<T extends NotificationProperties> {
 
     /**
      * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
-     *
      * @return ID of the listener which will be used as namespace in the config file.
      */
     default String getLabel() {
@@ -36,11 +35,9 @@ public interface SupportedListener<T extends NotificationProperties> {
 
     /**
      * Type of event that this listener responds to.
-     *
      * @return Event type.
      */
     Class<? extends Event> getEventType();
 
     EventListener<? extends Event> getListener(final T properties);
-
 }

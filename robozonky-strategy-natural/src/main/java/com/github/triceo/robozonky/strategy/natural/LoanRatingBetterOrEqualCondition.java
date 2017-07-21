@@ -41,5 +41,4 @@ class LoanRatingBetterOrEqualCondition extends MarketplaceFilterCondition {
     public boolean test(final Loan loan) {
         return loan.getRating().compareTo(worstPossibleRating) <= 0;
     }
-
 }

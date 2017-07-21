@@ -47,5 +47,4 @@ public class ManagementTest {
         final int beanCountAfterUnregister = ManagementTest.SERVER.getMBeanCount();
         Assertions.assertThat(beanCountAfterUnregister).isEqualTo(beanCountBeforeRegister);
     }
-
 }
