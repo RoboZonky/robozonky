@@ -23,9 +23,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -81,19 +79,17 @@ class Activity {
      * @param instant The earliest point in time for the marketplace to published on.
      * @return Ordered by publishing time descending.
      */
-    private Collection<LoanDescriptor> getLoansNewerThan(final OffsetDateTime instant) {
+    private boolean hasLoansNewerThan(final OffsetDateTime instant) {
         return this.recentLoansDescending.stream()
-                .filter(l -> l.getLoan().getDatePublished().isAfter(instant))
-                .collect(Collectors.toList());
+                .anyMatch(l -> l.getLoan().getDatePublished().isAfter(instant));
     }
 
-    private List<LoanDescriptor> getUnactionableLoans() {
+    private boolean hasUnactionableLoans() {
         final OffsetDateTime now = OffsetDateTime.now();
         return this.recentLoansDescending.stream()
-                .filter(l -> l.getLoanCaptchaProtectionEndDateTime()
+                .anyMatch(l -> l.getLoanCaptchaProtectionEndDateTime()
                         .map(captchaEnds -> captchaEnds.isAfter(now))
-                        .orElse(false))
-                .collect(Collectors.toList());
+                        .orElse(false));
     }
 
     /**
@@ -102,14 +98,14 @@ class Activity {
      */
     public boolean shouldSleep() {
         final OffsetDateTime lastKnownAction = Activity.getLatestMarketplaceAction();
-        final boolean hasUnactionableLoans = !this.getUnactionableLoans().isEmpty();
+        final boolean hasUnactionableLoans = this.hasUnactionableLoans();
         final boolean shouldSleep;
         if (lastKnownAction.plus(this.sleepInterval).isBefore(OffsetDateTime.now())) {
             // try investing since we haven't tried in a while; maybe we have some more funds now
             shouldSleep = false;
         } else {
             // try investing if we have some unseen loans
-            final boolean hasUnseenLoans = !this.getLoansNewerThan(lastKnownAction).isEmpty();
+            final boolean hasUnseenLoans = this.hasLoansNewerThan(lastKnownAction);
             shouldSleep = !(hasUnseenLoans || hasUnactionableLoans);
         }
         // only change marketplace check timestamp when we're intending to execute some actual investing.
