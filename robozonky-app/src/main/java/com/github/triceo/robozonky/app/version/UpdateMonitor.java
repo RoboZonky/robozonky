@@ -22,15 +22,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,6 +47,7 @@ import com.github.triceo.robozonky.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -79,32 +81,29 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
     }
 
     private static boolean isStable(final String version) {
-        final Matcher matcher = UpdateMonitor.PATTERN_STABLE_VERSION.matcher(version);
-        return matcher.find();
+        return UpdateMonitor.PATTERN_STABLE_VERSION.matcher(version).find();
     }
 
-    static String findLastStable(final Set<String> versions) {
+    static String findFirstStable(final Set<String> versions) {
         return versions.stream()
-                .sorted(new VersionComparator().reversed())
                 .filter(UpdateMonitor::isStable)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Impossible."));
     }
 
     static VersionIdentifier parseNodeList(final NodeList nodeList) {
-        final SortedSet<String> versions = new TreeSet<>(new VersionComparator());
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final String version = nodeList.item(i).getTextContent();
-            versions.add(version);
-        }
+        final SortedSet<String> versions = IntStream.range(0, nodeList.getLength())
+                .mapToObj(nodeList::item)
+                .map(Node::getTextContent)
+                .collect(Collectors.toCollection(() -> new TreeSet<>(new VersionComparator().reversed())));
         // find latest stable
-        final String stable = UpdateMonitor.findLastStable(versions);
-        // and check if it is followed by any other versions
-        final SortedSet<String> tail = versions.tailSet(stable);
-        if (tail.size() == 1) {
-            return new VersionIdentifier(stable);
+        final String firstStable = UpdateMonitor.findFirstStable(versions);
+        // and check if it is followed by any other unstable versions
+        final String first = versions.first();
+        if (Objects.equals(first, firstStable)) {
+            return new VersionIdentifier(firstStable);
         } else {
-            return new VersionIdentifier(stable, tail.last());
+            return new VersionIdentifier(firstStable, first);
         }
     }
 

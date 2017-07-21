@@ -44,7 +44,7 @@ public class UpdateMonitorTest {
 
     @Test
     public void checkNoStable() {
-        Assertions.assertThatThrownBy(() -> UpdateMonitor.findLastStable(Collections.singleton("1.2.0-beta-1")))
+        Assertions.assertThatThrownBy(() -> UpdateMonitor.findFirstStable(Collections.singleton("1.2.0-beta-1")))
                 .isInstanceOf(IllegalStateException.class);
     }
 
