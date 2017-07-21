@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
- * given marketplace.
+ * given loan.
  * <p>
  * Instances of this class are supposed to be short-lived, as the marketplace and Zonky account balance can change
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
@@ -120,11 +120,10 @@ class Session implements AutoCloseable {
     }
 
     /**
-     * Blocked amounts represent marketplace in various stages. Either the user has invested and the loan has not yet
-     * been
+     * Blocked amounts represent loans in various stages. Either the user has invested and the loan has not yet been
      * funded to 100 % ("na tržišti"), or the user invested and the loan has been funded ("na cestě"). In the latter
      * case, the loan has already disappeared from the marketplace, which means that it will not be available for
-     * investing any more. As far as I know, the next stage is "v pořádku", the blocked amount is cleared and the loan
+     * investing any more. As far as we know, the next stage is "v pořádku", the blocked amount is cleared and the loan
      * becomes an active investment.
      * <p>
      * Based on that, this method deals with the first case - when the loan is still available for investing, but we've
@@ -143,7 +142,7 @@ class Session implements AutoCloseable {
                         .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
                         .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
                                                        Collectors.summingInt(BlockedAmount::getAmount)));
-        // and then fetch all the marketplace in parallel, converting them into investments
+        // and then fetch all the loans in parallel, converting them into investments
         return amountsBlockedByLoans.entrySet().parallelStream()
                 .map(entry ->
                              Retriever.retrieve(() -> Optional.of(api.getLoan(entry.getKey())))
@@ -203,9 +202,8 @@ class Session implements AutoCloseable {
     }
 
     /**
-     * Get marketplace that are available to be evaluated by the strategy. These are marketplace that come from the
-     * marketplace,
-     * minus marketplace that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
+     * Get loans that are available to be evaluated by the strategy. These are loans that come from the marketplace,
+     * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
     public synchronized Collection<LoanDescriptor> getAvailableLoans() {
