@@ -21,7 +21,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import com.github.triceo.robozonky.common.extensions.Checker;
-import com.github.triceo.robozonky.notifications.email.RefreshableEmailNotificationProperties;
+import com.github.triceo.robozonky.notifications.email.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
@@ -34,7 +34,7 @@ public class EmailSettingsValidator extends AbstractValidator {
             final Properties emailConfig = Util.configureEmailNotifications(installData);
             final File emailConfigTarget = File.createTempFile("robozonky-", ".cfg");
             Util.writeOutProperties(emailConfig, emailConfigTarget);
-            System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+            System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                                emailConfigTarget.toURI().toURL().toExternalForm());
             return Checker.notifications(Variables.ZONKY_USERNAME.getValue(installData))
                     ? DataValidator.Status.OK : DataValidator.Status.ERROR;
@@ -42,7 +42,7 @@ public class EmailSettingsValidator extends AbstractValidator {
             LOGGER.log(Level.WARNING, "Failed sending e-mail.", ex);
             return DataValidator.Status.WARNING;
         } finally {
-            System.clearProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
+            System.clearProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         }
     }
 

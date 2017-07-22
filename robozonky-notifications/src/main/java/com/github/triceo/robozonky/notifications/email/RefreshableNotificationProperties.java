@@ -33,7 +33,7 @@ import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
+public class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
 
     private static String readUrl(final URL url) throws IOException {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {

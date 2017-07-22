@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.common.secrets.KeyStoreHandler;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import com.github.triceo.robozonky.internal.api.Settings;
-import com.github.triceo.robozonky.notifications.email.RefreshableEmailNotificationProperties;
+import com.github.triceo.robozonky.notifications.email.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
@@ -110,7 +110,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final Properties p = Util.configureEmailNotifications(DATA);
         try {
             Util.writeOutProperties(p, EMAIL_CONFIG_FILE);
-            final String property = RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY;
+            final String property = RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY;
             return new CommandLinePart().setProperty(property, EMAIL_CONFIG_FILE.toURI().toURL().toExternalForm());
         } catch (final Exception ex) {
             throw new IllegalStateException("Failed writing e-mail configuration.", ex);
