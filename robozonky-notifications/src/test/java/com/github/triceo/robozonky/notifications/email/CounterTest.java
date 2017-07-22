@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications;
+package com.github.triceo.robozonky.notifications.email;
 
 import java.time.Duration;
 import java.util.UUID;

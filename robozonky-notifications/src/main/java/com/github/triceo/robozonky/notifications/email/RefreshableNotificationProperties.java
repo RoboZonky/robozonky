@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications;
+package com.github.triceo.robozonky.notifications.email;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -33,7 +33,7 @@ import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class RefreshableNotificationProperties<N extends NotificationProperties> extends Refreshable<N> {
+class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
 
     private static String readUrl(final URL url) throws IOException {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
@@ -43,18 +43,15 @@ public abstract class RefreshableNotificationProperties<N extends NotificationPr
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    abstract protected N newNotificationProperties(final Properties properties);
-
-    abstract protected String getConfigFileLocationPropertyName();
-
-    abstract protected File getDefaultConfigFileLocation();
+    static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
+    public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
 
     @Override
-    public Optional<N> transform(final String source) {
+    public Optional<NotificationProperties> transform(final String source) {
         try (final ByteArrayInputStream baos = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
             final Properties p = new Properties();
             p.load(baos);
-            return Optional.of(this.newNotificationProperties(p));
+            return Optional.of(new NotificationProperties(p));
         } catch (final IOException ex) {
             LOGGER.warn("Failed transforming source.", ex);
             return Optional.empty();
@@ -67,7 +64,8 @@ public abstract class RefreshableNotificationProperties<N extends NotificationPr
     }
 
     private Optional<String> getPropertiesContents() {
-        final String propValue = Settings.INSTANCE.get(this.getConfigFileLocationPropertyName(), (String) null);
+        final String propValue = Settings.INSTANCE.get(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                                                       (String) null);
         if (propValue != null) { // attempt to read from the URL specified by the property
             LOGGER.debug("Reading notification configuration from {}.", propValue);
             try {
@@ -77,7 +75,7 @@ public abstract class RefreshableNotificationProperties<N extends NotificationPr
                 LOGGER.debug("Failed reading configuration from {}.", propValue);
             }
         }
-        final File defaultConfigFile = this.getDefaultConfigFileLocation();
+        final File defaultConfigFile = RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION;
         if (defaultConfigFile.canRead()) {
             try {
                 LOGGER.debug("Read config file {}.", defaultConfigFile.getAbsolutePath());

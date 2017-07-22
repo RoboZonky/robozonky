@@ -31,9 +31,9 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdate
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.triceo.robozonky.notifications.SupportedListener;
+import org.apache.commons.lang3.StringUtils;
 
-enum SupportedEmailListener implements SupportedListener<EmailNotificationProperties> {
+enum SupportedListener {
 
     INVESTMENT_MADE {
         @Override
@@ -203,8 +203,24 @@ enum SupportedEmailListener implements SupportedListener<EmailNotificationProper
     protected abstract EventListener<? extends Event> newListener(
             final ListenerSpecificNotificationProperties properties);
 
-    @Override
-    public EventListener<? extends Event> getListener(final EmailNotificationProperties properties) {
+    /**
+     * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
+     * @return ID of the listener which will be used as namespace in the config file.
+     */
+    String getLabel() {
+        final String className = this.getEventType().getSimpleName();
+        final String decapitalized = StringUtils.uncapitalize(className);
+        // this works because Event subclasses must be named (Something)Event; check Event().
+        return decapitalized.substring(0, decapitalized.length() - "Event".length());
+    }
+
+    /**
+     * Type of event that this listener responds to.
+     * @return Event type.
+     */
+    abstract Class<? extends Event> getEventType();
+
+    public EventListener<? extends Event> getListener(final NotificationProperties properties) {
         return this.newListener(new ListenerSpecificNotificationProperties(this, properties));
     }
 

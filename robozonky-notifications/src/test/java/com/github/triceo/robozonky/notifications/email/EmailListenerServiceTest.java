@@ -24,12 +24,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 
-public class EmailListenerServiceTest extends AbstractListenerTest {
+public class EmailListenerServiceTest extends AbstractEmailingListenerTest {
 
     @Rule
     public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
-            RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-            EmailNotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
+            RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+            NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
 
     private final EmailListenerService service = new EmailListenerService();
 
@@ -42,7 +42,7 @@ public class EmailListenerServiceTest extends AbstractListenerTest {
 
     @Test
     public void noPropertiesNoListeners() {
-        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "");
+        System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "");
         Assertions.assertThat(getListener(this.event.getClass()).getLatest()).isEmpty();
     }
 

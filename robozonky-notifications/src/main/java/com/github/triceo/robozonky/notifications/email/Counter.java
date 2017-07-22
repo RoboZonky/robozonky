@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications;
+package com.github.triceo.robozonky.notifications.email;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -30,7 +30,7 @@ import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Counter {
+final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
     private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Counter.class);
@@ -66,10 +66,6 @@ public final class Counter {
         this.maxItems = maxItems;
         this.period = period;
         this.timestamps = new LinkedHashSet<>(Counter.load(id));
-    }
-
-    public synchronized int getCount() {
-        return this.timestamps.size();
     }
 
     /**

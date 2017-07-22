@@ -24,7 +24,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>robozonky-notifications</artifactId>
-  <name>RoboZonky: Sends notifications (file, e-mail)</name>
+  <name>RoboZonky: Sends e-mail notifications</name>
 
   <dependencies>
     <dependency>

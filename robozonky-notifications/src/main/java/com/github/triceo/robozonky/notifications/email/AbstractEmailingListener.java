@@ -28,7 +28,6 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.internal.api.Defaults;
-import com.github.triceo.robozonky.notifications.Counter;
 import com.github.triceo.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -59,14 +58,14 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         }
     }
 
-    protected static String stackTraceToString(final Throwable t) {
+    static String stackTraceToString(final Throwable t) {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
         t.printStackTrace(pw);
         return sw.toString();
     }
 
-    private static Email createNewEmail(final EmailNotificationProperties properties) throws EmailException {
+    private static Email createNewEmail(final NotificationProperties properties) throws EmailException {
         final Email email = new SimpleEmail();
         email.setCharset(Defaults.CHARSET.displayName());
         email.setHostName(properties.getSmtpHostname());
@@ -110,7 +109,6 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         userInfoMap.put("userAgent", sessionInfo.getUserAgent());
         final Map<String, Object> result = new HashMap<>(eventSpecific);
         result.put("session", userInfoMap);
-        System.out.println(result);
         return result;
     }
 
@@ -118,7 +116,6 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     public void handle(final T event, final SessionInfo sessionInfo) {
         if (!this.shouldSendEmail(event)) {
             LOGGER.debug("Will not send e-mail.");
-            return;
         } else {
             try {
                 final Email email = AbstractEmailingListener.createNewEmail(properties);

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import freemarker.template.Configuration;
@@ -39,17 +38,16 @@ public class TemplateProcessorTest extends AbstractEmailingListenerTest {
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("No charsets!"));
         final Configuration c = TemplateProcessor.getFreemarkerConfiguration(ch);
-        final AbstractEmailingListener<Event> l = this.getEmailingListener();
-        final Template t = c.getTemplate(l.getTemplateFileName());
+        final Template t = c.getTemplate(this.listener.getTemplateFileName());
         // make sure the arbitrary charset was preferred over the default
         Assertions.assertThat(t.getEncoding()).isEqualTo(ch.displayName());
     }
 
     @Test
     public void processingWithoutErrors() throws IOException, TemplateException {
-        final AbstractEmailingListener<Event> l = this.getEmailingListener();
-        final String s = TemplateProcessor.INSTANCE.process(l.getTemplateFileName(),
-                                                            l.getData(event, new SessionInfo("someone@somewhere.net")));
+        final String s = TemplateProcessor.INSTANCE.process(this.listener.getTemplateFileName(),
+                                                            this.listener.getData(event, new SessionInfo(
+                                                                    "someone@somewhere.net")));
         Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 }

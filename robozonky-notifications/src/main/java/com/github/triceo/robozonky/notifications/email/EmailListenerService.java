@@ -23,10 +23,10 @@ import com.github.triceo.robozonky.api.notifications.ListenerService;
 
 public final class EmailListenerService implements ListenerService {
 
-    private final Refreshable<EmailNotificationProperties> properties = new RefreshableEmailNotificationProperties();
+    private final RefreshableNotificationProperties properties = new RefreshableNotificationProperties();
 
     @Override
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
-        return new RefreshableEmailEventListener<>(properties, eventType);
+        return new RefreshableEventListener<>(properties, eventType);
     }
 }

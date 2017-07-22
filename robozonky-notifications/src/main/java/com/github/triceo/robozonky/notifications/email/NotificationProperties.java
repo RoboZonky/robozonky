@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.notifications;
+package com.github.triceo.robozonky.notifications.email;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -22,23 +22,24 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+class NotificationProperties {
 
-public abstract class NotificationProperties {
+    static final String HOURLY_LIMIT = "hourlyMaxEmails";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationProperties.class);
-
-    protected Properties getProperties() {
-        return this.properties;
+    static String getCompositePropertyName(final SupportedListener listener, final String property) {
+        return listener.getLabel() + "." + property;
     }
 
     final protected Properties properties;
     private final Counter globalCounter;
 
-    protected NotificationProperties(final Properties source) {
+    public NotificationProperties(final Properties source) {
         this.properties = source;
         this.globalCounter = new Counter("global", this.getGlobalHourlyLimit(), Duration.ofHours(1));
+    }
+
+    protected Properties getProperties() {
+        return this.properties;
     }
 
     protected boolean getBooleanValue(final String propertyName, final boolean defaultValue) {
@@ -74,7 +75,51 @@ public abstract class NotificationProperties {
         return this.getBooleanValue("enabled", false);
     }
 
-    protected abstract int getGlobalHourlyLimit();
+    public String getSender() {
+        return this.getStringValue("from", "noreply@robozonky.cz");
+    }
+
+    public String getRecipient() {
+        return this.getStringValue("to", "");
+    }
+
+    public boolean isStartTlsRequired() {
+        return this.getBooleanValue("smtp.requiresStartTLS", false);
+    }
+
+    public boolean isSslOnConnectRequired() {
+        return this.getBooleanValue("smtp.requiresSslOnConnect", false);
+    }
+
+    public String getSmtpUsername() {
+        return this.getStringValue("smtp.username", this.getRecipient());
+    }
+
+    public String getSmtpPassword() {
+        return this.getStringValue("smtp.password", "");
+    }
+
+    public String getSmtpHostname() {
+        return this.getStringValue("smtp.hostname", "localhost");
+    }
+
+    public int getSmtpPort() {
+        return this.getIntValue("smtp.port", 25);
+    }
+
+    public boolean isListenerEnabled(final SupportedListener listener) {
+        if (listener == SupportedListener.TESTING) {
+            return true;
+        } else {
+            final String propName = NotificationProperties.getCompositePropertyName(listener, "enabled");
+            return this.isEnabled() && this.getBooleanValue(propName, false);
+        }
+    }
+
+    protected int getGlobalHourlyLimit() {
+        final int val = this.getIntValue(NotificationProperties.HOURLY_LIMIT, Integer.MAX_VALUE);
+        return (val < 0) ? Integer.MAX_VALUE : val;
+    }
 
     public Counter getGlobalCounter() {
         return globalCounter;

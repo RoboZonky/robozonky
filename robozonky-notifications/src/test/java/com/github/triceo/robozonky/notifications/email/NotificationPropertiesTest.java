@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.notifications.email;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.Properties;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import org.assertj.core.api.Assertions;
@@ -28,57 +29,69 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ClearSystemProperties;
 
-public class EmailNotificationPropertiesTest {
+public class NotificationPropertiesTest {
 
     private static final URL CONFIG_ENABLED =
-            EmailNotificationPropertiesTest.class.getResource("notifications-enabled.cfg");
+            NotificationPropertiesTest.class.getResource("notifications-enabled.cfg");
     private static final URL WINDOWS_ENCODED =
-            EmailNotificationPropertiesTest.class.getResource("notifications-windows-encoding.cfg");
+            NotificationPropertiesTest.class.getResource("notifications-windows-encoding.cfg");
 
-    private static Optional<EmailNotificationProperties> getProperties() {
-        final Refreshable<EmailNotificationProperties> r = new RefreshableEmailNotificationProperties();
+    private static final class TestingProperties extends NotificationProperties {
+
+        TestingProperties(final Properties source) {
+            super(source);
+        }
+
+        @Override
+        protected int getGlobalHourlyLimit() {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    private static Optional<NotificationProperties> getProperties() {
+        final Refreshable<NotificationProperties> r = new RefreshableNotificationProperties();
         r.run();
         return r.getLatest();
     }
 
     @Rule
     public final ClearSystemProperties myPropertyIsCleared =
-            new ClearSystemProperties(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
+            new ClearSystemProperties(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
 
     @Before
     public void prepareBackupConfig() throws Exception {
-        Files.write(RefreshableEmailNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath(),
+        Files.write(RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath(),
                     "enabled = false".getBytes());
     }
 
     @After
     public void deleteBackupConfig() {
-        RefreshableEmailNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.delete();
+        RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.delete();
     }
 
     @Test
     public void wrongPropertiesUrlReadsPropertyFile() {
-        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+        System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                            "wrongprotocol://somewhere");
-        final Optional<EmailNotificationProperties> np = EmailNotificationPropertiesTest.getProperties();
+        final Optional<NotificationProperties> np = NotificationPropertiesTest.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isFalse();
     }
 
     @Test
     public void correctUrlIgnoresPropertyFile() {
-        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                           EmailNotificationPropertiesTest.CONFIG_ENABLED.toString());
-        final Optional<EmailNotificationProperties> np = EmailNotificationPropertiesTest.getProperties();
+        System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                           NotificationPropertiesTest.CONFIG_ENABLED.toString());
+        final Optional<NotificationProperties> np = NotificationPropertiesTest.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isTrue();
     }
 
     @Test
     public void windowsEncoding() {
-        System.setProperty(RefreshableEmailNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                           EmailNotificationPropertiesTest.WINDOWS_ENCODED.toString());
-        final Optional<EmailNotificationProperties> np = EmailNotificationPropertiesTest.getProperties();
+        System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                           NotificationPropertiesTest.WINDOWS_ENCODED.toString());
+        final Optional<NotificationProperties> np = NotificationPropertiesTest.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isTrue();
     }
