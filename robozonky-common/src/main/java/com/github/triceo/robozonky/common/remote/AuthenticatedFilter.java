@@ -20,7 +20,7 @@ import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 
 class AuthenticatedFilter extends RoboZonkyFilter {
 
-    public static final char[] EMPTY_TOKEN = new char[0];
+    private static final char[] EMPTY_TOKEN = new char[0];
 
     public AuthenticatedFilter(final ZonkyApiToken token) {
         // null token = no token

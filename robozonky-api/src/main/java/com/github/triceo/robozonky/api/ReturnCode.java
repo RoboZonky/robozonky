@@ -41,19 +41,13 @@ public enum ReturnCode {
      */
     ERROR_REMOTE(4),
     /**
-     * Failed acquiring run lock for an unknown reason. Deprecated and not used since the locking functionality was
-     * removed from RoboZonky following up on the introduction of daemon.
-     */
-    @Deprecated
-    ERROR_LOCK(5),
-    /**
      * Unexpected error state, possibly app bug.
      */
     ERROR_UNEXPECTED(255);
 
     private final int code;
 
-    ReturnCode(int code) {
+    ReturnCode(final int code) {
         this.code = code;
     }
 

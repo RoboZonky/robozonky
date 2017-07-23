@@ -148,7 +148,7 @@ public enum Settings {
     }
 
     public boolean isDebugHttpResponseLoggingEnabled() {
-        return get(Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING);
+        return get(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING);
     }
 
     public TemporalAmount getTokenRefreshBeforeExpiration() {

@@ -91,8 +91,9 @@ class ShutdownHook {
     }
 
     /**
-     * How many hooks are ready to be {@link #execute(Result)}d.
-     * @return Number of call to {@link #register(Handler)} since {@link #execute(Result)} last called.
+     * How many hooks are ready to be {@link #execute(ShutdownHook.Result)}d.
+     * @return Number of call to {@link #register(ShutdownHook.Handler)} since {@link #execute(ShutdownHook.Result)}
+     * last called.
      */
     public int getRegisteredCount() {
         return this.stack.size();
@@ -102,7 +103,7 @@ class ShutdownHook {
      * Execute and remove all handlers that were previously {@link #register(ShutdownHook.Handler)}ed, in the reverse
      * order of
      * their registration. If any handler throws an exception, it will be ignored.
-     * @param result The terminating state of the appliation.
+     * @param result The terminating state of the application.
      */
     public void execute(final ShutdownHook.Result result) {
         ShutdownHook.LOGGER.debug("RoboZonky terminating with '{}' return code.", result.getReturnCode());

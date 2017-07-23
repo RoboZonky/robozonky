@@ -90,7 +90,7 @@ class ImmutableConfiguration {
      * @param key Key in question.
      * @return True if contains.
      */
-    boolean containsKey(final String key) {
+    private boolean containsKey(final String key) {
         return properties.containsKey(key);
     }
 

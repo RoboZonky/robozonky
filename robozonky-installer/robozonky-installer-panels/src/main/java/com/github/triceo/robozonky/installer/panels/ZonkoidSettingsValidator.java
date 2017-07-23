@@ -55,8 +55,7 @@ public class ZonkoidSettingsValidator extends AbstractValidator {
 
     @Override
     public String getErrorMessageId() {
-        return "Nepodařilo se odeslat notifikaci do mobilní aplikace. " +
-                "Kod nebylo možné ověřit.";
+        return "Nepodařilo se odeslat notifikaci do mobilní aplikace. Kód nebylo možné ověřit.";
     }
 
     @Override

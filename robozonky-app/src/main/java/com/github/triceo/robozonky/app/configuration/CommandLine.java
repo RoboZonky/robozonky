@@ -36,7 +36,6 @@ public class CommandLine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
 
     private static Optional<InvestmentMode> terminate(final ParameterException ex) {
-        System.out.println(ex.getMessage());
         return CommandLine.terminate(ex.getJCommander());
     }
 
@@ -106,11 +105,8 @@ public class CommandLine {
     }
 
     private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
-        return SecretProviderFactory.getSecretProvider(this)
-                .map(secrets -> Optional.ofNullable(mode)
-                        .map(i -> i.configure(this, authenticationFragment.createAuthenticationHandler(secrets)))
-                        .orElse(Optional.empty()))
-                .orElse(Optional.empty());
+        return SecretProviderFactory.getSecretProvider(this).flatMap(secrets -> Optional.ofNullable(mode).flatMap(
+                i -> i.configure(this, authenticationFragment.createAuthenticationHandler(secrets))));
     }
 
     AuthenticationCommandLineFragment getAuthenticationFragment() {

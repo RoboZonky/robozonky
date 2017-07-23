@@ -49,7 +49,7 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             BY_RECENCY = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getDatePublished()).reversed(),
             BY_REMAINING = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getRemainingInvestment()).reversed();
 
-    static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
+    private static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
         return Collections.unmodifiableMap(loans.distinct()
                                                    .collect(Collectors.groupingBy(l -> l.getLoan().getRating())));
     }
@@ -142,7 +142,7 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         return evaluate(loans, portfolio).collect(Collectors.toList());
     }
 
-    int[] getRecommendationBoundaries(final Loan loan) {
+    private int[] getRecommendationBoundaries(final Loan loan) {
         final Rating rating = loan.getRating();
         final int minimumInvestment = strategy.getMinimumInvestmentSizeInCzk(rating);
         final int maximumInvestment = strategy.getMaximumInvestmentSizeInCzk(rating);

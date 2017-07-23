@@ -50,7 +50,7 @@ class Activity {
 
     private final TemporalAmount sleepInterval;
     private final Collection<LoanDescriptor> recentLoansDescending;
-    private final AtomicReference<Runnable> settler = new AtomicReference<>(DO_NOTHING);
+    private final AtomicReference<Runnable> settler = new AtomicReference<>(Activity.DO_NOTHING);
 
     Activity(final Collection<LoanDescriptor> loans) {
         this(loans, Duration.ofMinutes(60));

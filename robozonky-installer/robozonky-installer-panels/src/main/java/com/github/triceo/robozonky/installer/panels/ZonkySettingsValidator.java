@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.installer.panels;
 
-import java.net.SocketException;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import javax.ws.rs.ServerErrorException;
@@ -60,14 +59,12 @@ public class ZonkySettingsValidator extends AbstractValidator {
                 z.logout();
             }
             return DataValidator.Status.OK;
+        } catch (final ServerErrorException t) {
+            LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
+            return DataValidator.Status.ERROR;
         } catch (final Exception t) {
-            if (t instanceof SocketException | t instanceof ServerErrorException) {
-                LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
-                return DataValidator.Status.ERROR;
-            } else {
-                LOGGER.log(Level.WARNING, "Failed logging in.", t);
-                return DataValidator.Status.WARNING;
-            }
+            LOGGER.log(Level.WARNING, "Failed logging in.", t);
+            return DataValidator.Status.WARNING;
         }
     }
 

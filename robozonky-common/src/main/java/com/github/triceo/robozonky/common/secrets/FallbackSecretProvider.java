@@ -60,9 +60,8 @@ final class FallbackSecretProvider implements SecretProvider {
 
     @Override
     public Optional<Reader> getToken() {
-        return FallbackSecretProvider.STATE.getValue(FallbackSecretProvider.TOKEN_STATE_ID)
-                .map(o -> Optional.of((Reader) new StringReader(o)))
-                .orElse(Optional.empty());
+        return FallbackSecretProvider.STATE.getValue(FallbackSecretProvider.TOKEN_STATE_ID).map(
+                o -> (Reader) new StringReader(o));
     }
 
     @Override

@@ -128,7 +128,7 @@ public enum Events {
      */
     public static <E extends Event> void fire(final E event, final SessionInfo sessionInfo) {
         if (sessionInfo != null) {
-            SESSION_INFO = sessionInfo;
+            Events.SESSION_INFO = sessionInfo;
         }
         final Class<E> eventClass = (Class<E>) event.getClass();
         Events.LOGGER.debug("Firing {}.", eventClass);

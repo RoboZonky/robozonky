@@ -22,15 +22,10 @@ import java.time.ZoneId;
 import java.util.Locale;
 import javax.ws.rs.core.MediaType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Carries application constants (such as version) and desired environmental settings (such as charset or locale).
  */
 public final class Defaults {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Defaults.class);
 
     public static final String MEDIA_TYPE = MediaType.APPLICATION_JSON + ";charset=UTF-8";
     public static final Locale LOCALE = Locale.forLanguageTag("cs_CZ");

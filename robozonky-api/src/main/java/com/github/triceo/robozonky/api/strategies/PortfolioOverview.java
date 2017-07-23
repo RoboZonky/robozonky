@@ -121,7 +121,7 @@ public class PortfolioOverview {
      * @return Share of the given rating on overall investments.
      */
     public BigDecimal getShareOnInvestment(final Rating r) {
-        return this.getSharesOnInvestment().getOrDefault(r, BigDecimal.ZERO);
+        return this.sharesOnInvestment.getOrDefault(r, BigDecimal.ZERO);
     }
 
     /**

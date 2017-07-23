@@ -43,7 +43,7 @@ public class InvestmentStatuses {
             return InvestmentStatuses.of();
         }
         // and finally convert
-        return of(Stream.of(parts)
+        return InvestmentStatuses.of(Stream.of(parts)
                           .map(String::trim)
                           .map(InvestmentStatus::valueOf)
                           .collect(Collectors.toList()));

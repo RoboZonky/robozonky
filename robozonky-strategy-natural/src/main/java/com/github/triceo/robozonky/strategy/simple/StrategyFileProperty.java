@@ -77,10 +77,6 @@ enum StrategyFileProperty {
         this.key = key;
     }
 
-    public String getKey() {
-        return this.key;
-    }
-
     public <T> Optional<T> getValue(final Function<String, Optional<T>> supplier) {
         return StrategyFileProperty.getValue(this.key, supplier);
     }

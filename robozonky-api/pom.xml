@@ -248,6 +248,23 @@
                     "classSimpleName": "InvestmentMadeEvent",
                     "methodName": "<init>",
                     "justification": "Deprecated since 3.2.0"
+                  }, {
+                    "code": "java.field.removed",
+                    "old": "field com.github.triceo.robozonky.api.ReturnCode.ERROR_LOCK",
+                    "package": "com.github.triceo.robozonky.api",
+                    "classSimpleName": "ReturnCode",
+                    "fieldName": "ERROR_LOCK",
+                    "justification": "Previously deprecated for removal."
+                  }, {
+                    "code": "java.field.enumConstantOrderChanged",
+                    "old": "field com.github.triceo.robozonky.api.ReturnCode.ERROR_UNEXPECTED",
+                    "new": "field com.github.triceo.robozonky.api.ReturnCode.ERROR_UNEXPECTED",
+                    "oldOrdinal": "6",
+                    "newOrdinal": "5",
+                    "package": "com.github.triceo.robozonky.api",
+                    "classSimpleName": "ReturnCode",
+                    "fieldName": "ERROR_UNEXPECTED",
+                    "justification": "Takes place of ERROR_LOCK, which was previously deprecated for removal."
                   }
                 ]
               }

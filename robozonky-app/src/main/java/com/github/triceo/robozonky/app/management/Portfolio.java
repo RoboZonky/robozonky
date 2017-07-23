@@ -32,7 +32,7 @@ import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
 public class Portfolio implements PortfolioMBean {
 
-    private static Comparator<Rating> COMPARATOR =
+    private static final Comparator<Rating> COMPARATOR =
             Comparator.comparing(Rating::getExpectedYield).thenComparing(Rating::getCode);
 
     private static Stream<Rating> getRatingStream() {

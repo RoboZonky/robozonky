@@ -30,10 +30,8 @@ class VersionComparator implements Comparator<String>,
     private static final long serialVersionUID = -4138266839888566436L;
 
     public static boolean isSmallerThan(final String first, final String second) {
-        if (first == null || second == null) { // this is a development snapshot during tests
-            return false;
-        }
-        return new VersionComparator().compare(first, second) < 0;
+        // this is a development snapshot during tests
+        return first != null && second != null && new VersionComparator().compare(first, second) < 0;
     }
 
     @Override

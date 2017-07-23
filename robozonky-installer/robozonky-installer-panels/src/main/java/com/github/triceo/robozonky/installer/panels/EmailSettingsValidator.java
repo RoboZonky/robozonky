@@ -53,7 +53,6 @@ public class EmailSettingsValidator extends AbstractValidator {
 
     @Override
     public String getWarningMessageId() {
-        return "Došlo k chybě při komunikaci s SMTP " +
-                "E-mailové notifikace nemusí fungovat správně.";
+        return "Došlo k chybě při komunikaci s SMTP. E-mailové notifikace nemusí fungovat správně.";
     }
 }

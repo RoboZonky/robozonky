@@ -52,9 +52,7 @@ public class Investor {
         }
 
         public Optional<RequestId> getConfirmationRequestUsed() {
-            return this.getConfirmationUsed()
-                    .map(c -> Optional.of(new RequestId(username, password)))
-                    .orElse(Optional.empty());
+            return this.getConfirmationUsed().map(c -> new RequestId(username, password));
         }
 
         public Investor.Builder asUser(final String username) {

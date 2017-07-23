@@ -110,11 +110,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
     @Override
     public Optional<Reader> getToken() {
         final Optional<char[]> stored = this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN);
-        if (stored.isPresent()) {
-            return Optional.of(new CharArrayReader(stored.get()));
-        } else {
-            return Optional.empty();
-        }
+        return stored.map(CharArrayReader::new);
     }
 
     @Override

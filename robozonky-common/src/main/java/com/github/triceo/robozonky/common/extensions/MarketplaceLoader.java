@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public final class MarketplaceLoader {
 
+    private static final char[] EMPTY = new char[0];
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketplaceLoader.class);
     private static final ServiceLoader<MarketplaceService> LOADER =
             ExtensionsManager.INSTANCE.getServiceLoader(MarketplaceService.class);
@@ -35,7 +36,7 @@ public final class MarketplaceLoader {
     static Optional<Marketplace> processMarketplace(final MarketplaceService service, final Credentials credentials) {
         final String providerId = credentials.getToolId();
         MarketplaceLoader.LOGGER.debug("Evaluating marketplace '{}' with '{}'.", providerId, service.getClass());
-        final char[] secret = credentials.getToken().orElse(new char[0]);
+        final char[] secret = credentials.getToken().orElse(MarketplaceLoader.EMPTY);
         return service.find(providerId, secret);
     }
 

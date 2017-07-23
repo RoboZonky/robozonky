@@ -39,7 +39,7 @@ public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
 
-    static void exit(final ReturnCode returnCode) {
+    private static void exit(final ReturnCode returnCode) {
         App.LOGGER.trace("Exit requested with return code {}.", returnCode);
         App.exit(new ShutdownHook.Result(returnCode, null));
     }
@@ -77,7 +77,7 @@ public class App {
         return App.execute(mode);
     }
 
-    static ReturnCode execute(final String[] args, final AtomicBoolean faultTolerant) {
+    private static ReturnCode execute(final String[] args, final AtomicBoolean faultTolerant) {
         return CommandLine.parse(args)
                 .map(mode -> App.execute(mode, faultTolerant))
                 .orElse(ReturnCode.ERROR_WRONG_PARAMETERS);

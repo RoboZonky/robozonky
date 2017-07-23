@@ -48,7 +48,7 @@ public final class InvestmentStrategyLoader {
         }
     }
 
-    static Optional<InvestmentStrategy> load(final String strategy, Iterable<InvestmentStrategyService> loader) {
+    static Optional<InvestmentStrategy> load(final String strategy, final Iterable<InvestmentStrategyService> loader) {
         return Util.toStream(loader)
                 .map(iss -> InvestmentStrategyLoader.processInvestmentStrategyService(iss, strategy))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
