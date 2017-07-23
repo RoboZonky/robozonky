@@ -36,6 +36,7 @@ public class CommandLine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
 
     private static Optional<InvestmentMode> terminate(final ParameterException ex) {
+        System.out.println(ex.getMessage()); // error will be shown to users on stdout
         return CommandLine.terminate(ex.getJCommander());
     }
 
