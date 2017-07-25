@@ -16,14 +16,11 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.function.Function;
-import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -38,10 +35,6 @@ import org.slf4j.LoggerFactory;
 class TokenBasedAccess implements Authenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
-
-    private static Reader tokenToReader(final ZonkyApiToken token) throws JAXBException {
-        return new StringReader(ZonkyApiToken.marshal(token));
-    }
 
     private final Refreshable<ZonkyApiToken> refreshableToken;
     private final SecretProvider secrets;
@@ -59,16 +52,10 @@ class TokenBasedAccess implements Authenticated {
     @Override
     public Collection<Investment> execute(final Function<Zonky, Collection<Investment>> operation) {
         try (final Refreshable.Pause p = refreshableToken.pause()) { // pause token refresh during this request
-            final ZonkyApiToken token = refreshableToken.getLatest(Duration.ofSeconds(1))
+            final ZonkyApiToken token = refreshableToken.getLatest(Duration.ofSeconds(5))
                     .orElseThrow(() -> new IllegalStateException("No API token available, authentication failed."));
             try (final Zonky zonky = apis.authenticated(token)) {
                 return operation.apply(zonky);
-            } finally {
-                try {
-                    secrets.setToken(TokenBasedAccess.tokenToReader(token));
-                } catch (final JAXBException ex) {
-                    TokenBasedAccess.LOGGER.info("Failed storing token into secure storage.", ex);
-                }
             }
         }
     }

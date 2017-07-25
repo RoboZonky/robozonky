@@ -16,11 +16,14 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import javax.xml.bind.JAXBException;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
@@ -31,6 +34,10 @@ import com.github.triceo.robozonky.common.secrets.SecretProvider;
 class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
 
     private static final TemporalAmount SAFETY_PRE_EXPIRATION_INTERVAL = Duration.ofSeconds(5);
+
+    private static Reader tokenToReader(final ZonkyApiToken token) throws JAXBException {
+        return new StringReader(ZonkyApiToken.marshal(token));
+    }
 
     private final SecretProvider secrets;
     private final ApiProvider apis;
@@ -62,7 +69,7 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
     @Override
     protected Optional<ZonkyApiToken> transform(final String source) {
         try {
-            final ZonkyApiToken newToken = this.getLatest().map(token -> {
+            final ZonkyApiToken newToken = this.getLatest(Duration.ofMillis(1)).map(token -> {
                 if (token.willExpireIn(RefreshableZonkyApiToken.SAFETY_PRE_EXPIRATION_INTERVAL)) {
                     // may not be enough time for token refresh; rather disregard than risk auth exception
                     LOGGER.debug("Token expired or expiring too soon, using password.");
@@ -71,6 +78,11 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
                     return withToken(token);
                 }
             }).orElseGet(this::withPassword);
+            try {
+                secrets.setToken(RefreshableZonkyApiToken.tokenToReader(newToken));
+            } catch (final JAXBException ex) {
+                LOGGER.info("Failed storing token into secure storage.", ex);
+            }
             return Optional.of(newToken);
         } catch (final Exception ex) {
             LOGGER.warn("Authentication failed.", ex);

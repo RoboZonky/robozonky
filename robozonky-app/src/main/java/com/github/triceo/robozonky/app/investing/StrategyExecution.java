@@ -65,7 +65,6 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                 .map(strategy -> {
                     final Activity activity = new Activity(loans, maximumSleepPeriod);
                     if (activity.shouldSleep()) {
-                        authenticationHandler.execute(null); // just reauth to make sure token does not expire
                         StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
                         return Collections.<Investment>emptyList();
                     }
