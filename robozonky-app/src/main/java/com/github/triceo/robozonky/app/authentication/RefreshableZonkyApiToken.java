@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app.authentication;
 import java.io.Reader;
 import java.io.StringReader;
 import java.time.Duration;
-import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -35,8 +34,6 @@ import com.github.triceo.robozonky.common.secrets.SecretProvider;
  * Will keep permanent user authentication running in the background.
  */
 class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
-
-    private static final TemporalAmount SAFETY_PRE_EXPIRATION_INTERVAL = Duration.ofSeconds(5);
 
     private static Reader tokenToReader(final ZonkyApiToken token) throws JAXBException {
         return new StringReader(ZonkyApiToken.marshal(token));
@@ -54,14 +51,14 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
         LOGGER.info("Authenticating as '{}', refreshing access token.", secrets.getUsername());
         try (final OAuth oauth = apis.oauth()) {
             return oauth.refresh(token);
+        } catch (final Exception ex) { // possibly just an expired token, retry with password
+            LOGGER.debug("Failed refreshing access token, using password.", ex);
+            return withPassword();
         }
     }
 
     private ZonkyApiToken withPassword() {
-        try (final OAuth oauth = apis.oauth()) {
-            LOGGER.info("Authenticating as '{}', using password.", secrets.getUsername());
-            return oauth.login(secrets.getUsername(), secrets.getPassword());
-        }
+        return PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
     }
 
     @Override
@@ -72,19 +69,13 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
     @Override
     protected Optional<ZonkyApiToken> transform(final String source) {
         try {
-            final ZonkyApiToken newToken = this.getLatest(Duration.ofMillis(1)).map(token -> {
-                if (token.willExpireIn(RefreshableZonkyApiToken.SAFETY_PRE_EXPIRATION_INTERVAL)) {
-                    // may not be enough time for token refresh; rather disregard than risk auth exception
-                    LOGGER.debug("Token expired or expiring too soon, using password.");
-                    return withPassword();
-                } else {
-                    return withToken(token);
-                }
-            }).orElseGet(this::withPassword);
-            try {
+            final ZonkyApiToken newToken = this.getLatest(Duration.ofMillis(1))
+                    .map(this::withToken)
+                    .orElseGet(this::withPassword);
+            try { // store token so that it can be retrieved back in case of daemon restart
                 secrets.setToken(RefreshableZonkyApiToken.tokenToReader(newToken));
             } catch (final JAXBException ex) {
-                LOGGER.info("Failed storing token into secure storage.", ex);
+                LOGGER.debug("Failed storing token into secure storage, may need to use password next time.", ex);
             }
             return Optional.of(newToken);
         } catch (final Exception ex) {

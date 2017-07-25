@@ -32,6 +32,13 @@ class PasswordBasedAccess implements Authenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordBasedAccess.class);
 
+    static ZonkyApiToken trigger(final ApiProvider apis, final String username, final char... password) {
+        try (final OAuth oauth = apis.oauth()) {
+            LOGGER.info("Authenticating as '{}', using password.", username);
+            return oauth.login(username, password);
+        }
+    }
+
     private final SecretProvider secrets;
     private final ApiProvider apis;
 
@@ -42,15 +49,13 @@ class PasswordBasedAccess implements Authenticated {
 
     @Override
     public Collection<Investment> execute(final Function<Zonky, Collection<Investment>> op) {
-        try (final OAuth oauth = apis.oauth()) {
-            final ZonkyApiToken token = oauth.login(secrets.getUsername(), secrets.getPassword());
-            try (final Zonky zonky = apis.authenticated(token)) {
-                try {
-                    return op.apply(zonky);
-                } finally { // attempt to log out no matter what happens
-                    LOGGER.info("Logging out.");
-                    zonky.logout();
-                }
+        final ZonkyApiToken token = PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
+        try (final Zonky zonky = apis.authenticated(token)) {
+            try {
+                return op.apply(zonky);
+            } finally { // attempt to log out no matter what happens
+                LOGGER.info("Logging out.");
+                zonky.logout();
             }
         }
     }
