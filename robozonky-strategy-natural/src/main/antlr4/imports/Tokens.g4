@@ -1,6 +1,8 @@
 grammar Tokens;
 
 @header {
+    import java.lang.String;
+    import java.math.BigDecimal;
     import java.math.BigInteger;
     import java.util.Collection;
     import java.util.LinkedHashSet;
@@ -65,13 +67,20 @@ purposeExpression returns [Purpose result] :
     { $result = Purpose.findByCode($r.getText()); }
 ;
 
+floatExpression returns [BigDecimal result] :
+    f=FLOAT {
+        final String replaced = $f.getText().replaceFirst("\\Q,\\E", ".");
+        $result = new BigDecimal(replaced);
+    }
+;
+
 // shared strings
 KC      : 'Kč' ;
 DOT     : '.' ;
 DELIM   : '- ' ;
 UP_TO   : ' až ';
 OR      : ' nebo ';
-OR_COMMA: ', ';
+OR_COMMA: COMMA ' ';
 
 // regions
 REGION_A : 'Praha';
@@ -123,10 +132,12 @@ PURPOSE_JINE                    : 'jiné';
 
 // basic types
 INTEGER : DIGIT+ ;
+FLOAT   : DIGIT+ COMMA DIGIT+;
 
 // skip whitespace and comments
 COMMENT     : ('#' ~( '\r' | '\n' )*) -> skip;
 WHITESPACE  : (' '|'\r'|'\n'|'\t') -> channel(HIDDEN);
 
 fragment DIGIT: [0-9];
+fragment COMMA: ',';
 

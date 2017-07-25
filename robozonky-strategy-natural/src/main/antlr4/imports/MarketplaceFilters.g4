@@ -33,6 +33,7 @@ marketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c5=storyCondition { $result = $c5.result; }
     | c6=termCondition { $result = $c6.result; }
     | c7=amountCondition { $result = $c7.result; }
+    | c8=interestCondition { $result = $c8.result; }
 ;
 
 regionCondition returns [BorrowerRegionCondition result]:
@@ -110,6 +111,29 @@ termConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
 termConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     'nedosahuje ' max=INTEGER
     { $result = new LoanTermCondition(0, Integer.parseInt($max.getText()) - 1); }
+;
+
+interestCondition returns [MarketplaceFilterCondition result]:
+    'úrok ' (
+        (c1 = interestConditionRangeOpen { $result = $c1.result; })
+        | (c2 = interestConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = interestConditionRangeClosedRight { $result = $c3.result; })
+    ) ' % p.a.'
+;
+
+interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    'je ' min=floatExpression UP_TO max=floatExpression
+    { $result = new LoanInterestRateCondition($min.result, $max.result); }
+;
+
+interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    'přesahuje ' min=floatExpression
+    { $result = new LoanInterestRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
+;
+
+interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    'nedosahuje ' max=floatExpression
+    { $result = new LoanInterestRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
 ;
 
 amountCondition returns [MarketplaceFilterCondition result]:

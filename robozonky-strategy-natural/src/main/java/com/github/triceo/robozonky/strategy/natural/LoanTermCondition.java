@@ -24,7 +24,7 @@ public class LoanTermCondition extends AbstractRangeCondition {
 
     private static void assertIsInRange(final int months) {
         if ((months < LoanTermCondition.MIN_TERM) || (months > LoanTermCondition.MAX_TERM)) {
-            throw new IllegalArgumentException("Loan terms must be in range of <" + LoanTermCondition.MIN_TERM + "; "
+            throw new IllegalArgumentException("Loan term must be in range of <" + LoanTermCondition.MIN_TERM + "; "
                                                        + LoanTermCondition.MAX_TERM + ">.");
         }
     }

@@ -43,9 +43,10 @@ Ignorovat úvěr, kde: rating je lepší než A+.
 # Stručně prozkoumat lze i příběh.
 Ignorovat úvěr, kde: příběh je velmi krátký.
 
-# Výše a délka úvěru je určena intervalem.
+# Výše, délka a úrok úvěru jsou určeny intervalem.
 Ignorovat úvěr, kde: délka nedosahuje 36 měsíců.
 Ignorovat úvěr, kde: délka je 20 až 40 měsíců.
+Ignorovat úvěr, kde: úrok je 6,66 až 42,0 % p.a..
 Ignorovat úvěr, kde: výše je 100000 až 150000 Kč.
 Ignorovat úvěr, kde: výše přesahuje 200000 Kč.
 
