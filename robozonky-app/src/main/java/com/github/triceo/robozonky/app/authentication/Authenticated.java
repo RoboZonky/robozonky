@@ -29,11 +29,8 @@ public interface Authenticated {
 
     /**
      * Build authentication mechanism that will keep the session alive via the use of session token. The mechanism will
-     * never log out, but the session may expire if not refreshed regularly. This is potentially unsafe, as it will
+     * never log out, constantly refreshing the session in the background. This is potentially unsafe, as it will
      * eventually store a plain-text access token on the hard drive, for everyone to see.
-     * <p>
-     * The token will only be refreshed if RoboZonky is launched between token expiration and X second before token
-     * expiration, where X comes from the arguments of this method.
      * @param data Provider for the sensitive information, such as passwords and tokens.
      * @param refreshAfter Access token will be refreshed after expiration minus this.
      * @return This.

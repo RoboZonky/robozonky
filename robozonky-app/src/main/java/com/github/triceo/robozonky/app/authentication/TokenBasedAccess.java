@@ -29,12 +29,8 @@ import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import com.github.triceo.robozonky.util.Scheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class TokenBasedAccess implements Authenticated {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
 
     private final Refreshable<ZonkyApiToken> refreshableToken;
     private final SecretProvider secrets;

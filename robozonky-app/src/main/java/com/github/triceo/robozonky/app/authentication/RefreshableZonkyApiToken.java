@@ -31,6 +31,9 @@ import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.OAuth;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 
+/**
+ * Will keep permanent user authentication running in the background.
+ */
 class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
 
     private static final TemporalAmount SAFETY_PRE_EXPIRATION_INTERVAL = Duration.ofSeconds(5);
