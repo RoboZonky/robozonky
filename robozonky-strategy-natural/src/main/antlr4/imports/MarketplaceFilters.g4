@@ -33,13 +33,14 @@ marketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c5=storyCondition { $result = $c5.result; }
     | c6=termCondition { $result = $c6.result; }
     | c7=amountCondition { $result = $c7.result; }
+    | c8=interestCondition { $result = $c8.result; }
 ;
 
 regionCondition returns [BorrowerRegionCondition result]:
     { $result = new BorrowerRegionCondition(); }
-    'kraj klienta je ' (
+    'kraj klienta ' IS (
         (
-            r1=regionExpression COMMA { $result.add($r1.result); }
+            r1=regionExpression OR_COMMA { $result.add($r1.result); }
         )*
         r2=regionExpression OR { $result.add($r2.result); }
     )?
@@ -47,7 +48,7 @@ regionCondition returns [BorrowerRegionCondition result]:
 ;
 
 ratingCondition returns [MarketplaceFilterCondition result]:
-    'rating je ' (
+    'rating ' IS (
         ( r1=ratingEnumeratedExpression
             {
                 $result = new LoanRatingEnumeratedCondition();
@@ -60,9 +61,9 @@ ratingCondition returns [MarketplaceFilterCondition result]:
 
 incomeCondition returns [BorrowerIncomeCondition result]:
     { $result = new BorrowerIncomeCondition(); }
-    'klient je ' (
+    'klient ' IS (
         (
-            i1=incomeExpression COMMA { $result.add($i1.result); }
+            i1=incomeExpression OR_COMMA { $result.add($i1.result); }
         )*
         i2=incomeExpression OR { $result.add($i2.result); }
     )?
@@ -71,9 +72,9 @@ incomeCondition returns [BorrowerIncomeCondition result]:
 
 purposeCondition returns [LoanPurposeCondition result]:
     { $result = new LoanPurposeCondition(); }
-    'účel je ' (
+    'účel ' IS (
         (
-            p1=purposeExpression COMMA { $result.add($p1.result); }
+            p1=purposeExpression OR_COMMA { $result.add($p1.result); }
         )*
         p2=purposeExpression OR { $result.add($p2.result); }
     )?
@@ -81,7 +82,7 @@ purposeCondition returns [LoanPurposeCondition result]:
 ;
 
 storyCondition returns [MarketplaceFilterCondition result]:
-    'příběh je ' (
+    'příběh ' IS (
         'velmi krátký' { $result = new VeryShortStoryCondition(); }
         | 'kratší než průměrný' { $result = new ShortStoryCondition(); }
         | 'průměrně dlouhý' { $result = new AverageStoryCondition(); }
@@ -98,18 +99,41 @@ termCondition returns [MarketplaceFilterCondition result]:
 ;
 
 termConditionRangeOpen returns [MarketplaceFilterCondition result]:
-    'je ' min=INTEGER UP_TO max=INTEGER
+    IS min=INTEGER UP_TO max=INTEGER
     { $result = new LoanTermCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
 ;
 
 termConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
-    'přesahuje ' min=INTEGER
+    MORE_THAN min=INTEGER
     { $result = new LoanTermCondition(Integer.parseInt($min.getText()) + 1); }
 ;
 
 termConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
-    'nedosahuje ' max=INTEGER
+    LESS_THAN max=INTEGER
     { $result = new LoanTermCondition(0, Integer.parseInt($max.getText()) - 1); }
+;
+
+interestCondition returns [MarketplaceFilterCondition result]:
+    'úrok ' (
+        (c1 = interestConditionRangeOpen { $result = $c1.result; })
+        | (c2 = interestConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = interestConditionRangeClosedRight { $result = $c3.result; })
+    ) ' % p.a' DOT? // last dot is optional, so that it is possible to end sentence like "p.a." and not "p.a.."
+;
+
+interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=floatExpression UP_TO max=floatExpression
+    { $result = new LoanInterestRateCondition($min.result, $max.result); }
+;
+
+interestConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=floatExpression
+    { $result = new LoanInterestRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
+;
+
+interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=floatExpression
+    { $result = new LoanInterestRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
 ;
 
 amountCondition returns [MarketplaceFilterCondition result]:
@@ -121,16 +145,16 @@ amountCondition returns [MarketplaceFilterCondition result]:
 ;
 
 amountConditionRangeOpen returns [MarketplaceFilterCondition result]:
-    'je ' min=INTEGER UP_TO max=INTEGER
+    IS min=INTEGER UP_TO max=INTEGER
     { $result = new LoanAmountCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
 ;
 
 amountConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
-    'přesahuje ' min=INTEGER
+    MORE_THAN min=INTEGER
     { $result = new LoanAmountCondition(Integer.parseInt($min.getText()) + 1); }
 ;
 
 amountConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
-    'nedosahuje ' max=INTEGER
+    LESS_THAN max=INTEGER
     { $result = new LoanAmountCondition(0, Integer.parseInt($max.getText()) - 1); }
 ;
