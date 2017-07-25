@@ -75,7 +75,7 @@ public class AuthenticationCommandLineFragmentTest {
         final File keystore = new File("");
         final AuthenticationCommandLineFragment fragment =
                 new AuthenticationCommandLineFragment("username", keystore, true);
-        Assertions.assertThat(fragment.createAuthenticationHandler(SecretProvider.fallback("username", new char[0])))
+        Assertions.assertThat(fragment.createAuthenticated(SecretProvider.fallback("username", new char[0])))
                 .isNotNull();
     }
 }

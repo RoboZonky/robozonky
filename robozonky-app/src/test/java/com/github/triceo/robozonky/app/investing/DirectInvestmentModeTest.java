@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
@@ -44,13 +44,11 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest {
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.of(l));
         Mockito.when(z.getStatistics()).thenReturn(Mockito.mock(Statistics.class));
         Mockito.when(z.getInvestments()).thenReturn(Stream.empty());
-        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
-                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                AbstractInvestingTest.harmlessApi(z)
-        );
+        final Authenticated a = Authenticated.passwordBased(AbstractInvestingTest.harmlessApi(z),
+                                                            SecretProvider.fallback("username", new char[0]));
         final Investor.Builder b = new Investor.Builder().asDryRun();
         try (final DirectInvestmentMode exec =
-                     new DirectInvestmentMode(auth, b, true, l.getId(), (int) l.getAmount())) {
+                     new DirectInvestmentMode(a, b, true, l.getId(), (int) l.getAmount())) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(exec.get()).isPresent();
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
@@ -70,7 +68,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest {
         Mockito.doThrow(IllegalStateException.class).when(z).getLoan(ArgumentMatchers.anyInt());
         final ApiProvider p = AbstractInvestingTest.harmlessApi(z);
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
+                Authenticated.passwordBased(SecretProvider.fallback("username", new char[0])),
                 new Investor.Builder().asDryRun(), true, l.getId(), (int) l.getAmount())) {
             Assertions.assertThat(exec.get()).isEmpty();
         } catch (final Exception ex) {

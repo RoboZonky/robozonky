@@ -28,7 +28,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.Events;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +37,13 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecution.class);
 
-    private final AuthenticationHandler authenticationHandler;
+    private final Authenticated authenticationHandler;
     private final Investor.Builder investor;
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final TemporalAmount maximumSleepPeriod;
 
     public StrategyExecution(final Investor.Builder investor, final Refreshable<InvestmentStrategy> strategy,
-                             final AuthenticationHandler auth, final TemporalAmount maximumSleepPeriod) {
+                             final Authenticated auth, final TemporalAmount maximumSleepPeriod) {
         this.authenticationHandler = auth;
         this.investor = investor;
         this.refreshableStrategy = strategy;

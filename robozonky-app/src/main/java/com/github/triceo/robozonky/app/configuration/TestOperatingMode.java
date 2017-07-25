@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.Checker;
@@ -33,8 +33,7 @@ import org.slf4j.LoggerFactory;
 class TestOperatingMode extends OperatingMode {
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
-                                                         final AuthenticationHandler auth,
+    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
         return Optional.of(new InvestmentMode() {
 

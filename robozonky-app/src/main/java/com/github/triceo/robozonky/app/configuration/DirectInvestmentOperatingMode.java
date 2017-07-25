@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
@@ -40,8 +40,7 @@ class DirectInvestmentOperatingMode extends OperatingMode {
     Integer loanAmount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
-                                                         final AuthenticationHandler auth,
+    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
         final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
         return Optional.of(new DirectInvestmentMode(auth, builder, fragment.isFaultTolerant(), loanId, loanAmount));

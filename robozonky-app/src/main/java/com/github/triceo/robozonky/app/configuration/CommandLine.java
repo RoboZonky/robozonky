@@ -107,7 +107,7 @@ public class CommandLine {
 
     private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
         return SecretProviderFactory.getSecretProvider(this).flatMap(secrets -> Optional.ofNullable(mode).flatMap(
-                i -> i.configure(this, authenticationFragment.createAuthenticationHandler(secrets))));
+                i -> i.configure(this, authenticationFragment.createAuthenticated(secrets))));
     }
 
     AuthenticationCommandLineFragment getAuthenticationFragment() {

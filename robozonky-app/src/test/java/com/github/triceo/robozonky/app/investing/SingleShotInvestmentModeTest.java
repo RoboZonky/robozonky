@@ -31,7 +31,7 @@ import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
@@ -88,9 +88,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
     @Test
     public void standard() {
         final Zonky z = AbstractInvestingTest.harmlessZonky(0);
-        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
-                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                AbstractInvestingTest.harmlessApi(z));
+        final Authenticated a = Authenticated.passwordBased(AbstractInvestingTest.harmlessApi(z),
+                                                            SecretProvider.fallback("username", new char[0]));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
@@ -100,7 +99,7 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(Mockito.mock(InvestmentStrategy.class));
         s.run();
         try (final SingleShotInvestmentMode exec =
-                     new SingleShotInvestmentMode(auth, new Investor.Builder().asDryRun(), true, m, s)) {
+                     new SingleShotInvestmentMode(a, new Investor.Builder().asDryRun(), true, m, s)) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(exec.get()).isPresent();
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
@@ -125,9 +124,8 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
     public void failingDuringInvest() {
         final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         Mockito.doThrow(IllegalStateException.class).when(z).getWallet();
-        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
-                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username")),
-                AbstractInvestingTest.harmlessApi(z));
+        final Authenticated a = Authenticated.passwordBased(AbstractInvestingTest.harmlessApi(z),
+                                                            SecretProvider.fallback("username", new char[0]));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
@@ -137,7 +135,7 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(Mockito.mock(InvestmentStrategy.class));
         s.run();
         try (final SingleShotInvestmentMode exec =
-                     new SingleShotInvestmentMode(auth, new Investor.Builder(), true, m, s)) {
+                     new SingleShotInvestmentMode(a, new Investor.Builder(), true, m, s)) {
             Assertions.assertThat(exec.get()).isEmpty();
         } catch (final Exception ex) {
             Assertions.fail("Unexpected exception.", ex);

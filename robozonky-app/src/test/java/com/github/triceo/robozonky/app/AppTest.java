@@ -27,7 +27,7 @@ import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
@@ -66,7 +66,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         // a lot of mocking to exercise the basic path all the way through to the core
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
-        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(OAuth.class));
@@ -83,7 +83,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         // a lot of mocking to exercise the basic path all the way through to the core
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
-        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.execute(ArgumentMatchers.any())).thenReturn(Collections.emptyList());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(OAuth.class));
