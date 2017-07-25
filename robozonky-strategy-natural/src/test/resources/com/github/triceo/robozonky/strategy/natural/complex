@@ -46,12 +46,12 @@ Ignorovat úvěr, kde: příběh je velmi krátký.
 # Výše, délka a úrok úvěru jsou určeny intervalem.
 Ignorovat úvěr, kde: délka nedosahuje 36 měsíců.
 Ignorovat úvěr, kde: délka je 20 až 40 měsíců.
-Ignorovat úvěr, kde: úrok je 6,66 až 42,0 % p.a..
+Ignorovat úvěr, kde: úrok je 6,66 až 42,0 % p.a.
 Ignorovat úvěr, kde: výše je 100000 až 150000 Kč.
 Ignorovat úvěr, kde: výše přesahuje 200000 Kč.
 
 # Jednotlivé podmínky jde slučovat. Středník (";") zastupuje logickou spojku "AND", "a zároveň."
-Ignorovat úvěr, kde: rating je horší než A+; klient je bez zaměstnání nebo důchodce.
+Ignorovat úvěr, kde: rating je horší než A+; úrok nedosahuje 5,0 % p.a.; klient je bez zaměstnání nebo důchodce.
 
 # Z filtrů lze dělat i výjimky. Pravidla v závorce se vztahují k předcházejícímu filtru.
 Ignorovat úvěr, kde: kraj klienta je Ústecký nebo Moravskoslezský; délka přesahuje 36 měsíců.

@@ -75,12 +75,15 @@ floatExpression returns [BigDecimal result] :
 ;
 
 // shared strings
-KC      : 'Kč' ;
-DOT     : '.' ;
-DELIM   : '- ' ;
-UP_TO   : ' až ';
-OR      : ' nebo ';
-OR_COMMA: COMMA ' ';
+KC        : 'Kč' ;
+DOT       : '.' ;
+DELIM     : '- ' ;
+UP_TO     : ' až ';
+IS        : 'je ';
+OR        : ' nebo ';
+OR_COMMA  : COMMA ' ';
+LESS_THAN : 'nedosahuje ';
+MORE_THAN : 'přesahuje ';
 
 // regions
 REGION_A : 'Praha';
