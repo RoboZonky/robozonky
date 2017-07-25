@@ -40,7 +40,7 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
     { $result = new LinkedHashSet<Rating>(); }
     (
         (
-            r1=ratingExpression COMMA { $result.add($r1.result); }
+            r1=ratingExpression OR_COMMA { $result.add($r1.result); }
         )*
         r2=ratingExpression OR { $result.add($r2.result); }
     )?
@@ -66,12 +66,12 @@ purposeExpression returns [Purpose result] :
 ;
 
 // shared strings
-KC   : 'Kč' ;
-DOT  : '.' ;
-DELIM: '- ' ;
-UP_TO: ' až ';
-OR   : ' nebo ';
-COMMA: ', ';
+KC      : 'Kč' ;
+DOT     : '.' ;
+DELIM   : '- ' ;
+UP_TO   : ' až ';
+OR      : ' nebo ';
+OR_COMMA: ', ';
 
 // regions
 REGION_A : 'Praha';

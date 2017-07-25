@@ -39,7 +39,7 @@ regionCondition returns [BorrowerRegionCondition result]:
     { $result = new BorrowerRegionCondition(); }
     'kraj klienta je ' (
         (
-            r1=regionExpression COMMA { $result.add($r1.result); }
+            r1=regionExpression OR_COMMA { $result.add($r1.result); }
         )*
         r2=regionExpression OR { $result.add($r2.result); }
     )?
@@ -62,7 +62,7 @@ incomeCondition returns [BorrowerIncomeCondition result]:
     { $result = new BorrowerIncomeCondition(); }
     'klient je ' (
         (
-            i1=incomeExpression COMMA { $result.add($i1.result); }
+            i1=incomeExpression OR_COMMA { $result.add($i1.result); }
         )*
         i2=incomeExpression OR { $result.add($i2.result); }
     )?
@@ -73,7 +73,7 @@ purposeCondition returns [LoanPurposeCondition result]:
     { $result = new LoanPurposeCondition(); }
     'účel je ' (
         (
-            p1=purposeExpression COMMA { $result.add($p1.result); }
+            p1=purposeExpression OR_COMMA { $result.add($p1.result); }
         )*
         p2=purposeExpression OR { $result.add($p2.result); }
     )?
