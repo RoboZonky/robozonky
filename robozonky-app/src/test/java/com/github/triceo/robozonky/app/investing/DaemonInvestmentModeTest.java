@@ -36,7 +36,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
@@ -117,12 +117,11 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         final Zonky z = AbstractInvestingTest.harmlessZonky(1000);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         Mockito.when(z.getAvailableLoans()).thenReturn(Stream.empty());
-        final AuthenticationHandler auth = AbstractInvestingTest.newAuthenticationHandler(
-                () -> AuthenticationHandler.passwordBased(SecretProvider.fallback("username", new char[0])),
-                AbstractInvestingTest.harmlessApi(z));
+        final Authenticated a = Authenticated.passwordBased(AbstractInvestingTest.harmlessApi(z),
+                                                            SecretProvider.fallback("username", new char[0]));
         final Refreshable<InvestmentStrategy> s = Refreshable.createImmutable(ms);
         s.run();
-        try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(auth, new Investor.Builder().asDryRun(),
+        try (final DaemonInvestmentMode mode = new DaemonInvestmentMode(a, new Investor.Builder().asDryRun(),
                                                                         false, m, s, Duration.ofMinutes(60),
                                                                         Duration.ofSeconds(1))) {
             final Future<Boolean> wasLockedByUser = Executors.newScheduledThreadPool(1).schedule(() -> {

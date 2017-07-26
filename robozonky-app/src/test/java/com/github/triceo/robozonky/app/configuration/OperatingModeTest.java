@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
@@ -38,8 +38,8 @@ public class OperatingModeTest {
         final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         final Investor.Builder builder = new Investor.Builder();
-        final AuthenticationHandler auth =
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
+        final Authenticated auth =
+                Authenticated.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
         final OperatingMode mode = new DirectInvestmentOperatingMode();
         final Optional<InvestmentMode> config = mode.getInvestmentMode(cli, auth, builder);
         Assertions.assertThat(config.get()).isExactlyInstanceOf(DirectInvestmentMode.class);
@@ -51,8 +51,8 @@ public class OperatingModeTest {
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         final Investor.Builder builder = new Investor.Builder();
         builder.usingConfirmation(Mockito.mock(ConfirmationProvider.class), new char[0]);
-        final AuthenticationHandler auth =
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
+        final Authenticated auth =
+                Authenticated.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
         final OperatingMode mode = new TestOperatingMode();
         final Optional<InvestmentMode> config = mode.getInvestmentMode(cli, auth, builder);
         Assertions.assertThat(config).isPresent();
@@ -70,8 +70,8 @@ public class OperatingModeTest {
         Mockito.when(f.isDryRunEnabled()).thenReturn(true);
         final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(f);
-        final AuthenticationHandler auth =
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
+        final Authenticated auth =
+                Authenticated.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = "zonkoid:123456";
         Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
@@ -85,8 +85,8 @@ public class OperatingModeTest {
     public void withConfirmationAndUnknownId() {
         final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
-        final AuthenticationHandler auth =
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
+        final Authenticated auth =
+                Authenticated.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = UUID.randomUUID().toString();
         Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
@@ -99,8 +99,8 @@ public class OperatingModeTest {
     public void withConfirmationAndNoSecret() {
         final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
-        final AuthenticationHandler auth =
-                AuthenticationHandler.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
+        final Authenticated auth =
+                Authenticated.passwordBased(SecretProvider.fallback("user", "pass".toCharArray()));
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = "zonkoid";
         Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
@@ -114,7 +114,7 @@ public class OperatingModeTest {
         final CommandLine cli = Mockito.mock(CommandLine.class);
         Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
         Mockito.when(cli.getConfirmationFragment()).thenReturn(Mockito.mock(ConfirmationCommandLineFragment.class));
-        final AuthenticationHandler auth = Mockito.mock(AuthenticationHandler.class);
+        final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.getSecretProvider()).thenReturn(SecretProvider.fallback("user", new char[0]));
         final OperatingMode mode = new DirectInvestmentOperatingMode();
         final Optional<InvestmentMode> config = mode.configure(cli, auth);

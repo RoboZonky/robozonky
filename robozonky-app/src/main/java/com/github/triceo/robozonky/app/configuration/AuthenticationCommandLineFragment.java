@@ -23,7 +23,7 @@ import java.util.Optional;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import com.github.triceo.robozonky.internal.api.Settings;
 
@@ -72,12 +72,12 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
         return Optional.ofNullable(keystore);
     }
 
-    public AuthenticationHandler createAuthenticationHandler(final SecretProvider secrets) {
+    public Authenticated createAuthenticated(final SecretProvider secrets) {
         if (refreshTokenEnabled) {
             final TemporalAmount duration = Settings.INSTANCE.getTokenRefreshBeforeExpiration();
-            return AuthenticationHandler.tokenBased(secrets, duration);
+            return Authenticated.tokenBased(secrets, duration);
         } else {
-            return AuthenticationHandler.passwordBased(secrets);
+            return Authenticated.passwordBased(secrets);
         }
     }
 

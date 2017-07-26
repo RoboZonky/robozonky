@@ -22,7 +22,7 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
@@ -39,8 +39,7 @@ class SingleShotOperatingMode extends OperatingMode {
     StrategyCommandLineFragment strategyFragment = new StrategyCommandLineFragment();
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
-                                                         final AuthenticationHandler auth,
+    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
         final Refreshable<InvestmentStrategy> strategy =
                 RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());

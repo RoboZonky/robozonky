@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +36,12 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private final boolean isFaultTolerant;
-    private final AuthenticationHandler authenticationHandler;
+    private final Authenticated authenticated;
     private final Investor.Builder investorBuilder;
 
-    protected AbstractInvestmentMode(final AuthenticationHandler authenticationHandler, final Investor.Builder builder,
+    protected AbstractInvestmentMode(final Authenticated authenticated, final Investor.Builder builder,
                                      final boolean isFaultTolerant) {
-        this.authenticationHandler = authenticationHandler;
+        this.authenticated = authenticated;
         this.investorBuilder = builder;
         this.isFaultTolerant = isFaultTolerant;
     }
@@ -53,7 +53,7 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
 
     @Override
     public String getUsername() {
-        return this.authenticationHandler.getSecretProvider().getUsername();
+        return this.authenticated.getSecretProvider().getUsername();
     }
 
     @Override
@@ -65,8 +65,8 @@ abstract class AbstractInvestmentMode implements InvestmentMode {
         return investorBuilder;
     }
 
-    protected AuthenticationHandler getAuthenticationHandler() {
-        return authenticationHandler;
+    protected Authenticated getAuthenticated() {
+        return authenticated;
     }
 
     protected boolean wasSuddenDeath() {

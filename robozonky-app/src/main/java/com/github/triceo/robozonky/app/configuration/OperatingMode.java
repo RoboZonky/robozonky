@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.app.configuration;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.ConfirmationProviderLoader;
@@ -59,10 +59,10 @@ abstract class OperatingMode implements CommandLineFragment {
     }
 
     protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
-                                                                  final AuthenticationHandler auth,
+                                                                  final Authenticated auth,
                                                                   final Investor.Builder builder);
 
-    public Optional<InvestmentMode> configure(final CommandLine cli, final AuthenticationHandler auth) {
+    public Optional<InvestmentMode> configure(final CommandLine cli, final Authenticated auth) {
         final Optional<Credentials> cred = cli.getConfirmationFragment().getConfirmationCredentials().map(
                 value -> new Credentials(value, auth.getSecretProvider()));
         final Optional<Investor.Builder> optionalBuilder = cred

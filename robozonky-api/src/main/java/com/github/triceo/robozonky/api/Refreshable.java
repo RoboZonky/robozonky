@@ -26,6 +26,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -42,38 +44,37 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Refreshable<T> implements Runnable {
 
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Semaphore valueIsMissing = new Semaphore(1);
+    private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
+    private final AtomicReference<T> cachedResult = new AtomicReference<>();
+    private final AtomicInteger requestsToPause = new AtomicInteger(0);
     /**
-     * Listener for changes to the original resource. Use {@link #registerListener(Refreshable.RefreshListener)} to
-     * enable.
-     * Implementations of methods in this interface must not throw exceptions.
-     * @param <T> Target {@link Refreshable}'s generic type.
+     * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
      */
-    public interface RefreshListener<T> {
+    private final CountDownLatch completionAssurance = new CountDownLatch(1);
+    private final Set<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
-        /**
-         * Resource now has a value where there was none before.
-         * @param newValue New value for the resource.
-         */
-        default void valueSet(final T newValue) {
-            // do nothing
-        }
+    public Refreshable() {
+        this.valueIsMissing.acquireUninterruptibly();
+        // the only task of this listener is to log changes to the resource
+        this.registerListener(new Refreshable.RefreshListener<T>() {
 
-        /**
-         * Resource used to have a value but no longer has one.
-         * @param oldValue Former value of the resource.
-         */
-        default void valueUnset(final T oldValue) {
-            // do nothing
-        }
+            @Override
+            public void valueSet(final T newValue) {
+                LOGGER.debug("New value for {}: {}.", Refreshable.this, newValue);
+            }
 
-        /**
-         * Resource continues to have a value, and that value has changed.
-         * @param oldValue Former value of the resource.
-         * @param newValue New value of the resource.
-         */
-        default void valueChanged(final T oldValue, final T newValue) {
-            // do nothing
-        }
+            @Override
+            public void valueUnset(final T oldValue) {
+                LOGGER.debug("Value removed from {}.", Refreshable.this);
+            }
+
+            @Override
+            public void valueChanged(final T oldValue, final T newValue) {
+                this.valueSet(newValue);
+            }
+        });
     }
 
     /**
@@ -103,39 +104,6 @@ public abstract class Refreshable<T> implements Runnable {
                 return Optional.ofNullable(toReturn);
             }
         };
-    }
-
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
-    private final Semaphore valueIsMissing = new Semaphore(1);
-    private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
-    private final AtomicReference<T> cachedResult = new AtomicReference<>();
-    /**
-     * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
-     */
-    private final CountDownLatch completionAssurance = new CountDownLatch(1);
-    private final Set<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
-
-    public Refreshable() {
-        this.valueIsMissing.acquireUninterruptibly();
-        // the only task of this listener is to log changes to the resource
-        this.registerListener(new Refreshable.RefreshListener<T>() {
-
-            @Override
-            public void valueSet(final T newValue) {
-                LOGGER.debug("New value for {}: {}.", Refreshable.this, newValue);
-            }
-
-            @Override
-            public void valueUnset(final T oldValue) {
-                LOGGER.debug("Value removed from {}.", Refreshable.this);
-            }
-
-            @Override
-            public void valueChanged(final T oldValue, final T newValue) {
-                this.valueSet(newValue);
-            }
-        });
     }
 
     /**
@@ -229,6 +197,15 @@ public abstract class Refreshable<T> implements Runnable {
         return this.listeners.remove(listener);
     }
 
+    /**
+     * Will stop refreshing until {@link Refreshable.Pause#close()} is called. If multiple pause requests are active
+     * at the same time, both must be released before the refresh is started again.
+     * @return The {@link Refreshable.Pause} object to use to re-start the refresh.
+     */
+    public Refreshable.Pause pause() {
+        return new Refreshable.Pause(requestsToPause);
+    }
+
     private void storeResult(final T result) {
         final T previous = cachedResult.getAndSet(result);
         if (Objects.equals(previous, result)) {
@@ -273,10 +250,69 @@ public abstract class Refreshable<T> implements Runnable {
      */
     @Override
     public void run() {
+        if (requestsToPause.get() > 0) {
+            LOGGER.debug("Paused, no refresh.");
+            return;
+        }
         try {
             runLocked();
         } finally {
             completionAssurance.countDown();
+        }
+    }
+
+    /**
+     * Listener for changes to the original resource. Use {@link #registerListener(Refreshable.RefreshListener)} to
+     * enable.
+     * Implementations of methods in this interface must not throw exceptions.
+     * @param <T> Target {@link Refreshable}'s generic type.
+     */
+    public interface RefreshListener<T> {
+
+        /**
+         * Resource now has a value where there was none before.
+         * @param newValue New value for the resource.
+         */
+        default void valueSet(final T newValue) {
+            // do nothing
+        }
+
+        /**
+         * Resource used to have a value but no longer has one.
+         * @param oldValue Former value of the resource.
+         */
+        default void valueUnset(final T oldValue) {
+            // do nothing
+        }
+
+        /**
+         * Resource continues to have a value, and that value has changed.
+         * @param oldValue Former value of the resource.
+         * @param newValue New value of the resource.
+         */
+        default void valueChanged(final T oldValue, final T newValue) {
+            // do nothing
+        }
+    }
+
+    public static class Pause implements AutoCloseable {
+
+        private final AtomicInteger pauseCounter;
+        private final AtomicBoolean released = new AtomicBoolean(false);
+
+        private Pause(final AtomicInteger pauseCounter) {
+            this.pauseCounter = pauseCounter;
+            pauseCounter.incrementAndGet();
+        }
+
+        /**
+         * Restart the refresh. Subsequent calls have no effect.
+         */
+        @Override
+        public void close() {
+            if (!released.getAndSet(true)) {
+                pauseCounter.decrementAndGet();
+            }
         }
     }
 }

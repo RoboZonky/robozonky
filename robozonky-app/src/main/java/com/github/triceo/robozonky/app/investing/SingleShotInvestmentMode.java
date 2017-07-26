@@ -30,7 +30,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 
 public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
@@ -38,7 +38,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
     private final Marketplace marketplace;
     private final TemporalAmount maximumSleepPeriod;
 
-    public SingleShotInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
+    public SingleShotInvestmentMode(final Authenticated auth, final Investor.Builder builder,
                                     final boolean isFaultTolerant, final Marketplace marketplace,
                                     final Refreshable<InvestmentStrategy> strategy,
                                     final TemporalAmount maximumSleepPeriod) {
@@ -51,7 +51,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
         this.maximumSleepPeriod = maximumSleepPeriod;
     }
 
-    public SingleShotInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
+    public SingleShotInvestmentMode(final Authenticated auth, final Investor.Builder builder,
                                     final boolean isFaultTolerant, final Marketplace marketplace,
                                     final Refreshable<InvestmentStrategy> strategy) {
         this(auth, builder, isFaultTolerant, marketplace, strategy, Duration.ofMinutes(60));
@@ -70,7 +70,7 @@ public class SingleShotInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
-        return new StrategyExecution(getInvestorBuilder(), refreshableStrategy, getAuthenticationHandler(),
+        return new StrategyExecution(getInvestorBuilder(), refreshableStrategy, getAuthenticated(),
                                      maximumSleepPeriod);
     }
 

@@ -36,7 +36,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 
 public class DaemonInvestmentMode extends AbstractInvestmentMode {
@@ -59,10 +59,9 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
     private final CountDownLatch blockUntilZero;
     private final Thread shutdownHook;
 
-    public DaemonInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
-                                final boolean isFaultTolerant, final Marketplace marketplace,
-                                final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod,
-                                final TemporalAmount periodBetweenChecks) {
+    public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
+                                final Marketplace marketplace, final Refreshable<InvestmentStrategy> strategy,
+                                final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
         super(auth, builder, isFaultTolerant);
         this.blockUntilZero =
                 DaemonInvestmentMode.BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
@@ -123,8 +122,7 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
-        return new StrategyExecution(getInvestorBuilder(), refreshableStrategy, getAuthenticationHandler(),
-                                     maximumSleepPeriod);
+        return new StrategyExecution(getInvestorBuilder(), refreshableStrategy, getAuthenticated(), maximumSleepPeriod);
     }
 
     @Override

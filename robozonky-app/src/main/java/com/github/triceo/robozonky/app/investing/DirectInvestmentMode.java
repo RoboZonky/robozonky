@@ -25,15 +25,15 @@ import java.util.function.Function;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
 
 public class DirectInvestmentMode extends AbstractInvestmentMode {
 
     private final int loanId, loanAmount;
 
-    public DirectInvestmentMode(final AuthenticationHandler auth, final Investor.Builder builder,
-                                final boolean isFaultTolerant, final int loanId, final int loanAmount) {
+    public DirectInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
+                                final int loanId, final int loanAmount) {
         super(auth, builder, isFaultTolerant);
         this.loanId = loanId;
         this.loanAmount = loanAmount;
@@ -53,7 +53,7 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
                     .map(r -> Session.invest(getInvestorBuilder(), zonky, new DirectInvestmentCommand(r)))
                     .orElse(Collections.emptyList());
         };
-        return (marketplace) -> this.getAuthenticationHandler().execute(op);
+        return (marketplace) -> this.getAuthenticated().execute(op);
     }
 
     @Override
