@@ -37,7 +37,9 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
+import com.github.triceo.robozonky.app.investing.delinquency.DelinquencyUpdater;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
+import com.github.triceo.robozonky.util.Scheduler;
 
 public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
@@ -73,6 +75,8 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         this.periodBetweenChecks = periodBetweenChecks;
         this.suddenDeath = new SuddenDeathDetection(blockUntilZero,
                                                     DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
+        // FIXME move to a more appropriate place
+        Scheduler.BACKGROUND_SCHEDULER.submit(new DelinquencyUpdater(auth), Duration.ofHours(1));
     }
 
     Thread getShutdownHook() {

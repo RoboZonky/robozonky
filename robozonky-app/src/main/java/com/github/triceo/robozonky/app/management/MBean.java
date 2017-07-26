@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app.management;
 
 import java.lang.management.ManagementFactory;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -31,9 +32,11 @@ import org.slf4j.LoggerFactory;
 
 public enum MBean {
 
-    RUNTIME(new Runtime()),
-    INVESTMENTS(new Investments()),
-    PORTFOLIO(new Portfolio());
+    RUNTIME(Runtime::new),
+    INVESTMENTS(Investments::new),
+    PORTFOLIO(Portfolio::new);
+
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MBean.class);
 
@@ -82,14 +85,19 @@ public enum MBean {
         }
     }
 
-    private final BaseMBean implementation;
+    private final Supplier<BaseMBean> supplier;
+    private BaseMBean implementation;
 
-    MBean(final BaseMBean implementation) {
-        this.implementation = implementation;
+    MBean(final Supplier<BaseMBean> supplier) {
+        this.supplier = supplier;
+        this.reset();
     }
 
     public BaseMBean getImplementation() {
         return implementation;
     }
 
+    void reset() {
+        implementation = supplier.get();
+    }
 }

@@ -53,7 +53,7 @@ public class DirectInvestmentMode extends AbstractInvestmentMode {
                     .map(r -> Session.invest(getInvestorBuilder(), zonky, new DirectInvestmentCommand(r)))
                     .orElse(Collections.emptyList());
         };
-        return (marketplace) -> this.getAuthenticated().execute(op);
+        return (marketplace) -> this.getAuthenticated().call(op);
     }
 
     @Override

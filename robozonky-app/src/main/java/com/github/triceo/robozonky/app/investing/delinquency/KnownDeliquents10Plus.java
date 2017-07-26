@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.app.investing.delinquency;
 
-import java.time.OffsetDateTime;
+final class KnownDeliquents10Plus extends KnownDelinquents {
 
-public interface BaseMBean {
-
-    OffsetDateTime getLatestUpdatedDateTime();
-
+    @Override
+    protected int getThresholdInDays() {
+        return 10;
+    }
 }

@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.app.investing.delinquency;
 
-import java.util.concurrent.CountDownLatch;
+import java.time.OffsetDateTime;
 
-import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-public class RuntimeMBeanTest {
+public class DelinquencyUpdaterTest {
 
     @Test
-    public void unblock() {
-        final CountDownLatch s = DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get();
-        final Runtime bean = (Runtime) MBean.RUNTIME.getImplementation();
-        bean.reset();
-        bean.stopDaemon();
-        Assertions.assertThat(s.getCount()).isEqualTo(0);
+    public void update() {
+        final Authenticated a = Mockito.mock(Authenticated.class);
+        final Refreshable<OffsetDateTime> r = new DelinquencyUpdater(a);
+        r.run();
+        Assertions.assertThat(r.getLatest()).isPresent();
     }
 }
-
-

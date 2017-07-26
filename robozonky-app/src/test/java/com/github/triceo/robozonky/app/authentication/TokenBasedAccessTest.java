@@ -49,11 +49,11 @@ public class TokenBasedAccessTest {
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(api.authenticated(ArgumentMatchers.eq(token))).thenReturn(z);
         final Authenticated a = Authenticated.tokenBased(api, sp, Duration.ofSeconds(60));
-        // execute SUT
+        // call SUT
         final Function<Zonky, Collection<Investment>> f = Mockito.mock(Function.class);
         final Collection<Investment> expectedResult = Collections.emptyList();
         Mockito.when(f.apply(ArgumentMatchers.eq(z))).thenReturn(expectedResult);
-        final Collection<Investment> result = a.execute(f);
+        final Collection<Investment> result = a.call(f);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result).isSameAs(expectedResult);
             softly.assertThat(a.getSecretProvider()).isSameAs(sp);

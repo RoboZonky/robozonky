@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.api.remote.enums;
 
-import java.time.OffsetDateTime;
+// FIXME likely incomplete
+public enum PaymentStatus {
 
-public interface BaseMBean {
-
-    OffsetDateTime getLatestUpdatedDateTime();
+    DUE,
+    PAID,
+    COVERED,
+    // "na cestě"
+    OK
 
 }

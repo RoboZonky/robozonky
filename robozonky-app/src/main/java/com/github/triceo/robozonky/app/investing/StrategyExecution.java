@@ -56,7 +56,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
             final InvestmentCommand c = new StrategyBasedInvestmentCommand(strategy, marketplace);
             return Session.invest(investor, zonky, c);
         };
-        return authenticationHandler.execute(op);
+        return authenticationHandler.call(op);
     }
 
     @Override

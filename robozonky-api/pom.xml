@@ -265,6 +265,26 @@
                     "classSimpleName": "ReturnCode",
                     "fieldName": "ERROR_UNEXPECTED",
                     "justification": "Takes place of ERROR_LOCK, which was previously deprecated for removal."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method java.lang.String com.github.triceo.robozonky.api.remote.entities.Investment::getPaymentStatus()",
+                    "new": "method com.github.triceo.robozonky.api.remote.enums.PaymentStatus com.github.triceo.robozonky.api.remote.entities.Investment::getPaymentStatus()",
+                    "oldType": "java.lang.String",
+                    "newType": "com.github.triceo.robozonky.api.remote.enums.PaymentStatus",
+                    "package": "com.github.triceo.robozonky.api.remote.entities",
+                    "classSimpleName": "Investment",
+                    "methodName": "getPaymentStatus",
+                    "justification": "Implemented payment status as enum."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method java.lang.String com.github.triceo.robozonky.api.remote.entities.MyInvestment::getStatus()",
+                    "new": "method com.github.triceo.robozonky.api.remote.enums.InvestmentStatus com.github.triceo.robozonky.api.remote.entities.BaseInvestment::getStatus() @ com.github.triceo.robozonky.api.remote.entities.MyInvestment",
+                    "oldType": "java.lang.String",
+                    "newType": "com.github.triceo.robozonky.api.remote.enums.InvestmentStatus",
+                    "package": "com.github.triceo.robozonky.api.remote.entities",
+                    "classSimpleName": "MyInvestment",
+                    "methodName": "getStatus",
+                    "justification": "Now inherits the same field from Investment."
                   }
                 ]
               }

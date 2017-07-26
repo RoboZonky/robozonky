@@ -48,11 +48,11 @@ public class PasswordBasedAccessTest {
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(api.authenticated(ArgumentMatchers.eq(token))).thenReturn(z);
         final Authenticated a = Authenticated.passwordBased(api, sp);
-        // execute SUT
+        // call SUT
         final Function<Zonky, Collection<Investment>> f = Mockito.mock(Function.class);
         final Collection<Investment> expectedResult = Collections.emptyList();
         Mockito.when(f.apply(ArgumentMatchers.eq(z))).thenReturn(expectedResult);
-        final Collection<Investment> result = a.execute(f);
+        final Collection<Investment> result = a.call(f);
         Assertions.assertThat(result).isSameAs(expectedResult);
         Mockito.verify(oauth).login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password));
         Mockito.verify(oauth, Mockito.never()).refresh(ArgumentMatchers.any());
@@ -73,10 +73,10 @@ public class PasswordBasedAccessTest {
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(api.authenticated(ArgumentMatchers.eq(token))).thenReturn(z);
         final Authenticated a = Authenticated.passwordBased(api, sp);
-        // execute SUT
+        // call SUT
         final Function<Zonky, Collection<Investment>> f = Mockito.mock(Function.class);
         Mockito.when(f.apply(ArgumentMatchers.eq(z))).thenThrow(new IllegalStateException());
-        Assertions.assertThatThrownBy(() -> a.execute(f)).isInstanceOf(IllegalStateException.class);
+        Assertions.assertThatThrownBy(() -> a.call(f)).isInstanceOf(IllegalStateException.class);
         Mockito.verify(z).logout();
     }
 }

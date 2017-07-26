@@ -48,7 +48,7 @@ class PasswordBasedAccess implements Authenticated {
     }
 
     @Override
-    public Collection<Investment> execute(final Function<Zonky, Collection<Investment>> op) {
+    public Collection<Investment> call(final Function<Zonky, Collection<Investment>> op) {
         final ZonkyApiToken token = PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
         try (final Zonky zonky = apis.authenticated(token)) {
             try {

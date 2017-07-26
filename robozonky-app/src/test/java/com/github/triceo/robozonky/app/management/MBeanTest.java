@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -41,5 +43,11 @@ public class MBeanTest {
     @Test
     public void isValid() {
         Assertions.assertThat(mbean.getImplementation().getLatestUpdatedDateTime()).isNull();
+    }
+
+    @After
+    @Before
+    public void reset() {
+        Stream.of(MBean.values()).forEach(MBean::reset);
     }
 }

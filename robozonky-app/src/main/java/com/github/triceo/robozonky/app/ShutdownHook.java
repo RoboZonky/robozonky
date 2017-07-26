@@ -68,9 +68,9 @@ class ShutdownHook {
     private final Stack<Consumer<ShutdownHook.Result>> stack = new Stack<>();
 
     /**
-     * Register a handler to call arbitrary code during execute.
-     * @param handler Needs to return the execute handler and optionally perform other things.
-     * @return True if the handler was registered and will be executed during execute.
+     * Register a handler to call arbitrary code during call.
+     * @param handler Needs to return the call handler and optionally perform other things.
+     * @return True if the handler was registered and will be executed during call.
      */
     public boolean register(final ShutdownHook.Handler handler) {
         if (handler == null) {
@@ -111,7 +111,7 @@ class ShutdownHook {
             try {
                 stack.pop().accept(result);
             } catch (final RuntimeException ex) {
-                ShutdownHook.LOGGER.warn("Failed to execute state handler.", ex);
+                ShutdownHook.LOGGER.warn("Failed to call state handler.", ex);
             }
         }
     }

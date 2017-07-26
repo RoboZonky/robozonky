@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.api.notifications;
 
-import java.time.OffsetDateTime;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-public interface BaseMBean {
+/**
+ * Fired immediately after an {@link Investment} is identified as no longer delinquent.
+ */
+public final class LoanNoLongerDelinquentEvent extends Event {
 
-    OffsetDateTime getLatestUpdatedDateTime();
+    private final Loan loan;
 
+    public LoanNoLongerDelinquentEvent(final Loan loan) {
+        this.loan = loan;
+    }
+
+    public Loan getLoan() {
+        return loan;
+    }
 }

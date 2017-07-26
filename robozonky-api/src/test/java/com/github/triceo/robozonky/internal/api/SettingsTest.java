@@ -79,7 +79,7 @@ public class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(5));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(5));
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(20);
         });
     }
 

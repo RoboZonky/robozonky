@@ -18,6 +18,9 @@ package com.github.triceo.robozonky.internal.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 
 import org.ini4j.Ini;
@@ -54,6 +57,14 @@ public enum State {
          */
         public Optional<String> getValue(final String key) {
             return State.INSTANCE.getValue(this.classIdentifier, key);
+        }
+
+        /**
+         * Retrieve all keys associated with this class-specific state storage.
+         * @return Unique key values.
+         */
+        public Collection<String> getKeys() {
+            return State.INSTANCE.getKeys(this.classIdentifier);
         }
 
         /**
@@ -124,6 +135,14 @@ public enum State {
             return Optional.of(this.stateFile.get(section, key, String.class));
         } else {
             return Optional.empty();
+        }
+    }
+
+    synchronized Collection<String> getKeys(final String section) {
+        if (this.stateFile.containsKey(section)) {
+            return new HashSet<>(this.stateFile.get(section).keySet());
+        } else {
+            return Collections.emptySet();
         }
     }
 

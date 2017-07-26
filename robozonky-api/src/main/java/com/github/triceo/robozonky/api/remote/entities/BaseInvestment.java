@@ -20,10 +20,13 @@ import java.util.Optional;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import com.github.triceo.robozonky.api.remote.enums.InvestmentStatus;
+
 abstract class BaseInvestment extends BaseEntity {
 
     private int id, loanId, amount, additionalAmount, firstAmount;
     private Loan loan;
+    private InvestmentStatus status;
 
     BaseInvestment() {
         // for JAXB
@@ -33,12 +36,18 @@ abstract class BaseInvestment extends BaseEntity {
         this.loan = loan;
         this.loanId = loan.getId();
         this.amount = amount;
+        this.status = InvestmentStatus.STOPPED;
         if (loan.getMyInvestment() != null) {
             final MyInvestment m = loan.getMyInvestment();
             this.id = m.getId();
             this.additionalAmount = m.getAdditionalAmount();
             this.firstAmount = m.getFirstAmount();
         }
+    }
+
+    @XmlElement
+    public InvestmentStatus getStatus() {
+        return status;
     }
 
     @XmlElement

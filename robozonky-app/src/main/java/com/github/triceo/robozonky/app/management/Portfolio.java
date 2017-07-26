@@ -90,12 +90,6 @@ public class Portfolio implements PortfolioMBean {
         return this.latestUpdatedDateTime;
     }
 
-    @Override
-    public void reset() {
-        this.latestPortfolioOverview = null;
-        this.latestUpdatedDateTime = null;
-    }
-
     void setPortfolioOverview(final StrategyStartedEvent event) {
         this.latestPortfolioOverview = event.getPortfolioOverview();
         this.latestUpdatedDateTime = event.getCreatedOn();

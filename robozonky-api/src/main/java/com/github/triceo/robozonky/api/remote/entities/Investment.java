@@ -20,12 +20,14 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
 public class Investment extends BaseInvestment {
 
+    private PaymentStatus paymentStatus;
     private int dpd, loanTermInMonth, currentTerm;
-    private String loanName, nickname, firstName, surname, paymentStatus;
+    private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate, nextPaymentDate;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal,
             expectedInterest;
@@ -43,7 +45,7 @@ public class Investment extends BaseInvestment {
         this.loanTermInMonth = loan.getTermInMonths();
         this.interestRate = loan.getInterestRate();
         this.currentTerm = this.loanTermInMonth;
-        this.paymentStatus = "OK";
+        this.paymentStatus = PaymentStatus.OK;
         this.paid = BigDecimal.ZERO;
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.valueOf(amount);
@@ -95,8 +97,7 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    // FIXME implement as enum, do not forget error-catching deserializer
-    public String getPaymentStatus() {
+    public PaymentStatus getPaymentStatus() {
         return paymentStatus;
     }
 

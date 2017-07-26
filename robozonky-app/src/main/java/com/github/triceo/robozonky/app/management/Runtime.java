@@ -33,7 +33,6 @@ class Runtime implements RuntimeMBean {
 
     private String zonkyUsername = "";
     private OffsetDateTime lastUpdatedDateTime;
-    private CountDownLatch allowDaemonToTerminate;
 
     private static void countDown(final CountDownLatch latch) {
         Runtime.LOGGER.debug("Counting down {}.", latch);
@@ -47,7 +46,7 @@ class Runtime implements RuntimeMBean {
          * Graceful shutdown will be assured due to the daemon shutdown hook only being called on normal application
          * shutdown. Therefore we can signal graceful shutdown right away.
          */
-        Runtime.countDown(allowDaemonToTerminate);
+        Runtime.countDown(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get());
     }
 
     @Override
@@ -58,14 +57,6 @@ class Runtime implements RuntimeMBean {
     void registerInvestmentRun(final ExecutionCompletedEvent event, final SessionInfo sessionInfo) {
         this.lastUpdatedDateTime = event.getCreatedOn();
         this.zonkyUsername = sessionInfo.getUserName();
-        this.allowDaemonToTerminate = ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get();
-    }
-
-    @Override
-    public void reset() {
-        this.zonkyUsername = "";
-        this.lastUpdatedDateTime = null;
-        this.allowDaemonToTerminate = ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get();
     }
 
     @Override

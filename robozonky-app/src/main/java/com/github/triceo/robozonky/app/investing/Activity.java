@@ -108,7 +108,7 @@ class Activity {
             final boolean hasUnseenLoans = this.hasLoansNewerThan(lastKnownAction);
             shouldSleep = !(hasUnseenLoans || hasUnactionableLoans);
         }
-        // only change marketplace check timestamp when we're intending to execute some actual investing.
+        // only change marketplace check timestamp when we're intending to call some actual investing.
         this.settler.set(shouldSleep ? null : () -> this.persist(hasUnactionableLoans));
         return shouldSleep;
     }

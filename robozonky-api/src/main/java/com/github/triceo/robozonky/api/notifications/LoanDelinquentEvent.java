@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.api.remote.entities;
+package com.github.triceo.robozonky.api.notifications;
 
 import java.time.OffsetDateTime;
-import javax.xml.bind.annotation.XmlElement;
 
-public class MyInvestment extends BaseInvestment {
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-    private int investorId;
-    private String investorNickname;
-    private OffsetDateTime timeCreated;
+/**
+ * Fired immediately after an {@link Investment} is identified as delinquent.
+ */
+public final class LoanDelinquentEvent extends Event {
 
-    MyInvestment() {
-        // for JAXB
+    private final Loan loan;
+    private final OffsetDateTime since;
+
+    public LoanDelinquentEvent(final Loan loan, final OffsetDateTime since) {
+        this.loan = loan;
+        this.since = since;
     }
 
-    @XmlElement
-    public int getInvestorId() {
-        return investorId;
+    public Loan getLoan() {
+        return loan;
     }
 
-    @XmlElement
-    public String getInvestorNickname() {
-        return investorNickname;
-    }
-
-    @XmlElement
-    public OffsetDateTime getTimeCreated() {
-        return timeCreated;
+    public OffsetDateTime getSince() {
+        return since;
     }
 }

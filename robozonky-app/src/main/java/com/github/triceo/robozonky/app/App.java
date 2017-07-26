@@ -94,9 +94,9 @@ public class App {
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.BACKGROUND_SCHEDULER.shutdown()));
         // check for new RoboZonky version every now and then
         Scheduler.BACKGROUND_SCHEDULER.submit(new UpdateMonitor(), Duration.ofHours(1));
-        // read the command line and execute the runtime
+        // read the command line and call the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
-        try { // execute core code
+        try { // call core code
             App.exit(App.execute(args, faultTolerant));
         } catch (final Exception ex) {
             new AppRuntimeExceptionHandler(faultTolerant.get()).handle(ex);

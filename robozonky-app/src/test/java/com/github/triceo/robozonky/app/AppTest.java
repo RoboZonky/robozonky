@@ -60,7 +60,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         final SecretProvider secret = Mockito.mock(SecretProvider.class);
         Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
         final Authenticated auth = Mockito.mock(Authenticated.class);
-        Mockito.doThrow(IllegalStateException.class).when(auth).execute(ArgumentMatchers.any());
+        Mockito.doThrow(IllegalStateException.class).when(auth).call(ArgumentMatchers.any());
         final ApiProvider api = Mockito.mock(ApiProvider.class);
         Mockito.when(api.oauth()).thenReturn(Mockito.mock(OAuth.class));
         final Loan loan = Mockito.mock(Loan.class);

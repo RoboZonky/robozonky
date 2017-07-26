@@ -58,7 +58,7 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
      * Execute an action when a new version is detected.
      * @param newVersion New version that has just been detected.
      * @param lastKnownVersion The version that was last known to exist. Will be updated.
-     * @param handler Action to execute.
+     * @param handler Action to call.
      */
     private void updateVersion(final String newVersion, final AtomicReference<String> lastKnownVersion,
                                final Consumer<String> handler) {
