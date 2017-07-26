@@ -17,24 +17,17 @@
 package com.github.triceo.robozonky.app;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
-import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
-import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
-import com.github.triceo.robozonky.app.investing.SingleShotInvestmentMode;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.OAuth;
-import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -76,29 +69,6 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         final ReturnCode rc = App.execute(new DirectInvestmentMode(auth, new Investor.Builder().asDryRun(),
                                                                    false, 1, 1000));
         Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_SETUP);
-    }
-
-    @Test
-    public void strategyBasedExecutionInvestingNothing() {
-        // a lot of mocking to exercise the basic path all the way through to the core
-        final SecretProvider secret = Mockito.mock(SecretProvider.class);
-        Mockito.when(secret.getPassword()).thenReturn("".toCharArray());
-        final Authenticated auth = Mockito.mock(Authenticated.class);
-        Mockito.when(auth.execute(ArgumentMatchers.any())).thenReturn(Collections.emptyList());
-        final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth()).thenReturn(Mockito.mock(OAuth.class));
-        final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        Mockito.when(api.authenticated(ArgumentMatchers.any())).thenReturn(Mockito.mock(Zonky.class));
-        final InvestmentStrategy strategyMock = Mockito.mock(InvestmentStrategy.class);
-        final Refreshable<InvestmentStrategy> refreshable = Mockito.mock(Refreshable.class);
-        Mockito.when(refreshable.getLatest()).thenReturn(Optional.of(strategyMock));
-        final Marketplace marketplace = Mockito.mock(Marketplace.class);
-        Mockito.when(marketplace.specifyExpectedTreatment()).thenReturn(ExpectedTreatment.POLLING);
-        // and now test
-        final ReturnCode rc = App.execute(new SingleShotInvestmentMode(auth, new Investor.Builder().asDryRun(),
-                                                                       false, marketplace, refreshable));
-        Assertions.assertThat(rc).isEqualTo(ReturnCode.OK);
     }
 
     @Test

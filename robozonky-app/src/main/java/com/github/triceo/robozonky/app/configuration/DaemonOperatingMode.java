@@ -33,7 +33,7 @@ import com.github.triceo.robozonky.common.secrets.Credentials;
 class DaemonOperatingMode extends OperatingMode {
 
     @ParametersDelegate
-    DaemonModeMarketplaceCommandLineFragment marketplaceFragment = new DaemonModeMarketplaceCommandLineFragment();
+    MarketplaceCommandLineFragment marketplaceFragment = new MarketplaceCommandLineFragment();
 
     @ParametersDelegate
     StrategyCommandLineFragment strategyFragment = new StrategyCommandLineFragment();

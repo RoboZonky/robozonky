@@ -77,7 +77,6 @@ public class CommandLine {
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(CommandLine.getScriptIdentifier())
                 .addCommand(new DaemonOperatingMode())
-                .addCommand(new SingleShotOperatingMode())
                 .addCommand(new DirectInvestmentOperatingMode())
                 .addCommand(new TestOperatingMode())
                 .addObject(cli);

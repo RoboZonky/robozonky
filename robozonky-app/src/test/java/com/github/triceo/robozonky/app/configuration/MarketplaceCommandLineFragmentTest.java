@@ -22,18 +22,18 @@ import java.time.temporal.TemporalAmount;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class DaemonModeMarketplaceCommandLineFragmentTest {
+public class MarketplaceCommandLineFragmentTest {
 
     @Test
     public void durationBetweenChecks() {
-        final DaemonModeMarketplaceCommandLineFragment f = new DaemonModeMarketplaceCommandLineFragment();
+        final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
         final TemporalAmount a = f.getDelayBetweenChecks();
         Assertions.assertThat(a.get(ChronoUnit.SECONDS)).isEqualTo(f.delayBetweenChecks);
     }
 
     @Test
     public void durationForSleeping() {
-        final DaemonModeMarketplaceCommandLineFragment f = new DaemonModeMarketplaceCommandLineFragment();
+        final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
         final TemporalAmount a = f.getMaximumSleepDuration();
         Assertions.assertThat(a.get(ChronoUnit.SECONDS)).isEqualTo(f.maximumSleepDuration * 60);
     }

@@ -30,6 +30,14 @@ class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
             description = "The longest amount of time in minutes for which Zonky is allowed to sleep, if applicable.")
     int maximumSleepDuration = 60;
 
+    @Parameter(names = {"-w", "--wait"},
+            description = "Number of seconds between consecutive marketplace checks, if applicable.")
+    int delayBetweenChecks = 1;
+
+    public TemporalAmount getDelayBetweenChecks() {
+        return Duration.ofSeconds(delayBetweenChecks);
+    }
+
     public String getMarketplaceCredentials() {
         return marketplaceCredentials;
     }
