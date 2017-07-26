@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -23,10 +24,10 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.github.triceo.robozonky.api.remote.enums.InvestmentStatus;
 
 abstract class BaseInvestment extends BaseEntity {
-
     private int id, loanId, amount, additionalAmount, firstAmount;
     private Loan loan;
     private InvestmentStatus status;
+    private OffsetDateTime timeCreated;
 
     BaseInvestment() {
         // for JAXB
@@ -37,12 +38,18 @@ abstract class BaseInvestment extends BaseEntity {
         this.loanId = loan.getId();
         this.amount = amount;
         this.status = InvestmentStatus.STOPPED;
+        this.timeCreated = OffsetDateTime.MIN;
         if (loan.getMyInvestment() != null) {
             final MyInvestment m = loan.getMyInvestment();
             this.id = m.getId();
             this.additionalAmount = m.getAdditionalAmount();
             this.firstAmount = m.getFirstAmount();
         }
+    }
+
+    @XmlElement
+    public OffsetDateTime getTimeCreated() {
+        return timeCreated;
     }
 
     @XmlElement

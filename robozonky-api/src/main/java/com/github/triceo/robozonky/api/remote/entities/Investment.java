@@ -23,14 +23,16 @@ import javax.xml.bind.annotation.XmlElement;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
+// FIXME split into two classes based on primary and secondary marketplace
 public class Investment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
-    private int dpd, loanTermInMonth, currentTerm;
+    private boolean smpRelated, onSmp, canBeOffered;
+    private int dpd, loanTermInMonth, currentTerm, remainingMonths;
     private String loanName, nickname, firstName, surname;
-    private OffsetDateTime investmentDate, nextPaymentDate;
+    private OffsetDateTime investmentDate, nextPaymentDate, activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal,
-            expectedInterest;
+            expectedInterest, purchasePrice;
     private Rating rating;
 
     Investment() {
@@ -45,15 +47,16 @@ public class Investment extends BaseInvestment {
         this.loanTermInMonth = loan.getTermInMonths();
         this.interestRate = loan.getInterestRate();
         this.currentTerm = this.loanTermInMonth;
+        this.remainingMonths = loan.getTermInMonths();
         this.paymentStatus = PaymentStatus.OK;
         this.paid = BigDecimal.ZERO;
         this.paidPrincipal = BigDecimal.ZERO;
         this.duePrincipal = BigDecimal.valueOf(amount);
-        if (loan.getMyInvestment() != null) {
-            this.investmentDate = loan.getMyInvestment().getTimeCreated();
-        } else {
-            this.investmentDate = OffsetDateTime.now();
-        }
+        this.purchasePrice = this.duePrincipal;
+        this.canBeOffered = false;
+        this.onSmp = false;
+        this.smpRelated = false;
+        this.activeTo = OffsetDateTime.MAX;
     }
 
     @XmlElement
@@ -74,6 +77,31 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public int getCurrentTerm() {
         return currentTerm;
+    }
+
+    @XmlElement
+    public boolean isSmpRelated() {
+        return smpRelated;
+    }
+
+    @XmlElement
+    public boolean isOnSmp() {
+        return onSmp;
+    }
+
+    @XmlElement
+    public boolean isCanBeOffered() {
+        return canBeOffered;
+    }
+
+    @XmlElement
+    public int getRemainingMonths() {
+        return remainingMonths;
+    }
+
+    @XmlElement
+    public BigDecimal getPurchasePrice() {
+        return purchasePrice;
     }
 
     @XmlElement
@@ -109,6 +137,11 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public OffsetDateTime getNextPaymentDate() {
         return nextPaymentDate;
+    }
+
+    @XmlElement
+    public OffsetDateTime getActiveTo() {
+        return activeTo;
     }
 
     @XmlElement

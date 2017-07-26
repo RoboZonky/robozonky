@@ -16,14 +16,12 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
-import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
 public class MyInvestment extends BaseInvestment {
 
     private int investorId;
     private String investorNickname;
-    private OffsetDateTime timeCreated;
 
     MyInvestment() {
         // for JAXB
@@ -37,10 +35,5 @@ public class MyInvestment extends BaseInvestment {
     @XmlElement
     public String getInvestorNickname() {
         return investorNickname;
-    }
-
-    @XmlElement
-    public OffsetDateTime getTimeCreated() {
-        return timeCreated;
     }
 }
