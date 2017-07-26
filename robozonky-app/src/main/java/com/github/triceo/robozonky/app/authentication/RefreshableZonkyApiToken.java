@@ -35,16 +35,15 @@ import com.github.triceo.robozonky.common.secrets.SecretProvider;
  */
 class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
 
-    private static Reader tokenToReader(final ZonkyApiToken token) throws JAXBException {
-        return new StringReader(ZonkyApiToken.marshal(token));
-    }
-
     private final SecretProvider secrets;
     private final ApiProvider apis;
-
     public RefreshableZonkyApiToken(final ApiProvider apis, final SecretProvider secrets) {
         this.apis = apis;
         this.secrets = secrets;
+    }
+
+    private static Reader tokenToReader(final ZonkyApiToken token) throws JAXBException {
+        return new StringReader(ZonkyApiToken.marshal(token));
     }
 
     private ZonkyApiToken withToken(final ZonkyApiToken token) {
@@ -69,9 +68,9 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
     @Override
     protected Optional<ZonkyApiToken> transform(final String source) {
         try {
-            final ZonkyApiToken newToken = this.getLatest(Duration.ofMillis(1))
-                    .map(this::withToken)
-                    .orElseGet(this::withPassword);
+            final ZonkyApiToken newToken = this.getLatest(Duration.ofNanos(1)) // don't wait if refreshable not run yet
+                    .map(this::withToken) // subsequent runs = token refresh
+                    .orElseGet(this::withPassword); // first run = password-based auth
             try { // store token so that it can be retrieved back in case of daemon restart
                 secrets.setToken(RefreshableZonkyApiToken.tokenToReader(newToken));
             } catch (final JAXBException ex) {
