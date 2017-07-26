@@ -49,7 +49,7 @@ public class PortfolioTest {
             softly.assertThat(mbean.getExpectedYield()).isEqualTo(portfolio.getCzkExpectedYield());
             softly.assertThat(mbean.getRelativeExpectedYield()).isEqualTo(portfolio.getRelativeExpectedYield());
             softly.assertThat(mbean.getInvestedAmount()).isEqualTo(portfolio.getCzkInvested());
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isBefore(OffsetDateTime.now());
+            softly.assertThat(mbean.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
             Stream.of(Rating.values()).forEach(r -> {
                 softly.assertThat(mbean.getInvestedAmountPerRating()).containsEntry(r.getCode(), 1000);
                 softly.assertThat(mbean.getRatingShare()).containsEntry(r.getCode(), BigDecimal.ONE);
