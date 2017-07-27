@@ -47,9 +47,9 @@ class TokenBasedAccess implements Authenticated {
 
     @Override
     public Collection<Investment> call(final Function<Zonky, Collection<Investment>> operation) {
+        final ZonkyApiToken token = refreshableToken.getLatest()
+                .orElseThrow(() -> new IllegalStateException("No API token available, authentication failed."));
         try (final Refreshable.Pause p = refreshableToken.pause()) { // pause token refresh during this request
-            final ZonkyApiToken token = refreshableToken.getLatest(Duration.ofSeconds(5))
-                    .orElseThrow(() -> new IllegalStateException("No API token available, authentication failed."));
             try (final Zonky zonky = apis.authenticated(token)) {
                 return operation.apply(zonky);
             }
