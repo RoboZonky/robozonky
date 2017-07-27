@@ -76,10 +76,10 @@ public class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(2 * 60));
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(5));
+                    .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
-                    .matches(new SettingsTest.TemporalPredicate(5));
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(20);
+                    .matches(new SettingsTest.TemporalPredicate(60));
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
         });
     }
 

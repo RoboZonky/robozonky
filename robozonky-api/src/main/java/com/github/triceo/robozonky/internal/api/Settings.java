@@ -160,11 +160,11 @@ public enum Settings {
     }
 
     public TemporalAmount getSocketTimeout() {
-        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_SOCKET_TIMEOUT, 5));
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_SOCKET_TIMEOUT, 60));
     }
 
     public TemporalAmount getConnectionTimeout() {
-        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 5));
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 60));
     }
 
     public TemporalAmount getCaptchaDelay() {
@@ -176,7 +176,7 @@ public enum Settings {
     }
 
     public int getDefaultApiPageSize() {
-        return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 20);
+        return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 100);
     }
 
 }
