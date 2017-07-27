@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.internal.api.State;
@@ -47,21 +48,21 @@ public final class PresentDelinquents {
     }
 
     public void update(final Collection<Investment> receivedDelinquents) {
+        // load pre-existing delinquents, removing ones that are no longer delinquent
+        final Collection<Delinquent> known = get().stream()
+                .filter(d -> receivedDelinquents.stream().anyMatch(r -> r.getLoanId() == d.getLoanId()))
+                .collect(Collectors.toSet());
+        // update the list of known delinquents based on the newly received information
         final OffsetDateTime detectionTimestamp = OffsetDateTime.now();
-        final Collection<Delinquent> received = receivedDelinquents.stream()
+        final Stream<Delinquent> newlyDelinquent = receivedDelinquents.stream()
+                .filter(i -> known.stream().noneMatch(k -> k.getLoanId() == i.getLoanId()))
                 .map(i -> {
                     final int daysPastDue = i.getDpd();
                     final OffsetDateTime lapsed = detectionTimestamp.minus(Duration.ofDays(daysPastDue));
                     return new Delinquent(i.getLoanId(), lapsed);
-                }).collect(Collectors.toSet());
-        // load pre-existing delinquents, removing ones that are no longer delinquent
-        final Collection<Delinquent> known = get().stream()
-                .filter(d -> received.stream().anyMatch(r -> r.getLoanId() == d.getLoanId()))
-                .collect(Collectors.toSet());
-        // update the list of known delinquents based on the newly received information
-        if (known.addAll(received)) {
-            PresentDelinquents.saveDelinquents(state, known);
-        }
+                });
+        final Stream<Delinquent> result = Stream.concat(known.stream(), newlyDelinquent);
+        PresentDelinquents.saveDelinquents(state, result.collect(Collectors.toSet()));
     }
 
     public Collection<Delinquent> get() {

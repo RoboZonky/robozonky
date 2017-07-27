@@ -38,6 +38,14 @@ final class Delinquent {
     }
 
     @Override
+    public String toString() {
+        return "Delinquent{" +
+                "loanId=" + loanId +
+                ", since=" + since +
+                '}';
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;

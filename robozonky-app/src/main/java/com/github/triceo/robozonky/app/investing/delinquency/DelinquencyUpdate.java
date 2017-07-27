@@ -63,16 +63,16 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
         final Map<PaymentStatus, List<Investment>> investments = zonky.getInvestments()
                 .collect(Collectors.groupingBy(Investment::getPaymentStatus));
         final PresentDelinquents d = new PresentDelinquents();
-        final Collection<Delinquent> currentlyDelinquent = d.get();
+        final Collection<Delinquent> before = d.get();
         d.update(investments.get(PaymentStatus.DUE));
-        final Collection<Delinquent> nowDelinquent = d.get();
-        DelinquencyUpdate.sendEvents(DelinquencyUpdate.getDifference(nowDelinquent, currentlyDelinquent), zonky,
+        final Collection<Delinquent> after = d.get();
+        DelinquencyUpdate.sendEvents(DelinquencyUpdate.getDifference(after, before), zonky,
                                      (l, i) -> new LoanDelinquentEvent(l, i.getSince()));
-        DelinquencyUpdate.sendEvents(DelinquencyUpdate.getDifference(currentlyDelinquent, nowDelinquent), zonky,
+        DelinquencyUpdate.sendEvents(DelinquencyUpdate.getDifference(before, after), zonky,
                                      (l, i) -> new LoanNoLongerDelinquentEvent(l));
         Stream.of(DelinquencyCategory.values()).forEach(c -> {
             LOGGER.debug("Updating {}.", c);
-            c.updateKnownDelinquents(currentlyDelinquent);
+            c.updateKnownDelinquents(after);
             c.purge(investments.get(PaymentStatus.PAID));
         });
         LOGGER.debug("Finished.");
