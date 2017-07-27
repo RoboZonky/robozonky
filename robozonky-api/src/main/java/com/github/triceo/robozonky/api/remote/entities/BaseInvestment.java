@@ -37,7 +37,7 @@ abstract class BaseInvestment extends BaseEntity {
         this.loan = loan;
         this.loanId = loan.getId();
         this.amount = amount;
-        this.status = InvestmentStatus.STOPPED;
+        this.status = InvestmentStatus.ACTIVE;
         this.timeCreated = OffsetDateTime.MIN;
         if (loan.getMyInvestment() != null) {
             final MyInvestment m = loan.getMyInvestment();

@@ -16,13 +16,12 @@
 
 package com.github.triceo.robozonky.api.remote.enums;
 
+/**
+ * Represents the status of current user's investment into a given loan.
+ */
 public enum InvestmentStatus {
 
-    SIGNED,
-    COVERED,
     ACTIVE,
-    PAID,
-    PAID_OFF,
-    STOPPED
+    SOLD
 
 }

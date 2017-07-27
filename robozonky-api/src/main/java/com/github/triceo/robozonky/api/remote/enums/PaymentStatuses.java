@@ -25,54 +25,54 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class InvestmentStatuses {
+public class PaymentStatuses {
 
     private static final Pattern COMMA_SEPARATED = Pattern.compile("\\Q,\\E");
 
-    public static InvestmentStatuses valueOf(final String statuses) {
+    public static PaymentStatuses valueOf(final String statuses) {
         // trim the surrounding []
         final String trimmed = statuses.trim();
         if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
             throw new IllegalArgumentException("Expecting string in the format of [A, B, C], got " + statuses);
         }
         if (trimmed.length() == 2) { // only contains []
-            return InvestmentStatuses.of();
+            return PaymentStatuses.of();
         }
-        final String[] parts = InvestmentStatuses.COMMA_SEPARATED.split(trimmed.substring(1, trimmed.length() - 1));
+        final String[] parts = PaymentStatuses.COMMA_SEPARATED.split(trimmed.substring(1, trimmed.length() - 1));
         if (parts.length == 1 && parts[0].trim().length() == 0) { // only contains whitespace
-            return InvestmentStatuses.of();
+            return PaymentStatuses.of();
         }
         // and finally convert
-        return InvestmentStatuses.of(Stream.of(parts)
+        return PaymentStatuses.of(Stream.of(parts)
                           .map(String::trim)
-                          .map(InvestmentStatus::valueOf)
+                                          .map(PaymentStatus::valueOf)
                           .collect(Collectors.toList()));
     }
 
-    public static InvestmentStatuses of(final InvestmentStatus... statuses) {
-        return InvestmentStatuses.of(Arrays.asList(statuses));
+    public static PaymentStatuses of(final PaymentStatus... statuses) {
+        return PaymentStatuses.of(Arrays.asList(statuses));
     }
 
-    public static InvestmentStatuses of(final Collection<InvestmentStatus> statuses) {
-        return new InvestmentStatuses(statuses);
+    public static PaymentStatuses of(final Collection<PaymentStatus> statuses) {
+        return new PaymentStatuses(statuses);
     }
 
-    public static InvestmentStatuses all() {
-        return InvestmentStatuses.of(InvestmentStatus.values());
+    public static PaymentStatuses all() {
+        return PaymentStatuses.of(PaymentStatus.values());
     }
 
-    private final Set<InvestmentStatus> statuses;
+    private final Set<PaymentStatus> statuses;
 
-    private InvestmentStatuses(final Collection<InvestmentStatus> statuses) {
+    private PaymentStatuses(final Collection<PaymentStatus> statuses) {
         this.statuses = statuses.isEmpty() ? Collections.emptySet() : EnumSet.copyOf(statuses);
     }
 
-    public Set<InvestmentStatus> getInvestmentStatuses() {
+    public Set<PaymentStatus> getPaymentStatuses() {
         return Collections.unmodifiableSet(statuses);
     }
 
     @Override
     public String toString() {
-        return statuses.stream().map(InvestmentStatus::name).collect(Collectors.joining(", ", "[", "]"));
+        return statuses.stream().map(PaymentStatus::name).collect(Collectors.joining(", ", "[", "]"));
     }
 }

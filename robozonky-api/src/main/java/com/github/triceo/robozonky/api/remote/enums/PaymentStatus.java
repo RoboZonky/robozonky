@@ -16,13 +16,18 @@
 
 package com.github.triceo.robozonky.api.remote.enums;
 
-// FIXME likely incomplete
+/**
+ * Represents the status of a loan.
+ */
 public enum PaymentStatus {
 
+    OK,
     DUE,
-    PAID,
     COVERED,
-    // "na cestě"
-    OK
+    NOT_COVERED,
+    PAID_OFF,
+    CANCELED,
+    WRITTEN_OFF,
+    PAID
 
 }

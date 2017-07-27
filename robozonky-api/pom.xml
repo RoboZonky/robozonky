@@ -285,6 +285,57 @@
                     "classSimpleName": "MyInvestment",
                     "methodName": "getStatus",
                     "justification": "Now inherits the same field from Investment."
+                  }, {
+                    "code": "java.field.enumConstantOrderChanged",
+                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.ACTIVE",
+                    "new": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.ACTIVE",
+                    "oldOrdinal": "2",
+                    "newOrdinal": "0",
+                    "package": "com.github.triceo.robozonky.api.remote.enums",
+                    "classSimpleName": "InvestmentStatus",
+                    "fieldName": "ACTIVE",
+                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
+                  }, {
+                    "code": "java.field.removed",
+                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.COVERED",
+                    "package": "com.github.triceo.robozonky.api.remote.enums",
+                    "classSimpleName": "InvestmentStatus",
+                    "fieldName": "COVERED",
+                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
+                  }, {
+                    "code": "java.field.removed",
+                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.PAID",
+                    "package": "com.github.triceo.robozonky.api.remote.enums",
+                    "classSimpleName": "InvestmentStatus",
+                    "fieldName": "PAID",
+                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
+                  }, {
+                    "code": "java.field.removed",
+                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.PAID_OFF",
+                    "package": "com.github.triceo.robozonky.api.remote.enums",
+                    "classSimpleName": "InvestmentStatus",
+                    "fieldName": "PAID_OFF",
+                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
+                  }, {
+                    "code": "java.field.removed",
+                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.SIGNED",
+                    "package": "com.github.triceo.robozonky.api.remote.enums",
+                    "classSimpleName": "InvestmentStatus",
+                    "fieldName": "SIGNED",
+                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
+                  }, {
+                    "code": "java.field.removed",
+                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.STOPPED",
+                    "package": "com.github.triceo.robozonky.api.remote.enums",
+                    "classSimpleName": "InvestmentStatus",
+                    "fieldName": "STOPPED",
+                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.triceo.robozonky.api.remote.enums.InvestmentStatuses",
+                    "package": "com.github.triceo.robozonky.api.remote.enums",
+                    "classSimpleName": "InvestmentStatuses",
+                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
                   }
                 ]
               }
