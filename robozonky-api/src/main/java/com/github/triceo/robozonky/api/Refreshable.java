@@ -251,13 +251,17 @@ public abstract class Refreshable<T> implements Runnable {
     @Override
     public void run() {
         if (requestsToPause.get() > 0) {
-            LOGGER.debug("Paused, no refresh.");
+            LOGGER.trace("Paused, no refresh.");
             return;
         }
         try {
+            LOGGER.trace("Starting {}.", this);
             runLocked();
+        } catch (final Exception ex) {
+            LOGGER.warn("Refresh failed: {}.", this, ex);
         } finally {
             completionAssurance.countDown();
+            LOGGER.trace("Finished {}.", this);
         }
     }
 

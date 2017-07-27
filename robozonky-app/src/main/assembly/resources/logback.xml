@@ -36,7 +36,7 @@
     </appender>
     <logger name="org.apache.http" level="INFO"/>
     <logger name="org.jboss" level="INFO"/>
-    <root level="TRACE">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
     </root>
