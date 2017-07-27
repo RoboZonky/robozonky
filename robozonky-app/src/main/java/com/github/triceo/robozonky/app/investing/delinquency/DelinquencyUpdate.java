@@ -30,6 +30,7 @@ import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
+import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
@@ -57,6 +58,13 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
         });
     }
 
+    static Collection<Investment> getWithPaymentStatus(final Map<PaymentStatus, List<Investment>> investments,
+                                                       final PaymentStatuses target) {
+        return target.getPaymentStatuses().stream()
+                .flatMap(ps -> investments.get(ps).stream())
+                .collect(Collectors.toSet());
+    }
+
     @Override
     public void accept(final Zonky zonky) {
         LOGGER.info("Daily update started.");
@@ -64,7 +72,7 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
                 .collect(Collectors.groupingBy(Investment::getPaymentStatus));
         final PresentDelinquents d = new PresentDelinquents();
         final Collection<Delinquent> before = d.get();
-        d.update(investments.get(PaymentStatus.DUE));
+        d.update(DelinquencyUpdate.getWithPaymentStatus(investments, PaymentStatus.getDelinquent()));
         final Collection<Delinquent> after = d.get();
         DelinquencyUpdate.sendEvents(DelinquencyUpdate.getDifference(after, before), zonky,
                                      (l, i) -> new LoanDelinquentEvent(l, i.getSince()));
@@ -73,7 +81,7 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
         Stream.of(DelinquencyCategory.values()).forEach(c -> {
             LOGGER.debug("Updating {}.", c);
             c.updateKnownDelinquents(after);
-            c.purge(investments.get(PaymentStatus.PAID));
+            c.purge(DelinquencyUpdate.getWithPaymentStatus(investments, PaymentStatus.getDone()));
         });
         LOGGER.debug("Finished.");
     }

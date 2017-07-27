@@ -28,6 +28,15 @@ public enum PaymentStatus {
     PAID_OFF,
     CANCELED,
     WRITTEN_OFF,
-    PAID
+    PAID;
+
+    public static PaymentStatuses getDelinquent() {
+        return PaymentStatuses.of(PaymentStatus.DUE);
+    }
+
+    public static PaymentStatuses getDone() {
+        return PaymentStatuses.of(PaymentStatus.CANCELED, PaymentStatus.PAID_OFF, PaymentStatus.WRITTEN_OFF,
+                                  PaymentStatus.PAID);
+    }
 
 }
