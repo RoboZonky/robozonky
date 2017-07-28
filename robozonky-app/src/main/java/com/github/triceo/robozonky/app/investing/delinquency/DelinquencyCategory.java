@@ -17,9 +17,11 @@
 package com.github.triceo.robozonky.app.investing.delinquency;
 
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 
 public enum DelinquencyCategory {
 
@@ -38,8 +40,9 @@ public enum DelinquencyCategory {
         return supplier.get().get();
     }
 
-    public void updateKnownDelinquents(final Collection<Delinquent> presentDelinquents) {
-        supplier.get().update(presentDelinquents);
+    public void updateKnownDelinquents(final Collection<Delinquent> presentDelinquents,
+                                       final Function<Integer, Loan> loanProvider) {
+        supplier.get().update(presentDelinquents, loanProvider);
     }
 
     public void purge(final Collection<Investment> investmentsToPurge) {

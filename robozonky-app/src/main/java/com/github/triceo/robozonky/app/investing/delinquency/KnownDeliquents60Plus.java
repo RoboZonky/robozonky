@@ -16,10 +16,20 @@
 
 package com.github.triceo.robozonky.app.investing.delinquency;
 
+import java.time.OffsetDateTime;
+
+import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+
 final class KnownDeliquents60Plus extends KnownDelinquents {
 
     @Override
     protected int getThresholdInDays() {
         return 60;
+    }
+
+    @Override
+    protected LoanDelinquentEvent getEventToFire(final Loan loan, final OffsetDateTime since) {
+        return new LoanDelinquent60DaysOrMoreEvent(loan, since);
     }
 }

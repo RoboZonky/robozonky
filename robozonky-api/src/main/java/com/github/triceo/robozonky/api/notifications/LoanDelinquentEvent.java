@@ -24,7 +24,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 /**
  * Fired immediately after an {@link Investment} is identified as delinquent.
  */
-public final class LoanDelinquentEvent extends Event {
+public abstract class LoanDelinquentEvent extends Event {
 
     private final Loan loan;
     private final OffsetDateTime since;

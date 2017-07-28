@@ -20,14 +20,22 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.internal.api.State;
 
+/**
+ * Keeps a historical record of which loans were delinquent for a period of time longer than
+ * {@link #getThresholdInDays()}.
+ */
 abstract class KnownDelinquents {
 
     private static final String TIMESTAMP_SEPARATOR = ";";
@@ -65,23 +73,53 @@ abstract class KnownDelinquents {
                 });
     }
 
+    /**
+     * How many days after the due date must a loan be delinquent for in order to count towards this statistic.
+     * @return Number of days, inclusive.
+     */
     protected abstract int getThresholdInDays();
 
-    public void update(final Collection<Delinquent> delinquents) {
+    protected abstract Event getEventToFire(final Loan delinquent, final OffsetDateTime since);
+
+    private void fireEvent(final Delinquent delinquent, final Function<Integer, Loan> loanProvider) {
+        final int loanId = delinquent.getLoanId();
+        final Loan l = loanProvider.apply(loanId);
+        Events.fire(getEventToFire(l, delinquent.getSince()));
+    }
+
+    /**
+     * Update the evidence of delinquent loans by the loans which are currently delinquent.
+     * @param delinquents Loans delinquent at the moment.
+     */
+    public void update(final Collection<Delinquent> delinquents, final Function<Integer, Loan> loanProvider) {
         final Collection<Delinquent> known = get();
-        final Collection<Delinquent> belong = delinquents.stream().filter(belongs).collect(Collectors.toSet());
+        final Collection<Delinquent> belong = delinquents.stream()
+                .filter(belongs)
+                .filter(d -> !known.contains(d))
+                .peek(d -> this.fireEvent(d, loanProvider))
+                .collect(Collectors.toSet());
         if (known.addAll(belong)) {
             KnownDelinquents.saveDelinquents(state, known);
         }
     }
 
+    /**
+     * Get the loans that, at some point in time, were delinquent for a time longer or equal to
+     * {@link #getThresholdInDays()}.
+     *
+     * @return Loans over threshold.
+     */
     public Collection<Delinquent> get() {
         return KnownDelinquents.loadDelinquents(state);
     }
 
-    public void purge(final Collection<Investment> toRemove) {
+    /**
+     * Remove loans from the evidence that are no longer active - that is, they were fully paid or written off.
+     * @param deadLoans Loans to remove from evidence.
+     */
+    public void purge(final Collection<Investment> deadLoans) {
         final Collection<Delinquent> known = get();
-        final boolean removed = known.removeIf(d -> toRemove.stream().anyMatch(i -> i.getLoanId() == d.getLoanId()));
+        final boolean removed = known.removeIf(d -> deadLoans.stream().anyMatch(i -> i.getLoanId() == d.getLoanId()));
         if (removed) {
             KnownDelinquents.saveDelinquents(state, known);
         }

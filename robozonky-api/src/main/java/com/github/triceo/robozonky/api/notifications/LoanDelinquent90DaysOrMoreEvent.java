@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing.delinquency;
+package com.github.triceo.robozonky.api.notifications;
 
 import java.time.OffsetDateTime;
 
-import com.github.triceo.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-final class KnownDeliquents90Plus extends KnownDelinquents {
+public final class LoanDelinquent90DaysOrMoreEvent extends LoanDelinquentEvent {
 
-    @Override
-    protected int getThresholdInDays() {
-        return 90;
-    }
-
-    @Override
-    protected LoanDelinquentEvent getEventToFire(final Loan loan, final OffsetDateTime since) {
-        return new LoanDelinquent90DaysOrMoreEvent(loan, since);
+    public LoanDelinquent90DaysOrMoreEvent(final Loan loan, final OffsetDateTime since) {
+        super(loan, since);
     }
 }

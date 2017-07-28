@@ -20,9 +20,13 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
+import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.investing.AbstractInvestingTest;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
@@ -47,7 +51,11 @@ public class DelinquencyUpdateTest extends AbstractInvestingTest {
         final Delinquent d = new Delinquent(1, OffsetDateTime.now());
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(d.getLoanId()))).thenReturn(new Loan(d.getLoanId(), 200));
-        DelinquencyUpdate.sendEvents(Collections.singleton(d), z, (l, i) -> new LoanDelinquentEvent(l, i.getSince()));
+        final BiFunction<Loan, Delinquent, Event> eventSupplier = (l, i) -> new LoanDelinquentEvent(l, i.getSince());
+        Collections.singleton(d).forEach(d1 -> {
+            final Loan l1 = ((Function<Integer, Loan>) z).apply(d1.getLoanId())
+            Events.fire(eventSupplier.apply(l1, d1));
+        });
         Assertions.assertThat(this.getNewEvents()).first().isInstanceOf(LoanDelinquentEvent.class);
     }
 }

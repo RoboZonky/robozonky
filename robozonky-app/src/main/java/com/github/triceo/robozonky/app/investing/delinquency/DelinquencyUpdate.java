@@ -19,13 +19,11 @@ package com.github.triceo.robozonky.app.investing.delinquency;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.notifications.Event;
-import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -50,19 +48,15 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
         return one.stream().filter(i -> !two.contains(i)).collect(Collectors.toSet());
     }
 
-    static void sendEvents(final Collection<Delinquent> delinquents, final Zonky zonky,
-                           final BiFunction<Loan, Delinquent, Event> eventSupplier) {
-        delinquents.forEach(d -> {
-            final Loan l = zonky.getLoan(d.getLoanId());
-            Events.fire(eventSupplier.apply(l, d));
-        });
-    }
-
     static Collection<Investment> getWithPaymentStatus(final Map<PaymentStatus, List<Investment>> investments,
                                                        final PaymentStatuses target) {
         return target.getPaymentStatuses().stream()
                 .flatMap(ps -> investments.get(ps).stream())
                 .collect(Collectors.toSet());
+    }
+
+    static Function<Integer, Loan> getLoanProvider(final Zonky zonky) {
+        return zonky::getLoan;
     }
 
     @Override
@@ -74,13 +68,14 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
         final Collection<Delinquent> before = d.get();
         d.update(DelinquencyUpdate.getWithPaymentStatus(investments, PaymentStatus.getDelinquent()));
         final Collection<Delinquent> after = d.get();
-        DelinquencyUpdate.sendEvents(DelinquencyUpdate.getDifference(after, before), zonky,
-                                     (l, i) -> new LoanDelinquentEvent(l, i.getSince()));
-        DelinquencyUpdate.sendEvents(DelinquencyUpdate.getDifference(before, after), zonky,
-                                     (l, i) -> new LoanNoLongerDelinquentEvent(l));
+        final Function<Integer, Loan> loanProvider = getLoanProvider(zonky);
+        DelinquencyUpdate.getDifference(before, after).forEach(noLongerDelinquent -> {
+            final Loan l = loanProvider.apply(noLongerDelinquent.getLoanId());
+            Events.fire(new LoanNoLongerDelinquentEvent(l));
+        });
         Stream.of(DelinquencyCategory.values()).forEach(c -> {
             LOGGER.debug("Updating {}.", c);
-            c.updateKnownDelinquents(after);
+            c.updateKnownDelinquents(after, loanProvider);
             c.purge(DelinquencyUpdate.getWithPaymentStatus(investments, PaymentStatus.getDone()));
         });
         LOGGER.debug("Finished.");
