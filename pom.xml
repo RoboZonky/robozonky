@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.triceo.robozonky</groupId>
   <artifactId>robozonky</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0-beta-1</version>
   <modules>
     <module>robozonky-api</module>
     <module>robozonky-app</module>
@@ -441,7 +441,7 @@
     <url>git@github.com:triceo/robozonky.git</url>
     <connection>scm:git:git@github.com:triceo/robozonky.git</connection>
     <developerConnection>scm:git:git@github.com:triceo/robozonky.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>robozonky-4.0.0-beta-1</tag>
   </scm>
   <issueManagement>
     <system>github</system>
