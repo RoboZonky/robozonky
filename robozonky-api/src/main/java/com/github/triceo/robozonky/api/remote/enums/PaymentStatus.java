@@ -30,10 +30,17 @@ public enum PaymentStatus {
     WRITTEN_OFF,
     PAID;
 
+    /**
+     * @return Values of this enum that correspond to investments where there are overdue instalments.
+     */
     public static PaymentStatuses getDelinquent() {
         return PaymentStatuses.of(PaymentStatus.DUE);
     }
 
+    /**
+     *
+     * @return Values of this enum that correspond to investments that have no expected future instalments.
+     */
     public static PaymentStatuses getDone() {
         return PaymentStatuses.of(PaymentStatus.CANCELED, PaymentStatus.PAID_OFF, PaymentStatus.WRITTEN_OFF,
                                   PaymentStatus.PAID);

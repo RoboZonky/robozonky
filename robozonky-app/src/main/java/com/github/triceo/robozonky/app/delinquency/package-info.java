@@ -18,4 +18,4 @@
  * Do not, in any way, change FQN of any of the classes in this package. It would result in losing delinquency state
  * that had potentially been accumulating for months.
  */
-package com.github.triceo.robozonky.app.investing.delinquency;
+package com.github.triceo.robozonky.app.delinquency;

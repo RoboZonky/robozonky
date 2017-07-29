@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -24,21 +24,27 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 /**
  * Fired immediately after an {@link Investment} is identified as delinquent.
  */
-public final class LoanDelinquentEvent extends Event {
+public abstract class LoanDelinquentEvent extends Event {
 
     private final Loan loan;
-    private final OffsetDateTime since;
+    private final LocalDate since;
+    private final int thresholdInDays;
 
-    public LoanDelinquentEvent(final Loan loan, final OffsetDateTime since) {
+    public LoanDelinquentEvent(final Loan loan, final LocalDate since, final int thresholdInDays) {
         this.loan = loan;
         this.since = since;
+        this.thresholdInDays = thresholdInDays;
+    }
+
+    public int getThresholdInDays() {
+        return thresholdInDays;
     }
 
     public Loan getLoan() {
         return loan;
     }
 
-    public OffsetDateTime getSince() {
+    public LocalDate getDelinquentSince() {
         return since;
     }
 }

@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing.delinquency;
+package com.github.triceo.robozonky.app.management;
 
-final class KnownDeliquents30Plus extends KnownDelinquents {
+import java.time.LocalDate;
+import java.util.Map;
 
-    @Override
-    protected int getThresholdInDays() {
-        return 30;
-    }
+public interface DelinquencyMBean extends BaseMBean {
+
+    Map<Integer, LocalDate> getAll();
+
+    Map<Integer, LocalDate> get10Plus();
+
+    Map<Integer, LocalDate> get30Plus();
+
+    Map<Integer, LocalDate> get60Plus();
+
+    Map<Integer, LocalDate> get90Plus();
 }

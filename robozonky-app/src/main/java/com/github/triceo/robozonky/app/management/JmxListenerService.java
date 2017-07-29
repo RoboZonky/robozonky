@@ -26,8 +26,8 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
-import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 
@@ -43,18 +43,18 @@ public class JmxListenerService implements ListenerService {
         } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
             final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
             return (event, sessionInfo) -> bean.addDelegatedInvestment((InvestmentDelegatedEvent) event);
-        } else if (Objects.equals(eventType, LoanDelinquentEvent.class)) {
-            final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
-            return (event, sessionInfo) -> bean.addDelinquentLoan((LoanDelinquentEvent) event);
-        } else if (Objects.equals(eventType, LoanNoLongerDelinquentEvent.class)) {
-            final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
-            return (event, sessionInfo) -> bean.removeDelinquentLoan((LoanNoLongerDelinquentEvent) event);
         } else if (Objects.equals(eventType, InvestmentRejectedEvent.class)) {
             final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
             return (event, sessionInfo) -> bean.addRejectedInvestment((InvestmentRejectedEvent) event);
         } else if (Objects.equals(eventType, InvestmentMadeEvent.class)) {
             final Investments bean = (Investments) MBean.INVESTMENTS.getImplementation();
             return (event, sessionInfo) -> bean.addSuccessfulInvestment((InvestmentMadeEvent) event);
+        } else if (Objects.equals(eventType, LoanNowDelinquentEvent.class)) {
+            final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
+            return (event, sessionInfo) -> bean.registerRun((LoanNowDelinquentEvent) event);
+        } else if (Objects.equals(eventType, LoanNoLongerDelinquentEvent.class)) {
+            final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
+            return (event, sessionInfo) -> bean.registerRun((LoanNoLongerDelinquentEvent) event);
         } else if (Objects.equals(eventType, StrategyStartedEvent.class)) {
             final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
             return (event, sessionInfo) -> bean.setPortfolioOverview((StrategyStartedEvent) event);

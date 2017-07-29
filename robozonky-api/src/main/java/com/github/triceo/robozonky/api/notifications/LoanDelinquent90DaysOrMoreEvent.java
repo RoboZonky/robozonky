@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.api.notifications;
 
-import java.util.Map;
+import java.time.LocalDate;
 
-public interface InvestmentsMBean extends BaseMBean {
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-    Map<Integer, Integer> getSuccessfulInvestments();
+public final class LoanDelinquent90DaysOrMoreEvent extends LoanDelinquentEvent {
 
-    Map<Integer, Integer> getDelegatedInvestments();
-
-    Map<Integer, Integer> getRejectedInvestments();
+    public LoanDelinquent90DaysOrMoreEvent(final Loan loan, final LocalDate since) {
+        super(loan, since, 90);
+    }
 }

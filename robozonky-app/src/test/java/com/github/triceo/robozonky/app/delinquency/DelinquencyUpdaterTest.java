@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.management;
+package com.github.triceo.robozonky.app.delinquency;
 
-import java.util.Map;
+import java.time.OffsetDateTime;
 
-public interface InvestmentsMBean extends BaseMBean {
+import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.app.authentication.Authenticated;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-    Map<Integer, Integer> getSuccessfulInvestments();
+public class DelinquencyUpdaterTest {
 
-    Map<Integer, Integer> getDelegatedInvestments();
-
-    Map<Integer, Integer> getRejectedInvestments();
+    @Test
+    public void update() {
+        final Authenticated a = Mockito.mock(Authenticated.class);
+        final Refreshable<OffsetDateTime> r = new DelinquencyUpdater(a);
+        r.run();
+        Assertions.assertThat(r.getLatest()).isPresent();
+    }
 }

@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing.delinquency;
+package com.github.triceo.robozonky.api.notifications;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
-import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.app.authentication.Authenticated;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.mockito.Mockito;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-public class DelinquencyUpdaterTest {
+public final class LoanNowDelinquentEvent extends LoanDelinquentEvent {
 
-    @Test
-    public void update() {
-        final Authenticated a = Mockito.mock(Authenticated.class);
-        final Refreshable<OffsetDateTime> r = new DelinquencyUpdater(a);
-        r.run();
-        Assertions.assertThat(r.getLatest()).isPresent();
+    public LoanNowDelinquentEvent(final Loan loan, final LocalDate since) {
+        super(loan, since, 0);
     }
 }

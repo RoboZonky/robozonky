@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.notifications.email;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +34,12 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -88,6 +95,18 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
         events.put(SupportedListener.INVESTMENT_REJECTED,
                    new InvestmentRejectedEvent(recommendation, 200, "random"));
+        events.put(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
+                   new LoanNoLongerDelinquentEvent(loan));
+        events.put(SupportedListener.LOAN_NOW_DELINQUENT,
+                   new LoanNowDelinquentEvent(loan, LocalDate.now()));
+        events.put(SupportedListener.LOAN_DELINQUENT_10_PLUS,
+                   new LoanDelinquent10DaysOrMoreEvent(loan, LocalDate.now().minusDays(11)));
+        events.put(SupportedListener.LOAN_DELINQUENT_30_PLUS,
+                   new LoanDelinquent30DaysOrMoreEvent(loan, LocalDate.now().minusDays(31)));
+        events.put(SupportedListener.LOAN_DELINQUENT_60_PLUS,
+                   new LoanDelinquent60DaysOrMoreEvent(loan, LocalDate.now().minusDays(61)));
+        events.put(SupportedListener.LOAN_DELINQUENT_90_PLUS,
+                   new LoanDelinquent90DaysOrMoreEvent(loan, LocalDate.now().minusDays(91)));
         events.put(SupportedListener.BALANCE_ON_TARGET, new ExecutionStartedEvent(Collections.emptyList(), 200));
         events.put(SupportedListener.BALANCE_UNDER_MINIMUM,
                    new ExecutionStartedEvent(Collections.emptyList(), 199));
