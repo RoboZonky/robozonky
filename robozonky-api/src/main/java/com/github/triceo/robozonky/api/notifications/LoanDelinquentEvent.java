@@ -28,10 +28,16 @@ public abstract class LoanDelinquentEvent extends Event {
 
     private final Loan loan;
     private final OffsetDateTime since;
+    private final int thresholdInDays;
 
-    public LoanDelinquentEvent(final Loan loan, final OffsetDateTime since) {
+    public LoanDelinquentEvent(final Loan loan, final OffsetDateTime since, final int thresholdInDays) {
         this.loan = loan;
         this.since = since;
+        this.thresholdInDays = thresholdInDays;
+    }
+
+    public int getThresholdInDays() {
+        return thresholdInDays;
     }
 
     public Loan getLoan() {

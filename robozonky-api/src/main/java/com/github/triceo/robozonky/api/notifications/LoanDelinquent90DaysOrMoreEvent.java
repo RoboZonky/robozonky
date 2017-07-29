@@ -23,6 +23,6 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 public final class LoanDelinquent90DaysOrMoreEvent extends LoanDelinquentEvent {
 
     public LoanDelinquent90DaysOrMoreEvent(final Loan loan, final OffsetDateTime since) {
-        super(loan, since);
+        super(loan, since, 90);
     }
 }

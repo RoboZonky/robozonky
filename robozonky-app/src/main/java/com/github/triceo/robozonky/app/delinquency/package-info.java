@@ -14,22 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing.delinquency;
-
-import java.time.OffsetDateTime;
-
-import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-
-final class KnownDeliquents60Plus extends KnownDelinquents {
-
-    @Override
-    protected int getThresholdInDays() {
-        return 60;
-    }
-
-    @Override
-    protected LoanDelinquentEvent getEventToFire(final Loan loan, final OffsetDateTime since) {
-        return new LoanDelinquent60DaysOrMoreEvent(loan, since);
-    }
-}
+/**
+ * Do not, in any way, change FQN of any of the classes in this package. It would result in losing delinquency state
+ * that had potentially been accumulating for months.
+ */
+package com.github.triceo.robozonky.app.delinquency;

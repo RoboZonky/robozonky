@@ -37,7 +37,7 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.investing.delinquency.DelinquencyUpdater;
+import com.github.triceo.robozonky.app.delinquency.DelinquencyUpdater;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 import com.github.triceo.robozonky.util.Scheduler;
 

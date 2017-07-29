@@ -32,7 +32,6 @@ import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
@@ -108,6 +107,7 @@ public class JmxListenerServiceTest {
         return new Object[]{evt.getClass(), evt, before, after};
     }
 
+    /*
     private static Object[] getParametersForDelinquentLoan() {
         final Loan l = new Loan(1, 1000);
         final OffsetDateTime now = OffsetDateTime.now();
@@ -123,6 +123,7 @@ public class JmxListenerServiceTest {
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
+    */
 
     private static Object[] getParametersForNoLongerDelinquentLoan() {
         final OffsetDateTime now = OffsetDateTime.now();
@@ -194,7 +195,7 @@ public class JmxListenerServiceTest {
                              JmxListenerServiceTest.getParametersForInvestmentRejected(),
                              JmxListenerServiceTest.getParametersForStrategyStarted(),
                              JmxListenerServiceTest.getParametersForStrategyCompleted(),
-                             JmxListenerServiceTest.getParametersForDelinquentLoan(),
+                             //JmxListenerServiceTest.getParametersForDelinquentLoan(),
                              JmxListenerServiceTest.getParametersForNoLongerDelinquentLoan());
     }
 
