@@ -23,6 +23,12 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -77,6 +83,72 @@ enum SupportedListener {
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentRejectedEventListener(properties);
+        }
+    },
+    LOAN_NOW_DELINQUENT {
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new LoanDelinquentEventListener(properties);
+        }
+
+        @Override
+        Class<? extends Event> getEventType() {
+            return LoanNowDelinquentEvent.class;
+        }
+    },
+    LOAN_DELINQUENT_10_PLUS {
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new LoanDelinquentEventListener(properties);
+        }
+
+        @Override
+        Class<? extends Event> getEventType() {
+            return LoanDelinquent10DaysOrMoreEvent.class;
+        }
+    },
+    LOAN_DELINQUENT_30_PLUS {
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new LoanDelinquentEventListener(properties);
+        }
+
+        @Override
+        Class<? extends Event> getEventType() {
+            return LoanDelinquent30DaysOrMoreEvent.class;
+        }
+    },
+    LOAN_DELINQUENT_60_PLUS {
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new LoanDelinquentEventListener(properties);
+        }
+
+        @Override
+        Class<? extends Event> getEventType() {
+            return LoanDelinquent60DaysOrMoreEvent.class;
+        }
+    },
+    LOAN_DELINQUENT_90_PLUS {
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new LoanDelinquentEventListener(properties);
+        }
+
+        @Override
+        Class<? extends Event> getEventType() {
+            return LoanDelinquent90DaysOrMoreEvent.class;
+        }
+    },
+    LOAN_NO_LONGER_DELINQUENT {
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new LoanNoLongerDelinquentEventListener(properties);
+        }
+
+        @Override
+        Class<? extends Event> getEventType() {
+            return LoanNoLongerDelinquentEvent.class;
         }
     },
     BALANCE_ON_TARGET {
