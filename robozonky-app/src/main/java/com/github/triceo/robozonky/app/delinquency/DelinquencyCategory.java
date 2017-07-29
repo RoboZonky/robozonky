@@ -17,9 +17,7 @@
 package com.github.triceo.robozonky.app.delinquency;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
@@ -58,9 +56,9 @@ enum DelinquencyCategory {
     }
 
     private static boolean isOverThreshold(final Delinquency d, final int threshold) {
-        final TemporalAmount target = Duration.ofDays(threshold);
-        final TemporalAmount actual = d.getDuration();
-        return actual.get(ChronoUnit.SECONDS) >= target.get(ChronoUnit.SECONDS);
+        final Duration target = Duration.ofDays(threshold);
+        final Duration actual = d.getDuration();
+        return actual.compareTo(target) >= 0;
     }
 
     private static Stream<Integer> fromIdString(final String idString) {
@@ -74,7 +72,7 @@ enum DelinquencyCategory {
         return stream.distinct().sorted().map(Object::toString).collect(Collectors.joining(COMMA));
     }
 
-    private static BiFunction<Loan, OffsetDateTime, LoanDelinquentEvent> getEventSupplier(final int threshold) {
+    private static BiFunction<Loan, LocalDate, LoanDelinquentEvent> getEventSupplier(final int threshold) {
         switch (threshold) {
             case 0:
                 return LoanNowDelinquentEvent::new;
@@ -93,7 +91,7 @@ enum DelinquencyCategory {
 
     private static LoanDelinquentEvent getEvent(final Delinquency d, final int threshold, final Zonky z) {
         final Loan loan = d.getParent().getLoan(z);
-        final OffsetDateTime since = d.getDetectedOn();
+        final LocalDate since = d.getDetectedOn();
         return getEventSupplier(threshold).apply(loan, since);
     }
 

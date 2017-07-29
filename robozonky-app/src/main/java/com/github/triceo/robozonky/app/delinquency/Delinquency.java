@@ -17,27 +17,28 @@
 package com.github.triceo.robozonky.app.delinquency;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.temporal.TemporalAmount;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Optional;
+
+import com.github.triceo.robozonky.internal.api.Defaults;
 
 /**
  * Represents one occasion on which a loan, represented by {@link #getParent()}, was overdue.
  */
 public final class Delinquency {
 
-    private final OffsetDateTime detectedOn;
+    private final LocalDate detectedOn;
     private final Delinquent parent;
-    private OffsetDateTime fixedOn;
+    private LocalDate fixedOn;
 
     /**
      * Create a delinquency which is active, ie. instalment is currently overdue.
      * @param d The delinquent loan in question.
      * @param detectedOn The day that this delinquency was noticed.
      */
-    Delinquency(final Delinquent d, final OffsetDateTime detectedOn) {
+    Delinquency(final Delinquent d, final LocalDate detectedOn) {
         this(d, detectedOn, null);
     }
 
@@ -47,17 +48,10 @@ public final class Delinquency {
      * @param detectedOn The day that this delinquency was noticed.
      * @param fixedOn The day that the outstanding instalment was paid back.
      */
-    Delinquency(final Delinquent d, final OffsetDateTime detectedOn, final OffsetDateTime fixedOn) {
+    Delinquency(final Delinquent d, final LocalDate detectedOn, final LocalDate fixedOn) {
         this.parent = d;
         this.detectedOn = detectedOn;
         this.fixedOn = fixedOn;
-    }
-
-    private static TemporalAmount difference(final OffsetDateTime start, final OffsetDateTime end) {
-        final long startInstant = Instant.from(start).toEpochMilli();
-        final long endInstant = Instant.from(end).toEpochMilli();
-        final long difference = endInstant - startInstant;
-        return Duration.ofMillis(difference);
     }
 
     /**
@@ -70,14 +64,14 @@ public final class Delinquency {
     /**
      * @return The day that this delinquency was first noticed.
      */
-    public OffsetDateTime getDetectedOn() {
+    public LocalDate getDetectedOn() {
         return detectedOn;
     }
 
     /**
      * @return The day that the outstanding instalment was paid back, or empty if delinquency is active.
      */
-    public Optional<OffsetDateTime> getFixedOn() {
+    public Optional<LocalDate> getFixedOn() {
         return Optional.ofNullable(fixedOn);
     }
 
@@ -85,7 +79,7 @@ public final class Delinquency {
      * De-activate the delinquency.
      * @param fixedOn The day that the outstanding instalment was paid back.
      */
-    public void setFixedOn(final OffsetDateTime fixedOn) {
+    public void setFixedOn(final LocalDate fixedOn) {
         this.fixedOn = fixedOn;
     }
 
@@ -93,10 +87,11 @@ public final class Delinquency {
      * @return How long it took for the loan to be delinquent for this instalment. If active, the end date is
      * calculated as today.
      */
-    public TemporalAmount getDuration() {
+    public Duration getDuration() {
+        final ZoneId zone = Defaults.ZONE_ID;
         return getFixedOn()
-                .map(fixedOn -> difference(detectedOn, fixedOn))
-                .orElse(difference(detectedOn, OffsetDateTime.now()));
+                .map(fixedOn -> Duration.between(detectedOn.atStartOfDay(zone), fixedOn.atStartOfDay(zone)))
+                .orElse(Duration.between(detectedOn.atStartOfDay(zone), LocalDate.now().atStartOfDay(zone)));
     }
 
     /**

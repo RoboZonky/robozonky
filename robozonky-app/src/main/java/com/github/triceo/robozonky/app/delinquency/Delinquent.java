@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.app.delinquency;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -32,14 +32,14 @@ import com.github.triceo.robozonky.common.remote.Zonky;
 public final class Delinquent {
 
     private final int loanId;
-    private final SortedMap<OffsetDateTime, Delinquency> delinquencies = new TreeMap<>();
+    private final SortedMap<LocalDate, Delinquency> delinquencies = new TreeMap<>();
 
     /**
      * New delinquent loan with one active delinquent instalment.
      * @param loanId ID of the loan in question.
      * @param since The day that an instalment was first noticed overdue.
      */
-    Delinquent(final int loanId, final OffsetDateTime since) {
+    Delinquent(final int loanId, final LocalDate since) {
         this.loanId = loanId;
         this.delinquencies.put(since, new Delinquency(this, since));
     }
@@ -101,7 +101,7 @@ public final class Delinquent {
      * @return New instance or, if such delinquency already existed, the original instance. See
      * {@link Delinquency#equals(Object)}.
      */
-    Delinquency addDelinquency(final OffsetDateTime since) {
+    Delinquency addDelinquency(final LocalDate since) {
         if (delinquencies.containsKey(since)) {
             return delinquencies.get(since);
         }
@@ -117,7 +117,7 @@ public final class Delinquent {
      * @return New instance or, if such delinquency already existed, the original instance. See
      * {@link Delinquency#equals(Object)}.
      */
-    Delinquency addDelinquency(final OffsetDateTime since, final OffsetDateTime until) {
+    Delinquency addDelinquency(final LocalDate since, final LocalDate until) {
         if (delinquencies.containsKey(since)) {
             final Delinquency d = delinquencies.get(since);
             d.setFixedOn(until);

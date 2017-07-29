@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.app.management;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.Map;
 
 public interface InvestmentsMBean extends BaseMBean {
@@ -27,5 +27,5 @@ public interface InvestmentsMBean extends BaseMBean {
 
     Map<Integer, Integer> getRejectedInvestments();
 
-    Map<Integer, OffsetDateTime> getDelinquentLoans();
+    Map<Integer, LocalDate> getDelinquentLoans();
 }

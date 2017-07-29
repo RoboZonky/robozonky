@@ -17,11 +17,9 @@
 package com.github.triceo.robozonky.app.delinquency;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.common.remote.Zonky;
-import com.github.triceo.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -44,7 +42,7 @@ public class DelinquentTest {
 
     @Test
     public void withActiveDelinquency() {
-        final OffsetDateTime since = OffsetDateTime.now();
+        final LocalDate since = LocalDate.now();
         final int loanId = 1;
         final Delinquent d = new Delinquent(loanId, since);
         SoftAssertions.assertSoftly(softly -> {
@@ -69,7 +67,7 @@ public class DelinquentTest {
             softly.assertThat(d.getActiveDelinquency()).isEmpty();
             softly.assertThat(d.hasActiveDelinquency()).isFalse();
         });
-        final OffsetDateTime since = LocalDate.now().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
+        final LocalDate since = LocalDate.now().minusDays(2);
         // add active delinquency
         final Delinquency d1 = d.addDelinquency(since);
         SoftAssertions.assertSoftly(softly -> {
@@ -79,7 +77,7 @@ public class DelinquentTest {
             softly.assertThat(d.getActiveDelinquency()).contains(d1);
         });
         // replace that delinquency with an inactive one
-        final OffsetDateTime fixed = OffsetDateTime.now();
+        final LocalDate fixed = LocalDate.now().minusDays(1);
         final Delinquency d2 = d.addDelinquency(since, fixed);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(d2).isSameAs(d1);
@@ -87,7 +85,7 @@ public class DelinquentTest {
             softly.assertThat(d.getActiveDelinquency()).isEmpty();
         });
         // add another active dependency
-        final OffsetDateTime next = OffsetDateTime.now();
+        final LocalDate next = LocalDate.now();
         final Delinquency d3 = d.addDelinquency(next);
         final Delinquency d4 = d.addDelinquency(next);
         Assertions.assertThat(d4).isSameAs(d3);

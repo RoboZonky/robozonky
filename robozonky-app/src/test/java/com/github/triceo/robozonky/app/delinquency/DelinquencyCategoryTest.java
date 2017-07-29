@@ -16,8 +16,8 @@
 
 package com.github.triceo.robozonky.app.delinquency;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,7 +53,7 @@ public class DelinquencyCategoryTest extends AbstractInvestingTest {
 
     @Before
     public void prepareTimelines() {
-        minimumMatchingDuration = Duration.ofDays(category.getThresholdInDays());
+        minimumMatchingDuration = Period.ofDays(category.getThresholdInDays());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class DelinquencyCategoryTest extends AbstractInvestingTest {
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(new Loan(loanId, 200));
         // store a delinquent loan
         final Delinquent d = new Delinquent(loanId);
-        final Delinquency dy = d.addDelinquency(OffsetDateTime.now().minus(minimumMatchingDuration));
+        final Delinquency dy = d.addDelinquency(LocalDate.now().minus(minimumMatchingDuration));
         Assertions.assertThat(category.update(Collections.singleton(dy), zonky)).containsExactly(loanId);
         final List<Event> events = this.getNewEvents();
         SoftAssertions.assertSoftly(softly -> {

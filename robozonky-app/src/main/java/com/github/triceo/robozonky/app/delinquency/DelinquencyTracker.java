@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.delinquency;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;
@@ -29,7 +28,6 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
-import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.internal.api.State;
 
 /**
@@ -56,9 +54,9 @@ public enum DelinquencyTracker {
     private static Delinquency fromString(final Delinquent d, final String delinquency) {
         final String[] parts = TIME_SPLITTER.split(delinquency);
         if (parts.length == 1) {
-            return d.addDelinquency(OffsetDateTime.parse(parts[0]));
+            return d.addDelinquency(LocalDate.parse(parts[0]));
         } else if (parts.length == 2) {
-            return d.addDelinquency(OffsetDateTime.parse(parts[0]), OffsetDateTime.parse(parts[1]));
+            return d.addDelinquency(LocalDate.parse(parts[0]), LocalDate.parse(parts[1]));
         } else {
             throw new IllegalStateException("Unexpected number of dates: " + parts.length);
         }
@@ -84,7 +82,7 @@ public enum DelinquencyTracker {
      */
     public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent,
                        final Collection<Investment> noLongerActive) {
-        final OffsetDateTime now = LocalDate.now().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
+        final LocalDate now = LocalDate.now();
         final Collection<Delinquent> knownDelinquents = this.getDelinquents();
         knownDelinquents.stream()
                 .filter(Delinquent::hasActiveDelinquency) // only care about present delinquents

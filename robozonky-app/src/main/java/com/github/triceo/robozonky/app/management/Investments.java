@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.management;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,7 +33,7 @@ class Investments implements InvestmentsMBean {
     private OffsetDateTime lastInvestmentRunTimestamp;
     private final Map<Integer, Integer> successfulInvestments = new LinkedHashMap<>(),
             delegatedInvestments = new LinkedHashMap<>(), rejectedInvestments = new LinkedHashMap<>();
-    private final Map<Integer, OffsetDateTime> delinquentLoans = new LinkedHashMap<>();
+    private final Map<Integer, LocalDate> delinquentLoans = new LinkedHashMap<>();
 
     @Override
     public Map<Integer, Integer> getSuccessfulInvestments() {
@@ -66,7 +67,7 @@ class Investments implements InvestmentsMBean {
     }
 
     @Override
-    public Map<Integer, OffsetDateTime> getDelinquentLoans() {
+    public Map<Integer, LocalDate> getDelinquentLoans() {
         return this.delinquentLoans;
     }
 

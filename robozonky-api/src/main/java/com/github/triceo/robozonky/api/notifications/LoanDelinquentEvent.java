@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -27,10 +27,10 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 public abstract class LoanDelinquentEvent extends Event {
 
     private final Loan loan;
-    private final OffsetDateTime since;
+    private final LocalDate since;
     private final int thresholdInDays;
 
-    public LoanDelinquentEvent(final Loan loan, final OffsetDateTime since, final int thresholdInDays) {
+    public LoanDelinquentEvent(final Loan loan, final LocalDate since, final int thresholdInDays) {
         this.loan = loan;
         this.since = since;
         this.thresholdInDays = thresholdInDays;
@@ -44,7 +44,7 @@ public abstract class LoanDelinquentEvent extends Event {
         return loan;
     }
 
-    public OffsetDateTime getSince() {
+    public LocalDate getSince() {
         return since;
     }
 }
