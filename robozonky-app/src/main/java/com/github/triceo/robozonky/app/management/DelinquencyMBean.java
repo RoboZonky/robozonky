@@ -16,13 +16,18 @@
 
 package com.github.triceo.robozonky.app.management;
 
+import java.time.LocalDate;
 import java.util.Map;
 
-public interface InvestmentsMBean extends BaseMBean {
+public interface DelinquencyMBean extends BaseMBean {
 
-    Map<Integer, Integer> getSuccessfulInvestments();
+    Map<Integer, LocalDate> getAll();
 
-    Map<Integer, Integer> getDelegatedInvestments();
+    Map<Integer, LocalDate> get10Plus();
 
-    Map<Integer, Integer> getRejectedInvestments();
+    Map<Integer, LocalDate> get30Plus();
+
+    Map<Integer, LocalDate> get60Plus();
+
+    Map<Integer, LocalDate> get90Plus();
 }

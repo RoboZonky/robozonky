@@ -34,9 +34,8 @@ public enum MBean {
 
     RUNTIME(Runtime::new),
     INVESTMENTS(Investments::new),
+    DELINQUENCY(Delinquency::new),
     PORTFOLIO(Portfolio::new);
-
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MBean.class);
 

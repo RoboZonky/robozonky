@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.management;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,15 +24,12 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.triceo.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 
 class Investments implements InvestmentsMBean {
 
     private OffsetDateTime lastInvestmentRunTimestamp;
     private final Map<Integer, Integer> successfulInvestments = new LinkedHashMap<>(),
             delegatedInvestments = new LinkedHashMap<>(), rejectedInvestments = new LinkedHashMap<>();
-    private final Map<Integer, LocalDate> delinquentLoans = new LinkedHashMap<>();
 
     @Override
     public Map<Integer, Integer> getSuccessfulInvestments() {
@@ -64,21 +60,6 @@ class Investments implements InvestmentsMBean {
         this.rejectedInvestments.put(
                 event.getRecommendation().getLoanDescriptor().getLoan().getId(),
                 event.getRecommendation().getRecommendedInvestmentAmount());
-    }
-
-    @Override
-    public Map<Integer, LocalDate> getDelinquentLoans() {
-        return this.delinquentLoans;
-    }
-
-    void addDelinquentLoan(final LoanDelinquentEvent event) {
-        this.delinquentLoans.put(event.getLoan().getId(), event.getSince());
-        this.registerInvestmentRun(event);
-    }
-
-    void removeDelinquentLoan(final LoanNoLongerDelinquentEvent event) {
-        this.delinquentLoans.remove(event.getLoan().getId());
-        this.registerInvestmentRun(event);
     }
 
     @Override

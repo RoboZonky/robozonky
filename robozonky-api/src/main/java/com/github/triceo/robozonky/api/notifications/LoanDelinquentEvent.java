@@ -44,7 +44,7 @@ public abstract class LoanDelinquentEvent extends Event {
         return loan;
     }
 
-    public LocalDate getSince() {
+    public LocalDate getDelinquentSince() {
         return since;
     }
 }

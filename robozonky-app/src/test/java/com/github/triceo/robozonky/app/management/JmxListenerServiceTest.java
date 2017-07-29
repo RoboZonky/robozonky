@@ -33,6 +33,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
@@ -53,6 +54,7 @@ import org.junit.runners.Parameterized;
 public class JmxListenerServiceTest {
 
     private static final String USERNAME = "someone@somewhere.cz";
+    private static final Supplier<Delinquency> DELINQUENCY = () -> (Delinquency) MBean.DELINQUENCY.getImplementation();
     private static final Supplier<InvestmentsMBean> INVESTMENTS =
             () -> (Investments) MBean.INVESTMENTS.getImplementation();
     private static final Supplier<RuntimeMBean> RUNTIME = () -> (Runtime) MBean.RUNTIME.getImplementation();
@@ -107,35 +109,33 @@ public class JmxListenerServiceTest {
         return new Object[]{evt.getClass(), evt, before, after};
     }
 
-    /*
     private static Object[] getParametersForDelinquentLoan() {
         final Loan l = new Loan(1, 1000);
         final OffsetDateTime now = OffsetDateTime.now();
-        final Event evt = new LoanDelinquentEvent(l, now);
+        final Event evt = new LoanNowDelinquentEvent(l, now.toLocalDate());
         final Consumer<SoftAssertions> before = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
-            softly.assertThat(mbean.getDelinquentLoans()).isEmpty();
+            final DelinquencyMBean mbean = DELINQUENCY.get();
+            softly.assertThat(mbean.getAll()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
-            softly.assertThat(mbean.getDelinquentLoans()).containsEntry(l.getId(), now);
+            final DelinquencyMBean mbean = DELINQUENCY.get();
+            softly.assertThat(mbean.getAll()).containsEntry(l.getId(), now.toLocalDate());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isAfterOrEqualTo(now);
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
-    */
 
     private static Object[] getParametersForNoLongerDelinquentLoan() {
         final OffsetDateTime now = OffsetDateTime.now();
         final Loan l = new Loan(1, 1000);
         final Event evt = new LoanNoLongerDelinquentEvent(l);
         final Consumer<SoftAssertions> before = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
-            softly.assertThat(mbean.getDelinquentLoans()).isEmpty();
+            final DelinquencyMBean mbean = DELINQUENCY.get();
+            softly.assertThat(mbean.getAll()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
-            softly.assertThat(mbean.getDelinquentLoans()).isEmpty();
+            final DelinquencyMBean mbean = DELINQUENCY.get();
+            softly.assertThat(mbean.getAll()).isEmpty();
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isAfterOrEqualTo(now);
         };
         return new Object[]{evt.getClass(), evt, before, after};
@@ -195,7 +195,7 @@ public class JmxListenerServiceTest {
                              JmxListenerServiceTest.getParametersForInvestmentRejected(),
                              JmxListenerServiceTest.getParametersForStrategyStarted(),
                              JmxListenerServiceTest.getParametersForStrategyCompleted(),
-                             //JmxListenerServiceTest.getParametersForDelinquentLoan(),
+                             JmxListenerServiceTest.getParametersForDelinquentLoan(),
                              JmxListenerServiceTest.getParametersForNoLongerDelinquentLoan());
     }
 
