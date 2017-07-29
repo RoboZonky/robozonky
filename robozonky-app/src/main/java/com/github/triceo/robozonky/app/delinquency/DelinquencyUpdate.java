@@ -37,6 +37,7 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
     static Collection<Investment> getWithPaymentStatus(final Map<PaymentStatus, List<Investment>> investments,
                                                        final PaymentStatuses target) {
         return target.getPaymentStatuses().stream()
+                .filter(investments::containsKey)
                 .flatMap(ps -> investments.get(ps).stream())
                 .collect(Collectors.toSet());
     }
