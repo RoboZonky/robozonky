@@ -84,7 +84,11 @@ public enum State {
 
     Optional<String> getValue(final String section, final String key) {
         if (this.containskey(section, key)) {
-            return Optional.of(getStateFile().get(section, key, String.class));
+            final String value = getStateFile().get(section, key, String.class);
+            if (value.trim().length() == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(value);
         } else {
             return Optional.empty();
         }
