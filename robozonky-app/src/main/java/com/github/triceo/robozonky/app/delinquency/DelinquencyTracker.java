@@ -26,11 +26,15 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.internal.api.State;
 
+/**
+ * Main entry point to the delinquency API.
+ */
 public enum DelinquencyTracker {
 
     INSTANCE; // cheap thread-safe singleton
@@ -70,6 +74,14 @@ public enum DelinquencyTracker {
         update(zonky, presentlyDelinquent, Collections.emptyList());
     }
 
+    /**
+     * Updates delinquency information based on the information about loans that are either currently delinquent or no
+     * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
+     * @param zonky The API that will be used to retrieve the loan instances.
+     * @param presentlyDelinquent Loans that currently have overdue instalments. This corresponds to
+     * {@link PaymentStatus#getDelinquent()}
+     * @param noLongerActive Loans that are no longer relevant. This corresponds to {@link PaymentStatus#getDone()}.
+     */
     public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent,
                        final Collection<Investment> noLongerActive) {
         final OffsetDateTime now = LocalDate.now().atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
@@ -99,6 +111,9 @@ public enum DelinquencyTracker {
         }
     }
 
+    /**
+     * @return Active loans that are now, or at some point have been, currently tracked as delinquent.
+     */
     public synchronized Collection<Delinquent> getDelinquents() {
         final State.ClassSpecificState state = State.INSTANCE.forClass(this.getClass());
         return state.getKeys().stream()

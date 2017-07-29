@@ -26,28 +26,51 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.common.remote.Zonky;
 
-final class Delinquent {
+/**
+ * Represents a loan that, either now or at some point in the past, had at least one overdue instalment.
+ */
+public final class Delinquent {
 
     private final int loanId;
     private final SortedMap<OffsetDateTime, Delinquency> delinquencies = new TreeMap<>();
 
+    /**
+     * New delinquent loan with one active delinquent instalment.
+     * @param loanId ID of the loan in question.
+     * @param since The day that an instalment was first noticed overdue.
+     */
     Delinquent(final int loanId, final OffsetDateTime since) {
         this.loanId = loanId;
         this.delinquencies.put(since, new Delinquency(this, since));
     }
 
+    /**
+     * New delinquent loan with no delinquent instalments.
+     * @param loanId ID of the loan in question.
+     */
     Delinquent(final int loanId) {
         this.loanId = loanId;
     }
 
+    /**
+     * @return ID of the delinquent loan.
+     */
     public int getLoanId() {
         return loanId;
     }
 
+    /**
+     * Retrieve from remote Zonky server the {@link Loan} identified by {@link #getLoanId()}.
+     * @param zonky Authenticated API to retrieve the loan.
+     * @return The delinquent loan.
+     */
     public Loan getLoan(final Zonky zonky) {
         return zonky.getLoan(loanId);
     }
 
+    /**
+     * @return Present if there is currently an overdue instalment for the loan in question.
+     */
     public Optional<Delinquency> getActiveDelinquency() {
         if (delinquencies.isEmpty()) {
             return Optional.empty();
@@ -58,14 +81,26 @@ final class Delinquent {
                 .orElse(Optional.of(latestDelinquency));
     }
 
+    /**
+     * @return True if {@link #getActiveDelinquency()} is present.
+     */
     public boolean hasActiveDelinquency() {
         return getActiveDelinquency().isPresent();
     }
 
+    /**
+     * @return All registered delinquent instalments, both present and past.
+     */
     public Stream<Delinquency> getDelinquencies() {
         return delinquencies.values().stream();
     }
 
+    /**
+     * Add active delinquency.
+     * @param since The day that an instalment was first noticed overdue.
+     * @return New instance or, if such delinquency already existed, the original instance. See
+     * {@link Delinquency#equals(Object)}.
+     */
     Delinquency addDelinquency(final OffsetDateTime since) {
         if (delinquencies.containsKey(since)) {
             return delinquencies.get(since);
@@ -75,6 +110,13 @@ final class Delinquent {
         return d;
     }
 
+    /**
+     * Add inactive delinquency.
+     * @param since The day that an instalment was first noticed overdue.
+     * @param until The day that the loan was first noticed as no longer delinquent.
+     * @return New instance or, if such delinquency already existed, the original instance. See
+     * {@link Delinquency#equals(Object)}.
+     */
     Delinquency addDelinquency(final OffsetDateTime since, final OffsetDateTime until) {
         if (delinquencies.containsKey(since)) {
             final Delinquency d = delinquencies.get(since);
@@ -86,6 +128,11 @@ final class Delinquent {
         return d;
     }
 
+    /**
+     * See {@link Object#equals(Object)}.
+     * @param o Another delinquent loan.
+     * @return Delinquent loans are considered equal when their {@link #getLoanId()}s are equal.
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

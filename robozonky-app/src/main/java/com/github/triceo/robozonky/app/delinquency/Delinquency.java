@@ -23,7 +23,35 @@ import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Delinquency {
+/**
+ * Represents one occasion on which a loan, represented by {@link #getParent()}, was overdue.
+ */
+public final class Delinquency {
+
+    private final OffsetDateTime detectedOn;
+    private final Delinquent parent;
+    private OffsetDateTime fixedOn;
+
+    /**
+     * Create a delinquency which is active, ie. instalment is currently overdue.
+     * @param d The delinquent loan in question.
+     * @param detectedOn The day that this delinquency was noticed.
+     */
+    Delinquency(final Delinquent d, final OffsetDateTime detectedOn) {
+        this(d, detectedOn, null);
+    }
+
+    /**
+     * Create a delinquency which is inactive, repaid.
+     * @param d The delinquent loan in question.
+     * @param detectedOn The day that this delinquency was noticed.
+     * @param fixedOn The day that the outstanding instalment was paid back.
+     */
+    Delinquency(final Delinquent d, final OffsetDateTime detectedOn, final OffsetDateTime fixedOn) {
+        this.parent = d;
+        this.detectedOn = detectedOn;
+        this.fixedOn = fixedOn;
+    }
 
     private static TemporalAmount difference(final OffsetDateTime start, final OffsetDateTime end) {
         final long startInstant = Instant.from(start).toEpochMilli();
@@ -32,42 +60,50 @@ public class Delinquency {
         return Duration.ofMillis(difference);
     }
 
-    private final OffsetDateTime detectedOn;
-    private OffsetDateTime fixedOn;
-    private final Delinquent parent;
-
-    Delinquency(final Delinquent d, final OffsetDateTime detectedOn) {
-        this(d, detectedOn, null);
-    }
-
-    Delinquency(final Delinquent d, final OffsetDateTime detectedOn, final OffsetDateTime fixedOn) {
-        this.parent = d;
-        this.detectedOn = detectedOn;
-        this.fixedOn = fixedOn;
-    }
-
+    /**
+     * @return The loan that this delinquent instalment was part of.
+     */
     public Delinquent getParent() {
         return parent;
     }
 
+    /**
+     * @return The day that this delinquency was first noticed.
+     */
     public OffsetDateTime getDetectedOn() {
         return detectedOn;
     }
 
+    /**
+     * @return The day that the outstanding instalment was paid back, or empty if delinquency is active.
+     */
     public Optional<OffsetDateTime> getFixedOn() {
         return Optional.ofNullable(fixedOn);
     }
 
+    /**
+     * De-activate the delinquency.
+     * @param fixedOn The day that the outstanding instalment was paid back.
+     */
     public void setFixedOn(final OffsetDateTime fixedOn) {
         this.fixedOn = fixedOn;
     }
 
+    /**
+     * @return How long it took for the loan to be delinquent for this instalment. If active, the end date is
+     * calculated as today.
+     */
     public TemporalAmount getDuration() {
         return getFixedOn()
                 .map(fixedOn -> difference(detectedOn, fixedOn))
                 .orElse(difference(detectedOn, OffsetDateTime.now()));
     }
 
+    /**
+     * See {@link Object#equals(Object)}
+     * @param o Other delinquency.
+     * @return Deliquencies are considered equal when they share {@link #getParent()} and {@link #getDetectedOn()}..
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

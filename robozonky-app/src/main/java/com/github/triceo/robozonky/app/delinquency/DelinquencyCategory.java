@@ -37,6 +37,10 @@ import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.State;
 
+/**
+ * Keeps active delinquencies over a given threshold. When a new delinquency over a particular threshold arrives, an
+ * event is sent. When a delinquency is no longer among active, it is silently removed.
+ */
 enum DelinquencyCategory {
 
     NEW(0),
@@ -97,10 +101,20 @@ enum DelinquencyCategory {
         return "notified" + dayThreshold + "plus";
     }
 
+    /**
+     * @return Number of days at minimum for a delinquency to belong to this category.
+     */
     public int getThresholdInDays() {
         return thresholdInDays;
     }
 
+    /**
+     * Update internal state trackers and send events if necessary.
+     *
+     * @param delinquencies Active delinquencies - ie. payments that are, right now, overdue.
+     * @param zonky Authenticated API to be used for retrieving loan data.
+     * @return IDs of loans that are being tracked in this category.
+     */
     public Collection<Integer> update(final Collection<Delinquency> delinquencies, final Zonky zonky) {
         final Collection<Delinquency> activeAndPresnet = delinquencies.stream()
                 .filter(d -> !d.getFixedOn().isPresent())
