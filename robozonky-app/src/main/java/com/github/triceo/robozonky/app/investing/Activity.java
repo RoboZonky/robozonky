@@ -45,7 +45,7 @@ class Activity {
     };
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
     private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
-    static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Activity.class);
+    static final State.ClassSpecificState STATE = State.forClass(Activity.class);
     static final String LAST_MARKETPLACE_CHECK_STATE_ID = "lastMarketplaceCheck";
 
     private final TemporalAmount sleepInterval;
@@ -125,7 +125,7 @@ class Activity {
         final OffsetDateTime result = hasUnactionableLoans ?
                 OffsetDateTime.now().minus(Duration.from(ResultTracker.CAPTCHA_DELAY).plus(Duration.ofSeconds(30)))
                 : OffsetDateTime.now();
-        Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, result.toString());
+        Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, result.toString()).call();
         Activity.LOGGER.debug("New marketplace last checked time is {}.", result);
     }
 }

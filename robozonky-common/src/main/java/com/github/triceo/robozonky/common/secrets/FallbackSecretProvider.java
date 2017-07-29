@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 final class FallbackSecretProvider implements SecretProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FallbackSecretProvider.class);
-    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(FallbackSecretProvider.class);
+    private static final State.ClassSpecificState STATE = State.forClass(FallbackSecretProvider.class);
     private static final String TOKEN_STATE_ID = "token";
 
     private final String username;
@@ -67,7 +67,10 @@ final class FallbackSecretProvider implements SecretProvider {
     @Override
     public boolean setToken(final Reader token) {
         try (final BufferedReader r = new BufferedReader(token)) {
-            FallbackSecretProvider.STATE.setValue(FallbackSecretProvider.TOKEN_STATE_ID, r.readLine());
+            FallbackSecretProvider.STATE
+                    .newBatch()
+                    .set(FallbackSecretProvider.TOKEN_STATE_ID, r.readLine())
+                    .call();
             return true;
         } catch (final IOException ex) {
             FallbackSecretProvider.LOGGER.warn("Failed setting token.", ex);
@@ -88,7 +91,9 @@ final class FallbackSecretProvider implements SecretProvider {
 
     @Override
     public boolean deleteToken() {
-        return FallbackSecretProvider.STATE.reset();
+        return FallbackSecretProvider.STATE
+                .newBatch(true)
+                .call();
     }
 
     @Override

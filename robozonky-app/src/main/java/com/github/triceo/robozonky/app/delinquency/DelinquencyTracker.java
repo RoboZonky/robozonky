@@ -97,13 +97,14 @@ public enum DelinquencyTracker {
                 .filter(i -> knownDelinquents.stream().noneMatch(d -> d.getLoanId() == i.getLoanId()))
                 .map(i -> new Delinquent(i.getLoanId(), now));
         synchronized (this) { // store to the state file
-            final State.ClassSpecificState state = State.INSTANCE.forClass(this.getClass());
-            state.reset();
+            final State.ClassSpecificState state = State.forClass(this.getClass());
+            final State.Batch stateUpdate = state.newBatch(true);
             // update state of delinquents
             final Collection<Delinquency> allPresent = Stream.concat(stillDelinquent, newDelinquents)
-                    .peek(d -> state.setValue(String.valueOf(d.getLoanId()), toString(d)))
+                    .peek(d -> stateUpdate.set(String.valueOf(d.getLoanId()), toString(d)))
                     .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                     .collect(Collectors.toSet());
+            stateUpdate.call(); // persist state updates
             // and notify of new delinquencies over all known thresholds
             Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, zonky));
         }
@@ -113,7 +114,7 @@ public enum DelinquencyTracker {
      * @return Active loans that are now, or at some point have been, currently tracked as delinquent.
      */
     public synchronized Collection<Delinquent> getDelinquents() {
-        final State.ClassSpecificState state = State.INSTANCE.forClass(this.getClass());
+        final State.ClassSpecificState state = State.forClass(this.getClass());
         return state.getKeys().stream()
                 .map(key -> {
                     final int loanId = Integer.parseInt(key);

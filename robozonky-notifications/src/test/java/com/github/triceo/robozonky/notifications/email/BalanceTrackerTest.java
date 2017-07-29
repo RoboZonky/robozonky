@@ -34,13 +34,13 @@ public class BalanceTrackerTest {
 
     @Before
     public void makeSureNoState() {
-        final State.ClassSpecificState state = State.INSTANCE.forClass(BalanceTracker.class);
+        final State.ClassSpecificState state = State.forClass(BalanceTracker.class);
         Assume.assumeFalse(state.getValue(BalanceTracker.BALANCE_KEY).isPresent());
     }
 
     @Test
     public void lifecycle() {
-        final State.ClassSpecificState state = State.INSTANCE.forClass(BalanceTracker.class);
+        final State.ClassSpecificState state = State.forClass(BalanceTracker.class);
         Assume.assumeFalse(state.getValue(BalanceTracker.BALANCE_KEY).isPresent());
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
         // store new value
@@ -59,8 +59,8 @@ public class BalanceTrackerTest {
 
     @Test
     public void wrongData() {
-        final State.ClassSpecificState state = State.INSTANCE.forClass(BalanceTracker.class);
-        state.setValue(BalanceTracker.BALANCE_KEY, UUID.randomUUID().toString());
+        final State.ClassSpecificState state = State.forClass(BalanceTracker.class);
+        state.newBatch().set(BalanceTracker.BALANCE_KEY, UUID.randomUUID().toString()).call();
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
     }
 }

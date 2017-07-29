@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 class SessionState {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);
-    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Session.class);
+    private static final State.ClassSpecificState STATE = State.forClass(Session.class);
     private static final String SEEN_INVESTMENTS_ID = "seenInvestments",
             UNTOUCHABLE_INVESTMENTS_ID = "untouchableInvestments";
 
@@ -70,7 +70,7 @@ class SessionState {
                 .sorted()
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
-        SessionState.STATE.setValue(propertyName, result);
+        SessionState.STATE.newBatch().set(propertyName, result).call();
     }
 
     private static void writeUntouchableInvestments(final Collection<LoanDescriptor> rejectedInvestments) {

@@ -33,14 +33,14 @@ import org.slf4j.LoggerFactory;
 final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
-    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(Counter.class);
+    private static final State.ClassSpecificState STATE = State.forClass(Counter.class);
     private static final String SEPARATOR = ";";
 
     private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
         final String result = timestamps.stream()
                 .map(OffsetDateTime::toString)
                 .collect(Collectors.joining(Counter.SEPARATOR));
-        return Counter.STATE.setValue(id, result);
+        return Counter.STATE.newBatch().set(id, result).call();
     }
 
     private static Collection<OffsetDateTime> load(final String id) {

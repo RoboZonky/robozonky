@@ -21,58 +21,47 @@ import java.util.UUID;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Test;
 
 public class StateTest {
 
+    private final State.ClassSpecificState state = State.forClass(this.getClass());
+
     @After
-    public void deleteState() {
-        State.getStateLocation().delete();
+    public void reset() {
+        state.newBatch(true).call();
     }
 
     @Test
-    public void persistentStorage() {
-        final String key = UUID.randomUUID().toString();
-        final String value = UUID.randomUUID().toString();
+    public void empty() {
+        Assertions.assertThat(state.getKeys()).isEmpty();
+    }
+
+    @Test
+    public void store() {
+        final State.ClassSpecificState state = State.forClass(this.getClass());
         // store
-        final State.ClassSpecificState old = State.INSTANCE.forClass(StateTest.class);
-        old.setValue(key, value);
-        Assertions.assertThat(old.getValue(key)).isPresent().contains(value);
-        // retrieve from a new instance
-        final State.ClassSpecificState current = State.INSTANCE.forClass(StateTest.class);
-        Assertions.assertThat(current.getValue(key)).isPresent().contains(value);
-        // reset and check if both empty, since backed by the same storage
-        Assertions.assertThat(current.reset()).isTrue();
+        final State.Batch b = state.newBatch();
+        final String key = UUID.randomUUID().toString(), value = UUID.randomUUID().toString(),
+                key2 = UUID.randomUUID().toString(), value2 = UUID.randomUUID().toString();
+        b.set(key, value).set(key2, value2);
+        b.call();
+        // read stored
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(old.getValue(key)).isEmpty();
-            softly.assertThat(current.getValue(key)).isEmpty();
+            softly.assertThat(state.getValue(key)).contains(value);
+            softly.assertThat(state.getValue(key2)).contains(value2);
         });
-    }
-
-    @Test
-    public void isolatedStorage() {
-        final String key = UUID.randomUUID().toString();
-        final String value = UUID.randomUUID().toString();
-        // store
-        final State.ClassSpecificState first = State.INSTANCE.forClass(StateTest.class);
-        first.setValue(key, value);
-        Assume.assumeTrue(first.getValue(key).isPresent());
-        final State.ClassSpecificState second = State.INSTANCE.forClass(State.class);
-        second.setValue(key, value);
-        Assume.assumeTrue(second.getValue(key).isPresent());
-        // delete one, make sure second is unaffected
-        Assertions.assertThat(first.unsetValue(key)).isTrue();
-        Assertions.assertThat(second.getValue(key)).isPresent().contains(value);
-        // delete again, make sure fails
-        Assertions.assertThat(first.unsetValue(key)).isFalse();
-    }
-
-    @Test
-    public void gracefullyHandleDeletedState() {
-        final State.ClassSpecificState first = State.INSTANCE.forClass(StateTest.class);
-        Assertions.assertThat(first.setValue("aaaa", "bbbb")).isTrue();
-        this.deleteState();
-        Assertions.assertThat(first.setValue("bbbb", "cccc")).isTrue();
+        // unset something
+        state.newBatch().unset(key).set(key2, value).call();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(state.getValue(key)).isEmpty();
+            softly.assertThat(state.getValue(key2)).contains(value);
+        });
+        // and perform plain reset
+        state.newBatch(true).set(key, value2).call();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(state.getKeys()).containsExactly(key);
+            softly.assertThat(state.getValue(key)).contains(value2);
+        });
     }
 }

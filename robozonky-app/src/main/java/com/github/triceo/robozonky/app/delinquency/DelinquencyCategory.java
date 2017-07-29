@@ -117,7 +117,7 @@ enum DelinquencyCategory {
         final Collection<Delinquency> activeAndPresnet = delinquencies.stream()
                 .filter(d -> !d.getFixedOn().isPresent())
                 .collect(Collectors.toSet());
-        final State.ClassSpecificState state = State.INSTANCE.forClass(this.getClass());
+        final State.ClassSpecificState state = State.forClass(this.getClass());
         final String fieldName = getFieldName(thresholdInDays);
         final Collection<Integer> activeHistorical = state.getValue(fieldName)
                 .map(idString -> fromIdString(idString))
@@ -132,7 +132,7 @@ enum DelinquencyCategory {
         final Collection<Integer> result = Stream.concat(activeHistorical.stream(), newFound)
                 .sorted()
                 .collect(Collectors.toSet());
-        state.setValue(fieldName, toIdString(result.stream()));
+        state.newBatch().set(fieldName, toIdString(result.stream())).call();
         return result;
     }
 

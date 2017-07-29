@@ -35,7 +35,7 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
 
     @Test
     public void timestampFailover() {
-        Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, "definitelyNotADate");
+        Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, "definitelyNotADate").call();
         Assertions.assertThat(Activity.getLatestMarketplaceAction()).isNotNull();
     }
 
@@ -44,7 +44,7 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp =
                 OffsetDateTime.now().minus(ActivityTest.SLEEP_PERIOD_MINUTES / 2, ChronoUnit.MINUTES);
-        Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString());
+        Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
         // load API that has marketplace more recent than that, but makes sure not to come within the closed period
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getDatePublished()).thenReturn(timestamp.plus(10, ChronoUnit.MINUTES));
@@ -66,7 +66,7 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
     public void doesTakeIntoAccountClosedPeriod() throws IOException {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp = OffsetDateTime.now();
-        Activity.STATE.setValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString());
+        Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
         // load API that has marketplace within the closed period
         final Loan activeLoan = Mockito.mock(Loan.class);
         Mockito.when(activeLoan.getId()).thenReturn(1);

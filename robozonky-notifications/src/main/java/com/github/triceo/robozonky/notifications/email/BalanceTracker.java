@@ -28,7 +28,7 @@ enum BalanceTracker {
     INSTANCE; // fast thread-safe singleton
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BalanceTracker.class);
-    private static final State.ClassSpecificState STATE = State.INSTANCE.forClass(BalanceTracker.class);
+    private static final State.ClassSpecificState STATE = State.forClass(BalanceTracker.class);
     static final String BALANCE_KEY = "lastKnownBalance";
 
     public OptionalInt getLastKnownBalance() {
@@ -48,11 +48,14 @@ enum BalanceTracker {
     }
 
     public void setLastKnownBalance(final int newBalance) {
-        BalanceTracker.STATE.setValue(BalanceTracker.BALANCE_KEY, String.valueOf(newBalance));
+        BalanceTracker.STATE
+                .newBatch()
+                .set(BalanceTracker.BALANCE_KEY, String.valueOf(newBalance))
+                .call();
     }
 
     boolean reset() {
-        return BalanceTracker.STATE.reset();
+        return BalanceTracker.STATE.newBatch(true).call();
     }
 
 }
