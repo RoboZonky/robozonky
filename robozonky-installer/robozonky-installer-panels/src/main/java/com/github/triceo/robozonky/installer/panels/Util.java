@@ -60,6 +60,17 @@ class Util {
         p.setProperty("investmentRejected.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentMade.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentDelegated.enabled", isInvestmentEmailEnabled);
+        p.setProperty("loanNowDelinquent.enabled", "false"); // by default, let's prevent people from panicking
+        p.setProperty("loanNoLongerDelinquent.enabled",
+                      toBoolean(Variables.EMAIL_IS_LOAN_NOT_DELINQUENT.getValue(data)));
+        p.setProperty("loanDelinquent10DaysOrMore.enabled",
+                      toBoolean(Variables.EMAIL_IS_LOAN_DELINQUENT_10_PLUS.getValue(data)));
+        p.setProperty("loanDelinquent30DaysOrMore.enabled",
+                      toBoolean(Variables.EMAIL_IS_LOAN_DELINQUENT_30_PLUS.getValue(data)));
+        p.setProperty("loanDelinquent60DaysOrMore.enabled",
+                      toBoolean(Variables.EMAIL_IS_LOAN_DELINQUENT_60_PLUS.getValue(data)));
+        p.setProperty("loanDelinquent90DaysOrMore.enabled",
+                      toBoolean(Variables.EMAIL_IS_LOAN_DELINQUENT_90_PLUS.getValue(data)));
         p.setProperty("balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
         p.setProperty("balanceTracker.targetBalance", "200");
         p.setProperty("roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));
