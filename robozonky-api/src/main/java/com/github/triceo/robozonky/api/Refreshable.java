@@ -62,16 +62,17 @@ public abstract class Refreshable<T> implements Runnable {
 
             @Override
             public void valueSet(final T newValue) {
-                LOGGER.debug("New value for {}: {}.", Refreshable.this, newValue);
+                LOGGER.trace("New value: {}.", newValue);
             }
 
             @Override
             public void valueUnset(final T oldValue) {
-                LOGGER.debug("Value removed from {}.", Refreshable.this);
+                LOGGER.trace("Value removed.");
             }
 
             @Override
             public void valueChanged(final T oldValue, final T newValue) {
+                LOGGER.trace("Value changed: {}.", newValue);
                 this.valueSet(newValue);
             }
         });
@@ -102,6 +103,11 @@ public abstract class Refreshable<T> implements Runnable {
             @Override
             protected Optional<I> transform(final String source) {
                 return Optional.ofNullable(toReturn);
+            }
+
+            @Override
+            public String toString() {
+                return "ImmutableRefreshable{toReturn=" + toReturn + "}";
             }
         };
     }
@@ -209,6 +215,7 @@ public abstract class Refreshable<T> implements Runnable {
     private void storeResult(final T result) {
         final T previous = cachedResult.getAndSet(result);
         if (Objects.equals(previous, result)) {
+            LOGGER.trace("Value not changed.");
             return;
         }
         if (previous == null && result != null) { // value newly available
@@ -227,6 +234,7 @@ public abstract class Refreshable<T> implements Runnable {
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
             if (Objects.equals(newSource, latestKnownSource.get())) {
+                LOGGER.trace("Source not changed.");
                 return;
             }
             // source changed, result needs to be refreshed

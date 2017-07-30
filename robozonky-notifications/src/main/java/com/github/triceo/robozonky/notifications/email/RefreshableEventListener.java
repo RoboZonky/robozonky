@@ -35,10 +35,6 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
         this.eventType = eventType;
     }
 
-    protected RefreshableNotificationProperties getProperties() {
-        return properties;
-    }
-
     @Override
     public Optional<Refreshable<?>> getDependedOn() {
         return Optional.of(properties);
@@ -52,10 +48,22 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
     @Override
     protected Optional<EventListener<T>> transform(final String source) {
         final Optional<NotificationProperties> optionalProps = properties.getLatest();
-        return optionalProps.flatMap(props -> Stream.of(SupportedListener.values())
-                .filter(l -> Objects.equals(eventType, l.getEventType()))
-                .filter(l -> props.isEnabled())
-                .filter(props::isListenerEnabled)
-                .findFirst().map(l -> (EventListener<T>) l.getListener(props)));
+        return optionalProps.flatMap(props -> {
+            if (!props.isEnabled()) {
+                LOGGER.debug("E-mail notifications disabled in settings.");
+                return Optional.empty();
+            }
+            return Stream.of(SupportedListener.values())
+                    .filter(l -> Objects.equals(eventType, l.getEventType()))
+                    .peek(l -> LOGGER.trace("Found listener: {}.", l))
+                    .filter(props::isListenerEnabled)
+                    .peek(l -> LOGGER.trace("Will call listener: {}.", l))
+                    .findFirst().map(l -> (EventListener<T>) l.getListener(props));
+        });
+    }
+
+    @Override
+    public String toString() {
+        return "RefreshableEventListener{eventType=" + eventType.getName() + "}";
     }
 }
