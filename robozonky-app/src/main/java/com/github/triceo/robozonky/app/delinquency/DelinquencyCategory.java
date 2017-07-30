@@ -34,6 +34,8 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Keeps active delinquencies over a given threshold. When a new delinquency over a particular threshold arrives, an
@@ -47,6 +49,7 @@ enum DelinquencyCategory {
     CRITICAL(60),
     DEFAULTED(90);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
     private static final String COMMA = ",";
     private static final Pattern SPLIT_BY_COMMA = Pattern.compile("\\Q" + COMMA + "\\E");
     private final int thresholdInDays;
@@ -114,7 +117,8 @@ enum DelinquencyCategory {
      * @return IDs of loans that are being tracked in this category.
      */
     public Collection<Integer> update(final Collection<Delinquency> delinquencies, final Zonky zonky) {
-        final Collection<Delinquency> activeAndPresnet = delinquencies.stream()
+        LOGGER.trace("Updating {}.", this);
+        final Collection<Delinquency> activeAndPresent = delinquencies.stream()
                 .filter(d -> !d.getFixedOn().isPresent())
                 .collect(Collectors.toSet());
         final State.ClassSpecificState state = State.forClass(this.getClass());
@@ -122,9 +126,9 @@ enum DelinquencyCategory {
         final Collection<Integer> activeHistorical = state.getValue(fieldName)
                 .map(idString -> fromIdString(idString))
                 .orElse(Stream.empty())
-                .filter(id -> activeAndPresnet.stream().anyMatch(d -> d.getParent().getLoanId() == id))
+                .filter(id -> activeAndPresent.stream().anyMatch(d -> d.getParent().getLoanId() == id))
                 .collect(Collectors.toSet());
-        final Stream<Integer> newFound = activeAndPresnet.stream()
+        final Stream<Integer> newFound = activeAndPresent.stream()
                 .filter(d -> isOverThreshold(d, thresholdInDays))
                 .filter(d -> activeHistorical.stream().noneMatch(i -> d.getParent().getLoanId() == i))
                 .peek(d -> Events.fire(getEvent(d, thresholdInDays, zonky)))
@@ -133,6 +137,7 @@ enum DelinquencyCategory {
                 .sorted()
                 .collect(Collectors.toSet());
         state.newBatch().set(fieldName, toIdString(result.stream())).call();
+        LOGGER.trace("Update over.");
         return result;
     }
 

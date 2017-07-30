@@ -21,12 +21,14 @@ import java.util.UUID;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class StateTest {
 
     private final State.ClassSpecificState state = State.forClass(this.getClass());
 
+    @Before
     @After
     public void reset() {
         state.newBatch(true).call();

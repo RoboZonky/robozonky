@@ -50,16 +50,16 @@ public class DelinquencyTrackerTest extends AbstractInvestingTest {
         DelinquencyTracker.INSTANCE.update(zonky, Collections.singleton(i));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).hasSize(1);
-            softly.assertThat(this.getNewEvents()).hasSize(1)
-                    .first().isInstanceOf(LoanNowDelinquentEvent.class);
+            softly.assertThat(this.getNewEvents()).hasSize(1);
         });
+        Assertions.assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
         // make sure delinquences are persisted even when there are none present
         DelinquencyTracker.INSTANCE.update(zonky, Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).hasSize(1);
-            softly.assertThat(this.getNewEvents()).hasSize(2)
-                    .last().isInstanceOf(LoanNoLongerDelinquentEvent.class);
+            softly.assertThat(this.getNewEvents()).hasSize(2);
         });
+        Assertions.assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanNoLongerDelinquentEvent.class);
         // and when they are no longer active, they're gone for good
         DelinquencyTracker.INSTANCE.update(zonky, Collections.emptyList(), Collections.singleton(i));
         Assertions.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).hasSize(0);

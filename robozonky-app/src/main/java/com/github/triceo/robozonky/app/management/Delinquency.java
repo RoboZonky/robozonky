@@ -29,10 +29,15 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.triceo.robozonky.app.delinquency.DelinquencyTracker;
+import com.github.triceo.robozonky.app.delinquency.Delinquent;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Delinquency implements DelinquencyMBean {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Delinquency.class);
     private final SortedMap<Integer, LocalDate> delinquents = new TreeMap<>();
     private OffsetDateTime lastInvestmentRunTimestamp;
 
@@ -42,16 +47,20 @@ class Delinquency implements DelinquencyMBean {
     }
 
     void registerRun(final LoanNowDelinquentEvent event) {
-        delinquents.put(event.getLoan().getId(), event.getDelinquentSince());
         registerRun((Event) event);
     }
 
     void registerRun(final LoanNoLongerDelinquentEvent event) {
-        delinquents.remove(event.getLoan().getId());
         registerRun((Event) event);
     }
 
-    private void registerRun(final Event event) {
+    private synchronized void registerRun(final Event event) {
+        LOGGER.trace("Updating.");
+        delinquents.clear();
+        DelinquencyTracker.INSTANCE.getDelinquents().stream()
+                .filter(Delinquent::hasActiveDelinquency)
+                .forEach(d -> delinquents.put(d.getLoanId(), d.getActiveDelinquency().get().getDetectedOn()));
+        LOGGER.trace("Updated.");
         this.lastInvestmentRunTimestamp = event.getCreatedOn();
     }
 

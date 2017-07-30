@@ -29,6 +29,8 @@ import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main entry point to the delinquency API.
@@ -37,6 +39,7 @@ public enum DelinquencyTracker {
 
     INSTANCE; // cheap thread-safe singleton
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyTracker.class);
     private static final String ITEM_SEPARATOR = ";", TIME_SEPARATOR = ":::";
     private static final Pattern ITEM_SPLITTER = Pattern.compile("\\Q" + ITEM_SEPARATOR + "\\E"),
             TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
@@ -95,8 +98,14 @@ public enum DelinquencyTracker {
                 .filter(d -> noLongerActive.stream().noneMatch(i -> d.getLoanId() == i.getLoanId()));
         final Stream<Delinquent> newDelinquents = presentlyDelinquent.stream()
                 .filter(i -> knownDelinquents.stream().noneMatch(d -> d.getLoanId() == i.getLoanId()))
-                .map(i -> new Delinquent(i.getLoanId(), now));
+                .map(i -> {
+                    // no matter when we register delinquency, we can be sure it's delinquent from the last payment day
+                    final LocalDate delinquentPayment = (i.getNextPaymentDate() == null) ? now :
+                            i.getNextPaymentDate().toLocalDate().minusMonths(1).plusDays(1);
+                    return new Delinquent(i.getLoanId(), delinquentPayment);
+                });
         synchronized (this) { // store to the state file
+            LOGGER.trace("Starting delinquency update.");
             final State.ClassSpecificState state = State.forClass(this.getClass());
             final State.Batch stateUpdate = state.newBatch(true);
             // update state of delinquents
@@ -105,6 +114,7 @@ public enum DelinquencyTracker {
                     .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                     .collect(Collectors.toSet());
             stateUpdate.call(); // persist state updates
+            LOGGER.trace("Delinquency update finished.");
             // and notify of new delinquencies over all known thresholds
             Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, zonky));
         }
@@ -113,7 +123,7 @@ public enum DelinquencyTracker {
     /**
      * @return Active loans that are now, or at some point have been, currently tracked as delinquent.
      */
-    public synchronized Collection<Delinquent> getDelinquents() {
+    public Collection<Delinquent> getDelinquents() {
         final State.ClassSpecificState state = State.forClass(this.getClass());
         return state.getKeys().stream()
                 .map(key -> {

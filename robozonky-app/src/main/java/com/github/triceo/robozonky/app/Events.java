@@ -126,13 +126,14 @@ public enum Events {
      * @param sessionInfo If not null, internal {@link SessionInfo} instance will be updated.
      * @param <E> Event type to distribute.
      */
-    public static <E extends Event> void fire(final E event, final SessionInfo sessionInfo) {
+    public synchronized static <E extends Event> void fire(final E event, final SessionInfo sessionInfo) {
         if (sessionInfo != null) {
             Events.SESSION_INFO = sessionInfo;
         }
         final Class<E> eventClass = (Class<E>) event.getClass();
         Events.LOGGER.debug("Firing {}.", eventClass);
         Events.INSTANCE.getListeners(eventClass).parallel().forEach(l -> Events.fire(event, l, Events.SESSION_INFO));
+        Events.LOGGER.trace("Fired.");
         if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
             Events.EVENTS_FIRED.add(event);
         }
