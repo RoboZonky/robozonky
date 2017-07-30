@@ -244,20 +244,25 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         return subexecutable.getAbsolutePath() + " " + commandLine.convertOptions();
     }
 
-    private Collection<String> getWindowsScript(final CommandLinePart commandLine) {
-        final Collection<String> result =
-                this.getScript(commandLine, (s, s2) -> "set \"" + s + "=" + s2 + "\"", "set \"JAVA_OPTS=%JAVA_OPTS% ");
-        result.add(this.createScript(commandLine, "robozonky.bat"));
+    private Collection<String> getCommonScript(final CommandLinePart commandLine,
+                                               final BiFunction<String, String, String> envConverter,
+                                               final String javaOptsPrefix, final String scriptName) {
+        final Collection<String> result = this.getScript(commandLine, envConverter, javaOptsPrefix);
+        result.add(this.createScript(commandLine, scriptName));
         return result;
+    }
+
+    private Collection<String> getWindowsScript(final CommandLinePart commandLine) {
+        return this.getCommonScript(commandLine, (s, s2) -> "set \"" + s + "=" + s2 + "\"",
+                                    "set \"JAVA_OPTS=%JAVA_OPTS% ", "robozonky.bat");
+
     }
 
     private Collection<String> getUnixScript(final CommandLinePart commandLine) {
         final Collection<String> result = new ArrayList<>();
         result.add("#!/bin/bash");
-        result.addAll(this.getScript(commandLine, (s, s2) -> s + "=\"" + s2 + "\"",
-                "JAVA_OPTS=\"$JAVA_OPTS "));
-        // make script executable
-        result.add(this.createScript(commandLine, "robozonky.sh"));
+        result.addAll(this.getCommonScript(commandLine, (s, s2) -> "export " + s + "=\"" + s2 + "\"",
+                                           "export JAVA_OPTS=\"$JAVA_OPTS ", "robozonky.sh"));
         return result;
     }
 
