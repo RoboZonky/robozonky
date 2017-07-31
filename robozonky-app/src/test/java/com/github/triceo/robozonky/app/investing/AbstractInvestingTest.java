@@ -17,9 +17,7 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -32,6 +30,7 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
@@ -59,20 +58,25 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
     }
 
     protected static LoanDescriptor mockLoanDescriptor() {
-        return AbstractInvestingTest.mockLoanDescriptor(Duration.ofSeconds(30));
+        return AbstractInvestingTest.mockLoanDescriptor(AbstractInvestingTest.RANDOM.nextInt());
     }
 
     protected static LoanDescriptor mockLoanDescriptor(final int loanId) {
-        return AbstractInvestingTest.mockLoanDescriptor(loanId, Duration.ofSeconds(30));
+        return AbstractInvestingTest.mockLoanDescriptor(loanId, true);
     }
 
-    protected static LoanDescriptor mockLoanDescriptor(final TemporalAmount captchaDelay) {
-        return AbstractInvestingTest.mockLoanDescriptor(AbstractInvestingTest.RANDOM.nextInt(), captchaDelay);
+    protected static LoanDescriptor mockLoanDescriptorWithoutCaptcha() {
+        return AbstractInvestingTest.mockLoanDescriptor(AbstractInvestingTest.RANDOM.nextInt(), false);
     }
 
-    protected static LoanDescriptor mockLoanDescriptor(final int loanId, final TemporalAmount captchaDelay) {
+    protected static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
         final Loan loan = AbstractInvestingTest.mockLoan(loanId);
-        return new LoanDescriptor(loan, captchaDelay);
+        if (withCaptcha) {
+            Mockito.when(loan.getRating()).thenReturn(Rating.D);
+        } else {
+            Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
+        }
+        return new LoanDescriptor(loan);
     }
 
     protected static ApiProvider harmlessApi(final Zonky zonky) {

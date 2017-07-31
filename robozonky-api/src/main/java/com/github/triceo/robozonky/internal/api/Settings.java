@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,15 @@ public enum Settings {
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
         DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
         DEFAULTS_DRY_RUN_BALANCE("robozonky.default.dry_run_balance"),
-        DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size");
+        DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size"),
+        CAPTCHA_DELAY_AAAAA("robozonky.aaaaa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AAAA("robozonky.aaaa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AAA("robozonky.aaa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AA("robozonky.aa_loan_protection_seconds"),
+        CAPTCHA_DELAY_A("robozonky.a_loan_protection_seconds"),
+        CAPTCHA_DELAY_B("robozonky.b_loan_protection_seconds"),
+        CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
+        CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds");
 
         private final String name;
 
@@ -119,8 +128,22 @@ public enum Settings {
         });
     }
 
+    public <T> T get(final String key, final Function<String, T> adapter, final T defaultValue) {
+        return get(key, value -> {
+            if (value == null) {
+                return defaultValue;
+            } else {
+                return adapter.apply(value);
+            }
+        });
+    }
+
     public boolean get(final String key) {
         return get(key, Boolean::parseBoolean);
+    }
+
+    public <T> T get(final Settings.Key key, final Function<String, T> adapter, final T defaultValue) {
+        return get(key.getName(), adapter, defaultValue);
     }
 
     public <T> T get(final Settings.Key key, final Function<String, T> adapter) {
@@ -165,6 +188,33 @@ public enum Settings {
 
     public TemporalAmount getConnectionTimeout() {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 60));
+    }
+
+    private Settings.Key getRatingKey(final Rating r) {
+        switch (r) {
+            case AAAAA:
+                return Settings.Key.CAPTCHA_DELAY_AAAAA;
+            case AAAA:
+                return Settings.Key.CAPTCHA_DELAY_AAAA;
+            case AAA:
+                return Settings.Key.CAPTCHA_DELAY_AAA;
+            case AA:
+                return Settings.Key.CAPTCHA_DELAY_AA;
+            case A:
+                return Settings.Key.CAPTCHA_DELAY_A;
+            case B:
+                return Settings.Key.CAPTCHA_DELAY_B;
+            case C:
+                return Settings.Key.CAPTCHA_DELAY_C;
+            case D:
+                return Settings.Key.CAPTCHA_DELAY_D;
+            default:
+                throw new IllegalStateException("Impossible");
+        }
+    }
+
+    public TemporalAmount getCaptchaDelay(final Rating r) {
+        return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Integer.parseInt(delay)), r.getCaptchaDelay());
     }
 
     public TemporalAmount getCaptchaDelay() {

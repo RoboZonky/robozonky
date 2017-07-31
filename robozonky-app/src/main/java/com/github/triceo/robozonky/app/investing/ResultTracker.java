@@ -48,7 +48,7 @@ class ResultTracker {
         return loans.stream()
                 .filter(l -> l.getRemainingInvestment() >= Defaults.MINIMUM_INVESTMENT_IN_CZK)
                 .filter(l -> investmentsMade.stream().noneMatch(i -> i.getLoanId() == l.getId()))
-                .map(l -> new LoanDescriptor(l, ResultTracker.CAPTCHA_DELAY))
+                .map(LoanDescriptor::new)
                 .collect(Collectors.toList());
     }
 

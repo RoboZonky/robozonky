@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +24,6 @@ import java.util.Optional;
 import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.common.remote.Zonky;
@@ -153,8 +151,11 @@ public class InvestorTest extends AbstractInvestingTest {
     private static final int CONFIRMED_AMOUNT = (int) (InvestorTest.LOAN_AMOUNT / 2);
 
     private static LoanDescriptor mockLoanDescriptor(final boolean protectByCaptcha) {
-        final Loan loan = AbstractInvestingTest.mockLoan();
-        return new LoanDescriptor(loan, protectByCaptcha ? Duration.ofHours(1) : Duration.ZERO);
+        if (protectByCaptcha) {
+            return AbstractInvestingTest.mockLoanDescriptor();
+        } else {
+            return AbstractInvestingTest.mockLoanDescriptorWithoutCaptcha();
+        }
     }
 
     @Parameterized.Parameter

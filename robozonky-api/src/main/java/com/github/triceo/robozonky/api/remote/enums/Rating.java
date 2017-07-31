@@ -17,16 +17,20 @@
 package com.github.triceo.robozonky.api.remote.enums;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import com.github.triceo.robozonky.internal.api.Settings;
 
 public enum Rating implements BaseEnum {
 
     // it is imperative for proper functioning of strategy algorithms that ratings here be ordered best to worst
-    AAAAA("A**", new BigDecimal("0.025")),
-    AAAA("A*", new BigDecimal("0.034")),
-    AAA("A++", new BigDecimal("0.042")),
-    AA("A+", new BigDecimal("0.058")),
+    AAAAA("A**", new BigDecimal("0.025"), Duration.ZERO),
+    AAAA("A*", new BigDecimal("0.034"), Duration.ZERO),
+    AAA("A++", new BigDecimal("0.042"), Duration.ZERO),
+    AA("A+", new BigDecimal("0.058"), Duration.ZERO),
     A("A", new BigDecimal("0.074")),
     B("B", new BigDecimal("0.089")),
     C("C", new BigDecimal("0.099")),
@@ -41,11 +45,21 @@ public enum Rating implements BaseEnum {
 
     private final String code;
     private final BigDecimal expectedYield;
+    private final TemporalAmount captchaDelay;
 
     // TODO somehow reflect change on expected yield post-August 2017
     Rating(final String code, final BigDecimal expectedYield) {
+        this(code, expectedYield, Settings.INSTANCE.getCaptchaDelay());
+    }
+
+    Rating(final String code, final BigDecimal expectedYield, final TemporalAmount captchaDelay) {
         this.code = code;
         this.expectedYield = expectedYield;
+        this.captchaDelay = captchaDelay;
+    }
+
+    public TemporalAmount getCaptchaDelay() {
+        return captchaDelay;
     }
 
     @Override

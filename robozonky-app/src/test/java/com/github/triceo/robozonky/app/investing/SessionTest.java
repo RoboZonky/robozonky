@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -116,7 +115,7 @@ public class SessionTest extends AbstractInvestingTest {
         final Zonky z = AbstractInvestingTest.harmlessZonky(200);
         // run test
         final int amount = 200;
-        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(Duration.ZERO);
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptorWithoutCaptcha();
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
         try (final Session it = Session.create(new Investor.Builder(), z, lds)) {
             it.invest(ld.recommend(amount).get());

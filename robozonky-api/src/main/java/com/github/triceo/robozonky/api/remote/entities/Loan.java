@@ -59,7 +59,7 @@ public class Loan extends BaseEntity {
     private String name, nickName, story, url;
     private BigDecimal interestRate = BigDecimal.ZERO;
     private OffsetDateTime datePublished, deadline = OffsetDateTime.MAX;
-    private Rating rating;
+    private Rating rating = Rating.D;
     private Collection<Photo> photos = Collections.emptyList();
     private BigDecimal investmentRate = BigDecimal.ZERO;
     private MyInvestment myInvestment;

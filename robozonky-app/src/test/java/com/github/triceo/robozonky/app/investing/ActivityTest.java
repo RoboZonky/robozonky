@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import org.assertj.core.api.Assertions;
@@ -47,6 +48,7 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
         // load API that has marketplace more recent than that, but makes sure not to come within the closed period
         final Loan l = Mockito.mock(Loan.class);
+        Mockito.when(l.getRating()).thenReturn(Rating.D);
         Mockito.when(l.getDatePublished()).thenReturn(timestamp.plus(10, ChronoUnit.MINUTES));
         Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
         final LoanDescriptor ld = new LoanDescriptor(l);
@@ -70,11 +72,13 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
         // load API that has marketplace within the closed period
         final Loan activeLoan = Mockito.mock(Loan.class);
         Mockito.when(activeLoan.getId()).thenReturn(1);
+        Mockito.when(activeLoan.getRating()).thenReturn(Rating.C); // captcha
         Mockito.when(activeLoan.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
         Mockito.when(activeLoan.getRemainingInvestment()).thenReturn(1000.0);
         final Loan ignoredLoan = Mockito.mock(Loan.class);
+        Mockito.when(ignoredLoan.getRating()).thenReturn(Rating.AAAAA); // no captcha
         Mockito.when(ignoredLoan.getId()).thenReturn(2);
-        Mockito.when(ignoredLoan.getDatePublished()).thenReturn(timestamp.plus(1, ChronoUnit.SECONDS));
+        Mockito.when(ignoredLoan.getDatePublished()).thenReturn(timestamp);
         Mockito.when(ignoredLoan.getRemainingInvestment()).thenReturn(100.0); // not enough => ignored
         // there is nothing to do, so the app should fall asleep...
         final Activity activity =

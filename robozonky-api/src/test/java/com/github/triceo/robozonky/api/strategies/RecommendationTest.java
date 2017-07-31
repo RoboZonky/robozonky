@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -36,7 +35,7 @@ public class RecommendationTest {
 
     private static LoanDescriptor mockLoanDescriptor() {
         final Loan loan = RecommendationTest.mockLoan();
-        return new LoanDescriptor(loan, Duration.ofSeconds(30));
+        return new LoanDescriptor(loan);
     }
 
     @Test
