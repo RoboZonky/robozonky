@@ -28,7 +28,7 @@
   <name>RoboZonky Extension: Rule-based investment strategy</name>
 
   <properties>
-    <version.org.drools>7.0.0.Beta8</version.org.drools>
+    <version.org.drools>7.1.0.Final</version.org.drools>
   </properties>
 
   <dependencies>
