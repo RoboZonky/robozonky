@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -160,7 +159,7 @@ public class SimpleInvestmentStategyTest {
     }
 
     private static LoanDescriptor getLoanDescriptor(final Loan l) {
-        return new LoanDescriptor(l, Duration.ofSeconds(100));
+        return new LoanDescriptor(l);
     }
 
     @Test

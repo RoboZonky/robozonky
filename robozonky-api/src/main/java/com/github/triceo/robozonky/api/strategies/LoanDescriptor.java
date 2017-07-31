@@ -16,8 +16,8 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,6 +25,7 @@ import java.util.Optional;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,28 +37,26 @@ public final class LoanDescriptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanDescriptor.class);
 
     private final Loan loan;
-    private final OffsetDateTime captchaExpirationDateTime;
-
-    public LoanDescriptor(final Loan loan, final TemporalAmount captchaProtectionDuration) {
-        this.loan = loan;
-        this.captchaExpirationDateTime = loan.getDatePublished().plus(captchaProtectionDuration);
-    }
 
     public LoanDescriptor(final Loan loan) {
-        this(loan, Duration.ZERO);
+        this.loan = loan;
     }
 
     public Loan getLoan() {
-        return this.loan;
+        return loan;
     }
 
     /**
      * If protected by CAPTCHA, gives the first instant when the CAPTCHA protection is over.
-     *
-     * @return Present if loan protected by CAPTCHA (= currently always), otherwise empty.
+     * @return Present if loan protected by CAPTCHA, otherwise empty.
      */
     public Optional<OffsetDateTime> getLoanCaptchaProtectionEndDateTime() {
-        return Optional.of(captchaExpirationDateTime);
+        final TemporalAmount captchaDelay = Settings.INSTANCE.getCaptchaDelay(loan.getRating());
+        if (captchaDelay.get(ChronoUnit.SECONDS) == 0) {
+            return Optional.empty();
+        } else {
+            return Optional.of(loan.getDatePublished().plus(captchaDelay));
+        }
     }
 
     /**
@@ -71,8 +70,8 @@ public final class LoanDescriptor {
         if (amount >= Defaults.MINIMUM_INVESTMENT_IN_CZK && amount <= loan.getRemainingInvestment()) {
             return Optional.of(new Recommendation(this, amount, confirmationRequired));
         } else {
-            LoanDescriptor.LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
-                    loan.getRemainingInvestment(), loan.getId());
+            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
+                        loan.getRemainingInvestment(), loan.getId());
             return Optional.empty();
         }
     }
@@ -89,8 +88,8 @@ public final class LoanDescriptor {
 
     @Override
     public String toString() {
-        return "LoanDescriptorImpl{" + "loan=" + loan +
-                ", captchaExpirationDateTime=" + captchaExpirationDateTime +
+        return "LoanDescriptor{" +
+                "loan=" + loan +
                 '}';
     }
 

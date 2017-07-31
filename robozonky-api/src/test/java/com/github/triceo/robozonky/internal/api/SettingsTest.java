@@ -16,8 +16,10 @@
 
 package com.github.triceo.robozonky.internal.api;
 
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,10 +39,13 @@ public class SettingsTest {
             softly.assertThat(Settings.INSTANCE.isDebugEventStorageEnabled()).isFalse();
             softly.assertThat(Settings.INSTANCE.getTokenRefreshBeforeExpirationInSeconds()).isEqualTo(60);
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshIntervalInMinutes()).isEqualTo(5);
-            softly.assertThat(Settings.INSTANCE.getCaptchaDelayInSeconds()).isEqualTo(120);
+            softly.assertThat(Settings.INSTANCE.getCaptchaDelay().get(ChronoUnit.SECONDS)).isEqualTo(120);
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout()).isNotNull();
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout()).isNotNull();
+            for (final Rating r : Rating.values()) {
+                softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r)).isEqualTo(r.getCaptchaDelay());
+            }
         });
     }
 

@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.strategy.rules;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -102,7 +101,7 @@ public class RuleBasedInvestmentStrategyServiceTest {
         Mockito.when(portfolio.getShareOnInvestment(Rating.AAA)).thenReturn(BigDecimal.ONE);
         // check investing logic
         final Map<Loan, LoanDescriptor> loans = Stream.of(aaaaa, aaaa, aaa, aa, b, c, d)
-                .collect(Collectors.toMap(Function.identity(), l -> new LoanDescriptor(l, Duration.ofSeconds(100))));
+                .collect(Collectors.toMap(Function.identity(), l -> new LoanDescriptor(l)));
         final List<Recommendation> result = is.recommend(loans.values(), portfolio);
         Assertions.assertThat(result).containsOnly(loans.get(d).recommend(200).get(),
                 loans.get(aaaa).recommend(400).get());

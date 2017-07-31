@@ -27,8 +27,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.internal.api.State;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
+import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +142,7 @@ class Activity {
     private void persist(final boolean hasUnactionableLoans) {
         // make sure the unactionable loans are never included in the time the marketplace was last checked
         final OffsetDateTime result = hasUnactionableLoans ?
-                OffsetDateTime.now().minus(Duration.from(ResultTracker.CAPTCHA_DELAY).plus(Duration.ofSeconds(30)))
+                OffsetDateTime.now().minus(Settings.INSTANCE.getCaptchaDelay()).plus(Duration.ofSeconds(30))
                 : OffsetDateTime.now();
         if (hasUnactionableLoans) {
             Activity.LOGGER.debug("New marketplace last checked time placed before beginning of closed season: {}.",

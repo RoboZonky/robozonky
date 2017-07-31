@@ -16,8 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.time.Duration;
-import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,15 +25,12 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.internal.api.Defaults;
-import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class ResultTracker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultTracker.class);
-    static final TemporalAmount CAPTCHA_DELAY =
-            Duration.ofSeconds(Settings.INSTANCE.getCaptchaDelayInSeconds());
 
     /**
      * We are using volatile so that the write operation is guaranteed to be atomic.
@@ -50,7 +45,7 @@ class ResultTracker {
         return loans.stream()
                 .filter(l -> l.getRemainingInvestment() >= Defaults.MINIMUM_INVESTMENT_IN_CZK)
                 .filter(l -> investmentsMade.stream().noneMatch(i -> i.getLoanId() == l.getId()))
-                .map(l -> new LoanDescriptor(l, ResultTracker.CAPTCHA_DELAY))
+                .map(LoanDescriptor::new)
                 .collect(Collectors.toList());
     }
 

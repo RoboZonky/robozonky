@@ -16,12 +16,13 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -30,8 +31,13 @@ import org.mockito.Mockito;
 public class LoanDescriptorTest {
 
     private static Loan mockLoan() {
+        return mockLoan(Rating.D);
+    }
+
+    private static Loan mockLoan(final Rating r) {
         final Loan mockedLoan = Mockito.mock(Loan.class);
         Mockito.when(mockedLoan.getId()).thenReturn(1);
+        Mockito.when(mockedLoan.getRating()).thenReturn(r);
         Mockito.when(mockedLoan.getAmount()).thenReturn(2000.0);
         Mockito.when(mockedLoan.getRemainingInvestment()).thenReturn(1000.0);
         Mockito.when(mockedLoan.getDatePublished()).thenReturn(OffsetDateTime.now());
@@ -39,32 +45,42 @@ public class LoanDescriptorTest {
     }
 
     @Test
-    public void constructor() {
+    public void constructorForCaptcha() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
-        final LoanDescriptor ld = new LoanDescriptor(mockedLoan, Duration.ofSeconds(0));
+        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(ld.getLoan()).isSameAs(mockedLoan);
         softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime())
                 .isPresent()
-                .contains(mockedLoan.getDatePublished());
+                .contains(mockedLoan.getDatePublished().plus(Settings.INSTANCE.getCaptchaDelay()));
         softly.assertAll();
+    }
+
+    @Test
+    public void constructorForCaptchaLess() {
+        final Loan mockedLoan = LoanDescriptorTest.mockLoan(Rating.AAAAA);
+        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(ld.getLoan()).isSameAs(mockedLoan);
+            softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime()).isEmpty();
+        });
     }
 
     @Test
     public void equalsSelf() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
-        final LoanDescriptor ld = new LoanDescriptor(mockedLoan, Duration.ofSeconds(100));
+        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         Assertions.assertThat(ld)
                 .isNotEqualTo(null)
                 .isEqualTo(ld);
-        final LoanDescriptor ld2 = new LoanDescriptor(mockedLoan, Duration.ofSeconds(100));
+        final LoanDescriptor ld2 = new LoanDescriptor(mockedLoan);
         Assertions.assertThat(ld).isEqualTo(ld2);
     }
 
     @Test
     public void recommendAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
-        final LoanDescriptor ld = new LoanDescriptor(mockedLoan, Duration.ofSeconds(100));
+        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<Recommendation> r = ld.recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK);
         Assertions.assertThat(r).isPresent();
         final Recommendation recommendation = r.get();
@@ -79,7 +95,7 @@ public class LoanDescriptorTest {
     @Test
     public void recommendWrongAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
-        final LoanDescriptor ld = new LoanDescriptor(mockedLoan, Duration.ofSeconds(100));
+        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<Recommendation> r = ld.recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
         Assertions.assertThat(r).isEmpty();
     }

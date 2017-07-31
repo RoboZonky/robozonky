@@ -33,6 +33,7 @@ import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.app.authentication.AuthenticationHandler;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
@@ -100,6 +101,7 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
+        Mockito.when(l.getRating()).thenReturn(Rating.D);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
         Mockito.when(l.getDatePublished()).thenReturn(OffsetDateTime.now());
         Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
@@ -158,6 +160,7 @@ public class SingleShotInvestmentModeTest extends AbstractInvestingTest {
         Mockito.when(p.oauth()).thenReturn(Mockito.mock(ApiProvider.ApiWrapper.class));
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getId()).thenReturn(1);
+        Mockito.when(l.getRating()).thenReturn(Rating.D);
         Mockito.when(l.getAmount()).thenReturn(10000.0);
         Mockito.when(l.getDatePublished()).thenReturn(OffsetDateTime.now());
         Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);

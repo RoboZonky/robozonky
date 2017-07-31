@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +33,6 @@ import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.remote.ZonkyApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -110,7 +108,7 @@ public class SessionTest extends AbstractInvestingTest {
     @Test
     public void makeInvestment() {
         final int amount = 200;
-        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(Duration.ZERO);
+        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptorWithoutCaptcha();
         final ZonkyApi a = SessionTest.mockApi(10_000);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
         try (final Session it = Session.create(new ZonkyProxy.Builder().build(a), lds)) {
