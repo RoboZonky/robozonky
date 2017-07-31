@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.triceo.robozonky</groupId>
   <artifactId>robozonky</artifactId>
-  <version>3.3.0</version>
+  <version>3.3.1-SNAPSHOT</version>
   <modules>
     <module>robozonky-api</module>
     <module>robozonky-strategy-simple</module>
@@ -463,7 +463,7 @@
     <url>git@github.com:triceo/robozonky.git</url>
     <connection>scm:git:git@github.com:triceo/robozonky.git</connection>
     <developerConnection>scm:git:git@github.com:triceo/robozonky.git</developerConnection>
-    <tag>robozonky-3.3.0</tag>
+    <tag>robozonky-3.2.0</tag>
   </scm>
   <issueManagement>
     <system>github</system>
