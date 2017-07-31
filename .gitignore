@@ -11,3 +11,6 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 /robozonky-extensions/robozonky-strategy-rules/src/test/resources/com/github/triceo/robozonky/strategy/rules/.~lock.ExampleStrategy.xlsx#
+**/robozonky.cli
+**/robozonky.keystore
+**/robozonky.state
