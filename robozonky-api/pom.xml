@@ -336,13 +336,6 @@
                     "package": "com.github.triceo.robozonky.api.remote.enums",
                     "classSimpleName": "InvestmentStatuses",
                     "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method void com.github.triceo.robozonky.api.strategies.LoanDescriptor::<init>(com.github.triceo.robozonky.api.remote.entities.Loan, java.time.temporal.TemporalAmount)",
-                    "package": "com.github.triceo.robozonky.api.strategies",
-                    "classSimpleName": "LoanDescriptor",
-                    "methodName": "<init>",
-                    "justification": "No longer relevant, as CAPTCHA is now enabled per-rating."
                   }
                 ]
               }
