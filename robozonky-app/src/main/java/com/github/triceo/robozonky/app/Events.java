@@ -133,7 +133,7 @@ public enum Events {
         final Class<E> eventClass = (Class<E>) event.getClass();
         Events.LOGGER.debug("Firing {}.", eventClass);
         Events.INSTANCE.getListeners(eventClass).parallel().forEach(l -> Events.fire(event, l, Events.SESSION_INFO));
-        Events.LOGGER.trace("Fired.");
+        Events.LOGGER.trace("Fired {}.", event);
         if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
             Events.EVENTS_FIRED.add(event);
         }
