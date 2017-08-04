@@ -73,6 +73,12 @@ public class Zonky implements AutoCloseable {
         });
     }
 
+    public void purchase(final Participation participation) {
+        controlApi.execute(api -> {
+            api.purchase(participation.getId(), NumberUtil.toCurrency(participation.getRemainingPrincipal()));
+        });
+    }
+
     public void sell(final Investment investment) {
         controlApi.execute(api -> {
             api.offer(investment.getId(), NumberUtil.toCurrency(investment.getRemainingPrincipal()),

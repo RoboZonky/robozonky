@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -28,7 +29,7 @@ public class Participation {
     private OffsetDateTime deadline, nextPaymentDate;
     private int id, investmentId, loanId, originalInstalmentCount, remainingInstalmentCount, userId;
     private MainIncomeType incomeType;
-    private double interestRate, remainingPrincipal;
+    private BigDecimal interestRate, remainingPrincipal;
     private String loanName;
     private Purpose purpose;
     private Rating rating;
@@ -80,12 +81,12 @@ public class Participation {
     }
 
     @XmlElement
-    public double getInterestRate() {
+    public BigDecimal getInterestRate() {
         return interestRate;
     }
 
     @XmlElement
-    public double getRemainingPrincipal() {
+    public BigDecimal getRemainingPrincipal() {
         return remainingPrincipal;
     }
 

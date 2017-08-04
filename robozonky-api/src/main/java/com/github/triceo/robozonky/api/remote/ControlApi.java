@@ -51,9 +51,13 @@ public interface ControlApi {
     void offer(@FormParam("id") int id, @FormParam("remainingPrincipal") double remainingPrincipal,
                @FormParam("feeAmount") double feeAmount);
 
+    @POST
+    @Path("/smp/investments/{id}")
+    void purchase(@PathParam("id") int id, @FormParam("amount") double amount);
+
     @DELETE
-    @Path("/traded-investments/{loanId}")
-    void cancel(@PathParam("loanId") int id);
+    @Path("/traded-investments/{id}")
+    void cancel(@PathParam("id") int id);
 
 }
 
