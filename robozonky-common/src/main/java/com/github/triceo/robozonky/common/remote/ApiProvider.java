@@ -21,12 +21,14 @@ import java.util.Collection;
 import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
 import com.github.triceo.robozonky.api.remote.LoanApi;
+import com.github.triceo.robozonky.api.remote.ParticipationApi;
 import com.github.triceo.robozonky.api.remote.PortfolioApi;
 import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
@@ -92,8 +94,8 @@ public class ApiProvider {
     }
 
     public Zonky authenticated(final ZonkyApiToken token) {
-        return new Zonky(this.control(token), this.marketplace(token), this.portfolio(token),
-                         this.wallet(token));
+        return new Zonky(this.control(token), this.marketplace(token), this.secondaryMarketplace(token),
+                         this.portfolio(token), this.wallet(token));
     }
 
     /**
@@ -103,6 +105,15 @@ public class ApiProvider {
      */
     private PaginatedApi<Loan, LoanApi> marketplace(final ZonkyApiToken token) {
         return this.obtainPaginated(LoanApi.class, ApiProvider.ZONKY_URL, token);
+    }
+
+    /**
+     * Retrieve user-specific Zonky participation API which requires authentication.
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     */
+    private PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final ZonkyApiToken token) {
+        return this.obtainPaginated(ParticipationApi.class, ApiProvider.ZONKY_URL, token);
     }
 
     /**
