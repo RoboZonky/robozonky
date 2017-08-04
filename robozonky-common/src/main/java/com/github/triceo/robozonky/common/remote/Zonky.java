@@ -51,7 +51,7 @@ public class Zonky implements AutoCloseable {
           final PaginatedApi<Participation, ParticipationApi> participations,
           final PaginatedApi<Investment, PortfolioApi> portfolio,
           final PaginatedApi<BlockedAmount, WalletApi> wallet) {
-        if (control == null || loans == null || portfolio == null || wallet == null) {
+        if (control == null || loans == null || participations == null || portfolio == null || wallet == null) {
             throw new IllegalArgumentException("No API may be null.");
         }
         this.controlApi = control;

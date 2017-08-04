@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +29,9 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.api.strategies.Recommendation;
 import com.github.triceo.robozonky.strategy.natural.DefaultInvestmentShare;
 import com.github.triceo.robozonky.strategy.natural.DefaultPortfolio;
 import com.github.triceo.robozonky.strategy.natural.DefaultValues;
@@ -138,7 +142,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
             return f;
         }).forEach(filters::add);
         final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, filters);
-        return new NaturalLanguageInvestmentStrategy(p);
+        final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);
+        return new SimpleInvestmentStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);
     }
 
     @Override
@@ -150,6 +155,21 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         } catch (final Exception ex) {
             SimpleInvestmentStrategyService.LOGGER.debug("Failed converting to a natural strategy. May be OK.", ex);
             return Optional.empty();
+        }
+    }
+
+    private static final class ExclusivelyPrimaryMarketplaceInvestmentStrategy implements InvestmentStrategy {
+
+        private final InvestmentStrategy child;
+
+        public ExclusivelyPrimaryMarketplaceInvestmentStrategy(final InvestmentStrategy child) {
+            this.child = child;
+        }
+
+        @Override
+        public List<Recommendation> recommend(final Collection<LoanDescriptor> availableLoans,
+                                              final PortfolioOverview portfolio) {
+            return child.recommend(availableLoans, portfolio);
         }
     }
 }

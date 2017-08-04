@@ -202,4 +202,9 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         }
         return Optional.of(new int[]{minimumInvestment, maximumInvestment});
     }
+
+    @Override
+    public boolean supportsSecondaryMarketplace() {
+        return true;
+    }
 }

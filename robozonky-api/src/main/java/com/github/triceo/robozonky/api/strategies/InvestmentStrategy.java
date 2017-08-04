@@ -54,4 +54,12 @@ public interface InvestmentStrategy {
                                             final PortfolioOverview portfolio) {
         return recommend(availableLoans, portfolio).stream();
     }
+
+    /**
+     * Whether or not this strategy supports the secondary marketplace.
+     * @return By default, returns false for backwards compatibility reasons.
+     */
+    default boolean supportsSecondaryMarketplace() {
+        return false;
+    }
 }
