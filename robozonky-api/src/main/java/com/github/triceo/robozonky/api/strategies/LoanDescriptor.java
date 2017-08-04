@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Carries metadata regarding a {@link Loan}.
  */
-public final class LoanDescriptor {
+public final class LoanDescriptor implements Descriptor<Recommendation, LoanDescriptor, Loan> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanDescriptor.class);
 
@@ -40,10 +41,6 @@ public final class LoanDescriptor {
 
     public LoanDescriptor(final Loan loan) {
         this.loan = loan;
-    }
-
-    public Loan getLoan() {
-        return loan;
     }
 
     /**
@@ -57,33 +54,6 @@ public final class LoanDescriptor {
         } else {
             return Optional.of(loan.getDatePublished().plus(captchaDelay));
         }
-    }
-
-    /**
-     * Convert the descriptor into an actual investment recommendation. This will be executed by the
-     * {@link InvestmentStrategy}.
-     * @param amount The amount recommended to invest.
-     * @param confirmationRequired Whether or not {@link ConfirmationProvider} is required to confirm the investment.
-     * @return Empty if amount is out of bounds.
-     */
-    public Optional<Recommendation> recommend(final int amount, final boolean confirmationRequired) {
-        if (amount >= Defaults.MINIMUM_INVESTMENT_IN_CZK && amount <= loan.getRemainingInvestment()) {
-            return Optional.of(new Recommendation(this, amount, confirmationRequired));
-        } else {
-            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
-                        loan.getRemainingInvestment(), loan.getId());
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Convert the descriptor into an actual investment recommendation. This will be executed by the
-     * {@link InvestmentStrategy}.
-     * @param amount The amount recommended to invest.
-     * @return The value returned by {@link #recommend(int, boolean)}, where the last argument is false.
-     */
-    public Optional<Recommendation> recommend(final int amount) {
-        return recommend(amount, false);
     }
 
     @Override
@@ -108,5 +78,33 @@ public final class LoanDescriptor {
     @Override
     public int hashCode() {
         return Objects.hash(loan);
+    }
+
+    @Override
+    public Loan item() {
+        return loan;
+    }
+
+    /**
+     * Convert the descriptor into an actual investment recommendation. This will be executed by the
+     * {@link InvestmentStrategy}.
+     * @param toInvest The amount recommended to invest.
+     * @param confirmationRequired Whether or not {@link ConfirmationProvider} is required to confirm the investment.
+     * @return Empty if amount is out of bounds.
+     */
+    public Optional<Recommendation> recommend(final BigDecimal toInvest, final boolean confirmationRequired) {
+        final int amount = toInvest.intValue();
+        if (amount >= Defaults.MINIMUM_INVESTMENT_IN_CZK && amount <= loan.getRemainingInvestment()) {
+            return Optional.of(new Recommendation(this, amount, confirmationRequired));
+        } else {
+            LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
+                        loan.getRemainingInvestment(), loan.getId());
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<Recommendation> recommend(final BigDecimal toInvest) {
+        return recommend(toInvest, false);
     }
 }

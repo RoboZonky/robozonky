@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
@@ -25,7 +26,7 @@ import com.github.triceo.robozonky.internal.api.Defaults;
 /**
  * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link Loan} for investing.
  */
-public final class Recommendation {
+public final class Recommendation implements Recommended<Recommendation, LoanDescriptor, Loan> {
 
     private final LoanDescriptor loanDescriptor;
     private final int recommendedInvestmentAmount;
@@ -48,21 +49,6 @@ public final class Recommendation {
      */
     public boolean isConfirmationRequired() {
         return confirmationRequired;
-    }
-
-    /**
-     * Describes the loan this recommendation relates to.
-     * @return
-     */
-    public LoanDescriptor getLoanDescriptor() {
-        return loanDescriptor;
-    }
-
-    /**
-     * @return The amount recommended to invest.
-     */
-    public int getRecommendedInvestmentAmount() {
-        return recommendedInvestmentAmount;
     }
 
     @Override
@@ -90,5 +76,15 @@ public final class Recommendation {
                 ", recommendedInvestmentAmount=" + recommendedInvestmentAmount +
                 ", confirmationRequired=" + confirmationRequired +
                 '}';
+    }
+
+    @Override
+    public LoanDescriptor descriptor() {
+        return loanDescriptor;
+    }
+
+    @Override
+    public BigDecimal amount() {
+        return BigDecimal.valueOf(recommendedInvestmentAmount);
     }
 }
