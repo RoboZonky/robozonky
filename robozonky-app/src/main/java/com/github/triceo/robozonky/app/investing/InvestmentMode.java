@@ -25,17 +25,11 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 public interface InvestmentMode extends Supplier<Optional<Collection<Investment>>>,
                                         AutoCloseable {
 
-    default boolean isFaultTolerant() {
-        return false;
-    }
+    boolean isFaultTolerant();
 
-    default boolean isDryRun() {
-        return false;
-    }
+    boolean isDryRun();
 
-    default String getUsername() {
-        return "";
-    }
+    String getUsername();
 
     @Override
     default void close() throws Exception {

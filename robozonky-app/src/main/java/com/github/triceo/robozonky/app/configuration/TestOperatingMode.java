@@ -37,6 +37,21 @@ class TestOperatingMode extends OperatingMode {
                                                          final Investor.Builder builder) {
         return Optional.of(new InvestmentMode() {
 
+            @Override
+            public boolean isFaultTolerant() {
+                return false;
+            }
+
+            @Override
+            public boolean isDryRun() {
+                return false;
+            }
+
+            @Override
+            public String getUsername() {
+                return "";
+            }
+
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
             @Override

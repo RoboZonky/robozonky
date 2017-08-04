@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
@@ -40,8 +42,12 @@ import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.delinquency.DelinquencyUpdater;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 import com.github.triceo.robozonky.util.Scheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DaemonInvestmentMode extends AbstractInvestmentMode {
+public class DaemonInvestmentMode implements InvestmentMode {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
 
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO =
@@ -52,28 +58,33 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         return Duration.ofMinutes(secondBetweenChecks); // multiply by 60
     }
 
+    private final Investor.Builder builder;
+    private final Authenticated authenticated;
+    private final boolean isFaultTolerant;
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor =
             Executors.newScheduledThreadPool(2, DaemonInvestmentMode.THREAD_FACTORY);
     private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
     private final SuddenDeathDetection suddenDeath;
-    private final CountDownLatch blockUntilZero;
+    private final CountDownLatch circuitBreaker;
     private final Thread shutdownHook;
 
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
                                 final Marketplace marketplace, final Refreshable<InvestmentStrategy> strategy,
                                 final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
-        super(auth, builder, isFaultTolerant);
-        this.blockUntilZero =
+        this.authenticated = auth;
+        this.builder = builder;
+        this.isFaultTolerant = isFaultTolerant;
+        this.circuitBreaker =
                 DaemonInvestmentMode.BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
-        this.shutdownHook = new DaemonShutdownHook(blockUntilZero);
+        this.shutdownHook = new DaemonShutdownHook(circuitBreaker);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
         this.refreshableStrategy = strategy;
         this.marketplace = marketplace;
         this.maximumSleepPeriod = maximumSleepPeriod;
         this.periodBetweenChecks = periodBetweenChecks;
-        this.suddenDeath = new SuddenDeathDetection(blockUntilZero,
+        this.suddenDeath = new SuddenDeathDetection(circuitBreaker,
                                                     DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
         // FIXME move to a more appropriate place
         Scheduler.BACKGROUND_SCHEDULER.submit(new DelinquencyUpdater(auth), Duration.ofHours(1));
@@ -85,15 +96,39 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
 
     @Override
     public Optional<Collection<Investment>> get() {
-        /*
-         * in tests, the number of available permits may get over 1 as the semaphore is released multiple times.
-         * let's make sure we always acquire all the available permits, no matter what the actual number is.
-         */
-        return execute(blockUntilZero);
+        LOGGER.trace("Executing.");
+        try {
+            final ResultTracker buffer = new ResultTracker();
+            final Consumer<Collection<Loan>> investor = (loans) -> {
+                final Collection<LoanDescriptor> descriptors = buffer.acceptLoansFromMarketplace(loans);
+                final Collection<Investment> result = getInvestor().apply(descriptors);
+                buffer.acceptInvestmentsFromRobot(result);
+            };
+            openMarketplace(investor);
+            if (circuitBreaker != null) { // daemon mode requires special handling
+                LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
+                circuitBreaker.await();
+                LOGGER.trace("Request to stop received.");
+                if (this.suddenDeath.isSuddenDeath()) {
+                    throw new SuddenDeathException();
+                }
+            }
+            return Optional.of(buffer.getInvestmentsMade());
+        } catch (final SuddenDeathException ex) {
+            LOGGER.error("Thread stack traces:");
+            Thread.getAllStackTraces().forEach((key, value) -> {
+                LOGGER.error("Stack trace for thread {}: {}", key, Stream.of(value)
+                        .map(StackTraceElement::toString)
+                        .collect(Collectors.joining(System.lineSeparator())));
+            });
+            throw new IllegalStateException(ex);
+        } catch (final Exception ex) {
+            LOGGER.error("Failed executing investments.", ex);
+            return Optional.empty();
+        }
     }
 
-    @Override
-    protected void openMarketplace(final Consumer<Collection<Loan>> target) {
+    private void openMarketplace(final Consumer<Collection<Loan>> target) {
         marketplace.registerListener(target);
         final Runnable marketplaceCheck = () -> {
             try {
@@ -124,14 +159,23 @@ public class DaemonInvestmentMode extends AbstractInvestmentMode {
         }
     }
 
-    @Override
-    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
-        return new StrategyExecution(getInvestorBuilder(), refreshableStrategy, getAuthenticated(), maximumSleepPeriod);
+    private Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
+        return new StrategyExecution(builder, refreshableStrategy, authenticated, maximumSleepPeriod);
     }
 
     @Override
-    protected boolean wasSuddenDeath() {
-        return suddenDeath.isSuddenDeath();
+    public boolean isFaultTolerant() {
+        return isFaultTolerant;
+    }
+
+    @Override
+    public boolean isDryRun() {
+        return builder.isDryRun();
+    }
+
+    @Override
+    public String getUsername() {
+        return authenticated.getSecretProvider().getUsername();
     }
 
     @Override

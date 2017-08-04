@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app.investing;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -27,37 +26,57 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DirectInvestmentMode extends AbstractInvestmentMode {
+public class DirectInvestmentMode implements InvestmentMode {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectInvestmentMode.class);
 
     private final int loanId, loanAmount;
+    private final Authenticated authenticated;
+    private final Investor.Builder builder;
+    private final boolean isFaultTolerant;
 
     public DirectInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
                                 final int loanId, final int loanAmount) {
-        super(auth, builder, isFaultTolerant);
+        this.authenticated = auth;
+        this.builder = builder;
+        this.isFaultTolerant = isFaultTolerant;
         this.loanId = loanId;
         this.loanAmount = loanAmount;
     }
 
     @Override
-    protected void openMarketplace(final Consumer<Collection<Loan>> target) {
-        target.accept(Collections.emptyList());
-    }
-
-    @Override
-    protected Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
-        final Function<Zonky, Collection<Investment>> op = (zonky) -> {
-            final Loan l = zonky.getLoan(loanId);
-            final LoanDescriptor d = new LoanDescriptor(l);
-            return d.recommend(loanAmount, false)
-                    .map(r -> Session.invest(getInvestorBuilder(), zonky, new DirectInvestmentCommand(r)))
-                    .orElse(Collections.emptyList());
-        };
-        return (marketplace) -> this.getAuthenticated().call(op);
-    }
-
-    @Override
     public Optional<Collection<Investment>> get() {
-        return this.execute(null);
+        LOGGER.trace("Executing.");
+        try {
+            final Function<Zonky, Collection<Investment>> op = (zonky) -> {
+                final Loan l = zonky.getLoan(loanId);
+                final LoanDescriptor d = new LoanDescriptor(l);
+                return d.recommend(loanAmount, false)
+                        .map(r -> Session.invest(builder, zonky, new DirectInvestmentCommand(r)))
+                        .orElse(Collections.emptyList());
+            };
+            return Optional.of(authenticated.call(op));
+        } catch (final Exception ex) {
+            LOGGER.error("Failed executing investments.", ex);
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public boolean isFaultTolerant() {
+        return isFaultTolerant;
+    }
+
+    @Override
+    public boolean isDryRun() {
+        return builder.isDryRun();
+    }
+
+    @Override
+    public String getUsername() {
+        return authenticated.getSecretProvider().getUsername();
     }
 }
