@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.strategy.natural;
+package com.github.triceo.robozonky.strategy.natural.conditions;
 
-import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
+import java.util.function.Predicate;
 
-class BorrowerIncomeCondition extends AbstractEnumeratedCondition<Wrapper, MainIncomeType>
-        implements JointMarketplaceFilterCondition {
+public interface Condition<T> extends Predicate<T> {
 
-    public BorrowerIncomeCondition() {
-        super(Wrapper::getMainIncomeType);
-    }
 }

@@ -20,15 +20,15 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Region;
 import org.mockito.Mockito;
 
-public class BorrowerRegionConditionTest extends AbstractEnumeratedConditionTest<Region> {
+public class BorrowerRegionConditionTest extends AbstractEnumeratedConditionTest<Loan, Region> {
 
     @Override
-    protected AbstractEnumeratedCondition<Region> getSUT() {
+    protected AbstractEnumeratedCondition<Loan, Region> getSUT() {
         return new BorrowerRegionCondition();
     }
 
     @Override
-    protected Loan getMockedLoan() {
+    protected Loan getMocked() {
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getRegion()).thenReturn(this.getTriggerItem());
         return loan;

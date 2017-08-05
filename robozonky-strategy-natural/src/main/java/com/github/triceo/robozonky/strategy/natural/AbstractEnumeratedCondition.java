@@ -21,14 +21,15 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.strategy.natural.conditions.EnumeratedCondition;
 
-class AbstractEnumeratedCondition<T> extends MarketplaceFilterCondition {
+class AbstractEnumeratedCondition<S, T> extends MarketplaceFilterConditionImpl<S>
+        implements MarketplaceFilterCondition<S> {
 
-    private final Function<Loan, T> fieldRetriever;
+    private final Function<S, T> fieldRetriever;
     private final Collection<T> possibleValues = new LinkedHashSet<>(0);
 
-    protected AbstractEnumeratedCondition(final Function<Loan, T> fieldRetriever) {
+    protected AbstractEnumeratedCondition(final Function<S, T> fieldRetriever) {
         this.fieldRetriever = fieldRetriever;
     }
 
@@ -41,13 +42,12 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterCondition {
     }
 
     @Override
-    protected Optional<String> getDescription() {
+    public Optional<String> getDescription() {
         return Optional.of("Possible values: " + possibleValues + '.');
     }
 
     @Override
-    public boolean test(final Loan loan) {
-        final T match = fieldRetriever.apply(loan);
-        return possibleValues.contains(match);
+    public boolean test(final S item) {
+        return new EnumeratedCondition<>(fieldRetriever, possibleValues).test(item);
     }
 }

@@ -18,10 +18,10 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Optional;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-class LoanRatingBetterOrEqualCondition extends MarketplaceFilterCondition {
+class LoanRatingBetterOrEqualCondition extends MarketplaceFilterConditionImpl<Wrapper>
+        implements JointMarketplaceFilterCondition {
 
     private final Rating worstPossibleRating;
 
@@ -33,12 +33,12 @@ class LoanRatingBetterOrEqualCondition extends MarketplaceFilterCondition {
     }
 
     @Override
-    protected Optional<String> getDescription() {
+    public Optional<String> getDescription() {
         return Optional.of("Threshold: " + worstPossibleRating + ".");
     }
 
     @Override
-    public boolean test(final Loan loan) {
-        return loan.getRating().compareTo(worstPossibleRating) <= 0;
+    public boolean test(final Wrapper item) {
+        return item.getRating().compareTo(worstPossibleRating) <= 0;
     }
 }

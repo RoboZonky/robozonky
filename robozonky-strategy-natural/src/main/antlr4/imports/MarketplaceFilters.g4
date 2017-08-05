@@ -16,54 +16,55 @@ marketplaceFilterExpression returns [Collection<MarketplaceFilter> result]:
     )+
 ;
 
-jointMarketplaceFilter returns [JointMarketplaceFilter result]:
-    { $result = new JointMarketplaceFilter(); }
-    'Ignorovat úvěr i participaci, kde: ' r=jointMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
+jointMarketplaceFilter returns [MarketplaceFilter result]:
+    { $result = new MarketplaceFilter(); }
+    'Ignorovat vše, kde: ' r=jointMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
     ('(Ale ne když: ' s=jointMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
-primaryMarketplaceFilter returns [PrimaryMarketplaceFilter result]:
-    { $result = new PrimaryMarketplaceFilter(); }
+primaryMarketplaceFilter returns [MarketplaceFilter result]:
+    { $result = new MarketplaceFilter(); }
     'Ignorovat úvěr, kde: ' r=primaryMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
     ('(Ale ne když: ' s=primaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
-secondaryMarketplaceFilter returns [SecondaryMarketplaceFilter result]:
-    { $result = new SecondaryMarketplaceFilter(); }
+secondaryMarketplaceFilter returns [MarketplaceFilter result]:
+    { $result = new MarketplaceFilter(); }
     'Ignorovat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
     ('(Ale ne když: ' s=secondaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
-jointMarketplaceFilterConditions returns [Collection<JointMarketplaceFilterCondition> result]:
-    { Collection<JointMarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+jointMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
+    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
     (c1=primaryMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=primaryMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
-primaryMarketplaceFilterConditions returns [Collection<PrimaryMarketplaceFilterCondition> result]:
-    { Collection<PrimaryMarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+primaryMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
+    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
     (c1=primaryMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=primaryMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
-secondaryMarketplaceFilterConditions returns [Collection<SecondaryMarketplaceFilterCondition> result]:
-    { Collection<SecondaryMarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+secondaryMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
+    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
     (c1=secondaryMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=secondaryMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
-jointMarketplaceFilterCondition returns [JointMarketplaceFilterCondition result]:
+jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c2=ratingCondition { $result = $c2.result; }
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c6=termCondition { $result = $c6.result; }
+    | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
 ;
 
-primaryMarketplaceFilterCondition returns [PrimaryMarketplaceFilterCondition result]:
+primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     c1=regionCondition { $result = $c1.result; }
     | c2=ratingCondition { $result = $c2.result; }
     | c3=incomeCondition { $result = $c3.result; }
@@ -74,40 +75,28 @@ primaryMarketplaceFilterCondition returns [PrimaryMarketplaceFilterCondition res
     | c8=interestCondition { $result = $c8.result; }
 ;
 
-secondaryMarketplaceFilterCondition returns [SecondaryMarketplaceFilterCondition result]:
+secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     c2=ratingCondition { $result = $c2.result; }
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c6=termCondition { $result = $c6.result; }
+    | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
-    | c9=remainingTermCondition { $result = $c9.result; }
-    | c10=remainingAmountCondition { $result = $c10.result; }
 ;
 
 regionCondition returns [PrimaryMarketplaceFilterCondition result]:
-    { $result = new BorrowerRegionCondition(); }
+    { BorrowerRegionCondition c = new BorrowerRegionCondition(); }
     'kraj klienta ' IS (
         (
-            r1=regionExpression OR_COMMA { $result.add($r1.result); }
+            r1=regionExpression OR_COMMA { c.add($r1.result); }
         )*
-        r2=regionExpression OR { $result.add($r2.result); }
+        r2=regionExpression OR { c.add($r2.result); }
     )?
-    r3=regionExpression { $result.add($r3.result); }
+    r3=regionExpression { c.add($r3.result); }
+    { $result = c; }
 ;
 
-ratingCondition returns [JointMarketplaceFilterCondition result]:
-    'rating ' IS (
-        ( r1=ratingEnumeratedExpression
-            {
-                $result = new LoanRatingEnumeratedCondition();
-                $result.add($r1.result);
-            })
-        | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterOrEqualCondition($r2.result); })
-        | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseOrEqualCondition($r3.result); })
-    )
-;
-
-incomeCondition returns [JointBorrowerIncomeCondition result]:
+incomeCondition returns [BorrowerIncomeCondition result]:
     { $result = new BorrowerIncomeCondition(); }
     'klient ' IS (
         (
@@ -118,7 +107,7 @@ incomeCondition returns [JointBorrowerIncomeCondition result]:
     i3=incomeExpression { $result.add($i3.result); }
 ;
 
-purposeCondition returns [JointLoanPurposeCondition result]:
+purposeCondition returns [LoanPurposeCondition result]:
     { $result = new LoanPurposeCondition(); }
     'účel ' IS (
         (
@@ -129,7 +118,7 @@ purposeCondition returns [JointLoanPurposeCondition result]:
     p3=purposeExpression { $result.add($p3.result); }
 ;
 
-storyCondition returns [PrimaryMarketplaceFilterCondition result]:
+storyCondition returns [AbstractStoryCondition result]:
     'příběh ' IS (
         'velmi krátký' { $result = new VeryShortStoryCondition(); }
         | 'kratší než průměrný' { $result = new ShortStoryCondition(); }
@@ -138,7 +127,7 @@ storyCondition returns [PrimaryMarketplaceFilterCondition result]:
     )
 ;
 
-termCondition returns [JointMarketplaceFilterCondition result]:
+termCondition returns [LoanTermCondition result]:
     'délka ' (
         (c1 = termConditionRangeOpen { $result = $c1.result; })
         | (c2 = termConditionRangeClosedLeft { $result = $c2.result; })
@@ -146,30 +135,22 @@ termCondition returns [JointMarketplaceFilterCondition result]:
     ) ' měsíců'
 ;
 
-termConditionRangeOpen returns [JointMarketplaceFilterCondition result]:
+termConditionRangeOpen returns [LoanTermCondition result]:
     IS min=INTEGER UP_TO max=INTEGER
     { $result = new LoanTermCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
 ;
 
-termConditionRangeClosedLeft returns [JointMarketplaceFilterCondition result]:
+termConditionRangeClosedLeft returns [LoanTermCondition result]:
     MORE_THAN min=INTEGER
     { $result = new LoanTermCondition(Integer.parseInt($min.getText()) + 1); }
 ;
 
-termConditionRangeClosedRight returns [JointMarketplaceFilterCondition result]:
+termConditionRangeClosedRight returns [LoanTermCondition result]:
     LESS_THAN max=INTEGER
     { $result = new LoanTermCondition(0, Integer.parseInt($max.getText()) - 1); }
 ;
 
-remainingTermCondition returns [SecondaryMarketplaceFilterCondition result]:
-    'zbývající délka ' (
-        (c1 = termConditionRangeOpen { $result = $c1.result; })
-        | (c2 = termConditionRangeClosedLeft { $result = $c2.result; })
-        | (c3 = termConditionRangeClosedRight { $result = $c3.result; })
-    ) ' měsíců'
-;
-
-interestCondition returns [JointMarketplaceFilterCondition result]:
+interestCondition returns [LoanInterestRateCondition result]:
     'úrok ' (
         (c1 = interestConditionRangeOpen { $result = $c1.result; })
         | (c2 = interestConditionRangeClosedLeft { $result = $c2.result; })
@@ -177,22 +158,22 @@ interestCondition returns [JointMarketplaceFilterCondition result]:
     ) ' % p.a' DOT? // last dot is optional, so that it is possible to end sentence like "p.a." and not "p.a.."
 ;
 
-interestConditionRangeOpen returns [JointMarketplaceFilterCondition result]:
+interestConditionRangeOpen returns [LoanInterestRateCondition result]:
     IS min=floatExpression UP_TO max=floatExpression
     { $result = new LoanInterestRateCondition($min.result, $max.result); }
 ;
 
-interestConditionRangeClosedLeft returns [JointMarketplaceFilterCondition result]:
+interestConditionRangeClosedLeft returns [LoanInterestRateCondition result]:
     MORE_THAN min=floatExpression
     { $result = new LoanInterestRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
 ;
 
-interestConditionRangeClosedRight returns [JointMarketplaceFilterCondition result]:
+interestConditionRangeClosedRight returns [LoanInterestRateCondition result]:
     LESS_THAN max=floatExpression
     { $result = new LoanInterestRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
 ;
 
-amountCondition returns [PrimaryMarketplaceFilterCondition result]:
+amountCondition returns [LoanAmountCondition result]:
     'výše ' (
         (c1 = amountConditionRangeOpen { $result = $c1.result; })
         | (c2 = amountConditionRangeClosedLeft { $result = $c2.result; })
@@ -200,25 +181,17 @@ amountCondition returns [PrimaryMarketplaceFilterCondition result]:
     ) ' ' KC
 ;
 
-amountConditionRangeOpen returns [PrimaryMarketplaceFilterCondition result]:
+amountConditionRangeOpen returns [LoanAmountCondition result]:
     IS min=INTEGER UP_TO max=INTEGER
     { $result = new LoanAmountCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
 ;
 
-amountConditionRangeClosedLeft returns [PrimaryMarketplaceFilterCondition result]:
+amountConditionRangeClosedLeft returns [LoanAmountCondition result]:
     MORE_THAN min=INTEGER
     { $result = new LoanAmountCondition(Integer.parseInt($min.getText()) + 1); }
 ;
 
-amountConditionRangeClosedRight returns [PrimaryMarketplaceFilterCondition result]:
+amountConditionRangeClosedRight returns [LoanAmountCondition result]:
     LESS_THAN max=INTEGER
     { $result = new LoanAmountCondition(0, Integer.parseInt($max.getText()) - 1); }
-;
-
-remainingAmountCondition returns [SecondaryMarketplaceFilterCondition result]:
-    'zbývající výše ' (
-        (c1 = amountConditionRangeOpen { $result = $c1.result; })
-        | (c2 = amountConditionRangeClosedLeft { $result = $c2.result; })
-        | (c3 = amountConditionRangeClosedRight { $result = $c3.result; })
-    ) ' ' KC
 ;

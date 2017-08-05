@@ -20,11 +20,11 @@ portfolioExpression returns [DefaultPortfolio result] :
     ) ' portfolio' DOT
 ;
 
-ratingCondition returns [MarketplaceFilterCondition result]:
-    'rating je ' (
+ratingCondition returns [JointMarketplaceFilterCondition result]:
+    'rating ' IS (
         ( r1=ratingEnumeratedExpression
             {
-                AbstractEnumeratedCondition<Rating> c = new LoanRatingEnumeratedCondition();
+                LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
                 c.add($r1.result);
                 $result = c;
             })

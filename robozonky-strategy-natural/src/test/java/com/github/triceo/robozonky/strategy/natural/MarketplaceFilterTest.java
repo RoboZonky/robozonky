@@ -16,60 +16,108 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
 
+@RunWith(Parameterized.class)
 public class MarketplaceFilterTest {
 
-    private static final Supplier<MarketplaceFilterCondition> MATCHING = () -> new MarketplaceFilterCondition() {
+    private static final Supplier<PrimaryMarketplaceFilterCondition> PRIMARY_MATCHING = () -> new
+            PrimaryMarketplaceFilterCondition() {
 
         @Override
         public boolean test(final Loan loan) {
             return true;
         }
     };
-    private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = () -> new MarketplaceFilterCondition() {
+    private static final Supplier<PrimaryMarketplaceFilterCondition> PRIMARY_NOT_MATCHING = () -> new
+            PrimaryMarketplaceFilterCondition() {
+        // this is the default
+    };
+    private static final Supplier<SecondaryMarketplaceFilterCondition> SECONDARY_MATCHING = () -> new
+            SecondaryMarketplaceFilterCondition() {
+
+        @Override
+        public boolean test(final Participation loan) {
+            return true;
+        }
+    };
+    private static final Supplier<SecondaryMarketplaceFilterCondition> SECONDARY_NOT_MATCHING = () -> new
+            SecondaryMarketplaceFilterCondition() {
+        // this is the default
+    };
+    private static final Supplier<JointMarketplaceFilterCondition> JOINT_MATCHING = () -> new
+            JointMarketplaceFilterCondition() {
+
+        @Override
+        public boolean test(final Wrapper loan) {
+            return true;
+        }
+    };
+    private static final Supplier<JointMarketplaceFilterCondition> JOINT_NOT_MATCHING = () -> new
+            JointMarketplaceFilterCondition() {
         // this is the default
     };
 
+    @Parameterized.Parameters
+    public static Collection<Object[]> parameters() {
+        final Collection<Object[]> result = new ArrayList<>();
+        result.add(new Object[]{Mockito.mock(Loan.class), PRIMARY_MATCHING, PRIMARY_NOT_MATCHING});
+        result.add(new Object[]{Mockito.mock(Participation.class), SECONDARY_MATCHING, SECONDARY_NOT_MATCHING});
+        result.add(new Object[]{Mockito.mock(Loan.class), JOINT_MATCHING, JOINT_NOT_MATCHING});
+        result.add(new Object[]{Mockito.mock(Participation.class), JOINT_MATCHING, JOINT_NOT_MATCHING});
+        return result;
+    }
+
+    @Parameterized.Parameter
+    public Object toMatch;
+    @Parameterized.Parameter(1)
+    public Supplier<MarketplaceFilterCondition> matching;
+    @Parameterized.Parameter(2)
+    public Supplier<MarketplaceFilterCondition> notMatching;
+
     @Test
     public void noConditions() {
-        final MarketplaceFilterCondition f = new MarketplaceFilter();
-        Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isTrue();
+        final MarketplaceFilterConditionImpl f = new MarketplaceFilter();
+        Assertions.assertThat(f.test(toMatch)).isTrue();
     }
 
     @Test
     public void oneMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.ignoreWhen(Collections.singletonList(MarketplaceFilterTest.MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isTrue();
+        f.ignoreWhen(Collections.singletonList(matching.get()));
+        Assertions.assertThat(f.test(toMatch)).isTrue();
     }
 
     @Test
     public void notAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.ignoreWhen(Arrays.asList(MarketplaceFilterTest.MATCHING.get(), MarketplaceFilterTest.NOT_MATCHING.get(),
-                                   MarketplaceFilterTest.MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isFalse();
+        f.ignoreWhen(Arrays.asList(matching.get(), notMatching.get(), matching.get()));
+        Assertions.assertThat(f.test(toMatch)).isFalse();
     }
 
     @Test
     public void secondaryOneNotMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.butNotWhen(Collections.singleton(MarketplaceFilterTest.NOT_MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isTrue();
+        f.butNotWhen(Collections.singleton(notMatching.get()));
+        Assertions.assertThat(f.test(toMatch)).isTrue();
     }
 
     @Test
     public void secondaryAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.butNotWhen(Arrays.asList(MarketplaceFilterTest.MATCHING.get(), MarketplaceFilterTest.MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Loan.class))).isFalse();
+        f.butNotWhen(Arrays.asList(matching.get(), matching.get()));
+        Assertions.assertThat(f.test(toMatch)).isFalse();
     }
 }

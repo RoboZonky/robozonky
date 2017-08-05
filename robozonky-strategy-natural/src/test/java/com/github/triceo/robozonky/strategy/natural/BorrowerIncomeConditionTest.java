@@ -20,18 +20,18 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
 import org.mockito.Mockito;
 
-public class BorrowerIncomeConditionTest extends AbstractEnumeratedConditionTest<MainIncomeType> {
+public class BorrowerIncomeConditionTest extends AbstractEnumeratedConditionTest<Wrapper, MainIncomeType> {
 
     @Override
-    protected AbstractEnumeratedCondition<MainIncomeType> getSUT() {
+    protected AbstractEnumeratedCondition<Wrapper, MainIncomeType> getSUT() {
         return new BorrowerIncomeCondition();
     }
 
     @Override
-    protected Loan getMockedLoan() {
+    protected Wrapper getMocked() {
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getMainIncomeType()).thenReturn(this.getTriggerItem());
-        return loan;
+        return new Wrapper(loan);
     }
 
     @Override

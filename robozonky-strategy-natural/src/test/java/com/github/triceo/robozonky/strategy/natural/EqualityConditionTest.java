@@ -54,10 +54,10 @@ public class EqualityConditionTest {
     @Parameterized.Parameter(2)
     public Collection<Rating> worseThanCurrent;
 
-    private Loan mockLoan(final Rating r) {
+    private Wrapper mockLoan(final Rating r) {
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getRating()).thenReturn(r);
-        return l;
+        return new Wrapper(l);
     }
 
     @Test

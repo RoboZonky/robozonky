@@ -16,9 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-
-public class LoanTermCondition extends AbstractRangeCondition {
+public class LoanTermCondition extends AbstractRangeCondition<Wrapper> implements JointMarketplaceFilterCondition {
 
     private static final int MIN_TERM = 0, MAX_TERM = 84;
 
@@ -30,7 +28,7 @@ public class LoanTermCondition extends AbstractRangeCondition {
     }
 
     public LoanTermCondition(final int fromInclusive, final int toInclusive) {
-        super(Loan::getTermInMonths, fromInclusive, toInclusive);
+        super(Wrapper::getRemainingTermInMonths, fromInclusive, toInclusive);
         LoanTermCondition.assertIsInRange(fromInclusive);
         LoanTermCondition.assertIsInRange(toInclusive);
     }

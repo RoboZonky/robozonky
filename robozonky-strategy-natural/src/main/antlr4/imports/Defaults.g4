@@ -43,7 +43,7 @@ targetBalanceExpression returns [int result] :
     {$result = Integer.parseInt($balance.getText());}
 ;
 
-confirmationExpression returns [MarketplaceFilterCondition result] :
+confirmationExpression returns [JointMarketplaceFilterCondition result] :
     'Potvrzovat mobilem investice do úvěrů, kde ' r=ratingCondition DOT
     {$result = $r.result;}
 ;

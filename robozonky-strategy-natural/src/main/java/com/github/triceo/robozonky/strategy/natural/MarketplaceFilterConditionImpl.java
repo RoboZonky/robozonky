@@ -16,25 +16,17 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import java.util.Optional;
-import java.util.function.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public interface MarketplaceFilterCondition<T> extends Predicate<T> {
+public abstract class MarketplaceFilterConditionImpl<T> implements MarketplaceFilterCondition<T> {
 
-    /**
-     * Describe the condition using eg. range boundaries.
-     * @return If present, is a whole sentence. (Starting with capital letter, ending with a full stop.)
-     */
-    default Optional<String> getDescription() {
-        return Optional.empty();
-    }
+    // not static as we want to have the specific impl class in the logs
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    /**
-     * Determine whether or not the item in question matches the condition represented by this class.
-     * @param item Item in question.
-     * @return True if item matches the condition.
-     */
-    default boolean test(final T item) {
-        return false;
+    @Override
+    public String toString() {
+        final String description = getDescription().orElse("N/A.");
+        return this.getClass().getSimpleName() + " (" + description + ")";
     }
 }

@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 
-class AbstractStoryCondition extends MarketplaceFilterCondition {
+class AbstractStoryCondition extends MarketplaceFilterConditionImpl<Loan> implements PrimaryMarketplaceFilterCondition {
 
     // these values were the first and third quartile of story length in all loans between 2016-10-01 and 2017-05-20
     static final int SHORT_STORY_THRESHOLD = 200, LONG_STORY_THRESHOLD = 600;

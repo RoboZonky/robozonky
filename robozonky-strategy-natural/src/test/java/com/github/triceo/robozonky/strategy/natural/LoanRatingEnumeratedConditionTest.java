@@ -20,18 +20,18 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.mockito.Mockito;
 
-public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditionTest<Rating> {
+public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditionTest<Wrapper, Rating> {
 
     @Override
-    protected AbstractEnumeratedCondition<Rating> getSUT() {
+    protected AbstractEnumeratedCondition<Wrapper, Rating> getSUT() {
         return new LoanRatingEnumeratedCondition();
     }
 
     @Override
-    protected Loan getMockedLoan() {
+    protected Wrapper getMocked() {
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getRating()).thenReturn(this.getTriggerItem());
-        return loan;
+        return new Wrapper(loan);
     }
 
     @Override

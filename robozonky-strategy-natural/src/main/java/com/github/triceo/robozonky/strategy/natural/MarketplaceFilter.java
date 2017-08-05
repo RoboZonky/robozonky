@@ -24,8 +24,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 
-public class MarketplaceFilter extends MarketplaceFilterCondition {
+public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
 
     private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
         return conditions.stream()
@@ -36,27 +37,42 @@ public class MarketplaceFilter extends MarketplaceFilterCondition {
     private Collection<MarketplaceFilterCondition> ignoreWhen = Collections.emptySet(),
             butNotWhen = Collections.emptySet();
 
-    public void ignoreWhen(final Collection<MarketplaceFilterCondition> conditions) {
+    public void ignoreWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
         ignoreWhen = new LinkedHashSet<>(conditions);
     }
 
-    public void butNotWhen(final Collection<MarketplaceFilterCondition> conditions) {
+    public void butNotWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
         butNotWhen = new LinkedHashSet<>(conditions);
     }
 
     @Override
-    protected Optional<String> getDescription() {
+    public Optional<String> getDescription() {
         return Optional.of("When [" + toString(ignoreWhen) + "] but not when [" + toString(butNotWhen) + "].");
     }
 
     /**
-     * Whether or not the loan should be filtered out.
-     * @param loan Loan in question.
+     * Whether or not the item should be filtered out.
+     * @param item Item in question.
      * @return True when all the initial conditions return true AND when one or more secondary conditions don't.
      */
     @Override
-    public boolean test(final Loan loan) {
-        final Predicate<MarketplaceFilterCondition> f = c -> c.test(loan);
+    public boolean test(final Object item) {
+        final Predicate<MarketplaceFilterCondition> f = c -> {
+            if (item instanceof Loan) {
+                if (c instanceof JointMarketplaceFilterCondition) {
+                    return c.test(new Wrapper((Loan) item));
+                } else if (c instanceof PrimaryMarketplaceFilterCondition) {
+                    return c.test(item);
+                }
+            } else if (item instanceof Participation) {
+                if (c instanceof JointMarketplaceFilterCondition) {
+                    return c.test(new Wrapper((Participation) item));
+                } else if (c instanceof SecondaryMarketplaceFilterCondition) {
+                    return c.test(item);
+                }
+            }
+            throw new IllegalStateException("Invalid combination: " + item.getClass() + ", " + c.getClass());
+        };
         return ignoreWhen.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
     }
 }

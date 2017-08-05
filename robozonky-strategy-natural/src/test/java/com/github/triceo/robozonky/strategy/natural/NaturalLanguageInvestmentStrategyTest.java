@@ -69,7 +69,7 @@ public class NaturalLanguageInvestmentStrategyTest {
     @Test
     public void noLoansApplicable() {
         final MarketplaceFilter filter = new MarketplaceFilter();
-        filter.ignoreWhen(Collections.singleton(new MarketplaceFilterCondition() {
+        filter.ignoreWhen(Collections.singleton(new PrimaryMarketplaceFilterCondition() {
             @Override
             public boolean test(final Loan loan) {
                 return true;
