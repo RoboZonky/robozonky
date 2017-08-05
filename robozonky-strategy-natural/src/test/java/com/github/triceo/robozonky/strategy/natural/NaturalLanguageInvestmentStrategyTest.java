@@ -119,7 +119,7 @@ public class NaturalLanguageInvestmentStrategyTest {
         final RecommendedLoan r = result.get(0);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.descriptor()).isEqualTo(ld);
-            softly.assertThat(r.amount()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+            softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
             softly.assertThat(r.isConfirmationRequired()).isFalse();
         });
     }
