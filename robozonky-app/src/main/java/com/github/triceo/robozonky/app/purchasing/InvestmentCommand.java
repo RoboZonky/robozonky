@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.app.purchasing;
 
-class SuddenDeathException extends Exception {
+import java.util.Collection;
+import java.util.function.Consumer;
 
+import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+
+interface InvestmentCommand extends Consumer<Session> {
+
+    Collection<LoanDescriptor> getLoans();
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.app.purchasing;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -52,7 +52,8 @@ import org.slf4j.LoggerFactory;
 
 public class DaemonInvestmentMode implements InvestmentMode {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+            DaemonInvestmentMode.class);
 
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO =

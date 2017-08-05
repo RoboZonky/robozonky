@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.app.commons;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;

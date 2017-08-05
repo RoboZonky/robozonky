@@ -18,9 +18,9 @@ package com.github.triceo.robozonky.app.configuration;
 
 import java.util.Optional;
 
+import com.github.triceo.robozonky.app.commons.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
-import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.app.commons;
 
 import java.util.function.Consumer;
 
@@ -25,7 +25,7 @@ import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class DaemonRuntimeExceptionHandler extends RuntimeExceptionHandler {
+public final class DaemonRuntimeExceptionHandler extends RuntimeExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonRuntimeExceptionHandler.class);
 
