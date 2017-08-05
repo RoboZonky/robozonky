@@ -19,9 +19,7 @@ package com.github.triceo.robozonky.strategy.natural;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -147,70 +145,4 @@ public class NaturalLanguageInvestmentStrategyTest {
         Assertions.assertThat(remainder.intValue()).isEqualTo(0);
     }
 
-    private static PortfolioOverview prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
-                                                     final BigDecimal ratingC) {
-        final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
-        Arrays.stream(Rating.values()).forEach(r -> map.put(r, BigDecimal.ZERO));
-        map.put(Rating.A, ratingA);
-        map.put(Rating.B, ratingB);
-        map.put(Rating.C, ratingC);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(map);
-        map.forEach((key, value) ->
-                            Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.eq(key))).thenReturn(value));
-        return portfolio;
-    }
-
-    private static void assertOrder(final Stream<Rating> result, final Rating... ratingsOrderedDown) {
-        assertOrder(result.collect(Collectors.toList()), ratingsOrderedDown);
-    }
-
-    private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
-        final Rating first = result.get(0);
-        final Rating last = result.get(ratingsOrderedDown.length - 1);
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(first).isGreaterThan(last);
-            softly.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
-            softly.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
-        });
-    }
-
-    private static void assertOrder(final Stream<Rating> result, final Rating r) {
-        assertOrder(result.collect(Collectors.toList()), r);
-    }
-
-    private static void assertOrder(final List<Rating> result, final Rating r) {
-        Assertions.assertThat(result.get(0)).isEqualTo(r);
-    }
-
-    @Test
-    public void properRankingOfRatings() {
-        final int targetShareA = 1;
-        final int targetShareB = targetShareA * 5;
-        final int targetShareC = targetShareB * 5;
-
-        final ParsedStrategy parsedStrategy = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
-                                                                 Arrays.asList(
-                                                                         new PortfolioShare(Rating.A, targetShareA,
-                                                                                            targetShareA),
-                                                                         new PortfolioShare(Rating.B, targetShareB,
-                                                                                            targetShareB),
-                                                                         new PortfolioShare(Rating.C, targetShareC,
-                                                                                            targetShareC)),
-                                                                 Collections.emptyList(),
-                                                                 Collections.emptyList());
-        final NaturalLanguageInvestmentStrategy sis = new NaturalLanguageInvestmentStrategy(parsedStrategy);
-
-        // all ratings have zero share; C > B > A
-        PortfolioOverview portfolio = prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        assertOrder(sis.rankRatingsByDemand(portfolio.getSharesOnInvestment()), Rating.C, Rating.B, Rating.A);
-
-        // A only; B, C overinvested
-        portfolio = prepareShareMap(BigDecimal.ZERO, BigDecimal.valueOf(10), BigDecimal.valueOf(30));
-        assertOrder(sis.rankRatingsByDemand(portfolio.getSharesOnInvestment()), Rating.A);
-
-        // B > C > A
-        portfolio = prepareShareMap(BigDecimal.valueOf(0.0099), BigDecimal.ZERO, BigDecimal.valueOf(0.249));
-        assertOrder(sis.rankRatingsByDemand(portfolio.getSharesOnInvestment()), Rating.B, Rating.C, Rating.A);
-    }
 }

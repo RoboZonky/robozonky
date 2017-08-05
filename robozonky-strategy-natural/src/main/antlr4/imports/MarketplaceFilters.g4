@@ -60,7 +60,6 @@ jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c6=termCondition { $result = $c6.result; }
-    | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
 ;
 
@@ -80,7 +79,6 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c3=incomeCondition { $result = $c3.result; }
     | c4=purposeCondition { $result = $c4.result; }
     | c6=termCondition { $result = $c6.result; }
-    | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
 ;
 

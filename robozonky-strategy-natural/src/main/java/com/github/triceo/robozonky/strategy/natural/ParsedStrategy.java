@@ -24,9 +24,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,15 +121,20 @@ public class ParsedStrategy {
         }
     }
 
-    private boolean matchesNoFilter(final Loan loan) {
+    private boolean matchesNoFilter(final Object loan, final int loanId) {
         return !marketplaceFilters.stream()
                 .filter(f -> f.test(loan))
-                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", loan.getId(), f))
+                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", loanId, f))
                 .findFirst()
                 .isPresent();
     }
 
-    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> loans) {
-        return loans.stream().filter(l -> matchesNoFilter(l.item()));
+    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
+        return items.stream().filter(i -> matchesNoFilter(i.item(), i.item().getId()));
+    }
+
+    public Stream<ParticipationDescriptor> getApplicableParticipations(
+            final Collection<ParticipationDescriptor> items) {
+        return items.stream().filter(i -> matchesNoFilter(i.item(), i.item().getLoanId()));
     }
 }

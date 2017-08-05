@@ -21,11 +21,8 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,28 +66,6 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         this.strategy = p;
     }
 
-    Stream<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
-        final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
-        // put the ratings into buckets based on how much we're missing them
-        currentShare.forEach((r, currentRatingShare) -> {
-            final int fromStrategy = strategy.getMaximumShare(r);
-            final BigDecimal maximumAllowedShare = BigDecimal.valueOf(fromStrategy)
-                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_EVEN);
-            final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
-            if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
-                return;
-            }
-            mostWantedRatings.compute(undershare, (k, v) -> {
-                if (v == null) {
-                    return EnumSet.of(r);
-                }
-                v.add(r);
-                return v;
-            });
-        });
-        return mostWantedRatings.values().stream().flatMap(Collection::stream);
-    }
-
     private boolean isAcceptable(final PortfolioOverview portfolio) {
         final int balance = portfolio.getCzkAvailable();
         if (balance < strategy.getMinimumBalance()) {
@@ -126,7 +101,7 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
         // and now return recommendations in the order in which investment should be attempted
         final int balance = portfolio.getCzkAvailable();
-        return this.rankRatingsByDemand(relevantPortfolio)
+        return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
                     return splitByRating.get(rating).stream()
                             .sorted(NaturalLanguageInvestmentStrategy.getLoanComparator());

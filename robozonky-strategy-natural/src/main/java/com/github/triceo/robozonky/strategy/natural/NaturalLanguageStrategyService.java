@@ -79,6 +79,12 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     @Override
     public Optional<PurchaseStrategy> toPurchase(final InputStream strategy) {
-        return Optional.empty(); // FIXME implement
+        try { // FIXME share parsed
+            final ParsedStrategy s = NaturalLanguageStrategyService.parseWithAntlr(strategy);
+            return Optional.of(new NaturalLanguagePurchaseStrategy(s));
+        } catch (final Exception ex) {
+            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
+            return Optional.empty();
+        }
     }
 }

@@ -31,7 +31,6 @@ public class Wrapper {
     private final Purpose purpose;
     private final Rating rating;
     private final int remainingTermInMonths;
-    private final BigDecimal remainingAmount;
 
     public Wrapper(final Loan loan) {
         this.mainIncomeType = loan.getMainIncomeType();
@@ -39,7 +38,6 @@ public class Wrapper {
         this.purpose = loan.getPurpose();
         this.rating = loan.getRating();
         this.remainingTermInMonths = loan.getTermInMonths();
-        this.remainingAmount = BigDecimal.valueOf(loan.getAmount());
     }
 
     public Wrapper(final Participation participation) {
@@ -48,7 +46,6 @@ public class Wrapper {
         this.purpose = participation.getPurpose();
         this.rating = participation.getRating();
         this.remainingTermInMonths = participation.getRemainingInstalmentCount();
-        this.remainingAmount = participation.getRemainingPrincipal();
     }
 
     public MainIncomeType getMainIncomeType() {
@@ -69,9 +66,5 @@ public class Wrapper {
 
     public int getRemainingTermInMonths() {
         return remainingTermInMonths;
-    }
-
-    public BigDecimal getRemainingAmount() {
-        return remainingAmount;
     }
 }
