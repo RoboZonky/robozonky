@@ -27,8 +27,4 @@
   <name>RoboZonky Extension: Parent POM</name>
   <packaging>pom</packaging>
 
-  <modules>
-    <module>robozonky-strategy-rules</module>
-  </modules>
-
 </project>
