@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.common.extensions.InvestmentStrategyLoader;
+import com.github.triceo.robozonky.common.extensions.StrategyLoader;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.util.Scheduler;
 
@@ -74,6 +74,6 @@ final class RefreshableInvestmentStrategy extends Refreshable<InvestmentStrategy
 
     @Override
     protected Optional<InvestmentStrategy> transform(final String source) {
-        return InvestmentStrategyLoader.load(source);
+        return StrategyLoader.toInvest(source);
     }
 }

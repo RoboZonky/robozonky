@@ -46,7 +46,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -166,8 +166,8 @@ class Session implements AutoCloseable {
         allInvestments = Session.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         loansStillAvailable = marketplace.stream()
                 .filter(l -> state.getDiscardedLoans().stream()
-                        .noneMatch(l2 -> l.getLoan().getId() == l2.getLoan().getId()))
-                .filter(l -> allInvestments.stream().noneMatch(i -> l.getLoan().getId() == i.getLoanId()))
+                        .noneMatch(l2 -> l.item().getId() == l2.item().getId()))
+                .filter(l -> allInvestments.stream().noneMatch(i -> l.item().getId() == i.getLoanId()))
                 .collect(Collectors.toList());
         portfolioOverview = new Refreshable<PortfolioOverview>() {
 
@@ -224,16 +224,16 @@ class Session implements AutoCloseable {
      * @return True if investment successful. The investment is reflected in {@link #getInvestmentsMade()}.
      * @throws IllegalStateException When already {@link #close()}d.
      */
-    public synchronized boolean invest(final Recommendation recommendation) {
+    public synchronized boolean invest(final RecommendedLoan recommendation) {
         this.ensureOpen();
-        final LoanDescriptor loan = recommendation.getLoanDescriptor();
-        final int loanId = loan.getLoan().getId();
-        if (balance.intValue() < recommendation.getRecommendedInvestmentAmount()) {
+        final LoanDescriptor loan = recommendation.descriptor();
+        final int loanId = loan.item().getId();
+        if (balance.intValue() < recommendation.amount().intValue()) {
             // should not be allowed by the calling code
             return false;
         }
         Events.fire(new InvestmentRequestedEvent(recommendation));
-        final boolean seenBefore = state.getSeenLoans().stream().anyMatch(l -> l.getLoan().getId() == loanId);
+        final boolean seenBefore = state.getSeenLoans().stream().anyMatch(l -> l.item().getId() == loanId);
         final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         Session.LOGGER.debug("Response for loan {}: {}.", loanId, response);
         final String providerId = investor.getConfirmationProviderId().orElse("-");
@@ -263,7 +263,7 @@ class Session implements AutoCloseable {
                 return false;
             case INVESTED:
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
-                final Investment i = new Investment(recommendation.getLoanDescriptor().getLoan(), confirmedAmount);
+                final Investment i = new Investment(recommendation.descriptor().item(), confirmedAmount);
                 this.markSuccessfulInvestment(i);
                 Events.fire(new InvestmentMadeEvent(i, balance.intValue(), investor.isDryRun()));
                 return true;
@@ -278,7 +278,7 @@ class Session implements AutoCloseable {
     private synchronized void markSuccessfulInvestment(final Investment i) {
         this.allInvestments.add(i);
         this.investmentsMadeNow.add(i);
-        this.loansStillAvailable.removeIf(l -> l.getLoan().getId() == i.getLoanId());
+        this.loansStillAvailable.removeIf(l -> l.item().getId() == i.getLoanId());
         this.balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
         portfolioOverview.run(); // refresh portfolio overview
     }

@@ -47,8 +47,8 @@ class Investments implements InvestmentsMBean {
 
     void addDelegatedInvestment(final InvestmentDelegatedEvent event) {
         this.delegatedInvestments.put(
-                event.getRecommendation().getLoanDescriptor().getLoan().getId(),
-                event.getRecommendation().getRecommendedInvestmentAmount());
+                event.getRecommendation().descriptor().item().getId(),
+                event.getRecommendation().amount().intValue());
     }
 
     @Override
@@ -58,8 +58,8 @@ class Investments implements InvestmentsMBean {
 
     void addRejectedInvestment(final InvestmentRejectedEvent event) {
         this.rejectedInvestments.put(
-                event.getRecommendation().getLoanDescriptor().getLoan().getId(),
-                event.getRecommendation().getRecommendedInvestmentAmount());
+                event.getRecommendation().descriptor().item().getId(),
+                event.getRecommendation().amount().intValue());
     }
 
     @Override

@@ -81,7 +81,7 @@ class Activity {
      */
     private boolean hasLoansNewerThan(final OffsetDateTime instant) {
         return this.recentLoansDescending.stream()
-                .anyMatch(l -> l.getLoan().getDatePublished().isAfter(instant));
+                .anyMatch(l -> l.item().getDatePublished().isAfter(instant));
     }
 
     private boolean hasUnactionableLoans() {

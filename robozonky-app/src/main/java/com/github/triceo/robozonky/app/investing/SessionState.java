@@ -38,7 +38,7 @@ class SessionState {
     private static Stream<LoanDescriptor> findLoanWithId(final int loanId,
                                                          final Collection<LoanDescriptor> knownLoans) {
         final Optional<LoanDescriptor> maybeLoan =
-                knownLoans.stream().filter(loan -> loan.getLoan().getId() == loanId).findFirst();
+                knownLoans.stream().filter(loan -> loan.item().getId() == loanId).findFirst();
         return maybeLoan.map(Stream::of).orElse(Stream.empty());
     }
 
@@ -65,7 +65,7 @@ class SessionState {
     private static void writeInvestments(final String propertyName,
                                          final Collection<LoanDescriptor> rejectedInvestments) {
         final String result = rejectedInvestments.stream()
-                .map(l -> l.getLoan().getId())
+                .map(l -> l.item().getId())
                 .distinct()
                 .sorted()
                 .map(String::valueOf)

@@ -82,7 +82,7 @@
 
   <build>
     <plugins>
-      <plugin>
+      <!-- plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
         <version>0.8.0</version>
@@ -349,7 +349,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin !--> <!-- FIXME reenable -->
     </plugins>
   </build>
 

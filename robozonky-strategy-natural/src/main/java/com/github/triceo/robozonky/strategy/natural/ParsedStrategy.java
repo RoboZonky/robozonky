@@ -70,7 +70,7 @@ public class ParsedStrategy {
     }
 
     public boolean needsConfirmation(final LoanDescriptor loan) {
-        return defaults.needsConfirmation(loan.getLoan());
+        return defaults.needsConfirmation(loan.item());
     }
 
     public int getMinimumBalance() {
@@ -130,6 +130,6 @@ public class ParsedStrategy {
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> loans) {
-        return loans.stream().filter(l -> matchesNoFilter(l.getLoan()));
+        return loans.stream().filter(l -> matchesNoFilter(l.item()));
     }
 }

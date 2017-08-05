@@ -21,17 +21,18 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
+import com.github.triceo.robozonky.api.strategies.SellStrategy;
+import com.github.triceo.robozonky.api.strategies.StrategyService;
 import com.github.triceo.robozonky.strategy.natural.DefaultInvestmentShare;
 import com.github.triceo.robozonky.strategy.natural.DefaultPortfolio;
 import com.github.triceo.robozonky.strategy.natural.DefaultValues;
@@ -47,9 +48,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Deprecated
-public class SimpleInvestmentStrategyService implements InvestmentStrategyService {
+public class SimpleStrategyService implements StrategyService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInvestmentStrategyService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStrategyService.class);
 
     private static int getMinimumBalance(final ImmutableConfiguration config) {
         return StrategyFileProperty.MINIMUM_BALANCE.getValue(config::getInt)
@@ -64,8 +65,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
     private static int getInvestmentShare(final ImmutableConfiguration config) {
         return Stream.of(Rating.values())
                 .mapToInt(r ->
-                                  SimpleInvestmentStrategyService.getShare(config,
-                                                                           StrategyFileProperty.MAXIMUM_LOAN_SHARE, r))
+                                  SimpleStrategyService.getShare(config,
+                                                                 StrategyFileProperty.MAXIMUM_LOAN_SHARE, r))
                 .distinct()
                 .min() // natural strategy only allows for one such value; let's pick the smallest available for safety
                 .orElseThrow(() -> new IllegalStateException("Maximum loan share is missing"));
@@ -81,9 +82,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         final ImmutableConfiguration config = ImmutableConfiguration.from(strategy);
         // set default values
         final DefaultValues d = new DefaultValues(DefaultPortfolio.EMPTY);
-        d.setMinimumBalance(SimpleInvestmentStrategyService.getMinimumBalance(config));
-        d.setTargetPortfolioSize(SimpleInvestmentStrategyService.getTargetPortfolioSize(config));
-        d.setInvestmentShare(new DefaultInvestmentShare(SimpleInvestmentStrategyService.getInvestmentShare(config)));
+        d.setMinimumBalance(SimpleStrategyService.getMinimumBalance(config));
+        d.setTargetPortfolioSize(SimpleStrategyService.getTargetPortfolioSize(config));
+        d.setInvestmentShare(new DefaultInvestmentShare(SimpleStrategyService.getInvestmentShare(config)));
         final LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
         Stream.of(Rating.values())
                 .filter(r -> StrategyFileProperty.REQUIRE_CONFIRMATION.getValue(r, config::getBoolean))
@@ -99,9 +100,9 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         final Collection<PortfolioShare> portfolio = Stream.of(Rating.values())
                 .map(r -> {
                     final int min =
-                            SimpleInvestmentStrategyService.getShare(config, StrategyFileProperty.TARGET_SHARE, r);
+                            SimpleStrategyService.getShare(config, StrategyFileProperty.TARGET_SHARE, r);
                     final int max =
-                            SimpleInvestmentStrategyService.getShare(config, StrategyFileProperty.MAXIMUM_SHARE, r);
+                            SimpleStrategyService.getShare(config, StrategyFileProperty.MAXIMUM_SHARE, r);
                     return new PortfolioShare(r, min, max);
                 }).collect(Collectors.toList());
         final Collection<MarketplaceFilter> filters = new ArrayList<>();
@@ -143,19 +144,29 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         }).forEach(filters::add);
         final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, filters);
         final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);
-        return new SimpleInvestmentStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);
+        return new SimpleStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);
     }
 
     @Override
-    public Optional<InvestmentStrategy> parse(final InputStream strategy) {
+    public Optional<InvestmentStrategy> toInvest(final InputStream strategy) {
         try {
-            final InvestmentStrategy s = SimpleInvestmentStrategyService.parseOrThrow(strategy);
-            SimpleInvestmentStrategyService.LOGGER.warn("You are using a deprecated strategy format!");
+            final InvestmentStrategy s = SimpleStrategyService.parseOrThrow(strategy);
+            SimpleStrategyService.LOGGER.warn("You are using a deprecated strategy format!");
             return Optional.of(s);
         } catch (final Exception ex) {
-            SimpleInvestmentStrategyService.LOGGER.debug("Failed converting to a natural strategy. May be OK.", ex);
+            SimpleStrategyService.LOGGER.debug("Failed converting to a natural strategy. May be OK.", ex);
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<SellStrategy> toSell(final InputStream strategy) {
+        return Optional.empty(); // not supported
+    }
+
+    @Override
+    public Optional<PurchaseStrategy> toPurchase(final InputStream strategy) {
+        return Optional.empty(); // not supported
     }
 
     private static final class ExclusivelyPrimaryMarketplaceInvestmentStrategy implements InvestmentStrategy {
@@ -167,8 +178,8 @@ public class SimpleInvestmentStrategyService implements InvestmentStrategyServic
         }
 
         @Override
-        public List<Recommendation> recommend(final Collection<LoanDescriptor> availableLoans,
-                                              final PortfolioOverview portfolio) {
+        public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> availableLoans,
+                                                 final PortfolioOverview portfolio) {
             return child.recommend(availableLoans, portfolio);
         }
     }

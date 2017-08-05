@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Carries metadata regarding a {@link Loan}.
  */
-public final class LoanDescriptor implements Descriptor<Recommendation, LoanDescriptor, Loan> {
+public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDescriptor, Loan> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanDescriptor.class);
 
@@ -88,14 +88,13 @@ public final class LoanDescriptor implements Descriptor<Recommendation, LoanDesc
     /**
      * Convert the descriptor into an actual investment recommendation. This will be executed by the
      * {@link InvestmentStrategy}.
-     * @param toInvest The amount recommended to invest.
+     * @param amount The amount recommended to invest.
      * @param confirmationRequired Whether or not {@link ConfirmationProvider} is required to confirm the investment.
      * @return Empty if amount is out of bounds.
      */
-    public Optional<Recommendation> recommend(final BigDecimal toInvest, final boolean confirmationRequired) {
-        final int amount = toInvest.intValue();
+    public Optional<RecommendedLoan> recommend(final int amount, final boolean confirmationRequired) {
         if (amount >= Defaults.MINIMUM_INVESTMENT_IN_CZK && amount <= loan.getRemainingInvestment()) {
-            return Optional.of(new Recommendation(this, amount, confirmationRequired));
+            return Optional.of(new RecommendedLoan(this, amount, confirmationRequired));
         } else {
             LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,
                         loan.getRemainingInvestment(), loan.getId());
@@ -103,8 +102,12 @@ public final class LoanDescriptor implements Descriptor<Recommendation, LoanDesc
         }
     }
 
-    @Override
-    public Optional<Recommendation> recommend(final BigDecimal toInvest) {
+    public Optional<RecommendedLoan> recommend(final int toInvest) {
         return recommend(toInvest, false);
+    }
+
+    @Override
+    public Optional<RecommendedLoan> recommend(final BigDecimal toInvest) {
+        return recommend(toInvest.intValue());
     }
 }

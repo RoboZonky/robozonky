@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategyService;
+import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
+import com.github.triceo.robozonky.api.strategies.SellStrategy;
+import com.github.triceo.robozonky.api.strategies.StrategyService;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -32,9 +34,9 @@ import org.antlr.v4.runtime.Recognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NaturalLanguageInvestmentStrategyService implements InvestmentStrategyService {
+public class NaturalLanguageStrategyService implements StrategyService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageInvestmentStrategyService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageStrategyService.class);
 
     private static final ANTLRErrorListener ERROR_LISTENER = new BaseErrorListener() {
 
@@ -55,18 +57,28 @@ public class NaturalLanguageInvestmentStrategyService implements InvestmentStrat
         final CharStream s = CharStreams.fromStream(strategy);
         final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
         final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(new CommonTokenStream(l));
-        p.addErrorListener(NaturalLanguageInvestmentStrategyService.ERROR_LISTENER);
+        p.addErrorListener(NaturalLanguageStrategyService.ERROR_LISTENER);
         return p.primaryExpression().result;
     }
 
     @Override
-    public Optional<InvestmentStrategy> parse(final InputStream strategy) {
+    public Optional<InvestmentStrategy> toInvest(final InputStream strategy) {
         try {
-            final ParsedStrategy s = NaturalLanguageInvestmentStrategyService.parseWithAntlr(strategy);
+            final ParsedStrategy s = NaturalLanguageStrategyService.parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguageInvestmentStrategy(s));
         } catch (final Exception ex) {
-            NaturalLanguageInvestmentStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
+            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<SellStrategy> toSell(final InputStream strategy) {
+        return Optional.empty(); // FIXME implement
+    }
+
+    @Override
+    public Optional<PurchaseStrategy> toPurchase(final InputStream strategy) {
+        return Optional.empty(); // FIXME implement
     }
 }

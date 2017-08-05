@@ -70,7 +70,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                     }
                     StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
                             .peek(l -> Events.fire(new LoanArrivedEvent(l)))
-                            .map(l -> String.valueOf(l.getLoan().getId()))
+                            .map(l -> String.valueOf(l.item().getId()))
                             .collect(Collectors.joining(", ")));
                     final Collection<Investment> investments = invest(strategy, loans);
                     activity.settle();

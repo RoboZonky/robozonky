@@ -52,7 +52,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.common.AbstractStateLeveragingTest;
 import org.junit.After;
 import org.junit.runner.RunWith;
@@ -84,7 +84,7 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         Mockito.when(loan.getTermInMonths()).thenReturn(25);
         Mockito.when(loan.getUrl()).thenReturn("http://www.robozonky.cz/");
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
-        final Recommendation recommendation = loanDescriptor.recommend(1200, false).get();
+        final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = new Investment(loan, 1000);
         final NotificationProperties properties = AbstractEmailingListenerTest.getNotificationProperties();
         // create events for listeners

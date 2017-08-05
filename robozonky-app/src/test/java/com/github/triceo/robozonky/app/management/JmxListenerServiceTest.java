@@ -40,7 +40,7 @@ import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -79,7 +79,7 @@ public class JmxListenerServiceTest {
     private static Object[] getParametersForInvestmentDelegated() {
         final Loan l = new Loan(1, 1000);
         final LoanDescriptor ld = new LoanDescriptor(l);
-        final Recommendation r = ld.recommend(200).get();
+        final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentDelegatedEvent(r, 10000, "");
         final Consumer<SoftAssertions> before = (softly) -> {
             final InvestmentsMBean mbean = INVESTMENTS.get();
@@ -95,7 +95,7 @@ public class JmxListenerServiceTest {
     private static Object[] getParametersForInvestmentRejected() {
         final Loan l = new Loan(1, 1000);
         final LoanDescriptor ld = new LoanDescriptor(l);
-        final Recommendation r = ld.recommend(200).get();
+        final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentRejectedEvent(r, 10000, "");
         final Consumer<SoftAssertions> before = (softly) -> {
             final InvestmentsMBean mbean = INVESTMENTS.get();

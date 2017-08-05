@@ -46,7 +46,7 @@ final class StrategyBasedInvestmentCommand implements InvestmentCommand {
         Events.fire(new StrategyStartedEvent(strategy, s.getAvailableLoans(), s.getPortfolioOverview()));
         boolean invested;
         do {
-            invested = strategy.evaluate(s.getAvailableLoans(), s.getPortfolioOverview())
+            invested = strategy.recommend(s.getAvailableLoans(), s.getPortfolioOverview())
                     .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
                     .anyMatch(s::invest); // keep trying until investment opportunities are exhausted
         } while (invested);

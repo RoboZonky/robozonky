@@ -23,12 +23,26 @@ import java.util.ServiceLoader;
 /**
  * Use Java's {@link ServiceLoader} to load different strategy implementations.
  */
-public interface InvestmentStrategyService {
+public interface StrategyService {
 
     /**
-     * Prepare the investment strategy for being used by the app.
+     * Prepare investing strategy for being used by the app.
      * @param strategy Investment strategy in question.
-     * @return Processed instance of the investment strategy provided by the user, if the file format is supported.
+     * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */
-    Optional<InvestmentStrategy> parse(InputStream strategy);
+    Optional<InvestmentStrategy> toInvest(InputStream strategy);
+
+    /**
+     * Prepare selling strategy for being used by the app.
+     * @param strategy Investment strategy in question.
+     * @return Processed instance of the strategy provided by the user, if the input format is supported.
+     */
+    Optional<SellStrategy> toSell(InputStream strategy);
+
+    /**
+     * Prepare purchasing strategy for being used by the app.
+     * @param strategy Investment strategy in question.
+     * @return Processed instance of the strategy provided by the user, if the input format is supported.
+     */
+    Optional<PurchaseStrategy> toPurchase(InputStream strategy);
 }

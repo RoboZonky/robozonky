@@ -20,19 +20,19 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 
 final class DirectInvestmentCommand implements InvestmentCommand {
 
-    private final Recommendation recommendation;
+    private final RecommendedLoan recommendation;
 
-    public DirectInvestmentCommand(final Recommendation recommendation) {
+    public DirectInvestmentCommand(final RecommendedLoan recommendation) {
         this.recommendation = recommendation;
     }
 
     @Override
     public Collection<LoanDescriptor> getLoans() {
-        return Collections.singletonList(recommendation.getLoanDescriptor());
+        return Collections.singletonList(recommendation.descriptor());
     }
 
     @Override

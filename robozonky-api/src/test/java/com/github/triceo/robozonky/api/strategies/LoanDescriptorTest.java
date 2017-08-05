@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public class LoanDescriptorTest {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(ld.getLoan()).isSameAs(mockedLoan);
+        softly.assertThat(ld.item()).isSameAs(mockedLoan);
         softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime())
                 .isPresent()
                 .contains(mockedLoan.getDatePublished().plus(Settings.INSTANCE.getCaptchaDelay()));
@@ -61,7 +62,7 @@ public class LoanDescriptorTest {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan(Rating.AAAAA);
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(ld.getLoan()).isSameAs(mockedLoan);
+            softly.assertThat(ld.item()).isSameAs(mockedLoan);
             softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime()).isEmpty();
         });
     }
@@ -81,13 +82,13 @@ public class LoanDescriptorTest {
     public void recommendAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<Recommendation> r = ld.recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+        final Optional<RecommendedLoan> r = ld.recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
         Assertions.assertThat(r).isPresent();
-        final Recommendation recommendation = r.get();
+        final RecommendedLoan recommendation = r.get();
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(recommendation.getLoanDescriptor()).isSameAs(ld);
-        softly.assertThat(recommendation.getRecommendedInvestmentAmount())
-                .isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+        softly.assertThat(recommendation.descriptor()).isSameAs(ld);
+        softly.assertThat(recommendation.amount())
+                .isEqualTo(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
         softly.assertThat(recommendation.isConfirmationRequired()).isFalse();
         softly.assertAll();
     }
@@ -96,7 +97,7 @@ public class LoanDescriptorTest {
     public void recommendWrongAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<Recommendation> r = ld.recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
+        final Optional<RecommendedLoan> r = ld.recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1));
         Assertions.assertThat(r).isEmpty();
     }
 }

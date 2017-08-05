@@ -25,7 +25,7 @@ import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
@@ -169,7 +169,7 @@ public class InvestorTest extends AbstractInvestingTest {
     @Parameterized.Parameter(4)
     public ZonkyResponseType responseType;
 
-    private Recommendation getRecommendation() {
+    private RecommendedLoan getRecommendation() {
         final LoanDescriptor ld =
                 InvestorTest.mockLoanDescriptor(captcha == InvestorTest.Captcha.PROTECTED);
         return ld.recommend(InvestorTest.CONFIRMED_AMOUNT,
@@ -208,7 +208,7 @@ public class InvestorTest extends AbstractInvestingTest {
     }
 
     private void test(final boolean seenBefore) {
-        final Recommendation r = this.getRecommendation();
+        final RecommendedLoan r = this.getRecommendation();
         final Investor p = this.getZonkyProxy();
         ZonkyResponse result;
         try {

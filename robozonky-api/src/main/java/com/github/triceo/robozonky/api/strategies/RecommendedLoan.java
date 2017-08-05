@@ -26,13 +26,13 @@ import com.github.triceo.robozonky.internal.api.Defaults;
 /**
  * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link Loan} for investing.
  */
-public final class Recommendation implements Recommended<Recommendation, LoanDescriptor, Loan> {
+public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, Loan> {
 
     private final LoanDescriptor loanDescriptor;
     private final int recommendedInvestmentAmount;
     private final boolean confirmationRequired;
 
-    Recommendation(final LoanDescriptor loanDescriptor, final int amount, final boolean confirmationRequired) {
+    RecommendedLoan(final LoanDescriptor loanDescriptor, final int amount, final boolean confirmationRequired) {
         if (loanDescriptor == null) {
             throw new IllegalArgumentException("Loan descriptor must not be null.");
         } else if (amount < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
@@ -55,10 +55,10 @@ public final class Recommendation implements Recommended<Recommendation, LoanDes
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
-        } else if (!(o instanceof Recommendation)) {
+        } else if (!(o instanceof RecommendedLoan)) {
             return false;
         }
-        final Recommendation that = (Recommendation) o;
+        final RecommendedLoan that = (RecommendedLoan) o;
         return recommendedInvestmentAmount == that.recommendedInvestmentAmount &&
                 confirmationRequired == that.confirmationRequired &&
                 Objects.equals(loanDescriptor, that.loanDescriptor);

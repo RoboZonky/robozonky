@@ -35,7 +35,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
@@ -108,11 +108,11 @@ public class DaemonInvestmentModeTest extends AbstractInvestingTest {
         System.setProperty("robozonky.default.dry_run_balance", String.valueOf(1000)); // no need to mock wallet
         final Loan l = new Loan(1, 10000, OffsetDateTime.now());
         final LoanDescriptor ld = new LoanDescriptor(l);
-        final Recommendation r = ld.recommend(200, false).get();
+        final RecommendedLoan r = ld.recommend(200, false).get();
         final DaemonInvestmentModeTest.TestMarketplace m =
                 new DaemonInvestmentModeTest.TestMarketplace(Collections.singletonList(l), treatment);
         final InvestmentStrategy ms = Mockito.mock(InvestmentStrategy.class);
-        Mockito.when(ms.evaluate(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
+        Mockito.when(ms.recommend(ArgumentMatchers.anyCollection(), ArgumentMatchers.any()))
                 .thenAnswer(invocation -> Stream.of(r));
         final Zonky z = AbstractInvestingTest.harmlessZonky(1000);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);

@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -36,7 +35,7 @@ import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +44,12 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageInvestmentStrategy.class);
     private static final Comparator<LoanDescriptor>
-            BY_TERM = Comparator.comparingInt(l -> l.getLoan().getTermInMonths()),
-            BY_RECENCY = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getDatePublished()).reversed(),
-            BY_REMAINING = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getRemainingInvestment()).reversed();
+            BY_TERM = Comparator.comparingInt(l -> l.item().getTermInMonths()),
+            BY_RECENCY = Comparator.comparing((LoanDescriptor l) -> l.item().getDatePublished()).reversed(),
+            BY_REMAINING = Comparator.comparing((LoanDescriptor l) -> l.item().getRemainingInvestment()).reversed();
 
     private static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
-        return Collections.unmodifiableMap(loans.distinct()
-                                                   .collect(Collectors.groupingBy(l -> l.getLoan().getRating())));
+        return Collections.unmodifiableMap(loans.distinct().collect(Collectors.groupingBy(l -> l.item().getRating())));
     }
 
     /**
@@ -115,7 +113,8 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public Stream<Recommendation> evaluate(final Collection<LoanDescriptor> loans, final PortfolioOverview portfolio) {
+    public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans,
+                                             final PortfolioOverview portfolio) {
         if (!this.isAcceptable(portfolio)) {
             return Stream.empty();
         }
@@ -132,14 +131,9 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                     return splitByRating.get(rating).stream()
                             .sorted(NaturalLanguageInvestmentStrategy.getLoanComparator());
                 }).map(l -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = this.recommendInvestmentAmount(l.getLoan(), balance);
+                    final int recommendedAmount = this.recommendInvestmentAmount(l.item(), balance);
                     return l.recommend(recommendedAmount, this.needsConfirmation(l));
                 }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
-    }
-
-    @Override
-    public List<Recommendation> recommend(final Collection<LoanDescriptor> loans, final PortfolioOverview portfolio) {
-        return evaluate(loans, portfolio).collect(Collectors.toList());
     }
 
     private int[] getRecommendationBoundaries(final Loan loan) {
@@ -201,10 +195,5 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             return Optional.empty();
         }
         return Optional.of(new int[]{minimumInvestment, maximumInvestment});
-    }
-
-    @Override
-    public boolean supportsSecondaryMarketplace() {
-        return true;
     }
 }
