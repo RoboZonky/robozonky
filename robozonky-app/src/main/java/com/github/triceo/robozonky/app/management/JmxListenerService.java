@@ -22,14 +22,13 @@ import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
-import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 
 public class JmxListenerService implements ListenerService {
 
@@ -55,12 +54,12 @@ public class JmxListenerService implements ListenerService {
         } else if (Objects.equals(eventType, LoanNoLongerDelinquentEvent.class)) {
             final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
             return (event, sessionInfo) -> bean.registerRun((LoanNoLongerDelinquentEvent) event);
-        } else if (Objects.equals(eventType, StrategyStartedEvent.class)) {
+        } else if (Objects.equals(eventType, ExecutionStartedEvent.class)) {
             final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
-            return (event, sessionInfo) -> bean.setPortfolioOverview((StrategyStartedEvent) event);
-        } else if (Objects.equals(eventType, StrategyCompletedEvent.class)) {
+            return (event, sessionInfo) -> bean.setPortfolioOverview((ExecutionStartedEvent) event);
+        } else if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
             final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
-            return (event, sessionInfo) -> bean.setPortfolioOverview((StrategyCompletedEvent) event);
+            return (event, sessionInfo) -> bean.setPortfolioOverview((ExecutionCompletedEvent) event);
         } else {
             return null;
         }

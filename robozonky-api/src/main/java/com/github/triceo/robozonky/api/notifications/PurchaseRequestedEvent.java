@@ -16,23 +16,22 @@
 
 package com.github.triceo.robozonky.api.notifications;
 
-import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.strategies.RecommendedParticipation;
 
 /**
- * Fired immediately after a new loan is received from the marketplace.
+ * Fired immediately before {@link ControlApi#purchase(int, double)} call is made or, in case of dry run,
+ * immediately before such a call would otherwise be made. Will be followed by {@link PurchaseMadeEvent}.
  */
-public final class LoanArrivedEvent extends Event {
+public final class PurchaseRequestedEvent extends Event {
 
-    private final LoanDescriptor loanDescriptor;
+    private final RecommendedParticipation recommendation;
 
-    public LoanArrivedEvent(final LoanDescriptor loanDescriptor) {
-        this.loanDescriptor = loanDescriptor;
+    public PurchaseRequestedEvent(final RecommendedParticipation recommendation) {
+        this.recommendation = recommendation;
     }
 
-    /**
-     * @return The loan in question.
-     */
-    public LoanDescriptor getLoanDescriptor() {
-        return this.loanDescriptor;
+    public RecommendedParticipation getRecommendation() {
+        return recommendation;
     }
 }

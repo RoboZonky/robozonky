@@ -102,7 +102,7 @@ class Session implements AutoCloseable {
                                          final InvestmentCommand command) {
         try (final Session session = Session.create(investor, api, command.getLoans())) {
             final int balance = session.getPortfolioOverview().getCzkAvailable();
-            Events.fire(new ExecutionStartedEvent(command.getLoans(), balance));
+            Events.fire(new ExecutionStartedEvent(command.getLoans(), session.getPortfolioOverview()));
             if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailableLoans().isEmpty()) {
                 command.accept(session);
             }
@@ -114,7 +114,7 @@ class Session implements AutoCloseable {
                                                                                                            .HALF_EVEN),
                                 portfolio.getCzkExpectedYield());
             final Collection<Investment> result = session.getInvestmentsMade();
-            Events.fire(new ExecutionCompletedEvent(result, portfolio.getCzkAvailable()));
+            Events.fire(new ExecutionCompletedEvent(result, portfolio));
             return Collections.unmodifiableCollection(result);
         }
     }

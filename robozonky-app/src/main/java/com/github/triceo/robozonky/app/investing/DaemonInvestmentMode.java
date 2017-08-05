@@ -189,6 +189,5 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.executor.shutdownNow();
         LOGGER.trace("Closing marketplace.");
         this.marketplace.close();
-        // reinitialize so that new daemons don't end right away
     }
 }

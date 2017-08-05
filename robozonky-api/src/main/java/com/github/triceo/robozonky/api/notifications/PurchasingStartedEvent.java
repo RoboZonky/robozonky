@@ -19,33 +19,29 @@ package com.github.triceo.robozonky.api.notifications;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
 /**
- * Fired immediately after all loans have been evaluated and all possible investment operations performed.
+ * Fired immediately before the loans are submitted to the investing algorithm.
+ * Will eventually be followed by {@link PurchasingCompletedEvent}.
  */
-public final class StrategyCompletedEvent extends Event {
+public final class PurchasingStartedEvent extends Event {
 
-    private final InvestmentStrategy investmentStrategyUsed;
-    private final Collection<Investment> investmentsMade;
+    private final Collection<ParticipationDescriptor> descriptors;
     private final PortfolioOverview portfolioOverview;
 
-    public StrategyCompletedEvent(final InvestmentStrategy investmentStrategy,
-                                  final Collection<Investment> investmentsMade,
+    public PurchasingStartedEvent(final Collection<ParticipationDescriptor> descriptors,
                                   final PortfolioOverview portfolioOverview) {
-        this.investmentStrategyUsed = investmentStrategy;
-        this.investmentsMade = Collections.unmodifiableCollection(investmentsMade);
+        this.descriptors = Collections.unmodifiableCollection(descriptors);
         this.portfolioOverview = portfolioOverview;
     }
 
-    public InvestmentStrategy getInvestmentStrategyUsed() {
-        return investmentStrategyUsed;
-    }
-
-    public Collection<Investment> getInvestmentsMade() {
-        return investmentsMade;
+    /**
+     * @return Participations on the secondary marketplace that are available for robotic investment.
+     */
+    public Collection<ParticipationDescriptor> getDescriptors() {
+        return this.descriptors;
     }
 
     public PortfolioOverview getPortfolioOverview() {

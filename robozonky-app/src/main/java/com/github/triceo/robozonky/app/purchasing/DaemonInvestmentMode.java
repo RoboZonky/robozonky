@@ -33,20 +33,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
+import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.commons.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.app.commons.DaemonShutdownHook;
 import com.github.triceo.robozonky.app.commons.InvestmentMode;
 import com.github.triceo.robozonky.app.commons.SuddenDeathDetection;
 import com.github.triceo.robozonky.app.commons.SuddenDeathException;
-import com.github.triceo.robozonky.app.delinquency.DelinquencyUpdater;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
-import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +52,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LoggerFactory.getLogger(
             DaemonInvestmentMode.class);
 
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
+    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzPurchase"));
     public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO =
             new AtomicReference<>(new CountDownLatch(1));
 
@@ -64,11 +61,9 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return Duration.ofMinutes(secondBetweenChecks); // multiply by 60
     }
 
-    private final Investor.Builder builder;
     private final Authenticated authenticated;
-    private final boolean isFaultTolerant;
-    private final Refreshable<InvestmentStrategy> refreshableStrategy;
-    private final Marketplace marketplace;
+    private final boolean isFaultTolerant, isDryRun;
+    private final Refreshable<PurchaseStrategy> refreshableStrategy;
     private final ScheduledExecutorService executor =
             Executors.newScheduledThreadPool(2, DaemonInvestmentMode.THREAD_FACTORY);
     private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
@@ -76,24 +71,21 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final CountDownLatch circuitBreaker;
     private final Thread shutdownHook;
 
-    public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
-                                final Marketplace marketplace, final Refreshable<InvestmentStrategy> strategy,
-                                final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
+    public DaemonInvestmentMode(final Authenticated auth, final boolean isDryRun, final boolean isFaultTolerant,
+                                final Refreshable<PurchaseStrategy> strategy, final TemporalAmount maximumSleepPeriod,
+                                final TemporalAmount periodBetweenChecks) {
         this.authenticated = auth;
-        this.builder = builder;
         this.isFaultTolerant = isFaultTolerant;
+        this.isDryRun = isDryRun;
         this.circuitBreaker =
                 DaemonInvestmentMode.BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
         this.shutdownHook = new DaemonShutdownHook(circuitBreaker);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
         this.refreshableStrategy = strategy;
-        this.marketplace = marketplace;
         this.maximumSleepPeriod = maximumSleepPeriod;
         this.periodBetweenChecks = periodBetweenChecks;
         this.suddenDeath = new SuddenDeathDetection(circuitBreaker,
                                                     DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
-        // FIXME move to a more appropriate place
-        Scheduler.BACKGROUND_SCHEDULER.submit(new DelinquencyUpdater(auth), Duration.ofHours(1));
     }
 
     Thread getShutdownHook() {
@@ -105,8 +97,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
         LOGGER.trace("Executing.");
         try {
             final ResultTracker buffer = new ResultTracker();
-            final Consumer<Collection<Loan>> investor = (loans) -> {
-                final Collection<LoanDescriptor> descriptors = buffer.acceptLoansFromMarketplace(loans);
+            final Consumer<Collection<Participation>> investor = (items) -> {
+                final Collection<ParticipationDescriptor> descriptors = buffer.acceptLoansFromMarketplace(items);
                 final Collection<Investment> result = getInvestor().apply(descriptors);
                 buffer.acceptInvestmentsFromRobot(result);
             };
@@ -129,16 +121,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
             });
             throw new IllegalStateException(ex);
         } catch (final Exception ex) {
-            LOGGER.error("Failed executing investments.", ex);
+            LOGGER.error("Failed executing purchase.", ex);
             return Optional.empty();
         }
     }
 
-    private void openMarketplace(final Consumer<Collection<Loan>> target) {
-        marketplace.registerListener(target);
+    private void openMarketplace(final Consumer<Collection<Participation>> target) {
         final Runnable marketplaceCheck = () -> {
-            try {
-                marketplace.run();
+            try { // FIXME perhaps streaming would be more resource-efficient?
+                authenticated.run(z -> target.accept(z.getAvailableParticipations().collect(Collectors.toList())));
             } catch (final Throwable t) {
                 /*
                  * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
@@ -149,24 +140,14 @@ public class DaemonInvestmentMode implements InvestmentMode {
                 suddenDeath.registerMarketplaceCheck(); // sudden death averted for now
             }
         };
-        switch (marketplace.specifyExpectedTreatment()) {
-            case POLLING:
-                final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
-                LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
-                executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
-                executor.scheduleAtFixedRate(this.suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
-                break;
-            case LISTENING:
-                LOGGER.debug("Starting marketplace listener.");
-                executor.submit(marketplaceCheck);
-                break;
-            default:
-                throw new IllegalStateException("Impossible.");
-        }
+        final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
+        LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
+        executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(this.suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
     }
 
-    private Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
-        return new StrategyExecution(builder, refreshableStrategy, authenticated, maximumSleepPeriod);
+    private Function<Collection<ParticipationDescriptor>, Collection<Investment>> getInvestor() {
+        return new StrategyExecution(refreshableStrategy, authenticated, maximumSleepPeriod, isDryRun);
     }
 
     @Override
@@ -176,7 +157,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     @Override
     public boolean isDryRun() {
-        return builder.isDryRun();
+        return isDryRun;
     }
 
     @Override
@@ -188,8 +169,5 @@ public class DaemonInvestmentMode implements InvestmentMode {
     public void close() throws Exception {
         LOGGER.trace("Shutting down executor.");
         this.executor.shutdownNow();
-        LOGGER.trace("Closing marketplace.");
-        this.marketplace.close();
-        // reinitialize so that new daemons don't end right away
     }
 }

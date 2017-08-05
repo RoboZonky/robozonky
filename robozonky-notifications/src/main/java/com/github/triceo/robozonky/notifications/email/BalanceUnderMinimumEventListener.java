@@ -51,7 +51,7 @@ public class BalanceUnderMinimumEventListener extends AbstractEmailingListener<E
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
         final Map<String, Object> result = new HashMap<>();
-        result.put("newBalance", event.getBalance());
+        result.put("newBalance", event.getPortfolioOverview().getCzkAvailable());
         result.put("minimumBalance", minimumBalance);
         return result;
     }
@@ -60,7 +60,7 @@ public class BalanceUnderMinimumEventListener extends AbstractEmailingListener<E
     public void handle(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
         // figure out whether or not the balance is over the threshold
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance();
-        final int newBalance = event.getBalance();
+        final int newBalance = event.getPortfolioOverview().getCzkAvailable();
         if (newBalance < minimumBalance) {
             this.shouldSendEmail = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() >= minimumBalance;
         } else {

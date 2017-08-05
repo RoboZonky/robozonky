@@ -18,20 +18,15 @@ package com.github.triceo.robozonky.app.investing;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-import com.github.triceo.robozonky.api.notifications.Event;
-import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
-import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class StrategyBasedInvestmentCommandTest extends AbstractInvestingTest {
+public class InvestmentCommandTest extends AbstractInvestingTest {
 
     @Test
     public void empty() {
@@ -42,12 +37,5 @@ public class StrategyBasedInvestmentCommandTest extends AbstractInvestingTest {
         c.accept(sess); // SUT
         Assertions.assertThat(sess.getInvestmentsMade()).isEmpty();
         Mockito.verify(sess, Mockito.never()).invest(ArgumentMatchers.any());
-        // verify events
-        final List<Event> events = this.getNewEvents();
-        Assertions.assertThat(events).hasSize(2);
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(events.get(0)).isInstanceOf(StrategyStartedEvent.class);
-            softly.assertThat(events.get(1)).isInstanceOf(StrategyCompletedEvent.class);
-        });
     }
 }

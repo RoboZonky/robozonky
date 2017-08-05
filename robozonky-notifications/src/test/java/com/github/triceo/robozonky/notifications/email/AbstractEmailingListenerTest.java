@@ -52,6 +52,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.common.AbstractStateLeveragingTest;
 import org.junit.After;
@@ -70,6 +71,12 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         final Optional<NotificationProperties> p = r.getLatest();
         System.clearProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         return p.get();
+    }
+
+    private static PortfolioOverview mockPortfolio(final int balance) {
+        final PortfolioOverview portfolioOverview = Mockito.mock(PortfolioOverview.class);
+        Mockito.when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
+        return portfolioOverview;
     }
 
     @Parameterized.Parameters(name = "{0}")
@@ -107,9 +114,10 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
                    new LoanDelinquent60DaysOrMoreEvent(loan, LocalDate.now().minusDays(61)));
         events.put(SupportedListener.LOAN_DELINQUENT_90_PLUS,
                    new LoanDelinquent90DaysOrMoreEvent(loan, LocalDate.now().minusDays(91)));
-        events.put(SupportedListener.BALANCE_ON_TARGET, new ExecutionStartedEvent(Collections.emptyList(), 200));
+        events.put(SupportedListener.BALANCE_ON_TARGET,
+                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(200)));
         events.put(SupportedListener.BALANCE_UNDER_MINIMUM,
-                   new ExecutionStartedEvent(Collections.emptyList(), 199));
+                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(199)));
         events.put(SupportedListener.CRASHED,
                    new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
         events.put(SupportedListener.REMOTE_OPERATION_FAILED,

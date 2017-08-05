@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.management;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,8 +34,6 @@ import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
-import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
-import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
@@ -60,7 +57,7 @@ public class JmxListenerServiceTest {
     private static final Supplier<Portfolio> PORTFOLIO = () -> (Portfolio) MBean.PORTFOLIO.getImplementation();
 
     private static Object[] getParametersForExecutionCompleted() {
-        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), 0);
+        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
         final Consumer<SoftAssertions> before = (softly) -> {
             final InvestmentsMBean mbean = INVESTMENTS.get();
             final RuntimeMBean mbean2 = RUNTIME.get();
@@ -138,46 +135,12 @@ public class JmxListenerServiceTest {
         return new Object[]{evt.getClass(), evt, before, after};
     }
 
-    private static Object[] getParametersForStrategyStarted() {
-        final StrategyStartedEvent evt = new StrategyStartedEvent(null, Collections.emptyList(), null);
-        final Consumer<SoftAssertions> before = (softly) -> {
-            final PortfolioMBean mbean = PORTFOLIO.get();
-            softly.assertThat(mbean.getAvailableBalance()).isEqualTo(0);
-            softly.assertThat(mbean.getExpectedYield()).isEqualTo(0);
-            softly.assertThat(mbean.getInvestedAmount()).isEqualTo(0);
-            softly.assertThat(mbean.getRelativeExpectedYield()).isEqualTo(BigDecimal.ZERO);
-            softly.assertThat(mbean.getInvestedAmountPerRating()).isNotEmpty();
-            softly.assertThat(mbean.getRatingShare()).isNotEmpty();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isNull();
-        };
-        final Consumer<SoftAssertions> after = (softly) -> {
-            final PortfolioMBean mbean = PORTFOLIO.get();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
-        };
-        return new Object[]{evt.getClass(), evt, before, after};
-    }
-
-    private static Object[] getParametersForStrategyCompleted() {
-        final StrategyCompletedEvent evt = new StrategyCompletedEvent(null, Collections.emptyList(), null);
-        final Consumer<SoftAssertions> before = (softly) -> {
-            final PortfolioMBean mbean = PORTFOLIO.get();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isNull();
-        };
-        final Consumer<SoftAssertions> after = (softly) -> {
-            final PortfolioMBean mbean = PORTFOLIO.get();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
-        };
-        return new Object[]{evt.getClass(), evt, before, after};
-    }
-
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
         return Arrays.asList(JmxListenerServiceTest.getParametersForExecutionCompleted(),
                              JmxListenerServiceTest.getParametersForInvestmentDelegated(),
                              JmxListenerServiceTest.getParametersForInvestmentMade(),
                              JmxListenerServiceTest.getParametersForInvestmentRejected(),
-                             JmxListenerServiceTest.getParametersForStrategyStarted(),
-                             JmxListenerServiceTest.getParametersForStrategyCompleted(),
                              JmxListenerServiceTest.getParametersForNoLongerDelinquentLoan());
     }
 

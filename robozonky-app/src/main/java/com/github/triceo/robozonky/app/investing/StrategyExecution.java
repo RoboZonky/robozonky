@@ -23,11 +23,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.notifications.LoanArrivedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
@@ -69,7 +67,6 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                         return Collections.<Investment>emptyList();
                     }
                     StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
-                            .peek(l -> Events.fire(new LoanArrivedEvent(l)))
                             .map(l -> String.valueOf(l.item().getId()))
                             .collect(Collectors.joining(", ")));
                     final Collection<Investment> investments = invest(strategy, loans);

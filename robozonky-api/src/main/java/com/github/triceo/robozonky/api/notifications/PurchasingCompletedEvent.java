@@ -19,28 +19,28 @@ package com.github.triceo.robozonky.api.notifications;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
 /**
- * Fired immediately before the loans are submitted to the investing algorithm. Will eventually be followed by
- * {@link ExecutionCompletedEvent}.
+ * Fired immediately after the investing algorithm is finished purchasing participations in the secondary marketplace.
  */
-public final class ExecutionStartedEvent extends Event {
+public final class PurchasingCompletedEvent extends Event {
 
-    private final Collection<LoanDescriptor> loanDescriptors;
+    private final Collection<Investment> investment;
     private final PortfolioOverview portfolioOverview;
 
-    public ExecutionStartedEvent(final Collection<LoanDescriptor> loanDescriptors, final PortfolioOverview portfolio) {
-        this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
-        this.portfolioOverview = portfolio;
+    public PurchasingCompletedEvent(final Collection<Investment> investment,
+                                    final PortfolioOverview portfolioOverview) {
+        this.investment = Collections.unmodifiableCollection(investment);
+        this.portfolioOverview = portfolioOverview;
     }
 
     /**
-     * @return Loans found on the marketplace that are available for robotic investment, not protected by CAPTCHA.
+     * @return The investments that were made.
      */
-    public Collection<LoanDescriptor> getLoanDescriptors() {
-        return this.loanDescriptors;
+    public Collection<Investment> getInvestments() {
+        return this.investment;
     }
 
     public PortfolioOverview getPortfolioOverview() {

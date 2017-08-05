@@ -25,8 +25,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
-import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
@@ -90,12 +90,12 @@ public class Portfolio implements PortfolioMBean {
         return this.latestUpdatedDateTime;
     }
 
-    void setPortfolioOverview(final StrategyStartedEvent event) {
+    void setPortfolioOverview(final ExecutionStartedEvent event) {
         this.latestPortfolioOverview = event.getPortfolioOverview();
         this.latestUpdatedDateTime = event.getCreatedOn();
     }
 
-    void setPortfolioOverview(final StrategyCompletedEvent event) {
+    void setPortfolioOverview(final ExecutionCompletedEvent event) {
         this.latestPortfolioOverview = event.getPortfolioOverview();
         this.latestUpdatedDateTime = event.getCreatedOn();
     }

@@ -19,22 +19,22 @@ package com.github.triceo.robozonky.api.notifications;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 
 /**
- * Fired immediately after an investment was submitted to the API.
+ * Fired immediately after secondary market purchase was submitted to the API.
  */
-public final class InvestmentMadeEvent extends Event {
+public final class PurchaseMadeEvent extends Event {
 
     private final Investment investment;
     private final int finalBalance;
     private final boolean dryRun;
 
-    public InvestmentMadeEvent(final Investment investment, final int finalBalance, final boolean isDryRun) {
+    public PurchaseMadeEvent(final Investment investment, final int finalBalance, final boolean isDryRun) {
         this.investment = investment;
         this.finalBalance = finalBalance;
         this.dryRun = isDryRun;
     }
 
     /**
-     * @return The investment that was made.
+     * @return The purchase that was made.
      */
     public Investment getInvestment() {
         return this.investment;

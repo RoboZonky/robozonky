@@ -16,10 +16,8 @@
 
 package com.github.triceo.robozonky.app.authentication;
 
-import java.util.Collection;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.OAuth;
@@ -48,7 +46,7 @@ class PasswordBasedAccess implements Authenticated {
     }
 
     @Override
-    public Collection<Investment> call(final Function<Zonky, Collection<Investment>> op) {
+    public <T> T call(final Function<Zonky, T> op) {
         final ZonkyApiToken token = PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
         try (final Zonky zonky = apis.authenticated(token)) {
             try {

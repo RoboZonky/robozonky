@@ -19,8 +19,6 @@ package com.github.triceo.robozonky.app.investing;
 import java.util.Collection;
 
 import com.github.triceo.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.triceo.robozonky.api.notifications.StrategyCompletedEvent;
-import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.Events;
@@ -43,13 +41,11 @@ final class StrategyBasedInvestmentCommand implements InvestmentCommand {
 
     @Override
     public void accept(final Session s) {
-        Events.fire(new StrategyStartedEvent(strategy, s.getAvailableLoans(), s.getPortfolioOverview()));
         boolean invested;
         do {
             invested = strategy.recommend(s.getAvailableLoans(), s.getPortfolioOverview())
                     .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
                     .anyMatch(s::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
-        Events.fire(new StrategyCompletedEvent(strategy, s.getInvestmentsMade(), s.getPortfolioOverview()));
     }
 }

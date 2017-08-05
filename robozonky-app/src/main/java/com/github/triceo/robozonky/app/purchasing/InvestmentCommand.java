@@ -19,9 +19,33 @@ package com.github.triceo.robozonky.app.purchasing;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.notifications.PurchaseRecommendedEvent;
+import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
+import com.github.triceo.robozonky.app.Events;
 
-interface InvestmentCommand extends Consumer<Session> {
+final class InvestmentCommand implements Consumer<Session> {
 
-    Collection<LoanDescriptor> getLoans();
+    private final PurchaseStrategy strategy;
+    private final Collection<ParticipationDescriptor> loans;
+
+    public InvestmentCommand(final PurchaseStrategy strategy,
+                             final Collection<ParticipationDescriptor> loans) {
+        this.strategy = strategy;
+        this.loans = loans;
+    }
+
+    public Collection<ParticipationDescriptor> getItems() {
+        return loans;
+    }
+
+    @Override
+    public void accept(final Session s) {
+        boolean invested;
+        do {
+            invested = strategy.recommend(s.getAvailableParticipations(), s.getPortfolioOverview())
+                    .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
+                    .anyMatch(s::invest); // keep trying until investment opportunities are exhausted
+        } while (invested);
+    }
 }

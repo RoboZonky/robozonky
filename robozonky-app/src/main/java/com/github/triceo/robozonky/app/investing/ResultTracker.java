@@ -42,7 +42,7 @@ class ResultTracker {
 
     public Collection<LoanDescriptor> acceptLoansFromMarketplace(final Collection<Loan> loans) {
         if (loans == null) {
-            ResultTracker.LOGGER.info("Marketplace returned null marketplace, possible Zonky downtime.");
+            ResultTracker.LOGGER.info("Marketplace returned null, possible Zonky downtime.");
             return Collections.emptyList();
         }
         return loans.stream()

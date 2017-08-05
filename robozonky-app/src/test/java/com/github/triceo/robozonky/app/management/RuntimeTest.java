@@ -45,14 +45,12 @@ public class RuntimeTest {
         final Runtime r = new Runtime();
         Assertions.assertThat(r.getVersion()).isEqualTo(Defaults.ROBOZONKY_VERSION);
         final String username = UUID.randomUUID().toString();
-        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), 200);
+        final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
         r.registerInvestmentRun(evt, new SessionInfo(username));
         Assertions.assertThat(r.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
         Assertions.assertThat(r.getZonkyUsername()).isEqualTo(username);
         r.stopDaemon();
-        Assertions.assertThat(DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().getCount())
-                .isEqualTo(0);
-        Assertions.assertThat(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get().getCount())
-                .isEqualTo(0);
+        Assertions.assertThat(DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().getCount()).isEqualTo(0);
+        Assertions.assertThat(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get().getCount()).isEqualTo(0);
     }
 }
