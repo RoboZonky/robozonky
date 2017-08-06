@@ -31,13 +31,9 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
     private final Class<T> eventType;
 
     public RefreshableEventListener(final RefreshableNotificationProperties properties, final Class<T> eventType) {
+        super(properties);
         this.properties = properties;
         this.eventType = eventType;
-    }
-
-    @Override
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.of(properties);
     }
 
     @Override

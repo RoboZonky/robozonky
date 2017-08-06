@@ -26,25 +26,7 @@ import org.junit.Test;
 
 public class SchedulerTest {
 
-    private static final Refreshable<String> REFRESHABLE = new Refreshable<String>() {
-
-        private final Refreshable<Void> immutable = Refreshable.createImmutable();
-
-        @Override
-        public Optional<Refreshable<?>> getDependedOn() {
-            return Optional.of(immutable);
-        }
-
-        @Override
-        protected Supplier<Optional<String>> getLatestSource() {
-            return () -> Optional.of("");
-        }
-
-        @Override
-        protected Optional<String> transform(final String source) {
-            return Optional.of(source);
-        }
-    };
+    private static final Refreshable<String> REFRESHABLE = new RefreshableString();
 
     @Test
     public void lifecycle() {
@@ -81,5 +63,22 @@ public class SchedulerTest {
             softly.assertThat(s.isSubmitted(r)).isFalse();
             softly.assertThat(s.isShutdown()).isFalse();
         });
+    }
+
+    private static final class RefreshableString extends Refreshable<String> {
+
+        public RefreshableString() {
+            super(Refreshable.createImmutable());
+        }
+
+        @Override
+        protected Supplier<Optional<String>> getLatestSource() {
+            return () -> Optional.of("");
+        }
+
+        @Override
+        protected Optional<String> transform(final String source) {
+            return Optional.of(source);
+        }
     }
 }

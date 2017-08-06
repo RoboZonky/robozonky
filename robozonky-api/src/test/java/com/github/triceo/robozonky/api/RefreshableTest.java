@@ -16,7 +16,9 @@
 
 package com.github.triceo.robozonky.api;
 
+import java.time.Duration;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -146,5 +148,51 @@ public class RefreshableTest {
         Assertions.assertThat(r.unregisterListener(l)).isTrue();
         Assertions.assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
         Assertions.assertThat(r.registerListener(l)).isTrue(); // re-registration
+    }
+
+    private static class RefreshableString extends Refreshable<String> {
+
+        public RefreshableString(final Refreshable<?> parent) {
+            super(parent);
+        }
+
+        public RefreshableString() {
+        }
+
+        @Override
+        protected Supplier<Optional<String>> getLatestSource() {
+            return () -> Optional.of(UUID.randomUUID().toString());
+        }
+
+        @Override
+        protected Optional<String> transform(final String source) {
+            return Optional.of(source);
+        }
+    }
+
+    @Test
+    public void refreshOnDependent() {
+        final Refreshable<String> parent = new RefreshableString();
+        final Refreshable<String> child = new RefreshableString(parent);
+        final Refreshable<String> childSpied = Mockito.spy(child);
+        Mockito.verify(childSpied, Mockito.never()).run();
+        final Optional<String> before = child.getLatest(Duration.ofMillis(1));
+        parent.run(); // refresh parent
+        final Optional<String> after = child.getLatest();
+        Assertions.assertThat(before).isNotEqualTo(after);
+    }
+
+    @Test
+    public void refreshAfterUnpaused() {
+        final Refreshable<String> parent = new RefreshableString();
+        parent.run();
+        final Optional<String> before = parent.getLatest();
+        try (final Refreshable<String>.Pause p = parent.pause()) {
+            parent.run(); // this will not be executed
+            final Optional<String> after = parent.getLatest();
+            Assertions.assertThat(before).isEqualTo(after);
+        } // pause is over, now the refresh should be run automatically
+        final Optional<String> after = parent.getLatest();
+        Assertions.assertThat(before).isNotEqualTo(after);
     }
 }
