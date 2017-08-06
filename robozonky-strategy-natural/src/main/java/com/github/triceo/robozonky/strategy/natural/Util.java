@@ -27,8 +27,13 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Util {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     public static Stream<Rating> rankRatingsByDemand(final ParsedStrategy strategy,
                                                      final Map<Rating, BigDecimal> currentShare) {
@@ -40,6 +45,7 @@ class Util {
                     .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_EVEN);
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
             if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
+                LOGGER.trace("Rating {} over-invested by {}.", r, undershare.negate());
                 return;
             }
             mostWantedRatings.compute(undershare, (k, v) -> {
@@ -51,5 +57,18 @@ class Util {
             });
         });
         return mostWantedRatings.values().stream().flatMap(Collection::stream);
+    }
+
+    public static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
+        final int balance = portfolio.getCzkAvailable();
+        if (balance < strategy.getMinimumBalance()) {
+            return false;
+        }
+        final int invested = portfolio.getCzkInvested();
+        final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
+        if (invested >= investmentCeiling) {
+            return false;
+        }
+        return true;
     }
 }

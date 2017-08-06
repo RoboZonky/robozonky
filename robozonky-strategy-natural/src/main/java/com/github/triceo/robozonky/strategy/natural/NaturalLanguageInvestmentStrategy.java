@@ -55,32 +55,13 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
      * @return Comparator to order the marketplace with.
      */
     private static Comparator<LoanDescriptor> getLoanComparator() {
-        return NaturalLanguageInvestmentStrategy.BY_TERM
-                .thenComparing(NaturalLanguageInvestmentStrategy.BY_REMAINING)
-                .thenComparing(NaturalLanguageInvestmentStrategy.BY_RECENCY);
+        return BY_TERM.thenComparing(BY_REMAINING).thenComparing(BY_RECENCY);
     }
 
     private final ParsedStrategy strategy;
 
     public NaturalLanguageInvestmentStrategy(final ParsedStrategy p) {
         this.strategy = p;
-    }
-
-    private boolean isAcceptable(final PortfolioOverview portfolio) {
-        final int balance = portfolio.getCzkAvailable();
-        if (balance < strategy.getMinimumBalance()) {
-            NaturalLanguageInvestmentStrategy.LOGGER.debug("{} CZK balance is less than minimum {} CZK.",
-                                                           balance, strategy.getMinimumBalance());
-            return false;
-        }
-        final int invested = portfolio.getCzkInvested();
-        final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
-        if (invested >= investmentCeiling) {
-            NaturalLanguageInvestmentStrategy.LOGGER.debug("{} CZK total investment over {} CZK ceiling.",
-                                                           invested, investmentCeiling);
-            return false;
-        }
-        return true;
     }
 
     private boolean needsConfirmation(final LoanDescriptor loanDescriptor) {
@@ -90,7 +71,8 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     @Override
     public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans,
                                              final PortfolioOverview portfolio) {
-        if (!this.isAcceptable(portfolio)) {
+        if (!Util.isAcceptable(strategy, portfolio)) {
+            LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
@@ -103,11 +85,10 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         final int balance = portfolio.getCzkAvailable();
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
-                    return splitByRating.get(rating).stream()
-                            .sorted(NaturalLanguageInvestmentStrategy.getLoanComparator());
+                    return splitByRating.get(rating).stream().sorted(getLoanComparator());
                 }).map(l -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = this.recommendInvestmentAmount(l.item(), balance);
-                    return l.recommend(recommendedAmount, this.needsConfirmation(l));
+                    final int recommendedAmount = recommendInvestmentAmount(l.item(), balance);
+                    return l.recommend(recommendedAmount, needsConfirmation(l));
                 }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
     }
 
@@ -129,23 +110,25 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         return recommendInvestmentAmount(loan).map(recommended -> {
             final int minimumRecommendation = recommended[0];
             final int maximumRecommendation = recommended[1];
-            NaturalLanguageInvestmentStrategy.LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.",
-                                                           loan.getId(), minimumRecommendation, maximumRecommendation);
+            LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.", loan.getId(),
+                         minimumRecommendation, maximumRecommendation);
             // round to nearest lower increment
             final int loanRemaining = (int) loan.getRemainingInvestment();
             if (minimumRecommendation > balance) {
+                LOGGER.trace("Not recommending loan #{} due to minimum over balance.", loan.getId());
                 return 0;
             } else if (minimumRecommendation > loanRemaining) {
+                LOGGER.trace("Not recommending loan #{} due to minimum over remaining.", loan.getId());
                 return 0;
             }
             final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
             final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
             final int r = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
             if (r < minimumRecommendation) {
+                LOGGER.trace("Not recommending loan #{} due to recommendation below minimum.", loan.getId());
                 return 0;
             } else {
-                NaturalLanguageInvestmentStrategy.LOGGER.debug("Final recommendation for loan #{} is {} CZK.",
-                                                               loan.getId(), r);
+                LOGGER.debug("Final recommendation for loan #{} is {} CZK.", loan.getId(), r);
                 return r;
             }
         }).orElse(0); // not recommended
@@ -156,8 +139,8 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         final int minimumRecommendation = Math.max(recommended[0], Defaults.MINIMUM_INVESTMENT_IN_CZK);
         final int maximumRecommendation = recommended[1];
         final int loanId = loan.getId();
-        NaturalLanguageInvestmentStrategy.LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.",
-                                                       loanId, minimumRecommendation, maximumRecommendation);
+        LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId,
+                     minimumRecommendation, maximumRecommendation);
         final int minimumInvestmentByShare =
                 NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
                                                                 strategy.getMinimumInvestmentShareInPercent());

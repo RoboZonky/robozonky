@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -33,23 +34,38 @@ import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum Investments {
 
     INSTANCE;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Investment.class);
+
     private final AtomicReference<List<Investment>> investments = new AtomicReference<>(Collections.emptyList());
     private final Collection<Consumer<Zonky>> updaters = new CopyOnWriteArraySet<>();
+
+    Investments() {
+        registerUpdater(new DelinquencyUpdate());
+    }
 
     public void registerUpdater(final Consumer<Zonky> updater) {
         updaters.add(updater);
     }
 
-    public void update(final Zonky zonky, final Collection<Investment> allInvestments) {
+    public void update(final Zonky zonky) {
         try {
-            investments.set(new ArrayList<>(allInvestments));
-            updaters.forEach(u -> u.accept(zonky));
-        } catch (final Throwable t) {
+            LOGGER.info("Daily update started.");
+            final List<Investment> remote = zonky.getInvestments().collect(Collectors.toList());
+            investments.set(new ArrayList<>(remote));
+            LOGGER.trace("Finished state update.");
+            updaters.forEach(u -> {
+                LOGGER.trace("Running dependent: {}", u);
+                u.accept(zonky);
+            });
+            LOGGER.debug("Finished.");
+        } catch (final Throwable t) { // users should know
             new DaemonRuntimeExceptionHandler().handle(t);
         }
     }

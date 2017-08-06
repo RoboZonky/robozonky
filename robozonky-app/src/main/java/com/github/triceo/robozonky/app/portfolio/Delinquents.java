@@ -71,10 +71,6 @@ public enum Delinquents {
         return d;
     }
 
-    Delinquents() {
-        Investments.INSTANCE.registerUpdater(new DelinquencyUpdate());
-    }
-
     public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent) {
         update(zonky, presentlyDelinquent, Collections.emptyList());
     }

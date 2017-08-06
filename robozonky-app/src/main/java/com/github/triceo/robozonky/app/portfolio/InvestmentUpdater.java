@@ -33,18 +33,18 @@ public class InvestmentUpdater extends Refreshable<OffsetDateTime> {
     }
 
     /**
-     * Will only update once a day, after 1am. This is to make sure that the updates happen when all the overnight
+     * Will only update once a day, after 4am. This is to make sure that the updates happen when all the overnight
      * transactions on Zonky have cleared.
      * @return
      */
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
-        return () -> Optional.of(Util.getYesterdayIfAfter(Duration.ofHours(1)).toString());
+        return () -> Optional.of(Util.getYesterdayIfAfter(Duration.ofHours(4)).toString());
     }
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        authenticated.run(new InvestmentUpdate());
+        authenticated.run(Investments.INSTANCE::update);
         return Optional.of(OffsetDateTime.now());
     }
 }

@@ -65,21 +65,6 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         this.strategy = p;
     }
 
-    private boolean isAcceptable(final PortfolioOverview portfolio) {
-        final int balance = portfolio.getCzkAvailable();
-        if (balance < strategy.getMinimumBalance()) {
-            LOGGER.debug("{} CZK balance is less than minimum {} CZK.", balance, strategy.getMinimumBalance());
-            return false;
-        }
-        final int invested = portfolio.getCzkInvested();
-        final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
-        if (invested >= investmentCeiling) {
-            LOGGER.debug("{} CZK total investment over {} CZK ceiling.", invested, investmentCeiling);
-            return false;
-        }
-        return true;
-    }
-
     private int[] getRecommendationBoundaries(final Participation participation) {
         final Rating rating = participation.getRating();
         final int minimumInvestment = strategy.getMinimumInvestmentSizeInCzk(rating);
@@ -143,7 +128,8 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
     @Override
     public Stream<RecommendedParticipation> recommend(final Collection<ParticipationDescriptor> available,
                                                       final PortfolioOverview portfolio) {
-        if (!this.isAcceptable(portfolio)) {
+        if (!Util.isAcceptable(strategy, portfolio)) {
+            LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
