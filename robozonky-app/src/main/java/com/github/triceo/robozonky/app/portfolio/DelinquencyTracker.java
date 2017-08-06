@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.delinquency;
+package com.github.triceo.robozonky.app.portfolio;
 
 import java.time.LocalDate;
 import java.util.Collection;
