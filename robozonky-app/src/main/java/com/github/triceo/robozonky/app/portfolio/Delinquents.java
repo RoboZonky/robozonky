@@ -35,11 +35,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Main entry point to the delinquency API.
  */
-public enum DelinquencyTracker {
+public enum Delinquents {
 
     INSTANCE; // cheap thread-safe singleton
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyTracker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Delinquents.class);
     private static final String ITEM_SEPARATOR = ";", TIME_SEPARATOR = ":::";
     private static final Pattern ITEM_SPLITTER = Pattern.compile("\\Q" + ITEM_SEPARATOR + "\\E"),
             TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
@@ -51,7 +51,7 @@ public enum DelinquencyTracker {
     }
 
     private static String toString(final Delinquent d) {
-        return d.getDelinquencies().map(DelinquencyTracker::toString).collect(Collectors.joining(ITEM_SEPARATOR));
+        return d.getDelinquencies().map(Delinquents::toString).collect(Collectors.joining(ITEM_SEPARATOR));
     }
 
     private static Delinquency fromString(final Delinquent d, final String delinquency) {
@@ -71,6 +71,10 @@ public enum DelinquencyTracker {
         return d;
     }
 
+    Delinquents() {
+        Investments.INSTANCE.registerUpdater(new DelinquencyUpdate());
+    }
+
     public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent) {
         update(zonky, presentlyDelinquent, Collections.emptyList());
     }
@@ -85,6 +89,7 @@ public enum DelinquencyTracker {
      */
     public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent,
                        final Collection<Investment> noLongerActive) {
+        LOGGER.debug("Updating delinquent loans.");
         final LocalDate now = LocalDate.now();
         final Collection<Delinquent> knownDelinquents = this.getDelinquents();
         knownDelinquents.stream()
@@ -118,6 +123,7 @@ public enum DelinquencyTracker {
             // and notify of new delinquencies over all known thresholds
             Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, zonky));
         }
+        LOGGER.trace("Done.");
     }
 
     /**

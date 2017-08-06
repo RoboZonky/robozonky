@@ -37,10 +37,8 @@ import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investing;
 import com.github.triceo.robozonky.app.investing.Investor;
-import com.github.triceo.robozonky.app.portfolio.DelinquencyUpdater;
 import com.github.triceo.robozonky.app.purchasing.Purchasing;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
-import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,8 +88,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
             purchasing.run();
             suddenDeath.registerMarketplaceCheck();
         };
-        // FIXME move to a more appropriate place
-        Scheduler.BACKGROUND_SCHEDULER.submit(new DelinquencyUpdater(auth), Duration.ofHours(1));
     }
 
     Thread getShutdownHook() {

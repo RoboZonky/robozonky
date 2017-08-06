@@ -16,24 +16,29 @@
 
 package com.github.triceo.robozonky.app.portfolio;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
-import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
+import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class DelinquencyUpdate implements Consumer<Zonky> {
+class InvestmentUpdate implements Consumer<Zonky> {
 
-    private static Collection<Investment> getWithPaymentStatus(final PaymentStatuses target) {
-        return Investments.INSTANCE.getWithPaymentStatus(target).collect(Collectors.toList());
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentUpdate.class);
 
     @Override
     public void accept(final Zonky zonky) {
-        Delinquents.INSTANCE.update(zonky, getWithPaymentStatus(PaymentStatus.getDelinquent()),
-                                    getWithPaymentStatus(PaymentStatus.getDone()));
+        try {
+            LOGGER.info("Daily update started.");
+            final List<Investment> investments = zonky.getInvestments().collect(Collectors.toList());
+            Investments.INSTANCE.update(zonky, investments);
+            LOGGER.debug("Finished.");
+        } catch (final Throwable t) {
+            new DaemonRuntimeExceptionHandler().handle(t);
+        }
     }
 }

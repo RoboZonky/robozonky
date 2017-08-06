@@ -17,41 +17,34 @@
 package com.github.triceo.robozonky.app.portfolio;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.internal.api.Defaults;
 
-public class DelinquencyUpdater extends Refreshable<OffsetDateTime> {
+public class InvestmentUpdater extends Refreshable<OffsetDateTime> {
 
     private final Authenticated authenticated;
 
-    public DelinquencyUpdater(final Authenticated authenticated) {
+    public InvestmentUpdater(final Authenticated authenticated) {
         this.authenticated = authenticated;
     }
 
     /**
-     * Will only update once a day, after 10am. This is to make sure that the updates happen when all the overnight
+     * Will only update once a day, after 1am. This is to make sure that the updates happen when all the overnight
      * transactions on Zonky have cleared.
      * @return
      */
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
-        final LocalDate now = LocalDate.now();
-        final ZonedDateTime tenAmToday = now.atStartOfDay(Defaults.ZONE_ID).plus(Duration.ofHours(10));
-        final LocalDate toReport = Instant.now().isAfter(tenAmToday.toInstant()) ? now : now.minusDays(1);
-        return () -> Optional.of(toReport.toString());
+        return () -> Optional.of(Util.getYesterdayIfAfter(Duration.ofHours(1)).toString());
     }
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        authenticated.run(new DelinquencyUpdate());
+        authenticated.run(new InvestmentUpdate());
         return Optional.of(OffsetDateTime.now());
     }
 }

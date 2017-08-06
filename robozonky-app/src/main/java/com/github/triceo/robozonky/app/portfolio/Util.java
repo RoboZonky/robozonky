@@ -16,21 +16,18 @@
 
 package com.github.triceo.robozonky.app.portfolio;
 
-import java.time.OffsetDateTime;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
-import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.app.authentication.Authenticated;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.mockito.Mockito;
+import com.github.triceo.robozonky.internal.api.Defaults;
 
-public class DelinquencyUpdaterTest {
+class Util {
 
-    @Test
-    public void update() {
-        final Authenticated a = Mockito.mock(Authenticated.class);
-        final Refreshable<OffsetDateTime> r = new DelinquencyUpdater(a);
-        r.run();
-        Assertions.assertThat(r.getLatest()).isPresent();
+    public static LocalDate getYesterdayIfAfter(final Duration timeFromMidnightToday) {
+        final LocalDate now = LocalDate.now();
+        final ZonedDateTime targetTimeToday = now.atStartOfDay(Defaults.ZONE_ID).plus(timeFromMidnightToday);
+        return Instant.now().isAfter(targetTimeToday.toInstant()) ? now : now.minusDays(1);
     }
 }

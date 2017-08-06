@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.util;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,7 +26,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,27 +54,15 @@ public class Scheduler {
         this.executor = executorProvider.get();
     }
 
-    private void actuallySubmit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
-        final long delayInSeconds = delayInBetween.get(ChronoUnit.SECONDS);
-        Scheduler.LOGGER.debug("Scheduling {} every {} seconds.", toSchedule, delayInSeconds);
-        this.submitted.add(toSchedule);
-        executor.scheduleWithFixedDelay(toSchedule, 0, delayInSeconds, TimeUnit.SECONDS);
-    }
-
     public void submit(final Runnable toSchedule) {
         this.submit(toSchedule, Scheduler.REFRESH);
     }
 
     public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
-        if (toSchedule instanceof Refreshable) {
-            final Optional<Refreshable<?>> maybeDependedOn = ((Refreshable<?>) toSchedule).getDependedOn();
-            maybeDependedOn.ifPresent(dependedOn -> {
-                this.submit(dependedOn, delayInBetween); // make sure the parent's parent is also submitted
-            });
-        }
-        if (!isSubmitted(toSchedule)) {
-            this.actuallySubmit(toSchedule, delayInBetween);
-        }
+        final long delayInSeconds = delayInBetween.get(ChronoUnit.SECONDS);
+        Scheduler.LOGGER.debug("Scheduling {} every {} seconds.", toSchedule, delayInSeconds);
+        this.submitted.add(toSchedule);
+        executor.scheduleWithFixedDelay(toSchedule, 0, delayInSeconds, TimeUnit.SECONDS);
     }
 
     public boolean isSubmitted(final Runnable refreshable) {

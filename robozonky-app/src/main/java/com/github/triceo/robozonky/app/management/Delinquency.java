@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.triceo.robozonky.app.portfolio.DelinquencyTracker;
 import com.github.triceo.robozonky.app.portfolio.Delinquent;
+import com.github.triceo.robozonky.app.portfolio.Delinquents;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ class Delinquency implements DelinquencyMBean {
     private synchronized void registerRun(final Event event) {
         LOGGER.trace("Updating.");
         delinquents.clear();
-        DelinquencyTracker.INSTANCE.getDelinquents().stream()
+        Delinquents.INSTANCE.getDelinquents().stream()
                 .filter(Delinquent::hasActiveDelinquency)
                 .forEach(d -> delinquents.put(d.getLoanId(), d.getActiveDelinquency().get().getDetectedOn()));
         LOGGER.trace("Updated.");

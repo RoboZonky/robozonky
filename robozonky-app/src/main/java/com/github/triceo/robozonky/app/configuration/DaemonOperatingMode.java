@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
+import java.time.Duration;
 import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
@@ -26,8 +27,10 @@ import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
+import com.github.triceo.robozonky.app.portfolio.InvestmentUpdater;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
+import com.github.triceo.robozonky.util.Scheduler;
 
 @Parameters(commandNames = "daemon", commandDescription = "Constantly checks marketplaces, invests based on strategy.")
 class DaemonOperatingMode extends OperatingMode {
@@ -41,6 +44,9 @@ class DaemonOperatingMode extends OperatingMode {
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
+        // schedule internal data updates
+        Scheduler.BACKGROUND_SCHEDULER.submit(new InvestmentUpdater(auth), Duration.ofHours(1));
+        // and prepare robot
         final Refreshable<InvestmentStrategy> strategy1 =
                 RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
         final Refreshable<PurchaseStrategy> strategy2 =

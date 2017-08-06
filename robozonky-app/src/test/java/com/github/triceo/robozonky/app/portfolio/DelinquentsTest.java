@@ -30,13 +30,13 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class DelinquencyTrackerTest extends AbstractInvestingTest {
+public class DelinquentsTest extends AbstractInvestingTest {
 
     @Test
     public void empty() {
-        Assertions.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).isEmpty();
-        DelinquencyTracker.INSTANCE.update(null, Collections.emptyList());
-        Assertions.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).isEmpty();
+        Assertions.assertThat(Delinquents.INSTANCE.getDelinquents()).isEmpty();
+        Delinquents.INSTANCE.update(null, Collections.emptyList());
+        Assertions.assertThat(Delinquents.INSTANCE.getDelinquents()).isEmpty();
         Assertions.assertThat(this.getNewEvents()).isEmpty();
     }
 
@@ -47,21 +47,21 @@ public class DelinquencyTrackerTest extends AbstractInvestingTest {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         // make sure new delinquences are reported and stored
-        DelinquencyTracker.INSTANCE.update(zonky, Collections.singleton(i));
+        Delinquents.INSTANCE.update(zonky, Collections.singleton(i));
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.INSTANCE.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(1);
         });
         Assertions.assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
         // make sure delinquences are persisted even when there are none present
-        DelinquencyTracker.INSTANCE.update(zonky, Collections.emptyList());
+        Delinquents.INSTANCE.update(zonky, Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.INSTANCE.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(2);
         });
         Assertions.assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanNoLongerDelinquentEvent.class);
         // and when they are no longer active, they're gone for good
-        DelinquencyTracker.INSTANCE.update(zonky, Collections.emptyList(), Collections.singleton(i));
-        Assertions.assertThat(DelinquencyTracker.INSTANCE.getDelinquents()).hasSize(0);
+        Delinquents.INSTANCE.update(zonky, Collections.emptyList(), Collections.singleton(i));
+        Assertions.assertThat(Delinquents.INSTANCE.getDelinquents()).hasSize(0);
     }
 }

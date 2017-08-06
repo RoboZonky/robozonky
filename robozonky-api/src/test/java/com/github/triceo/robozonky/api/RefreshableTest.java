@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.api;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -52,11 +51,6 @@ public class RefreshableTest {
         }
 
         @Override
-        public Optional<Refreshable<?>> getDependedOn() {
-            return Optional.empty();
-        }
-
-        @Override
         protected Supplier<Optional<String>> getLatestSource() {
             return () -> Optional.ofNullable(latestSource);
         }
@@ -70,7 +64,6 @@ public class RefreshableTest {
     @Test
     public void immutable() {
         final Refreshable<Void> r = Refreshable.createImmutable();
-        Assertions.assertThat(r.getDependedOn()).isEmpty();
         r.run();
         Assertions.assertThat(r.getLatest()).isEmpty();
     }
@@ -152,10 +145,6 @@ public class RefreshableTest {
 
     private static class RefreshableString extends Refreshable<String> {
 
-        public RefreshableString(final Refreshable<?> parent) {
-            super(parent);
-        }
-
         public RefreshableString() {
         }
 
@@ -168,18 +157,6 @@ public class RefreshableTest {
         protected Optional<String> transform(final String source) {
             return Optional.of(source);
         }
-    }
-
-    @Test
-    public void refreshOnDependent() {
-        final Refreshable<String> parent = new RefreshableString();
-        final Refreshable<String> child = new RefreshableString(parent);
-        final Refreshable<String> childSpied = Mockito.spy(child);
-        Mockito.verify(childSpied, Mockito.never()).run();
-        final Optional<String> before = child.getLatest(Duration.ofMillis(1));
-        parent.run(); // refresh parent
-        final Optional<String> after = child.getLatest();
-        Assertions.assertThat(before).isNotEqualTo(after);
     }
 
     @Test

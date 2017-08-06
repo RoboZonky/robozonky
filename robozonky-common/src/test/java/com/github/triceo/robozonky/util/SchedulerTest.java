@@ -36,10 +36,7 @@ public class SchedulerTest {
             softly.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
         });
         s.submit(REFRESHABLE);
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
-            softly.assertThat(s.isSubmitted(REFRESHABLE.getDependedOn().get())).isTrue();
-        });
+        Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
         s.shutdown();
         Assertions.assertThat(s.isShutdown()).isTrue();
     }
@@ -66,10 +63,6 @@ public class SchedulerTest {
     }
 
     private static final class RefreshableString extends Refreshable<String> {
-
-        public RefreshableString() {
-            super(Refreshable.createImmutable());
-        }
 
         @Override
         protected Supplier<Optional<String>> getLatestSource() {

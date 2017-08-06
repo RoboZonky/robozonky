@@ -18,9 +18,9 @@ package com.github.triceo.robozonky.api;
 
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 public abstract class Refreshable<T> implements Runnable {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final Refreshable<?> dependedOn;
     private final Semaphore valueIsMissing = new Semaphore(1);
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
@@ -55,17 +54,11 @@ public abstract class Refreshable<T> implements Runnable {
      * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
      */
     private final CountDownLatch completionAssurance = new CountDownLatch(1);
-    private final Set<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
-
-    public Refreshable(final Refreshable<?> parent) {
-        this.valueIsMissing.acquireUninterruptibly();
-        this.registerListener(new UpdateNotification()); // log changes to resource
-        this.dependedOn = parent;
-        this.getDependedOn().ifPresent(r -> r.registerListener(new RefreshRequest())); // refresh when parent refreshed
-    }
+    private final Collection<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
     public Refreshable() {
-        this(null);
+        this.valueIsMissing.acquireUninterruptibly();
+        this.registerListener(new UpdateNotification()); // log changes to resource
     }
 
     /**
@@ -100,14 +93,6 @@ public abstract class Refreshable<T> implements Runnable {
                 return "ImmutableRefreshable{toReturn=" + toReturn + "}";
             }
         };
-    }
-
-    /**
-     * Whether or not the refresh of this resource depends on the refresh of another resource.
-     * @return Present if this resource needs another resource to be properly refreshed.
-     */
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.ofNullable(dependedOn);
     }
 
     /**
@@ -327,29 +312,6 @@ public abstract class Refreshable<T> implements Runnable {
                 LOGGER.trace("Refreshing after pause.");
                 Refreshable.this.run();
             }
-        }
-    }
-
-    private final class RefreshRequest implements Refreshable.RefreshListener {
-
-        private void run() {
-            LOGGER.trace("Updating due to update of parent.");
-            Refreshable.this.run();
-        }
-
-        @Override
-        public void valueSet(final Object newValue) {
-            run();
-        }
-
-        @Override
-        public void valueUnset(final Object oldValue) {
-            run();
-        }
-
-        @Override
-        public void valueChanged(final Object oldValue, final Object newValue) {
-            run();
         }
     }
 
