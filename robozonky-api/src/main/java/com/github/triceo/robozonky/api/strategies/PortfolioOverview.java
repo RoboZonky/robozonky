@@ -62,6 +62,11 @@ public class PortfolioOverview {
         return new PortfolioOverview(balance, amounts);
     }
 
+    public static PortfolioOverview calculate(final BigDecimal balance, final Statistics stats,
+                                              final Stream<Investment> investments) {
+        return calculate(balance, stats, investments.collect(Collectors.toSet()));
+    }
+
     private final int czkAvailable, czkInvested, czkExpectedYield;
     private final Map<Rating, Integer> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> sharesOnInvestment;

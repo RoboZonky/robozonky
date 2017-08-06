@@ -20,8 +20,16 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
+import com.github.triceo.robozonky.internal.api.Retriever;
 
 class Util {
 
@@ -30,4 +38,37 @@ class Util {
         final ZonedDateTime targetTimeToday = now.atStartOfDay(Defaults.ZONE_ID).plus(timeFromMidnightToday);
         return Instant.now().isAfter(targetTimeToday.toInstant()) ? now : now.minusDays(1);
     }
+
+    /**
+     * Blocked amounts represent loans in various stages. Either the user has invested and the loan has not yet been
+     * funded to 100 % ("na tržišti"), or the user invested and the loan has been funded ("na cestě"). In the latter
+     * case, the loan has already disappeared from the marketplace, which means that it will not be available for
+     * investing any more. As far as we know, the next stage is "v pořádku", the blocked amount is cleared and the loan
+     * becomes an active investment.
+     * <p>
+     * Based on that, this method deals with the first case - when the loan is still available for investing, but we've
+     * already invested as evidenced by the blocked amount. It also unnecessarily deals with the second case, since
+     * that is represented by a blocked amount as well. But that does no harm.
+     * <p>
+     * In case user has made repeated investments into a particular loan, this will show up as multiple blocked amounts.
+     * The method needs to handle this as well.
+     * @param api Authenticated Zonky API to read data from.
+     * @return Every blocked amount represents a future investment. This method returns such investments.
+     */
+    public static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final Zonky api) {
+        // first group all blocked amounts by the loan ID and sum them
+        final Map<Integer, Integer> amountsBlockedByLoans =
+                api.getBlockedAmounts()
+                        .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
+                        .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
+                                                       Collectors.summingInt(BlockedAmount::getAmount)));
+        // and then fetch all the loans in parallel, converting them into investments
+        return amountsBlockedByLoans.entrySet().parallelStream()
+                .map(entry ->
+                             Retriever.retrieve(() -> Optional.of(api.getLoan(entry.getKey())))
+                                     .map(l -> new Investment(l, entry.getValue()))
+                                     .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
+                ).collect(Collectors.toList());
+    }
+
 }

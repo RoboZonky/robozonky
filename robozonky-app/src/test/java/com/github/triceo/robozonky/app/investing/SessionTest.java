@@ -35,6 +35,7 @@ import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
@@ -57,10 +58,10 @@ public class SessionTest extends AbstractInvestingTest {
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         try (final Session it = Session.create(new Investor.Builder(), zonky, lds)) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailableLoans())
+                softly.assertThat(it.getAvailable())
                         .isNotSameAs(lds)
                         .containsExactly(ld);
-                softly.assertThat(it.getInvestmentsMade()).isEmpty();
+                softly.assertThat(it.getResult()).isEmpty();
             });
             // no new sessions should be allowed before the current one is disposed of
             Assertions.assertThatThrownBy(() -> Session.create(new Investor.Builder(), zonky, lds))
@@ -81,10 +82,10 @@ public class SessionTest extends AbstractInvestingTest {
         // test that the loan is not available
         try (final Session it = Session.create(new Investor.Builder(), zonky, lds)) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailableLoans())
+                softly.assertThat(it.getAvailable())
                         .hasSize(1)
                         .doesNotContain(ld);
-                softly.assertThat(it.getInvestmentsMade()).isEmpty();
+                softly.assertThat(it.getResult()).isEmpty();
             });
         }
     }
@@ -99,12 +100,11 @@ public class SessionTest extends AbstractInvestingTest {
         final BlockedAmount ba = new BlockedAmount(loanId, Defaults.MINIMUM_INVESTMENT_IN_CZK);
         Mockito.when(z.getBlockedAmounts()).thenReturn(Stream.of(ba));
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.item());
+        Portfolio.INSTANCE.update(z); // make sure data from API is loaded
         try (final Session it = Session.create(new Investor.Builder(), z, lds)) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailableLoans())
-                        .hasSize(1)
-                        .doesNotContain(ld);
-                softly.assertThat(it.getInvestmentsMade()).isEmpty();
+                softly.assertThat(it.getAvailable()).hasSize(1).doesNotContain(ld);
+                softly.assertThat(it.getResult()).isEmpty();
             });
         }
     }
@@ -120,8 +120,8 @@ public class SessionTest extends AbstractInvestingTest {
         try (final Session it = Session.create(new Investor.Builder(), z, lds)) {
             it.invest(ld.recommend(BigDecimal.valueOf(amount)).get());
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailableLoans()).isNotEmpty().doesNotContain(ld);
-                softly.assertThat(it.getInvestmentsMade()).hasSize(1);
+                softly.assertThat(it.getAvailable()).isNotEmpty().doesNotContain(ld);
+                softly.assertThat(it.getResult()).hasSize(1);
                 softly.assertAll();
             });
         }
@@ -278,6 +278,7 @@ public class SessionTest extends AbstractInvestingTest {
         final RecommendedLoan r = AbstractInvestingTest.mockLoanDescriptor().recommend(amountToInvest).get();
         final Zonky z = AbstractInvestingTest.harmlessZonky(oldBalance);
         final Investor p = Mockito.mock(Investor.class);
+        Mockito.doReturn(z).when(p).getZonky();
         Mockito.doReturn(new ZonkyResponse(amountToInvest))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
@@ -286,7 +287,7 @@ public class SessionTest extends AbstractInvestingTest {
         try (final Session t = Session.create(b, z, Collections.emptyList())) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isTrue();
-            final List<Investment> investments = t.getInvestmentsMade();
+            final List<Investment> investments = t.getResult();
             Assertions.assertThat(investments).hasSize(1);
             Assertions.assertThat(investments.get(0).getAmount()).isEqualTo(amountToInvest);
         }

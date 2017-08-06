@@ -32,7 +32,7 @@ public class InvestmentCommandTest extends AbstractInvestingTest {
         final Collection<LoanDescriptor> loans = Collections.emptyList();
         final Session sess = Mockito.mock(Session.class);
         final InvestmentStrategy s = Mockito.mock(InvestmentStrategy.class);
-        final InvestmentCommand c = new StrategyBasedInvestmentCommand(s, loans);
+        final InvestmentCommand c = new InvestmentCommand(s, loans);
         c.accept(sess); // SUT
         Mockito.verify(sess, Mockito.never()).invest(ArgumentMatchers.any());
     }

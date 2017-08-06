@@ -17,14 +17,13 @@
 package com.github.triceo.robozonky.app.purchasing;
 
 import java.util.Collection;
-import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.Events;
 
-final class InvestmentCommand implements Consumer<Session> {
+final class InvestmentCommand {
 
     private final PurchaseStrategy strategy;
     private final Collection<ParticipationDescriptor> loans;
@@ -38,11 +37,10 @@ final class InvestmentCommand implements Consumer<Session> {
         return loans;
     }
 
-    @Override
     public void accept(final Session s) {
         boolean invested;
         do {
-            invested = strategy.recommend(s.getAvailableParticipations(), s.getPortfolioOverview())
+            invested = strategy.recommend(s.getAvailable(), s.getPortfolioOverview())
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(s::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);

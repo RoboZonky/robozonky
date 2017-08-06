@@ -28,7 +28,7 @@ import com.github.triceo.robozonky.common.remote.Zonky;
 class DelinquencyUpdate implements Consumer<Zonky> {
 
     private static Collection<Investment> getWithPaymentStatus(final PaymentStatuses target) {
-        return Investments.INSTANCE.getWithPaymentStatus(target).collect(Collectors.toList());
+        return Portfolio.INSTANCE.getActiveWithPaymentStatus(target).collect(Collectors.toList());
     }
 
     @Override

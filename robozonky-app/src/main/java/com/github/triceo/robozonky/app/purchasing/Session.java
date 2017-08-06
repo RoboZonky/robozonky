@@ -24,12 +24,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
-import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.notifications.PurchaseMadeEvent;
 import com.github.triceo.robozonky.api.notifications.PurchaseRequestedEvent;
@@ -38,14 +35,13 @@ import com.github.triceo.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
-import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.RecommendedParticipation;
 import com.github.triceo.robozonky.app.Events;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.ApiUtil;
 import com.github.triceo.robozonky.common.remote.Zonky;
-import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +56,8 @@ class Session implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private static final AtomicReference<Session> INSTANCE = new AtomicReference<>(null);
     private final List<ParticipationDescriptor> stillAvailable;
-    private final Collection<Investment> allInvestments, investmentsMadeNow = new LinkedHashSet<>();
-    private final Refreshable<PortfolioOverview> portfolioOverview;
+    private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>();
+    private PortfolioOverview portfolioOverview;
     private final Zonky zonky;
     private final boolean isDryRun;
     private BigDecimal balance;
@@ -71,23 +67,8 @@ class Session implements AutoCloseable {
         this.isDryRun = dryRun;
         this.balance = isDryRun ? ApiUtil.getDryRunBalance(zonky) : ApiUtil.getLiveBalance(zonky);
         Session.LOGGER.info("Starting account balance: {} CZK.", balance);
-        this.allInvestments = ApiUtil.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         this.stillAvailable = new ArrayList<>(marketplace);
-        this.portfolioOverview = new Refreshable<PortfolioOverview>() {
-
-            private final Statistics stats = zonky.getStatistics();
-
-            @Override
-            protected Supplier<Optional<String>> getLatestSource() {
-                return () -> Optional.of(investmentsMadeNow.toString());
-            }
-
-            @Override
-            protected Optional<PortfolioOverview> transform(final String source) {
-                return Optional.of(PortfolioOverview.calculate(balance, stats, allInvestments));
-            }
-        };
-        portfolioOverview.run(); // load initial portfolio overview so that strategy can use it
+        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, balance);
     }
 
     public synchronized static Session create(final Zonky api, final Collection<ParticipationDescriptor> marketplace,
@@ -103,24 +84,22 @@ class Session implements AutoCloseable {
     static Collection<Investment> purchase(final Zonky api, final InvestmentCommand command, final boolean dryRun) {
         final Collection<ParticipationDescriptor> items = command.getItems();
         try (final Session session = Session.create(api, items, dryRun)) {
-            final int balance = session.getPortfolioOverview().getCzkAvailable();
             Events.fire(new PurchasingStartedEvent(items, session.getPortfolioOverview()));
-            if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailableParticipations().isEmpty()) {
+            if (!session.getAvailable().isEmpty()) {
                 command.accept(session);
             }
             final PortfolioOverview portfolio = session.getPortfolioOverview();
             Session.LOGGER.info("Current value of portfolio is {} CZK, annual expected yield is {} % ({} CZK).",
                                 portfolio.getCzkInvested(),
-                                portfolio.getRelativeExpectedYield().scaleByPowerOfTen(2).setScale(2,
-                                                                                                   RoundingMode
-                                                                                                           .HALF_EVEN),
+                                portfolio.getRelativeExpectedYield()
+                                        .scaleByPowerOfTen(2)
+                                        .setScale(2, RoundingMode.HALF_EVEN),
                                 portfolio.getCzkExpectedYield());
-            final Collection<Investment> result = session.getParticipationsBought();
+            final Collection<Investment> result = session.getResult();
             Events.fire(new PurchasingCompletedEvent(result, portfolio));
             return Collections.unmodifiableCollection(result);
         }
     }
-
 
     private synchronized void ensureOpen() {
         final Session s = Session.INSTANCE.get();
@@ -134,7 +113,7 @@ class Session implements AutoCloseable {
      * @return Portfolio.
      */
     public synchronized PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview.getLatestBlocking();
+        return portfolioOverview;
     }
 
     /**
@@ -142,20 +121,20 @@ class Session implements AutoCloseable {
      * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
-    public synchronized Collection<ParticipationDescriptor> getAvailableParticipations() {
-        return Collections.unmodifiableList(new ArrayList<>(this.stillAvailable));
+    public synchronized Collection<ParticipationDescriptor> getAvailable() {
+        return Collections.unmodifiableList(new ArrayList<>(stillAvailable));
     }
 
     /**
      * Get investments made during this session.
      * @return Investments made so far during this session. Unmodifiable.
      */
-    public synchronized List<Investment> getParticipationsBought() {
-        return Collections.unmodifiableList(new ArrayList<>(this.investmentsMadeNow));
+    public synchronized List<Investment> getResult() {
+        return Collections.unmodifiableList(new ArrayList<>(investmentsMadeNow));
     }
 
     public synchronized boolean purchase(final RecommendedParticipation recommendation) {
-        this.ensureOpen();
+        ensureOpen();
         final ParticipationDescriptor descriptor = recommendation.descriptor();
         final Participation participation = descriptor.item();
         if (balance.intValue() < recommendation.amount().intValue()) {
@@ -174,11 +153,11 @@ class Session implements AutoCloseable {
     }
 
     private synchronized void markSuccessfulInvestment(final Investment i) {
-        this.allInvestments.add(i);
-        this.investmentsMadeNow.add(i);
-        this.stillAvailable.removeIf(l -> l.item().getLoanId() == i.getLoanId());
-        this.balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
-        portfolioOverview.run(); // refresh portfolio overview
+        investmentsMadeNow.add(i);
+        stillAvailable.removeIf(l -> l.item().getLoanId() == i.getLoanId());
+        balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
+        Portfolio.INSTANCE.update(zonky, Portfolio.UpdateType.PARTIAL);
+        portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, balance);
     }
 
     @Override

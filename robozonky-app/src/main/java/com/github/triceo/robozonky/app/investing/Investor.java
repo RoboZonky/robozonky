@@ -31,64 +31,11 @@ import org.slf4j.LoggerFactory;
 public class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
-
-    public static class Builder {
-
-        private String username = "";
-        private boolean isDryRun = false;
-        private ConfirmationProvider provider;
-        private char[] password;
-
-        public Investor.Builder usingConfirmation(final ConfirmationProvider provider, final char... password) {
-            this.provider = provider;
-            this.password = Arrays.copyOf(password, password.length);
-            return this;
-        }
-
-        public Optional<ConfirmationProvider> getConfirmationUsed() {
-            return Optional.ofNullable(provider);
-        }
-
-        public Optional<RequestId> getConfirmationRequestUsed() {
-            return this.getConfirmationUsed().map(c -> new RequestId(username, password));
-        }
-
-        public Investor.Builder asUser(final String username) {
-            this.username = username;
-            return this;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public Investor.Builder asDryRun() {
-            this.isDryRun = true;
-            return this;
-        }
-
-        public boolean isDryRun() {
-            return isDryRun;
-        }
-
-        public Investor build(final Zonky zonky) {
-            return this.getConfirmationRequestUsed()
-                    .map(r -> new Investor(r, provider, zonky, isDryRun))
-                    .orElse(new Investor(username, zonky, isDryRun));
-        }
-    }
-
-    static Investment convertToInvestment(final RecommendedLoan r) {
-        final int amount = r.amount().intValue();
-        return new Investment(r.descriptor().item(), amount);
-    }
-
     private final String username;
     private final Zonky zonky;
     private final boolean isDryRun;
     private final RequestId requestId;
     private final ConfirmationProvider provider;
-
     private Investor(final RequestId requestId, final ConfirmationProvider provider, final Zonky zonky,
                      final boolean isDryRun) {
         this.username = requestId.getUserId();
@@ -97,17 +44,25 @@ public class Investor {
         this.provider = provider;
         this.requestId = requestId;
     }
-
-    public boolean isDryRun() {
-        return isDryRun;
-    }
-
     private Investor(final String username, final Zonky zonky, final boolean isDryRun) {
         this.username = username;
         this.zonky = zonky;
         this.isDryRun = isDryRun;
         this.provider = null;
         this.requestId = null;
+    }
+
+    static Investment convertToInvestment(final RecommendedLoan r) {
+        final int amount = r.amount().intValue();
+        return new Investment(r.descriptor().item(), amount);
+    }
+
+    public Zonky getZonky() {
+        return zonky;
+    }
+
+    public boolean isDryRun() {
+        return isDryRun;
     }
 
     public String getUsername() {
@@ -188,6 +143,52 @@ public class Investor {
         } else {
             Investor.LOGGER.debug("Investment not confirmed delegated, not investing: {}.", r);
             return new ZonkyResponse(ZonkyResponseType.REJECTED);
+        }
+    }
+
+    public static class Builder {
+
+        private String username = "";
+        private boolean isDryRun = false;
+        private ConfirmationProvider provider;
+        private char[] password;
+
+        public Investor.Builder usingConfirmation(final ConfirmationProvider provider, final char... password) {
+            this.provider = provider;
+            this.password = Arrays.copyOf(password, password.length);
+            return this;
+        }
+
+        public Optional<ConfirmationProvider> getConfirmationUsed() {
+            return Optional.ofNullable(provider);
+        }
+
+        public Optional<RequestId> getConfirmationRequestUsed() {
+            return this.getConfirmationUsed().map(c -> new RequestId(username, password));
+        }
+
+        public Investor.Builder asUser(final String username) {
+            this.username = username;
+            return this;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public Investor.Builder asDryRun() {
+            this.isDryRun = true;
+            return this;
+        }
+
+        public boolean isDryRun() {
+            return isDryRun;
+        }
+
+        public Investor build(final Zonky zonky) {
+            return this.getConfirmationRequestUsed()
+                    .map(r -> new Investor(r, provider, zonky, isDryRun))
+                    .orElse(new Investor(username, zonky, isDryRun));
         }
     }
 }

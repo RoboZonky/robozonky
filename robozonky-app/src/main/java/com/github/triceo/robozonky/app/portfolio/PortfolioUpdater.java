@@ -24,11 +24,11 @@ import java.util.function.Supplier;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 
-public class InvestmentUpdater extends Refreshable<OffsetDateTime> {
+public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
 
     private final Authenticated authenticated;
 
-    public InvestmentUpdater(final Authenticated authenticated) {
+    public PortfolioUpdater(final Authenticated authenticated) {
         this.authenticated = authenticated;
     }
 
@@ -44,7 +44,7 @@ public class InvestmentUpdater extends Refreshable<OffsetDateTime> {
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        authenticated.run(Investments.INSTANCE::update);
+        authenticated.run(Portfolio.INSTANCE::update);
         return Optional.of(OffsetDateTime.now());
     }
 }

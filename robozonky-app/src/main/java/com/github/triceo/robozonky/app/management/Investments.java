@@ -25,6 +25,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 
+// FIXME SMP purchases and sells
 class Investments implements InvestmentsMBean {
 
     private OffsetDateTime lastInvestmentRunTimestamp;

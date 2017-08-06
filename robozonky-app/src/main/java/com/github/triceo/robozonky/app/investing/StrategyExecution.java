@@ -51,7 +51,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
     private Collection<Investment> invest(final InvestmentStrategy strategy,
                                           final Collection<LoanDescriptor> marketplace) {
         final Function<Zonky, Collection<Investment>> op = (zonky) -> {
-            final InvestmentCommand c = new StrategyBasedInvestmentCommand(strategy, marketplace);
+            final InvestmentCommand c = new InvestmentCommand(strategy, marketplace);
             return Session.invest(investor, zonky, c);
         };
         return authenticationHandler.call(op);

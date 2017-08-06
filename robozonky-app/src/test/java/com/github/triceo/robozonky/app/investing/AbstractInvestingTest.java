@@ -34,9 +34,11 @@ import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.OAuth;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -103,6 +105,15 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
     }
 
     private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
+
+    @Before
+    @After
+    public void clearPortfolioTracker() {
+        final Zonky z = Mockito.mock(Zonky.class);
+        Mockito.when(z.getBlockedAmounts()).thenReturn(Stream.empty());
+        Mockito.when(z.getInvestments()).thenReturn(Stream.empty());
+        Portfolio.INSTANCE.reset();
+    }
 
     @Before
     public void readPreexistingEvents() {
