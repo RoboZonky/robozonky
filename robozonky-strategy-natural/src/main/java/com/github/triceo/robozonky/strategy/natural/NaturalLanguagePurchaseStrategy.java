@@ -103,23 +103,17 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         }).orElse(false); // not recommended
     }
 
-    private Optional<int[]> recommendInvestmentAmount(final Participation loan) {
-        final int[] recommended = getRecommendationBoundaries(loan);
+    private Optional<int[]> recommendInvestmentAmount(final Participation item) {
+        final int[] recommended = getRecommendationBoundaries(item);
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
-        final int loanId = loan.getId();
+        final int loanId = item.getLoanId();
         LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId, minimumRecommendation,
                      maximumRecommendation);
-        final double remainingPrincipal = loan.getRemainingPrincipal().doubleValue();
-        final int minimumInvestmentByShare =
-                getPercentage(remainingPrincipal, strategy.getMinimumInvestmentShareInPercent());
-        final int minimumInvestment =
-                Math.max(minimumInvestmentByShare, strategy.getMinimumInvestmentSizeInCzk(loan.getRating()));
-        final int maximumInvestmentByShare =
-                getPercentage(remainingPrincipal, strategy.getMaximumInvestmentShareInPercent());
-        final int maximumInvestment =
-                Math.min(maximumInvestmentByShare, strategy.getMaximumInvestmentSizeInCzk(loan.getRating()));
+        final int minimumInvestment = strategy.getMinimumInvestmentSizeInCzk(item.getRating());
+        final int maximumInvestment = strategy.getMaximumInvestmentSizeInCzk(item.getRating());
         if (maximumInvestment < minimumInvestment) {
+            LOGGER.trace("Loan #{} skipped; {} CZK > {} CZK.", loanId, minimumInvestment, maximumInvestment);
             return Optional.empty();
         }
         return Optional.of(new int[]{minimumInvestment, maximumInvestment});

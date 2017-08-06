@@ -59,7 +59,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyList(),
-                                                    Collections.emptyList());
+                                                    Collections.emptyMap());
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
@@ -78,7 +78,9 @@ public class NaturalLanguagePurchaseStrategyTest {
                 return true;
             }
         }));
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
+        final ParsedStrategy p =
+                new ParsedStrategy(DefaultPortfolio.PROGRESSIVE,
+                                   Collections.singletonMap(Boolean.FALSE, Collections.singleton(filter)));
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());

@@ -25,8 +25,12 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(MarketplaceFilter.class);
 
     private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
         return conditions.stream()

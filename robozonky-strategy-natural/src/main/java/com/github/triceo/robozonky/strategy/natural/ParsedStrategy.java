@@ -18,12 +18,13 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
@@ -37,26 +38,27 @@ public class ParsedStrategy {
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioShare> portfolio;
     private final Map<Rating, InvestmentSize> investmentSizes;
-    private final Collection<MarketplaceFilter> marketplaceFilters;
+    private final Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters;
 
     public ParsedStrategy(final DefaultPortfolio portfolio) {
-        this(portfolio, Collections.emptyList());
+        this(portfolio, Collections.emptyMap());
     }
 
-    ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> filters) {
+    ParsedStrategy(final DefaultPortfolio portfolio, final Map<Boolean, Collection<MarketplaceFilter>> filters) {
         this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyList(), filters);
     }
 
     public ParsedStrategy(final DefaultValues defaults,
                           final Collection<PortfolioShare> portfolio,
                           final Collection<InvestmentSize> investmentSizes,
-                          final Collection<MarketplaceFilter> marketplaceFilters) {
+                          final Map<Boolean, Collection<MarketplaceFilter>> marketplaceFilters) {
         this.defaults = defaults;
         this.portfolio = portfolio.stream()
                 .collect(Collectors.toMap(PortfolioShare::getRating, Function.identity()));
         this.investmentSizes = investmentSizes.stream()
                 .collect(Collectors.toMap(InvestmentSize::getRating, Function.identity()));
-        this.marketplaceFilters = new LinkedHashSet<>(marketplaceFilters);
+        this.primaryMarketplaceFilters = marketplaceFilters.getOrDefault(true, Collections.emptyList());
+        this.secondaryMarketplaceFilters = marketplaceFilters.getOrDefault(false, Collections.emptyList());
         final int shareSum = sumMinimalShares();
         if (shareSum > 100) {
             throw new IllegalArgumentException("Sum of minimal rating shares in portfolio is over 100 %.");
@@ -121,9 +123,20 @@ public class ParsedStrategy {
         }
     }
 
-    private boolean matchesNoFilter(final Object loan, final int loanId) {
-        return !marketplaceFilters.stream()
-                .filter(f -> f.test(loan))
+    private Collection<MarketplaceFilter> getProperFilters(final Object item) {
+        if (item instanceof Loan) {
+            return primaryMarketplaceFilters;
+        } else if (item instanceof Participation) {
+            return secondaryMarketplaceFilters;
+        } else {
+            throw new IllegalStateException("Wrong object type: " + item.getClass());
+        }
+    }
+
+    private boolean matchesNoFilter(final Object item, final int loanId) {
+        final Collection<MarketplaceFilter> filters = getProperFilters(item);
+        return !filters.stream()
+                .filter(f -> f.test(item))
                 .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", loanId, f))
                 .findFirst()
                 .isPresent();

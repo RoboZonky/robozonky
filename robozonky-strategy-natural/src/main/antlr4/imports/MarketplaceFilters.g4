@@ -4,15 +4,26 @@ import Tokens;
 
 @header {
     import java.util.Collection;
+    import java.util.ArrayList;
+    import java.util.Map;
+    import java.util.HashMap;
     import com.github.triceo.robozonky.strategy.natural.*;
 }
 
-marketplaceFilterExpression returns [Collection<MarketplaceFilter> result]:
-    { $result = new ArrayList<>(); }
+marketplaceFilterExpression returns [Map<Boolean, Collection<MarketplaceFilter>> result]:
+    { $result = new HashMap<>();
+      $result.put(true, new ArrayList<>());
+      $result.put(false, new ArrayList<>());
+    }
     (
-        (j=jointMarketplaceFilter { $result.add($j.result); })
-        |(p=primaryMarketplaceFilter { $result.add($p.result); })
-        |(s=secondaryMarketplaceFilter { $result.add($s.result); })
+        (j=jointMarketplaceFilter {
+            $result.get(true).add($j.result);
+            $result.get(false).add($j.result);
+        }) | (p=primaryMarketplaceFilter {
+            $result.get(true).add($p.result);
+        }) | (s=secondaryMarketplaceFilter {
+            $result.get(false).add($s.result);
+        })
     )+
 ;
 

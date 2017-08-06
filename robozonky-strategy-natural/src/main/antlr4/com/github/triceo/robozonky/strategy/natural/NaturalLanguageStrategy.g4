@@ -36,7 +36,7 @@ complexExpression returns [ParsedStrategy result] :
         { investmentSizes = $i.result; }
     )?
 
-    { Collection<MarketplaceFilter> filters = Collections.emptyList(); }
+    { Map<Boolean, Collection<MarketplaceFilter>> filters = Collections.emptyMap(); }
     (
         DELIM 'Filtrování tržiště'
         m=marketplaceFilterExpression

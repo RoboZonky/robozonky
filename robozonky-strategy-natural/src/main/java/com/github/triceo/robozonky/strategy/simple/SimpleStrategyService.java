@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -142,7 +144,10 @@ public class SimpleStrategyService implements StrategyService {
             f.ignoreWhen(Collections.singleton(condition));
             return f;
         }).forEach(filters::add);
-        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, filters);
+        final Map<Boolean, Collection<MarketplaceFilter>> resultingFilters = new HashMap<>();
+        resultingFilters.put(true, filters);
+        resultingFilters.put(false, Collections.emptyList());
+        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, resultingFilters);
         final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);
         return new SimpleStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);
     }
