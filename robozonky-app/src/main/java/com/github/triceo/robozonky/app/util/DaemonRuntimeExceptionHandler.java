@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.commons;
+package com.github.triceo.robozonky.app.util;
 
 import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.app.Events;
-import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

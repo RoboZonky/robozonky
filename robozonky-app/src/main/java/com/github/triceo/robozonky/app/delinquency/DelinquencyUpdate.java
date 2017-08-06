@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.common.remote.Zonky;
@@ -46,6 +47,7 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
     public void accept(final Zonky zonky) {
         LOGGER.info("Daily update started.");
         final Map<PaymentStatus, List<Investment>> investments = zonky.getInvestments()
+                .filter(i -> i.getStatus() != InvestmentStatus.SOLD)
                 .collect(Collectors.groupingBy(Investment::getPaymentStatus));
         DelinquencyTracker.INSTANCE.update(zonky, getWithPaymentStatus(investments, PaymentStatus.getDelinquent()),
                                            getWithPaymentStatus(investments, PaymentStatus.getDone()));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.commons;
+package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * the robot, sending a warning e-mail. When that happens, we will have up-to-date logs and will be able to identify
  * the culprit.
  */
-public class SuddenDeathDetection implements Runnable {
+class SuddenDeathDetection implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SuddenDeathDetection.class);
 

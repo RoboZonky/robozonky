@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.configuration;
+package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -34,10 +34,7 @@ import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.commons.DaemonShutdownHook;
-import com.github.triceo.robozonky.app.commons.InvestmentMode;
-import com.github.triceo.robozonky.app.commons.SuddenDeathDetection;
-import com.github.triceo.robozonky.app.commons.SuddenDeathException;
+import com.github.triceo.robozonky.app.configuration.InvestmentMode;
 import com.github.triceo.robozonky.app.delinquency.DelinquencyUpdater;
 import com.github.triceo.robozonky.app.investing.Investing;
 import com.github.triceo.robozonky.app.investing.Investor;

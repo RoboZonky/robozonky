@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -24,9 +25,10 @@ import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
 import com.github.triceo.robozonky.api.remote.enums.Purpose;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-public class Participation {
+public class Participation extends BaseEntity {
 
-    private OffsetDateTime deadline, nextPaymentDate;
+    private OffsetDateTime deadline;
+    private LocalDate nextPaymentDate;
     private int id, investmentId, loanId, originalInstalmentCount, remainingInstalmentCount, userId;
     private MainIncomeType incomeType;
     private BigDecimal interestRate, remainingPrincipal;
@@ -34,6 +36,7 @@ public class Participation {
     private Purpose purpose;
     private Rating rating;
     private boolean willExceedLoanInvestmentLimit;
+    private Object loanInvestments;
 
     @XmlElement
     public OffsetDateTime getDeadline() {
@@ -41,7 +44,7 @@ public class Participation {
     }
 
     @XmlElement
-    public OffsetDateTime getNextPaymentDate() {
+    public LocalDate getNextPaymentDate() {
         return nextPaymentDate;
     }
 
@@ -108,5 +111,10 @@ public class Participation {
     @XmlElement
     public boolean isWillExceedLoanInvestmentLimit() {
         return willExceedLoanInvestmentLimit;
+    }
+
+    @XmlElement
+    public Object getLoanInvestments() { // FIXME figure out what this means
+        return loanInvestments;
     }
 }

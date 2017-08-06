@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import java.time.Duration;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.function.Function;
@@ -27,9 +26,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.commons.DaemonRuntimeExceptionHandler;
-import com.github.triceo.robozonky.app.delinquency.DelinquencyUpdater;
-import com.github.triceo.robozonky.util.Scheduler;
+import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 
 public class Investing implements Runnable {
 
@@ -41,8 +38,7 @@ public class Investing implements Runnable {
     private final ResultTracker buffer = new ResultTracker();
 
     public Investing(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
-                     final Refreshable<InvestmentStrategy> strategy,
-                     final TemporalAmount maximumSleepPeriod) {
+                     final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod) {
         this.authenticated = auth;
         this.builder = builder;
         this.refreshableStrategy = strategy;
@@ -53,8 +49,6 @@ public class Investing implements Runnable {
             final Collection<Investment> result = getInvestor().apply(descriptors);
             buffer.acceptInvestmentsFromRobot(result);
         });
-        // FIXME move to a more appropriate place
-        Scheduler.BACKGROUND_SCHEDULER.submit(new DelinquencyUpdater(auth), Duration.ofHours(1));
     }
 
     @Override

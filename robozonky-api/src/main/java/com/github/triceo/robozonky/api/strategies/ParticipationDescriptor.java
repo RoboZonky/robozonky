@@ -33,7 +33,7 @@ public final class ParticipationDescriptor
 
     @Override
     public Participation item() {
-        return null;
+        return participation;
     }
 
     public Optional<RecommendedParticipation> recommend() {

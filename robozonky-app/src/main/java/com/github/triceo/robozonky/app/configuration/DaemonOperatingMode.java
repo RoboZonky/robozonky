@@ -24,7 +24,7 @@ import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.commons.InvestmentMode;
+import com.github.triceo.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;

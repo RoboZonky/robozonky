@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.commons.InvestmentMode;
+import com.github.triceo.robozonky.app.configuration.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.remote.ApiProvider;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.commons;
+package com.github.triceo.robozonky.app.configuration;
 
 import java.util.function.Supplier;
 

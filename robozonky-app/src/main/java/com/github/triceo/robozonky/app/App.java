@@ -24,8 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
-import com.github.triceo.robozonky.app.commons.InvestmentMode;
 import com.github.triceo.robozonky.app.configuration.CommandLine;
+import com.github.triceo.robozonky.app.configuration.InvestmentMode;
 import com.github.triceo.robozonky.app.version.UpdateMonitor;
 import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;

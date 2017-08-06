@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.commons;
+package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +23,7 @@ import com.github.triceo.robozonky.app.ShutdownEnabler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DaemonShutdownHook extends Thread {
+class DaemonShutdownHook extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonShutdownHook.class);
 

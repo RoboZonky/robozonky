@@ -21,7 +21,6 @@ import java.util.Optional;
 import com.beust.jcommander.Parameters;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.commons.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.Checker;
 import org.slf4j.Logger;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lukáš Petrovický
+ * Copyright 2017 Lukáš Petrovický
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-@XmlJavaTypeAdapters({
-        @XmlJavaTypeAdapter(type = OffsetDateTime.class, value = OffsetDateTimeAdapter.class),
-        @XmlJavaTypeAdapter(type = LocalDate.class, value = LocalDateAdapter.class)
-})
-package com.github.triceo.robozonky.api.remote.entities;
+package com.github.triceo.robozonky.app.configuration.daemon;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+class SuddenDeathException extends Exception {
+
+}

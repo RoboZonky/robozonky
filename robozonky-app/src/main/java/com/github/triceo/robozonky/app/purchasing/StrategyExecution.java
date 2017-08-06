@@ -68,6 +68,7 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
                         return Collections.<Investment>emptyList();
                     }
                     StrategyExecution.LOGGER.debug("Sending following participations to purchasing: {}.", items.stream()
+                            .peek(System.out::println)
                             .map(p -> String.valueOf(p.item().getId()))
                             .collect(Collectors.joining(", ")));
                     final Collection<Investment> investments = invest(strategy, items);

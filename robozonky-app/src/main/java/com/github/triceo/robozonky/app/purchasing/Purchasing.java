@@ -27,7 +27,7 @@ import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.commons.DaemonRuntimeExceptionHandler;
+import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 
 public class Purchasing implements Runnable {
 
@@ -37,8 +37,8 @@ public class Purchasing implements Runnable {
     private final TemporalAmount maximumSleepPeriod;
     private final ResultTracker buffer = new ResultTracker();
 
-    public Purchasing(final Authenticated auth, final boolean isDryRun,
-                      final Refreshable<PurchaseStrategy> strategy, final TemporalAmount maximumSleepPeriod) {
+    public Purchasing(final Authenticated auth, final boolean isDryRun, final Refreshable<PurchaseStrategy> strategy,
+                      final TemporalAmount maximumSleepPeriod) {
         this.authenticated = auth;
         this.isDryRun = isDryRun;
         this.refreshableStrategy = strategy;

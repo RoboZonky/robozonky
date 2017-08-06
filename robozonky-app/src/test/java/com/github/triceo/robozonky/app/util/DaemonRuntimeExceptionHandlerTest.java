@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.commons;
+package com.github.triceo.robozonky.app.util;
 
 import java.net.SocketException;
 import javax.ws.rs.NotAllowedException;
@@ -26,7 +26,6 @@ import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
-import com.github.triceo.robozonky.app.util.RuntimeExceptionHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.commons;
+package com.github.triceo.robozonky.api.remote.entities;
 
-public class SuddenDeathException extends Exception {
+import java.time.LocalDate;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
+class LocalDateAdapter extends XmlAdapter<String, LocalDate> {
+
+    @Override
+    public LocalDate unmarshal(final String s) throws Exception {
+        return LocalDate.parse(s);
+    }
+
+    @Override
+    public String marshal(final LocalDate localDate) throws Exception {
+        return localDate.toString();
+    }
 }

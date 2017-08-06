@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.commons;
+package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
