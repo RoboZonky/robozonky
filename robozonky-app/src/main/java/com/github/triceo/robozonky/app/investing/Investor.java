@@ -19,9 +19,7 @@ package com.github.triceo.robozonky.app.investing;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
-import javax.ws.rs.ServiceUnavailableException;
 
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -80,10 +78,8 @@ public class Investor {
         }
     }
 
-    static Investment convertToInvestment(final RecommendedLoan r, final Confirmation confirmation) {
-        final int amount = (confirmation == null || !confirmation.getAmount().isPresent()) ?
-                r.amount().intValue() :
-                confirmation.getAmount().getAsInt();
+    static Investment convertToInvestment(final RecommendedLoan r) {
+        final int amount = r.amount().intValue();
         return new Investment(r.descriptor().item(), amount);
     }
 
@@ -150,7 +146,7 @@ public class Investor {
                 if (this.provider == null) {
                     throw new IllegalStateException("Confirmation required but no confirmation provider specified.");
                 } else {
-                    return this.approveOrDelegate(r);
+                    return this.delegateOrReject(r);
                 }
             } else {
                 return this.investOrDelegateOnCaptcha(r);
@@ -158,19 +154,15 @@ public class Investor {
         }
     }
 
-    private ZonkyResponse investLocallyFailingOnCaptcha(final RecommendedLoan r, final Confirmation c) {
-        Investor.LOGGER.debug("Executing investment: {}, confirmation: {}.", r, c);
-        final Investment i = Investor.convertToInvestment(r, c);
+    private ZonkyResponse investLocallyFailingOnCaptcha(final RecommendedLoan r) {
+        Investor.LOGGER.debug("Executing investment: {}.", r);
+        final Investment i = Investor.convertToInvestment(r);
         this.zonky.invest(i);
         Investor.LOGGER.debug("Investment succeeded.");
         return new ZonkyResponse(i.getAmount());
     }
 
-    private ZonkyResponse investLocallyFailingOnCaptcha(final RecommendedLoan recommendation) {
-        return this.investLocallyFailingOnCaptcha(recommendation, null);
-    }
-
-    ZonkyResponse investOrDelegateOnCaptcha(final RecommendedLoan r) {
+    private ZonkyResponse investOrDelegateOnCaptcha(final RecommendedLoan r) {
         final Optional<OffsetDateTime> captchaEndDateTime =
                 r.descriptor().getLoanCaptchaProtectionEndDateTime();
         final boolean isCaptchaProtected = captchaEndDateTime.isPresent() &&
@@ -185,41 +177,17 @@ public class Investor {
         return new ZonkyResponse(ZonkyResponseType.REJECTED);
     }
 
-    ZonkyResponse approveOrDelegate(final RecommendedLoan r) {
-        Investor.LOGGER.debug("Asking to confirm investment: {}.", r);
-        final Optional<Confirmation> confirmation = this.provider.requestConfirmation(this.requestId,
-                                                                                      r.descriptor().item().getId(),
-                                                                                      r.amount().intValue());
-        return confirmation.map(result -> {
-            switch (result.getType()) {
-                case REJECTED:
-                    Investor.LOGGER.debug("Negative confirmation received, not investing: {}.", r);
-                    return new ZonkyResponse(ZonkyResponseType.REJECTED);
-                case DELEGATED:
-                    Investor.LOGGER.debug("Investment confirmed delegated, not investing: {}.", r);
-                    return new ZonkyResponse(ZonkyResponseType.DELEGATED);
-                case APPROVED:
-                    return this.investLocallyFailingOnCaptcha(r, confirmation.get());
-                default:
-                    throw new IllegalStateException("No way how this could happen.");
-            }
-        }).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond."));
-    }
-
     private ZonkyResponse delegateOrReject(final RecommendedLoan r) {
         Investor.LOGGER.debug("Asking to confirm investment: {}.", r);
-        final Optional<Confirmation> confirmation = this.provider.requestConfirmation(this.requestId,
-                                                                                      r.descriptor().item().getId(),
-                                                                                      r.amount().intValue());
-        return confirmation.map(result -> {
-            switch (result.getType()) {
-                case DELEGATED:
-                    Investor.LOGGER.debug("Investment confirmed delegated, not investing: {}.", r);
-                    return new ZonkyResponse(ZonkyResponseType.DELEGATED);
-                default:
-                    Investor.LOGGER.warn("Investment not delegated, not investing: {}.", r);
-                    return new ZonkyResponse(ZonkyResponseType.REJECTED);
-            }
-        }).orElseThrow(() -> new ServiceUnavailableException("Confirmation provider did not respond"));
+        final boolean delegationSucceeded = this.provider.requestConfirmation(this.requestId,
+                                                                              r.descriptor().item().getId(),
+                                                                              r.amount().intValue());
+        if (delegationSucceeded) {
+            Investor.LOGGER.debug("Investment confirmed delegated, not investing: {}.", r);
+            return new ZonkyResponse(ZonkyResponseType.DELEGATED);
+        } else {
+            Investor.LOGGER.debug("Investment not confirmed delegated, not investing: {}.", r);
+            return new ZonkyResponse(ZonkyResponseType.REJECTED);
+        }
     }
 }

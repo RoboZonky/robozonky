@@ -19,11 +19,8 @@ package com.github.triceo.robozonky.app.investing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.common.remote.Zonky;
@@ -104,8 +101,8 @@ public class InvestorTest extends AbstractInvestingTest {
 
     private enum RemoteResponse {
 
-        PRESENT,
-        ABSENT
+        ACK,
+        NAK
     }
 
     @Parameterized.Parameters(name = "{0}+{1}+{2}({3})={4}")
@@ -126,24 +123,24 @@ public class InvestorTest extends AbstractInvestingTest {
                 InvestorTest.Remote.CONFIRMED, null, null});
         result.add(new Object[]{InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.UNPROTECTED,
                 InvestorTest.Remote.UNCONFIRMED, null, ZonkyResponseType.INVESTED});
-        // confirming proxy, response present
+        // confirming proxy, response positive
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
-                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ACK, ZonkyResponseType.DELEGATED});
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
-                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.DELEGATED});
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ACK, ZonkyResponseType.DELEGATED});
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
-                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ACK, ZonkyResponseType.DELEGATED});
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
-                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.PRESENT, ZonkyResponseType.INVESTED});
-        // confirming proxy, network failure
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ACK, ZonkyResponseType.INVESTED});
+        // confirming proxy, response negative
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
-                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.NAK, ZonkyResponseType.REJECTED});
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.PROTECTED,
-                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.NAK, ZonkyResponseType.REJECTED});
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
-                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.ABSENT, null});
+                InvestorTest.Remote.CONFIRMED, InvestorTest.RemoteResponse.NAK, ZonkyResponseType.REJECTED});
         result.add(new Object[]{InvestorTest.ProxyType.CONFIRMING, InvestorTest.Captcha.UNPROTECTED,
-                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.ABSENT, ZonkyResponseType.INVESTED});
+                InvestorTest.Remote.UNCONFIRMED, InvestorTest.RemoteResponse.NAK, ZonkyResponseType.INVESTED});
         return Collections.unmodifiableCollection(result);
     }
 
@@ -187,16 +184,13 @@ public class InvestorTest extends AbstractInvestingTest {
                 final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
                 Mockito.when(cp.getId()).thenReturn("something");
                 switch (confirmationResponse) {
-                    case PRESENT:
-                        final Confirmation c = (captcha == InvestorTest.Captcha.PROTECTED) ?
-                                new Confirmation(ConfirmationType.DELEGATED) :
-                                new Confirmation(InvestorTest.CONFIRMED_AMOUNT);
+                    case ACK:
                         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                                            ArgumentMatchers.anyInt())).thenReturn(Optional.of(c));
+                                                            ArgumentMatchers.anyInt())).thenReturn(true);
                         break;
-                    case ABSENT:
+                    case NAK:
                         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                                            ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
+                                                            ArgumentMatchers.anyInt())).thenReturn(false);
                         break;
                     default:
                         throw new IllegalStateException();

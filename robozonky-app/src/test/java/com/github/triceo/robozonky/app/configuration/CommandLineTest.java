@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.app.commons.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
-import com.github.triceo.robozonky.app.investing.Investing;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,7 +69,7 @@ public class CommandLineTest {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
                                                                "daemon", "-s", "somewhere");
-        Assertions.assertThat(cfg).isPresent().containsInstanceOf(Investing.class);
+        Assertions.assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
     }
 
     @Test

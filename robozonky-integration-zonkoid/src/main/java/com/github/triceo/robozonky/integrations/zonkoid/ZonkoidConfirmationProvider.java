@@ -22,12 +22,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.StringJoiner;
 
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
@@ -42,8 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This provider will either return {@link ConfirmationType#DELEGATED}, or fail. If delegated, this provider will allow
- * investors to fill out CAPTCHA.
+ * If delegated, this provider will allow investors to fill out CAPTCHA.
  */
 public class ZonkoidConfirmationProvider implements ConfirmationProvider {
 
@@ -94,8 +90,8 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         return httpPost;
     }
 
-    static Optional<Confirmation> handleError(final RequestId requestId, final int loanId, final int amount,
-                                              final String domain, final String protocol, final Exception ex) {
+    static boolean handleError(final RequestId requestId, final int loanId, final int amount, final String domain,
+                               final String protocol, final Exception ex) {
         switch (protocol) {
             case ZonkoidConfirmationProvider.PROTOCOL_MAIN:
                 ZonkoidConfirmationProvider.LOGGER.warn("HTTPS communication with Zonkoid failed, trying HTTP.");
@@ -103,15 +99,14 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
                                                                        ZonkoidConfirmationProvider.PROTOCOL_FALLBACK);
             case ZonkoidConfirmationProvider.PROTOCOL_FALLBACK:
                 ZonkoidConfirmationProvider.LOGGER.error("Communication with Zonkoid failed.", ex);
-                return Optional.empty();
+                return false;
             default:
                 throw new IllegalStateException("Can not happen.");
         }
     }
 
-    private static Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId,
-                                                              final int amount, final String domain,
-                                                              final String protocol) {
+    private static boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount,
+                                               final String domain, final String protocol) {
         try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
             ZonkoidConfirmationProvider.LOGGER.trace("Sending request.");
             final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, protocol, domain);
@@ -119,10 +114,10 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
                 final int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode >= 200 && statusCode < 300) {
                     ZonkoidConfirmationProvider.LOGGER.debug("Response: {}", response.getStatusLine());
-                    return Optional.of(new Confirmation(ConfirmationType.DELEGATED));
+                    return true;
                 } else {
                     ZonkoidConfirmationProvider.LOGGER.error("Unknown response: {}", response.getStatusLine());
-                    return Optional.empty();
+                    return false;
                 }
             }
         } catch (final Exception ex) {
@@ -130,14 +125,14 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         }
     }
 
-    static Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId, final int amount,
-                                                      final String domain) {
+    static boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount,
+                                       final String domain) {
         return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, domain,
                                                                ZonkoidConfirmationProvider.PROTOCOL_MAIN);
     }
 
     @Override
-    public Optional<Confirmation> requestConfirmation(final RequestId requestId, final int loanId, final int amount) {
+    public boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount) {
         return ZonkoidConfirmationProvider.requestConfirmation(requestId, loanId, amount, "urbancoders.eu");
     }
 

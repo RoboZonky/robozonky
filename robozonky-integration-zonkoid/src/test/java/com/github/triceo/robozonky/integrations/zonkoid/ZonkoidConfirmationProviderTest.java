@@ -18,11 +18,8 @@ package com.github.triceo.robozonky.integrations.zonkoid;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Optional;
 import java.util.UUID;
 
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
-import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -68,9 +65,9 @@ public class ZonkoidConfirmationProviderTest {
                       once());
     }
 
-    private Optional<Confirmation> execute(final int code) {
+    private boolean execute(final int code) {
         this.mockServerResponse(code);
-        final Optional<Confirmation> result =
+        final boolean result =
                 ZonkoidConfirmationProvider.requestConfirmation(new RequestId("user@somewhere.cz",
                                                                               "apitest".toCharArray()), 1, 200,
                                                                 serverUrl);
@@ -80,27 +77,26 @@ public class ZonkoidConfirmationProviderTest {
 
     @Test
     public void normalResponse() {
-        final Optional<Confirmation> result = this.execute(200);
-        Assertions.assertThat(result).isPresent();
-        Assertions.assertThat(result.get().getType()).isEqualTo(ConfirmationType.DELEGATED);
+        final boolean result = this.execute(200);
+        Assertions.assertThat(result).isTrue();
     }
 
     @Test
     public void unknownResponse() {
-        final Optional<Confirmation> result = this.execute(500);
-        Assertions.assertThat(result).isEmpty();
+        final boolean result = this.execute(500);
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test
     public void failingReponse1() {
-        final Optional<Confirmation> result = this.execute(400);
-        Assertions.assertThat(result).isEmpty();
+        final boolean result = this.execute(400);
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test
     public void failingResponse2() {
-        final Optional<Confirmation> result = this.execute(403);
-        Assertions.assertThat(result).isEmpty();
+        final boolean result = this.execute(403);
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test
@@ -112,16 +108,16 @@ public class ZonkoidConfirmationProviderTest {
 
     @Test
     public void errorOverHttps() throws NoSuchAlgorithmException {
-        final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
-                                                                                      "https", new RuntimeException());
-        Assertions.assertThat(result).isEmpty();
+        final boolean result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some", "https",
+                                                                       new RuntimeException());
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test
     public void errorOverHttp() throws NoSuchAlgorithmException {
-        final Optional<Confirmation> result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
-                                                                                      "http", new RuntimeException());
-        Assertions.assertThat(result).isEmpty();
+        final boolean result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some", "http",
+                                                                       new RuntimeException());
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test

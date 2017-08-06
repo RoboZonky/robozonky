@@ -67,7 +67,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
         // and now test
         final ReturnCode rc = App.execute(new DirectInvestmentMode(auth, new Investor.Builder().asDryRun(),
                                                                    false, 1, 1000));
-        Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_SETUP);
+        Assertions.assertThat(rc).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
     }
 
     @Test

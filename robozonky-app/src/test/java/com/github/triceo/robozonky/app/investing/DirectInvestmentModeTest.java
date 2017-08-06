@@ -51,7 +51,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest {
         try (final DirectInvestmentMode exec =
                      new DirectInvestmentMode(a, b, true, l.getId(), (int) l.getAmount())) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(exec.get()).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
+                softly.assertThat(exec.get()).isEqualTo(ReturnCode.OK);
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
                 softly.assertThat(exec.isDryRun()).isTrue();
             });
