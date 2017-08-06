@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.purchasing;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
@@ -80,6 +81,10 @@ class Activity {
     private final TemporalAmount sleepInterval;
     private final Collection<ParticipationDescriptor> recentDescending;
     private final AtomicReference<Runnable> settler = new AtomicReference<>(Activity.DO_NOTHING);
+
+    Activity(final Collection<ParticipationDescriptor> items) {
+        this(items, Duration.ofMinutes(60));
+    }
 
     public Activity(final Collection<ParticipationDescriptor> items, final TemporalAmount maximumSleepPeriod) {
         this.sleepInterval = maximumSleepPeriod;

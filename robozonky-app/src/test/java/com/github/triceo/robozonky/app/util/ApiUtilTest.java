@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.app.util;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.app.investing.AbstractInvestingTest;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -30,13 +32,41 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class BlockedAmountsTest {
+public class ApiUtilTest extends AbstractInvestingTest {
+
+    @Test
+    public void getBalancePropertyInDryRun() {
+        final int value = 0;
+        System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
+        Assertions.assertThat(ApiUtil.getDryRunBalance(null).intValue()).isEqualTo(value);
+    }
+
+    @Test
+    public void getLiveBalanceInDryRun() {
+        final int value = -1;
+        System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
+        Assertions.assertThat(ApiUtil.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    public void getBalancePropertyIgnoredWhenNotDryRun() {
+        System.setProperty("robozonky.default.dry_run_balance", "200");
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
+        Assertions.assertThat(ApiUtil.getLiveBalance(z)).isEqualTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    public void getRemoteBalanceInDryRun() {
+        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
+        Assertions.assertThat(ApiUtil.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
+    }
 
     @Test
     public void noBlockedAmounts() {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
-        final Collection<Investment> result = Session.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
+        final Collection<Investment> result = ApiUtil.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -60,7 +90,7 @@ public class BlockedAmountsTest {
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId1))).thenReturn(loan1);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId2))).thenReturn(loan2);
         // check the loan amounts have been properly merged, investors' fees ignored
-        final List<Investment> result = Session.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
+        final List<Investment> result = ApiUtil.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         Assertions.assertThat(result).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.get(0).getAmount()).isEqualTo(loan1amount1 + loan1amount2);

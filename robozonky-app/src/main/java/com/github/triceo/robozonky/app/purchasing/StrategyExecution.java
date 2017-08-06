@@ -53,7 +53,7 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
                                           final Collection<ParticipationDescriptor> marketplace) {
         final Function<Zonky, Collection<Investment>> op = (zonky) -> {
             final InvestmentCommand c = new InvestmentCommand(strategy, marketplace);
-            return Session.invest(zonky, c, dryRun);
+            return Session.purchase(zonky, c, dryRun);
         };
         return authenticationHandler.call(op);
     }
@@ -68,7 +68,6 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
                         return Collections.<Investment>emptyList();
                     }
                     StrategyExecution.LOGGER.debug("Sending following participations to purchasing: {}.", items.stream()
-                            .peek(System.out::println)
                             .map(p -> String.valueOf(p.item().getId()))
                             .collect(Collectors.joining(", ")));
                     final Collection<Investment> investments = invest(strategy, items);

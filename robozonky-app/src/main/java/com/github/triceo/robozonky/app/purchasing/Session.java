@@ -23,13 +23,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
@@ -37,7 +35,6 @@ import com.github.triceo.robozonky.api.notifications.PurchaseMadeEvent;
 import com.github.triceo.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
@@ -46,16 +43,14 @@ import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.RecommendedParticipation;
 import com.github.triceo.robozonky.app.Events;
+import com.github.triceo.robozonky.app.util.ApiUtil;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
-import com.github.triceo.robozonky.internal.api.Retriever;
-import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
- * given loan.
+ * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.
  * <p>
  * Instances of this class are supposed to be short-lived, as the marketplace and Zonky account balance can change
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
@@ -73,12 +68,12 @@ class Session implements AutoCloseable {
 
     private Session(final Set<ParticipationDescriptor> marketplace, final Zonky zonky, final boolean dryRun) {
         this.zonky = zonky;
-        isDryRun = dryRun;
-        balance = isDryRun ? Session.getDryRunBalance(zonky) : Session.getLiveBalance(zonky);
+        this.isDryRun = dryRun;
+        this.balance = isDryRun ? ApiUtil.getDryRunBalance(zonky) : ApiUtil.getLiveBalance(zonky);
         Session.LOGGER.info("Starting account balance: {} CZK.", balance);
-        allInvestments = Session.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
-        stillAvailable = new ArrayList<>(marketplace);
-        portfolioOverview = new Refreshable<PortfolioOverview>() {
+        this.allInvestments = ApiUtil.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
+        this.stillAvailable = new ArrayList<>(marketplace);
+        this.portfolioOverview = new Refreshable<PortfolioOverview>() {
 
             private final Statistics stats = zonky.getStatistics();
 
@@ -105,16 +100,7 @@ class Session implements AutoCloseable {
         return s;
     }
 
-    static BigDecimal getLiveBalance(final Zonky api) {
-        return api.getWallet().getAvailableBalance();
-    }
-
-    static BigDecimal getDryRunBalance(final Zonky api) {
-        final int balance = Settings.INSTANCE.getDefaultDryRunBalance();
-        return (balance > -1) ? BigDecimal.valueOf(balance) : Session.getLiveBalance(api);
-    }
-
-    static Collection<Investment> invest(final Zonky api, final InvestmentCommand command, final boolean dryRun) {
+    static Collection<Investment> purchase(final Zonky api, final InvestmentCommand command, final boolean dryRun) {
         final Collection<ParticipationDescriptor> items = command.getItems();
         try (final Session session = Session.create(api, items, dryRun)) {
             final int balance = session.getPortfolioOverview().getCzkAvailable();
@@ -135,37 +121,6 @@ class Session implements AutoCloseable {
         }
     }
 
-    /**
-     * Blocked amounts represent loans in various stages. Either the user has invested and the loan has not yet been
-     * funded to 100 % ("na tržišti"), or the user invested and the loan has been funded ("na cestě"). In the latter
-     * case, the loan has already disappeared from the marketplace, which means that it will not be available for
-     * investing any more. As far as we know, the next stage is "v pořádku", the blocked amount is cleared and the loan
-     * becomes an active investment.
-     * <p>
-     * Based on that, this method deals with the first case - when the loan is still available for investing, but we've
-     * already invested as evidenced by the blocked amount. It also unnecessarily deals with the second case, since
-     * that is represented by a blocked amount as well. But that does no harm.
-     * <p>
-     * In case user has made repeated investments into a particular loan, this will show up as multiple blocked amounts.
-     * The method needs to handle this as well.
-     * @param api Authenticated Zonky API to read data from.
-     * @return Every blocked amount represents a future investment. This method returns such investments.
-     */
-    static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final Zonky api) {
-        // first group all blocked amounts by the loan ID and sum them
-        final Map<Integer, Integer> amountsBlockedByLoans =
-                api.getBlockedAmounts()
-                        .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
-                        .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
-                                                       Collectors.summingInt(BlockedAmount::getAmount)));
-        // and then fetch all the loans in parallel, converting them into investments
-        return amountsBlockedByLoans.entrySet().parallelStream()
-                .map(entry ->
-                             Retriever.retrieve(() -> Optional.of(api.getLoan(entry.getKey())))
-                                     .map(l -> new Investment(l, entry.getValue()))
-                                     .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
-                ).collect(Collectors.toList());
-    }
 
     private synchronized void ensureOpen() {
         final Session s = Session.INSTANCE.get();
@@ -199,7 +154,7 @@ class Session implements AutoCloseable {
         return Collections.unmodifiableList(new ArrayList<>(this.investmentsMadeNow));
     }
 
-    public synchronized boolean invest(final RecommendedParticipation recommendation) {
+    public synchronized boolean purchase(final RecommendedParticipation recommendation) {
         this.ensureOpen();
         final ParticipationDescriptor descriptor = recommendation.descriptor();
         final Participation participation = descriptor.item();

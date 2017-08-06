@@ -128,34 +128,6 @@ public class SessionTest extends AbstractInvestingTest {
     }
 
     @Test
-    public void getBalancePropertyInDryRun() {
-        final int value = 0;
-        System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
-        Assertions.assertThat(Session.getDryRunBalance(null).intValue()).isEqualTo(value);
-    }
-
-    @Test
-    public void getLiveBalanceInDryRun() {
-        final int value = -1;
-        System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
-        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
-        Assertions.assertThat(Session.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
-    }
-
-    @Test
-    public void getBalancePropertyIgnoredWhenNotDryRun() {
-        System.setProperty("robozonky.default.dry_run_balance", "200");
-        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
-        Assertions.assertThat(Session.getLiveBalance(z)).isEqualTo(BigDecimal.ZERO);
-    }
-
-    @Test
-    public void getRemoteBalanceInDryRun() {
-        final Zonky z = AbstractInvestingTest.harmlessZonky(0);
-        Assertions.assertThat(Session.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
-    }
-
-    @Test
     public void underBalance() {
         // setup APIs
         final Zonky z = AbstractInvestingTest.harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);

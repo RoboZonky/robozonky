@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
@@ -35,7 +34,6 @@ public class Purchasing implements Runnable {
     private final boolean isDryRun;
     private final Refreshable<PurchaseStrategy> refreshableStrategy;
     private final TemporalAmount maximumSleepPeriod;
-    private final ResultTracker buffer = new ResultTracker();
 
     public Purchasing(final Authenticated auth, final boolean isDryRun, final Refreshable<PurchaseStrategy> strategy,
                       final TemporalAmount maximumSleepPeriod) {
@@ -48,13 +46,9 @@ public class Purchasing implements Runnable {
     @Override
     public void run() {
         try { // FIXME perhaps streaming would be more resource-efficient?
-            authenticated.run(z -> {
-                final Collection<Participation> items =
-                        z.getAvailableParticipations().collect(Collectors.toList());
-                final Collection<ParticipationDescriptor> descriptors = buffer.acceptFromMarketplace(items);
-                final Collection<Investment> result = getInvestor().apply(descriptors);
-                buffer.acceptFromRobot(result);
-            });
+            authenticated.run(z -> getInvestor().apply(z.getAvailableParticipations()
+                                                               .map(ParticipationDescriptor::new)
+                                                               .collect(Collectors.toList())));
         } catch (final Throwable t) {
             /*
              * We catch Throwable so that we can inform users even about errors. Sudden death detection will take

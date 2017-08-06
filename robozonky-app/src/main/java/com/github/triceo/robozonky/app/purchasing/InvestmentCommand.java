@@ -29,8 +29,7 @@ final class InvestmentCommand implements Consumer<Session> {
     private final PurchaseStrategy strategy;
     private final Collection<ParticipationDescriptor> loans;
 
-    public InvestmentCommand(final PurchaseStrategy strategy,
-                             final Collection<ParticipationDescriptor> loans) {
+    public InvestmentCommand(final PurchaseStrategy strategy, final Collection<ParticipationDescriptor> loans) {
         this.strategy = strategy;
         this.loans = loans;
     }
@@ -45,7 +44,7 @@ final class InvestmentCommand implements Consumer<Session> {
         do {
             invested = strategy.recommend(s.getAvailableParticipations(), s.getPortfolioOverview())
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
-                    .anyMatch(s::invest); // keep trying until investment opportunities are exhausted
+                    .anyMatch(s::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
     }
 }
