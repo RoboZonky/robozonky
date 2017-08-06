@@ -29,7 +29,7 @@ import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
 
-@Parameters(commandNames = "daemon", commandDescription = "Constantly checks marketplace, invests based on strategy.")
+@Parameters(commandNames = "daemon", commandDescription = "Constantly checks marketplaces, invests based on strategy.")
 class DaemonOperatingMode extends OperatingMode {
 
     @ParametersDelegate

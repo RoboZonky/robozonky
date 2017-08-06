@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app.configuration;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.app.configuration.daemon.DaemonInvestmentMode;
-import com.github.triceo.robozonky.app.investing.DirectInvestmentMode;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,13 +69,5 @@ public class CommandLineTest {
         final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
                                                                "daemon", "-s", "somewhere");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
-    }
-
-    @Test
-    public void validDirectCli() {
-        // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
-                                                               "direct", "-l", "1", "-a", "200");
-        Assertions.assertThat(cfg).isPresent().containsInstanceOf(DirectInvestmentMode.class);
     }
 }
