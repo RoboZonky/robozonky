@@ -26,6 +26,7 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
+import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +46,16 @@ public class DelinquencyUpdate implements Consumer<Zonky> {
 
     @Override
     public void accept(final Zonky zonky) {
-        LOGGER.info("Daily update started.");
-        final Map<PaymentStatus, List<Investment>> investments = zonky.getInvestments()
-                .filter(i -> i.getStatus() != InvestmentStatus.SOLD)
-                .collect(Collectors.groupingBy(Investment::getPaymentStatus));
-        DelinquencyTracker.INSTANCE.update(zonky, getWithPaymentStatus(investments, PaymentStatus.getDelinquent()),
-                                           getWithPaymentStatus(investments, PaymentStatus.getDone()));
-        LOGGER.debug("Finished.");
+        try {
+            LOGGER.info("Daily update started.");
+            final Map<PaymentStatus, List<Investment>> investments = zonky.getInvestments()
+                    .filter(i -> i.getStatus() != InvestmentStatus.SOLD)
+                    .collect(Collectors.groupingBy(Investment::getPaymentStatus));
+            DelinquencyTracker.INSTANCE.update(zonky, getWithPaymentStatus(investments, PaymentStatus.getDelinquent()),
+                                               getWithPaymentStatus(investments, PaymentStatus.getDone()));
+            LOGGER.debug("Finished.");
+        } catch (final Throwable t) {
+            new DaemonRuntimeExceptionHandler().handle(t);
+        }
     }
 }

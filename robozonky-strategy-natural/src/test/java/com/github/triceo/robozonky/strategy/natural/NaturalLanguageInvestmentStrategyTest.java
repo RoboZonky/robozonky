@@ -133,7 +133,7 @@ public class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy s = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE);
         final NaturalLanguageInvestmentStrategy overallStrategy = new NaturalLanguageInvestmentStrategy(s);
         final int actualInvestment = overallStrategy.recommendInvestmentAmount(mockLoan, Integer.MAX_VALUE);
-        Assertions.assertThat(actualInvestment).isLessThanOrEqualTo(s.getMinimumInvestmentSizeInCzk(Rating.A));
+        Assertions.assertThat(actualInvestment).isLessThanOrEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
 
         // with balance just a little less than the recommended investment
         final int adjustedForBalance = overallStrategy.recommendInvestmentAmount(mockLoan, actualInvestment - 1);

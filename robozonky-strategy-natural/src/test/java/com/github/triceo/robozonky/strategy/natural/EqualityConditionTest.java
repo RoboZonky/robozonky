@@ -62,7 +62,6 @@ public class EqualityConditionTest {
 
     @Test
     public void testBetterThan() {
-        System.out.println(current + " " + betterThanCurrent + " " + worseThanCurrent);
         final MarketplaceFilterCondition c = new LoanRatingBetterOrEqualCondition(current);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(c.test(mockLoan(current))).isTrue();

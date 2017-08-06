@@ -153,17 +153,19 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private Optional<int[]> recommendInvestmentAmount(final Loan loan) {
         final int[] recommended = getRecommendationBoundaries(loan);
-        final int minimumRecommendation = recommended[0];
+        final int minimumRecommendation = Math.max(recommended[0], Defaults.MINIMUM_INVESTMENT_IN_CZK);
         final int maximumRecommendation = recommended[1];
         final int loanId = loan.getId();
         NaturalLanguageInvestmentStrategy.LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.",
                                                        loanId, minimumRecommendation, maximumRecommendation);
-        final int minimumInvestmentByShare = NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
-                                                                                             strategy.getMinimumInvestmentShareInPercent());
+        final int minimumInvestmentByShare =
+                NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
+                                                                strategy.getMinimumInvestmentShareInPercent());
         final int minimumInvestment =
                 Math.max(minimumInvestmentByShare, strategy.getMinimumInvestmentSizeInCzk(loan.getRating()));
-        final int maximumInvestmentByShare = NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
-                                                                                             strategy.getMaximumInvestmentShareInPercent());
+        final int maximumInvestmentByShare =
+                NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
+                                                                strategy.getMaximumInvestmentShareInPercent());
         final int maximumInvestment =
                 Math.min(maximumInvestmentByShare, strategy.getMaximumInvestmentSizeInCzk(loan.getRating()));
         if (maximumInvestment < minimumInvestment) {

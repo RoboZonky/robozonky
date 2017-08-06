@@ -16,26 +16,23 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import java.util.Collections;
+import java.math.BigDecimal;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public abstract class AbstractEnumeratedConditionTest<S, T> {
-
-    protected abstract AbstractEnumeratedCondition<S, T> getSUT();
-
-    protected abstract S getMocked();
-
-    protected abstract T getTriggerItem();
+public class LoanInterestRateConditionTest {
 
     @Test
-    public void proper() {
-        final S i = this.getMocked();
-        final AbstractEnumeratedCondition<S, T> sut = this.getSUT();
-        Assertions.assertThat(sut.test(i)).isFalse();
-        sut.add(Collections.singleton(this.getTriggerItem()));
-        Assertions.assertThat(sut.test(i)).isTrue();
-        Assertions.assertThat(sut.getDescription()).isPresent();
+    public void leftBoundary() {
+        Assertions.assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO.subtract(BigDecimal.ONE)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void rightBoundary() {
+        final BigDecimal maxInterestRate = LoanInterestRateCondition.moreThan(BigDecimal.valueOf(Double.MAX_VALUE));
+        Assertions.assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO, maxInterestRate))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

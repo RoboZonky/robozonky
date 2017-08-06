@@ -41,10 +41,9 @@ public class ParsedStrategyTest {
                     .isEqualTo(portfolio.getDefaultShare(Rating.A));
             softly.assertThat(strategy.getMaximumShare(Rating.B))
                     .isEqualTo(portfolio.getDefaultShare(Rating.B));
-            softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.C))
-                    .isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D))
-                    .isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+            softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.C)).isEqualTo(0);
+            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(
+                    Defaults.MINIMUM_INVESTMENT_IN_CZK);
             softly.assertThat(strategy.needsConfirmation(new LoanDescriptor(new Loan(1, 2)))).isFalse();
         });
     }

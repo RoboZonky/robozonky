@@ -42,8 +42,8 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
     private static final Comparator<ParticipationDescriptor>
             BY_TERM = Comparator.comparingInt(p -> p.item().getRemainingInstalmentCount()),
             BY_RECENCY = Comparator.comparing(p -> p.item().getDeadline()),
-            BY_REMAINING = Comparator.comparing(
-                    (ParticipationDescriptor p) -> p.item().getRemainingPrincipal()).reversed();
+            BY_REMAINING =
+                    Comparator.comparing((ParticipationDescriptor p) -> p.item().getRemainingPrincipal()).reversed();
 
     private static Map<Rating, Collection<ParticipationDescriptor>> sortByRating(
             final Stream<ParticipationDescriptor> items) {
@@ -103,7 +103,7 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
             // round to nearest lower increment
             final double price = participation.getRemainingPrincipal().doubleValue();
             if (balance < price) {
-                LOGGER.debug("Loan #{} not recommended due to low balance.", participation.getLoanId());
+                LOGGER.debug("Loan #{} not recommended due to price over balance.", participation.getLoanId());
                 return false;
             } else if (minimumRecommendation > price) {
                 LOGGER.debug("Loan #{} not recommended due to price below minimum.", participation.getLoanId());

@@ -17,31 +17,55 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.strategies.StrategyService;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+@RunWith(Parameterized.class)
 public class NaturalLanguageStrategyServiceTest {
+
+    private static Function<InputStream, Optional<?>> getInvesting(final StrategyService s) {
+        return s::toInvest;
+    }
+
+    private static Function<InputStream, Optional<?>> getPurchasing(final StrategyService s) {
+        return s::toPurchase;
+    }
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> parameters() {
+        final Collection<Object[]> result = new ArrayList<>();
+        final StrategyService service = new NaturalLanguageStrategyService();
+        result.add(new Object[]{getInvesting(service)});
+        result.add(new Object[]{getPurchasing(service)});
+        return result;
+    }
+
+    @Parameterized.Parameter
+    public Function<InputStream, Optional<Object>> strategyProvider;
 
     @Test
     public void test() {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("only-whitespace");
-        final StrategyService service = new NaturalLanguageStrategyService();
-        Assertions.assertThat(service.toInvest(s)).isEmpty();
+        Assertions.assertThat(strategyProvider.apply(s)).isEmpty();
     }
 
     @Test
     public void complex() {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex");
-        final StrategyService service = new NaturalLanguageStrategyService();
-        Assertions.assertThat(service.toInvest(s)).isPresent();
+        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
     }
 
     @Test
     public void simplest() {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("simplest");
-        final StrategyService service = new NaturalLanguageStrategyService();
-        Assertions.assertThat(service.toInvest(s)).isPresent();
+        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
     }
 }
