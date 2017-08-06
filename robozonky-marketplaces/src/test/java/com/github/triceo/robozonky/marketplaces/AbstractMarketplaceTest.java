@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,10 +45,7 @@ public class AbstractMarketplaceTest {
         final Consumer<Collection<Loan>> consumer = Mockito.mock(Consumer.class);
         try (final Marketplace market = marketClass.newInstance()) {
             Mockito.verify(consumer, Mockito.never()).accept(ArgumentMatchers.any());
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(market.specifyExpectedTreatment()).isEqualTo(ExpectedTreatment.POLLING);
-                softly.assertThat(market.registerListener(consumer)).isTrue();
-            });
+            Assertions.assertThat(market.registerListener(consumer)).isTrue();
             market.run();
             Mockito.verify(consumer, Mockito.times(1))
                     .accept(ArgumentMatchers.argThat(argument -> argument != null && !argument.isEmpty()));

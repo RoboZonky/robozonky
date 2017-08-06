@@ -16,10 +16,10 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.commons.InvestmentMode;
@@ -60,7 +60,7 @@ public class OperatingModeTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.isDryRun()).isFalse();
             softly.assertThat(result.isFaultTolerant()).isFalse();
-            softly.assertThat(result.get()).isPresent().contains(Collections.emptyList());
+            softly.assertThat(result.get()).isEqualTo(ReturnCode.OK);
         });
     }
 

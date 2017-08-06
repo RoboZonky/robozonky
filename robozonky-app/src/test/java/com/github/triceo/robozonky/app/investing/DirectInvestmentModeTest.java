@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app.investing;
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
@@ -50,7 +51,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest {
         try (final DirectInvestmentMode exec =
                      new DirectInvestmentMode(a, b, true, l.getId(), (int) l.getAmount())) {
             SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(exec.get()).isPresent();
+                softly.assertThat(exec.get()).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
                 softly.assertThat(exec.isFaultTolerant()).isTrue();
                 softly.assertThat(exec.isDryRun()).isTrue();
             });
@@ -70,7 +71,7 @@ public class DirectInvestmentModeTest extends AbstractInvestingTest {
         try (final DirectInvestmentMode exec = new DirectInvestmentMode(
                 Authenticated.passwordBased(SecretProvider.fallback("username", new char[0])),
                 new Investor.Builder().asDryRun(), true, l.getId(), (int) l.getAmount())) {
-            Assertions.assertThat(exec.get()).isEmpty();
+            Assertions.assertThat(exec.get()).isEqualTo(ReturnCode.ERROR_UNEXPECTED);
         } catch (final Exception ex) {
             Assertions.fail("Unexpected exception.", ex);
         }

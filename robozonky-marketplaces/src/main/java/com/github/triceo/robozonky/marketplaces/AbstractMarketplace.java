@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
-import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
@@ -35,11 +34,6 @@ abstract class AbstractMarketplace implements Marketplace {
     @Override
     public synchronized boolean registerListener(final Consumer<Collection<Loan>> listener) {
         return this.loanListeners.add(listener);
-    }
-
-    @Override
-    public ExpectedTreatment specifyExpectedTreatment() {
-        return ExpectedTreatment.POLLING;
     }
 
     @Override

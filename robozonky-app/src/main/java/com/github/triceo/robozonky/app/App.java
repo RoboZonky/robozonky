@@ -56,10 +56,7 @@ public class App {
 
     static ReturnCode execute(final InvestmentMode mode) {
         try {
-            return mode.get().map(r -> {
-                App.LOGGER.info("RoboZonky {}invested into {} loans.", mode.isDryRun() ? "would have " : "", r.size());
-                return ReturnCode.OK;
-            }).orElse(ReturnCode.ERROR_SETUP);
+            return mode.get();
         } finally {
             try {
                 mode.close();

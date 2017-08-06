@@ -14,37 +14,34 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.investing;
+package com.github.triceo.robozonky.app.configuration;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
-import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
-import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.commons.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.app.commons.DaemonShutdownHook;
 import com.github.triceo.robozonky.app.commons.InvestmentMode;
 import com.github.triceo.robozonky.app.commons.SuddenDeathDetection;
 import com.github.triceo.robozonky.app.commons.SuddenDeathException;
 import com.github.triceo.robozonky.app.delinquency.DelinquencyUpdater;
+import com.github.triceo.robozonky.app.investing.Investing;
+import com.github.triceo.robozonky.app.investing.Investor;
+import com.github.triceo.robozonky.app.purchasing.Purchasing;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
@@ -63,34 +60,39 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return Duration.ofMinutes(secondBetweenChecks); // multiply by 60
     }
 
-    private final Investor.Builder builder;
-    private final Authenticated authenticated;
-    private final boolean isFaultTolerant;
-    private final Refreshable<InvestmentStrategy> refreshableStrategy;
+    private final String username;
+    private final boolean faultTolerant, dryRun;
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor =
             Executors.newScheduledThreadPool(2, DaemonInvestmentMode.THREAD_FACTORY);
-    private final TemporalAmount maximumSleepPeriod, periodBetweenChecks;
+    private final TemporalAmount periodBetweenChecks;
     private final SuddenDeathDetection suddenDeath;
     private final CountDownLatch circuitBreaker;
+    private final Runnable marketplaceCheck;
     private final Thread shutdownHook;
 
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
-                                final Marketplace marketplace, final Refreshable<InvestmentStrategy> strategy,
+                                final Marketplace marketplace, final Refreshable<InvestmentStrategy> investingStrategy,
+                                final Refreshable<PurchaseStrategy> purchasingStrategy,
                                 final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
-        this.authenticated = auth;
-        this.builder = builder;
-        this.isFaultTolerant = isFaultTolerant;
+        this.username = auth.getSecretProvider().getUsername();
+        this.dryRun = builder.isDryRun();
+        this.faultTolerant = isFaultTolerant;
         this.circuitBreaker =
                 DaemonInvestmentMode.BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
         this.shutdownHook = new DaemonShutdownHook(circuitBreaker);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
-        this.refreshableStrategy = strategy;
         this.marketplace = marketplace;
-        this.maximumSleepPeriod = maximumSleepPeriod;
         this.periodBetweenChecks = periodBetweenChecks;
         this.suddenDeath = new SuddenDeathDetection(circuitBreaker,
                                                     DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
+        final Runnable investing = new Investing(auth, builder, marketplace, investingStrategy, maximumSleepPeriod);
+        final Runnable purchasing = new Purchasing(auth, dryRun, purchasingStrategy, maximumSleepPeriod);
+        this.marketplaceCheck = () -> { // FIXME separate
+            investing.run();
+            purchasing.run();
+            suddenDeath.registerMarketplaceCheck();
+        };
         // FIXME move to a more appropriate place
         Scheduler.BACKGROUND_SCHEDULER.submit(new DelinquencyUpdater(auth), Duration.ofHours(1));
     }
@@ -100,25 +102,19 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     @Override
-    public Optional<Collection<Investment>> get() {
-        LOGGER.trace("Executing.");
+    public ReturnCode get() {
         try {
-            final ResultTracker buffer = new ResultTracker();
-            final Consumer<Collection<Loan>> investor = (loans) -> {
-                final Collection<LoanDescriptor> descriptors = buffer.acceptLoansFromMarketplace(loans);
-                final Collection<Investment> result = getInvestor().apply(descriptors);
-                buffer.acceptInvestmentsFromRobot(result);
-            };
-            openMarketplace(investor);
-            if (circuitBreaker != null) { // daemon mode requires special handling
-                LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
-                circuitBreaker.await();
-                LOGGER.trace("Request to stop received.");
-                if (this.suddenDeath.isSuddenDeath()) {
-                    throw new SuddenDeathException();
-                }
+            final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
+            LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
+            executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
+            LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
+            circuitBreaker.await();
+            LOGGER.trace("Request to stop received.");
+            if (suddenDeath.isSuddenDeath()) {
+                throw new SuddenDeathException();
             }
-            return Optional.of(buffer.getInvestmentsMade());
+            return ReturnCode.OK;
         } catch (final SuddenDeathException ex) {
             LOGGER.error("Thread stack traces:");
             Thread.getAllStackTraces().forEach((key, value) -> {
@@ -129,58 +125,23 @@ public class DaemonInvestmentMode implements InvestmentMode {
             throw new IllegalStateException(ex);
         } catch (final Exception ex) {
             LOGGER.error("Failed executing investments.", ex);
-            return Optional.empty();
+            return ReturnCode.ERROR_UNEXPECTED;
         }
-    }
-
-    private void openMarketplace(final Consumer<Collection<Loan>> target) {
-        marketplace.registerListener(target);
-        final Runnable marketplaceCheck = () -> {
-            try {
-                marketplace.run();
-            } catch (final Throwable t) {
-                /*
-                 * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
-                 * care of errors stopping the thread.
-                 */
-                new DaemonRuntimeExceptionHandler().handle(t);
-            } finally {
-                suddenDeath.registerMarketplaceCheck(); // sudden death averted for now
-            }
-        };
-        switch (marketplace.specifyExpectedTreatment()) {
-            case POLLING:
-                final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
-                LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
-                executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
-                executor.scheduleAtFixedRate(this.suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
-                break;
-            case LISTENING:
-                LOGGER.debug("Starting marketplace listener.");
-                executor.submit(marketplaceCheck);
-                break;
-            default:
-                throw new IllegalStateException("Impossible.");
-        }
-    }
-
-    private Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
-        return new StrategyExecution(builder, refreshableStrategy, authenticated, maximumSleepPeriod);
     }
 
     @Override
     public boolean isFaultTolerant() {
-        return isFaultTolerant;
+        return faultTolerant;
     }
 
     @Override
     public boolean isDryRun() {
-        return builder.isDryRun();
+        return dryRun;
     }
 
     @Override
     public String getUsername() {
-        return authenticated.getSecretProvider().getUsername();
+        return username;
     }
 
     @Override

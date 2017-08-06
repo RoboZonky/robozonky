@@ -16,12 +16,10 @@
 
 package com.github.triceo.robozonky.app.configuration;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
-import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.commons.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
@@ -55,19 +53,14 @@ class TestOperatingMode extends OperatingMode {
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
             @Override
-            public Optional<Collection<Investment>> get() {
+            public ReturnCode get() {
                 LOGGER.info("Notification sent: {}.", Checker.notifications(auth.getSecretProvider().getUsername()));
-                builder.getConfirmationUsed().ifPresent(c ->
-                                                                builder.getConfirmationRequestUsed().ifPresent(r ->
-                                                                                                                       LOGGER.info(
-                                                                                                                               "Confirmation received: {}.",
-                                                                                                                               Checker.confirmations(
-                                                                                                                                       c,
-                                                                                                                                       r.getUserId(),
-                                                                                                                                       r.getPassword()))
-                                                                )
-                );
-                return Optional.of(Collections.emptyList());
+                return builder.getConfirmationUsed().map(c -> builder.getConfirmationRequestUsed()
+                        .map(r -> {
+                            LOGGER.info("Confirmation received: {}.",
+                                        Checker.confirmations(c, r.getUserId(), r.getPassword()));
+                            return ReturnCode.OK;
+                        }).orElse(ReturnCode.ERROR_UNEXPECTED)).orElse(ReturnCode.OK);
             }
         });
     }

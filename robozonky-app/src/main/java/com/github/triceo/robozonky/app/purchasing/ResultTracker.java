@@ -37,7 +37,7 @@ class ResultTracker {
      */
     private volatile Collection<Investment> investmentsMade = new ArrayList<>(0);
 
-    public Collection<ParticipationDescriptor> acceptLoansFromMarketplace(final Collection<Participation> items) {
+    public Collection<ParticipationDescriptor> acceptFromMarketplace(final Collection<Participation> items) {
         if (items == null) {
             ResultTracker.LOGGER.info("Marketplace returned null, possible Zonky downtime.");
             return Collections.emptyList();
@@ -48,7 +48,7 @@ class ResultTracker {
                 .collect(Collectors.toList());
     }
 
-    public void acceptInvestmentsFromRobot(final Collection<Investment> investments) {
+    public void acceptFromRobot(final Collection<Investment> investments) {
         investments.stream()
                 .filter(i -> investmentsMade.stream().noneMatch(i2 -> i2.getLoanId() == i.getLoanId()))
                 .forEach(i -> investmentsMade.add(i));

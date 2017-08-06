@@ -16,13 +16,11 @@
 
 package com.github.triceo.robozonky.app.commons;
 
-import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.ReturnCode;
 
-public interface InvestmentMode extends Supplier<Optional<Collection<Investment>>>,
+public interface InvestmentMode extends Supplier<ReturnCode>,
                                         AutoCloseable {
 
     boolean isFaultTolerant();

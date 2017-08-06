@@ -22,9 +22,9 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.commons.InvestmentMode;
-import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
@@ -41,15 +41,17 @@ class DaemonOperatingMode extends OperatingMode {
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
-        final Refreshable<InvestmentStrategy> strategy =
+        final Refreshable<InvestmentStrategy> strategy1 =
                 RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
-        final TweaksCommandLineFragment fragment = cli.getTweaksFragment();
+        final Refreshable<PurchaseStrategy> strategy2 =
+                RefreshablePurchaseStrategy.create(strategyFragment.getStrategyLocation());
+        final boolean isFaultTolerant = cli.getTweaksFragment().isFaultTolerant();
         final Credentials cred = new Credentials(marketplaceFragment.getMarketplaceCredentials(),
                                                  auth.getSecretProvider());
         return MarketplaceLoader.load(cred)
                 .map(marketplace -> {
-                    final InvestmentMode m = new DaemonInvestmentMode(auth, builder, fragment.isFaultTolerant(),
-                                                                      marketplace, strategy,
+                    final InvestmentMode m = new DaemonInvestmentMode(auth, builder, isFaultTolerant, marketplace,
+                                                                      strategy1, strategy2,
                                                                       marketplaceFragment.getMaximumSleepDuration(),
                                                                       marketplaceFragment.getDelayBetweenChecks());
                     return Optional.of(m);

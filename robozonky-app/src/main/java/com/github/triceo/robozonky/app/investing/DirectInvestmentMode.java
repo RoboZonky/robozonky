@@ -18,9 +18,9 @@ package com.github.triceo.robozonky.app.investing;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.function.Function;
 
+import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
@@ -49,7 +49,7 @@ public class DirectInvestmentMode implements InvestmentMode {
     }
 
     @Override
-    public Optional<Collection<Investment>> get() {
+    public ReturnCode get() {
         LOGGER.trace("Executing.");
         try {
             final Function<Zonky, Collection<Investment>> op = (zonky) -> {
@@ -59,10 +59,11 @@ public class DirectInvestmentMode implements InvestmentMode {
                         .map(r -> Session.invest(builder, zonky, new DirectInvestmentCommand(r)))
                         .orElse(Collections.emptyList());
             };
-            return Optional.of(authenticated.call(op));
+            authenticated.call(op);
+            return ReturnCode.OK;
         } catch (final Exception ex) {
             LOGGER.error("Failed executing investments.", ex);
-            return Optional.empty();
+            return ReturnCode.ERROR_UNEXPECTED;
         }
     }
 

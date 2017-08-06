@@ -18,7 +18,10 @@ package com.github.triceo.robozonky.api.confirmations;
 
 /**
  * Describes the type of response from the confirmation endpoint.
+ *
+ * At some point in the future, the endpoint will only ever support the "DELEGATED" response.
  */
+@Deprecated
 public enum ConfirmationType {
 
     /**

@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.triceo.robozonky.api.ReturnCode;
@@ -75,7 +74,7 @@ public class AppTest extends AbstractEventsAndStateLeveragingTest {
     public void modeProcessed() throws Exception {
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         final InvestmentMode mode = Mockito.mock(InvestmentMode.class);
-        Mockito.when(mode.get()).thenReturn(Optional.empty());
+        Mockito.when(mode.get()).thenReturn(ReturnCode.ERROR_SETUP);
         Mockito.when(mode.isFaultTolerant()).thenReturn(!faultTolerant.get());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(App.execute(mode, faultTolerant)).isEqualTo(ReturnCode.ERROR_SETUP);
