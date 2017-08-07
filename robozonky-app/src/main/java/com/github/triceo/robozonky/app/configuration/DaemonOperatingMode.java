@@ -21,9 +21,6 @@ import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
-import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
@@ -44,22 +41,17 @@ class DaemonOperatingMode extends OperatingMode {
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
-        // schedule internal data updates
-        Scheduler.BACKGROUND_SCHEDULER.submit(new PortfolioUpdater(auth), Duration.ofHours(1));
-        // and prepare robot
-        final Refreshable<InvestmentStrategy> strategy1 =
-                RefreshableInvestmentStrategy.create(strategyFragment.getStrategyLocation());
-        final Refreshable<PurchaseStrategy> strategy2 =
-                RefreshablePurchaseStrategy.create(strategyFragment.getStrategyLocation());
         final boolean isFaultTolerant = cli.getTweaksFragment().isFaultTolerant();
         final Credentials cred = new Credentials(marketplaceFragment.getMarketplaceCredentials(),
                                                  auth.getSecretProvider());
         return MarketplaceLoader.load(cred)
                 .map(marketplace -> {
                     final InvestmentMode m = new DaemonInvestmentMode(auth, builder, isFaultTolerant, marketplace,
-                                                                      strategy1, strategy2,
+                                                                      strategyFragment.getStrategyLocation(),
                                                                       marketplaceFragment.getMaximumSleepDuration(),
                                                                       marketplaceFragment.getDelayBetweenChecks());
+                    // only schedule internal data updates after daemon had a chance to initialize
+                    Scheduler.BACKGROUND_SCHEDULER.submit(new PortfolioUpdater(auth), Duration.ofHours(1));
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }

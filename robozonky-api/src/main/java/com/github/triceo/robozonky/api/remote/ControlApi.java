@@ -52,7 +52,7 @@ public interface ControlApi {
                @FormParam("feeAmount") double feeAmount);
 
     @POST
-    @Path("/smp/investments/{id}")
+    @Path("/smp/investments/{id}/shares")
     void purchase(@PathParam("id") int id, @FormParam("amount") double amount);
 
     @DELETE

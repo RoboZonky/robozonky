@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.configuration;
+package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.net.URL;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.SellStrategy;
 import com.github.triceo.robozonky.common.extensions.StrategyLoader;
 import com.github.triceo.robozonky.util.Scheduler;
 
-final class RefreshableInvestmentStrategy extends RefreshableStrategy<InvestmentStrategy> {
+final class RefreshableSellStrategy extends RefreshableStrategy<SellStrategy> {
 
-    public static Refreshable<InvestmentStrategy> create(final String maybeUrl) {
-        final Refreshable<InvestmentStrategy> result =
-                new RefreshableInvestmentStrategy(RefreshableStrategy.convertToUrl(maybeUrl));
-        Scheduler.BACKGROUND_SCHEDULER.submit(result);
-        return result;
+    public static Refreshable<SellStrategy> create(final String maybeUrl) {
+        final Refreshable<SellStrategy> r = new RefreshableSellStrategy(RefreshableStrategy.convertToUrl(maybeUrl));
+        Scheduler.BACKGROUND_SCHEDULER.submit(r);
+        return r;
     }
 
-    private RefreshableInvestmentStrategy(final URL target) {
+    private RefreshableSellStrategy(final URL target) {
         super(target);
     }
 
     @Override
-    protected Optional<InvestmentStrategy> transform(final String source) {
-        return StrategyLoader.toInvest(source);
+    protected Optional<SellStrategy> transform(final String source) {
+        return StrategyLoader.toSell(source);
     }
 }

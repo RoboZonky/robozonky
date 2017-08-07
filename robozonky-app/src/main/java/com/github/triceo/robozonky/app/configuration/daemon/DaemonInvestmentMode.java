@@ -28,16 +28,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
-import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investing;
 import com.github.triceo.robozonky.app.investing.Investor;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.purchasing.Purchasing;
+import com.github.triceo.robozonky.app.selling.Selling;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +66,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final Thread shutdownHook;
 
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
-                                final Marketplace marketplace, final Refreshable<InvestmentStrategy> investingStrategy,
-                                final Refreshable<PurchaseStrategy> purchasingStrategy,
+                                final Marketplace marketplace, final String strategyLocaion,
                                 final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
         this.username = auth.getSecretProvider().getUsername();
         this.dryRun = builder.isDryRun();
@@ -79,10 +77,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
         Runtime.getRuntime().addShutdownHook(shutdownHook);
         this.marketplace = marketplace;
         this.periodBetweenChecks = periodBetweenChecks;
-        this.suddenDeath = new SuddenDeathDetection(circuitBreaker,
-                                                    DaemonInvestmentMode.getSuddenDeathTimeout(periodBetweenChecks));
-        final Runnable investing = new Investing(auth, builder, marketplace, investingStrategy, maximumSleepPeriod);
-        final Runnable purchasing = new Purchasing(auth, dryRun, purchasingStrategy, maximumSleepPeriod);
+        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, getSuddenDeathTimeout(periodBetweenChecks));
+        final Runnable investing = new Investing(auth, builder, marketplace,
+                                                 RefreshableInvestmentStrategy.create(strategyLocaion),
+                                                 maximumSleepPeriod);
+        final Runnable purchasing = new Purchasing(auth, dryRun, RefreshablePurchaseStrategy.create(strategyLocaion),
+                                                   maximumSleepPeriod);
+        Portfolio.INSTANCE.registerUpdater(new Selling(RefreshableSellStrategy.create(strategyLocaion), dryRun));
         this.marketplaceCheck = () -> { // FIXME separate
             investing.run();
             purchasing.run();

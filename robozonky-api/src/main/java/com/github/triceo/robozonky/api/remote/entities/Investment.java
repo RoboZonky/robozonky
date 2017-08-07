@@ -203,4 +203,8 @@ public class Investment extends BaseInvestment {
     public BigDecimal getSmpFee() {
         return smpFee;
     }
+
+    public void setIsOnSmp(final boolean isOnSmp) {
+        this.onSmp = isOnSmp;
+    }
 }

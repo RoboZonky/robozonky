@@ -104,6 +104,14 @@ public enum Portfolio {
         return getActiveWithPaymentStatus(statuses.getPaymentStatuses());
     }
 
+    public Stream<Investment> getActiveForSecondaryMarketplace() {
+        return getActive().filter(Investment::isCanBeOffered).filter(i -> !i.isOnSmp());
+    }
+
+    public Stream<Investment> getActiveOnSecondaryMarketplace() {
+        return getActive().filter(Investment::isOnSmp);
+    }
+
     public Stream<Investment> getActive() {
         return investments.get().stream()
                 .filter(i -> i.getStatus() == InvestmentStatus.ACTIVE)

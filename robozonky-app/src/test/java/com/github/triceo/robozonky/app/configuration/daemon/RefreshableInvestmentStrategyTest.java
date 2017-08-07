@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.triceo.robozonky.app.configuration;
+package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.io.File;
 import java.net.MalformedURLException;
