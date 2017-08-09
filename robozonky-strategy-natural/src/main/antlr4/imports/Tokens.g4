@@ -49,6 +49,19 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
     r3=ratingExpression { $result.add($r3.result); }
 ;
 
+investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
+    (
+        (' ' amount=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($amount.getText()),
+                Integer.parseInt($amount.getText())); })
+        | (UP_TO maximumInvestmentInCzk=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($maximumInvestmentInCzk.getText())); })
+        | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($minimumInvestmentInCzk.getText()),
+                Integer.parseInt($maximumInvestmentInCzk.getText())); })
+    ) ' ' KC DOT
+;
+
 regionExpression returns [Region result] :
     r=(REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P |
         REGION_S | REGION_T | REGION_U | REGION_Z)
