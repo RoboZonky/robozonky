@@ -86,7 +86,9 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
                     return splitByRating.get(rating).stream().sorted(getLoanComparator());
-                }).map(l -> { // recommend amount to invest per strategy
+                })
+                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+                .map(l -> { // recommend amount to invest per strategy
                     final int recommendedAmount = recommendInvestmentAmount(l.item(), balance);
                     return l.recommend(recommendedAmount, needsConfirmation(l));
                 }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
@@ -107,28 +109,29 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     }
 
     int recommendInvestmentAmount(final Loan loan, final int balance) {
+        final int id = loan.getId();
         return recommendInvestmentAmount(loan).map(recommended -> {
             final int minimumRecommendation = recommended[0];
             final int maximumRecommendation = recommended[1];
-            LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.", loan.getId(),
-                         minimumRecommendation, maximumRecommendation);
+            LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.", id, minimumRecommendation,
+                         maximumRecommendation);
             // round to nearest lower increment
             final int loanRemaining = (int) loan.getRemainingInvestment();
             if (minimumRecommendation > balance) {
-                LOGGER.trace("Not recommending loan #{} due to minimum over balance.", loan.getId());
+                LOGGER.trace("Not recommending loan #{} due to minimum over balance.", id);
                 return 0;
             } else if (minimumRecommendation > loanRemaining) {
-                LOGGER.trace("Not recommending loan #{} due to minimum over remaining.", loan.getId());
+                LOGGER.trace("Not recommending loan #{} due to minimum over remaining.", id);
                 return 0;
             }
             final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
             final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
             final int r = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
             if (r < minimumRecommendation) {
-                LOGGER.trace("Not recommending loan #{} due to recommendation below minimum.", loan.getId());
+                LOGGER.trace("Not recommending loan #{} due to recommendation below minimum.", id);
                 return 0;
             } else {
-                LOGGER.debug("Final recommendation for loan #{} is {} CZK.", loan.getId(), r);
+                LOGGER.debug("Final recommendation for loan #{} is {} CZK.", id, r);
                 return r;
             }
         }).orElse(0); // not recommended

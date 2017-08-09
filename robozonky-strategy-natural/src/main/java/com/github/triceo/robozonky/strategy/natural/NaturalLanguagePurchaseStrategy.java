@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,32 +71,26 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         return new int[]{minimumInvestment, maximumInvestment};
     }
 
-    private static int getPercentage(final double original, final int percentage) {
-        return BigDecimal.valueOf(original)
-                .multiply(BigDecimal.valueOf(percentage))
-                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_EVEN)
-                .intValue();
-    }
-
     boolean sizeMatchesStrategy(final Participation participation, final int balance) {
+        final int id = participation.getLoanId();
         return recommendInvestmentAmount(participation).map(recommended -> {
             final int minimumRecommendation = recommended[0];
             final int maximumRecommendation = recommended[1];
-            LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.", participation.getId(),
-                         minimumRecommendation, maximumRecommendation);
+            LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.", id, minimumRecommendation,
+                         maximumRecommendation);
             // round to nearest lower increment
             final double price = participation.getRemainingPrincipal().doubleValue();
             if (balance < price) {
-                LOGGER.debug("Loan #{} not recommended due to price over balance.", participation.getLoanId());
+                LOGGER.debug("Loan #{} not recommended due to price over balance.", id);
                 return false;
             } else if (minimumRecommendation > price) {
-                LOGGER.debug("Loan #{} not recommended due to price below minimum.", participation.getLoanId());
+                LOGGER.debug("Loan #{} not recommended due to price below minimum.", id);
                 return false;
             } else if (price > maximumRecommendation) {
-                LOGGER.debug("Loan #{} not recommended due to price over maximum.", participation.getLoanId());
+                LOGGER.debug("Loan #{} not recommended due to price over maximum.", id);
                 return false;
             } else {
-                LOGGER.debug("Final recommendation for loan #{} is to buy.", participation.getLoanId());
+                LOGGER.debug("Final recommendation for loan #{} is to buy.", id);
                 return true;
             }
         }).orElse(false); // not recommended
@@ -137,6 +130,7 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
                     return splitByRating.get(rating).stream().sorted(getLoanComparator());
                 })
+                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .filter(d -> sizeMatchesStrategy(d.item(), portfolio.getCzkAvailable()))
                 .map(ParticipationDescriptor::recommend) // must do full amount; Zonky enforces
                 .flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
