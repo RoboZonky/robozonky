@@ -51,8 +51,8 @@ public class PortfolioOverview {
     public static PortfolioOverview calculate(final BigDecimal balance, final Statistics stats,
                                               final Collection<Investment> investments) {
         // first figure out how much we have in outstanding loans
-        final Map<Rating, Integer> amounts = stats.getRiskPortfolio().stream().collect(
-                Collectors.toMap(RiskPortfolio::getRating, p -> p.getTotalAmount() - p.getPaid())
+        final Map<Rating, Integer> amounts = stats.getRiskPortfolio().stream()
+                .collect(Collectors.toMap(RiskPortfolio::getRating, p -> p.getTotalAmount() - p.getPaid())
         );
         // then make sure the share reflects investments made by RoboZonky which have not yet been reflected in the API
         investments.forEach(previousInvestment -> {

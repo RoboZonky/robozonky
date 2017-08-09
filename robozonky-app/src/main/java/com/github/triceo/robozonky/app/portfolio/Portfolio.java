@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +73,7 @@ public enum Portfolio {
             LOGGER.trace("Update started: {}.", updateType);
             if (updateType == Portfolio.UpdateType.FULL) {
                 final List<Investment> remote = zonky.getInvestments().collect(Collectors.toList());
-                investments.set(new ArrayList<>(remote));
+                investments.set(remote);
             }
             investmentsPending.set(Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky));
             updaters.forEach((u, requiredType) -> {

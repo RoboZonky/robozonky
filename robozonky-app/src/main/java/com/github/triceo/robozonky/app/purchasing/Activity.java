@@ -23,6 +23,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -63,11 +64,14 @@ class Activity {
     }
 
     private static SortedSet<Integer> read() {
-        final String source = STATE.getValue(LAST_MARKETPLACE_STATE_ID).orElse("");
-        final Set<Integer> result = Stream.of(COMMA_PATTERN.split(source))
-                .map(s -> Integer.parseInt(s.trim()))
-                .collect(Collectors.toSet());
-        return new TreeSet<>(result);
+        return STATE.getValue(LAST_MARKETPLACE_STATE_ID)
+                .map(source -> {
+                    final Set<Integer> values = Stream.of(COMMA_PATTERN.split(source))
+                            .map(s -> Integer.parseInt(s.trim()))
+                            .collect(Collectors.toSet());
+                    return (SortedSet<Integer>) new TreeSet<>(values);
+                })
+                .orElse(Collections.emptySortedSet());
     }
 
     private static final Runnable DO_NOTHING = () -> {
@@ -136,10 +140,14 @@ class Activity {
 
     private void persist() {
         final OffsetDateTime result = OffsetDateTime.now();
-        STATE.newBatch()
-                .set(LAST_MARKETPLACE_CHECK_STATE_ID, result.toString())
-                .set(LAST_MARKETPLACE_STATE_ID, prepare(recentDescending))
-                .call();
+        final State.Batch b = STATE.newBatch();
+        b.set(LAST_MARKETPLACE_CHECK_STATE_ID, result.toString());
+        if (recentDescending.size() == 0) {
+            b.unset(LAST_MARKETPLACE_STATE_ID);
+        } else {
+            b.set(LAST_MARKETPLACE_STATE_ID, prepare(recentDescending));
+        }
+        b.call();
         LOGGER.debug("New marketplace last checked time is {}.", result);
     }
 }
