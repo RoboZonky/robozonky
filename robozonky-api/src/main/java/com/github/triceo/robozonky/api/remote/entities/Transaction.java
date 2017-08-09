@@ -16,35 +16,27 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.triceo.robozonky.api.remote.enums.TransactionCategory;
+import com.github.triceo.robozonky.api.remote.enums.TransactionOrientation;
 
-public class BlockedAmount extends BaseEntity {
+public class Transaction extends BaseEntity {
 
-    private int amount, loanId;
+    private BigDecimal amount;
     private TransactionCategory category;
+    private TransactionOrientation orientation;
+    private OffsetDateTime transactionDate;
+    private String customMessage;
+    private int loanId;
     private String loanName;
-    private OffsetDateTime dateStart;
-
-    public BlockedAmount(final int loanId, final int loanAmount) {
-        this.loanId = loanId;
-        this.amount = loanAmount;
-    }
-
-    private BlockedAmount() {
-        // for JAXB
-    }
+    private String nickName;
 
     @XmlElement
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
-    }
-
-    @XmlElement
-    public int getLoanId() {
-        return loanId;
     }
 
     @XmlElement
@@ -53,12 +45,32 @@ public class BlockedAmount extends BaseEntity {
     }
 
     @XmlElement
+    public TransactionOrientation getOrientation() {
+        return orientation;
+    }
+
+    @XmlElement
+    public OffsetDateTime getTransactionDate() {
+        return transactionDate;
+    }
+
+    @XmlElement
+    public String getCustomMessage() {
+        return customMessage;
+    }
+
+    @XmlElement
+    public int getLoanId() {
+        return loanId;
+    }
+
+    @XmlElement
     public String getLoanName() {
         return loanName;
     }
 
     @XmlElement
-    public OffsetDateTime getDateStart() {
-        return dateStart;
+    public String getNickName() {
+        return nickName;
     }
 }
