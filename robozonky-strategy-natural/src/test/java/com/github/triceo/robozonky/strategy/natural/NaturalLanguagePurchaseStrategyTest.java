@@ -38,6 +38,14 @@ import org.mockito.Mockito;
 
 public class NaturalLanguagePurchaseStrategyTest {
 
+    private final ParticipationDescriptor mockDescriptor() {
+        return mockDescriptor(mock());
+    }
+
+    private final ParticipationDescriptor mockDescriptor(final Participation participation) {
+        return new ParticipationDescriptor(participation, null);
+    }
+
     private final Participation mock() {
         final Participation p = Mockito.mock(Participation.class);
         return p;
@@ -50,7 +58,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance() - 1);
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(new ParticipationDescriptor(mock())), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -59,13 +67,13 @@ public class NaturalLanguagePurchaseStrategyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyList(),
-                                                    Collections.emptyMap());
+                                                    Collections.emptyMap(), Collections.emptyList());
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
         Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(new ParticipationDescriptor(mock())), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -86,7 +94,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
         Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(new ParticipationDescriptor(mock())), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -101,7 +109,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         final Participation l = mock();
         Mockito.doReturn(Rating.A).when(l).getRating();
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(new ParticipationDescriptor(l)), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor(l)), portfolio);
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -120,9 +128,9 @@ public class NaturalLanguagePurchaseStrategyTest {
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK - 1; // check amounts under Zonky investment minimum
         Mockito.doReturn(BigDecimal.valueOf(amount)).when(p2).getRemainingPrincipal();
         Mockito.doReturn(Rating.A).when(p2).getRating();
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p2);
+        final ParticipationDescriptor pd = mockDescriptor(p2);
         final List<RecommendedParticipation> result =
-                s.recommend(Arrays.asList(new ParticipationDescriptor(p), pd), portfolio).collect(Collectors.toList());
+                s.recommend(Arrays.asList(mockDescriptor(p), pd), portfolio).collect(Collectors.toList());
         Assertions.assertThat(result).hasSize(1);
         final RecommendedParticipation r = result.get(0);
         SoftAssertions.assertSoftly(softly -> {

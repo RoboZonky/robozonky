@@ -35,7 +35,7 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
     @Test
     public void noStrategy() {
         final Participation mock = Mockito.mock(Participation.class);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(mock);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(mock, null);
         final Refreshable<PurchaseStrategy> r = Refreshable.createImmutable(null);
         r.run();
         final StrategyExecution exec = new StrategyExecution(r, null, Duration.ofMinutes(60), true);

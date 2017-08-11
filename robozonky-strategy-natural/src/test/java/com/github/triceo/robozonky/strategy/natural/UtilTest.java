@@ -86,7 +86,7 @@ public class UtilTest {
                                                                          new PortfolioShare(Rating.C, targetShareC,
                                                                                             targetShareC)),
                                                                  Collections.emptyList(),
-                                                                 Collections.emptyMap());
+                                                                 Collections.emptyMap(), Collections.emptyList());
         // all ratings have zero share; C > B > A
         PortfolioOverview portfolio = prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio.getSharesOnInvestment()), Rating.C, Rating.B,

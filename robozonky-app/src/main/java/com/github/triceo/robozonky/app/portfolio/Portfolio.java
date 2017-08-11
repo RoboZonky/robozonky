@@ -21,7 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
@@ -36,6 +40,7 @@ import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import com.github.triceo.robozonky.internal.api.Retriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,19 +48,12 @@ public enum Portfolio {
 
     INSTANCE;
 
-    public enum UpdateType {
-
-        FULL,
-        PARTIAL
-
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Investment.class);
-
     private final AtomicReference<List<Investment>> investments = new AtomicReference<>(Collections.emptyList()),
             investmentsPending = new AtomicReference<>(Collections.emptyList());
+    private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>(
+            Collections.emptySortedMap());
     private final Map<Consumer<Zonky>, Portfolio.UpdateType> updaters = new ConcurrentHashMap<>();
-
     Portfolio() {
         registerUpdater(new DelinquencyUpdate());
     }
@@ -74,6 +72,7 @@ public enum Portfolio {
             if (updateType == Portfolio.UpdateType.FULL) {
                 final List<Investment> remote = zonky.getInvestments().collect(Collectors.toList());
                 investments.set(remote);
+                loanCache.set(new TreeMap<>());
             }
             investmentsPending.set(Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky));
             updaters.forEach((u, requiredType) -> {
@@ -131,6 +130,20 @@ public enum Portfolio {
         return calculateOverview(zonky, zonky.getWallet().getAvailableBalance());
     }
 
+    public Loan getLoan(final Zonky zonky, final int loanId) {
+        return loanCache.get().compute(loanId, (key, value) -> {
+            if (value != null) {
+                return value;
+            }
+            return Retriever.retrieve(() -> Optional.of(zonky.getLoan(key)))
+                    .orElseThrow(() -> new IllegalStateException("Loan retrieval failed."));
+        });
+    }
+
+    public Optional<Loan> getLoan(final int loanId) {
+        return Optional.ofNullable(loanCache.get().get(loanId));
+    }
+
     /**
      * For test purposes only.
      */
@@ -138,6 +151,13 @@ public enum Portfolio {
         investmentsPending.set(Collections.emptyList());
         investments.set(Collections.emptyList());
         updaters.clear();
+    }
+
+    public enum UpdateType {
+
+        FULL,
+        PARTIAL
+
     }
 
 }

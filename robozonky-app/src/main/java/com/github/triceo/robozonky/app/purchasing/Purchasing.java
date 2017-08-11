@@ -23,10 +23,14 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
+import com.github.triceo.robozonky.common.remote.Zonky;
 
 public class Purchasing implements Runnable {
 
@@ -43,11 +47,19 @@ public class Purchasing implements Runnable {
         this.maximumSleepPeriod = maximumSleepPeriod;
     }
 
+    private Loan getLoan(final int loanId, final Zonky zonky) {
+        return Portfolio.INSTANCE.getLoan(zonky, loanId);
+    }
+
+    private ParticipationDescriptor getDescriptor(final Participation p, final Zonky zonky) {
+        return new ParticipationDescriptor(p, getLoan(p.getLoanId(), zonky));
+    }
+
     @Override
     public void run() {
         try { // FIXME perhaps streaming would be more resource-efficient?
             authenticated.run(z -> getInvestor().apply(z.getAvailableParticipations()
-                                                               .map(ParticipationDescriptor::new)
+                                                               .map(p -> getDescriptor(p, z))
                                                                .collect(Collectors.toList())));
         } catch (final Throwable t) {
             /*

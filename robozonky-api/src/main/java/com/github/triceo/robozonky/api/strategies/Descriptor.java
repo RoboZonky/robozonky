@@ -19,9 +19,13 @@ package com.github.triceo.robozonky.api.strategies;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
+
 public interface Descriptor<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
 
     X item();
+
+    Loan related();
 
     Optional<T> recommend(final BigDecimal amount);
 }

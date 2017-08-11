@@ -20,20 +20,32 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
 
 public final class ParticipationDescriptor
         implements Descriptor<RecommendedParticipation, ParticipationDescriptor, Participation> {
 
     private final Participation participation;
+    private final Loan related;
 
-    public ParticipationDescriptor(final Participation participation) {
+    ParticipationDescriptor(final Participation participation) { // for testing purposes only
+        this(participation, null);
+    }
+
+    public ParticipationDescriptor(final Participation participation, final Loan related) {
         this.participation = participation;
+        this.related = related;
     }
 
     @Override
     public Participation item() {
         return participation;
+    }
+
+    @Override
+    public Loan related() {
+        return related;
     }
 
     public Optional<RecommendedParticipation> recommend() {

@@ -29,14 +29,25 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 public final class InvestmentDescriptor implements Descriptor<RecommendedInvestment, InvestmentDescriptor, Investment> {
 
     private final Investment investment;
+    private final Loan related;
 
-    public InvestmentDescriptor(final Investment investment) {
+    InvestmentDescriptor(final Investment investment) { // for testing purposes only
+        this(investment, null);
+    }
+
+    public InvestmentDescriptor(final Investment investment, final Loan related) {
         this.investment = investment;
+        this.related = related;
     }
 
     @Override
     public Investment item() {
         return investment;
+    }
+
+    @Override
+    public Loan related() {
+        return related;
     }
 
     public Optional<RecommendedInvestment> recommend() {
