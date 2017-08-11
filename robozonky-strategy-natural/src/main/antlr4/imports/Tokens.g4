@@ -20,7 +20,7 @@ portfolioExpression returns [DefaultPortfolio result] :
     ) ' portfolio' DOT
 ;
 
-ratingCondition returns [JointMarketplaceFilterCondition result]:
+ratingCondition returns [MarketplaceFilterCondition result]:
     'rating ' IS (
         ( r1=ratingEnumeratedExpression
             {

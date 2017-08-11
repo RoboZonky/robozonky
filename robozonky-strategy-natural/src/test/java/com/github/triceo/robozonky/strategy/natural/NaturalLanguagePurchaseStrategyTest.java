@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
@@ -43,7 +44,8 @@ public class NaturalLanguagePurchaseStrategyTest {
     }
 
     private final ParticipationDescriptor mockDescriptor(final Participation participation) {
-        return new ParticipationDescriptor(participation, null);
+        final Loan l = new Loan(1, 2);
+        return new ParticipationDescriptor(participation, l);
     }
 
     private final Participation mock() {
@@ -80,9 +82,9 @@ public class NaturalLanguagePurchaseStrategyTest {
     @Test
     public void noLoansApplicable() {
         final MarketplaceFilter filter = new MarketplaceFilter();
-        filter.ignoreWhen(Collections.singleton(new SecondaryMarketplaceFilterCondition() {
+        filter.ignoreWhen(Collections.singleton(new MarketplaceFilterCondition() {
             @Override
-            public boolean test(final Participation loan) {
+            public boolean test(final Wrapper loan) {
                 return true;
             }
         }));

@@ -17,54 +17,98 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
 import com.github.triceo.robozonky.api.remote.enums.Purpose;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.remote.enums.Region;
 
 public class Wrapper {
 
-    private final MainIncomeType mainIncomeType;
-    private final BigDecimal interestRate;
-    private final Purpose purpose;
-    private final Rating rating;
+    private final Loan loan;
     private final int remainingTermInMonths;
-
+    private final BigDecimal remainingAmount;
     public Wrapper(final Loan loan) {
-        this.mainIncomeType = loan.getMainIncomeType();
-        this.interestRate = loan.getInterestRate();
-        this.purpose = loan.getPurpose();
-        this.rating = loan.getRating();
+        this.loan = loan;
         this.remainingTermInMonths = loan.getTermInMonths();
+        this.remainingAmount = null;
     }
 
-    public Wrapper(final Participation participation) {
-        this.mainIncomeType = participation.getIncomeType();
-        this.interestRate = participation.getInterestRate();
-        this.purpose = participation.getPurpose();
-        this.rating = participation.getRating();
+    public Wrapper(final Participation participation, final Loan loan) {
+        this.loan = loan;
         this.remainingTermInMonths = participation.getRemainingInstalmentCount();
+        this.remainingAmount = null;
+    }
+
+    public Wrapper(final Investment investment, final Loan loan) {
+        this.loan = loan;
+        this.remainingTermInMonths = investment.getRemainingMonths();
+        this.remainingAmount = investment.getRemainingPrincipal();
+    }
+
+    public int getLoanId() {
+        return loan.getId();
+    }
+
+    public Region getRegion() {
+        return loan.getRegion();
+    }
+
+    public String getStory() {
+        return loan.getStory();
     }
 
     public MainIncomeType getMainIncomeType() {
-        return mainIncomeType;
+        return loan.getMainIncomeType();
     }
 
     public BigDecimal getInterestRate() {
-        return interestRate;
+        return loan.getInterestRate();
     }
 
     public Purpose getPurpose() {
-        return purpose;
+        return loan.getPurpose();
     }
 
     public Rating getRating() {
-        return rating;
+        return loan.getRating();
     }
 
     public int getRemainingTermInMonths() {
         return remainingTermInMonths;
+    }
+
+    public int getOriginalAmount() {
+        return (int) loan.getAmount();
+    }
+
+    public BigDecimal getRemainingAmount() {
+        if (remainingAmount == null) {
+            throw new IllegalStateException("Cannot request remaining amount here.");
+        }
+        return remainingAmount;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Wrapper wrapper = (Wrapper) o;
+        return remainingTermInMonths == wrapper.remainingTermInMonths &&
+                Objects.equals(loan, wrapper.loan) &&
+                Objects.equals(remainingAmount, wrapper.remainingAmount);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(loan, remainingTermInMonths, remainingAmount);
     }
 }

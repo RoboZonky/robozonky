@@ -18,8 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 
-public class LoanInterestRateCondition extends AbstractRangeCondition<Wrapper>
-        implements JointMarketplaceFilterCondition {
+public class LoanInterestRateCondition extends AbstractRangeCondition {
 
     private static final BigDecimal MIN_INCREMENT = BigDecimal.valueOf(Double.MIN_VALUE),
             MAX_RATE = BigDecimal.valueOf(Double.MAX_VALUE);

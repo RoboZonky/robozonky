@@ -23,9 +23,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
@@ -132,26 +129,17 @@ public class ParsedStrategy {
         }
     }
 
-    private Collection<MarketplaceFilter> getProperFilters(final Object item) {
-        if (item instanceof Loan) {
-            return primaryMarketplaceFilters;
-        } else if (item instanceof Participation) {
-            return secondaryMarketplaceFilters;
-        } else {
-            throw new IllegalStateException("Wrong object type: " + item.getClass());
-        }
-    }
-
-    private boolean matchesNoFilter(final Object item, final int loanId) {
-        final Collection<MarketplaceFilter> filters = getProperFilters(item);
+    private boolean matchesNoFilter(final Wrapper item, final boolean isSecondaryMarket) {
+        final Collection<MarketplaceFilter> filters =
+                isSecondaryMarket ? secondaryMarketplaceFilters : primaryMarketplaceFilters;
         return !filters.stream()
                 .filter(f -> f.test(item))
-                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", loanId, f))
+                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", item.getLoanId(), f))
                 .findFirst()
                 .isPresent();
     }
 
-    private boolean matchesAnyFilter(final Investment item) {
+    private boolean matchesAnyFilter(final Wrapper item) {
         return sellFilters.stream()
                 .filter(f -> f.test(item))
                 .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} matched {}.", item.getLoanId(), f))
@@ -160,15 +148,21 @@ public class ParsedStrategy {
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
-        return items.stream().filter(i -> matchesNoFilter(i.item(), i.item().getId()));
+        return items.stream().filter(i -> matchesNoFilter(new Wrapper(i.item()), false));
     }
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(
             final Collection<ParticipationDescriptor> items) {
-        return items.stream().filter(i -> matchesNoFilter(i.item(), i.item().getLoanId()));
+        return items.stream().filter(i -> {
+            final Wrapper w = new Wrapper(i.item(), i.related());
+            return matchesNoFilter(w, true);
+        });
     }
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
-        return items.stream().filter(i -> matchesAnyFilter(i.item()));
+        return items.stream().filter(i -> {
+            final Wrapper w = new Wrapper(i.item(), i.related());
+            return matchesAnyFilter(w);
+        });
     }
 }

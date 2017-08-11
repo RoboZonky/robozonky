@@ -16,10 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.enums.MainIncomeType;
-
-class BorrowerIncomeCondition extends AbstractEnumeratedCondition<Wrapper, MainIncomeType>
-        implements JointMarketplaceFilterCondition {
+class BorrowerIncomeCondition extends AbstractEnumeratedCondition {
 
     public BorrowerIncomeCondition() {
         super(Wrapper::getMainIncomeType);

@@ -20,10 +20,10 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.mockito.Mockito;
 
-public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditionTest<Wrapper, Rating> {
+public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditionTest<Rating> {
 
     @Override
-    protected AbstractEnumeratedCondition<Wrapper, Rating> getSUT() {
+    protected AbstractEnumeratedCondition getSUT() {
         return new LoanRatingEnumeratedCondition();
     }
 

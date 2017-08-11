@@ -16,10 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.enums.Rating;
-
-public class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Wrapper, Rating>
-        implements JointMarketplaceFilterCondition {
+public class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition {
 
     public LoanRatingEnumeratedCondition() {
         super(Wrapper::getRating);

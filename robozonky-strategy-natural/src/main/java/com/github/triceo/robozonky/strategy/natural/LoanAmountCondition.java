@@ -16,12 +16,10 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-
-public class LoanAmountCondition extends AbstractRangeCondition<Loan> implements PrimaryMarketplaceFilterCondition {
+public class LoanAmountCondition extends AbstractRangeCondition {
 
     public LoanAmountCondition(final int fromInclusive, final int toInclusive) {
-        super(Loan::getAmount, fromInclusive, toInclusive);
+        super(Wrapper::getOriginalAmount, fromInclusive, toInclusive);
         if (fromInclusive < 0 || toInclusive < 0) {
             throw new IllegalArgumentException("Either values need to be 0 or more.");
         }

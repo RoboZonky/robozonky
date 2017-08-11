@@ -17,9 +17,8 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
-public interface MarketplaceFilterCondition<T> extends Predicate<T> {
+public interface MarketplaceFilterCondition {
 
     /**
      * Describe the condition using eg. range boundaries.
@@ -29,12 +28,7 @@ public interface MarketplaceFilterCondition<T> extends Predicate<T> {
         return Optional.empty();
     }
 
-    /**
-     * Determine whether or not the item in question matches the condition represented by this class.
-     * @param item Item in question.
-     * @return True if item matches the condition.
-     */
-    default boolean test(final T item) {
+    default boolean test(final Wrapper item) {
         return false;
     }
 }

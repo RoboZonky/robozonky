@@ -43,7 +43,7 @@ complexExpression returns [ParsedStrategy result] :
         { buyFilters = $m.result; }
     )?
 
-    { Map<Boolean, Collection<MarketplaceFilter>> sellFilters = Collections.emptyMap(); }
+    { Collection<MarketplaceFilter> sellFilters = Collections.emptyList(); }
     (
         DELIM 'Likvidace pozic'
         s=sellFilterExpression

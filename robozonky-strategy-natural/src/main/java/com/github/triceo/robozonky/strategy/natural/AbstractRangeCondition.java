@@ -21,12 +21,11 @@ import java.util.function.Function;
 
 import com.github.triceo.robozonky.strategy.natural.conditions.RangeCondition;
 
-abstract class AbstractRangeCondition<T> extends MarketplaceFilterConditionImpl<T>
-        implements MarketplaceFilterCondition<T> {
+abstract class AbstractRangeCondition extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
-    private final RangeCondition<T> rangeCondition;
+    private final RangeCondition<Wrapper> rangeCondition;
 
-    protected AbstractRangeCondition(final Function<T, Number> targetAccessor, final Number minValueInclusive,
+    protected AbstractRangeCondition(final Function<Wrapper, Number> targetAccessor, final Number minValueInclusive,
                                      final Number maxValueInclusive) {
         this.rangeCondition = new RangeCondition<>(targetAccessor, minValueInclusive, maxValueInclusive);
     }
@@ -38,7 +37,7 @@ abstract class AbstractRangeCondition<T> extends MarketplaceFilterConditionImpl<
     }
 
     @Override
-    public boolean test(final T item) {
+    public boolean test(final Wrapper item) {
         return rangeCondition.test(item);
     }
 }

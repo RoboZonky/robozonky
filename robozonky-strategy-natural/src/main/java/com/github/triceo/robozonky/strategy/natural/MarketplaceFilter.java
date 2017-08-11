@@ -23,8 +23,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.entities.Participation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,23 +58,8 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @return True when all the initial conditions return true AND when one or more secondary conditions don't.
      */
     @Override
-    public boolean test(final Object item) {
-        final Predicate<MarketplaceFilterCondition> f = c -> {
-            if (item instanceof Loan) {
-                if (c instanceof JointMarketplaceFilterCondition) {
-                    return c.test(new Wrapper((Loan) item));
-                } else if (c instanceof PrimaryMarketplaceFilterCondition) {
-                    return c.test(item);
-                }
-            } else if (item instanceof Participation) {
-                if (c instanceof JointMarketplaceFilterCondition) {
-                    return c.test(new Wrapper((Participation) item));
-                } else if (c instanceof SecondaryMarketplaceFilterCondition) {
-                    return c.test(item);
-                }
-            }
-            throw new IllegalStateException("Invalid combination: " + item.getClass() + ", " + c.getClass());
-        };
+    public boolean test(final Wrapper item) {
+        final Predicate<MarketplaceFilterCondition> f = c -> c.test(item);
         return ignoreWhen.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
     }
 }

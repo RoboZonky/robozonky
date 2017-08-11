@@ -59,7 +59,7 @@ Ignorovat úvěr, kde: kraj klienta je Ústecký nebo Moravskoslezský; délka p
 (Ale ne když: rating je lepší než A++.)
 
 # Náhradou slova "úvěr" za "participaci" se filtr bude vztahovat na sekundární trh namísto primárního.
-# Ve filtrech pro sekundární trh se nelze dotazovat na zbývající výši úvěru, kraj a příběh.
+# Ve filtrech pro sekundární trh se nelze dotazovat na zbývající výši úvěru.
 # Délka úvěru je v případě sekundárního trhu ta právě zbývající, nikoliv původní v době uzavření smlouvy.
 Ignorovat participaci, kde: délka přesahuje 36 měsíců.
 

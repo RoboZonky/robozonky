@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.strategy.natural;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class MarketplaceFilterConditionImpl<T> implements MarketplaceFilterCondition<T> {
+public abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
     // not static as we want to have the specific impl class in the logs
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());

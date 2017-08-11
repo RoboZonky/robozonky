@@ -21,18 +21,18 @@ import java.util.Collections;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public abstract class AbstractEnumeratedConditionTest<S, T> {
+public abstract class AbstractEnumeratedConditionTest<T> {
 
-    protected abstract AbstractEnumeratedCondition<S, T> getSUT();
+    protected abstract AbstractEnumeratedCondition getSUT();
 
-    protected abstract S getMocked();
+    protected abstract Wrapper getMocked();
 
     protected abstract T getTriggerItem();
 
     @Test
     public void proper() {
-        final S i = this.getMocked();
-        final AbstractEnumeratedCondition<S, T> sut = this.getSUT();
+        final Wrapper i = this.getMocked();
+        final AbstractEnumeratedCondition sut = this.getSUT();
         Assertions.assertThat(sut.test(i)).isFalse();
         sut.add(Collections.singleton(this.getTriggerItem()));
         Assertions.assertThat(sut.test(i)).isTrue();

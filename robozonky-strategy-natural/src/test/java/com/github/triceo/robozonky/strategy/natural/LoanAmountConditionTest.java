@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -38,24 +37,24 @@ public class LoanAmountConditionTest {
 
     @Test
     public void boundaryCorrect() {
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getAmount()).thenReturn(0.0);
+        final Wrapper l = Mockito.mock(Wrapper.class);
+        Mockito.when(l.getOriginalAmount()).thenReturn(0);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(0, 0);
         Assertions.assertThat(condition.test(l)).isTrue();
     }
 
     @Test
     public void leftOutOfBounds() {
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getAmount()).thenReturn(0.0);
+        final Wrapper l = Mockito.mock(Wrapper.class);
+        Mockito.when(l.getOriginalAmount()).thenReturn(0);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
         Assertions.assertThat(condition.test(l)).isFalse();
     }
 
     @Test
     public void rightOutOfBounds() {
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getAmount()).thenReturn(2.0);
+        final Wrapper l = Mockito.mock(Wrapper.class);
+        Mockito.when(l.getOriginalAmount()).thenReturn(2);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
         Assertions.assertThat(condition.test(l)).isFalse();
     }

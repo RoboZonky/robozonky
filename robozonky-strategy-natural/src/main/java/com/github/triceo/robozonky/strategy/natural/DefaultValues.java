@@ -25,7 +25,7 @@ public class DefaultValues {
     private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
     private DefaultInvestmentSize investmentSize = new DefaultInvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
-    private JointMarketplaceFilterCondition confirmationCondition = new JointMarketplaceFilterCondition() {
+    private MarketplaceFilterCondition confirmationCondition = new MarketplaceFilterCondition() {
         // by default, do not confirm anything ever
     };
 
@@ -68,7 +68,7 @@ public class DefaultValues {
         this.investmentShare = investmentShare;
     }
 
-    public JointMarketplaceFilterCondition getConfirmationCondition() {
+    public MarketplaceFilterCondition getConfirmationCondition() {
         return confirmationCondition;
     }
 
@@ -87,7 +87,7 @@ public class DefaultValues {
         return confirmationCondition.test(new Wrapper(loan));
     }
 
-    public void setConfirmationCondition(final JointMarketplaceFilterCondition confirmationCondition) {
+    public void setConfirmationCondition(final MarketplaceFilterCondition confirmationCondition) {
         if (confirmationCondition == null) {
             throw new IllegalArgumentException("Confirmation condition must be provided.");
         }

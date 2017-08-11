@@ -20,8 +20,7 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-class LoanRatingWorseOrEqualCondition extends MarketplaceFilterConditionImpl<Wrapper>
-        implements JointMarketplaceFilterCondition {
+class LoanRatingWorseOrEqualCondition extends MarketplaceFilterConditionImpl {
 
     private final Rating bestPossibleRating;
 

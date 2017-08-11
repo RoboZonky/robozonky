@@ -16,10 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.enums.Purpose;
-
-class LoanPurposeCondition extends AbstractEnumeratedCondition<Wrapper, Purpose>
-        implements JointMarketplaceFilterCondition {
+class LoanPurposeCondition extends AbstractEnumeratedCondition {
 
     public LoanPurposeCondition() {
         super(Wrapper::getPurpose);

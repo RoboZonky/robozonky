@@ -20,10 +20,10 @@ import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Purpose;
 import org.mockito.Mockito;
 
-public class LoanPurposeConditionTest extends AbstractEnumeratedConditionTest<Wrapper, Purpose> {
+public class LoanPurposeConditionTest extends AbstractEnumeratedConditionTest<Purpose> {
 
     @Override
-    protected AbstractEnumeratedCondition<Wrapper, Purpose> getSUT() {
+    protected AbstractEnumeratedCondition getSUT() {
         return new LoanPurposeCondition();
     }
 

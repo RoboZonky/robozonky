@@ -23,21 +23,20 @@ import java.util.function.Function;
 
 import com.github.triceo.robozonky.strategy.natural.conditions.EnumeratedCondition;
 
-class AbstractEnumeratedCondition<S, T> extends MarketplaceFilterConditionImpl<S>
-        implements MarketplaceFilterCondition<S> {
+class AbstractEnumeratedCondition extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
-    private final Function<S, T> fieldRetriever;
-    private final Collection<T> possibleValues = new LinkedHashSet<>(0);
+    private final Function<Wrapper, Object> fieldRetriever;
+    private final Collection<Object> possibleValues = new LinkedHashSet<>(0);
 
-    protected AbstractEnumeratedCondition(final Function<S, T> fieldRetriever) {
+    protected AbstractEnumeratedCondition(final Function<Wrapper, Object> fieldRetriever) {
         this.fieldRetriever = fieldRetriever;
     }
 
-    public void add(final T item) {
+    public void add(final Object item) {
         this.possibleValues.add(item);
     }
 
-    public void add(final Collection<T> items) {
+    public void add(final Collection<Object> items) {
         items.forEach(this::add);
     }
 
@@ -47,7 +46,7 @@ class AbstractEnumeratedCondition<S, T> extends MarketplaceFilterConditionImpl<S
     }
 
     @Override
-    public boolean test(final S item) {
+    public boolean test(final Wrapper item) {
         return new EnumeratedCondition<>(fieldRetriever, possibleValues).test(item);
     }
 }

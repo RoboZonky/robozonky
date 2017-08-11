@@ -16,7 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-public class LoanTermCondition extends AbstractRangeCondition<Wrapper> implements JointMarketplaceFilterCondition {
+public class LoanTermCondition extends AbstractRangeCondition {
 
     private static final int MIN_TERM = 0, MAX_TERM = 84;
 

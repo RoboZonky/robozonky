@@ -18,9 +18,7 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.function.Predicate;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-
-class AbstractStoryCondition extends MarketplaceFilterConditionImpl<Loan> implements PrimaryMarketplaceFilterCondition {
+class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
 
     // these values were the first and third quartile of story length in all loans between 2016-10-01 and 2017-05-20
     static final int SHORT_STORY_THRESHOLD = 200, LONG_STORY_THRESHOLD = 600;
@@ -33,7 +31,7 @@ class AbstractStoryCondition extends MarketplaceFilterConditionImpl<Loan> implem
     }
 
     @Override
-    public boolean test(final Loan loan) {
+    public boolean test(final Wrapper loan) {
         final String story = loan.getStory();
         final boolean isStoryProvided = (story == null);
         return storyLength.test(isStoryProvided ? "" : loan.getStory().trim());
