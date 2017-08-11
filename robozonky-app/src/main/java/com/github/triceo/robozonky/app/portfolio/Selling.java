@@ -16,16 +16,23 @@
 
 package com.github.triceo.robozonky.app.portfolio;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
+import com.github.triceo.robozonky.api.notifications.SaleMadeEvent;
+import com.github.triceo.robozonky.api.notifications.SaleRecommendedEvent;
+import com.github.triceo.robozonky.api.notifications.SaleRequestedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingStartedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.SellStrategy;
+import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +59,14 @@ public class Selling implements Consumer<Zonky> {
 
     private void sell(final SellStrategy strategy, final Zonky zonky) {
         final PortfolioOverview portfolio = Portfolio.INSTANCE.calculateOverview(zonky);
-        final Stream<Investment> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace();
-        strategy.recommend(eligible.map(i -> getDescriptor(i, zonky)).collect(Collectors.toSet()), portfolio)
-                .forEach(r -> {
+        final Set<InvestmentDescriptor> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace()
+                .map(i -> getDescriptor(i, zonky))
+                .collect(Collectors.toSet());
+        Events.fire(new SellingStartedEvent(eligible, portfolio));
+        final Collection<Investment> investmentsSold = strategy.recommend(eligible, portfolio)
+                .peek(r -> Events.fire(new SaleRecommendedEvent(r)))
+                .peek(r -> Events.fire(new SaleRequestedEvent(r)))
+                .map(r -> {
                     final Investment i = r.descriptor().item();
                     if (isDryRun) {
                         LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
@@ -64,7 +76,11 @@ public class Selling implements Consumer<Zonky> {
                         i.setIsOnSmp(true);
                         LOGGER.trace("Request over.");
                     }
-                });
+                    return i;
+                })
+                .peek(r -> Events.fire(new SaleMadeEvent(r, isDryRun)))
+                .collect(Collectors.toSet());
+        Events.fire(new SellingCompletedEvent(investmentsSold, Portfolio.INSTANCE.calculateOverview(zonky)));
     }
 
     @Override
