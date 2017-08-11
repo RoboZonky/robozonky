@@ -40,6 +40,7 @@ import com.github.triceo.robozonky.api.notifications.LoanDelinquent60DaysOrMoreE
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.PurchaseMadeEvent;
 import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -48,6 +49,7 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdate
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
+import com.github.triceo.robozonky.api.notifications.SaleMadeEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
@@ -129,6 +131,8 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         events.put(SupportedListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3"));
         events.put(SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
                    new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
+        events.put(SupportedListener.PURCHASE_MADE, new PurchaseMadeEvent(i, 200, true));
+        events.put(SupportedListener.SALE_MADE, new SaleMadeEvent(i, true));
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[]{s, s.getListener(properties), events.get(s)})
