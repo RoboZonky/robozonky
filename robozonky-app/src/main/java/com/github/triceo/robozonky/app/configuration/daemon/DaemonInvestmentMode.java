@@ -106,7 +106,14 @@ public class DaemonInvestmentMode implements InvestmentMode {
             LOGGER.debug("Scheduling marketplace checks {} milliseconds apart.", checkPeriod);
             // schedule the tasks some time apart so that the CPU is evenly utilized
             getDelays(suddenDeath.getDaemonsToWatch(), checkPeriod).forEach((daemon, delay) -> {
-                executor.scheduleWithFixedDelay(daemon, delay, checkPeriod, TimeUnit.MILLISECONDS);
+                final Runnable r = () -> {
+                    if (Portfolio.INSTANCE.isUpdating()) {
+                        LOGGER.debug("Paused to allow for update of internal structures: {}.", daemon.getClass());
+                        return;
+                    }
+                    daemon.run();
+                };
+                executor.scheduleWithFixedDelay(r, delay, checkPeriod, TimeUnit.MILLISECONDS);
             });
             executor.scheduleAtFixedRate(suddenDeath, 0, checkPeriod, TimeUnit.MILLISECONDS);
             // block until request to stop the app is received

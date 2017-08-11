@@ -29,14 +29,9 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
-import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Investing implements Daemon {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Investing.class);
 
     private final Investor.Builder builder;
     private final Authenticated authenticated;
@@ -63,10 +58,6 @@ public class Investing implements Daemon {
     @Override
     public void run() {
         try {
-            if (Portfolio.INSTANCE.isUpdating()) {
-                LOGGER.info("Investing paused to allow for update of internal structures.");
-                return;
-            }
             marketplace.run();
         } catch (final Throwable t) {
             /*

@@ -34,12 +34,8 @@ import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Purchasing implements Daemon {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
     private final Authenticated authenticated;
     private final boolean isDryRun;
@@ -66,10 +62,6 @@ public class Purchasing implements Daemon {
     @Override
     public void run() {
         try {
-            if (Portfolio.INSTANCE.isUpdating()) {
-                LOGGER.info("Purchasing paused to allow for update of internal structures.");
-                return;
-            }
             // FIXME perhaps streaming would be more resource-efficient?
             authenticated.run(z -> getInvestor().apply(z.getAvailableParticipations()
                                                                .map(p -> getDescriptor(p, z))
