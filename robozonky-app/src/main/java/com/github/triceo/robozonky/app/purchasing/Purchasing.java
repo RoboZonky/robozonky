@@ -16,8 +16,10 @@
 
 package com.github.triceo.robozonky.app.purchasing;
 
+import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,16 +30,22 @@ import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
+import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Purchasing implements Runnable {
+public class Purchasing implements Daemon {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
     private final Authenticated authenticated;
     private final boolean isDryRun;
     private final Refreshable<PurchaseStrategy> refreshableStrategy;
     private final TemporalAmount maximumSleepPeriod;
+    private final AtomicReference<OffsetDateTime> lastRunDateTime = new AtomicReference<>();
 
     public Purchasing(final Authenticated auth, final boolean isDryRun, final Refreshable<PurchaseStrategy> strategy,
                       final TemporalAmount maximumSleepPeriod) {
@@ -57,7 +65,12 @@ public class Purchasing implements Runnable {
 
     @Override
     public void run() {
-        try { // FIXME perhaps streaming would be more resource-efficient?
+        try {
+            if (Portfolio.INSTANCE.isUpdating()) {
+                LOGGER.info("Purchasing paused to allow for update of internal structures.");
+                return;
+            }
+            // FIXME perhaps streaming would be more resource-efficient?
             authenticated.run(z -> getInvestor().apply(z.getAvailableParticipations()
                                                                .map(p -> getDescriptor(p, z))
                                                                .collect(Collectors.toList())));
@@ -67,10 +80,17 @@ public class Purchasing implements Runnable {
              * care of errors stopping the thread.
              */
             new DaemonRuntimeExceptionHandler().handle(t);
+        } finally {
+            lastRunDateTime.set(OffsetDateTime.now());
         }
     }
 
     private Function<Collection<ParticipationDescriptor>, Collection<Investment>> getInvestor() {
         return new StrategyExecution(refreshableStrategy, authenticated, maximumSleepPeriod, isDryRun);
+    }
+
+    @Override
+    public OffsetDateTime getLastRunDateTime() {
+        return lastRunDateTime.get();
     }
 }

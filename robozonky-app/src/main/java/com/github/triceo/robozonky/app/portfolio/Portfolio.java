@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ public enum Portfolio {
     private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>(
             Collections.emptySortedMap());
     private final Map<Consumer<Zonky>, Portfolio.UpdateType> updaters = new ConcurrentHashMap<>();
+    private final AtomicBoolean isUpdating = new AtomicBoolean(false);
     Portfolio() {
         registerUpdater(new DelinquencyUpdate());
     }
@@ -67,7 +69,10 @@ public enum Portfolio {
     }
 
     public void update(final Zonky zonky, final Portfolio.UpdateType updateType) {
-        try {
+        if (this.isUpdating.getAndSet(true)) {
+            LOGGER.trace("Update ignored due to already being updated.");
+            return;
+        } else try {
             LOGGER.trace("Update started: {}.", updateType);
             if (updateType == Portfolio.UpdateType.FULL) {
                 loanCache.set(new TreeMap<>());
@@ -85,8 +90,15 @@ public enum Portfolio {
             LOGGER.trace("Finished.");
         } catch (final Throwable t) { // users should know
             new DaemonRuntimeExceptionHandler().handle(t);
+        } finally {
+            this.isUpdating.set(false);
         }
     }
+
+    public boolean isUpdating() {
+        return this.isUpdating.get();
+    }
+
 
     public void update(final Zonky zonky) {
         update(zonky, Portfolio.UpdateType.FULL);

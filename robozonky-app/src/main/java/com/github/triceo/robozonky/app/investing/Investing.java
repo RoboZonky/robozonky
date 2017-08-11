@@ -16,8 +16,10 @@
 
 package com.github.triceo.robozonky.app.investing;
 
+import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.Refreshable;
@@ -26,15 +28,22 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
+import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Investing implements Runnable {
+public class Investing implements Daemon {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Investing.class);
 
     private final Investor.Builder builder;
     private final Authenticated authenticated;
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;
     private final TemporalAmount maximumSleepPeriod;
+    private final AtomicReference<OffsetDateTime> lastRunDateTime = new AtomicReference<>(null);
     private final ResultTracker buffer = new ResultTracker();
 
     public Investing(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
@@ -54,17 +63,28 @@ public class Investing implements Runnable {
     @Override
     public void run() {
         try {
+            if (Portfolio.INSTANCE.isUpdating()) {
+                LOGGER.info("Investing paused to allow for update of internal structures.");
+                return;
+            }
             marketplace.run();
         } catch (final Throwable t) {
-        /*
-         * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
-         * care of errors stopping the thread.
-         */
+            /*
+             * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
+             * care of errors stopping the thread.
+             */
             new DaemonRuntimeExceptionHandler().handle(t);
+        } finally {
+            lastRunDateTime.set(OffsetDateTime.now());
         }
     }
 
     private Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
         return new StrategyExecution(builder, refreshableStrategy, authenticated, maximumSleepPeriod);
+    }
+
+    @Override
+    public OffsetDateTime getLastRunDateTime() {
+        return lastRunDateTime.get();
     }
 }

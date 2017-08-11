@@ -63,7 +63,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                 .map(strategy -> {
                     final Activity activity = new Activity(loans, maximumSleepPeriod);
                     if (activity.shouldSleep()) {
-                        StrategyExecution.LOGGER.info("RoboZonky is asleep as there is nothing going on.");
+                        StrategyExecution.LOGGER.info("Investing is asleep as there is nothing going on.");
                         return Collections.<Investment>emptyList();
                     }
                     StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
@@ -73,7 +73,7 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                     activity.settle();
                     return investments;
                 }).orElseGet(() -> {
-                    StrategyExecution.LOGGER.info("RoboZonky is asleep as there is no investment strategy.");
+                    StrategyExecution.LOGGER.info("Investing is asleep as there is no investment strategy.");
                     return Collections.emptyList();
                 });
     }

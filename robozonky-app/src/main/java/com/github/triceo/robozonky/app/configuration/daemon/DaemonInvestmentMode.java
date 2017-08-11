@@ -19,6 +19,9 @@ package com.github.triceo.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -46,8 +49,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
 
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
-    public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO =
-            new AtomicReference<>(new CountDownLatch(1));
+    public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO = new AtomicReference<>(new CountDownLatch(1));
 
     private static TemporalAmount getSuddenDeathTimeout(final TemporalAmount periodBetweenChecks) {
         final long secondBetweenChecks = periodBetweenChecks.get(ChronoUnit.SECONDS);
@@ -58,11 +60,10 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final boolean faultTolerant, dryRun;
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor =
-            Executors.newScheduledThreadPool(2, DaemonInvestmentMode.THREAD_FACTORY);
+            Executors.newScheduledThreadPool(3, DaemonInvestmentMode.THREAD_FACTORY);
     private final TemporalAmount periodBetweenChecks;
     private final SuddenDeathDetection suddenDeath;
     private final CountDownLatch circuitBreaker;
-    private final Runnable marketplaceCheck;
     private final Thread shutdownHook;
 
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
@@ -77,31 +78,38 @@ public class DaemonInvestmentMode implements InvestmentMode {
         Runtime.getRuntime().addShutdownHook(shutdownHook);
         this.marketplace = marketplace;
         this.periodBetweenChecks = periodBetweenChecks;
-        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, getSuddenDeathTimeout(periodBetweenChecks));
-        final Runnable investing = new Investing(auth, builder, marketplace,
+        Portfolio.INSTANCE.registerUpdater(new Selling(RefreshableSellStrategy.create(strategyLocaion), dryRun));
+        final Daemon investing = new Investing(auth, builder, marketplace,
                                                  RefreshableInvestmentStrategy.create(strategyLocaion),
                                                  maximumSleepPeriod);
-        final Runnable purchasing = new Purchasing(auth, dryRun, RefreshablePurchaseStrategy.create(strategyLocaion),
-                                                   maximumSleepPeriod);
-        Portfolio.INSTANCE.registerUpdater(new Selling(RefreshableSellStrategy.create(strategyLocaion), dryRun));
-        this.marketplaceCheck = () -> { // FIXME separate
-            investing.run();
-            purchasing.run();
-            suddenDeath.registerMarketplaceCheck();
-        };
+        final Daemon purchasing = new Purchasing(auth, dryRun, RefreshablePurchaseStrategy.create(strategyLocaion),
+                                                 maximumSleepPeriod);
+        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, getSuddenDeathTimeout(periodBetweenChecks),
+                                                    investing, purchasing);
     }
 
-    Thread getShutdownHook() {
-        return shutdownHook;
+    private Map<Daemon, Long> getDelays(final Collection<Daemon> daemons, final long checkPeriod) {
+        final Map<Daemon, Long> result = new LinkedHashMap<>(daemons.size());
+        final long delay = checkPeriod / daemons.size();
+        long currentDelay = checkPeriod;
+        for (final Daemon d : suddenDeath.getDaemonsToWatch()) {
+            result.put(d, currentDelay);
+            currentDelay -= delay;
+        }
+        return result;
     }
 
     @Override
     public ReturnCode get() {
         try {
-            final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
-            LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
-            executor.scheduleWithFixedDelay(marketplaceCheck, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
-            executor.scheduleAtFixedRate(suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
+            final long checkPeriod = this.periodBetweenChecks.get(ChronoUnit.SECONDS) * 1000;
+            LOGGER.debug("Scheduling marketplace checks {} milliseconds apart.", checkPeriod);
+            // schedule the tasks some time apart so that the CPU is evenly utilized
+            getDelays(suddenDeath.getDaemonsToWatch(), checkPeriod).forEach((daemon, delay) -> {
+                executor.scheduleWithFixedDelay(daemon, delay, checkPeriod, TimeUnit.MILLISECONDS);
+            });
+            executor.scheduleAtFixedRate(suddenDeath, 0, checkPeriod, TimeUnit.MILLISECONDS);
+            // block until request to stop the app is received
             LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
             circuitBreaker.await();
             LOGGER.trace("Request to stop received.");

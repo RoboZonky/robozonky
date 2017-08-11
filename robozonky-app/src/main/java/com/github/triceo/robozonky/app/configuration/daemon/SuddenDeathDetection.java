@@ -18,9 +18,10 @@ package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,18 +38,30 @@ class SuddenDeathDetection implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SuddenDeathDetection.class);
 
+    private final Collection<Daemon> daemonsToWatch;
     private final CountDownLatch daemonStopsIfReleased;
-    private final AtomicReference<OffsetDateTime> lastMarketplaceCheck = new AtomicReference<>(OffsetDateTime.now());
     private final AtomicBoolean suddenDeath = new AtomicBoolean(false);
     private final TemporalAmount inactivityThreshold;
 
-    public SuddenDeathDetection(final CountDownLatch daemonStopsIfReleased, final TemporalAmount inactivityThreshold) {
+    public SuddenDeathDetection(final CountDownLatch daemonStopsIfReleased, final TemporalAmount inactivityThreshold,
+                                final Daemon... daemons) {
+        this.daemonsToWatch = Arrays.asList(daemons);
         this.daemonStopsIfReleased = daemonStopsIfReleased;
         this.inactivityThreshold = inactivityThreshold;
     }
 
-    public void registerMarketplaceCheck() {
-        lastMarketplaceCheck.set(OffsetDateTime.now());
+    private boolean isDead(final Daemon daemon) {
+        final OffsetDateTime now = OffsetDateTime.now();
+        final OffsetDateTime lastRefresh = daemon.getLastRunDateTime();
+        if (lastRefresh == null) {
+            return false;
+        } else {
+            return daemon.getLastRunDateTime().plus(inactivityThreshold).isBefore(now);
+        }
+    }
+
+    public Collection<Daemon> getDaemonsToWatch() {
+        return daemonsToWatch;
     }
 
     public boolean isSuddenDeath() {
@@ -58,14 +71,19 @@ class SuddenDeathDetection implements Runnable {
     @Override
     public void run() {
         try {
-            final OffsetDateTime now = OffsetDateTime.now();
-            if (lastMarketplaceCheck.get().plus(inactivityThreshold).isBefore(now)) {
-                SuddenDeathDetection.LOGGER.error("Sudden death is here.");
-                suddenDeath.set(true); // make the rest of the code notice the sudden death
-                daemonStopsIfReleased.countDown(); // kill daemon and report
+            for (final Daemon d : daemonsToWatch) {
+                if (isDead(d)) {
+                    SuddenDeathDetection.LOGGER.error("Sudden death is here: {}.", d);
+                    suddenDeath.set(true); // make the rest of the code notice the sudden death
+                    daemonStopsIfReleased.countDown(); // kill daemon and report
+                    break;
+                }
             }
         } catch (final Throwable t) { // not catching here would stop the thread, disabling sudden death detection
             SuddenDeathDetection.LOGGER.warn("Sudden death workaround error.", t);
+        }
+        if (suddenDeath.get()) {
+            throw new IllegalStateException("Sudden death, no need to keep running this thread.");
         }
     }
 }

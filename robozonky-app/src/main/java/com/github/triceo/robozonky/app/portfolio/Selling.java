@@ -17,9 +17,11 @@
 package com.github.triceo.robozonky.app.portfolio;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.notifications.SaleMadeEvent;
@@ -33,6 +35,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.SellStrategy;
 import com.github.triceo.robozonky.app.Events;
+import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,20 +68,26 @@ public class Selling implements Consumer<Zonky> {
         Events.fire(new SellingStartedEvent(eligible, portfolio));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, portfolio)
                 .peek(r -> Events.fire(new SaleRecommendedEvent(r)))
-                .peek(r -> Events.fire(new SaleRequestedEvent(r)))
                 .map(r -> {
-                    final Investment i = r.descriptor().item();
-                    if (isDryRun) {
-                        LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
-                    } else {
-                        LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
-                        zonky.sell(i);
-                        i.setIsOnSmp(true);
-                        LOGGER.trace("Request over.");
+                    try {
+                        Events.fire(new SaleRequestedEvent(r));
+                        final Investment i = r.descriptor().item();
+                        if (isDryRun) {
+                            LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
+                        } else {
+                            LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
+                            zonky.sell(i);
+                            i.setIsOnSmp(true);
+                            LOGGER.trace("Request over.");
+                        }
+                        Events.fire(new SaleMadeEvent(i, isDryRun)); // only executes on actual successful sale
+                        return Optional.of(i);
+                    } catch (final Throwable t) { // prevent failure in one operation from trying other operations
+                        new DaemonRuntimeExceptionHandler().handle(t);
+                        return Optional.<Investment>empty();
                     }
-                    return i;
                 })
-                .peek(r -> Events.fire(new SaleMadeEvent(r, isDryRun)))
+                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
         Events.fire(new SellingCompletedEvent(investmentsSold, Portfolio.INSTANCE.calculateOverview(zonky)));
     }
