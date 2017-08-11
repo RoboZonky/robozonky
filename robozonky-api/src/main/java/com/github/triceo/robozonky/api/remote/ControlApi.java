@@ -17,7 +17,6 @@ package com.github.triceo.robozonky.api.remote;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -25,6 +24,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.PurchaseRequest;
+import com.github.triceo.robozonky.api.remote.entities.SellRequest;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +49,11 @@ public interface ControlApi {
 
     @POST
     @Path("/traded-investments")
-    void offer(@FormParam("id") int id, @FormParam("remainingPrincipal") double remainingPrincipal,
-               @FormParam("feeAmount") double feeAmount);
+    void offer(SellRequest sellRequest);
 
     @POST
     @Path("/smp/investments/{id}/shares")
-    void purchase(@PathParam("id") int id, @FormParam("amount") double amount);
+    void purchase(@PathParam("id") int id, PurchaseRequest purchaseRequest);
 
     @DELETE
     @Path("/traded-investments/{id}")

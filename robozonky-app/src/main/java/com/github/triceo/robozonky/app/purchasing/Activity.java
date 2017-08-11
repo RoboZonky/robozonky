@@ -24,7 +24,6 @@ import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -109,7 +108,8 @@ class Activity {
     private boolean hasNewLoans() {
         final SortedSet<Integer> state = read();
         final SortedSet<Integer> now = serialize(recentDescending);
-        return !Objects.equals(state, now);
+        now.removeAll(state);
+        return !now.isEmpty();
     }
 
     /**

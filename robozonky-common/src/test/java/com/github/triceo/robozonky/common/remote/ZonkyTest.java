@@ -147,7 +147,7 @@ public class ZonkyTest {
             Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
             Mockito.when(p.getId()).thenReturn(1);
             z.purchase(p);
-            Mockito.verify(control).purchase(ArgumentMatchers.eq(p.getId()), ArgumentMatchers.eq(10.0));
+            Mockito.verify(control).purchase(ArgumentMatchers.eq(p.getId()), ArgumentMatchers.any());
         }
     }
 
@@ -166,8 +166,7 @@ public class ZonkyTest {
             Mockito.when(p.getSmpFee()).thenReturn(BigDecimal.ONE);
             Mockito.when(p.getId()).thenReturn(1);
             z.sell(p);
-            Mockito.verify(control)
-                    .offer(ArgumentMatchers.eq(p.getId()), ArgumentMatchers.eq(10.0), ArgumentMatchers.eq(1.0));
+            Mockito.verify(control).offer(ArgumentMatchers.any());
         }
     }
 

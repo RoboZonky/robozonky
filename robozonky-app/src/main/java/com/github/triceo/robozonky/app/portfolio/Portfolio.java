@@ -70,9 +70,9 @@ public enum Portfolio {
         try {
             LOGGER.trace("Update started: {}.", updateType);
             if (updateType == Portfolio.UpdateType.FULL) {
+                loanCache.set(new TreeMap<>());
                 final List<Investment> remote = zonky.getInvestments().collect(Collectors.toList());
                 investments.set(remote);
-                loanCache.set(new TreeMap<>());
             }
             investmentsPending.set(Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky));
             updaters.forEach((u, requiredType) -> {

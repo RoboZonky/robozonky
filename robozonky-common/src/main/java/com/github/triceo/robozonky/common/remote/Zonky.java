@@ -30,10 +30,11 @@ import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
+import com.github.triceo.robozonky.api.remote.entities.PurchaseRequest;
+import com.github.triceo.robozonky.api.remote.entities.SellRequest;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.internal.api.Settings;
-import com.github.triceo.robozonky.util.NumberUtil;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
@@ -75,14 +76,13 @@ public class Zonky implements AutoCloseable {
 
     public void purchase(final Participation participation) {
         controlApi.execute(api -> {
-            api.purchase(participation.getId(), NumberUtil.toCurrency(participation.getRemainingPrincipal()));
+            api.purchase(participation.getId(), new PurchaseRequest(participation));
         });
     }
 
     public void sell(final Investment investment) {
         controlApi.execute(api -> {
-            api.offer(investment.getId(), NumberUtil.toCurrency(investment.getRemainingPrincipal()),
-                      NumberUtil.toCurrency(investment.getSmpFee()));
+            api.offer(new SellRequest(investment));
         });
     }
 

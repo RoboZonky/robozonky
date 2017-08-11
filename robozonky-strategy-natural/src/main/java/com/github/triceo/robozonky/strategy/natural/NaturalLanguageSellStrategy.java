@@ -23,12 +23,8 @@ import com.github.triceo.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.RecommendedInvestment;
 import com.github.triceo.robozonky.api.strategies.SellStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NaturalLanguageSellStrategy implements SellStrategy {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageSellStrategy.class);
 
     private final ParsedStrategy strategy;
 
@@ -39,10 +35,6 @@ public class NaturalLanguageSellStrategy implements SellStrategy {
     @Override
     public Stream<RecommendedInvestment> recommend(final Collection<InvestmentDescriptor> available,
                                                    final PortfolioOverview portfolio) {
-        if (!Util.isAcceptable(strategy, portfolio)) {
-            LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
-            return Stream.empty();
-        }
         return strategy.getApplicableInvestments(available)
                 .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
                 .flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
