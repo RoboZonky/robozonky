@@ -45,7 +45,7 @@ complexExpression returns [ParsedStrategy result] :
 
     { Collection<MarketplaceFilter> sellFilters = Collections.emptyList(); }
     (
-        DELIM 'Likvidace pozic'
+        DELIM 'Prodej participací'
         s=sellFilterExpression
         { sellFilters = $s.result; }
     )?
