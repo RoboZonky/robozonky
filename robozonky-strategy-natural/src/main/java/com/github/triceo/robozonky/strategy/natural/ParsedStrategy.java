@@ -23,9 +23,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import org.slf4j.Logger;
@@ -38,20 +40,26 @@ public class ParsedStrategy {
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioShare> portfolio;
     private final Map<Rating, InvestmentSize> investmentSizes;
-    private final Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters;
+    private final Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters, sellFilters;
 
     public ParsedStrategy(final DefaultPortfolio portfolio) {
         this(portfolio, Collections.emptyMap());
     }
 
     ParsedStrategy(final DefaultPortfolio portfolio, final Map<Boolean, Collection<MarketplaceFilter>> filters) {
-        this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyList(), filters);
+        this(portfolio, filters, Collections.emptyList());
+    }
+
+    ParsedStrategy(final DefaultPortfolio portfolio, final Map<Boolean, Collection<MarketplaceFilter>> filters,
+                   final Collection<MarketplaceFilter> sellFilters) {
+        this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyList(), filters, sellFilters);
     }
 
     public ParsedStrategy(final DefaultValues defaults,
                           final Collection<PortfolioShare> portfolio,
                           final Collection<InvestmentSize> investmentSizes,
-                          final Map<Boolean, Collection<MarketplaceFilter>> marketplaceFilters) {
+                          final Map<Boolean, Collection<MarketplaceFilter>> marketplaceFilters,
+                          final Collection<MarketplaceFilter> sellFilters) {
         this.defaults = defaults;
         this.portfolio = portfolio.stream()
                 .collect(Collectors.toMap(PortfolioShare::getRating, Function.identity()));
@@ -59,6 +67,7 @@ public class ParsedStrategy {
                 .collect(Collectors.toMap(InvestmentSize::getRating, Function.identity()));
         this.primaryMarketplaceFilters = marketplaceFilters.getOrDefault(true, Collections.emptyList());
         this.secondaryMarketplaceFilters = marketplaceFilters.getOrDefault(false, Collections.emptyList());
+        this.sellFilters = sellFilters;
         final int shareSum = sumMinimalShares();
         if (shareSum > 100) {
             throw new IllegalArgumentException("Sum of minimal rating shares in portfolio is over 100 %.");
@@ -142,6 +151,14 @@ public class ParsedStrategy {
                 .isPresent();
     }
 
+    private boolean matchesAnyFilter(final Investment item) {
+        return sellFilters.stream()
+                .filter(f -> f.test(item))
+                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} matched {}.", item.getLoanId(), f))
+                .findFirst()
+                .isPresent();
+    }
+
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
         return items.stream().filter(i -> matchesNoFilter(i.item(), i.item().getId()));
     }
@@ -149,5 +166,9 @@ public class ParsedStrategy {
     public Stream<ParticipationDescriptor> getApplicableParticipations(
             final Collection<ParticipationDescriptor> items) {
         return items.stream().filter(i -> matchesNoFilter(i.item(), i.item().getLoanId()));
+    }
+
+    public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
+        return items.stream().filter(i -> matchesAnyFilter(i.item()));
     }
 }

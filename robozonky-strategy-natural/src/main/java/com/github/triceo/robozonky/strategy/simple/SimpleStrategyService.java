@@ -147,7 +147,8 @@ public class SimpleStrategyService implements StrategyService {
         final Map<Boolean, Collection<MarketplaceFilter>> resultingFilters = new HashMap<>();
         resultingFilters.put(true, filters);
         resultingFilters.put(false, Collections.emptyList());
-        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, resultingFilters);
+        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, resultingFilters,
+                                                    Collections.emptyList());
         final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);
         return new SimpleStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);
     }

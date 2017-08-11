@@ -32,5 +32,5 @@ public interface SellStrategy {
      * @param portfolio Aggregation of information as to the user's current portfolio.
      * @return Acceptable investments, in the order of their decreasing priority, mapped to the recommended sell price.
      */
-    Stream<RecommendedInvestment> recommend(Collection<RecommendedInvestment> available, PortfolioOverview portfolio);
+    Stream<RecommendedInvestment> recommend(Collection<InvestmentDescriptor> available, PortfolioOverview portfolio);
 }
