@@ -48,6 +48,7 @@ public class Investment extends BaseInvestment {
         this.interestRate = loan.getInterestRate();
         this.currentTerm = this.loanTermInMonth;
         this.remainingMonths = loan.getTermInMonths();
+        this.remainingPrincipal = BigDecimal.valueOf(amount);
         this.paymentStatus = PaymentStatus.OK;
         this.paid = BigDecimal.ZERO;
         this.paidPrincipal = BigDecimal.ZERO;

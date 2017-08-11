@@ -22,8 +22,6 @@ import java.util.Map;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.internal.api.Defaults;
 
 final class InvestmentMadeEventListener extends AbstractEmailingListener<InvestmentMadeEvent> {
 
@@ -42,12 +40,6 @@ final class InvestmentMadeEventListener extends AbstractEmailingListener<Investm
         return "investment-made.ftl";
     }
 
-    private String getLoanUrl(final Investment i) {
-        // convert investment safely to URL, using dummy loan if necessary
-        final Loan l = i.getLoan().orElseGet(() -> new Loan(i.getLoanId(), Defaults.MINIMUM_INVESTMENT_IN_CZK));
-        return Loan.getUrlSafe(l);
-    }
-
     @Override
     protected Map<String, Object> getData(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
@@ -56,7 +48,7 @@ final class InvestmentMadeEventListener extends AbstractEmailingListener<Investm
         result.put("loanId", i.getLoanId());
         result.put("loanRating", i.getRating().getCode());
         result.put("loanTerm", i.getLoanTermInMonth());
-        result.put("loanUrl", this.getLoanUrl(i));
+        result.put("loanUrl", AbstractEmailingListener.getLoanUrl(i));
         result.put("newBalance", event.getFinalBalance());
         result.put("isDryRun", event.isDryRun());
         return result;

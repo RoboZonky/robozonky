@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
+import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
@@ -56,6 +58,12 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         } else {
             throw new IllegalArgumentException("Not a valid e-mail address: " + username);
         }
+    }
+
+    protected static String getLoanUrl(final Investment i) {
+        // convert investment safely to URL, using dummy loan if necessary
+        final Loan l = i.getLoan().orElseGet(() -> new Loan(i.getLoanId(), Defaults.MINIMUM_INVESTMENT_IN_CZK));
+        return Loan.getUrlSafe(l);
     }
 
     static String stackTraceToString(final Throwable t) {
