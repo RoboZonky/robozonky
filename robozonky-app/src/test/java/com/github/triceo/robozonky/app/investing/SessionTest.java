@@ -97,7 +97,7 @@ public class SessionTest extends AbstractInvestingTest {
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
         // setup APIs
         final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
-        final BlockedAmount ba = new BlockedAmount(loanId, Defaults.MINIMUM_INVESTMENT_IN_CZK);
+        final BlockedAmount ba = new BlockedAmount(loanId, BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
         Mockito.when(z.getBlockedAmounts()).thenReturn(Stream.of(ba));
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.item());
         Portfolio.INSTANCE.update(z); // make sure data from API is loaded

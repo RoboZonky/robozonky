@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.portfolio;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.enums.TransactionCategory;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.internal.api.Retriever;
@@ -57,16 +59,17 @@ class Util {
      */
     public static List<Investment> retrieveInvestmentsRepresentedByBlockedAmounts(final Zonky api) {
         // first group all blocked amounts by the loan ID and sum them
-        final Map<Integer, Integer> amountsBlockedByLoans =
+        final Map<Integer, BigDecimal> amountsBlockedByLoans =
                 api.getBlockedAmounts()
-                        .filter(blocked -> blocked.getLoanId() > 0) // 0 == Zonky investors' fee
+                        .filter(blocked -> blocked.getCategory() == TransactionCategory.INVESTMENT)
                         .collect(Collectors.groupingBy(BlockedAmount::getLoanId,
-                                                       Collectors.summingInt(BlockedAmount::getAmount)));
+                                                       Collectors.reducing(BigDecimal.ZERO, BlockedAmount::getAmount,
+                                                                           BigDecimal::add)));
         // and then fetch all the loans in parallel, converting them into investments
         return amountsBlockedByLoans.entrySet().parallelStream()
                 .map(entry ->
                              Retriever.retrieve(() -> Optional.of(api.getLoan(entry.getKey())))
-                                     .map(l -> new Investment(l, entry.getValue()))
+                                     .map(l -> new Investment(l, entry.getValue().intValue()))
                                      .orElseThrow(() -> new RuntimeException("Loan retrieval failed."))
                 ).collect(Collectors.toList());
     }

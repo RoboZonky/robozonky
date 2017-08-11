@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.portfolio;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -43,15 +44,16 @@ public class UtilTest {
     @Test
     public void mergingBlockedAmounts() {
         // prepare data
-        final int loanId1 = 1, loanId2 = 2, investorsFee = 0;
-        final int loan1amount1 = 300, loan1amount2 = 400, loan2amount = 500;
+        final int loanId1 = 1, loanId2 = 2;
+        final BigDecimal loan1amount1 = BigDecimal.valueOf(300), loan1amount2 = BigDecimal.valueOf(400),
+                loan2amount = BigDecimal.valueOf(500);
         final Loan loan1 = Mockito.mock(Loan.class);
         Mockito.when(loan1.getId()).thenReturn(loanId1);
         final Loan loan2 = Mockito.mock(Loan.class);
         Mockito.when(loan2.getId()).thenReturn(loanId2);
         final Stream<BlockedAmount> blockedAmounts = Stream.of(
-                new BlockedAmount(investorsFee, 200), new BlockedAmount(loanId1, loan1amount1),
-                new BlockedAmount(investorsFee, 300), new BlockedAmount(loanId2, loan2amount),
+                new BlockedAmount(BigDecimal.valueOf(200)), new BlockedAmount(loanId1, loan1amount1),
+                new BlockedAmount(BigDecimal.valueOf(300)), new BlockedAmount(loanId2, loan2amount),
                 new BlockedAmount(loanId1, loan1amount2) // repeat loan we've already seen, simulating re-invest
         );
         // mock endpoints
@@ -63,8 +65,8 @@ public class UtilTest {
         final List<Investment> result = Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         Assertions.assertThat(result).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.get(0).getAmount()).isEqualTo(loan1amount1 + loan1amount2);
-            softly.assertThat(result.get(1).getAmount()).isEqualTo(loan2amount);
+            softly.assertThat(result.get(0).getAmount()).isEqualTo(loan1amount1.add(loan1amount2).intValue());
+            softly.assertThat(result.get(1).getAmount()).isEqualTo(loan2amount.intValue());
         });
     }
 }
