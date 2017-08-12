@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public enum MBean {
 
     RUNTIME(Runtime::new),
-    INVESTMENTS(Investments::new),
+    OPERATIONS(Operations::new),
     DELINQUENCY(Delinquency::new),
     PORTFOLIO(Portfolio::new);
 

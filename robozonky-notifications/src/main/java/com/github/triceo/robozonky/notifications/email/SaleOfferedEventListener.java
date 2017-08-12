@@ -19,28 +19,28 @@ package com.github.triceo.robozonky.notifications.email;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.triceo.robozonky.api.notifications.PurchaseMadeEvent;
+import com.github.triceo.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 
-final class PurchaseMadeEventListener extends AbstractEmailingListener<PurchaseMadeEvent> {
+final class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent> {
 
-    public PurchaseMadeEventListener(final ListenerSpecificNotificationProperties properties) {
+    public SaleOfferedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
     }
 
     @Override
-    String getSubject(final PurchaseMadeEvent event) {
-        return "Zakoupena participace k půjčce č. " + event.getInvestment().getLoanId();
+    String getSubject(final SaleOfferedEvent event) {
+        return "Participace k půjčce č. " + event.getInvestment().getLoanId() + " nabídnuta k prodeji";
     }
 
     @Override
     String getTemplateFileName() {
-        return "purchase-made.ftl";
+        return "sale-offered.ftl";
     }
 
     @Override
-    protected Map<String, Object> getData(final PurchaseMadeEvent event) {
+    protected Map<String, Object> getData(final SaleOfferedEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = new HashMap<>();
         result.put("investedAmount", i.getAmount());
@@ -49,13 +49,11 @@ final class PurchaseMadeEventListener extends AbstractEmailingListener<PurchaseM
         result.put("loanTerm", i.getRemainingMonths());
         result.put("loanUrl", AbstractEmailingListener.getLoanUrl(i));
         result.put("isDryRun", event.isDryRun());
-        result.put("newBalance", event.getFinalBalance());
         return result;
     }
 
     @Override
-    public void handle(final PurchaseMadeEvent event, final SessionInfo sessionInfo) {
-        BalanceTracker.INSTANCE.setLastKnownBalance(event.getFinalBalance());
+    public void handle(final SaleOfferedEvent event, final SessionInfo sessionInfo) {
         super.handle(event, sessionInfo);
     }
 }

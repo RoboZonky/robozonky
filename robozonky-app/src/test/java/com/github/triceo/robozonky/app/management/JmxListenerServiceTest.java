@@ -51,24 +51,16 @@ public class JmxListenerServiceTest {
 
     private static final String USERNAME = "someone@somewhere.cz";
     private static final Supplier<Delinquency> DELINQUENCY = () -> (Delinquency) MBean.DELINQUENCY.getImplementation();
-    private static final Supplier<InvestmentsMBean> INVESTMENTS =
-            () -> (Investments) MBean.INVESTMENTS.getImplementation();
+    private static final Supplier<OperationsMBean> OPERATIONS = () -> (Operations) MBean.OPERATIONS.getImplementation();
     private static final Supplier<RuntimeMBean> RUNTIME = () -> (Runtime) MBean.RUNTIME.getImplementation();
-    private static final Supplier<Portfolio> PORTFOLIO = () -> (Portfolio) MBean.PORTFOLIO.getImplementation();
 
     private static Object[] getParametersForExecutionCompleted() {
         final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
         final Consumer<SoftAssertions> before = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
-            final RuntimeMBean mbean2 = RUNTIME.get();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isNull();
-            softly.assertThat(mbean2.getZonkyUsername()).isEqualTo("");
+            softly.assertThat(RUNTIME.get().getZonkyUsername()).isEqualTo("");
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
-            final RuntimeMBean mbean2 = RUNTIME.get();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
-            softly.assertThat(mbean2.getZonkyUsername()).isEqualTo(USERNAME);
+            softly.assertThat(RUNTIME.get().getZonkyUsername()).isEqualTo(USERNAME);
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
@@ -79,11 +71,11 @@ public class JmxListenerServiceTest {
         final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentDelegatedEvent(r, 10000, "");
         final Consumer<SoftAssertions> before = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
+            final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getDelegatedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
+            final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getDelegatedInvestments()).containsOnlyKeys(l.getId());
         };
         return new Object[]{evt.getClass(), evt, before, after};
@@ -95,11 +87,11 @@ public class JmxListenerServiceTest {
         final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentRejectedEvent(r, 10000, "");
         final Consumer<SoftAssertions> before = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
+            final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getRejectedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
+            final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getRejectedInvestments()).containsOnlyKeys(l.getId());
         };
         return new Object[]{evt.getClass(), evt, before, after};
@@ -125,11 +117,11 @@ public class JmxListenerServiceTest {
         final Loan l = new Loan(1, 1000);
         final Event evt = new InvestmentMadeEvent(new Investment(l, 200), 1000, false);
         final Consumer<SoftAssertions> before = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
+            final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getSuccessfulInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final InvestmentsMBean mbean = INVESTMENTS.get();
+            final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getSuccessfulInvestments()).containsOnlyKeys(l.getId());
         };
         return new Object[]{evt.getClass(), evt, before, after};

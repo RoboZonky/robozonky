@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.api.notifications.PurchaseMadeEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchasingStartedEvent;
@@ -148,7 +148,7 @@ class Session implements AutoCloseable {
         final Loan l = new Loan(participation.getLoanId(), Integer.MAX_VALUE);
         final Investment i = new Investment(l, recommendation.amount().intValue());
         markSuccessfulInvestment(i);
-        Events.fire(new PurchaseMadeEvent(i, balance.intValue(), isDryRun));
+        Events.fire(new InvestmentPurchasedEvent(i, balance.intValue(), isDryRun));
         return true;
     }
 

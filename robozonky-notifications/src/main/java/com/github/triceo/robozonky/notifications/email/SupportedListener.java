@@ -21,6 +21,7 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
@@ -29,7 +30,6 @@ import com.github.triceo.robozonky.api.notifications.LoanDelinquent60DaysOrMoreE
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.triceo.robozonky.api.notifications.PurchaseMadeEvent;
 import com.github.triceo.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -38,7 +38,7 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdate
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.triceo.robozonky.api.notifications.SaleMadeEvent;
+import com.github.triceo.robozonky.api.notifications.SaleOfferedEvent;
 import org.apache.commons.lang3.StringUtils;
 
 enum SupportedListener {
@@ -85,6 +85,28 @@ enum SupportedListener {
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentRejectedEventListener(properties);
+        }
+    },
+    INVESTMENT_PURCHASED {
+        @Override
+        Class<? extends Event> getEventType() {
+            return InvestmentPurchasedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new InvestmentPurchasedEventListener(properties);
+        }
+    },
+    SALE_OFFERED {
+        @Override
+        Class<? extends Event> getEventType() {
+            return SaleOfferedEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new SaleOfferedEventListener(properties);
         }
     },
     LOAN_NOW_DELINQUENT {
@@ -271,28 +293,6 @@ enum SupportedListener {
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyExperimentalUpdateDetectedEventListener(properties);
-        }
-    },
-    PURCHASE_MADE {
-        @Override
-        Class<? extends Event> getEventType() {
-            return PurchaseMadeEvent.class;
-        }
-
-        @Override
-        protected EventListener<? extends Event> newListener(ListenerSpecificNotificationProperties properties) {
-            return new PurchaseMadeEventListener(properties);
-        }
-    },
-    SALE_MADE {
-        @Override
-        Class<? extends Event> getEventType() {
-            return SaleMadeEvent.class;
-        }
-
-        @Override
-        protected EventListener<? extends Event> newListener(ListenerSpecificNotificationProperties properties) {
-            return new SaleMadeEventListener(properties);
         }
     };
 

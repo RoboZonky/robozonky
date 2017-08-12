@@ -17,11 +17,12 @@
 package com.github.triceo.robozonky.api.notifications;
 
 import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.remote.entities.SellRequest;
 import com.github.triceo.robozonky.api.strategies.RecommendedParticipation;
 
 /**
- * Fired immediately before {@link ControlApi#purchase(int, double)} call is made or, in case of dry run,
- * immediately before such a call would otherwise be made. Will be followed by {@link PurchaseMadeEvent}.
+ * Fired immediately before {@link ControlApi#offer(SellRequest)} call is made or, in case of dry run,
+ * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentPurchasedEvent}.
  */
 public final class PurchaseRequestedEvent extends Event {
 

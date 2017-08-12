@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.notifications.SaleMadeEvent;
+import com.github.triceo.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.triceo.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.triceo.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.SellingCompletedEvent;
@@ -80,7 +80,7 @@ public class Selling implements Consumer<Zonky> {
                             i.setIsOnSmp(true);
                             LOGGER.trace("Request over.");
                         }
-                        Events.fire(new SaleMadeEvent(i, isDryRun)); // only executes on actual successful sale
+                        Events.fire(new SaleOfferedEvent(i, isDryRun)); // only executes on actual successful sale
                         return Optional.of(i);
                     } catch (final Throwable t) { // prevent failure in one operation from trying other operations
                         new DaemonRuntimeExceptionHandler().handle(t);

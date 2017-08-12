@@ -21,13 +21,15 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 /**
  * Fired immediately after secondary market purchase was submitted to the API.
  */
-public final class SaleMadeEvent extends Event {
+public final class InvestmentPurchasedEvent extends Event {
 
     private final Investment investment;
+    private final int finalBalance;
     private final boolean dryRun;
 
-    public SaleMadeEvent(final Investment investment, final boolean isDryRun) {
+    public InvestmentPurchasedEvent(final Investment investment, final int finalBalance, final boolean isDryRun) {
         this.investment = investment;
+        this.finalBalance = finalBalance;
         this.dryRun = isDryRun;
     }
 
@@ -36,6 +38,13 @@ public final class SaleMadeEvent extends Event {
      */
     public Investment getInvestment() {
         return this.investment;
+    }
+
+    /**
+     * @return The new account balance
+     */
+    public int getFinalBalance() {
+        return this.finalBalance;
     }
 
     /**

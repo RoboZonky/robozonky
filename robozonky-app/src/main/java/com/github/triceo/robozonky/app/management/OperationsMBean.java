@@ -18,11 +18,15 @@ package com.github.triceo.robozonky.app.management;
 
 import java.util.Map;
 
-public interface InvestmentsMBean extends BaseMBean {
+public interface OperationsMBean extends BaseMBean {
 
     Map<Integer, Integer> getSuccessfulInvestments();
 
     Map<Integer, Integer> getDelegatedInvestments();
 
     Map<Integer, Integer> getRejectedInvestments();
+
+    Map<Integer, Integer> getPurchasedInvestments();
+
+    Map<Integer, Integer> getOfferedInvestments();
 }

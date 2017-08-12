@@ -22,7 +22,7 @@ import com.github.triceo.robozonky.api.strategies.RecommendedInvestment;
 
 /**
  * Fired immediately before {@link ControlApi#offer(SellRequest)} call is made or, in case of dry run,
- * immediately before such a call would otherwise be made. Will be followed by {@link SaleMadeEvent}.
+ * immediately before such a call would otherwise be made. Will be followed by {@link SaleOfferedEvent}.
  */
 public final class SaleRequestedEvent extends Event {
 
