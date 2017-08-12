@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,6 +49,7 @@ class SuddenDeathDetection implements Runnable {
         this.daemonsToWatch = Arrays.asList(daemons);
         this.daemonStopsIfReleased = daemonStopsIfReleased;
         this.inactivityThreshold = inactivityThreshold;
+        LOGGER.debug("Sudden death threshold is {} seconds.", inactivityThreshold.get(ChronoUnit.SECONDS));
     }
 
     private boolean isDead(final Daemon daemon) {

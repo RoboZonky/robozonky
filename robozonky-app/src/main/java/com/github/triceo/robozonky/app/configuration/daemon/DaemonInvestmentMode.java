@@ -40,6 +40,7 @@ import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.portfolio.Selling;
 import com.github.triceo.robozonky.app.purchasing.Purchasing;
+import com.github.triceo.robozonky.internal.api.Settings;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,20 +48,20 @@ import org.slf4j.LoggerFactory;
 public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
-
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO = new AtomicReference<>(new CountDownLatch(1));
 
-    private static TemporalAmount getSuddenDeathTimeout(final TemporalAmount periodBetweenChecks) {
-        final long secondBetweenChecks = periodBetweenChecks.get(ChronoUnit.SECONDS);
-        return Duration.ofMinutes(secondBetweenChecks); // multiply by 60
+    private static TemporalAmount getSuddenDeathTimeout() {
+        final long socketTimeoutSeconds = Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS);
+        final long connectionTimeoutSeconds = Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS);
+        final long max = Math.max(socketTimeoutSeconds, connectionTimeoutSeconds);
+        return Duration.ofSeconds(max * 2);
     }
 
     private final String username;
     private final boolean faultTolerant, dryRun;
     private final Marketplace marketplace;
-    private final ScheduledExecutorService executor =
-            Executors.newScheduledThreadPool(3, DaemonInvestmentMode.THREAD_FACTORY);
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(3, THREAD_FACTORY);
     private final TemporalAmount periodBetweenChecks;
     private final SuddenDeathDetection suddenDeath;
     private final CountDownLatch circuitBreaker;
@@ -72,8 +73,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.username = auth.getSecretProvider().getUsername();
         this.dryRun = builder.isDryRun();
         this.faultTolerant = isFaultTolerant;
-        this.circuitBreaker =
-                DaemonInvestmentMode.BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
+        this.circuitBreaker = BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
         this.shutdownHook = new DaemonShutdownHook(circuitBreaker);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
         this.marketplace = marketplace;
@@ -84,8 +84,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                                  maximumSleepPeriod);
         final Daemon purchasing = new Purchasing(auth, dryRun, RefreshablePurchaseStrategy.create(strategyLocaion),
                                                  maximumSleepPeriod);
-        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, getSuddenDeathTimeout(periodBetweenChecks),
-                                                    investing, purchasing);
+        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, getSuddenDeathTimeout(), investing, purchasing);
     }
 
     private Map<Daemon, Long> getDelays(final Collection<Daemon> daemons, final long checkPeriod) {
