@@ -50,7 +50,7 @@ public enum State {
     INSTANCE; // cheap thread-safe singleton
 
     private final Logger LOGGER = LoggerFactory.getLogger(State.class);
-    private static final String DELIMITER = ",";
+    private static final String DELIMITER = ";";
     private static final Pattern SPLIT_BY_DELIMITER = Pattern.compile("\\Q" + DELIMITER + "\\E");
     private final AtomicReference<Ini> stateFile = new AtomicReference<>(null);
     private final Supplier<Ini> stateFileSupplier = () -> {
