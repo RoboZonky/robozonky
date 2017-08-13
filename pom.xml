@@ -404,7 +404,6 @@
             <timestampedReports>false</timestampedReports>
             <detectInlinedCode>true</detectInlinedCode>
             <mutationThreshold>85</mutationThreshold>
-            <timeoutConstant>20000</timeoutConstant> <!-- robozonky-app times out a lot -->
             <targetClasses>
               <param>com.github.triceo.robozonky.*</param>
             </targetClasses>
