@@ -57,9 +57,11 @@ class Util {
         p.setProperty("smtp.requiresSslOnConnect", toBoolean(Variables.SMTP_IS_SSL.getValue(data)));
         final String isInvestmentEmailEnabled = toBoolean(Variables.EMAIL_IS_INVESTMENT.getValue(data));
         p.setProperty("investmentSkipped.enabled", isInvestmentEmailEnabled);
+        p.setProperty("investmentPurchased.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentRejected.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentMade.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentDelegated.enabled", isInvestmentEmailEnabled);
+        p.setProperty("saleOffered.enabled", isInvestmentEmailEnabled);
         p.setProperty("loanNowDelinquent.enabled", "false"); // by default, let's prevent people from panicking
         p.setProperty("loanNoLongerDelinquent.enabled",
                       toBoolean(Variables.EMAIL_IS_LOAN_NOT_DELINQUENT.getValue(data)));
