@@ -249,7 +249,9 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private String createScript(final CommandLinePart commandLine, final String name) {
         final File subexecutable = new File(DIST_PATH, name);
         subexecutable.setExecutable(true);
-        return subexecutable.getAbsolutePath() + " " + commandLine.convertOptions();
+        final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
+        String sourcePrefix = isWindows ? "" : ". ";
+        return sourcePrefix + subexecutable.getAbsolutePath() + " " + commandLine.convertOptions();
     }
 
     private Collection<String> getCommonScript(final CommandLinePart commandLine,
