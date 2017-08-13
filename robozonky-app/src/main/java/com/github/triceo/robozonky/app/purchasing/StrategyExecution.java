@@ -63,7 +63,7 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
                 .map(strategy -> {
                     final Activity activity = new Activity(items, maximumSleepPeriod);
                     if (activity.shouldSleep()) {
-                        StrategyExecution.LOGGER.info("Purchasing is asleep as there is nothing going on.");
+                        StrategyExecution.LOGGER.debug("Purchasing is asleep as there is nothing going on.");
                         return Collections.<Investment>emptyList();
                     }
                     StrategyExecution.LOGGER.debug("Sending following participations to purchasing: {}.",
