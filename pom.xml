@@ -42,7 +42,7 @@
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <surefire.version>2.20</surefire.version>
-    <version.org.jboss.resteasy>3.1.3.Final</version.org.jboss.resteasy>
+    <version.org.jboss.resteasy>3.1.4.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <version.org.antlr>4.7</version.org.antlr>
   </properties>
