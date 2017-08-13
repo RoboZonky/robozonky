@@ -34,18 +34,15 @@ final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
     private static final State.ClassSpecificState STATE = State.forClass(Counter.class);
-    private static final String SEPARATOR = ";";
 
     private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
-        final String result = timestamps.stream()
-                .map(OffsetDateTime::toString)
-                .collect(Collectors.joining(Counter.SEPARATOR));
+        final Stream<String> result = timestamps.stream().map(OffsetDateTime::toString);
         return Counter.STATE.newBatch().set(id, result).call();
     }
 
     private static Collection<OffsetDateTime> load(final String id) {
-        return Counter.STATE.getValue(id)
-                .map(value -> Stream.of(value.split(Counter.SEPARATOR))
+        return Counter.STATE.getValues(id)
+                .map(value -> value.stream()
                         .map(String::trim)
                         .map(OffsetDateTime::parse)
                         .collect(Collectors.toSet()))

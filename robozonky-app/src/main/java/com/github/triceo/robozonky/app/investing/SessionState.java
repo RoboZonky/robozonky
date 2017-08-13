@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app.investing;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,8 +45,8 @@ class SessionState {
 
     private static Collection<LoanDescriptor> readInvestments(final Collection<LoanDescriptor> knownLoans,
                                                               final String propertyName) {
-        final Optional<String> result = SessionState.STATE.getValue(propertyName);
-        return result.map(s -> Stream.of(s.split(","))
+        final Optional<List<String>> result = SessionState.STATE.getValues(propertyName);
+        return result.map(s -> s.stream()
                 .map(Integer::parseInt)
                 .distinct()
                 .sorted()
@@ -64,12 +65,11 @@ class SessionState {
 
     private static void writeInvestments(final String propertyName,
                                          final Collection<LoanDescriptor> rejectedInvestments) {
-        final String result = rejectedInvestments.stream()
+        final Stream<String> result = rejectedInvestments.stream()
                 .map(l -> l.item().getId())
                 .distinct()
                 .sorted()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
+                .map(String::valueOf);
         SessionState.STATE.newBatch().set(propertyName, result).call();
     }
 
