@@ -23,6 +23,7 @@ import javax.xml.bind.annotation.XmlElement;
 import com.github.triceo.robozonky.api.remote.enums.TransactionCategory;
 import com.github.triceo.robozonky.api.remote.enums.TransactionOrientation;
 
+// FIXME implement transaction API
 public class Transaction extends BaseEntity {
 
     private BigDecimal amount;
@@ -33,6 +34,10 @@ public class Transaction extends BaseEntity {
     private int loanId;
     private String loanName;
     private String nickName;
+
+    private Transaction() {
+        // for JAXB
+    }
 
     @XmlElement
     public BigDecimal getAmount() {

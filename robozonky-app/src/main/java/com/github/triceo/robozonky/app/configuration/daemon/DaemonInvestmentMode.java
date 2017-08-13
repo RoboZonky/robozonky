@@ -47,17 +47,9 @@ import org.slf4j.LoggerFactory;
 
 public class DaemonInvestmentMode implements InvestmentMode {
 
+    public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO = new AtomicReference<>(new CountDownLatch(1));
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
-    public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO = new AtomicReference<>(new CountDownLatch(1));
-
-    private static TemporalAmount getSuddenDeathTimeout() {
-        final long socketTimeoutSeconds = Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS);
-        final long connectionTimeoutSeconds = Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS);
-        final long max = Math.max(socketTimeoutSeconds, connectionTimeoutSeconds);
-        return Duration.ofSeconds(max * 2);
-    }
-
     private final String username;
     private final boolean faultTolerant, dryRun;
     private final Marketplace marketplace;
@@ -80,41 +72,49 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.periodBetweenChecks = periodBetweenChecks;
         Portfolio.INSTANCE.registerUpdater(new Selling(RefreshableSellStrategy.create(strategyLocaion), dryRun));
         final Daemon investing = new Investing(auth, builder, marketplace,
-                                                 RefreshableInvestmentStrategy.create(strategyLocaion),
-                                                 maximumSleepPeriod);
-        final Daemon purchasing = new Purchasing(auth, dryRun, RefreshablePurchaseStrategy.create(strategyLocaion),
-                                                 maximumSleepPeriod);
-        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, getSuddenDeathTimeout(), investing, purchasing);
+                                               RefreshableInvestmentStrategy.create(strategyLocaion),
+                                               maximumSleepPeriod);
+        final Daemon purchasing = new Purchasing(auth, RefreshablePurchaseStrategy.create(strategyLocaion),
+                                                 maximumSleepPeriod, dryRun
+        );
+        this.suddenDeath = new SuddenDeathDetection(circuitBreaker,
+                                                    getSuddenDeathTimeout(periodBetweenChecks.get(ChronoUnit.SECONDS)),
+                                                    investing, purchasing);
     }
 
-    private Map<Daemon, Long> getDelays(final Collection<Daemon> daemons, final long checkPeriod) {
+    static TemporalAmount getSuddenDeathTimeout(final long periodBetweenChecksSeconds) {
+        final long socketTimeoutSeconds = Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS);
+        final long connectionTimeoutSeconds = Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS);
+        final long max = Math.max(Math.max(socketTimeoutSeconds, connectionTimeoutSeconds), periodBetweenChecksSeconds);
+        return Duration.ofSeconds(max * 2);
+    }
+
+    static Map<Daemon, Long> getDelays(final Collection<Daemon> daemons, final long checkPeriodInSeconds) {
         final Map<Daemon, Long> result = new LinkedHashMap<>(daemons.size());
-        final long delay = checkPeriod / daemons.size();
-        long currentDelay = checkPeriod;
-        for (final Daemon d : suddenDeath.getDaemonsToWatch()) {
+        final long delay = (checkPeriodInSeconds * 1000) / daemons.size();
+        long currentDelay = checkPeriodInSeconds * 1000;
+        for (final Daemon d : daemons) {
             result.put(d, currentDelay);
             currentDelay -= delay;
         }
         return result;
     }
 
+    Thread getShutdownHook() {
+        return shutdownHook;
+    }
+
     @Override
     public ReturnCode get() {
         try {
-            final long checkPeriod = this.periodBetweenChecks.get(ChronoUnit.SECONDS) * 1000;
-            LOGGER.debug("Scheduling marketplace checks {} milliseconds apart.", checkPeriod);
+            final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
+            LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
             // schedule the tasks some time apart so that the CPU is evenly utilized
-            getDelays(suddenDeath.getDaemonsToWatch(), checkPeriod).forEach((daemon, delay) -> {
-                final Runnable r = () -> {
-                    if (Portfolio.INSTANCE.isUpdating()) {
-                        LOGGER.debug("Paused to allow for update of internal structures: {}.", daemon.getClass());
-                        return;
-                    }
-                    daemon.run();
-                };
-                executor.scheduleWithFixedDelay(r, delay, checkPeriod, TimeUnit.MILLISECONDS);
+            getDelays(suddenDeath.getDaemonsToWatch(), checkPeriodInSeconds).forEach((daemon, delayInMillis) -> {
+                executor.scheduleWithFixedDelay(daemon, delayInMillis, checkPeriodInSeconds * 1000,
+                                                TimeUnit.MILLISECONDS);
             });
-            executor.scheduleAtFixedRate(suddenDeath, 0, checkPeriod, TimeUnit.MILLISECONDS);
+            executor.scheduleAtFixedRate(suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
             // block until request to stop the app is received
             LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
             circuitBreaker.await();
@@ -123,7 +123,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
                 throw new SuddenDeathException();
             }
             return ReturnCode.OK;
-        } catch (final SuddenDeathException ex) {
+        } catch (final SuddenDeathException | InterruptedException ex) { // handle unexpected runtime error
             LOGGER.error("Thread stack traces:");
             Thread.getAllStackTraces().forEach((key, value) -> {
                 LOGGER.error("Stack trace for thread {}: {}", key, Stream.of(value)
@@ -131,9 +131,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
                         .collect(Collectors.joining(System.lineSeparator())));
             });
             throw new IllegalStateException(ex);
-        } catch (final Exception ex) {
-            LOGGER.error("Failed executing investments.", ex);
-            return ReturnCode.ERROR_UNEXPECTED;
         }
     }
 

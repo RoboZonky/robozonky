@@ -28,9 +28,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.internal.api.Defaults;
@@ -48,24 +46,15 @@ import org.slf4j.LoggerFactory;
  */
 class Activity {
 
-    private static final String COMMA = ",";
-    private static final Pattern COMMA_PATTERN = Pattern.compile("\\Q" + COMMA + "\\E");
-
     private static SortedSet<Integer> serialize(final Collection<ParticipationDescriptor> items) {
         final Set<Integer> result = items.stream().map(i -> i.item().getInvestmentId()).collect(Collectors.toSet());
         return new TreeSet<>(result);
     }
 
-    private static String prepare(final Collection<ParticipationDescriptor> items) {
-        return serialize(items).stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(COMMA));
-    }
-
     private static SortedSet<Integer> read() {
-        return STATE.getValue(LAST_MARKETPLACE_STATE_ID)
+        return STATE.getValues(LAST_MARKETPLACE_STATE_ID)
                 .map(source -> {
-                    final Set<Integer> values = Stream.of(COMMA_PATTERN.split(source))
+                    final Set<Integer> values = source.stream()
                             .map(s -> Integer.parseInt(s.trim()))
                             .collect(Collectors.toSet());
                     return (SortedSet<Integer>) new TreeSet<>(values);
@@ -82,7 +71,7 @@ class Activity {
             LAST_MARKETPLACE_STATE_ID = "lastMarketplace";
 
     private final TemporalAmount sleepInterval;
-    private final Collection<ParticipationDescriptor> recentDescending;
+    private final Collection<ParticipationDescriptor> currentMarketplace;
     private final AtomicReference<Runnable> settler = new AtomicReference<>(Activity.DO_NOTHING);
 
     Activity(final Collection<ParticipationDescriptor> items) {
@@ -91,7 +80,7 @@ class Activity {
 
     public Activity(final Collection<ParticipationDescriptor> items, final TemporalAmount maximumSleepPeriod) {
         this.sleepInterval = maximumSleepPeriod;
-        this.recentDescending = new ArrayList<>(items);
+        this.currentMarketplace = new ArrayList<>(items);
     }
 
     static OffsetDateTime getLatestMarketplaceAction() {
@@ -107,7 +96,7 @@ class Activity {
 
     private boolean hasNewLoans() {
         final SortedSet<Integer> state = read();
-        final SortedSet<Integer> now = serialize(recentDescending);
+        final SortedSet<Integer> now = serialize(currentMarketplace);
         now.removeAll(state);
         return !now.isEmpty();
     }
@@ -142,10 +131,10 @@ class Activity {
         final OffsetDateTime result = OffsetDateTime.now();
         final State.Batch b = STATE.newBatch();
         b.set(LAST_MARKETPLACE_CHECK_STATE_ID, result.toString());
-        if (recentDescending.size() == 0) {
+        if (currentMarketplace.size() == 0) {
             b.unset(LAST_MARKETPLACE_STATE_ID);
         } else {
-            b.set(LAST_MARKETPLACE_STATE_ID, prepare(recentDescending));
+            b.set(LAST_MARKETPLACE_STATE_ID, serialize(currentMarketplace).stream().map(String::valueOf));
         }
         b.call();
         LOGGER.debug("New marketplace last checked time is {}.", result);

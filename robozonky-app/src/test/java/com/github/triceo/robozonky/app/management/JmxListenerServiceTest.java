@@ -16,6 +16,8 @@
 
 package com.github.triceo.robozonky.app.management;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,14 +32,18 @@ import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.triceo.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -54,6 +60,30 @@ public class JmxListenerServiceTest {
     private static final Supplier<OperationsMBean> OPERATIONS = () -> (Operations) MBean.OPERATIONS.getImplementation();
     private static final Supplier<RuntimeMBean> RUNTIME = () -> (Runtime) MBean.RUNTIME.getImplementation();
 
+    private static Object[] getParametersForLoanNowDelinquent() {
+        final Loan l = new Loan(1, 1000);
+        final LocalDate since = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID).toLocalDate();
+        final LoanNowDelinquentEvent evt = new LoanNowDelinquentEvent(l, since);
+        final Consumer<SoftAssertions> before = (softly) -> {
+            final Delinquency d = DELINQUENCY.get();
+            softly.assertThat(d.getAll()).isEmpty();
+            softly.assertThat(d.get10Plus()).isEmpty();
+            softly.assertThat(d.get30Plus()).isEmpty();
+            softly.assertThat(d.get60Plus()).isEmpty();
+            softly.assertThat(d.get90Plus()).isEmpty();
+        };
+        final Consumer<SoftAssertions> after = (softly) -> {
+            final Delinquency d = DELINQUENCY.get();
+            softly.assertThat(d.getAll()).containsKey(l.getId());
+            softly.assertThat(d.get10Plus()).containsKey(l.getId());
+            softly.assertThat(d.get30Plus()).containsKey(l.getId());
+            softly.assertThat(d.get60Plus()).containsKey(l.getId());
+            softly.assertThat(d.get90Plus()).containsKey(l.getId());
+            softly.assertThat(d.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+        };
+        return new Object[]{evt.getClass(), evt, before, after};
+    }
+
     private static Object[] getParametersForExecutionCompleted() {
         final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
         final Consumer<SoftAssertions> before = (softly) -> {
@@ -61,6 +91,7 @@ public class JmxListenerServiceTest {
         };
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(RUNTIME.get().getZonkyUsername()).isEqualTo(USERNAME);
+            softly.assertThat(RUNTIME.get().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
@@ -77,6 +108,7 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getDelegatedInvestments()).containsOnlyKeys(l.getId());
+            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
@@ -93,12 +125,12 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getRejectedInvestments()).containsOnlyKeys(l.getId());
+            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
 
     private static Object[] getParametersForNoLongerDelinquentLoan() {
-        final OffsetDateTime now = OffsetDateTime.now();
         final Loan l = new Loan(1, 1000);
         final Event evt = new LoanNoLongerDelinquentEvent(l);
         final Consumer<SoftAssertions> before = (softly) -> {
@@ -108,7 +140,7 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             final DelinquencyMBean mbean = DELINQUENCY.get();
             softly.assertThat(mbean.getAll()).isEmpty();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isAfterOrEqualTo(now);
+            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
@@ -123,6 +155,37 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getSuccessfulInvestments()).containsOnlyKeys(l.getId());
+            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+        };
+        return new Object[]{evt.getClass(), evt, before, after};
+    }
+
+    private static Object[] getParametersForSaleOffered() {
+        final Investment l = new Investment(new Loan(1, 1000), 200);
+        final Event evt = new SaleOfferedEvent(l, true);
+        final Consumer<SoftAssertions> before = (softly) -> {
+            final OperationsMBean mbean = OPERATIONS.get();
+            softly.assertThat(mbean.getOfferedInvestments()).isEmpty();
+        };
+        final Consumer<SoftAssertions> after = (softly) -> {
+            final OperationsMBean mbean = OPERATIONS.get();
+            softly.assertThat(mbean.getOfferedInvestments()).containsOnlyKeys(l.getLoanId());
+            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+        };
+        return new Object[]{evt.getClass(), evt, before, after};
+    }
+
+    private static Object[] getParametersForInvestmentPurchased() {
+        final Investment l = new Investment(new Loan(1, 1000), 200);
+        final Event evt = new InvestmentPurchasedEvent(l, 2000, true);
+        final Consumer<SoftAssertions> before = (softly) -> {
+            final OperationsMBean mbean = OPERATIONS.get();
+            softly.assertThat(mbean.getPurchasedInvestments()).isEmpty();
+        };
+        final Consumer<SoftAssertions> after = (softly) -> {
+            final OperationsMBean mbean = OPERATIONS.get();
+            softly.assertThat(mbean.getPurchasedInvestments()).containsOnlyKeys(l.getLoanId());
+            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
@@ -133,7 +196,10 @@ public class JmxListenerServiceTest {
                              JmxListenerServiceTest.getParametersForInvestmentDelegated(),
                              JmxListenerServiceTest.getParametersForInvestmentMade(),
                              JmxListenerServiceTest.getParametersForInvestmentRejected(),
-                             JmxListenerServiceTest.getParametersForNoLongerDelinquentLoan());
+                             JmxListenerServiceTest.getParametersForLoanNowDelinquent(),
+                             JmxListenerServiceTest.getParametersForNoLongerDelinquentLoan(),
+                             JmxListenerServiceTest.getParametersForSaleOffered(),
+                             JmxListenerServiceTest.getParametersForInvestmentPurchased());
     }
 
     /**

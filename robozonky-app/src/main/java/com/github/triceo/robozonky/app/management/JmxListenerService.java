@@ -57,10 +57,10 @@ public class JmxListenerService implements ListenerService {
             return (event, sessionInfo) -> bean.handle((InvestmentPurchasedEvent) event);
         } else if (Objects.equals(eventType, LoanNowDelinquentEvent.class)) {
             final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
-            return (event, sessionInfo) -> bean.registerRun((LoanNowDelinquentEvent) event);
+            return (event, sessionInfo) -> bean.handle((LoanNowDelinquentEvent) event);
         } else if (Objects.equals(eventType, LoanNoLongerDelinquentEvent.class)) {
             final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
-            return (event, sessionInfo) -> bean.registerRun((LoanNoLongerDelinquentEvent) event);
+            return (event, sessionInfo) -> bean.handle((LoanNoLongerDelinquentEvent) event);
         } else if (Objects.equals(eventType, ExecutionStartedEvent.class)) {
             final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
             return (event, sessionInfo) -> bean.setPortfolioOverview((ExecutionStartedEvent) event);

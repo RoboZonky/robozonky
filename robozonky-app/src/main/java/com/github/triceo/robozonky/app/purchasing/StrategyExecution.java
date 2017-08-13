@@ -20,7 +20,6 @@ import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -28,22 +27,22 @@ import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import com.github.triceo.robozonky.util.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class StrategyExecution implements Function<Collection<ParticipationDescriptor>, Collection<Investment>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(
-            StrategyExecution.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecution.class);
 
-    private final Authenticated authenticationHandler;
+    private final Authenticated authenticated;
     private final Refreshable<PurchaseStrategy> refreshableStrategy;
     private final TemporalAmount maximumSleepPeriod;
     private final boolean dryRun;
 
     public StrategyExecution(final Refreshable<PurchaseStrategy> strategy, final Authenticated auth,
                              final TemporalAmount maximumSleepPeriod, final boolean dryRun) {
-        this.authenticationHandler = auth;
+        this.authenticated = auth;
         this.refreshableStrategy = strategy;
         this.maximumSleepPeriod = maximumSleepPeriod;
         this.dryRun = dryRun;
@@ -55,7 +54,7 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
             final InvestmentCommand c = new InvestmentCommand(strategy, marketplace);
             return Session.purchase(zonky, c, dryRun);
         };
-        return authenticationHandler.call(op);
+        return authenticated.call(op);
     }
 
     @Override
@@ -67,14 +66,13 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
                         StrategyExecution.LOGGER.info("Purchasing is asleep as there is nothing going on.");
                         return Collections.<Investment>emptyList();
                     }
-                    StrategyExecution.LOGGER.debug("Sending following participations to purchasing: {}.", items.stream()
-                            .map(p -> String.valueOf(p.item().getId()))
-                            .collect(Collectors.joining(", ")));
+                    StrategyExecution.LOGGER.debug("Sending following participations to purchasing: {}.",
+                                                   TextUtil.toString(items, p -> String.valueOf(p.item().getId())));
                     final Collection<Investment> investments = invest(strategy, items);
                     activity.settle();
                     return investments;
                 }).orElseGet(() -> {
-                    StrategyExecution.LOGGER.info("Purchasing is asleep as there is no investment strategy.");
+                    StrategyExecution.LOGGER.info("Purchasing is asleep as there is no strategy.");
                     return Collections.emptyList();
                 });
     }

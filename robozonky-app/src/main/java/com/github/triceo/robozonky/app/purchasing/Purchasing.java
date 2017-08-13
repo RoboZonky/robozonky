@@ -26,46 +26,42 @@ import java.util.stream.Collectors;
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
-import com.github.triceo.robozonky.common.remote.Zonky;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Purchasing implements Daemon {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
+
     private final Authenticated authenticated;
-    private final boolean isDryRun;
-    private final Refreshable<PurchaseStrategy> refreshableStrategy;
-    private final TemporalAmount maximumSleepPeriod;
     private final AtomicReference<OffsetDateTime> lastRunDateTime = new AtomicReference<>();
+    private final Function<Collection<ParticipationDescriptor>, Collection<Investment>> investor;
 
-    public Purchasing(final Authenticated auth, final boolean isDryRun, final Refreshable<PurchaseStrategy> strategy,
-                      final TemporalAmount maximumSleepPeriod) {
+    public Purchasing(final Authenticated auth, final Refreshable<PurchaseStrategy> strategy,
+                      final TemporalAmount maximumSleepPeriod, final boolean isDryRun) {
         this.authenticated = auth;
-        this.isDryRun = isDryRun;
-        this.refreshableStrategy = strategy;
-        this.maximumSleepPeriod = maximumSleepPeriod;
-    }
-
-    private Loan getLoan(final int loanId, final Zonky zonky) {
-        return Portfolio.INSTANCE.getLoan(zonky, loanId);
-    }
-
-    private ParticipationDescriptor getDescriptor(final Participation p, final Zonky zonky) {
-        return new ParticipationDescriptor(p, getLoan(p.getLoanId(), zonky));
+        this.investor = new StrategyExecution(strategy, authenticated, maximumSleepPeriod, isDryRun);
     }
 
     @Override
     public void run() {
         try {
-            // FIXME perhaps streaming would be more resource-efficient?
-            authenticated.run(z -> getInvestor().apply(z.getAvailableParticipations()
-                                                               .map(p -> getDescriptor(p, z))
-                                                               .collect(Collectors.toList())));
+            if (!Portfolio.INSTANCE.isUpdating()) {
+                LOGGER.trace("Starting.");
+                authenticated.run(z -> investor.apply(z.getAvailableParticipations()
+                                                              .map(p -> {
+                                                                  final int loanId = p.getLoanId();
+                                                                  final Loan l = Portfolio.INSTANCE.getLoan(z, loanId);
+                                                                  return new ParticipationDescriptor(p, l);
+                                                              }).collect(Collectors.toList())));
+                LOGGER.trace("Finished.");
+            }
         } catch (final Throwable t) {
             /*
              * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
@@ -75,10 +71,6 @@ public class Purchasing implements Daemon {
         } finally {
             lastRunDateTime.set(OffsetDateTime.now());
         }
-    }
-
-    private Function<Collection<ParticipationDescriptor>, Collection<Investment>> getInvestor() {
-        return new StrategyExecution(refreshableStrategy, authenticated, maximumSleepPeriod, isDryRun);
     }
 
     @Override

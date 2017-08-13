@@ -19,6 +19,7 @@ package com.github.triceo.robozonky.app.portfolio;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,9 +41,8 @@ public enum Delinquents {
     INSTANCE; // cheap thread-safe singleton
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquents.class);
-    private static final String ITEM_SEPARATOR = ";", TIME_SEPARATOR = ":::";
-    private static final Pattern ITEM_SPLITTER = Pattern.compile("\\Q" + ITEM_SEPARATOR + "\\E"),
-            TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
+    private static final String TIME_SEPARATOR = ":::";
+    private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
 
     private static String toString(final Delinquency d) {
         return d.getFixedOn()
@@ -50,24 +50,24 @@ public enum Delinquents {
                 .orElse(d.getDetectedOn().toString());
     }
 
-    private static String toString(final Delinquent d) {
-        return d.getDelinquencies().map(Delinquents::toString).collect(Collectors.joining(ITEM_SEPARATOR));
+    private static Stream<String> toString(final Delinquent d) {
+        return d.getDelinquencies().map(Delinquents::toString);
     }
 
-    private static Delinquency fromString(final Delinquent d, final String delinquency) {
+    private static void add(final Delinquent d, final String delinquency) {
         final String[] parts = TIME_SPLITTER.split(delinquency);
         if (parts.length == 1) {
-            return d.addDelinquency(LocalDate.parse(parts[0]));
+            d.addDelinquency(LocalDate.parse(parts[0]));
         } else if (parts.length == 2) {
-            return d.addDelinquency(LocalDate.parse(parts[0]), LocalDate.parse(parts[1]));
+            d.addDelinquency(LocalDate.parse(parts[0]), LocalDate.parse(parts[1]));
         } else {
             throw new IllegalStateException("Unexpected number of dates: " + parts.length);
         }
     }
 
-    private static Delinquent fromString(final int loanId, final String delinquencies) {
+    private static Delinquent add(final int loanId, final List<String> delinquencies) {
         final Delinquent d = new Delinquent(loanId);
-        Stream.of(ITEM_SPLITTER.split(delinquencies)).forEach(delinquency -> fromString(d, delinquency));
+        delinquencies.forEach(delinquency -> add(d, delinquency));
         return d;
     }
 
@@ -130,9 +130,9 @@ public enum Delinquents {
         return state.getKeys().stream()
                 .map(key -> {
                     final int loanId = Integer.parseInt(key);
-                    final String rawDelinquencies =
-                            state.getValue(key).orElseThrow(() -> new IllegalStateException("Impossible."));
-                    return fromString(loanId, rawDelinquencies);
+                    final List<String> rawDelinquencies =
+                            state.getValues(key).orElseThrow(() -> new IllegalStateException("Impossible."));
+                    return add(loanId, rawDelinquencies);
                 }).collect(Collectors.toSet());
     }
 

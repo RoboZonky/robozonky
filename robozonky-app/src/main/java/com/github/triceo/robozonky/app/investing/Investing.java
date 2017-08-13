@@ -29,28 +29,31 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Investing implements Daemon {
 
-    private final Investor.Builder builder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Investing.class);
+
     private final Authenticated authenticated;
     private final Refreshable<InvestmentStrategy> refreshableStrategy;
     private final Marketplace marketplace;
-    private final TemporalAmount maximumSleepPeriod;
     private final AtomicReference<OffsetDateTime> lastRunDateTime = new AtomicReference<>(null);
     private final ResultTracker buffer = new ResultTracker();
 
     public Investing(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
                      final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod) {
         this.authenticated = auth;
-        this.builder = builder;
         this.refreshableStrategy = strategy;
-        this.maximumSleepPeriod = maximumSleepPeriod;
         this.marketplace = marketplace;
         marketplace.registerListener((loans) -> {
             final Collection<LoanDescriptor> descriptors = buffer.acceptLoansFromMarketplace(loans);
-            final Collection<Investment> result = getInvestor().apply(descriptors);
+            final Function<Collection<LoanDescriptor>, Collection<Investment>> investor =
+                    new StrategyExecution(builder, refreshableStrategy, authenticated, maximumSleepPeriod);
+            final Collection<Investment> result = investor.apply(descriptors);
             buffer.acceptInvestmentsFromRobot(result);
         });
     }
@@ -58,7 +61,11 @@ public class Investing implements Daemon {
     @Override
     public void run() {
         try {
-            marketplace.run();
+            if (!Portfolio.INSTANCE.isUpdating()) {
+                LOGGER.trace("Starting.");
+                marketplace.run();
+                LOGGER.trace("Finished.");
+            }
         } catch (final Throwable t) {
             /*
              * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
@@ -68,10 +75,6 @@ public class Investing implements Daemon {
         } finally {
             lastRunDateTime.set(OffsetDateTime.now());
         }
-    }
-
-    private Function<Collection<LoanDescriptor>, Collection<Investment>> getInvestor() {
-        return new StrategyExecution(builder, refreshableStrategy, authenticated, maximumSleepPeriod);
     }
 
     @Override

@@ -19,8 +19,8 @@ package com.github.triceo.robozonky.app.portfolio;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,8 +50,6 @@ enum DelinquencyCategory {
     DEFAULTED(90);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
-    private static final String COMMA = ",";
-    private static final Pattern SPLIT_BY_COMMA = Pattern.compile("\\Q" + COMMA + "\\E");
     private final int thresholdInDays;
 
     DelinquencyCategory(final int thresholdInDays) {
@@ -64,15 +62,12 @@ enum DelinquencyCategory {
         return actual.compareTo(target) >= 0;
     }
 
-    private static Stream<Integer> fromIdString(final String idString) {
-        return Stream.of(SPLIT_BY_COMMA.split(idString))
-                .map(String::trim)
-                .filter(s -> s.length() > 0)
-                .map(Integer::parseInt);
+    private static Stream<Integer> fromIdString(final List<String> idString) {
+        return idString.stream().map(String::trim).filter(s -> s.length() > 0).map(Integer::parseInt);
     }
 
-    private static String toIdString(final Stream<Integer> stream) {
-        return stream.distinct().sorted().map(Object::toString).collect(Collectors.joining(COMMA));
+    private static Stream<String> toIdString(final Stream<Integer> stream) {
+        return stream.distinct().sorted().map(Object::toString);
     }
 
     private static BiFunction<Loan, LocalDate, LoanDelinquentEvent> getEventSupplier(final int threshold) {
@@ -123,8 +118,8 @@ enum DelinquencyCategory {
                 .collect(Collectors.toSet());
         final State.ClassSpecificState state = State.forClass(this.getClass());
         final String fieldName = getFieldName(thresholdInDays);
-        final Collection<Integer> activeHistorical = state.getValue(fieldName)
-                .map(idString -> fromIdString(idString))
+        final Collection<Integer> activeHistorical = state.getValues(fieldName)
+                .map(DelinquencyCategory::fromIdString)
                 .orElse(Stream.empty())
                 .filter(id -> activeAndPresent.stream().anyMatch(d -> d.getParent().getLoanId() == id))
                 .collect(Collectors.toSet());

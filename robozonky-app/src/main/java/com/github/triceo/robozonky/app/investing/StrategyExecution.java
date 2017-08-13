@@ -20,7 +20,6 @@ import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
@@ -28,6 +27,7 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.common.remote.Zonky;
+import com.github.triceo.robozonky.util.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,14 +66,13 @@ class StrategyExecution implements Function<Collection<LoanDescriptor>, Collecti
                         StrategyExecution.LOGGER.info("Investing is asleep as there is nothing going on.");
                         return Collections.<Investment>emptyList();
                     }
-                    StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.", loans.stream()
-                            .map(l -> String.valueOf(l.item().getId()))
-                            .collect(Collectors.joining(", ")));
+                    StrategyExecution.LOGGER.debug("Sending following loans to the investor: {}.",
+                                                   TextUtil.toString(loans, l -> String.valueOf(l.item().getId())));
                     final Collection<Investment> investments = invest(strategy, loans);
                     activity.settle();
                     return investments;
                 }).orElseGet(() -> {
-                    StrategyExecution.LOGGER.info("Investing is asleep as there is no investment strategy.");
+                    StrategyExecution.LOGGER.info("Investing is asleep as there is no strategy.");
                     return Collections.emptyList();
                 });
     }

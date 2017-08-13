@@ -23,14 +23,17 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
+import com.github.triceo.robozonky.api.strategies.SellStrategy;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+// FIXME replace with new natural strategy
 @RunWith(Parameterized.class)
-public class RefreshableInvestmentStrategyTest {
+public class RefreshableStrategyTest {
 
     private static String getRoot() {
         return IoTestUtil.findMainSource("assembly", "resources", "examples", "strategies");
@@ -42,7 +45,7 @@ public class RefreshableInvestmentStrategyTest {
                 "robozonky-balanced.cfg", "robozonky-conservative.cfg", "robozonky-dynamic.cfg"
         };
         return Stream.of(files)
-                .map(f -> new File[]{new File(RefreshableInvestmentStrategyTest.getRoot(), f)})
+                .map(f -> new File[]{new File(RefreshableStrategyTest.getRoot(), f)})
                 .collect(Collectors.toList())
                 .toArray(new Object[files.length][1]);
     }
@@ -61,5 +64,17 @@ public class RefreshableInvestmentStrategyTest {
         final String url = strategy.toURI().toURL().toString();
         final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(url);
         Assertions.assertThat(r.getLatest()).isPresent();
+    }
+
+    @Test
+    public void missingPurchaseStrategy() {
+        final Refreshable<PurchaseStrategy> r = RefreshablePurchaseStrategy.create(strategy.getAbsolutePath());
+        Assertions.assertThat(r.getLatest()).isEmpty();
+    }
+
+    @Test
+    public void missingSellStrategy() {
+        final Refreshable<SellStrategy> r = RefreshableSellStrategy.create(strategy.getAbsolutePath());
+        Assertions.assertThat(r.getLatest()).isEmpty();
     }
 }

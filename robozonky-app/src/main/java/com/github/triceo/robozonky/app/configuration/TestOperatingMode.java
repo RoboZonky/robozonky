@@ -46,20 +46,21 @@ class TestOperatingMode extends OperatingMode {
 
             @Override
             public String getUsername() {
-                return "";
+                return auth.getSecretProvider().getUsername();
             }
 
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
             @Override
             public ReturnCode get() {
-                LOGGER.info("Notification sent: {}.", Checker.notifications(auth.getSecretProvider().getUsername()));
+                LOGGER.info("Notification sent: {}.", Checker.notifications(getUsername()));
                 return builder.getConfirmationUsed().map(c -> builder.getConfirmationRequestUsed()
                         .map(r -> {
                             LOGGER.info("Confirmation received: {}.",
                                         Checker.confirmations(c, r.getUserId(), r.getPassword()));
                             return ReturnCode.OK;
-                        }).orElse(ReturnCode.ERROR_UNEXPECTED)).orElse(ReturnCode.OK);
+                        }).orElse(ReturnCode.ERROR_UNEXPECTED))
+                        .orElse(ReturnCode.OK);
             }
         });
     }

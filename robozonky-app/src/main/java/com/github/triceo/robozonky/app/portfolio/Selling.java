@@ -30,9 +30,9 @@ import com.github.triceo.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.SellingStartedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.api.strategies.RecommendedInvestment;
 import com.github.triceo.robozonky.api.strategies.SellStrategy;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
@@ -52,15 +52,31 @@ public class Selling implements Consumer<Zonky> {
         this.isDryRun = isDryRun;
     }
 
-    private Loan getLoan(final int loanId, final Zonky zonky) {
-        return Portfolio.INSTANCE.getLoan(zonky, loanId);
-    }
-
     private InvestmentDescriptor getDescriptor(final Investment i, final Zonky zonky) {
-        return new InvestmentDescriptor(i, getLoan(i.getLoanId(), zonky));
+        return new InvestmentDescriptor(i, Portfolio.INSTANCE.getLoan(zonky, i.getLoanId()));
     }
 
-    private void sell(final SellStrategy strategy, final Zonky zonky) {
+    private Optional<Investment> processInvestment(final Zonky zonky, final RecommendedInvestment r) {
+        try {
+            Events.fire(new SaleRequestedEvent(r));
+            final Investment i = r.descriptor().item();
+            if (isDryRun) {
+                LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
+            } else {
+                LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
+                zonky.sell(i);
+                i.setIsOnSmp(true);
+                LOGGER.trace("Request over.");
+            }
+            Events.fire(new SaleOfferedEvent(i, isDryRun)); // only executes on actual successful sale
+            return Optional.of(i);
+        } catch (final Throwable t) { // prevent failure in one operation from trying other operations
+            new DaemonRuntimeExceptionHandler().handle(t);
+            return Optional.empty();
+        }
+    }
+
+    private void sell(final SellStrategy strategy, final Zonky zonky) { // FIXME dry run balance?
         final PortfolioOverview portfolio = Portfolio.INSTANCE.calculateOverview(zonky);
         final Set<InvestmentDescriptor> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace()
                 .map(i -> getDescriptor(i, zonky))
@@ -68,25 +84,7 @@ public class Selling implements Consumer<Zonky> {
         Events.fire(new SellingStartedEvent(eligible, portfolio));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, portfolio)
                 .peek(r -> Events.fire(new SaleRecommendedEvent(r)))
-                .map(r -> {
-                    try {
-                        Events.fire(new SaleRequestedEvent(r));
-                        final Investment i = r.descriptor().item();
-                        if (isDryRun) {
-                            LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
-                        } else {
-                            LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
-                            zonky.sell(i);
-                            i.setIsOnSmp(true);
-                            LOGGER.trace("Request over.");
-                        }
-                        Events.fire(new SaleOfferedEvent(i, isDryRun)); // only executes on actual successful sale
-                        return Optional.of(i);
-                    } catch (final Throwable t) { // prevent failure in one operation from trying other operations
-                        new DaemonRuntimeExceptionHandler().handle(t);
-                        return Optional.<Investment>empty();
-                    }
-                })
+                .map(r -> processInvestment(zonky, r))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
         Events.fire(new SellingCompletedEvent(investmentsSold, Portfolio.INSTANCE.calculateOverview(zonky)));

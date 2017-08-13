@@ -56,9 +56,6 @@ public enum Portfolio {
             Collections.emptySortedMap());
     private final Map<Consumer<Zonky>, Portfolio.UpdateType> updaters = new ConcurrentHashMap<>();
     private final AtomicBoolean isUpdating = new AtomicBoolean(false);
-    Portfolio() {
-        registerUpdater(new DelinquencyUpdate());
-    }
 
     public void registerUpdater(final Consumer<Zonky> updater) {
         registerUpdater(updater, Portfolio.UpdateType.FULL);
@@ -76,8 +73,7 @@ public enum Portfolio {
             LOGGER.trace("Update started: {}.", updateType);
             if (updateType == Portfolio.UpdateType.FULL) {
                 loanCache.set(new TreeMap<>());
-                final List<Investment> remote = zonky.getInvestments().collect(Collectors.toList());
-                investments.set(remote);
+                investments.set(zonky.getInvestments().collect(Collectors.toList()));
             }
             investmentsPending.set(Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky));
             updaters.forEach((u, requiredType) -> {
@@ -105,9 +101,7 @@ public enum Portfolio {
     }
 
     public Stream<Investment> getActiveWithPaymentStatus(final Set<PaymentStatus> statuses) {
-        return investments.get().stream()
-                .filter(i -> i.getStatus() != InvestmentStatus.SOLD) // sold investments have no payment status
-                .filter(i -> statuses.stream().anyMatch(s -> Objects.equals(s, i.getPaymentStatus())));
+        return getActive().filter(i -> statuses.stream().anyMatch(s -> Objects.equals(s, i.getPaymentStatus())));
     }
 
     public Stream<Investment> getActiveWithPaymentStatus(final PaymentStatuses statuses) {
@@ -118,14 +112,8 @@ public enum Portfolio {
         return getActive().filter(Investment::isCanBeOffered).filter(i -> !i.isOnSmp());
     }
 
-    public Stream<Investment> getActiveOnSecondaryMarketplace() {
-        return getActive().filter(Investment::isOnSmp);
-    }
-
     public Stream<Investment> getActive() {
-        return investments.get().stream()
-                .filter(i -> i.getStatus() == InvestmentStatus.ACTIVE)
-                .filter(i -> i.getRemainingPrincipal().compareTo(BigDecimal.ZERO) > 0);
+        return investments.get().stream().filter(i -> i.getStatus() == InvestmentStatus.ACTIVE);
     }
 
     public Stream<Investment> getPending() {
@@ -162,6 +150,7 @@ public enum Portfolio {
     public void reset() {
         investmentsPending.set(Collections.emptyList());
         investments.set(Collections.emptyList());
+        loanCache.set(new TreeMap<>());
         updaters.clear();
     }
 

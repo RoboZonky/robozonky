@@ -47,10 +47,6 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
 
     private static final Random RANDOM = new Random(0);
 
-    protected static Loan mockLoan() {
-        return AbstractInvestingTest.mockLoan(AbstractInvestingTest.RANDOM.nextInt());
-    }
-
     protected static Loan mockLoan(final int loanId) {
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getId()).thenReturn(loanId);
@@ -109,9 +105,6 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
     @Before
     @After
     public void clearPortfolioTracker() {
-        final Zonky z = Mockito.mock(Zonky.class);
-        Mockito.when(z.getBlockedAmounts()).thenReturn(Stream.empty());
-        Mockito.when(z.getInvestments()).thenReturn(Stream.empty());
         Portfolio.INSTANCE.reset();
     }
 

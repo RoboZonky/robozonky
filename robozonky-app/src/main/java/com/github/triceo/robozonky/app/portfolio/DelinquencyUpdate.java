@@ -25,10 +25,16 @@ import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.common.remote.Zonky;
 
-class DelinquencyUpdate implements Consumer<Zonky> {
+enum DelinquencyUpdate implements Consumer<Zonky> {
+
+    INSTANCE;
 
     private static Collection<Investment> getWithPaymentStatus(final PaymentStatuses target) {
         return Portfolio.INSTANCE.getActiveWithPaymentStatus(target).collect(Collectors.toList());
+    }
+
+    DelinquencyUpdate() {
+        Portfolio.INSTANCE.registerUpdater(this);
     }
 
     @Override
