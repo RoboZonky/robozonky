@@ -17,6 +17,7 @@
 package com.github.triceo.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,7 @@ public class Statistics extends BaseEntity {
     private OverallPortfolio overallPortfolio;
     private List<Instalment> cashFlow;
     private List<RiskPortfolio> riskPortfolio;
+    private OffsetDateTime timestamp = OffsetDateTime.now();
 
     @XmlElement
     public BigDecimal getCurrentProfitability() {
@@ -70,6 +72,11 @@ public class Statistics extends BaseEntity {
     @XmlElement
     public OverallPortfolio getOverallPortfolio() {
         return Statistics.getOrDefault(this.overallPortfolio, OverallPortfolio::new);
+    }
+
+    @XmlElement
+    public OffsetDateTime getTimestamp() {
+        return timestamp;
     }
 
     /**

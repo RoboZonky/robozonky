@@ -16,8 +16,6 @@
 
 package com.github.triceo.robozonky.api.confirmations;
 
-import java.util.Optional;
-
 /**
  * Remote endpoint to provide confirmations on investments.
  */
@@ -29,9 +27,9 @@ public interface ConfirmationProvider {
      * @param auth Information about this RoboZonky instance.
      * @param loanId The investment to confirm.
      * @param amount The amount to confirm.
-     * @return Decision on the investment.
+     * @return Whether or not the remote request suceeded.
      */
-    Optional<Confirmation> requestConfirmation(RequestId auth, final int loanId, final int amount);
+    boolean requestConfirmation(RequestId auth, final int loanId, final int amount);
 
     /**
      * Unique provider identification. When seen by users, they will understand which service this is.

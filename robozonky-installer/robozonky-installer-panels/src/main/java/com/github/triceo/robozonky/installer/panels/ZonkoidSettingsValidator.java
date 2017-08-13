@@ -47,9 +47,11 @@ public class ZonkoidSettingsValidator extends AbstractValidator {
                 .map(zonkoid -> {
                     final String username = Variables.ZONKY_USERNAME.getValue(installData);
                     final char[] token = Variables.ZONKOID_TOKEN.getValue(installData).toCharArray();
-                    return Checker.confirmations(zonkoid, username, token)
-                            .map(result -> result ? DataValidator.Status.OK : DataValidator.Status.WARNING)
-                            .orElse(DataValidator.Status.ERROR);
+                    if (Checker.confirmations(zonkoid, username, token)) {
+                        return DataValidator.Status.OK;
+                    } else {
+                        return DataValidator.Status.WARNING;
+                    }
                 }).orElse(DataValidator.Status.ERROR);
     }
 

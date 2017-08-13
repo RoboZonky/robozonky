@@ -16,7 +16,7 @@
 
 /**
  * This package holds a reimplementation of robozonky-strategy-simple (pre RoboZonky 4.0.0) via the means of
- * {@link com.github.triceo.robozonky.strategy.natural.NaturalLanguageInvestmentStrategyService}.
+ * {@link com.github.triceo.robozonky.strategy.natural.NaturalLanguageStrategyService}.
  * <p>
  * This implementation should be considered deprecated and will be removed at some future point in time.
  */

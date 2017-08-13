@@ -23,11 +23,15 @@ import java.util.stream.StreamSupport;
 import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.EntityCollectionApi;
 import com.github.triceo.robozonky.api.remote.LoanApi;
+import com.github.triceo.robozonky.api.remote.ParticipationApi;
 import com.github.triceo.robozonky.api.remote.PortfolioApi;
 import com.github.triceo.robozonky.api.remote.WalletApi;
 import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
+import com.github.triceo.robozonky.api.remote.entities.PurchaseRequest;
+import com.github.triceo.robozonky.api.remote.entities.SellRequest;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.internal.api.Settings;
@@ -40,17 +44,20 @@ public class Zonky implements AutoCloseable {
 
     private final Api<ControlApi> controlApi;
     private final PaginatedApi<Loan, LoanApi> loanApi;
+    private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<Investment, PortfolioApi> portfolioApi;
     private final PaginatedApi<BlockedAmount, WalletApi> walletApi;
 
     Zonky(final Api<ControlApi> control, final PaginatedApi<Loan, LoanApi> loans,
+          final PaginatedApi<Participation, ParticipationApi> participations,
           final PaginatedApi<Investment, PortfolioApi> portfolio,
           final PaginatedApi<BlockedAmount, WalletApi> wallet) {
-        if (control == null || loans == null || portfolio == null || wallet == null) {
+        if (control == null || loans == null || participations == null || portfolio == null || wallet == null) {
             throw new IllegalArgumentException("No API may be null.");
         }
         this.controlApi = control;
         this.loanApi = loans;
+        this.participationApi = participations;
         this.portfolioApi = portfolio;
         this.walletApi = wallet;
     }
@@ -58,6 +65,24 @@ public class Zonky implements AutoCloseable {
     public void invest(final Investment investment) {
         controlApi.execute(api -> {
             api.invest(investment);
+        });
+    }
+
+    public void cancel(final Investment investment) {
+        controlApi.execute(api -> {
+            api.cancel(investment.getId());
+        });
+    }
+
+    public void purchase(final Participation participation) {
+        controlApi.execute(api -> {
+            api.purchase(participation.getId(), new PurchaseRequest(participation));
+        });
+    }
+
+    public void sell(final Investment investment) {
+        controlApi.execute(api -> {
+            api.offer(new SellRequest(investment));
         });
     }
 
@@ -124,6 +149,14 @@ public class Zonky implements AutoCloseable {
      */
     public Stream<Loan> getAvailableLoans() {
         return Zonky.getStream(loanApi);
+    }
+
+    /**
+     * Retrieve participations from secondary marketplace via {@link ParticipationApi}.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Participation> getAvailableParticipations() {
+        return Zonky.getStream(participationApi);
     }
 
     /**

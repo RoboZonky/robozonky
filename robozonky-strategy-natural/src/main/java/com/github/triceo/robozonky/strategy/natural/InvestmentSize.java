@@ -32,6 +32,11 @@ public class InvestmentSize extends DefaultInvestmentSize {
         this.rating = r;
     }
 
+    public InvestmentSize(final Rating r, final DefaultInvestmentSize def) {
+        super(def.getMinimumInvestmentInCzk(), def.getMaximumInvestmentInCzk());
+        this.rating = r;
+    }
+
     public Rating getRating() {
         return rating;
     }

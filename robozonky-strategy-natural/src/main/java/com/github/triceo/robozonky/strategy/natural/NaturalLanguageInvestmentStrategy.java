@@ -21,12 +21,8 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,7 +32,7 @@ import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +41,12 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageInvestmentStrategy.class);
     private static final Comparator<LoanDescriptor>
-            BY_TERM = Comparator.comparingInt(l -> l.getLoan().getTermInMonths()),
-            BY_RECENCY = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getDatePublished()).reversed(),
-            BY_REMAINING = Comparator.comparing((LoanDescriptor l) -> l.getLoan().getRemainingInvestment()).reversed();
+            BY_TERM = Comparator.comparingInt(l -> l.item().getTermInMonths()),
+            BY_RECENCY = Comparator.comparing((LoanDescriptor l) -> l.item().getDatePublished()).reversed(),
+            BY_REMAINING = Comparator.comparing((LoanDescriptor l) -> l.item().getRemainingInvestment()).reversed();
 
     private static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
-        return Collections.unmodifiableMap(loans.distinct()
-                                                   .collect(Collectors.groupingBy(l -> l.getLoan().getRating())));
+        return Collections.unmodifiableMap(loans.distinct().collect(Collectors.groupingBy(l -> l.item().getRating())));
     }
 
     /**
@@ -60,9 +55,7 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
      * @return Comparator to order the marketplace with.
      */
     private static Comparator<LoanDescriptor> getLoanComparator() {
-        return NaturalLanguageInvestmentStrategy.BY_TERM
-                .thenComparing(NaturalLanguageInvestmentStrategy.BY_REMAINING)
-                .thenComparing(NaturalLanguageInvestmentStrategy.BY_RECENCY);
+        return BY_TERM.thenComparing(BY_REMAINING).thenComparing(BY_RECENCY);
     }
 
     private final ParsedStrategy strategy;
@@ -71,52 +64,15 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         this.strategy = p;
     }
 
-    Stream<Rating> rankRatingsByDemand(final Map<Rating, BigDecimal> currentShare) {
-        final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
-        // put the ratings into buckets based on how much we're missing them
-        currentShare.forEach((r, currentRatingShare) -> {
-            final int fromStrategy = strategy.getMaximumShare(r);
-            final BigDecimal maximumAllowedShare = BigDecimal.valueOf(fromStrategy)
-                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_EVEN);
-            final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
-            if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
-                return;
-            }
-            mostWantedRatings.compute(undershare, (k, v) -> {
-                if (v == null) {
-                    return EnumSet.of(r);
-                }
-                v.add(r);
-                return v;
-            });
-        });
-        return mostWantedRatings.values().stream().flatMap(Collection::stream);
-    }
-
-    private boolean isAcceptable(final PortfolioOverview portfolio) {
-        final int balance = portfolio.getCzkAvailable();
-        if (balance < strategy.getMinimumBalance()) {
-            NaturalLanguageInvestmentStrategy.LOGGER.debug("{} CZK balance is less than minimum {} CZK.",
-                                                           balance, strategy.getMinimumBalance());
-            return false;
-        }
-        final int invested = portfolio.getCzkInvested();
-        final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
-        if (invested >= investmentCeiling) {
-            NaturalLanguageInvestmentStrategy.LOGGER.debug("{} CZK total investment over {} CZK ceiling.",
-                                                           invested, investmentCeiling);
-            return false;
-        }
-        return true;
-    }
-
     private boolean needsConfirmation(final LoanDescriptor loanDescriptor) {
         return strategy.needsConfirmation(loanDescriptor);
     }
 
     @Override
-    public Stream<Recommendation> evaluate(final Collection<LoanDescriptor> loans, final PortfolioOverview portfolio) {
-        if (!this.isAcceptable(portfolio)) {
+    public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans,
+                                             final PortfolioOverview portfolio) {
+        if (!Util.isAcceptable(strategy, portfolio)) {
+            LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
@@ -127,19 +83,15 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
         // and now return recommendations in the order in which investment should be attempted
         final int balance = portfolio.getCzkAvailable();
-        return this.rankRatingsByDemand(relevantPortfolio)
+        return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
-                    return splitByRating.get(rating).stream()
-                            .sorted(NaturalLanguageInvestmentStrategy.getLoanComparator());
-                }).map(l -> { // recommend amount to invest per strategy
-                    final int recommendedAmount = this.recommendInvestmentAmount(l.getLoan(), balance);
-                    return l.recommend(recommendedAmount, this.needsConfirmation(l));
+                    return splitByRating.get(rating).stream().sorted(getLoanComparator());
+                })
+                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+                .map(l -> { // recommend amount to invest per strategy
+                    final int recommendedAmount = recommendInvestmentAmount(l.item(), balance);
+                    return l.recommend(recommendedAmount, needsConfirmation(l));
                 }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
-    }
-
-    @Override
-    public List<Recommendation> recommend(final Collection<LoanDescriptor> loans, final PortfolioOverview portfolio) {
-        return evaluate(loans, portfolio).collect(Collectors.toList());
     }
 
     private int[] getRecommendationBoundaries(final Loan loan) {
@@ -157,26 +109,29 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     }
 
     int recommendInvestmentAmount(final Loan loan, final int balance) {
+        final int id = loan.getId();
         return recommendInvestmentAmount(loan).map(recommended -> {
             final int minimumRecommendation = recommended[0];
             final int maximumRecommendation = recommended[1];
-            NaturalLanguageInvestmentStrategy.LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.",
-                                                           loan.getId(), minimumRecommendation, maximumRecommendation);
+            LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.", id, minimumRecommendation,
+                         maximumRecommendation);
             // round to nearest lower increment
             final int loanRemaining = (int) loan.getRemainingInvestment();
             if (minimumRecommendation > balance) {
+                LOGGER.trace("Not recommending loan #{} due to minimum over balance.", id);
                 return 0;
             } else if (minimumRecommendation > loanRemaining) {
+                LOGGER.trace("Not recommending loan #{} due to minimum over remaining.", id);
                 return 0;
             }
             final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
             final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
             final int r = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
             if (r < minimumRecommendation) {
+                LOGGER.trace("Not recommending loan #{} due to recommendation below minimum.", id);
                 return 0;
             } else {
-                NaturalLanguageInvestmentStrategy.LOGGER.debug("Final recommendation for loan #{} is {} CZK.",
-                                                               loan.getId(), r);
+                LOGGER.debug("Final recommendation for loan #{} is {} CZK.", id, r);
                 return r;
             }
         }).orElse(0); // not recommended
@@ -184,17 +139,19 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private Optional<int[]> recommendInvestmentAmount(final Loan loan) {
         final int[] recommended = getRecommendationBoundaries(loan);
-        final int minimumRecommendation = recommended[0];
+        final int minimumRecommendation = Math.max(recommended[0], Defaults.MINIMUM_INVESTMENT_IN_CZK);
         final int maximumRecommendation = recommended[1];
         final int loanId = loan.getId();
-        NaturalLanguageInvestmentStrategy.LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.",
-                                                       loanId, minimumRecommendation, maximumRecommendation);
-        final int minimumInvestmentByShare = NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
-                                                                                             strategy.getMinimumInvestmentShareInPercent());
+        LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId,
+                     minimumRecommendation, maximumRecommendation);
+        final int minimumInvestmentByShare =
+                NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
+                                                                strategy.getMinimumInvestmentShareInPercent());
         final int minimumInvestment =
                 Math.max(minimumInvestmentByShare, strategy.getMinimumInvestmentSizeInCzk(loan.getRating()));
-        final int maximumInvestmentByShare = NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
-                                                                                             strategy.getMaximumInvestmentShareInPercent());
+        final int maximumInvestmentByShare =
+                NaturalLanguageInvestmentStrategy.getPercentage(loan.getAmount(),
+                                                                strategy.getMaximumInvestmentShareInPercent());
         final int maximumInvestment =
                 Math.min(maximumInvestmentByShare, strategy.getMaximumInvestmentSizeInCzk(loan.getRating()));
         if (maximumInvestment < minimumInvestment) {

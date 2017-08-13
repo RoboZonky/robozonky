@@ -48,7 +48,7 @@ public class InvestmentSizeTest {
     public void omitted() {
         final InvestmentSize s = new InvestmentSize(Rating.A, InvestmentSizeTest.MAX);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+            softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(0);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
         });
     }

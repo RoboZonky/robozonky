@@ -24,7 +24,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
-import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +76,6 @@ public class CommandLine {
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(CommandLine.getScriptIdentifier())
                 .addCommand(new DaemonOperatingMode())
-                .addCommand(new DirectInvestmentOperatingMode())
                 .addCommand(new TestOperatingMode())
                 .addObject(cli);
         final JCommander jc = builder.build();

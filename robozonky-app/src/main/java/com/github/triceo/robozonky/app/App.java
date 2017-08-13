@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.github.triceo.robozonky.api.ReturnCode;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.triceo.robozonky.app.configuration.CommandLine;
-import com.github.triceo.robozonky.app.investing.InvestmentMode;
+import com.github.triceo.robozonky.app.configuration.InvestmentMode;
 import com.github.triceo.robozonky.app.version.UpdateMonitor;
 import com.github.triceo.robozonky.util.Scheduler;
 import org.slf4j.Logger;
@@ -56,10 +56,7 @@ public class App {
 
     static ReturnCode execute(final InvestmentMode mode) {
         try {
-            return mode.get().map(r -> {
-                App.LOGGER.info("RoboZonky {}invested into {} loans.", mode.isDryRun() ? "would have " : "", r.size());
-                return ReturnCode.OK;
-            }).orElse(ReturnCode.ERROR_SETUP);
+            return mode.get();
         } finally {
             try {
                 mode.close();

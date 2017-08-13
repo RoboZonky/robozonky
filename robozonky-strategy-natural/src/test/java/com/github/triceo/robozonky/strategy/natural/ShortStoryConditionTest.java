@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -26,7 +25,7 @@ public class ShortStoryConditionTest {
 
     @Test
     public void longerNotOk() {
-        final Loan l = Mockito.mock(Loan.class);
+        final Wrapper l = Mockito.mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD + 1, '*');
         Mockito.when(l.getStory()).thenReturn(story);
         Assertions.assertThat(new ShortStoryCondition().test(l)).isFalse();
@@ -34,7 +33,7 @@ public class ShortStoryConditionTest {
 
     @Test
     public void shorterOk() {
-        final Loan l = Mockito.mock(Loan.class);
+        final Wrapper l = Mockito.mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD, '*');
         Mockito.when(l.getStory()).thenReturn(story);
         Assertions.assertThat(new ShortStoryCondition().test(l)).isTrue();

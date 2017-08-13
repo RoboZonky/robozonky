@@ -1,6 +1,6 @@
 grammar NaturalLanguageStrategy;
 
-import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters;
+import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters, SellRules;
 
 @header {
     import java.math.BigDecimal;
@@ -36,13 +36,20 @@ complexExpression returns [ParsedStrategy result] :
         { investmentSizes = $i.result; }
     )?
 
-    { Collection<MarketplaceFilter> filters = Collections.emptyList(); }
+    { Map<Boolean, Collection<MarketplaceFilter>> buyFilters = Collections.emptyMap(); }
     (
         DELIM 'Filtrování tržiště'
         m=marketplaceFilterExpression
-        { filters = $m.result; }
+        { buyFilters = $m.result; }
+    )?
+
+    { Collection<MarketplaceFilter> sellFilters = Collections.emptyList(); }
+    (
+        DELIM 'Prodej participací'
+        s=sellFilterExpression
+        { sellFilters = $s.result; }
     )?
 
     EOF
-    {$result = new ParsedStrategy($d.result, portfolioStructures, investmentSizes, filters);}
+    {$result = new ParsedStrategy($d.result, portfolioStructures, investmentSizes, buyFilters, sellFilters);}
 ;

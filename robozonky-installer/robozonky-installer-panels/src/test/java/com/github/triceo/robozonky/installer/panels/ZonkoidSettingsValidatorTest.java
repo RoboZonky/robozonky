@@ -18,9 +18,7 @@ package com.github.triceo.robozonky.installer.panels;
 
 import java.util.Optional;
 
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
@@ -62,24 +60,10 @@ public class ZonkoidSettingsValidatorTest {
     }
 
     @Test
-    public void zonkoidPresentButNotConfirming() {
-        final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
-        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
-        final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
-        // execute SUT
-        final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
-        final DataValidator.Status result = validator.validateData(d);
-        // run test
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.ERROR);
-    }
-
-    @Test
     public void zonkoidPresentButRejecting() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(
-                Optional.of(new Confirmation(ConfirmationType.REJECTED)));
+                                            ArgumentMatchers.anyInt())).thenReturn(false);
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
         final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
@@ -92,8 +76,7 @@ public class ZonkoidSettingsValidatorTest {
     public void zonkoidProper() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(
-                Optional.of(new Confirmation(ConfirmationType.DELEGATED)));
+                                            ArgumentMatchers.anyInt())).thenReturn(true);
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
         final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));

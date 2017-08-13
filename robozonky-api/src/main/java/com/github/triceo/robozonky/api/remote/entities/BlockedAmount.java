@@ -16,18 +16,30 @@
 
 package com.github.triceo.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.triceo.robozonky.api.remote.enums.TransactionCategory;
+
 public class BlockedAmount extends BaseEntity {
 
-    private int amount, loanId;
-    private String category, loanName;
+    private BigDecimal amount;
+    private int loanId;
+    private TransactionCategory category;
+    private String loanName;
     private OffsetDateTime dateStart;
 
-    public BlockedAmount(final int loanId, final int loanAmount) {
+    public BlockedAmount(final BigDecimal loanAmount) {
+        this.loanId = 0;
+        this.amount = loanAmount;
+        this.category = TransactionCategory.INVESTMENT_FEE;
+    }
+
+    public BlockedAmount(final int loanId, final BigDecimal loanAmount) {
         this.loanId = loanId;
         this.amount = loanAmount;
+        this.category = TransactionCategory.INVESTMENT;
     }
 
     private BlockedAmount() {
@@ -35,7 +47,7 @@ public class BlockedAmount extends BaseEntity {
     }
 
     @XmlElement
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
@@ -45,7 +57,7 @@ public class BlockedAmount extends BaseEntity {
     }
 
     @XmlElement
-    public String getCategory() {
+    public TransactionCategory getCategory() {
         return category;
     }
 

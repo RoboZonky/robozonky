@@ -32,7 +32,7 @@ public class Investment extends BaseInvestment {
     private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate, nextPaymentDate, activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal,
-            expectedInterest, purchasePrice;
+            expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor, smpFee;
     private Rating rating;
 
     Investment() {
@@ -48,6 +48,7 @@ public class Investment extends BaseInvestment {
         this.interestRate = loan.getInterestRate();
         this.currentTerm = this.loanTermInMonth;
         this.remainingMonths = loan.getTermInMonths();
+        this.remainingPrincipal = BigDecimal.valueOf(amount);
         this.paymentStatus = PaymentStatus.OK;
         this.paid = BigDecimal.ZERO;
         this.paidPrincipal = BigDecimal.ZERO;
@@ -187,5 +188,24 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public BigDecimal getExpectedInterest() {
         return expectedInterest;
+    }
+
+    @XmlElement
+    public BigDecimal getRemainingPrincipal() {
+        return remainingPrincipal;
+    }
+
+    @XmlElement
+    public BigDecimal getSmpSoldFor() {
+        return smpSoldFor;
+    }
+
+    @XmlElement
+    public BigDecimal getSmpFee() {
+        return smpFee;
+    }
+
+    public void setIsOnSmp(final boolean isOnSmp) {
+        this.onSmp = isOnSmp;
     }
 }

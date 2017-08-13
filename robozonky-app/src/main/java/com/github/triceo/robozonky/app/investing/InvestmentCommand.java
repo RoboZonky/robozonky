@@ -17,11 +17,32 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.util.Collection;
-import java.util.function.Consumer;
 
+import com.github.triceo.robozonky.api.notifications.LoanRecommendedEvent;
+import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.app.Events;
 
-interface InvestmentCommand extends Consumer<Session> {
+final class InvestmentCommand {
 
-    Collection<LoanDescriptor> getLoans();
+    private final InvestmentStrategy strategy;
+    private final Collection<LoanDescriptor> loans;
+
+    public InvestmentCommand(final InvestmentStrategy strategy, final Collection<LoanDescriptor> loans) {
+        this.strategy = strategy;
+        this.loans = loans;
+    }
+
+    public Collection<LoanDescriptor> getLoans() {
+        return loans;
+    }
+
+    public void accept(final Session s) {
+        boolean invested;
+        do {
+            invested = strategy.recommend(s.getAvailable(), s.getPortfolioOverview())
+                    .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
+                    .anyMatch(s::invest); // keep trying until investment opportunities are exhausted
+        } while (invested);
+    }
 }

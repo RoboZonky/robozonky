@@ -62,7 +62,7 @@ public class IncompleteStrategyTest {
     @Test
     public void propertyIsMissing() throws IOException {
         final Optional<InvestmentStrategy> result =
-                new SimpleInvestmentStrategyService().parse(this.strategyFile.toURI().toURL().openStream());
+                new SimpleStrategyService().toInvest(this.strategyFile.toURI().toURL().openStream());
         Assertions.assertThat(result).isEmpty();
     }
 }

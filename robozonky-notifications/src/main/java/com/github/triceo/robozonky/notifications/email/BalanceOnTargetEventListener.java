@@ -51,7 +51,7 @@ public class BalanceOnTargetEventListener extends AbstractEmailingListener<Execu
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
         final Map<String, Object> result = new HashMap<>();
-        result.put("newBalance", event.getBalance());
+        result.put("newBalance", event.getPortfolioOverview().getCzkAvailable());
         result.put("targetBalance", targetBalance);
         return result;
     }
@@ -60,7 +60,7 @@ public class BalanceOnTargetEventListener extends AbstractEmailingListener<Execu
     public void handle(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
         // figure out whether or not the balance is over the threshold
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance();
-        final int newBalance = event.getBalance();
+        final int newBalance = event.getPortfolioOverview().getCzkAvailable();
         if (newBalance >= targetBalance) {
             this.shouldSendEmail = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() < targetBalance;
         } else {

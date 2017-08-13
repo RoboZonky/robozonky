@@ -17,12 +17,9 @@
 package com.github.triceo.robozonky.common.extensions;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.notifications.EventListener;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -38,18 +35,18 @@ public class CheckerTest {
     public void confirmationsMarketplaceFail() {
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
         Mockito.doThrow(new IllegalStateException("Testing")).when(provider).marketplace();
-        final Optional<Boolean> result =
+        final boolean result =
                 Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
-        Assertions.assertThat(result).isPresent().hasValue(false);
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test
     public void confirmationsMarketplaceWithoutLoans() {
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
         Mockito.when(provider.marketplace()).thenReturn(Collections.emptyList());
-        final Optional<Boolean> result =
+        final boolean result =
                 Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
-        Assertions.assertThat(result).isPresent().hasValue(false);
+        Assertions.assertThat(result).isFalse();
     }
 
     private static ApiProvider mockApiThatReturnsOneLoan() {
@@ -63,29 +60,27 @@ public class CheckerTest {
     public void confirmationsNotConfirming() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(Optional.empty());
-        final Optional<Boolean> result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
-        Assertions.assertThat(result).isEmpty();
+                                            ArgumentMatchers.anyInt())).thenReturn(false);
+        final boolean result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test
     public void confirmationsRejecting() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(
-                Optional.of(new Confirmation(ConfirmationType.REJECTED)));
-        final Optional<Boolean> result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
-        Assertions.assertThat(result).isPresent().hasValue(false);
+                                            ArgumentMatchers.anyInt())).thenReturn(false);
+        final boolean result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test
     public void confirmationsProper() {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(
-                Optional.of(new Confirmation(ConfirmationType.DELEGATED)));
-        final Optional<Boolean> result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
-        Assertions.assertThat(result).isPresent().hasValue(true);
+                                            ArgumentMatchers.anyInt())).thenReturn(false);
+        final boolean result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
+        Assertions.assertThat(result).isFalse();
     }
 
     @Test

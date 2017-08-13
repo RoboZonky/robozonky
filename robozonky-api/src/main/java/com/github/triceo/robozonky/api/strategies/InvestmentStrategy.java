@@ -17,41 +17,22 @@
 package com.github.triceo.robozonky.api.strategies;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 /**
  * Determines which loans will be invested into, and how much. What the strategy does or does not allow depends on the
- * {@link InvestmentStrategyService} implementation.
+ * {@link StrategyService} implementation.
  */
 public interface InvestmentStrategy {
-
-    /**
-     * Retrieve a list of loans that are acceptable by the strategy, in the order in which they are to be evaluated.
-     * After an investment has been made into any single one of these loans, the strategy should be called again to
-     * re-evaluate the resulting situation.
-     * <p>
-     * This method is deprecated, to be removed in some future version. Override
-     * {@link #evaluate(Collection, PortfolioOverview)} instead.
-     * @param availableLoans Loans to be evaluated for acceptability.
-     * @param portfolio Aggregation of information as to the user's current portfolio.
-     * @return Acceptable loans, in the iteration order of their decreasing priority, mapped to the recommended
-     * investment amounts.
-     */
-    @Deprecated
-    List<Recommendation> recommend(Collection<LoanDescriptor> availableLoans, PortfolioOverview portfolio);
 
     /**
      * Retrieve loans that are acceptable by the strategy, in the order in which they are to be evaluated. After an
      * investment has been made into any single one of these loans, the strategy should be called again to re-evaluate
      * the resulting situation.
-     * @param availableLoans Loans to be evaluated for acceptability.
+     * @param available Loans to be evaluated for acceptability.
      * @param portfolio Aggregation of information as to the user's current portfolio.
      * @return Acceptable loans, in the order of their decreasing priority, mapped to the recommended investment
      * amounts.
      */
-    default Stream<Recommendation> evaluate(final Collection<LoanDescriptor> availableLoans,
-                                            final PortfolioOverview portfolio) {
-        return recommend(availableLoans, portfolio).stream();
-    }
+    Stream<RecommendedLoan> recommend(Collection<LoanDescriptor> available, PortfolioOverview portfolio);
 }

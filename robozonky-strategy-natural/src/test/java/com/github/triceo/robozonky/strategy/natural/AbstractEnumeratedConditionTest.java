@@ -18,24 +18,24 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Collections;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public abstract class AbstractEnumeratedConditionTest<T> {
 
-    protected abstract AbstractEnumeratedCondition<T> getSUT();
+    protected abstract AbstractEnumeratedCondition getSUT();
 
-    protected abstract Loan getMockedLoan();
+    protected abstract Wrapper getMocked();
 
     protected abstract T getTriggerItem();
 
     @Test
     public void proper() {
-        final Loan l = this.getMockedLoan();
-        final AbstractEnumeratedCondition<T> sut = this.getSUT();
-        Assertions.assertThat(sut.test(l)).isFalse();
+        final Wrapper i = this.getMocked();
+        final AbstractEnumeratedCondition sut = this.getSUT();
+        Assertions.assertThat(sut.test(i)).isFalse();
         sut.add(Collections.singleton(this.getTriggerItem()));
-        Assertions.assertThat(sut.test(l)).isTrue();
+        Assertions.assertThat(sut.test(i)).isTrue();
+        Assertions.assertThat(sut.getDescription()).isPresent();
     }
 }

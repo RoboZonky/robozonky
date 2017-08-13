@@ -49,7 +49,7 @@ public class ResultTrackerTest {
         final List<LoanDescriptor> result =
                 new ArrayList<>(t.acceptLoansFromMarketplace(Arrays.asList(usefulLoan, uselessLoan)));
         Assertions.assertThat(result).hasSize(1);
-        Assertions.assertThat(result.get(0)).matches(ld -> ld.getLoan().getId() == usefulLoan.getId());
+        Assertions.assertThat(result.get(0)).matches(ld -> ld.item().getId() == usefulLoan.getId());
     }
 
     @Test
@@ -67,6 +67,6 @@ public class ResultTrackerTest {
         final List<LoanDescriptor> result =
                 new ArrayList<>(t.acceptLoansFromMarketplace(Arrays.asList(usefulLoan, uselessLoan)));
         Assertions.assertThat(result).hasSize(1);
-        Assertions.assertThat(result.get(0)).matches(ld -> ld.getLoan().getId() == usefulLoan.getId());
+        Assertions.assertThat(result.get(0)).matches(ld -> ld.item().getId() == usefulLoan.getId());
     }
 }

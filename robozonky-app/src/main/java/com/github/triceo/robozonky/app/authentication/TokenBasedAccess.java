@@ -19,11 +19,9 @@ package com.github.triceo.robozonky.app.authentication;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
-import java.util.Collection;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.Refreshable;
-import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
@@ -46,7 +44,7 @@ class TokenBasedAccess implements Authenticated {
     }
 
     @Override
-    public Collection<Investment> call(final Function<Zonky, Collection<Investment>> operation) {
+    public <T> T call(final Function<Zonky, T> operation) {
         final ZonkyApiToken token = refreshableToken.getLatest()
                 .orElseThrow(() -> new IllegalStateException("No API token available, authentication failed."));
         try (final Refreshable.Pause p = refreshableToken.pause()) { // pause token refresh during this request

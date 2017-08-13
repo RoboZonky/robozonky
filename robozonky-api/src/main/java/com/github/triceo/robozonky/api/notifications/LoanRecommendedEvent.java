@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky.api.notifications;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired immediately after {@link InvestmentStrategy} has recommended a particular loan.
@@ -25,16 +25,16 @@ import com.github.triceo.robozonky.api.strategies.Recommendation;
  */
 public final class LoanRecommendedEvent extends Event {
 
-    private final Recommendation recommendation;
+    private final RecommendedLoan recommendation;
 
-    public LoanRecommendedEvent(final Recommendation recommendation) {
+    public LoanRecommendedEvent(final RecommendedLoan recommendation) {
         this.recommendation = recommendation;
     }
 
     /**
      * @return The recommendation to be submitted to the investing algorithm.
      */
-    public Recommendation getRecommendation() {
+    public RecommendedLoan getRecommendation() {
         return this.recommendation;
     }
 }

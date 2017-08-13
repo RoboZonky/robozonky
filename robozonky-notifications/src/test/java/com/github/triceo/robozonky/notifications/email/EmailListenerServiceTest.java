@@ -35,7 +35,6 @@ public class EmailListenerServiceTest extends AbstractEmailingListenerTest {
 
     private <T extends Event> Refreshable<EventListener<T>> getListener(final Class<T> eventType) {
         final Refreshable<EventListener<T>> refreshable = service.findListener(eventType);
-        refreshable.getDependedOn().ifPresent(Refreshable::run);
         refreshable.run();
         return refreshable;
     }

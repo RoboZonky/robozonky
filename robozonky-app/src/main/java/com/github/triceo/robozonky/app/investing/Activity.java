@@ -72,16 +72,9 @@ class Activity {
         }).orElse(Activity.EPOCH);
     }
 
-    /**
-     * Retrieve all marketplace in the marketplace which have not yet been fully funded and which have been published
-     * past
-     * a certain point in time.
-     * @param instant The earliest point in time for the marketplace to published on.
-     * @return Ordered by publishing time descending.
-     */
     private boolean hasLoansNewerThan(final OffsetDateTime instant) {
         return this.recentLoansDescending.stream()
-                .anyMatch(l -> l.getLoan().getDatePublished().isAfter(instant));
+                .anyMatch(l -> l.item().getDatePublished().isAfter(instant));
     }
 
     private boolean hasUnactionableLoans() {

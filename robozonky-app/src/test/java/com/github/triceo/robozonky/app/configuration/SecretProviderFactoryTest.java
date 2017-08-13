@@ -36,6 +36,14 @@ public class SecretProviderFactoryTest {
     }
 
     @Test
+    public void nonexistentKeyStoreProvided() throws Exception {
+        final File tmp = File.createTempFile("robozonky-", ".keystore");
+        tmp.delete();
+        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, tmp, "password".toCharArray());
+        Assertions.assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
+    }
+
+    @Test
     public void wrongFormatKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
         final CommandLine cli = SecretProviderFactoryTest.mockCli(null, tmp, "password".toCharArray());

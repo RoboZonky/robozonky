@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -42,24 +41,24 @@ public class LoanTermConditionTest {
 
     @Test
     public void boundaryCorrect() {
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getTermInMonths()).thenReturn(1);
+        final Wrapper l = Mockito.mock(Wrapper.class);
+        Mockito.when(l.getRemainingTermInMonths()).thenReturn(1);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         Assertions.assertThat(condition.test(l)).isTrue();
     }
 
     @Test
     public void leftOutOfBounds() {
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getTermInMonths()).thenReturn(0);
+        final Wrapper l = Mockito.mock(Wrapper.class);
+        Mockito.when(l.getRemainingTermInMonths()).thenReturn(0);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         Assertions.assertThat(condition.test(l)).isFalse();
     }
 
     @Test
     public void rightOutOfBounds() {
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getTermInMonths()).thenReturn(2);
+        final Wrapper l = Mockito.mock(Wrapper.class);
+        Mockito.when(l.getRemainingTermInMonths()).thenReturn(2);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         Assertions.assertThat(condition.test(l)).isFalse();
     }

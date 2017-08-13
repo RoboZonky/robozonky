@@ -21,10 +21,10 @@ portfolioExpression returns [DefaultPortfolio result] :
 ;
 
 ratingCondition returns [MarketplaceFilterCondition result]:
-    'rating je ' (
+    'rating ' IS (
         ( r1=ratingEnumeratedExpression
             {
-                AbstractEnumeratedCondition<Rating> c = new LoanRatingEnumeratedCondition();
+                LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
                 c.add($r1.result);
                 $result = c;
             })
@@ -47,6 +47,19 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
         r2=ratingExpression OR { $result.add($r2.result); }
     )?
     r3=ratingExpression { $result.add($r3.result); }
+;
+
+investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
+    (
+        (' ' amount=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($amount.getText()),
+                Integer.parseInt($amount.getText())); })
+        | (UP_TO maximumInvestmentInCzk=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($maximumInvestmentInCzk.getText())); })
+        | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($minimumInvestmentInCzk.getText()),
+                Integer.parseInt($maximumInvestmentInCzk.getText())); })
+    ) ' ' KC DOT
 ;
 
 regionExpression returns [Region result] :

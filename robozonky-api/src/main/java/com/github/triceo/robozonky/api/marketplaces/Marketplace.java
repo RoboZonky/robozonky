@@ -39,21 +39,7 @@ public interface Marketplace extends AutoCloseable,
     boolean registerListener(Consumer<Collection<Loan>> listener);
 
     /**
-     * Allows the implementation to specify how it should be treated by the runtime.
-     * @return Treatment expected by the marketplace provider.
-     */
-    ExpectedTreatment specifyExpectedTreatment();
-
-    /**
-     * If {@link #specifyExpectedTreatment()} is {@link ExpectedTreatment#POLLING}, this method is supposed to check
-     * the marketplace once and terminate.
-     * <p>
-     * If {@link ExpectedTreatment#LISTENING}, this method is expected to open a connection and listen for incoming
-     * loans - it may be interrupted at any time, after which {@link #close()} will be called to clean up any lasting
-     * resources.
-     * <p>
-     * If any endless loops are created, implementors must check for {@link Thread#currentThread()}'s
-     * {@link Thread#isInterrupted()} method in order to know when to terminate them.
+     * This method is supposed to check the marketplace once and terminate.
      */
     @Override
     void run();

@@ -17,12 +17,10 @@
 package com.github.triceo.robozonky.app.authentication;
 
 import java.time.temporal.TemporalAmount;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.common.remote.ApiProvider;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
@@ -60,7 +58,7 @@ public interface Authenticated {
         return new PasswordBasedAccess(apis, data);
     }
 
-    Collection<Investment> call(Function<Zonky, Collection<Investment>> operation);
+    <T> T call(Function<Zonky, T> operation);
 
     default void run(final Consumer<Zonky> operation) {
         call(z -> {

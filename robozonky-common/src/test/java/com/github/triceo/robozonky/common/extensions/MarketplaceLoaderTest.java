@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import com.github.triceo.robozonky.api.marketplaces.ExpectedTreatment;
 import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.api.marketplaces.MarketplaceService;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -55,11 +54,6 @@ public class MarketplaceLoaderTest {
             @Override
             public boolean registerListener(Consumer<Collection<Loan>> listener) {
                 return false;
-            }
-
-            @Override
-            public ExpectedTreatment specifyExpectedTreatment() {
-                return null;
             }
 
             @Override

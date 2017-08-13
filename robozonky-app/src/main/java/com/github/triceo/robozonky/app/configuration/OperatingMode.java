@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.investing.InvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
