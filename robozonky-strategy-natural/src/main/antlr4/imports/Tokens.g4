@@ -133,7 +133,7 @@ INCOME_PENSION              : 'důchodce';
 INCOME_SELF_EMPLOYMENT      : 'OSVČ';
 INCOME_STUDENT              : 'student';
 INCOME_UNEMPLOYED           : 'bez zaměstnání';
-INCOME_OTHER                : 'ostatní';
+INCOME_OTHER                : 'jiné';
 
 // loan purpose types
 PURPOSE_AUTO_MOTO               : 'auto-moto';
