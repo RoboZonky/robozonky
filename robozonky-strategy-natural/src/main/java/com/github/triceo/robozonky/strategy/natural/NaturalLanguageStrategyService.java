@@ -53,7 +53,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
         }
     };
 
-    private static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {
+    static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {
         final CharStream s = CharStreams.fromStream(strategy);
         final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
         final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(new CommonTokenStream(l));
