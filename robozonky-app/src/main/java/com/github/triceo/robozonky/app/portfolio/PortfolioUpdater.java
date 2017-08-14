@@ -23,8 +23,12 @@ import java.util.function.Supplier;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
 
     private final Authenticated authenticated;
 
@@ -44,7 +48,9 @@ public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
+        LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
         authenticated.run(Portfolio.INSTANCE::update);
+        LOGGER.info("RoboZonky resumed.");
         return Optional.of(OffsetDateTime.now());
     }
 }
