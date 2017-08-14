@@ -3,7 +3,9 @@ Description=RoboZonky: Automated Zonky.cz investing robot
 After=network.target
 
 [Service]
-Restart=true
+User=robozonky
+Group=robozonky
+Restart=always
 WorkingDirectory=/usr/robozonky
 ExecStart=/usr/robozonky/robozonky.sh @robozonky.cli
 ExecStop=

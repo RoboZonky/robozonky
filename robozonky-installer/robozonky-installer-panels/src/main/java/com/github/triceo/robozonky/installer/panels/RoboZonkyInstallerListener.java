@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,8 +49,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
     private static InstallData DATA;
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
-    static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
-            CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
+    static File INSTALL_PATH, DIST_PATH, DIST_SERVICES_PATH, SERVICES_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
+            CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE, DAEMON_SYSD_FILE, DAEMON_UPST_FILE;
 
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
@@ -64,24 +65,32 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         RoboZonkyInstallerListener.DATA = data;
         INSTALL_PATH = new File(Variables.INSTALL_PATH.getValue(DATA));
         DIST_PATH = new File(INSTALL_PATH, "Dist/");
+        DIST_SERVICES_PATH = new File(DIST_PATH, "/examples/services/");
+        SERVICES_PATH = new File(INSTALL_PATH, "services/");
         KEYSTORE_FILE = new File(INSTALL_PATH, "robozonky.keystore");
         JMX_PROPERTIES_FILE = new File(INSTALL_PATH, "management.properties");
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
         SETTINGS_FILE = new File(INSTALL_PATH, "robozonky.properties");
         CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
         LOGBACK_CONFIG_FILE = new File(INSTALL_PATH, "logback.xml");
+        DAEMON_SYSD_FILE = new File(SERVICES_PATH, "robozonky-systemd.service");
+        DAEMON_UPST_FILE = new File(SERVICES_PATH, "robozonky-upstart.conf");
     }
 
     static void resetInstallData() {
         RoboZonkyInstallerListener.DATA = null;
         INSTALL_PATH = null;
         DIST_PATH = null;
+        DIST_SERVICES_PATH = null;
+        SERVICES_PATH = null;
         KEYSTORE_FILE = null;
         JMX_PROPERTIES_FILE = null;
         EMAIL_CONFIG_FILE = null;
         SETTINGS_FILE = null;
         CLI_CONFIG_FILE = null;
         LOGBACK_CONFIG_FILE = null;
+        DAEMON_SYSD_FILE = null;
+        DAEMON_UPST_FILE = null;
     }
 
     CommandLinePart prepareStrategy() {
@@ -302,10 +311,36 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    void prepareDaemons() {
+        Collection<String> contentC;
+        String content;
+        try {
+            SERVICES_PATH.mkdir();
+
+            content = Files.lines(Paths.get(DIST_SERVICES_PATH + "/robozonky-systemd.service")).collect(Collectors.joining("\n"));
+            content = content.replaceAll("/usr/robozonky", INSTALL_PATH.getAbsolutePath());
+            content = content.replaceAll("robozonky.sh @robozonky.cli", "run.sh");
+            contentC = new ArrayList<>();
+            contentC.add(content);
+            Files.write(DAEMON_SYSD_FILE.toPath(), contentC, Charset.defaultCharset());
+
+            content = Files.lines(Paths.get(DIST_SERVICES_PATH + "/robozonky-upstart.conf")).collect(Collectors.joining("\n"));
+            content = content.replaceAll("/usr/robozonky", INSTALL_PATH.getAbsolutePath());
+            content = content.replaceAll("robozonky.sh @robozonky.cli", "run.sh");
+            contentC = new ArrayList<>();
+            contentC.add(content);
+            Files.write(DAEMON_UPST_FILE.toPath(), contentC, Charset.defaultCharset());
+
+            Util.copyFile(new File(DIST_SERVICES_PATH, "README"), new File(SERVICES_PATH,"README"));
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Failed creating unit files.", ex);
+        } 
+    }
+
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
         try {
-            progressListener.startAction("Konfigurace RoboZonky", 7);
+            progressListener.startAction("Konfigurace RoboZonky", 8);
             progressListener.nextStep("Příprava strategie.", 1, 1);
             final CommandLinePart strategyConfig = prepareStrategy();
             progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
@@ -320,6 +355,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, credentials, logging);
             progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
             prepareRunScript(result);
+            progressListener.nextStep("Příprava konfiguračních souborů daemonů.", 8, 1);
+            prepareDaemons();
             progressListener.stopAction();
         } catch (final Exception ex) {
             LOGGER.log(Level.SEVERE, "Uncaught exception.", ex);
