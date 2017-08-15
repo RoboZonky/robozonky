@@ -17,8 +17,6 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
-import com.github.triceo.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
@@ -51,21 +49,5 @@ public class InvestmentSizeTest {
             softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(0);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
         });
-    }
-
-    @Test
-    public void small() {
-        Assertions.assertThatThrownBy(() -> new InvestmentSize(Rating.A, Defaults.MINIMUM_INVESTMENT_IN_CZK - 1))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    public void notMultipleOf200() {
-        Assertions.assertThatThrownBy(() -> new InvestmentSize(Rating.A, Defaults.MINIMUM_INVESTMENT_IN_CZK,
-                                                               Defaults.MINIMUM_INVESTMENT_IN_CZK + 1)).isInstanceOf(
-                IllegalArgumentException.class);
-        Assertions.assertThatThrownBy(() -> new InvestmentSize(Rating.A, Defaults.MINIMUM_INVESTMENT_IN_CZK + 1,
-                                                               Defaults.MINIMUM_INVESTMENT_IN_CZK)).isInstanceOf(
-                IllegalArgumentException.class);
     }
 }

@@ -45,6 +45,14 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             BY_RECENCY = Comparator.comparing((LoanDescriptor l) -> l.item().getDatePublished()).reversed(),
             BY_REMAINING = Comparator.comparing((LoanDescriptor l) -> l.item().getRemainingInvestment()).reversed();
 
+    private static int roundToNearestIncrement(final int number) {
+        return roundToNearestIncrement(number, Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK);
+    }
+
+    private static int roundToNearestIncrement(final int number, final int increment) {
+        return (number / increment) * increment;
+    }
+
     private static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
         return Collections.unmodifiableMap(loans.distinct().collect(Collectors.groupingBy(l -> l.item().getRating())));
     }
@@ -124,9 +132,8 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 LOGGER.trace("Not recommending loan #{} due to minimum over remaining.", id);
                 return 0;
             }
-            final int maxAllowedInvestmentIncrement = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
             final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
-            final int r = (recommendedAmount / maxAllowedInvestmentIncrement) * maxAllowedInvestmentIncrement;
+            final int r = roundToNearestIncrement(recommendedAmount);
             if (r < minimumRecommendation) {
                 LOGGER.trace("Not recommending loan #{} due to recommendation below minimum.", id);
                 return 0;
@@ -139,8 +146,9 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
     private Optional<int[]> recommendInvestmentAmount(final Loan loan) {
         final int[] recommended = getRecommendationBoundaries(loan);
-        final int minimumRecommendation = Math.max(recommended[0], Defaults.MINIMUM_INVESTMENT_IN_CZK);
-        final int maximumRecommendation = recommended[1];
+        final int minimumRecommendation =
+                roundToNearestIncrement(Math.max(recommended[0], Defaults.MINIMUM_INVESTMENT_IN_CZK));
+        final int maximumRecommendation = roundToNearestIncrement(recommended[1]);
         final int loanId = loan.getId();
         LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId,
                      minimumRecommendation, maximumRecommendation);

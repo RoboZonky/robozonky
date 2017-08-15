@@ -33,15 +33,6 @@ class DefaultInvestmentSize {
     public DefaultInvestmentSize(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
         this.minimumInvestmentInCzk = Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk);
         this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
-        /*
-         * minimum is allowed to go under 200 (Zonky minimum), so that the code would support partial participations
-         * on the secondary marketplace.
-         */
-        if (minimumInvestmentInCzk % 200 != 0) {
-            throw new IllegalArgumentException("Minimum investment must be a multiple of 200.");
-        } else if (maximumInvestmentInCzk % 200 != 0) {
-            throw new IllegalArgumentException("Maximum investment must be a multiple of 200.");
-        }
     }
 
     public int getMinimumInvestmentInCzk() {
