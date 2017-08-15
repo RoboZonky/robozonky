@@ -1,11 +1,13 @@
 install: true
-script: "mvn clean post-integration-test --batch-mode"
+script: "MAVEN_OPTS=\"-Xmx512m\" JAVA_OPTS=\"-Xmx512m\" mvn -T 1C --batch-mode clean post-integration-test"
 language: java
 os:
   - linux
 jdk:
   - oraclejdk8
+  - oraclejdk9
 addons: # make sure we're using the latest Java as Travis default is quite old
   apt:
     packages:
       - oracle-java8-installer
+      - oracle-java9-installer

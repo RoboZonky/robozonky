@@ -58,31 +58,22 @@ public class Checker {
         }
     }
 
-    static Optional<Boolean> notifyProvider(final Loan loan, final ConfirmationProvider zonkoid, final String username,
-                                            final char[] secret) {
+    static boolean notifyProvider(final Loan loan, final ConfirmationProvider zonkoid, final String username,
+                                  final char[] secret) {
         final RequestId id = new RequestId(username, secret);
-        return zonkoid.requestConfirmation(id, loan.getId(), 200)
-                .map(c -> {
-                    switch (c.getType()) {
-                        case APPROVED:
-                        case DELEGATED:
-                            return Optional.of(true);
-                        default:
-                            return Optional.of(false);
-                    }
-                }).orElse(Optional.empty());
+        return zonkoid.requestConfirmation(id, loan.getId(), 200);
     }
 
-    public static Optional<Boolean> confirmations(final ConfirmationProvider provider, final String username,
-                                                  final char[] secret) {
+    public static boolean confirmations(final ConfirmationProvider provider, final String username,
+                                        final char[] secret) {
         return Checker.confirmations(provider, username, secret, ApiProvider::new);
     }
 
-    static Optional<Boolean> confirmations(final ConfirmationProvider provider, final String username,
-                                           final char[] secret, final Supplier<ApiProvider> apiProviderSupplier) {
+    static boolean confirmations(final ConfirmationProvider provider, final String username, final char[] secret,
+                                 final Supplier<ApiProvider> apiProviderSupplier) {
         return Checker.getOneLoanFromMarketplace(apiProviderSupplier)
                 .map(l -> Checker.notifyProvider(l, provider, username, secret))
-                .orElse(Optional.of(false));
+                .orElse(false);
     }
 
     public static boolean notifications(final String username) {

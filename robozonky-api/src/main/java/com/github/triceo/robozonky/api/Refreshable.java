@@ -18,9 +18,9 @@ package com.github.triceo.robozonky.api;
 
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,33 +49,16 @@ public abstract class Refreshable<T> implements Runnable {
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
     private final AtomicInteger requestsToPause = new AtomicInteger(0);
+    private final AtomicBoolean refreshRequestedWhilePaused = new AtomicBoolean(false);
     /**
      * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
      */
     private final CountDownLatch completionAssurance = new CountDownLatch(1);
-    private final Set<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
+    private final Collection<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
     public Refreshable() {
         this.valueIsMissing.acquireUninterruptibly();
-        // the only task of this listener is to log changes to the resource
-        this.registerListener(new Refreshable.RefreshListener<T>() {
-
-            @Override
-            public void valueSet(final T newValue) {
-                LOGGER.trace("New value: {}.", newValue);
-            }
-
-            @Override
-            public void valueUnset(final T oldValue) {
-                LOGGER.trace("Value removed.");
-            }
-
-            @Override
-            public void valueChanged(final T oldValue, final T newValue) {
-                LOGGER.trace("Value changed: {}.", newValue);
-                this.valueSet(newValue);
-            }
-        });
+        this.registerListener(new UpdateNotification()); // log changes to resource
     }
 
     /**
@@ -110,15 +93,6 @@ public abstract class Refreshable<T> implements Runnable {
                 return "ImmutableRefreshable{toReturn=" + toReturn + "}";
             }
         };
-    }
-
-    /**
-     * Whether or not the refresh of this resource depends on the refresh of another resource. This method exists so
-     * that any scheduler can properly include all the required {@link Refreshable}s by overriding this one.
-     * @return Present if this resource needs another resource to be properly refreshed.
-     */
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.empty();
     }
 
     /**
@@ -191,6 +165,7 @@ public abstract class Refreshable<T> implements Runnable {
      * @return False if already registered.
      */
     public boolean registerListener(final Refreshable.RefreshListener<T> listener) {
+        LOGGER.trace("Registering listener {}.", listener);
         return this.listeners.add(listener);
     }
 
@@ -208,8 +183,8 @@ public abstract class Refreshable<T> implements Runnable {
      * at the same time, both must be released before the refresh is started again.
      * @return The {@link Refreshable.Pause} object to use to re-start the refresh.
      */
-    public Refreshable.Pause pause() {
-        return new Refreshable.Pause(requestsToPause);
+    public Refreshable<T>.Pause pause() {
+        return new Refreshable<T>.Pause(requestsToPause);
     }
 
     private void storeResult(final T result) {
@@ -229,7 +204,7 @@ public abstract class Refreshable<T> implements Runnable {
         }
     }
 
-    private void runLocked() {
+    private synchronized void runLocked() {
         final Optional<String> maybeNewSource = Retriever.retrieve(this.getLatestSource());
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
@@ -259,6 +234,7 @@ public abstract class Refreshable<T> implements Runnable {
     @Override
     public void run() {
         if (requestsToPause.get() > 0) {
+            refreshRequestedWhilePaused.set(true);
             LOGGER.trace("Paused, no refresh.");
             return;
         }
@@ -307,7 +283,7 @@ public abstract class Refreshable<T> implements Runnable {
         }
     }
 
-    public static class Pause implements AutoCloseable {
+    public class Pause implements AutoCloseable {
 
         private final AtomicInteger pauseCounter;
         private final AtomicBoolean released = new AtomicBoolean(false);
@@ -322,9 +298,38 @@ public abstract class Refreshable<T> implements Runnable {
          */
         @Override
         public void close() {
-            if (!released.getAndSet(true)) {
-                pauseCounter.decrementAndGet();
+            if (released.getAndSet(true)) {
+                return;
             }
+            // decrement counter
+            final int newCount = pauseCounter.decrementAndGet();
+            if (newCount > 0) {
+                return;
+            }
+            // counter now zero, refresh the resource if necessary
+            final boolean needsRefresh = refreshRequestedWhilePaused.getAndSet(false);
+            if (needsRefresh) {
+                LOGGER.trace("Refreshing after pause.");
+                Refreshable.this.run();
+            }
+        }
+    }
+
+    private final class UpdateNotification implements Refreshable.RefreshListener<T> {
+
+        @Override
+        public void valueSet(final T newValue) {
+            LOGGER.trace("New value: {}.", newValue);
+        }
+
+        @Override
+        public void valueUnset(final T oldValue) {
+            LOGGER.trace("Value removed.");
+        }
+
+        @Override
+        public void valueChanged(final T oldValue, final T newValue) {
+            LOGGER.trace("Value changed: {}.", newValue);
         }
     }
 }

@@ -31,8 +31,7 @@ public class DefaultValuesTest {
         final DefaultValues sut = new DefaultValues(p);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(sut.getPortfolio()).isSameAs(p);
-            softly.assertThat(sut.getInvestmentSize().getMinimumInvestmentInCzk())
-                    .isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+            softly.assertThat(sut.getInvestmentSize().getMinimumInvestmentInCzk()).isEqualTo(0);
             softly.assertThat(sut.needsConfirmation(Mockito.mock(Loan.class))).isFalse();
         });
     }

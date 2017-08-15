@@ -32,6 +32,7 @@ import com.github.triceo.robozonky.api.notifications.Event;
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
@@ -48,11 +49,13 @@ import com.github.triceo.robozonky.api.notifications.RoboZonkyExperimentalUpdate
 import com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
+import com.github.triceo.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.common.AbstractStateLeveragingTest;
 import org.junit.After;
 import org.junit.runner.RunWith;
@@ -72,6 +75,12 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         return p.get();
     }
 
+    private static PortfolioOverview mockPortfolio(final int balance) {
+        final PortfolioOverview portfolioOverview = Mockito.mock(PortfolioOverview.class);
+        Mockito.when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
+        return portfolioOverview;
+    }
+
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getListeners() {
         // prepare data
@@ -84,7 +93,7 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         Mockito.when(loan.getTermInMonths()).thenReturn(25);
         Mockito.when(loan.getUrl()).thenReturn("http://www.robozonky.cz/");
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
-        final Recommendation recommendation = loanDescriptor.recommend(1200, false).get();
+        final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = new Investment(loan, 1000);
         final NotificationProperties properties = AbstractEmailingListenerTest.getNotificationProperties();
         // create events for listeners
@@ -107,9 +116,10 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
                    new LoanDelinquent60DaysOrMoreEvent(loan, LocalDate.now().minusDays(61)));
         events.put(SupportedListener.LOAN_DELINQUENT_90_PLUS,
                    new LoanDelinquent90DaysOrMoreEvent(loan, LocalDate.now().minusDays(91)));
-        events.put(SupportedListener.BALANCE_ON_TARGET, new ExecutionStartedEvent(Collections.emptyList(), 200));
+        events.put(SupportedListener.BALANCE_ON_TARGET,
+                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(200)));
         events.put(SupportedListener.BALANCE_UNDER_MINIMUM,
-                   new ExecutionStartedEvent(Collections.emptyList(), 199));
+                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(199)));
         events.put(SupportedListener.CRASHED,
                    new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
         events.put(SupportedListener.REMOTE_OPERATION_FAILED,
@@ -121,6 +131,8 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         events.put(SupportedListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3"));
         events.put(SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
                    new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
+        events.put(SupportedListener.INVESTMENT_PURCHASED, new InvestmentPurchasedEvent(i, 200, true));
+        events.put(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, true));
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[]{s, s.getListener(properties), events.get(s)})

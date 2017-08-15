@@ -19,14 +19,19 @@ package com.github.triceo.robozonky.internal.api;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.ini4j.Ini;
 import org.slf4j.Logger;
@@ -45,6 +50,8 @@ public enum State {
     INSTANCE; // cheap thread-safe singleton
 
     private final Logger LOGGER = LoggerFactory.getLogger(State.class);
+    private static final String DELIMITER = ";";
+    private static final Pattern SPLIT_BY_DELIMITER = Pattern.compile("\\Q" + DELIMITER + "\\E");
     private final AtomicReference<Ini> stateFile = new AtomicReference<>(null);
     private final Supplier<Ini> stateFileSupplier = () -> {
         try {
@@ -148,6 +155,10 @@ public enum State {
             return this;
         }
 
+        public State.Batch set(final String key, final Stream<String> values) {
+            return set(key, values.collect(Collectors.joining(DELIMITER)));
+        }
+
         public State.Batch unset(final String key) {
             actions.add((state) -> state.unsetValue(key));
             return this;
@@ -190,6 +201,10 @@ public enum State {
             synchronized (State.INSTANCE) {
                 return State.INSTANCE.getValue(this.classIdentifier, key);
             }
+        }
+
+        public Optional<List<String>> getValues(final String key) {
+            return getValue(key).map(value -> Arrays.asList(SPLIT_BY_DELIMITER.split(value)));
         }
 
         /**

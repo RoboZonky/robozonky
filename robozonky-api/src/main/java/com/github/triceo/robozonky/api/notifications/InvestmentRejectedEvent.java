@@ -17,25 +17,25 @@
 package com.github.triceo.robozonky.api.notifications;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired immediately after {@link ConfirmationProvider} rejected a given investment.
  */
 public final class InvestmentRejectedEvent extends Event {
 
-    private final Recommendation recommendation;
+    private final RecommendedLoan recommendation;
     private final int balance;
     private final String confirmationProviderId;
 
-    public InvestmentRejectedEvent(final Recommendation recommendation, final int balance,
+    public InvestmentRejectedEvent(final RecommendedLoan recommendation, final int balance,
                                    final String confirmationProviderId) {
         this.recommendation = recommendation;
         this.balance = balance;
         this.confirmationProviderId = confirmationProviderId;
     }
 
-    public Recommendation getRecommendation() {
+    public RecommendedLoan getRecommendation() {
         return recommendation;
     }
 

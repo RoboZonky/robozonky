@@ -41,10 +41,9 @@ public class ParsedStrategyTest {
                     .isEqualTo(portfolio.getDefaultShare(Rating.A));
             softly.assertThat(strategy.getMaximumShare(Rating.B))
                     .isEqualTo(portfolio.getDefaultShare(Rating.B));
-            softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.C))
-                    .isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D))
-                    .isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+            softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.C)).isEqualTo(0);
+            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(
+                    Defaults.MINIMUM_INVESTMENT_IN_CZK);
             softly.assertThat(strategy.needsConfirmation(new LoanDescriptor(new Loan(1, 2)))).isFalse();
         });
     }
@@ -60,8 +59,9 @@ public class ParsedStrategyTest {
         Assertions.assertThat(strategy.getApplicableLoans(Collections.singletonList(ld))).contains(ld);
         // now add a filter and see no loans applicable
         final MarketplaceFilter f = Mockito.mock(MarketplaceFilter.class);
-        Mockito.when(f.test(ArgumentMatchers.eq(loan))).thenReturn(true);
-        final ParsedStrategy strategy2 = new ParsedStrategy(portfolio, Collections.singleton(f));
+        Mockito.when(f.test(ArgumentMatchers.eq(new Wrapper(loan)))).thenReturn(true);
+        final ParsedStrategy strategy2 =
+                new ParsedStrategy(portfolio, Collections.singletonMap(Boolean.TRUE, Collections.singleton(f)));
         Assertions.assertThat(strategy2.getApplicableLoans(Collections.singletonList(ld))).isEmpty();
     }
 
@@ -71,7 +71,8 @@ public class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         final PortfolioShare share = new PortfolioShare(Rating.D, 50, 100);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
-                                                           Collections.emptyList(), Collections.emptyList());
+                                                           Collections.emptyList(), Collections.emptyMap(),
+                                                           Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(50);
             softly.assertThat(strategy.getMaximumShare(Rating.D)).isEqualTo(100);
@@ -84,7 +85,8 @@ public class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         final InvestmentSize size = new InvestmentSize(Rating.D, 600, 1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(),
-                                                           Collections.singleton(size), Collections.emptyList());
+                                                           Collections.singleton(size), Collections.emptyMap(),
+                                                           Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.D)).isEqualTo(600);
             softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(1000);

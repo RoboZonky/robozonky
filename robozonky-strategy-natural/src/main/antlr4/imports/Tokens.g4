@@ -21,10 +21,10 @@ portfolioExpression returns [DefaultPortfolio result] :
 ;
 
 ratingCondition returns [MarketplaceFilterCondition result]:
-    'rating je ' (
+    'rating ' IS (
         ( r1=ratingEnumeratedExpression
             {
-                AbstractEnumeratedCondition<Rating> c = new LoanRatingEnumeratedCondition();
+                LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
                 c.add($r1.result);
                 $result = c;
             })
@@ -49,6 +49,19 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
     r3=ratingExpression { $result.add($r3.result); }
 ;
 
+investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
+    (
+        (' ' amount=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($amount.getText()),
+                Integer.parseInt($amount.getText())); })
+        | (UP_TO maximumInvestmentInCzk=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($maximumInvestmentInCzk.getText())); })
+        | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
+            { $result = new DefaultInvestmentSize(Integer.parseInt($minimumInvestmentInCzk.getText()),
+                Integer.parseInt($maximumInvestmentInCzk.getText())); })
+    ) ' ' KC DOT
+;
+
 regionExpression returns [Region result] :
     r=(REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P |
         REGION_S | REGION_T | REGION_U | REGION_Z)
@@ -57,13 +70,13 @@ regionExpression returns [Region result] :
 
 incomeExpression returns [MainIncomeType result] :
     r=(INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION | INCOME_MATERNITY_LEAVE
-        | INCOME_STUDENT | INCOME_UNEMPLOYED | INCOME_LIBERAL_PROFESSION | INCOME_OTHER )
+        | INCOME_STUDENT | INCOME_UNEMPLOYED | INCOME_LIBERAL_PROFESSION | OTHER )
     { $result = MainIncomeType.findByCode($r.getText()); }
 ;
 
 purposeExpression returns [Purpose result] :
     r=(PURPOSE_AUTO_MOTO | PURPOSE_CESTOVANI | PURPOSE_DOMACNOST | PURPOSE_ELEKTRONIKA | PURPOSE_REFINANCOVANI_PUJCEK
-        | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI | PURPOSE_ZDRAVI | PURPOSE_JINE)
+        | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI | PURPOSE_ZDRAVI | OTHER)
     { $result = Purpose.findByCode($r.getText()); }
 ;
 
@@ -84,6 +97,7 @@ OR        : ' nebo ';
 OR_COMMA  : COMMA ' ';
 LESS_THAN : 'nedosahuje ';
 MORE_THAN : 'přesahuje ';
+OTHER     : 'jiné';
 
 // regions
 REGION_A : 'Praha';
@@ -120,7 +134,6 @@ INCOME_PENSION              : 'důchodce';
 INCOME_SELF_EMPLOYMENT      : 'OSVČ';
 INCOME_STUDENT              : 'student';
 INCOME_UNEMPLOYED           : 'bez zaměstnání';
-INCOME_OTHER                : 'ostatní';
 
 // loan purpose types
 PURPOSE_AUTO_MOTO               : 'auto-moto';
@@ -131,7 +144,6 @@ PURPOSE_REFINANCOVANI_PUJCEK    : 'refinancování půjček';
 PURPOSE_VLASTNI_PROJEKT         : 'vlastní projekt';
 PURPOSE_VZDELANI                : 'vzdělání';
 PURPOSE_ZDRAVI                  : 'zdraví';
-PURPOSE_JINE                    : 'jiné';
 
 // basic types
 INTEGER : DIGIT+ ;

@@ -21,11 +21,10 @@ import javax.ws.rs.core.Feature;
 
 import com.github.triceo.robozonky.internal.api.Settings;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.LaxRedirectStrategy;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -47,19 +46,21 @@ final class ProxyFactory {
         }
     }
 
-    private static final HttpClientConnectionManager CONNECTION_MANAGER = new PoolingHttpClientConnectionManager();
+    private static final SocketConfig SOCKET_CONFIG = SocketConfig.copy(SocketConfig.DEFAULT)
+            .setSoTimeout((int) (Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .build();
     private static final RequestConfig REQUEST_CONFIG = RequestConfig.copy(RequestConfig.DEFAULT)
             .setRedirectsEnabled(true)
             .setRelativeRedirectsAllowed(true)
             .setConnectTimeout((int) (Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
             .setConnectionRequestTimeout(
                     (int) (Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS)) * 1000)
-            .setSocketTimeout((int) (Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS)) * 1000)
+            .setSocketTimeout(ProxyFactory.SOCKET_CONFIG.getSoTimeout())
             .build();
     private static final HttpClientBuilder CLIENT_BUILDER = HttpClientBuilder.create()
             .setRedirectStrategy(LaxRedirectStrategy.INSTANCE) // be tolerant of unexpected situations
-            .setDefaultRequestConfig(ProxyFactory.REQUEST_CONFIG) // no "sudden death" (marketplace blocking on socket)
-            .setConnectionManager(ProxyFactory.CONNECTION_MANAGER);
+            .setDefaultSocketConfig(ProxyFactory.SOCKET_CONFIG)
+            .setDefaultRequestConfig(ProxyFactory.REQUEST_CONFIG); // no "sudden death" (marketplace blocking on socket)
 
     public static ResteasyClient newResteasyClient(final RoboZonkyFilter filter) {
         final ResteasyClient client = ProxyFactory.newResteasyClient();

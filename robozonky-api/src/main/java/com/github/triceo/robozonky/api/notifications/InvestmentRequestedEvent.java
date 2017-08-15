@@ -18,7 +18,7 @@ package com.github.triceo.robozonky.api.notifications;
 
 import com.github.triceo.robozonky.api.remote.ControlApi;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.strategies.Recommendation;
+import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired immediately before {@link ControlApi#invest(Investment)} call is made or, in case of dry run,
@@ -26,13 +26,13 @@ import com.github.triceo.robozonky.api.strategies.Recommendation;
  */
 public final class InvestmentRequestedEvent extends Event {
 
-    private final Recommendation recommendation;
+    private final RecommendedLoan recommendation;
 
-    public InvestmentRequestedEvent(final Recommendation recommendation) {
+    public InvestmentRequestedEvent(final RecommendedLoan recommendation) {
         this.recommendation = recommendation;
     }
 
-    public Recommendation getRecommendation() {
+    public RecommendedLoan getRecommendation() {
         return recommendation;
     }
 }

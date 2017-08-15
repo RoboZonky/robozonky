@@ -17,38 +17,18 @@
 package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public abstract class MarketplaceFilterCondition implements Predicate<Loan> {
-
-    // not static as we want to have the specific impl class in the logs
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+public interface MarketplaceFilterCondition {
 
     /**
      * Describe the condition using eg. range boundaries.
      * @return If present, is a whole sentence. (Starting with capital letter, ending with a full stop.)
      */
-    protected Optional<String> getDescription() {
+    default Optional<String> getDescription() {
         return Optional.empty();
     }
 
-    /**
-     * Determine whether or not the loan in question matches the condition represented by this class.
-     * @param loan Loan in question.
-     * @return True if loan matches the condition.
-     */
-    public boolean test(final Loan loan) {
-        LOGGER.warn("Default condition implementation never matches the condition.");
+    default boolean test(final Wrapper item) {
         return false;
-    }
-
-    @Override
-    public String toString() {
-        final String description = getDescription().orElse("N/A.");
-        return this.getClass().getSimpleName() + " (" + description + ")";
     }
 }

@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately after the investing algorithm is finished making investments.
@@ -27,11 +28,11 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 public final class ExecutionCompletedEvent extends Event {
 
     private final Collection<Investment> investment;
-    private final int newBalance;
+    private final PortfolioOverview portfolioOverview;
 
-    public ExecutionCompletedEvent(final Collection<Investment> investment, final int newBalance) {
+    public ExecutionCompletedEvent(final Collection<Investment> investment, final PortfolioOverview portfolio) {
         this.investment = Collections.unmodifiableCollection(investment);
-        this.newBalance = newBalance;
+        this.portfolioOverview = portfolio;
     }
 
     /**
@@ -41,10 +42,7 @@ public final class ExecutionCompletedEvent extends Event {
         return this.investment;
     }
 
-    /**
-     * @return Account balance at the end of the investing algorithm.
-     */
-    public int getNewBalance() {
-        return this.newBalance;
+    public PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 }

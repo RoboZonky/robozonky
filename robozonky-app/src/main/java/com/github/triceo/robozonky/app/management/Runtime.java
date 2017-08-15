@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.app.ShutdownEnabler;
-import com.github.triceo.robozonky.app.investing.DaemonInvestmentMode;
+import com.github.triceo.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -36,12 +36,8 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
     }
 
     @Override
-    public Optional<Refreshable<?>> getDependedOn() {
-        return Optional.of(properties);
-    }
-
-    @Override
     protected Supplier<Optional<String>> getLatestSource() {
+        properties.run();
         return () -> properties.getLatest().map(Object::toString);
     }
 

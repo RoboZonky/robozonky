@@ -18,15 +18,15 @@ package com.github.triceo.robozonky.strategy.natural;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
+import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,26 +37,34 @@ public class ParsedStrategy {
     private final DefaultValues defaults;
     private final Map<Rating, PortfolioShare> portfolio;
     private final Map<Rating, InvestmentSize> investmentSizes;
-    private final Collection<MarketplaceFilter> marketplaceFilters;
+    private final Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters, sellFilters;
 
     public ParsedStrategy(final DefaultPortfolio portfolio) {
-        this(portfolio, Collections.emptyList());
+        this(portfolio, Collections.emptyMap());
     }
 
-    ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> filters) {
-        this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyList(), filters);
+    ParsedStrategy(final DefaultPortfolio portfolio, final Map<Boolean, Collection<MarketplaceFilter>> filters) {
+        this(portfolio, filters, Collections.emptyList());
+    }
+
+    ParsedStrategy(final DefaultPortfolio portfolio, final Map<Boolean, Collection<MarketplaceFilter>> filters,
+                   final Collection<MarketplaceFilter> sellFilters) {
+        this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyList(), filters, sellFilters);
     }
 
     public ParsedStrategy(final DefaultValues defaults,
                           final Collection<PortfolioShare> portfolio,
                           final Collection<InvestmentSize> investmentSizes,
-                          final Collection<MarketplaceFilter> marketplaceFilters) {
+                          final Map<Boolean, Collection<MarketplaceFilter>> marketplaceFilters,
+                          final Collection<MarketplaceFilter> sellFilters) {
         this.defaults = defaults;
         this.portfolio = portfolio.stream()
                 .collect(Collectors.toMap(PortfolioShare::getRating, Function.identity()));
         this.investmentSizes = investmentSizes.stream()
                 .collect(Collectors.toMap(InvestmentSize::getRating, Function.identity()));
-        this.marketplaceFilters = new LinkedHashSet<>(marketplaceFilters);
+        this.primaryMarketplaceFilters = marketplaceFilters.getOrDefault(true, Collections.emptyList());
+        this.secondaryMarketplaceFilters = marketplaceFilters.getOrDefault(false, Collections.emptyList());
+        this.sellFilters = sellFilters;
         final int shareSum = sumMinimalShares();
         if (shareSum > 100) {
             throw new IllegalArgumentException("Sum of minimal rating shares in portfolio is over 100 %.");
@@ -70,7 +78,7 @@ public class ParsedStrategy {
     }
 
     public boolean needsConfirmation(final LoanDescriptor loan) {
-        return defaults.needsConfirmation(loan.getLoan());
+        return defaults.needsConfirmation(loan.item());
     }
 
     public int getMinimumBalance() {
@@ -121,15 +129,40 @@ public class ParsedStrategy {
         }
     }
 
-    private boolean matchesNoFilter(final Loan loan) {
-        return !marketplaceFilters.stream()
-                .filter(f -> f.test(loan))
-                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", loan.getId(), f))
+    private boolean matchesNoFilter(final Wrapper item, final boolean isSecondaryMarket) {
+        final Collection<MarketplaceFilter> filters =
+                isSecondaryMarket ? secondaryMarketplaceFilters : primaryMarketplaceFilters;
+        return !filters.stream()
+                .filter(f -> f.test(item))
+                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", item.getLoanId(), f))
                 .findFirst()
                 .isPresent();
     }
 
-    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> loans) {
-        return loans.stream().filter(l -> matchesNoFilter(l.getLoan()));
+    private boolean matchesAnyFilter(final Wrapper item) {
+        return sellFilters.stream()
+                .filter(f -> f.test(item))
+                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} matched {}.", item.getLoanId(), f))
+                .findFirst()
+                .isPresent();
+    }
+
+    public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
+        return items.stream().filter(i -> matchesNoFilter(new Wrapper(i.item()), false));
+    }
+
+    public Stream<ParticipationDescriptor> getApplicableParticipations(
+            final Collection<ParticipationDescriptor> items) {
+        return items.stream().filter(i -> {
+            final Wrapper w = new Wrapper(i.item(), i.related());
+            return matchesNoFilter(w, true);
+        });
+    }
+
+    public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
+        return items.stream().filter(i -> {
+            final Wrapper w = new Wrapper(i.item(), i.related());
+            return matchesAnyFilter(w);
+        });
     }
 }

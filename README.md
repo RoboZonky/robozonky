@@ -1,15 +1,15 @@
 # RoboZonky
 
 [![Maven central](https://maven-badges.herokuapp.com/maven-central/com.github.triceo.robozonky/robozonky/badge.svg)](http://search.maven.org/#search|ga|1|robozonky-)
-[![Linux Build Status](https://travis-ci.org/triceo/robozonky.svg)](https://travis-ci.org/triceo/robozonky)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/5okjq7ms19pn4kpr?svg=true)](https://ci.appveyor.com/project/triceo/robozonky)
+[![Linux Build Status](https://travis-ci.org/RoboZonky/robozonky.svg)](https://travis-ci.org/RoboZonky/robozonky)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/o6983h25auupkt0p?svg=true)](https://ci.appveyor.com/project/triceo/robozonky-8acvb)
 
 ## Odkazy
 
-* [Ke stažení](http://triceo.github.io/robozonky/).
-* [Dokumentace](https://github.com/triceo/robozonky/wiki).
+* [Ke stažení](http://www.robozonky.cz).
+* [Dokumentace](https://github.com/RoboZonky/robozonky/wiki).
 * [Uživatelská podpora](https://groups.google.com/forum/#!forum/robozonky-users) pro dotazy a diskusi.
-* [Hlášení chyb](https://github.com/triceo/robozonky/issues) přímo na Githubu.
+* [Hlášení chyb](https://github.com/RoboZonky/robozonky/issues) přímo na Githubu.
 
 
 ## Proč to dělám

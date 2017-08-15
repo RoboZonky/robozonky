@@ -16,38 +16,28 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.remote.entities.Loan;
+import com.github.triceo.robozonky.strategy.natural.conditions.RangeCondition;
 
-abstract class AbstractRangeCondition extends MarketplaceFilterCondition {
+abstract class AbstractRangeCondition extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
-    private static BigDecimal toBigDecimal(final Number num) {
-        return BigDecimal.valueOf(num.doubleValue());
-    }
+    private final RangeCondition<Wrapper> rangeCondition;
 
-    private final Function<Loan, Number> targetAccessor;
-    private final BigDecimal minInclusive, maxInclusive;
-
-    protected AbstractRangeCondition(final Function<Loan, Number> targetAccessor, final Number minValueInclusive,
+    protected AbstractRangeCondition(final Function<Wrapper, Number> targetAccessor, final Number minValueInclusive,
                                      final Number maxValueInclusive) {
-        this.targetAccessor = targetAccessor;
-        final BigDecimal min = AbstractRangeCondition.toBigDecimal(minValueInclusive);
-        final BigDecimal max = AbstractRangeCondition.toBigDecimal(maxValueInclusive);
-        this.minInclusive = min.min(max);
-        this.maxInclusive = min.max(max);
+        this.rangeCondition = new RangeCondition<>(targetAccessor, minValueInclusive, maxValueInclusive);
     }
 
     @Override
-    protected Optional<String> getDescription() {
-        return Optional.of("Range: <" + minInclusive + "; " + maxInclusive + ">.");
+    public Optional<String> getDescription() {
+        return Optional.of(
+                "Range: <" + rangeCondition.getMinInclusive() + "; " + rangeCondition.getMaxInclusive() + ">.");
     }
 
     @Override
-    public boolean test(final Loan loan) {
-        final BigDecimal target = AbstractRangeCondition.toBigDecimal(targetAccessor.apply(loan));
-        return target.compareTo(minInclusive) >= 0 && target.compareTo(maxInclusive) <= 0;
+    public boolean test(final Wrapper item) {
+        return rangeCondition.test(item);
     }
 }

@@ -30,7 +30,7 @@ final class InvestmentSkippedEventListener extends AbstractEmailingListener<Inve
 
     @Override
     String getSubject(final InvestmentSkippedEvent event) {
-        return "Půjčka č. " + event.getRecommendation().getLoanDescriptor().getLoan().getId() + " dočasně přeskočena";
+        return "Půjčka č. " + event.getRecommendation().descriptor().item().getId() + " dočasně přeskočena";
     }
 
     @Override
@@ -40,10 +40,10 @@ final class InvestmentSkippedEventListener extends AbstractEmailingListener<Inve
 
     @Override
     protected Map<String, Object> getData(final InvestmentSkippedEvent event) {
-        final Loan loan = event.getRecommendation().getLoanDescriptor().getLoan();
+        final Loan loan = event.getRecommendation().descriptor().item();
         final Map<String, Object> result = new HashMap<>();
         result.put("loanId", loan.getId());
-        result.put("loanRecommendation", event.getRecommendation().getRecommendedInvestmentAmount());
+        result.put("loanRecommendation", event.getRecommendation().amount().intValue());
         result.put("loanAmount", loan.getAmount());
         result.put("loanRating", loan.getRating().getCode());
         result.put("loanTerm", loan.getTermInMonths());

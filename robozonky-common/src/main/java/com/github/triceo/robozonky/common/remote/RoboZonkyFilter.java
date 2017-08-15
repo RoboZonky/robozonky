@@ -73,6 +73,16 @@ public class RoboZonkyFilter implements ClientRequestFilter,
         return stream;
     }
 
+    private boolean shouldLogEntity(final ClientResponseContext responseCtx) {
+        if (!responseCtx.hasEntity()) {
+            return false;
+        } else if (responseCtx.getStatus() < 400) {
+            return Settings.INSTANCE.isDebugHttpResponseLoggingEnabled();
+        } else {
+            return true;
+        }
+    }
+
     @Override
     public void filter(final ClientRequestContext clientRequestContext) throws IOException {
         headersToSet.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
@@ -85,7 +95,7 @@ public class RoboZonkyFilter implements ClientRequestFilter,
         this.logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
                           clientRequestContext.getUri(), clientResponseContext.getStatus(),
                           clientResponseContext.getStatusInfo().getReasonPhrase());
-        if (Settings.INSTANCE.isDebugHttpResponseLoggingEnabled() && clientResponseContext.hasEntity()) {
+        if (shouldLogEntity(clientResponseContext)) {
             final StringBuilder b = new StringBuilder();
             final InputStream s = RoboZonkyFilter.logInboundEntity(b, clientResponseContext.getEntityStream());
             clientResponseContext.setEntityStream(s);

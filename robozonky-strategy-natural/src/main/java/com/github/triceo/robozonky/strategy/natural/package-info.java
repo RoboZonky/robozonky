@@ -16,7 +16,7 @@
 
 /**
  * The only public members of this package are the ones directly necessary for implementing
- * {@link com.github.triceo.robozonky.strategy.simple.SimpleInvestmentStrategyService}. They may be hidden after this
+ * {@link com.github.triceo.robozonky.strategy.simple.SimpleStrategyService}. They may be hidden after this
  * is removed.
  */
 package com.github.triceo.robozonky.strategy.natural;

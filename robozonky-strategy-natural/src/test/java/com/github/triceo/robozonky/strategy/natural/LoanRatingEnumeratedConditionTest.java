@@ -23,15 +23,15 @@ import org.mockito.Mockito;
 public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditionTest<Rating> {
 
     @Override
-    protected AbstractEnumeratedCondition<Rating> getSUT() {
+    protected AbstractEnumeratedCondition getSUT() {
         return new LoanRatingEnumeratedCondition();
     }
 
     @Override
-    protected Loan getMockedLoan() {
+    protected Wrapper getMocked() {
         final Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getRating()).thenReturn(this.getTriggerItem());
-        return loan;
+        return new Wrapper(loan);
     }
 
     @Override

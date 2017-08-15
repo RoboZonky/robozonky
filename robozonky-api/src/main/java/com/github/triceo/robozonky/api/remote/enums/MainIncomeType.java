@@ -36,7 +36,7 @@ public enum MainIncomeType implements BaseEnum {
     STUDENT("student"),
     UNEMPLOYED("bez zaměstnání"),
     LIBERAL_PROFESSION("svobodné povolání"),
-    OTHERS_MAIN("ostatní"),
+    OTHERS_MAIN("jiné"),
     NEXT_WORK("N/A"); // there is one loan in the API with this value; it is not documented and has no translation
 
     static class MainIncomeTypeDeserializer extends JsonDeserializer<MainIncomeType> {

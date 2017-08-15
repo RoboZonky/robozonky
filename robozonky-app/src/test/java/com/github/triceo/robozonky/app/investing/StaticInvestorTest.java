@@ -16,8 +16,6 @@
 
 package com.github.triceo.robozonky.app.investing;
 
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
-import com.github.triceo.robozonky.api.confirmations.ConfirmationType;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import org.assertj.core.api.Assertions;
@@ -26,19 +24,10 @@ import org.junit.Test;
 public class StaticInvestorTest extends AbstractInvestingTest {
 
     @Test
-    public void investmentFromNullConfirmation() {
-        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
-        final int recommended = 200;
-        final Investment i = Investor.convertToInvestment(ld.recommend(recommended).get(), null);
-        Assertions.assertThat(i.getAmount()).isEqualTo(recommended);
-    }
-
-    @Test
     public void investmentFromAmountlessConfirmation() {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final int recommended = 200;
-        final Investment i = Investor.convertToInvestment(ld.recommend(recommended).get(),
-                                                          new Confirmation(ConfirmationType.DELEGATED));
+        final Investment i = Investor.convertToInvestment(ld.recommend(recommended).get());
         Assertions.assertThat(i.getAmount()).isEqualTo(recommended);
     }
 }

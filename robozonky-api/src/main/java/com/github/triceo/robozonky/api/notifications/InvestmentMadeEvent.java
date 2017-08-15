@@ -19,7 +19,7 @@ package com.github.triceo.robozonky.api.notifications;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 
 /**
- * Fired immediately after an investment was submitted to the API. Will not be fired in case of a dry run.
+ * Fired immediately after an investment was submitted to the API.
  */
 public final class InvestmentMadeEvent extends Event {
 
@@ -41,7 +41,7 @@ public final class InvestmentMadeEvent extends Event {
     }
 
     /**
-     * @return The new account finalBalance
+     * @return The new account balance
      */
     public int getFinalBalance() {
         return this.finalBalance;

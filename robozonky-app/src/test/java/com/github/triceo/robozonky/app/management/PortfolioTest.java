@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import com.github.triceo.robozonky.api.notifications.StrategyStartedEvent;
+import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import org.assertj.core.api.SoftAssertions;
@@ -41,8 +41,7 @@ public class PortfolioTest {
         Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.any())).thenReturn(BigDecimal.ONE);
         Mockito.when(portfolio.getCzkInvested(ArgumentMatchers.any())).thenReturn(1000);
         final Portfolio mbean = new Portfolio();
-        final StrategyStartedEvent evt =
-                new StrategyStartedEvent(null, Collections.emptyList(), portfolio);
+        final ExecutionStartedEvent evt = new ExecutionStartedEvent(Collections.emptyList(), portfolio);
         mbean.setPortfolioOverview(evt);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(mbean.getAvailableBalance()).isEqualTo(portfolio.getCzkAvailable());

@@ -64,8 +64,8 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
     }
 
     private Optional<String> getPropertiesContents() {
-        final String propValue = Settings.INSTANCE.get(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                                                       (String) null);
+        final String propValue =
+                Settings.INSTANCE.get(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, (String) null);
         if (propValue != null) { // attempt to read from the URL specified by the property
             LOGGER.debug("Reading notification configuration from {}.", propValue);
             try {

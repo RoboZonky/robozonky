@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.triceo.robozonky.api.confirmations.Confirmation;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProviderService;
 import com.github.triceo.robozonky.api.confirmations.RequestId;
@@ -40,9 +39,8 @@ public class ConfirmationProviderLoaderTest {
         final String id = UUID.randomUUID().toString();
         final ConfirmationProvider cp = new ConfirmationProvider() {
             @Override
-            public Optional<Confirmation> requestConfirmation(final RequestId auth, final int loanId,
-                                                              final int amount) {
-                return Optional.empty();
+            public boolean requestConfirmation(final RequestId auth, final int loanId, final int amount) {
+                return false;
             }
 
             @Override
