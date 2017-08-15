@@ -21,15 +21,18 @@ import java.time.OffsetDateTime;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class PurchasingTest {
 
     @Test
     public void update() {
-        final Purchasing p = new Purchasing(Mockito.mock(Authenticated.class), null, null, true);
+        final Authenticated a = Mockito.mock(Authenticated.class);
+        final Purchasing p = new Purchasing(a, null, null, true);
         Assertions.assertThat(p.getLastRunDateTime()).isNull();
         p.run();
+        Mockito.verify(a).run(ArgumentMatchers.notNull());
         Assertions.assertThat(p.getLastRunDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
     }
 }

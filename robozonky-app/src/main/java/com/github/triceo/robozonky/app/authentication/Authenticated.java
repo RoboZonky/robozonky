@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.authentication;
 
 import java.time.temporal.TemporalAmount;
-import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -63,7 +62,7 @@ public interface Authenticated {
     default void run(final Consumer<Zonky> operation) {
         call(z -> {
             operation.accept(z);
-            return Collections.emptySet();
+            return null;
         });
     }
 

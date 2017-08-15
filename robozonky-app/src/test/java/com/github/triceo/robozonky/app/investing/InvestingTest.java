@@ -22,16 +22,20 @@ import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class InvestingTest {
 
     @Test
     public void update() {
-        final Investing p = new Investing(Mockito.mock(Authenticated.class), new Investor.Builder().asDryRun(),
-                                          Mockito.mock(Marketplace.class), null, null);
+        final Marketplace m = Mockito.mock(Marketplace.class);
+        final Investing p = new Investing(Mockito.mock(Authenticated.class), new Investor.Builder().asDryRun(), m, null,
+                                          null);
+        Mockito.verify(m).registerListener(ArgumentMatchers.notNull());
         Assertions.assertThat(p.getLastRunDateTime()).isNull();
         p.run();
+        Mockito.verify(m).run();
         Assertions.assertThat(p.getLastRunDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
     }
 }
