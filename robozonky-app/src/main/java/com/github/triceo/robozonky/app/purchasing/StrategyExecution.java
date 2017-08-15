@@ -54,7 +54,7 @@ class StrategyExecution implements Function<Collection<Participation>, Collectio
     private Collection<Investment> invest(final PurchaseStrategy strategy,
                                           final Collection<Participation> marketplace) {
         final Function<Zonky, Collection<Investment>> op = (zonky) -> {
-            final Collection<ParticipationDescriptor> participations = marketplace.stream()
+            final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
                     .map(p -> new ParticipationDescriptor(p, Portfolio.INSTANCE.getLoan(zonky, p.getLoanId())))
                     .collect(Collectors.toList());
             final InvestmentCommand c = new InvestmentCommand(strategy);

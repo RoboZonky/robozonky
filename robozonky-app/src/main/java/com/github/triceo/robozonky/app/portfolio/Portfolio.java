@@ -24,8 +24,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -40,7 +40,6 @@ import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
-import com.github.triceo.robozonky.internal.api.Retriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +50,13 @@ public enum Portfolio {
     private static final Logger LOGGER = LoggerFactory.getLogger(Investment.class);
     private final AtomicReference<List<Investment>> investments = new AtomicReference<>(Collections.emptyList()),
             investmentsPending = new AtomicReference<>(Collections.emptyList());
-    private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>(
-            Collections.emptySortedMap());
-    private final Map<Consumer<Zonky>, Portfolio.UpdateType> updaters = new ConcurrentHashMap<>();
+    private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>(initSortedMap());
+    private final Map<Consumer<Zonky>, Portfolio.UpdateType> updaters = new ConcurrentHashMap<>(0);
     private final AtomicBoolean isUpdating = new AtomicBoolean(false);
+
+    private static <R, S> SortedMap<R, S> initSortedMap() {
+        return new ConcurrentSkipListMap<>();
+    }
 
     public void registerUpdater(final Consumer<Zonky> updater) {
         registerUpdater(updater, Portfolio.UpdateType.FULL);
@@ -68,32 +70,33 @@ public enum Portfolio {
         if (this.isUpdating.getAndSet(true)) {
             LOGGER.trace("Update ignored due to already being updated.");
             return;
-        } else try {
-            LOGGER.trace("Update started: {}.", updateType);
-            if (updateType == Portfolio.UpdateType.FULL) {
-                loanCache.set(new TreeMap<>());
-                investments.set(zonky.getInvestments().collect(Collectors.toList()));
-            }
-            investmentsPending.set(Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky));
-            updaters.forEach((u, requiredType) -> {
-                if (requiredType == Portfolio.UpdateType.FULL && updateType == Portfolio.UpdateType.PARTIAL) {
-                    return;
+        } else {
+            try {
+                LOGGER.trace("Update started: {}.", updateType);
+                if (updateType == Portfolio.UpdateType.FULL) {
+                    loanCache.set(initSortedMap());
+                    investments.set(zonky.getInvestments().collect(Collectors.toList()));
                 }
-                LOGGER.trace("Running dependent: {}", u);
-                u.accept(zonky);
-            });
-            LOGGER.trace("Finished.");
-        } catch (final Throwable t) { // users should know
-            new DaemonRuntimeExceptionHandler().handle(t);
-        } finally {
-            this.isUpdating.set(false);
+                investmentsPending.set(Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky));
+                updaters.forEach((u, requiredType) -> {
+                    if (requiredType == Portfolio.UpdateType.FULL && updateType == Portfolio.UpdateType.PARTIAL) {
+                        return;
+                    }
+                    LOGGER.trace("Running dependent: {}", u);
+                    u.accept(zonky);
+                });
+                LOGGER.trace("Finished.");
+            } catch (final Throwable t) { // users should know
+                new DaemonRuntimeExceptionHandler().handle(t);
+            } finally {
+                this.isUpdating.set(false);
+            }
         }
     }
 
     public boolean isUpdating() {
         return this.isUpdating.get();
     }
-
 
     public void update(final Zonky zonky) {
         update(zonky, Portfolio.UpdateType.FULL);
@@ -134,8 +137,7 @@ public enum Portfolio {
             if (value != null) {
                 return value;
             }
-            return Retriever.retrieve(() -> Optional.of(zonky.getLoan(key)))
-                    .orElseThrow(() -> new IllegalStateException("Loan retrieval failed."));
+            return zonky.getLoan(loanId);
         });
     }
 
@@ -149,7 +151,7 @@ public enum Portfolio {
     public void reset() {
         investmentsPending.set(Collections.emptyList());
         investments.set(Collections.emptyList());
-        loanCache.set(new TreeMap<>());
+        loanCache.set(initSortedMap());
         updaters.clear();
     }
 

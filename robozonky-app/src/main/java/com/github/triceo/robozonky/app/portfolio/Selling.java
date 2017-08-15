@@ -79,6 +79,7 @@ public class Selling implements Consumer<Zonky> {
     private void sell(final SellStrategy strategy, final Zonky zonky) { // FIXME dry run balance?
         final PortfolioOverview portfolio = Portfolio.INSTANCE.calculateOverview(zonky);
         final Set<InvestmentDescriptor> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace()
+                .parallel()
                 .map(i -> getDescriptor(i, zonky))
                 .collect(Collectors.toSet());
         Events.fire(new SellingStartedEvent(eligible, portfolio));
