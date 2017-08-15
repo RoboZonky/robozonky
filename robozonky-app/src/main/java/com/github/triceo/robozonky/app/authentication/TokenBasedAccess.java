@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.function.Function;
+import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken;
@@ -46,7 +47,7 @@ class TokenBasedAccess implements Authenticated {
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
         final ZonkyApiToken token = refreshableToken.getLatest()
-                .orElseThrow(() -> new IllegalStateException("No API token available, authentication failed."));
+                .orElseThrow(() -> new ServiceUnavailableException("No API token available, authentication failed."));
         try (final Refreshable.Pause p = refreshableToken.pause()) { // pause token refresh during this request
             try (final Zonky zonky = apis.authenticated(token)) {
                 return operation.apply(zonky);
