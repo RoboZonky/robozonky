@@ -29,7 +29,7 @@ ratingCondition returns [MarketplaceFilterCondition result]:
                 $result = c;
             })
         | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterOrEqualCondition($r2.result); })
-        | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseOrEqualCondition($r3.result); })
+        | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseCondition($r3.result); })
     )
 ;
 

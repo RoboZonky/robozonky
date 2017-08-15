@@ -19,8 +19,9 @@ package com.github.triceo.robozonky.strategy.natural;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
@@ -40,8 +41,12 @@ public class EqualityConditionTest {
         final Collection<Object[]> result = new ArrayList<>();
         for (int i = 0; i < total; i++) {
             final Rating current = all.get(i);
-            final Collection<Rating> betterThan = i == 0 ? Collections.emptyList() : all.subList(0, i);
-            final Collection<Rating> worseThan = i == total - 1 ? Collections.emptyList() : all.subList(i + 1, total);
+            final Collection<Rating> betterThan = Stream.of(Rating.values())
+                    .filter(r -> r.compareTo(current) < 0)
+                    .collect(Collectors.toSet());
+            final Collection<Rating> worseThan = Stream.of(Rating.values())
+                    .filter(r -> r.compareTo(current) > 0)
+                    .collect(Collectors.toSet());
             result.add(new Object[]{current, betterThan, worseThan});
         }
         return result;
@@ -72,9 +77,9 @@ public class EqualityConditionTest {
 
     @Test
     public void testWorseThan() {
-        final MarketplaceFilterCondition c = new LoanRatingWorseOrEqualCondition(current);
+        final MarketplaceFilterCondition c = new LoanRatingWorseCondition(current);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(c.test(mockLoan(current))).isTrue();
+            softly.assertThat(c.test(mockLoan(current))).isFalse();
             betterThanCurrent.forEach(r -> softly.assertThat(c.test(mockLoan(r))).isFalse());
             worseThanCurrent.forEach(r -> softly.assertThat(c.test(mockLoan(r))).isTrue());
         });
