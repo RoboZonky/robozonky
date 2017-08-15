@@ -17,41 +17,22 @@
 package com.github.triceo.robozonky.api.strategies;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.RiskPortfolio;
-import com.github.triceo.robozonky.api.remote.entities.Statistics;
+import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class PortfolioOverviewTest {
 
-    private static void assertProperRatingShare(final PortfolioOverview result, final Rating r, final int amount,
-                                                final int total) {
-        final BigDecimal expectedShare =
-                BigDecimal.valueOf(amount).divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_EVEN);
-        Assertions.assertThat(result.getShareOnInvestment(r)).isEqualTo(expectedShare);
-    }
-
-    private static List<Investment> getMockInvestmentWithBalance(final int loanAmount) {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getAmount()).thenReturn(loanAmount);
-        return Collections.singletonList(i);
-    }
-
     @Test
     public void emptyPortfolio() {
         final int balance = 5000;
-        final Statistics s = Mockito.mock(Statistics.class);
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), s, Collections.emptyList
-                ());
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             for (final Rating r : Rating.values()) {
                 softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
@@ -63,44 +44,23 @@ public class PortfolioOverviewTest {
         });
     }
 
-    @Test
-    public void properRatingShareCalculation() {
-        // mock necessary structures
-        final int amountAA = 300, amountB = 200, amountD = 100;
-        final int totalPie = amountAA + amountB + amountD;
-        final RiskPortfolio riskAA = new RiskPortfolio(Rating.AA, 0, amountAA, 0);
-        final RiskPortfolio riskB = new RiskPortfolio(Rating.B, 0, amountB, 0);
-        final RiskPortfolio riskD = new RiskPortfolio(Rating.D, 0, amountD, 0);
-        final Statistics stats = Mockito.mock(Statistics.class);
-        Mockito.when(stats.getRiskPortfolio()).thenReturn(Arrays.asList(riskAA, riskB, riskD));
+    private static Loan mockLoan(final Rating r) {
+        final Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getRating()).thenReturn(r);
+        return loan;
+    }
 
-        // check standard operation
-        final BigDecimal balance = BigDecimal.TEN;
-        PortfolioOverview result = PortfolioOverview.calculate(balance, stats, Collections.emptyList());
-        Assertions.assertThat(result.getCzkAvailable()).isEqualTo(balance.intValue());
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AA, amountAA, totalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.B, amountB, totalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.D, amountD, totalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAAA, 0, totalPie); // test other ratings included
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAA, 0, totalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAA, 0, totalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.A, 0, totalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.C, 0, totalPie);
-        // check operation with offline investments
-        final int increment = 200, newTotalPie = totalPie + increment;
-        final List<Investment> investments = PortfolioOverviewTest.getMockInvestmentWithBalance(increment);
-        final Investment i = investments.get(0);
-        Mockito.when(i.getRating()).thenReturn(Rating.A);
-        result = PortfolioOverview.calculate(balance, stats, investments);
-        Assertions.assertThat(result.getCzkAvailable()).isEqualTo(balance.intValue());
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AA, amountAA, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.B, amountB, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.D, amountD, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAAA, 0,
-                                                      newTotalPie); // test other ratings included
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAAA, 0, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.AAA, 0, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.A, increment, newTotalPie);
-        PortfolioOverviewTest.assertProperRatingShare(result, Rating.C, 0, newTotalPie);
+    @Test
+    public void somePortfolio() {
+        final int balance = 5000;
+        final Investment i1 = new Investment(mockLoan(Rating.A), 400);
+        final Investment i2 = new Investment(mockLoan(Rating.B), 600);
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Arrays.asList(i1, i2));
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(o.getShareOnInvestment(Rating.A)).isEqualTo(new BigDecimal("0.4"));
+            softly.assertThat(o.getShareOnInvestment(Rating.B)).isEqualTo(new BigDecimal("0.6"));
+            softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
+            softly.assertThat(o.getCzkInvested()).isEqualTo(1000);
+        });
     }
 }

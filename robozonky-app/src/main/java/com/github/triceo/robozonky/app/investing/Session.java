@@ -120,7 +120,7 @@ class Session implements AutoCloseable {
                 .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> l.item().getId() == l2.item().getId()))
                 .filter(l -> Portfolio.INSTANCE.getPending().noneMatch(i -> l.item().getId() == i.getLoanId()))
                 .collect(Collectors.toList());
-        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, balance);
+        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }
 
     private synchronized void ensureOpen() {
@@ -217,7 +217,7 @@ class Session implements AutoCloseable {
         loansStillAvailable.removeIf(l -> l.item().getId() == i.getLoanId());
         balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
         Portfolio.INSTANCE.update(investor.getZonky(), Portfolio.UpdateType.PARTIAL);
-        portfolioOverview = Portfolio.INSTANCE.calculateOverview(investor.getZonky(), balance);
+        portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }
 
     private synchronized void discard(final LoanDescriptor loan) {

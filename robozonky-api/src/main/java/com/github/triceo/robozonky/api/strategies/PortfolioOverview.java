@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.RiskPortfolio;
-import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
 /**
@@ -37,41 +35,10 @@ import com.github.triceo.robozonky.api.remote.enums.Rating;
  */
 public class PortfolioOverview {
 
-    private static int sum(final Collection<Integer> vals) {
-        return vals.stream().reduce(0, (a, b) -> a + b);
-    }
-
-    /**
-     * Prepare an immutable portfolio overview, based on the provided information.
-     * @param balance Current available balance in the wallet.
-     * @param stats Statistics retrieved from the Zonky API.
-     * @param investments Investments not yet reflected in the Zonky API.
-     * @return Never null.
-     */
-    public static PortfolioOverview calculate(final BigDecimal balance, final Statistics stats,
-                                              final Collection<Investment> investments) {
-        // first figure out how much we have in outstanding loans
-        final Map<Rating, Integer> amounts = stats.getRiskPortfolio().stream()
-                .collect(Collectors.toMap(RiskPortfolio::getRating, p -> p.getTotalAmount() - p.getPaid())
-        );
-        // then make sure the share reflects investments made by RoboZonky which have not yet been reflected in the API
-        investments.forEach(previousInvestment -> {
-            final Rating r = previousInvestment.getRating();
-            amounts.compute(r, (k, v) -> (v == null ? 0 : v) + previousInvestment.getAmount());
-        });
-        return new PortfolioOverview(balance, amounts);
-    }
-
-    public static PortfolioOverview calculate(final BigDecimal balance, final Statistics stats,
-                                              final Stream<Investment> investments) {
-        return calculate(balance, stats, investments.collect(Collectors.toSet()));
-    }
-
     private final int czkAvailable, czkInvested, czkExpectedYield;
     private final Map<Rating, Integer> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> sharesOnInvestment;
     private final BigDecimal relativeExpectedYield;
-
     private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
         this.czkAvailable = czkAvailable.intValue();
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
@@ -84,7 +51,7 @@ public class PortfolioOverview {
                     r -> {
                         final BigDecimal invested = BigDecimal.valueOf(this.czkInvested);
                         final BigDecimal investedPerRating = BigDecimal.valueOf(this.getCzkInvested(r));
-                        return investedPerRating.divide(invested, 4, RoundingMode.HALF_EVEN);
+                        return investedPerRating.divide(invested, 4, RoundingMode.HALF_EVEN).stripTrailingZeros();
                     })
             );
         }
@@ -93,6 +60,28 @@ public class PortfolioOverview {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         this.czkExpectedYield =
                 this.relativeExpectedYield.multiply(BigDecimal.valueOf(this.czkInvested)).intValue();
+    }
+
+    private static int sum(final Collection<Integer> vals) {
+        return vals.stream().reduce(0, (a, b) -> a + b);
+    }
+
+    /**
+     * Prepare an immutable portfolio overview, based on the provided information.
+     * @param balance Current available balance in the wallet.
+     * @param investments All active investments incl. blocked amounts.
+     * @return Never null.
+     */
+    public static PortfolioOverview calculate(final BigDecimal balance, final Collection<Investment> investments) {
+        // first figure out how much we have in outstanding loans
+        final Map<Rating, Integer> amounts = investments.stream()
+                .collect(Collectors.groupingBy(Investment::getRating,
+                                               Collectors.summingInt(i -> i.getRemainingPrincipal().intValue())));
+        return new PortfolioOverview(balance, amounts);
+    }
+
+    public static PortfolioOverview calculate(final BigDecimal balance, final Stream<Investment> investments) {
+        return calculate(balance, investments.collect(Collectors.toSet()));
     }
 
     /**

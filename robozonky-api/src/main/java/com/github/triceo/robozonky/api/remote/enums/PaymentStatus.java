@@ -46,4 +46,11 @@ public enum PaymentStatus {
                                   PaymentStatus.PAID);
     }
 
+    /**
+     * @return Values of this enum that correspond to investments that still have expected future instalments.
+     */
+    public static PaymentStatuses getActive() {
+        return PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE, PaymentStatus.COVERED);
+    }
+
 }

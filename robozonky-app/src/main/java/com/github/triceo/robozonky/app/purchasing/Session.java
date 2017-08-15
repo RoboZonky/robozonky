@@ -68,7 +68,7 @@ class Session implements AutoCloseable {
         this.balance = isDryRun ? ApiUtil.getDryRunBalance(zonky) : ApiUtil.getLiveBalance(zonky);
         Session.LOGGER.info("Starting account balance: {} CZK.", balance);
         this.stillAvailable = new ArrayList<>(marketplace);
-        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, balance);
+        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }
 
     public synchronized static Session create(final Zonky api, final Collection<ParticipationDescriptor> marketplace,
@@ -159,7 +159,7 @@ class Session implements AutoCloseable {
         stillAvailable.removeIf(l -> l.item().getLoanId() == i.getLoanId());
         balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
         Portfolio.INSTANCE.update(zonky, Portfolio.UpdateType.PARTIAL);
-        portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, balance);
+        portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }
 
     @Override

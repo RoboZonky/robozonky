@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
@@ -120,14 +119,14 @@ public enum Portfolio {
         return investmentsPending.get().stream();
     }
 
-    public PortfolioOverview calculateOverview(final Zonky zonky, final BigDecimal balance) {
-        final Stream<Investment> allInvestment = Stream.concat(getActive(), getPending());
-        final Statistics stats = zonky.getStatistics();
-        return PortfolioOverview.calculate(balance, stats, allInvestment);
+    public PortfolioOverview calculateOverview(final BigDecimal balance) {
+        final Stream<Investment> allInvestment =
+                Stream.concat(getActiveWithPaymentStatus(PaymentStatus.getActive()), getPending());
+        return PortfolioOverview.calculate(balance, allInvestment);
     }
 
     public PortfolioOverview calculateOverview(final Zonky zonky) {
-        return calculateOverview(zonky, zonky.getWallet().getAvailableBalance());
+        return calculateOverview(zonky.getWallet().getAvailableBalance());
     }
 
     public Loan getLoan(final Zonky zonky, final int loanId) {
