@@ -24,7 +24,6 @@ import java.util.Collections;
 
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
-import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
@@ -69,9 +68,8 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
         // load API that has marketplace more recent than that
         final Loan l = new Loan(1, 200);
         final Participation p = Mockito.mock(Participation.class);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         // test proper wakeup
-        final Activity activity = new Activity(Collections.singletonList(pd));
+        final Activity activity = new Activity(Collections.singletonList(p));
         Assertions.assertThat(activity.shouldSleep()).isFalse();
         activity.settle();
         SoftAssertions.assertSoftly(softly -> {

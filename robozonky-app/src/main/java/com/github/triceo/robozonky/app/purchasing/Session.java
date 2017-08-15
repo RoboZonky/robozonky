@@ -81,13 +81,15 @@ class Session implements AutoCloseable {
         return s;
     }
 
-    static Collection<Investment> purchase(final Zonky api, final InvestmentCommand command, final boolean dryRun) {
-        final Collection<ParticipationDescriptor> items = command.getItems();
+    static Collection<Investment> purchase(final Zonky api, final Collection<ParticipationDescriptor> items,
+                                           final InvestmentCommand command, final boolean dryRun) {
         try (final Session session = Session.create(api, items, dryRun)) {
-            Events.fire(new PurchasingStartedEvent(items, session.getPortfolioOverview()));
-            if (!session.getAvailable().isEmpty()) {
-                command.accept(session);
+            final Collection<ParticipationDescriptor> c = session.getAvailable();
+            if (c.isEmpty()) {
+                return Collections.emptyList();
             }
+            Events.fire(new PurchasingStartedEvent(c, session.getPortfolioOverview()));
+            command.accept(session);
             final PortfolioOverview portfolio = session.getPortfolioOverview();
             Session.LOGGER.info("Current value of portfolio is {} CZK, annual expected yield is {} % ({} CZK).",
                                 portfolio.getCzkInvested(),

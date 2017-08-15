@@ -21,18 +21,18 @@ import javax.xml.bind.annotation.XmlElement;
 
 public class SellRequest extends BaseEntity {
 
-    private int id;
+    private int investmentId;
     private BigDecimal feeAmount, remainingPrincipal;
 
     public SellRequest(final Investment investment) {
-        this.id = investment.getId();
+        this.investmentId = investment.getId();
         this.remainingPrincipal = investment.getRemainingPrincipal();
         this.feeAmount = investment.getSmpFee();
     }
 
     @XmlElement
-    public int getId() {
-        return id;
+    public int getInvestmentId() {
+        return investmentId;
     }
 
     @XmlElement

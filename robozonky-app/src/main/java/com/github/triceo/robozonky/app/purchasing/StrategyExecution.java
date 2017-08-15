@@ -20,18 +20,21 @@ import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.util.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class StrategyExecution implements Function<Collection<ParticipationDescriptor>, Collection<Investment>> {
+class StrategyExecution implements Function<Collection<Participation>, Collection<Investment>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecution.class);
 
@@ -49,16 +52,19 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
     }
 
     private Collection<Investment> invest(final PurchaseStrategy strategy,
-                                          final Collection<ParticipationDescriptor> marketplace) {
+                                          final Collection<Participation> marketplace) {
         final Function<Zonky, Collection<Investment>> op = (zonky) -> {
-            final InvestmentCommand c = new InvestmentCommand(strategy, marketplace);
-            return Session.purchase(zonky, c, dryRun);
+            final Collection<ParticipationDescriptor> participations = marketplace.stream()
+                    .map(p -> new ParticipationDescriptor(p, Portfolio.INSTANCE.getLoan(zonky, p.getLoanId())))
+                    .collect(Collectors.toList());
+            final InvestmentCommand c = new InvestmentCommand(strategy);
+            return Session.purchase(zonky, participations, c, dryRun);
         };
         return authenticated.call(op);
     }
 
     @Override
-    public Collection<Investment> apply(final Collection<ParticipationDescriptor> items) {
+    public Collection<Investment> apply(final Collection<Participation> items) {
         return refreshableStrategy.getLatest()
                 .map(strategy -> {
                     final Activity activity = new Activity(items, maximumSleepPeriod);
@@ -67,7 +73,7 @@ class StrategyExecution implements Function<Collection<ParticipationDescriptor>,
                         return Collections.<Investment>emptyList();
                     }
                     StrategyExecution.LOGGER.debug("Sending following participations to purchasing: {}.",
-                                                   TextUtil.toString(items, p -> String.valueOf(p.item().getId())));
+                                                   TextUtil.toString(items, p -> String.valueOf(p.getId())));
                     final Collection<Investment> investments = invest(strategy, items);
                     activity.settle();
                     return investments;

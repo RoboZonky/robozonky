@@ -16,25 +16,18 @@
 
 package com.github.triceo.robozonky.app.purchasing;
 
-import java.util.Collection;
+import java.util.function.Consumer;
 
 import com.github.triceo.robozonky.api.notifications.PurchaseRecommendedEvent;
-import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.Events;
 
-final class InvestmentCommand {
+final class InvestmentCommand implements Consumer<Session> {
 
     private final PurchaseStrategy strategy;
-    private final Collection<ParticipationDescriptor> loans;
 
-    public InvestmentCommand(final PurchaseStrategy strategy, final Collection<ParticipationDescriptor> loans) {
+    public InvestmentCommand(final PurchaseStrategy strategy) {
         this.strategy = strategy;
-        this.loans = loans;
-    }
-
-    public Collection<ParticipationDescriptor> getItems() {
-        return loans;
     }
 
     public void accept(final Session s) {

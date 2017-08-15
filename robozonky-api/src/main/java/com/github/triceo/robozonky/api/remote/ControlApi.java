@@ -48,7 +48,7 @@ public interface ControlApi {
     void invest(Investment investment);
 
     @POST
-    @Path("/traded-investments")
+    @Path(ControlApi.ME + "/traded-investments")
     void offer(SellRequest sellRequest);
 
     @POST

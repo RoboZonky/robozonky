@@ -35,12 +35,16 @@ import com.github.triceo.robozonky.api.remote.entities.SellRequest;
 import com.github.triceo.robozonky.api.remote.entities.Statistics;
 import com.github.triceo.robozonky.api.remote.entities.Wallet;
 import com.github.triceo.robozonky.internal.api.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
  * user. Consider {@link #logout()} when done, followed by {@link #close()}.
  */
 public class Zonky implements AutoCloseable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Zonky.class);
 
     private final Api<ControlApi> controlApi;
     private final PaginatedApi<Loan, LoanApi> loanApi;
@@ -63,24 +67,28 @@ public class Zonky implements AutoCloseable {
     }
 
     public void invest(final Investment investment) {
+        LOGGER.info("Investing into loan #{}.", investment.getLoanId());
         controlApi.execute(api -> {
             api.invest(investment);
         });
     }
 
     public void cancel(final Investment investment) {
+        LOGGER.info("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
         controlApi.execute(api -> {
             api.cancel(investment.getId());
         });
     }
 
     public void purchase(final Participation participation) {
+        LOGGER.info("Purchasing investment in loan #{}.", participation.getLoanId());
         controlApi.execute(api -> {
             api.purchase(participation.getId(), new PurchaseRequest(participation));
         });
     }
 
     public void sell(final Investment investment) {
+        LOGGER.info("Offering to sell investment in loan #{}.", investment.getLoanId());
         controlApi.execute(api -> {
             api.offer(new SellRequest(investment));
         });

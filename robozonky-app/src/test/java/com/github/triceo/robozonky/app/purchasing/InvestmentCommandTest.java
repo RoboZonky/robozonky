@@ -16,10 +16,6 @@
 
 package com.github.triceo.robozonky.app.purchasing;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.investing.AbstractInvestingTest;
 import org.junit.Test;
@@ -30,10 +26,9 @@ public class InvestmentCommandTest extends AbstractInvestingTest {
 
     @Test
     public void empty() {
-        final Collection<ParticipationDescriptor> items = Collections.emptyList();
         final Session sess = Mockito.mock(Session.class);
         final PurchaseStrategy s = Mockito.mock(PurchaseStrategy.class);
-        final InvestmentCommand c = new InvestmentCommand(s, items);
+        final InvestmentCommand c = new InvestmentCommand(s);
         c.accept(sess); // SUT
         Mockito.verify(sess, Mockito.never()).purchase(ArgumentMatchers.any());
     }

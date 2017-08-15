@@ -30,7 +30,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.internal.api.State;
 import org.slf4j.Logger;
@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  */
 class Activity {
 
-    private static SortedSet<Integer> serialize(final Collection<ParticipationDescriptor> items) {
-        final Set<Integer> result = items.stream().map(i -> i.item().getInvestmentId()).collect(Collectors.toSet());
+    private static SortedSet<Integer> serialize(final Collection<Participation> items) {
+        final Set<Integer> result = items.stream().map(i -> i.getInvestmentId()).collect(Collectors.toSet());
         return new TreeSet<>(result);
     }
 
@@ -71,14 +71,14 @@ class Activity {
             LAST_MARKETPLACE_STATE_ID = "lastMarketplace";
 
     private final TemporalAmount sleepInterval;
-    private final Collection<ParticipationDescriptor> currentMarketplace;
+    private final Collection<Participation> currentMarketplace;
     private final AtomicReference<Runnable> settler = new AtomicReference<>(Activity.DO_NOTHING);
 
-    Activity(final Collection<ParticipationDescriptor> items) {
+    Activity(final Collection<Participation> items) {
         this(items, Duration.ofMinutes(60));
     }
 
-    public Activity(final Collection<ParticipationDescriptor> items, final TemporalAmount maximumSleepPeriod) {
+    public Activity(final Collection<Participation> items, final TemporalAmount maximumSleepPeriod) {
         this.sleepInterval = maximumSleepPeriod;
         this.currentMarketplace = new ArrayList<>(items);
     }

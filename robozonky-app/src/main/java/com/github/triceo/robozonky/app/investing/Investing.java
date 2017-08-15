@@ -60,6 +60,7 @@ public class Investing implements Daemon {
 
     @Override
     public void run() {
+        lastRunDateTime.set(OffsetDateTime.now());
         try {
             if (!Portfolio.INSTANCE.isUpdating()) {
                 LOGGER.trace("Starting.");
@@ -72,8 +73,6 @@ public class Investing implements Daemon {
              * care of errors stopping the thread.
              */
             new DaemonRuntimeExceptionHandler().handle(t);
-        } finally {
-            lastRunDateTime.set(OffsetDateTime.now());
         }
     }
 

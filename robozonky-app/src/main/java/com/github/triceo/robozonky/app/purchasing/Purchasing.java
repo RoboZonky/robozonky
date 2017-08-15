@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.Refreshable;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
-import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
@@ -41,7 +40,7 @@ public class Purchasing implements Daemon {
 
     private final Authenticated authenticated;
     private final AtomicReference<OffsetDateTime> lastRunDateTime = new AtomicReference<>();
-    private final Function<Collection<ParticipationDescriptor>, Collection<Investment>> investor;
+    private final Function<Collection<Participation>, Collection<Investment>> investor;
 
     public Purchasing(final Authenticated auth, final Refreshable<PurchaseStrategy> strategy,
                       final TemporalAmount maximumSleepPeriod, final boolean isDryRun) {
@@ -51,15 +50,11 @@ public class Purchasing implements Daemon {
 
     @Override
     public void run() {
+        lastRunDateTime.set(OffsetDateTime.now());
         try {
             if (!Portfolio.INSTANCE.isUpdating()) {
                 LOGGER.trace("Starting.");
-                authenticated.run(z -> investor.apply(z.getAvailableParticipations()
-                                                              .map(p -> {
-                                                                  final int loanId = p.getLoanId();
-                                                                  final Loan l = Portfolio.INSTANCE.getLoan(z, loanId);
-                                                                  return new ParticipationDescriptor(p, l);
-                                                              }).collect(Collectors.toList())));
+                authenticated.run(z -> investor.apply(z.getAvailableParticipations().collect(Collectors.toList())));
                 LOGGER.trace("Finished.");
             }
         } catch (final Throwable t) {
@@ -68,8 +63,6 @@ public class Purchasing implements Daemon {
              * care of errors stopping the thread.
              */
             new DaemonRuntimeExceptionHandler().handle(t);
-        } finally {
-            lastRunDateTime.set(OffsetDateTime.now());
         }
     }
 
