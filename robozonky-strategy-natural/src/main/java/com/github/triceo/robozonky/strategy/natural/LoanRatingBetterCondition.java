@@ -20,11 +20,11 @@ import java.util.Optional;
 
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 
-class LoanRatingBetterOrEqualCondition extends MarketplaceFilterConditionImpl {
+class LoanRatingBetterCondition extends MarketplaceFilterConditionImpl {
 
     private final Rating worstPossibleRating;
 
-    public LoanRatingBetterOrEqualCondition(final Rating r) {
+    public LoanRatingBetterCondition(final Rating r) {
         if (r == null) {
             throw new IllegalArgumentException("Rating must be provided.");
         }
@@ -38,6 +38,6 @@ class LoanRatingBetterOrEqualCondition extends MarketplaceFilterConditionImpl {
 
     @Override
     public boolean test(final Wrapper item) {
-        return item.getRating().compareTo(worstPossibleRating) <= 0;
+        return item.getRating().compareTo(worstPossibleRating) < 0;
     }
 }

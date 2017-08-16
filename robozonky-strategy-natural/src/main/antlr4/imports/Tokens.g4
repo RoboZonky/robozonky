@@ -28,7 +28,7 @@ ratingCondition returns [MarketplaceFilterCondition result]:
                 c.add($r1.result);
                 $result = c;
             })
-        | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterOrEqualCondition($r2.result); })
+        | ('lepší než ' r2=ratingExpression { $result = new LoanRatingBetterCondition($r2.result); })
         | ('horší než ' r3=ratingExpression { $result = new LoanRatingWorseCondition($r3.result); })
     )
 ;
