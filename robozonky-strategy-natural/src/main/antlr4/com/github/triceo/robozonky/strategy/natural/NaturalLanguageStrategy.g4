@@ -13,8 +13,11 @@ import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters, SellRul
 }
 
 primaryExpression returns [ParsedStrategy result] :
-    ( s=portfolioExpression { $result = new ParsedStrategy($s.result); })
-    | ( c=complexExpression { $result = $c.result; })
+    (
+        ( s=portfolioExpression { $result = new ParsedStrategy($s.result); })
+        | ( c=complexExpression { $result = $c.result; })
+    )
+    EOF
 ;
 
 complexExpression returns [ParsedStrategy result] :
@@ -50,6 +53,5 @@ complexExpression returns [ParsedStrategy result] :
         { sellFilters = $s.result; }
     )?
 
-    EOF
     {$result = new ParsedStrategy($d.result, portfolioStructures, investmentSizes, buyFilters, sellFilters);}
 ;

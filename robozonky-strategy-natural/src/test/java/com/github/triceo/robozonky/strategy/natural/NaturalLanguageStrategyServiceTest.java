@@ -68,4 +68,15 @@ public class NaturalLanguageStrategyServiceTest {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("simplest");
         Assertions.assertThat(strategyProvider.apply(s)).isPresent();
     }
+
+    /**
+     * This tests a real-life mistake. I forgot to end an expression with EOF - therefore the file was read to the
+     * end without error, but whatever was written there was silently ignored. This resulted in an empty strategy,
+     * leading the robot to invest into and purchase everything.
+     */
+    @Test
+    public void missingHeaders() {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("no-headers");
+        Assertions.assertThat(strategyProvider.apply(s)).isEmpty();
+    }
 }

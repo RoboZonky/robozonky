@@ -1,0 +1,18 @@
+# Testovací strategie pro RoboZonky
+# =================================
+
+# Obecná nastavení
+Robot má udržovat balancované portfolio.
+Investovat pouze pokud disponibilní zůstatek přesáhne 1000 Kč.
+Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
+
+# Úprava struktury portfolia
+Prostředky v ratingu A** tvoří 2 až 5 % aktuální zůstatkové částky.
+
+# Filtrace primárního trhu
+Ignorovat úvěr, kde: rating je A+; délka přesahuje 60 měsíců.
+
+# Filtrace sekundárního trhu
+Ignorovat participaci, kde: délka přesahuje 50 měsíců.
+
+# Prodej participací
