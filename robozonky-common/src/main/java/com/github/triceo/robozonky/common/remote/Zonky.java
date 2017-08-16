@@ -81,7 +81,7 @@ public class Zonky implements AutoCloseable {
     }
 
     public void purchase(final Participation participation) {
-        LOGGER.info("Purchasing investment in loan #{}.", participation.getLoanId());
+        LOGGER.info("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
         controlApi.execute(api -> {
             api.purchase(participation.getId(), new PurchaseRequest(participation));
         });

@@ -73,24 +73,28 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     boolean sizeMatchesStrategy(final Participation participation, final int balance) {
         final int id = participation.getLoanId();
+        final int participationId = participation.getId();
         return recommendInvestmentAmount(participation).map(recommended -> {
             final int minimumRecommendation = recommended[0];
             final int maximumRecommendation = recommended[1];
-            LOGGER.trace("Recommended investment range for loan #{} is <{}; {}> CZK.", id, minimumRecommendation,
-                         maximumRecommendation);
+            LOGGER.trace("Recommended investment range for loan #{} (participation #{}) is <{}; {}> CZK.", id,
+                         participationId, minimumRecommendation, maximumRecommendation);
             // round to nearest lower increment
             final double price = participation.getRemainingPrincipal().doubleValue();
             if (balance < price) {
-                LOGGER.debug("Loan #{} not recommended due to price over balance.", id);
+                LOGGER.debug("Loan #{} (participation #{}) not recommended due to price over balance.", id,
+                             participationId);
                 return false;
             } else if (minimumRecommendation > price) {
-                LOGGER.debug("Loan #{} not recommended due to price below minimum.", id);
+                LOGGER.debug("Loan #{} (participation #{}) not recommended due to price below minimum.", id,
+                             participationId);
                 return false;
             } else if (price > maximumRecommendation) {
-                LOGGER.debug("Loan #{} not recommended due to price over maximum.", id);
+                LOGGER.debug("Loan #{} (participation #{}) not recommended due to price over maximum.", id,
+                             participationId);
                 return false;
             } else {
-                LOGGER.debug("Final recommendation for loan #{} is to buy.", id);
+                LOGGER.debug("Final recommendation for loan #{} (participation #{}) is to buy.", id, participationId);
                 return true;
             }
         }).orElse(false); // not recommended
@@ -101,12 +105,14 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
         final int loanId = item.getLoanId();
-        LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId, minimumRecommendation,
-                     maximumRecommendation);
+        final int participationId = item.getId();
+        LOGGER.trace("Strategy gives investment range for loan #{} (participation #{}) of <{}; {}> CZK.", loanId,
+                     participationId, minimumRecommendation, maximumRecommendation);
         final int minimumInvestment = strategy.getMinimumInvestmentSizeInCzk(item.getRating());
         final int maximumInvestment = strategy.getMaximumInvestmentSizeInCzk(item.getRating());
         if (maximumInvestment < minimumInvestment) {
-            LOGGER.trace("Loan #{} skipped; {} CZK > {} CZK.", loanId, minimumInvestment, maximumInvestment);
+            LOGGER.trace("Loan #{} (participation #{}) skipped; {} CZK > {} CZK.", loanId, item.getId(),
+                         minimumInvestment, maximumInvestment);
             return Optional.empty();
         }
         return Optional.of(new int[]{minimumInvestment, maximumInvestment});
