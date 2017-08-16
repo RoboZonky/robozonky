@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.github.triceo.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,10 @@ class SuddenDeathDetection implements Runnable {
     private final CountDownLatch daemonStopsIfReleased;
     private final AtomicBoolean suddenDeath = new AtomicBoolean(false);
     private final TemporalAmount inactivityThreshold;
+
+    public SuddenDeathDetection(final CountDownLatch daemonStopsIfReleased, final Daemon... daemons) {
+        this(daemonStopsIfReleased, Settings.INSTANCE.getSuddenDeathDelay(), daemons);
+    }
 
     public SuddenDeathDetection(final CountDownLatch daemonStopsIfReleased, final TemporalAmount inactivityThreshold,
                                 final Daemon... daemons) {

@@ -18,7 +18,6 @@ package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -27,7 +26,6 @@ import com.github.triceo.robozonky.api.marketplaces.Marketplace;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.common.secrets.SecretProvider;
-import com.github.triceo.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -48,17 +46,6 @@ public class DaemonInvestmentModeTest {
         public void run() {
             // no need to do anything
         }
-    }
-
-    @Test
-    public void suddenDeathTimeout() {
-        final long checkSeconds = Settings.INSTANCE.getRemoteResourceRefreshInterval().get(ChronoUnit.SECONDS);
-        final long socketSeconds = Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS);
-        final long connectionSeconds = Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS);
-        Assertions.assertThat(DaemonInvestmentMode.getSuddenDeathTimeout(checkSeconds).get(ChronoUnit.SECONDS))
-                .isGreaterThan(checkSeconds)
-                .isGreaterThan(socketSeconds)
-                .isGreaterThan(connectionSeconds);
     }
 
     @Test

@@ -32,7 +32,7 @@ public class SuddenDeathDetectionTest {
     public void nothingTracked() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final int seconds = 2;
-        final SuddenDeathDetection workaround = new SuddenDeathDetection(latch, Duration.ofSeconds(seconds));
+        final SuddenDeathDetection workaround = new SuddenDeathDetection(latch, Duration.ofSeconds(2));
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
         workaround.run();
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
@@ -85,7 +85,7 @@ public class SuddenDeathDetectionTest {
         };
         final CountDownLatch latch = new CountDownLatch(1);
         final int seconds = 2;
-        final SuddenDeathDetection workaround = new SuddenDeathDetection(latch, Duration.ofSeconds(seconds), d);
+        final SuddenDeathDetection workaround = new SuddenDeathDetection(latch, Duration.ofSeconds(2), d);
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();
         workaround.run();
         Assertions.assertThat(workaround.isSuddenDeath()).isFalse();

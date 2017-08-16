@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.app.configuration.daemon;
 
-import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
@@ -40,7 +39,6 @@ import com.github.triceo.robozonky.app.investing.Investor;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.portfolio.Selling;
 import com.github.triceo.robozonky.app.purchasing.Purchasing;
-import com.github.triceo.robozonky.internal.api.Settings;
 import com.github.triceo.robozonky.util.RoboZonkyThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,16 +75,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         final Daemon purchasing = new Purchasing(auth, RefreshablePurchaseStrategy.create(strategyLocaion),
                                                  maximumSleepPeriod, dryRun
         );
-        this.suddenDeath = new SuddenDeathDetection(circuitBreaker,
-                                                    getSuddenDeathTimeout(periodBetweenChecks.get(ChronoUnit.SECONDS)),
-                                                    investing, purchasing);
-    }
-
-    static TemporalAmount getSuddenDeathTimeout(final long periodBetweenChecksSeconds) {
-        final long socketTimeoutSeconds = Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS);
-        final long connectionTimeoutSeconds = Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS);
-        final long max = Math.max(Math.max(socketTimeoutSeconds, connectionTimeoutSeconds), periodBetweenChecksSeconds);
-        return Duration.ofSeconds(max * 2);
+        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, investing, purchasing);
     }
 
     static Map<Daemon, Long> getDelays(final Collection<Daemon> daemons, final long checkPeriodInSeconds) {

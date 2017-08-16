@@ -57,7 +57,8 @@ public enum Settings {
         CAPTCHA_DELAY_A("robozonky.a_loan_protection_seconds"),
         CAPTCHA_DELAY_B("robozonky.b_loan_protection_seconds"),
         CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
-        CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds");
+        CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds"),
+        SUDDEN_DEATH_DELAY("robozonky.sudden_death_delay_minutes");
 
         private final String name;
 
@@ -188,6 +189,10 @@ public enum Settings {
 
     public TemporalAmount getConnectionTimeout() {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 60));
+    }
+
+    public TemporalAmount getSuddenDeathDelay() {
+        return Duration.ofMinutes(get(Key.SUDDEN_DEATH_DELAY, 5));
     }
 
     private Settings.Key getRatingKey(final Rating r) {
