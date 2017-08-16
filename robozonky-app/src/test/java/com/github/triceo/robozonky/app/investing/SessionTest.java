@@ -289,7 +289,7 @@ public class SessionTest extends AbstractInvestingTest {
             Assertions.assertThat(result).isTrue();
             final List<Investment> investments = t.getResult();
             Assertions.assertThat(investments).hasSize(1);
-            Assertions.assertThat(investments.get(0).getAmount()).isEqualTo(amountToInvest);
+            Assertions.assertThat(investments.get(0).getAmount().intValue()).isEqualTo(amountToInvest);
         }
         // validate event sequence
         final List<Event> newEvents = this.getNewEvents();

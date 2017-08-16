@@ -215,7 +215,7 @@ class Session implements AutoCloseable {
     private synchronized void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> l.item().getId() == i.getLoanId());
-        balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
+        balance = balance.subtract(i.getAmount());
         Portfolio.INSTANCE.update(investor.getZonky(), Portfolio.UpdateType.PARTIAL);
         portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }

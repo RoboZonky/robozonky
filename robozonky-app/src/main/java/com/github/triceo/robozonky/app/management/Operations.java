@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.app.management;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,32 +32,32 @@ import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 class Operations implements OperationsMBean {
 
     private OffsetDateTime lastInvestmentRunTimestamp;
-    private final Map<Integer, Integer> successfulInvestments = new LinkedHashMap<>(),
+    private final Map<Integer, BigDecimal> successfulInvestments = new LinkedHashMap<>(),
             delegatedInvestments = new LinkedHashMap<>(), rejectedInvestments = new LinkedHashMap<>(),
             purchasedInvestments = new LinkedHashMap<>(), offeredInvestments = new LinkedHashMap<>();
 
     @Override
-    public Map<Integer, Integer> getSuccessfulInvestments() {
+    public Map<Integer, BigDecimal> getSuccessfulInvestments() {
         return this.successfulInvestments;
     }
 
     @Override
-    public Map<Integer, Integer> getDelegatedInvestments() {
+    public Map<Integer, BigDecimal> getDelegatedInvestments() {
         return this.delegatedInvestments;
     }
 
     @Override
-    public Map<Integer, Integer> getRejectedInvestments() {
+    public Map<Integer, BigDecimal> getRejectedInvestments() {
         return this.rejectedInvestments;
     }
 
     @Override
-    public Map<Integer, Integer> getPurchasedInvestments() {
+    public Map<Integer, BigDecimal> getPurchasedInvestments() {
         return this.purchasedInvestments;
     }
 
     @Override
-    public Map<Integer, Integer> getOfferedInvestments() {
+    public Map<Integer, BigDecimal> getOfferedInvestments() {
         return this.offeredInvestments;
     }
 
@@ -72,13 +73,13 @@ class Operations implements OperationsMBean {
 
     void handle(final InvestmentDelegatedEvent event) {
         final RecommendedLoan r = event.getRecommendation();
-        this.delegatedInvestments.put(r.descriptor().item().getId(), r.amount().intValue());
+        this.delegatedInvestments.put(r.descriptor().item().getId(), r.amount());
         registerInvestmentRun(event);
     }
 
     void handle(final InvestmentRejectedEvent event) {
         final RecommendedLoan r = event.getRecommendation();
-        this.rejectedInvestments.put(r.descriptor().item().getId(), r.amount().intValue());
+        this.rejectedInvestments.put(r.descriptor().item().getId(), r.amount());
         registerInvestmentRun(event);
     }
 

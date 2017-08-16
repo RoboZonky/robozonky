@@ -65,8 +65,8 @@ public class UtilTest {
         final List<Investment> result = Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky);
         Assertions.assertThat(result).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.get(0).getAmount()).isEqualTo(loan1amount1.add(loan1amount2).intValue());
-            softly.assertThat(result.get(1).getAmount()).isEqualTo(loan2amount.intValue());
+            softly.assertThat(result.get(0).getAmount()).isEqualTo(loan1amount1.add(loan1amount2));
+            softly.assertThat(result.get(1).getAmount()).isEqualTo(loan2amount);
         });
     }
 }

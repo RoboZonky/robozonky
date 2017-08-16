@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
+import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 
 // FIXME split into two classes based on primary and secondary marketplace
 public class Investment extends BaseInvestment {
@@ -40,7 +41,7 @@ public class Investment extends BaseInvestment {
     }
 
     public Investment(final Loan loan, final int amount) {
-        super(loan, amount);
+        super(loan, BigDecimal.valueOf(amount));
         this.loanName = loan.getName();
         this.nickname = loan.getNickName();
         this.rating = loan.getRating();
@@ -55,6 +56,29 @@ public class Investment extends BaseInvestment {
         this.duePrincipal = BigDecimal.valueOf(amount);
         this.purchasePrice = this.duePrincipal;
         this.canBeOffered = false;
+        this.onSmp = false;
+        this.smpRelated = false;
+        this.activeTo = OffsetDateTime.MAX;
+    }
+
+    public Investment(final ParticipationDescriptor participationDescriptor) {
+        super(participationDescriptor.related(), participationDescriptor.item().getRemainingPrincipal());
+        final Loan loan = participationDescriptor.related();
+        final Participation participation = participationDescriptor.item();
+        this.loanName = loan.getName();
+        this.nickname = loan.getNickName();
+        this.rating = loan.getRating();
+        this.loanTermInMonth = loan.getTermInMonths();
+        this.interestRate = loan.getInterestRate();
+        this.currentTerm = participation.getRemainingInstalmentCount();
+        this.remainingMonths = participation.getRemainingInstalmentCount();
+        this.remainingPrincipal = participation.getRemainingPrincipal();
+        this.paymentStatus = PaymentStatus.OK;
+        this.paid = BigDecimal.ZERO;
+        this.paidPrincipal = BigDecimal.ZERO;
+        this.duePrincipal = BigDecimal.ZERO;
+        this.purchasePrice = participation.getRemainingPrincipal();
+        this.canBeOffered = true;
         this.onSmp = false;
         this.smpRelated = false;
         this.activeTo = OffsetDateTime.MAX;

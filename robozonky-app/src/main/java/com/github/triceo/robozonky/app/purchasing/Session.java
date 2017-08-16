@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.ws.rs.NotFoundException;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
@@ -135,29 +136,38 @@ class Session implements AutoCloseable {
         return Collections.unmodifiableList(new ArrayList<>(investmentsMadeNow));
     }
 
+    private boolean actuallPurchase(final Participation participation) {
+        try {
+            zonky.purchase(participation);
+            return true;
+        } catch (final NotFoundException ex) {
+            LOGGER.debug("Zonky 404 during purchasing. Likely someone's beaten us to it.", ex);
+            return false;
+        }
+    }
+
     public synchronized boolean purchase(final RecommendedParticipation recommendation) {
         ensureOpen();
-        final ParticipationDescriptor descriptor = recommendation.descriptor();
-        final Participation participation = descriptor.item();
         if (balance.intValue() < recommendation.amount().intValue()) {
             // should not be allowed by the calling code
             return false;
         }
         Events.fire(new PurchaseRequestedEvent(recommendation));
-        if (!isDryRun) {
-            zonky.purchase(recommendation.descriptor().item());
+        final Participation participation = recommendation.descriptor().item();
+        final boolean purchased = isDryRun || actuallPurchase(participation);
+        if (purchased) {
+            final Loan l = recommendation.descriptor().related();
+            final Investment i = new Investment(l, recommendation.amount().intValue());
+            markSuccessfulInvestment(i);
+            Events.fire(new InvestmentPurchasedEvent(i, balance.intValue(), isDryRun));
         }
-        final Loan l = new Loan(participation.getLoanId(), Integer.MAX_VALUE);
-        final Investment i = new Investment(l, recommendation.amount().intValue());
-        markSuccessfulInvestment(i);
-        Events.fire(new InvestmentPurchasedEvent(i, balance.intValue(), isDryRun));
-        return true;
+        return purchased;
     }
 
     private synchronized void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         stillAvailable.removeIf(l -> l.item().getLoanId() == i.getLoanId());
-        balance = balance.subtract(BigDecimal.valueOf(i.getAmount()));
+        balance = balance.subtract(i.getAmount());
         Portfolio.INSTANCE.update(zonky, Portfolio.UpdateType.PARTIAL);
         portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }

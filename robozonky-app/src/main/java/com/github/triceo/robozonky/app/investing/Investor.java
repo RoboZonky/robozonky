@@ -114,7 +114,7 @@ public class Investor {
         final Investment i = Investor.convertToInvestment(r);
         this.zonky.invest(i);
         Investor.LOGGER.debug("Investment succeeded.");
-        return new ZonkyResponse(i.getAmount());
+        return new ZonkyResponse(i.getAmount().intValue());
     }
 
     private ZonkyResponse investOrDelegateOnCaptcha(final RecommendedLoan r) {
