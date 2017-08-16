@@ -24,7 +24,7 @@ marketplaceFilterExpression returns [Map<Boolean, Collection<MarketplaceFilter>>
         }) | (s=secondaryMarketplaceFilter {
             $result.get(false).add($s.result);
         })
-    )+
+    )*
 ;
 
 jointMarketplaceFilter returns [MarketplaceFilter result]:

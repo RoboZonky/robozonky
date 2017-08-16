@@ -15,7 +15,7 @@ sellFilterExpression returns [Collection<MarketplaceFilter> result]:
     }
     (
         (j=sellMarketplaceFilter { $result.add($j.result); })
-    )+
+    )*
 ;
 
 sellMarketplaceFilter returns [MarketplaceFilter result]:

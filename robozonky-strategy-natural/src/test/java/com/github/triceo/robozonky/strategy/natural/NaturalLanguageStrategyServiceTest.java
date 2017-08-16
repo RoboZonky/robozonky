@@ -79,4 +79,23 @@ public class NaturalLanguageStrategyServiceTest {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("no-headers");
         Assertions.assertThat(strategyProvider.apply(s)).isEmpty();
     }
+
+    @Test
+    public void missingFilters1() {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters1");
+        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+    }
+
+    @Test
+    public void missingFilters2() {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters2");
+        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+    }
+
+    @Test
+    public void missingFilters3() {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters3");
+        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+    }
 }
+
