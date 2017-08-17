@@ -129,7 +129,7 @@ public class ParsedStrategy {
         }
     }
 
-    private boolean matchesNoFilter(final Wrapper item, final boolean isSecondaryMarket) {
+    private boolean doesNotMatchMarketplaceFilter(final Wrapper item, final boolean isSecondaryMarket) {
         final Collection<MarketplaceFilter> filters =
                 isSecondaryMarket ? secondaryMarketplaceFilters : primaryMarketplaceFilters;
         return !filters.stream()
@@ -139,7 +139,7 @@ public class ParsedStrategy {
                 .isPresent();
     }
 
-    private boolean matchesAnyFilter(final Wrapper item) {
+    private boolean matchesAnySellFilter(final Wrapper item) {
         return sellFilters.stream()
                 .filter(f -> f.test(item))
                 .peek(f -> ParsedStrategy.LOGGER.debug("{} matched {}.", item.getIdentifier(), f))
@@ -148,21 +148,21 @@ public class ParsedStrategy {
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
-        return items.stream().filter(i -> matchesNoFilter(new Wrapper(i.item()), false));
+        return items.parallelStream().filter(i -> doesNotMatchMarketplaceFilter(new Wrapper(i.item()), false));
     }
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(
             final Collection<ParticipationDescriptor> items) {
         return items.parallelStream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
-            return matchesNoFilter(w, true);
+            return doesNotMatchMarketplaceFilter(w, true);
         });
     }
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
-        return items.stream().filter(i -> {
+        return items.parallelStream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
-            return matchesAnyFilter(w);
+            return matchesAnySellFilter(w);
         });
     }
 
