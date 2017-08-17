@@ -54,7 +54,7 @@ class Runtime implements RuntimeMBean {
         return this.zonkyUsername;
     }
 
-    void registerInvestmentRun(final ExecutionCompletedEvent event, final SessionInfo sessionInfo) {
+    void handle(final ExecutionCompletedEvent event, final SessionInfo sessionInfo) {
         this.lastUpdatedDateTime = event.getCreatedOn();
         this.zonkyUsername = sessionInfo.getUserName();
     }

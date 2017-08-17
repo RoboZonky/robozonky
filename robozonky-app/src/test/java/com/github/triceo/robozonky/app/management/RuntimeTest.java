@@ -46,7 +46,7 @@ public class RuntimeTest {
         Assertions.assertThat(r.getVersion()).isEqualTo(Defaults.ROBOZONKY_VERSION);
         final String username = UUID.randomUUID().toString();
         final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
-        r.registerInvestmentRun(evt, new SessionInfo(username));
+        r.handle(evt, new SessionInfo(username));
         Assertions.assertThat(r.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
         Assertions.assertThat(r.getZonkyUsername()).isEqualTo(username);
         r.stopDaemon();

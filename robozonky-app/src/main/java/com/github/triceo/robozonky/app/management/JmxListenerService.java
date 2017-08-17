@@ -30,16 +30,36 @@ import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.ListenerService;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.PurchasingCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.triceo.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingStartedEvent;
 
 public class JmxListenerService implements ListenerService {
 
     private static <T extends Event> EventListener<T> newListener(final Class<T> eventType) {
-        if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
+        if (Objects.equals(eventType, ExecutionStartedEvent.class)) {
+            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
+            return (event, sessionInfo) -> bean.handle((ExecutionStartedEvent) event);
+        } else if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
             return (event, sessionInfo) -> {
                 final ExecutionCompletedEvent evt = (ExecutionCompletedEvent) event;
-                ((Runtime) MBean.RUNTIME.getImplementation()).registerInvestmentRun(evt, sessionInfo);
+                ((Runtime) MBean.RUNTIME.getImplementation()).handle(evt, sessionInfo);
+                ((Portfolio) MBean.PORTFOLIO.getImplementation()).handle(evt);
             };
+        } else if (Objects.equals(eventType, SellingStartedEvent.class)) {
+            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
+            return (event, sessionInfo) -> bean.handle((SellingStartedEvent) event);
+        } else if (Objects.equals(eventType, SellingCompletedEvent.class)) {
+            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
+            return (event, sessionInfo) -> bean.handle((SellingCompletedEvent) event);
+        } else if (Objects.equals(eventType, PurchasingStartedEvent.class)) {
+            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
+            return (event, sessionInfo) -> bean.handle((PurchasingStartedEvent) event);
+        } else if (Objects.equals(eventType, PurchasingCompletedEvent.class)) {
+            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
+            return (event, sessionInfo) -> bean.handle((PurchasingCompletedEvent) event);
         } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
             final Operations bean = (Operations) MBean.OPERATIONS.getImplementation();
             return (event, sessionInfo) -> bean.handle((InvestmentDelegatedEvent) event);
@@ -61,12 +81,6 @@ public class JmxListenerService implements ListenerService {
         } else if (Objects.equals(eventType, LoanNoLongerDelinquentEvent.class)) {
             final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
             return (event, sessionInfo) -> bean.handle((LoanNoLongerDelinquentEvent) event);
-        } else if (Objects.equals(eventType, ExecutionStartedEvent.class)) {
-            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
-            return (event, sessionInfo) -> bean.setPortfolioOverview((ExecutionStartedEvent) event);
-        } else if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
-            final Portfolio bean = (Portfolio) MBean.PORTFOLIO.getImplementation();
-            return (event, sessionInfo) -> bean.setPortfolioOverview((ExecutionCompletedEvent) event);
         } else {
             return null;
         }

@@ -36,8 +36,12 @@ import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.triceo.robozonky.api.notifications.PurchasingCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.triceo.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingStartedEvent;
 import com.github.triceo.robozonky.api.notifications.SessionInfo;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
@@ -59,6 +63,19 @@ public class JmxListenerServiceTest {
     private static final Supplier<Delinquency> DELINQUENCY = () -> (Delinquency) MBean.DELINQUENCY.getImplementation();
     private static final Supplier<OperationsMBean> OPERATIONS = () -> (Operations) MBean.OPERATIONS.getImplementation();
     private static final Supplier<RuntimeMBean> RUNTIME = () -> (Runtime) MBean.RUNTIME.getImplementation();
+    private static final Supplier<PortfolioMBean> PORTFOLIO = () -> (Portfolio) MBean.PORTFOLIO.getImplementation();
+    /**
+     * This exists so that parameterized tests can have a nicely readable ID. Don't put anything more complicated
+     * there, as PIT mutation testing will silently ignore the test if the name of the test is weird.
+     */
+    @Parameterized.Parameter
+    public Class<? extends Event> eventType;
+    @Parameterized.Parameter(1)
+    public Event event;
+    @Parameterized.Parameter(2)
+    public Consumer<SoftAssertions> assertionsBefore;
+    @Parameterized.Parameter(3)
+    public Consumer<SoftAssertions> assertionsAfter;
 
     private static Object[] getParametersForLoanNowDelinquent() {
         final Loan l = new Loan(1, 1000);
@@ -92,8 +109,34 @@ public class JmxListenerServiceTest {
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(RUNTIME.get().getZonkyUsername()).isEqualTo(USERNAME);
             softly.assertThat(RUNTIME.get().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+            softly.assertThat(PORTFOLIO.get().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
+    }
+
+    private static Object[] getParameters(final Event evt) {
+        final Consumer<SoftAssertions> before = (softly) -> {
+        };
+        final Consumer<SoftAssertions> after = (softly) -> {
+            softly.assertThat(PORTFOLIO.get().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+        };
+        return new Object[]{evt.getClass(), evt, before, after};
+    }
+
+    private static Object[] getParametersForSellingStarted() {
+        return getParameters(new SellingStartedEvent(Collections.emptyList(), null));
+    }
+
+    private static Object[] getParametersForSellingCompleted() {
+        return getParameters(new SellingCompletedEvent(Collections.emptyList(), null));
+    }
+
+    private static Object[] getParametersForPurchasingStarted() {
+        return getParameters(new PurchasingStartedEvent(Collections.emptyList(), null));
+    }
+
+    private static Object[] getParametersForPurchasingCompleted() {
+        return getParameters(new PurchasingCompletedEvent(Collections.emptyList(), null));
     }
 
     private static Object[] getParametersForInvestmentDelegated() {
@@ -193,6 +236,10 @@ public class JmxListenerServiceTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
         return Arrays.asList(JmxListenerServiceTest.getParametersForExecutionCompleted(),
+                             JmxListenerServiceTest.getParametersForPurchasingStarted(),
+                             JmxListenerServiceTest.getParametersForPurchasingCompleted(),
+                             JmxListenerServiceTest.getParametersForSellingStarted(),
+                             JmxListenerServiceTest.getParametersForSellingCompleted(),
                              JmxListenerServiceTest.getParametersForInvestmentDelegated(),
                              JmxListenerServiceTest.getParametersForInvestmentMade(),
                              JmxListenerServiceTest.getParametersForInvestmentRejected(),
@@ -201,19 +248,6 @@ public class JmxListenerServiceTest {
                              JmxListenerServiceTest.getParametersForSaleOffered(),
                              JmxListenerServiceTest.getParametersForInvestmentPurchased());
     }
-
-    /**
-     * This exists so that parameterized tests can have a nicely readable ID. Don't put anything more complicated
-     * there, as PIT mutation testing will silently ignore the test if the name of the test is weird.
-     */
-    @Parameterized.Parameter
-    public Class<? extends Event> eventType;
-    @Parameterized.Parameter(1)
-    public Event event;
-    @Parameterized.Parameter(2)
-    public Consumer<SoftAssertions> assertionsBefore;
-    @Parameterized.Parameter(3)
-    public Consumer<SoftAssertions> assertionsAfter;
 
     public <T extends Event> void handleEvent(final T event) {
         final JmxListenerService service = new JmxListenerService();

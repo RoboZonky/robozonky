@@ -42,7 +42,7 @@ public class PortfolioTest {
         Mockito.when(portfolio.getCzkInvested(ArgumentMatchers.any())).thenReturn(1000);
         final Portfolio mbean = new Portfolio();
         final ExecutionStartedEvent evt = new ExecutionStartedEvent(Collections.emptyList(), portfolio);
-        mbean.setPortfolioOverview(evt);
+        mbean.handle(evt);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(mbean.getAvailableBalance()).isEqualTo(portfolio.getCzkAvailable());
             softly.assertThat(mbean.getExpectedYield()).isEqualTo(portfolio.getCzkExpectedYield());

@@ -27,6 +27,10 @@ import java.util.stream.Stream;
 
 import com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.triceo.robozonky.api.notifications.PurchasingCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingCompletedEvent;
+import com.github.triceo.robozonky.api.notifications.SellingStartedEvent;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
@@ -90,12 +94,32 @@ public class Portfolio implements PortfolioMBean {
         return this.latestUpdatedDateTime;
     }
 
-    void setPortfolioOverview(final ExecutionStartedEvent event) {
+    void handle(final ExecutionStartedEvent event) {
         this.latestPortfolioOverview = event.getPortfolioOverview();
         this.latestUpdatedDateTime = event.getCreatedOn();
     }
 
-    void setPortfolioOverview(final ExecutionCompletedEvent event) {
+    void handle(final ExecutionCompletedEvent event) {
+        this.latestPortfolioOverview = event.getPortfolioOverview();
+        this.latestUpdatedDateTime = event.getCreatedOn();
+    }
+
+    void handle(final SellingStartedEvent event) {
+        this.latestPortfolioOverview = event.getPortfolioOverview();
+        this.latestUpdatedDateTime = event.getCreatedOn();
+    }
+
+    void handle(final SellingCompletedEvent event) {
+        this.latestPortfolioOverview = event.getPortfolioOverview();
+        this.latestUpdatedDateTime = event.getCreatedOn();
+    }
+
+    void handle(final PurchasingStartedEvent event) {
+        this.latestPortfolioOverview = event.getPortfolioOverview();
+        this.latestUpdatedDateTime = event.getCreatedOn();
+    }
+
+    void handle(final PurchasingCompletedEvent event) {
         this.latestPortfolioOverview = event.getPortfolioOverview();
         this.latestUpdatedDateTime = event.getCreatedOn();
     }
