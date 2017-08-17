@@ -22,7 +22,7 @@ import org.mockito.Mockito;
 public class BorrowerRegionConditionTest extends AbstractEnumeratedConditionTest<Region> {
 
     @Override
-    protected AbstractEnumeratedCondition getSUT() {
+    protected AbstractEnumeratedCondition<Region> getSUT() {
         return new BorrowerRegionCondition();
     }
 
@@ -36,5 +36,10 @@ public class BorrowerRegionConditionTest extends AbstractEnumeratedConditionTest
     @Override
     protected Region getTriggerItem() {
         return Region.JIHOCESKY;
+    }
+
+    @Override
+    protected Region getNotTriggerItem() {
+        return Region.JIHOMORAVSKY;
     }
 }

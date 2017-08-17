@@ -16,8 +16,6 @@
 
 package com.github.triceo.robozonky.common.extensions;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.BiFunction;
@@ -27,7 +25,6 @@ import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.api.strategies.SellStrategy;
 import com.github.triceo.robozonky.api.strategies.StrategyService;
-import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +38,10 @@ public final class StrategyLoader {
             ExtensionsManager.INSTANCE.getServiceLoader(StrategyService.class);
 
     static <T> Optional<T> processStrategyService(final StrategyService service, final String strategy,
-                                                  final BiFunction<StrategyService, InputStream, Optional<T>> getter) {
+                                                  final BiFunction<StrategyService, String, Optional<T>> getter) {
         StrategyLoader.LOGGER.debug("Reading strategy.");
-        try (final InputStream stream = new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET))) {
-            return getter.apply(service, stream);
+        try {
+            return getter.apply(service, strategy);
         } catch (final Exception ex) {
             StrategyLoader.LOGGER.error("Failed reading strategy.", ex);
             return Optional.empty();
@@ -52,7 +49,7 @@ public final class StrategyLoader {
     }
 
     static <T> Optional<T> load(final String strategy, final Iterable<StrategyService> loader,
-                                final BiFunction<StrategyService, InputStream, Optional<T>> provider) {
+                                final BiFunction<StrategyService, String, Optional<T>> provider) {
         return Util.toStream(loader)
                 .map(iss -> StrategyLoader.processStrategyService(iss, strategy, provider))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))

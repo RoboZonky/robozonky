@@ -16,6 +16,7 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +24,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.triceo.robozonky.api.strategies.StrategyService;
+import com.github.triceo.robozonky.internal.api.Defaults;
+import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,12 +34,19 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class NaturalLanguageStrategyServiceTest {
 
-    private static Function<InputStream, Optional<?>> getInvesting(final StrategyService s) {
+    @Parameterized.Parameter
+    public Function<String, Optional<Object>> strategyProvider;
+
+    private static Function<String, Optional<?>> getInvesting(final StrategyService s) {
         return s::toInvest;
     }
 
-    private static Function<InputStream, Optional<?>> getPurchasing(final StrategyService s) {
+    private static Function<String, Optional<?>> getPurchasing(final StrategyService s) {
         return s::toPurchase;
+    }
+
+    private static Function<String, Optional<?>> getSelling(final StrategyService s) {
+        return s::toSell;
     }
 
     @Parameterized.Parameters
@@ -45,28 +55,29 @@ public class NaturalLanguageStrategyServiceTest {
         final StrategyService service = new NaturalLanguageStrategyService();
         result.add(new Object[]{getInvesting(service)});
         result.add(new Object[]{getPurchasing(service)});
+        result.add(new Object[]{getSelling(service)});
         return result;
     }
 
-    @Parameterized.Parameter
-    public Function<InputStream, Optional<Object>> strategyProvider;
-
     @Test
-    public void test() {
+    public void test() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("only-whitespace");
-        Assertions.assertThat(strategyProvider.apply(s)).isEmpty();
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isEmpty();
     }
 
     @Test
-    public void complex() {
+    public void complex() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex");
-        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
     }
 
     @Test
-    public void simplest() {
+    public void simplest() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("simplest");
-        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
     }
 
     /**
@@ -75,27 +86,31 @@ public class NaturalLanguageStrategyServiceTest {
      * leading the robot to invest into and purchase everything.
      */
     @Test
-    public void missingHeaders() {
+    public void missingHeaders() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("no-headers");
-        Assertions.assertThat(strategyProvider.apply(s)).isEmpty();
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isEmpty();
     }
 
     @Test
-    public void missingFilters1() {
+    public void missingFilters1() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters1");
-        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
     }
 
     @Test
-    public void missingFilters2() {
+    public void missingFilters2() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters2");
-        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
     }
 
     @Test
-    public void missingFilters3() {
+    public void missingFilters3() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("missing-filters3");
-        Assertions.assertThat(strategyProvider.apply(s)).isPresent();
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
     }
 }
 

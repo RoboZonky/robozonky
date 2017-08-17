@@ -165,4 +165,16 @@ public class ParsedStrategy {
             return matchesAnyFilter(w);
         });
     }
+
+    @Override
+    public String toString() {
+        return "ParsedStrategy{" +
+                "defaults=" + defaults +
+                ", portfolio=" + portfolio +
+                ", investmentSizes=" + investmentSizes +
+                ", primaryMarketplaceFilters=" + primaryMarketplaceFilters +
+                ", secondaryMarketplaceFilters=" + secondaryMarketplaceFilters +
+                ", sellFilters=" + sellFilters +
+                '}';
+    }
 }

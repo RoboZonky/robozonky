@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import com.github.triceo.robozonky.util.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -53,6 +54,11 @@ public class IncompleteStrategyTest {
         return files;
     }
 
+    private static String fileToString(final File f) throws IOException {
+        return Files.readAllLines(f.toPath(), Defaults.CHARSET).stream().collect(
+                Collectors.joining(System.lineSeparator()));
+    }
+
     @Parameterized.Parameter
     public String lineBeingRemoved;
 
@@ -62,7 +68,7 @@ public class IncompleteStrategyTest {
     @Test
     public void propertyIsMissing() throws IOException {
         final Optional<InvestmentStrategy> result =
-                new SimpleStrategyService().toInvest(this.strategyFile.toURI().toURL().openStream());
+                new SimpleStrategyService().toInvest(fileToString(this.strategyFile));
         Assertions.assertThat(result).isEmpty();
     }
 }

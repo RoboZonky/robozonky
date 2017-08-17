@@ -20,15 +20,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(MarketplaceFilter.class);
+    private static AtomicInteger COUNTER = new AtomicInteger(0);
 
     private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
         return conditions.stream()
@@ -36,6 +34,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
                 .collect(Collectors.joining(" and "));
     }
 
+    private final int id = COUNTER.incrementAndGet();
     private Collection<MarketplaceFilterCondition> ignoreWhen = Collections.emptySet(),
             butNotWhen = Collections.emptySet();
 
@@ -49,7 +48,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("When [" + toString(ignoreWhen) + "] but not when [" + toString(butNotWhen) + "].");
+        return Optional.of("#" + id + ": [" + toString(ignoreWhen) + "] but not [" + toString(butNotWhen) + "].");
     }
 
     /**

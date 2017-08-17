@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditionTest<Rating> {
 
     @Override
-    protected AbstractEnumeratedCondition getSUT() {
+    protected AbstractEnumeratedCondition<Rating> getSUT() {
         return new LoanRatingEnumeratedCondition();
     }
 
@@ -37,5 +37,10 @@ public class LoanRatingEnumeratedConditionTest extends AbstractEnumeratedConditi
     @Override
     protected Rating getTriggerItem() {
         return Rating.A;
+    }
+
+    @Override
+    protected Rating getNotTriggerItem() {
+        return Rating.D;
     }
 }

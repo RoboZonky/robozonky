@@ -16,26 +16,44 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-import java.util.Collections;
+import java.util.Arrays;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public abstract class AbstractEnumeratedConditionTest<T> {
 
-    protected abstract AbstractEnumeratedCondition getSUT();
+    protected abstract AbstractEnumeratedCondition<T> getSUT();
 
     protected abstract Wrapper getMocked();
 
     protected abstract T getTriggerItem();
 
+    protected abstract T getNotTriggerItem();
+
     @Test
-    public void proper() {
+    public void properAsCollection() {
         final Wrapper i = this.getMocked();
-        final AbstractEnumeratedCondition sut = this.getSUT();
+        final AbstractEnumeratedCondition<T> sut = this.getSUT();
         Assertions.assertThat(sut.test(i)).isFalse();
-        sut.add(Collections.singleton(this.getTriggerItem()));
+        sut.add(Arrays.asList(this.getTriggerItem(), this.getNotTriggerItem()));
         Assertions.assertThat(sut.test(i)).isTrue();
         Assertions.assertThat(sut.getDescription()).isPresent();
+    }
+
+    @Test
+    public void properAsOne() {
+        final Wrapper i = this.getMocked();
+        final AbstractEnumeratedCondition<T> sut = this.getSUT();
+        Assertions.assertThat(sut.test(i)).isFalse();
+        sut.add(this.getTriggerItem());
+        sut.add(this.getNotTriggerItem());
+        Assertions.assertThat(sut.test(i)).isTrue();
+        Assertions.assertThat(sut.getDescription()).isPresent();
+    }
+
+    @Test
+    public void nonEmptyDescription() {
+        Assertions.assertThat(getSUT().getDescription()).isPresent();
     }
 }

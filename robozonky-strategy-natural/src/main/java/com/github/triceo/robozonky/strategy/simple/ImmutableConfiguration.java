@@ -16,19 +16,15 @@
 
 package com.github.triceo.robozonky.strategy.simple;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.Optional;
 import java.util.Properties;
-
-import com.github.triceo.robozonky.internal.api.Defaults;
 
 /**
  * Simple wrapper around a property file.
@@ -51,8 +47,8 @@ class ImmutableConfiguration {
      * @param properties The file in question.
      * @return The strategy available for reading.
      */
-    public static ImmutableConfiguration from(final InputStream properties) {
-        try (final Reader reader = new BufferedReader(new InputStreamReader(properties, Defaults.CHARSET))) {
+    public static ImmutableConfiguration from(final String properties) {
+        try (final Reader reader = new StringReader(properties)) {
             final Properties props = new Properties();
             props.load(reader);
             return ImmutableConfiguration.from(props);

@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.strategy.simple;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,7 +79,7 @@ public class SimpleStrategyService implements StrategyService {
         return share.multiply(BigDecimal.valueOf(100)).intValue();
     }
 
-    private static InvestmentStrategy parseOrThrow(final InputStream strategy) {
+    private static InvestmentStrategy parseOrThrow(final String strategy) {
         final ImmutableConfiguration config = ImmutableConfiguration.from(strategy);
         // set default values
         final DefaultValues d = new DefaultValues(DefaultPortfolio.EMPTY);
@@ -154,7 +153,7 @@ public class SimpleStrategyService implements StrategyService {
     }
 
     @Override
-    public Optional<InvestmentStrategy> toInvest(final InputStream strategy) {
+    public Optional<InvestmentStrategy> toInvest(final String strategy) {
         try {
             final InvestmentStrategy s = SimpleStrategyService.parseOrThrow(strategy);
             SimpleStrategyService.LOGGER.warn("You are using a deprecated strategy format!");
@@ -166,12 +165,12 @@ public class SimpleStrategyService implements StrategyService {
     }
 
     @Override
-    public Optional<SellStrategy> toSell(final InputStream strategy) {
+    public Optional<SellStrategy> toSell(final String strategy) {
         return Optional.empty(); // not supported
     }
 
     @Override
-    public Optional<PurchaseStrategy> toPurchase(final InputStream strategy) {
+    public Optional<PurchaseStrategy> toPurchase(final String strategy) {
         return Optional.empty(); // not supported
     }
 

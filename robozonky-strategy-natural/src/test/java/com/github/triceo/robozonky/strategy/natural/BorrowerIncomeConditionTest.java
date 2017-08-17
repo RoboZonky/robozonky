@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 public class BorrowerIncomeConditionTest extends AbstractEnumeratedConditionTest<MainIncomeType> {
 
     @Override
-    protected AbstractEnumeratedCondition getSUT() {
+    protected AbstractEnumeratedCondition<MainIncomeType> getSUT() {
         return new BorrowerIncomeCondition();
     }
 
@@ -37,5 +37,10 @@ public class BorrowerIncomeConditionTest extends AbstractEnumeratedConditionTest
     @Override
     protected MainIncomeType getTriggerItem() {
         return MainIncomeType.EMPLOYMENT;
+    }
+
+    @Override
+    protected MainIncomeType getNotTriggerItem() {
+        return MainIncomeType.ENTREPRENEUR;
     }
 }

@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 public class LoanPurposeConditionTest extends AbstractEnumeratedConditionTest<Purpose> {
 
     @Override
-    protected AbstractEnumeratedCondition getSUT() {
+    protected AbstractEnumeratedCondition<Purpose> getSUT() {
         return new LoanPurposeCondition();
     }
 
@@ -37,5 +37,10 @@ public class LoanPurposeConditionTest extends AbstractEnumeratedConditionTest<Pu
     @Override
     protected Purpose getTriggerItem() {
         return Purpose.AUTO_MOTO;
+    }
+
+    @Override
+    protected Purpose getNotTriggerItem() {
+        return Purpose.CESTOVANI;
     }
 }

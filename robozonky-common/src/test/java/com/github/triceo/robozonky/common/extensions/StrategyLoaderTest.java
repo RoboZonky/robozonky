@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.common.extensions;
 
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,17 +60,17 @@ public class StrategyLoaderTest {
         final InvestmentStrategy is = (availableLoans, portfolio) -> Stream.empty();
         final StrategyService iss = new StrategyService() {
             @Override
-            public Optional<InvestmentStrategy> toInvest(final InputStream strategy) {
+            public Optional<InvestmentStrategy> toInvest(final String strategy) {
                 return Optional.of(is);
             }
 
             @Override
-            public Optional<SellStrategy> toSell(final InputStream strategy) {
+            public Optional<SellStrategy> toSell(final String strategy) {
                 return Optional.empty();
             }
 
             @Override
-            public Optional<PurchaseStrategy> toPurchase(final InputStream strategy) {
+            public Optional<PurchaseStrategy> toPurchase(final String strategy) {
                 return Optional.empty();
             }
         };

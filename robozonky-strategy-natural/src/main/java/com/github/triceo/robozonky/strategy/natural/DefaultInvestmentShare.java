@@ -41,4 +41,12 @@ public class DefaultInvestmentShare {
     public int getMaximumShareInPercent() {
         return maximumShareInPercent;
     }
+
+    @Override
+    public String toString() {
+        return "DefaultInvestmentShare{" +
+                "minimumShareInPercent=" + minimumShareInPercent +
+                ", maximumShareInPercent=" + maximumShareInPercent +
+                '}';
+    }
 }

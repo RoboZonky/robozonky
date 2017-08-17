@@ -37,6 +37,7 @@ public class WrapperTest {
             softly.assertThat(w.getInterestRate()).isEqualTo(loan.getInterestRate());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
             softly.assertThat(w.getRemainingAmount()).isEqualTo(investment.getRemainingPrincipal());
+            softly.assertThat(w.getIdentifier()).isNotNull();
         });
     }
 

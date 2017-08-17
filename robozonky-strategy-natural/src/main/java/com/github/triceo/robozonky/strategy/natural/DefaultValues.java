@@ -93,4 +93,16 @@ public class DefaultValues {
         }
         this.confirmationCondition = confirmationCondition;
     }
+
+    @Override
+    public String toString() {
+        return "DefaultValues{" +
+                "portfolio=" + portfolio +
+                ", targetPortfolioSize=" + targetPortfolioSize +
+                ", minimumBalance=" + minimumBalance +
+                ", investmentSize=" + investmentSize +
+                ", investmentShare=" + investmentShare +
+                ", confirmationCondition=" + confirmationCondition +
+                '}';
+    }
 }

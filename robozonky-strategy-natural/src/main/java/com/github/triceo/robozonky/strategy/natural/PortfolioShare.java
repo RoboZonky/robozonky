@@ -52,4 +52,13 @@ public class PortfolioShare {
     public Rating getRating() {
         return rating;
     }
+
+    @Override
+    public String toString() {
+        return "PortfolioShare{" +
+                "mininumShareInPercent=" + mininumShareInPercent +
+                ", maximumShareInPercent=" + maximumShareInPercent +
+                ", rating=" + rating +
+                '}';
+    }
 }

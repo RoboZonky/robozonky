@@ -16,7 +16,9 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-class LoanPurposeCondition extends AbstractEnumeratedCondition {
+import com.github.triceo.robozonky.api.remote.enums.Purpose;
+
+class LoanPurposeCondition extends AbstractEnumeratedCondition<Purpose> {
 
     public LoanPurposeCondition() {
         super(Wrapper::getPurpose);

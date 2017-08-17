@@ -16,7 +16,6 @@
 
 package com.github.triceo.robozonky.api.strategies;
 
-import java.io.InputStream;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
@@ -30,19 +29,19 @@ public interface StrategyService {
      * @param strategy Investment strategy in question.
      * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */
-    Optional<InvestmentStrategy> toInvest(InputStream strategy);
+    Optional<InvestmentStrategy> toInvest(String strategy);
 
     /**
      * Prepare selling strategy for being used by the app.
      * @param strategy Investment strategy in question.
      * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */
-    Optional<SellStrategy> toSell(InputStream strategy);
+    Optional<SellStrategy> toSell(String strategy);
 
     /**
      * Prepare purchasing strategy for being used by the app.
      * @param strategy Investment strategy in question.
      * @return Processed instance of the strategy provided by the user, if the input format is supported.
      */
-    Optional<PurchaseStrategy> toPurchase(InputStream strategy);
+    Optional<PurchaseStrategy> toPurchase(String strategy);
 }

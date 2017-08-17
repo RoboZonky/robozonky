@@ -16,14 +16,19 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.api.strategies.SellStrategy;
 import com.github.triceo.robozonky.api.strategies.StrategyService;
+import com.github.triceo.robozonky.internal.api.Defaults;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -37,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public class NaturalLanguageStrategyService implements StrategyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageStrategyService.class);
+    private static final Map<String, ParsedStrategy> CACHE = new HashMap<>(1);
 
     private static final ANTLRErrorListener ERROR_LISTENER = new BaseErrorListener() {
 
@@ -53,6 +59,32 @@ public class NaturalLanguageStrategyService implements StrategyService {
         }
     };
 
+    private synchronized static void setCached(final String strategy, final ParsedStrategy parsed) {
+        CACHE.clear();
+        CACHE.put(strategy, parsed);
+        LOGGER.debug("Cached strategy: {}.", parsed);
+    }
+
+    private synchronized static Optional<ParsedStrategy> getCached(final String strategy) {
+        if (CACHE.containsKey(strategy)) {
+            return Optional.of(CACHE.get(strategy));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    synchronized static ParsedStrategy parseWithAntlr(final String strategy) throws IOException {
+        final Optional<ParsedStrategy> cached = getCached(strategy);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+        try (final BufferedInputStream bis = new BufferedInputStream(
+                new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET)))) {
+            setCached(strategy, parseWithAntlr(bis));
+            return parseWithAntlr(strategy); // call itself again, making use of the cache
+        }
+    }
+
     static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {
         final CharStream s = CharStreams.fromStream(strategy);
         final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
@@ -62,9 +94,9 @@ public class NaturalLanguageStrategyService implements StrategyService {
     }
 
     @Override
-    public Optional<InvestmentStrategy> toInvest(final InputStream strategy) {
+    public Optional<InvestmentStrategy> toInvest(final String strategy) {
         try {
-            final ParsedStrategy s = NaturalLanguageStrategyService.parseWithAntlr(strategy);
+            final ParsedStrategy s = parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguageInvestmentStrategy(s));
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
@@ -73,9 +105,9 @@ public class NaturalLanguageStrategyService implements StrategyService {
     }
 
     @Override
-    public Optional<SellStrategy> toSell(final InputStream strategy) {
+    public Optional<SellStrategy> toSell(final String strategy) {
         try {
-            final ParsedStrategy s = NaturalLanguageStrategyService.parseWithAntlr(strategy);
+            final ParsedStrategy s = parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguageSellStrategy(s));
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
@@ -84,9 +116,9 @@ public class NaturalLanguageStrategyService implements StrategyService {
     }
 
     @Override
-    public Optional<PurchaseStrategy> toPurchase(final InputStream strategy) {
-        try { // FIXME share parsed
-            final ParsedStrategy s = NaturalLanguageStrategyService.parseWithAntlr(strategy);
+    public Optional<PurchaseStrategy> toPurchase(final String strategy) {
+        try {
+            final ParsedStrategy s = parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguagePurchaseStrategy(s));
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);

@@ -16,7 +16,9 @@
 
 package com.github.triceo.robozonky.strategy.natural;
 
-class BorrowerRegionCondition extends AbstractEnumeratedCondition {
+import com.github.triceo.robozonky.api.remote.enums.Region;
+
+class BorrowerRegionCondition extends AbstractEnumeratedCondition<Region> {
 
     public BorrowerRegionCondition() {
         super(Wrapper::getRegion);

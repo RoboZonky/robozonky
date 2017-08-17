@@ -22,9 +22,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.github.triceo.robozonky.api.strategies.InvestmentStrategy;
-import com.github.triceo.robozonky.util.IoTestUtil;
+import com.github.triceo.robozonky.internal.api.Defaults;
+import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -43,47 +45,45 @@ public class SimpleStrategyServiceTest {
     private static final InputStream WRONG_ASKS =
             SimpleStrategyServiceTest.class.getResourceAsStream("strategy-wrongasks.cfg");
 
+    private static String toString(final InputStream s) throws IOException {
+        return IOUtils.readLines(s, Defaults.CHARSET).stream().collect(Collectors.joining(System.lineSeparator()));
+    }
+
     @Test
     public void shareSumsUnder100Percent() throws IOException {
-        final File f = IoTestUtil.streamToFile(SimpleStrategyServiceTest.PARTIAL, ".cfg");
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(f.toURI().toURL().openStream())).isPresent();
+        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.PARTIAL))).isPresent();
     }
 
     @Test
     public void proper() throws IOException {
-        final File f = IoTestUtil.streamToFile(SimpleStrategyServiceTest.PROPER, ".cfg");
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(f.toURI().toURL().openStream())).isPresent();
+        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.PROPER))).isPresent();
     }
 
     @Test
     public void improper() throws IOException {
-        final File f = IoTestUtil.streamToFile(SimpleStrategyServiceTest.IMPROPER);
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(f.toURI().toURL().openStream())).isEmpty();
+        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.IMPROPER))).isEmpty();
     }
 
     @Test
     public void wrongShares() throws IOException {
-        final File f = IoTestUtil.streamToFile(SimpleStrategyServiceTest.WRONG_SHARES);
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(f.toURI().toURL().openStream())).isEmpty();
+        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.WRONG_SHARES))).isEmpty();
     }
 
     @Test
     public void wrongTerms() throws IOException {
-        final File f = IoTestUtil.streamToFile(SimpleStrategyServiceTest.WRONG_TERMS, ".cfg");
         final SimpleStrategyService s = new SimpleStrategyService();
-        final Optional<InvestmentStrategy> result = s.toInvest(f.toURI().toURL().openStream());
+        final Optional<InvestmentStrategy> result = s.toInvest(toString(SimpleStrategyServiceTest.WRONG_TERMS));
         Assertions.assertThat(result).isEmpty();
     }
 
     @Test
     public void wrongAsks() throws IOException {
-        final File f = IoTestUtil.streamToFile(SimpleStrategyServiceTest.WRONG_ASKS, ".cfg");
         final SimpleStrategyService s = new SimpleStrategyService();
-        final Optional<InvestmentStrategy> result = s.toInvest(f.toURI().toURL().openStream());
+        final Optional<InvestmentStrategy> result = s.toInvest(toString(SimpleStrategyServiceTest.WRONG_ASKS));
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -104,6 +104,6 @@ public class SimpleStrategyServiceTest {
         Files.write(f.toPath(), Arrays.asList(lines));
         // make sure that the file reads properly
         final SimpleStrategyService s = new SimpleStrategyService();
-        s.toInvest(f.toURI().toURL().openStream());
+        s.toInvest(toString(f.toURI().toURL().openStream()));
     }
 }

@@ -42,4 +42,12 @@ class DefaultInvestmentSize {
     public int getMaximumInvestmentInCzk() {
         return maximumInvestmentInCzk;
     }
+
+    @Override
+    public String toString() {
+        return "DefaultInvestmentSize{" +
+                "minimumInvestmentInCzk=" + minimumInvestmentInCzk +
+                ", maximumInvestmentInCzk=" + maximumInvestmentInCzk +
+                '}';
+    }
 }
