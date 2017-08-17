@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
 import com.github.triceo.robozonky.api.confirmations.ConfirmationProvider;
@@ -140,7 +141,7 @@ class Session implements AutoCloseable {
         try {
             zonky.purchase(participation);
             return true;
-        } catch (final NotFoundException ex) {
+        } catch (final NotFoundException | BadRequestException ex) {
             LOGGER.debug("Zonky 404 during purchasing. Likely someone's beaten us to it.", ex);
             return false;
         }
