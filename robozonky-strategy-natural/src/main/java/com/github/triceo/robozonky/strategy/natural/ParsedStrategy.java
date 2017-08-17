@@ -134,7 +134,7 @@ public class ParsedStrategy {
                 isSecondaryMarket ? secondaryMarketplaceFilters : primaryMarketplaceFilters;
         return !filters.stream()
                 .filter(f -> f.test(item))
-                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} ignored, matched {}.", item.getLoanId(), f))
+                .peek(f -> ParsedStrategy.LOGGER.debug("{} ignored, matched {}.", item.getIdentifier(), f))
                 .findFirst()
                 .isPresent();
     }
@@ -142,7 +142,7 @@ public class ParsedStrategy {
     private boolean matchesAnyFilter(final Wrapper item) {
         return sellFilters.stream()
                 .filter(f -> f.test(item))
-                .peek(f -> ParsedStrategy.LOGGER.debug("Loan #{} matched {}.", item.getLoanId(), f))
+                .peek(f -> ParsedStrategy.LOGGER.debug("{} matched {}.", item.getIdentifier(), f))
                 .findFirst()
                 .isPresent();
     }
@@ -153,7 +153,7 @@ public class ParsedStrategy {
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(
             final Collection<ParticipationDescriptor> items) {
-        return items.stream().filter(i -> {
+        return items.parallelStream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
             return matchesNoFilter(w, true);
         });

@@ -30,22 +30,26 @@ import com.github.triceo.robozonky.api.remote.enums.Region;
 public class Wrapper {
 
     private final Loan loan;
+    private final String identifier;
     private final int remainingTermInMonths;
     private final BigDecimal remainingAmount;
     public Wrapper(final Loan loan) {
         this.loan = loan;
+        this.identifier = "Loan #" + loan.getId();
         this.remainingTermInMonths = loan.getTermInMonths();
         this.remainingAmount = null;
     }
 
     public Wrapper(final Participation participation, final Loan loan) {
         this.loan = loan;
+        this.identifier = "Loan #" + loan.getId() + " (participation #" + participation.getId() + ")";
         this.remainingTermInMonths = participation.getRemainingInstalmentCount();
         this.remainingAmount = null;
     }
 
     public Wrapper(final Investment investment, final Loan loan) {
         this.loan = loan;
+        this.identifier = "Loan #" + loan.getId() + " (investment #" + investment.getId() + ")";
         this.remainingTermInMonths = investment.getRemainingMonths();
         this.remainingAmount = investment.getRemainingPrincipal();
     }
@@ -93,6 +97,10 @@ public class Wrapper {
         return remainingAmount;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -102,13 +110,11 @@ public class Wrapper {
             return false;
         }
         final Wrapper wrapper = (Wrapper) o;
-        return remainingTermInMonths == wrapper.remainingTermInMonths &&
-                Objects.equals(loan, wrapper.loan) &&
-                Objects.equals(remainingAmount, wrapper.remainingAmount);
+        return Objects.equals(identifier, wrapper.identifier);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(loan, remainingTermInMonths, remainingAmount);
+        return Objects.hash(identifier);
     }
 }
