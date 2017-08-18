@@ -19,7 +19,6 @@ package com.github.triceo.robozonky.app.investing;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -35,12 +34,9 @@ import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
-import com.github.triceo.robozonky.common.remote.ApiProvider;
-import com.github.triceo.robozonky.common.remote.OAuth;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest {
@@ -75,14 +71,6 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
             Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
         }
         return new LoanDescriptor(loan);
-    }
-
-    protected static ApiProvider harmlessApi(final Zonky zonky) {
-        final ApiProvider p = Mockito.spy(new ApiProvider());
-        Mockito.doReturn(Mockito.mock(OAuth.class)).when(p).oauth();
-        Mockito.doReturn(Collections.emptyList()).when(p).marketplace();
-        Mockito.doReturn(zonky).when(p).authenticated(ArgumentMatchers.any());
-        return p;
     }
 
     protected static Zonky harmlessZonky(final int availableBalance) {

@@ -29,7 +29,7 @@ public class Investment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
     private boolean smpRelated, onSmp, canBeOffered;
-    private int dpd, loanTermInMonth, currentTerm, remainingMonths;
+    private int legalDpd, loanTermInMonth, currentTerm, remainingMonths;
     private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate, nextPaymentDate, activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal,
@@ -42,6 +42,7 @@ public class Investment extends BaseInvestment {
 
     public Investment(final Loan loan, final int amount) {
         super(loan, BigDecimal.valueOf(amount));
+        this.legalDpd = 0;
         this.loanName = loan.getName();
         this.nickname = loan.getNickName();
         this.rating = loan.getRating();
@@ -65,6 +66,7 @@ public class Investment extends BaseInvestment {
         super(participationDescriptor.related(), participationDescriptor.item().getRemainingPrincipal());
         final Loan loan = participationDescriptor.related();
         final Participation participation = participationDescriptor.item();
+        this.legalDpd = 0;
         this.loanName = loan.getName();
         this.nickname = loan.getNickName();
         this.rating = loan.getRating();
@@ -90,8 +92,8 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    public int getDpd() {
-        return dpd;
+    public int getLegalDpd() {
+        return legalDpd;
     }
 
     @XmlElement
@@ -159,6 +161,11 @@ public class Investment extends BaseInvestment {
         return investmentDate;
     }
 
+    /**
+     * In case of a presently delinquent loan, this always shows the date of the least recent instalment that is
+     * delinquent.
+     * @return
+     */
     @XmlElement
     public OffsetDateTime getNextPaymentDate() {
         return nextPaymentDate;

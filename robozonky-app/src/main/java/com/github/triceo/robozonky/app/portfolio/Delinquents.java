@@ -99,12 +99,7 @@ public enum Delinquents {
                 .filter(d -> noLongerActive.stream().noneMatch(i -> d.getLoanId() == i.getLoanId()));
         final Stream<Delinquent> newDelinquents = presentlyDelinquent.stream()
                 .filter(i -> knownDelinquents.stream().noneMatch(d -> d.getLoanId() == i.getLoanId()))
-                .map(i -> {
-                    // no matter when we register delinquency, we can be sure it's delinquent from the last payment day
-                    final LocalDate delinquentPayment = (i.getNextPaymentDate() == null) ? now :
-                            i.getNextPaymentDate().toLocalDate().minusMonths(1).plusDays(1);
-                    return new Delinquent(i.getLoanId(), delinquentPayment);
-                });
+                .map(i -> new Delinquent(i.getLoanId(), i.getNextPaymentDate().toLocalDate()));
         synchronized (this) { // store to the state file
             LOGGER.trace("Starting delinquency update.");
             final State.ClassSpecificState state = State.forClass(this.getClass());

@@ -97,7 +97,7 @@ public final class Delinquency {
     /**
      * See {@link Object#equals(Object)}
      * @param o Other delinquency.
-     * @return Deliquencies are considered equal when they share {@link #getParent()} and {@link #getDetectedOn()}..
+     * @return Delinquencies are considered equal when they share {@link #getParent()} and {@link #getDetectedOn()}.
      */
     @Override
     public boolean equals(final Object o) {
