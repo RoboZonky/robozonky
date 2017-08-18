@@ -34,6 +34,7 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.slf4j.Logger;
@@ -88,6 +89,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
     static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {
         final CharStream s = CharStreams.fromStream(strategy);
         final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
+        l.removeErrorListener(ConsoleErrorListener.INSTANCE); // prevent any sysout
         final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(new CommonTokenStream(l));
         p.addErrorListener(NaturalLanguageStrategyService.ERROR_LISTENER);
         return p.primaryExpression().result;
@@ -99,7 +101,8 @@ public class NaturalLanguageStrategyService implements StrategyService {
             final ParsedStrategy s = parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguageInvestmentStrategy(s));
         } catch (final Exception ex) {
-            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
+            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
+                                                        ex.getMessage());
             return Optional.empty();
         }
     }
@@ -110,7 +113,8 @@ public class NaturalLanguageStrategyService implements StrategyService {
             final ParsedStrategy s = parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguageSellStrategy(s));
         } catch (final Exception ex) {
-            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
+            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
+                                                        ex.getMessage());
             return Optional.empty();
         }
     }
@@ -121,7 +125,8 @@ public class NaturalLanguageStrategyService implements StrategyService {
             final ParsedStrategy s = parseWithAntlr(strategy);
             return Optional.of(new NaturalLanguagePurchaseStrategy(s));
         } catch (final Exception ex) {
-            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy.", ex);
+            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
+                                                        ex.getMessage());
             return Optional.empty();
         }
     }

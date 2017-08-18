@@ -156,10 +156,11 @@ public class SimpleStrategyService implements StrategyService {
     public Optional<InvestmentStrategy> toInvest(final String strategy) {
         try {
             final InvestmentStrategy s = SimpleStrategyService.parseOrThrow(strategy);
-            SimpleStrategyService.LOGGER.warn("You are using a deprecated strategy format!");
+            SimpleStrategyService.LOGGER.warn("Using legacy strategy format. Secondary marketplace support disabled.");
             return Optional.of(s);
         } catch (final Exception ex) {
-            SimpleStrategyService.LOGGER.debug("Failed converting to a natural strategy. May be OK.", ex);
+            SimpleStrategyService.LOGGER.debug("Failed parsing strategy, OK if using natural directly: {}.",
+                                               ex.getMessage());
             return Optional.empty();
         }
     }
