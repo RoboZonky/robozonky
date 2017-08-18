@@ -32,6 +32,8 @@ import org.junit.Test;
 
 public class SimpleStrategyServiceTest {
 
+    private static final InputStream REAL_LIFE =
+            SimpleStrategyServiceTest.class.getResourceAsStream("strategy-complex.cfg");
     private static final InputStream PROPER =
             SimpleStrategyServiceTest.class.getResourceAsStream("strategy-sample.cfg");
     private static final InputStream PARTIAL =
@@ -85,6 +87,14 @@ public class SimpleStrategyServiceTest {
         final SimpleStrategyService s = new SimpleStrategyService();
         final Optional<InvestmentStrategy> result = s.toInvest(toString(SimpleStrategyServiceTest.WRONG_ASKS));
         Assertions.assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void complex() throws IOException {
+        final SimpleStrategyService s = new SimpleStrategyService();
+        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.REAL_LIFE))).isPresent();
+        Assertions.assertThat(s.toSell(toString(SimpleStrategyServiceTest.REAL_LIFE))).isEmpty();
+        Assertions.assertThat(s.toPurchase(toString(SimpleStrategyServiceTest.REAL_LIFE))).isEmpty();
     }
 
     @Test

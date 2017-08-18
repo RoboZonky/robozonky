@@ -17,7 +17,7 @@
 package com.github.triceo.robozonky.strategy.simple;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,6 +42,7 @@ import com.github.triceo.robozonky.strategy.natural.LoanAmountCondition;
 import com.github.triceo.robozonky.strategy.natural.LoanRatingEnumeratedCondition;
 import com.github.triceo.robozonky.strategy.natural.LoanTermCondition;
 import com.github.triceo.robozonky.strategy.natural.MarketplaceFilter;
+import com.github.triceo.robozonky.strategy.natural.MarketplaceFilterCondition;
 import com.github.triceo.robozonky.strategy.natural.NaturalLanguageInvestmentStrategy;
 import com.github.triceo.robozonky.strategy.natural.ParsedStrategy;
 import com.github.triceo.robozonky.strategy.natural.PortfolioShare;
@@ -79,6 +80,14 @@ public class SimpleStrategyService implements StrategyService {
         return share.multiply(BigDecimal.valueOf(100)).intValue();
     }
 
+    private static MarketplaceFilter getRatingFilter(final Rating r, final MarketplaceFilterCondition condition) {
+        final LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
+        c.add(Collections.singleton(r));
+        final MarketplaceFilter f = new MarketplaceFilter();
+        f.ignoreWhen(Arrays.asList(c, condition));
+        return f;
+    }
+
     private static InvestmentStrategy parseOrThrow(final String strategy) {
         final ImmutableConfiguration config = ImmutableConfiguration.from(strategy);
         // set default values
@@ -106,48 +115,58 @@ public class SimpleStrategyService implements StrategyService {
                             SimpleStrategyService.getShare(config, StrategyFileProperty.MAXIMUM_SHARE, r);
                     return new PortfolioShare(r, min, max);
                 }).collect(Collectors.toList());
-        final Collection<MarketplaceFilter> filters = new ArrayList<>();
-        Stream.of(Rating.values()) // filter loans with less than minimum term
+        // filter loans with less than minimum term
+        final Stream<Optional<MarketplaceFilter>> s1 = Stream.of(Rating.values())
                 .map(r -> {
                     final int min = StrategyFileProperty.MINIMUM_TERM.getValue(r, config::getInt);
-                    return new LoanTermCondition(0, Math.max(0, min - 1)); // <0; 0> is not a problem
-                }).map(condition -> {
-            final MarketplaceFilter f = new MarketplaceFilter();
-            f.ignoreWhen(Collections.singleton(condition));
-            return f;
-        }).forEach(filters::add);
-        Stream.of(Rating.values()) // filter loans with more than maximum term
+                    if (min < 2) { // there will be no loan with term smaller than 1
+                        return Optional.empty();
+                    }
+                    final MarketplaceFilterCondition f = new LoanTermCondition(0, min - 1);
+                    return Optional.of(getRatingFilter(r, f));
+                });
+        // filter loans with more than maximum term
+        final Stream<Optional<MarketplaceFilter>> s2 = Stream.of(Rating.values())
                 .map(r -> {
                     final int max = StrategyFileProperty.MAXIMUM_TERM.getValue(r, config::getInt);
-                    return new LoanTermCondition(max + 1);
-                }).map(condition -> {
-            final MarketplaceFilter f = new MarketplaceFilter();
-            f.ignoreWhen(Collections.singleton(condition));
-            return f;
-        }).forEach(filters::add);
-        Stream.of(Rating.values()) // filter loans with ask for less than minimum
+                    if (max < 1) {
+                        return Optional.empty();
+                    }
+                    final MarketplaceFilterCondition f = new LoanTermCondition(max + 1);
+                    return Optional.of(getRatingFilter(r, f));
+                });
+        // filter loans with ask for less than minimum
+        final Stream<Optional<MarketplaceFilter>> s3 = Stream.of(Rating.values())
                 .map(r -> {
                     final int min = StrategyFileProperty.MINIMUM_ASK.getValue(r, config::getInt);
-                    return new LoanAmountCondition(0, Math.max(0, min - 1)); // <0; 0> is not a problem
-                }).map(condition -> {
-            final MarketplaceFilter f = new MarketplaceFilter();
-            f.ignoreWhen(Collections.singleton(condition));
-            return f;
-        }).forEach(filters::add);
-        Stream.of(Rating.values()) // filter loans with ask more than maximum
+                    if (min < 2) { // amount smaller than 1 is 0, no need to have that filter
+                        return Optional.empty();
+                    }
+                    final MarketplaceFilterCondition f = new LoanAmountCondition(0, min - 1);
+                    return Optional.of(getRatingFilter(r, f));
+                });
+        // filter loans with ask more than maximum
+        final Stream<Optional<MarketplaceFilter>> s4 = Stream.of(Rating.values())
                 .map(r -> {
                     final int max = StrategyFileProperty.MAXIMUM_ASK.getValue(r, config::getInt);
-                    return new LoanAmountCondition(max + 1);
-                }).map(condition -> {
-            final MarketplaceFilter f = new MarketplaceFilter();
-            f.ignoreWhen(Collections.singleton(condition));
-            return f;
-        }).forEach(filters::add);
-        final Map<Boolean, Collection<MarketplaceFilter>> resultingFilters = new HashMap<>();
+                    if (max < 1) {
+                        return Optional.empty();
+                    }
+                    final MarketplaceFilterCondition f = new LoanAmountCondition(max + 1);
+                    return Optional.of(getRatingFilter(r, f));
+                });
+        // put all filters together
+        final Collection<MarketplaceFilter> filters = Stream.of(s1, s2, s3, s4)
+                .flatMap(s -> s)
+                .flatMap(s -> s.map(Stream::of).orElse(Stream.empty()))
+                .collect(Collectors.toList());
+        final Map<Boolean, Collection<MarketplaceFilter>> resultingFilters = new HashMap<>(2);
         resultingFilters.put(true, filters);
-        resultingFilters.put(false, Collections.emptyList());
+        resultingFilters.put(false, Collections.emptyList()); // no secondary marketplace support
+        // and create the strategy
         final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, resultingFilters,
                                                     Collections.emptyList());
+        LOGGER.debug("Converted strategy: {}.", p);
         final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);
         return new SimpleStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);
     }
