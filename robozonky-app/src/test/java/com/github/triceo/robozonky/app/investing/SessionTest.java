@@ -116,6 +116,7 @@ public class SessionTest extends AbstractInvestingTest {
         // run test
         final int amount = 200;
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptorWithoutCaptcha();
+        Mockito.when(z.getLoan(ArgumentMatchers.eq(ld.item().getId()))).thenReturn(ld.item());
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
         try (final Session it = Session.create(new Investor.Builder(), z, lds)) {
             it.invest(ld.recommend(BigDecimal.valueOf(amount)).get());
@@ -277,6 +278,7 @@ public class SessionTest extends AbstractInvestingTest {
         final int amountToInvest = 200;
         final RecommendedLoan r = AbstractInvestingTest.mockLoanDescriptor().recommend(amountToInvest).get();
         final Zonky z = AbstractInvestingTest.harmlessZonky(oldBalance);
+        Mockito.when(z.getLoan(ArgumentMatchers.eq(r.descriptor().item().getId()))).thenReturn(r.descriptor().item());
         final Investor p = Mockito.mock(Investor.class);
         Mockito.doReturn(z).when(p).getZonky();
         Mockito.doReturn(new ZonkyResponse(amountToInvest))

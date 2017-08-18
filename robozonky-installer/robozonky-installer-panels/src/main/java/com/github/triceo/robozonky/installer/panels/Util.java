@@ -60,6 +60,7 @@ class Util {
         p.setProperty("investmentPurchased.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentRejected.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentMade.enabled", isInvestmentEmailEnabled);
+        p.setProperty("investmentSold.enabled", isInvestmentEmailEnabled);
         p.setProperty("investmentDelegated.enabled", isInvestmentEmailEnabled);
         p.setProperty("saleOffered.enabled", isInvestmentEmailEnabled);
         p.setProperty("loanNowDelinquent.enabled", "false"); // by default, let's prevent people from panicking

@@ -24,6 +24,7 @@ import com.beust.jcommander.ParametersDelegate;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
 import com.github.triceo.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.triceo.robozonky.app.investing.Investor;
+import com.github.triceo.robozonky.app.portfolio.BlockedAmountsUpdater;
 import com.github.triceo.robozonky.app.portfolio.PortfolioUpdater;
 import com.github.triceo.robozonky.common.extensions.MarketplaceLoader;
 import com.github.triceo.robozonky.common.secrets.Credentials;
@@ -52,6 +53,7 @@ class DaemonOperatingMode extends OperatingMode {
                                                                       marketplaceFragment.getDelayBetweenChecks());
                     // only schedule internal data updates after daemon had a chance to initialize
                     Scheduler.BACKGROUND_SCHEDULER.submit(new PortfolioUpdater(auth), Duration.ofHours(1));
+                    Scheduler.BACKGROUND_SCHEDULER.submit(new BlockedAmountsUpdater(auth), Duration.ofMinutes(1));
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }

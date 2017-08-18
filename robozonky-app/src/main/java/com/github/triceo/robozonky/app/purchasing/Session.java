@@ -34,9 +34,11 @@ import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.triceo.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
+import com.github.triceo.robozonky.api.remote.enums.TransactionCategory;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.RecommendedParticipation;
@@ -167,9 +169,11 @@ class Session implements AutoCloseable {
 
     private synchronized void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
-        stillAvailable.removeIf(l -> l.item().getLoanId() == i.getLoanId());
-        balance = balance.subtract(i.getAmount());
-        Portfolio.INSTANCE.update(zonky, Portfolio.UpdateType.PARTIAL);
+        final int id = i.getLoanId();
+        stillAvailable.removeIf(l -> l.item().getLoanId() == id);
+        final BigDecimal amount = i.getAmount();
+        balance = balance.subtract(amount);
+        Portfolio.INSTANCE.newBlockedAmount(zonky, new BlockedAmount(id, amount, TransactionCategory.SMP_BUY));
         portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }
 

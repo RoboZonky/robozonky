@@ -17,27 +17,32 @@
 package com.github.triceo.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.notifications.InvestmentSoldEvent;
+import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Loan;
 import com.github.triceo.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
+import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
@@ -47,41 +52,39 @@ public enum Portfolio {
 
     INSTANCE;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Investment.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final AtomicReference<List<Investment>> investments = new AtomicReference<>(Collections.emptyList()),
             investmentsPending = new AtomicReference<>(Collections.emptyList());
     private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>(initSortedMap());
-    private final Map<Consumer<Zonky>, Portfolio.UpdateType> updaters = new ConcurrentHashMap<>(0);
-    private final AtomicBoolean isUpdating = new AtomicBoolean(false);
+    private final Set<Consumer<Zonky>> updaters = new CopyOnWriteArraySet<>();
+    private final AtomicBoolean ranOnce = new AtomicBoolean(false), isUpdating = new AtomicBoolean(false);
 
     private static <R, S> SortedMap<R, S> initSortedMap() {
         return new ConcurrentSkipListMap<>();
     }
 
+    private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
+        final Loan l = getLoan(zonky, blockedAmount.getLoanId());
+        return new Investment(l, blockedAmount.getAmount().intValue());
+    }
+
     public void registerUpdater(final Consumer<Zonky> updater) {
-        registerUpdater(updater, Portfolio.UpdateType.FULL);
+        updaters.add(updater);
     }
 
-    public void registerUpdater(final Consumer<Zonky> updater, final Portfolio.UpdateType updateType) {
-        updaters.put(updater, updateType);
-    }
-
-    public void update(final Zonky zonky, final Portfolio.UpdateType updateType) {
+    public void update(final Zonky zonky) {
         if (this.isUpdating.getAndSet(true)) {
             LOGGER.trace("Update ignored due to already being updated.");
             return;
         } else {
             try {
-                LOGGER.trace("Update started: {}.", updateType);
-                if (updateType == Portfolio.UpdateType.FULL) {
-                    loanCache.set(initSortedMap());
-                    investments.set(zonky.getInvestments().collect(Collectors.toList()));
-                }
-                investmentsPending.set(Util.retrieveInvestmentsRepresentedByBlockedAmounts(zonky));
-                updaters.forEach((u, requiredType) -> {
-                    if (requiredType == Portfolio.UpdateType.FULL && updateType == Portfolio.UpdateType.PARTIAL) {
-                        return;
-                    }
+                LOGGER.trace("Started.");
+                loanCache.set(initSortedMap());
+                // read all investments from Zonky
+                investments.set(zonky.getInvestments().collect(Collectors.toList()));
+                // and make updates based on which have been recently made or sold
+                newBlockedAmounts(zonky, new TreeSet<>(zonky.getBlockedAmounts().collect(Collectors.toSet())));
+                updaters.forEach((u) -> {
                     LOGGER.trace("Running dependent: {}", u);
                     u.accept(zonky);
                 });
@@ -90,16 +93,51 @@ public enum Portfolio {
                 new DaemonRuntimeExceptionHandler().handle(t);
             } finally {
                 this.isUpdating.set(false);
+                this.ranOnce.set(true);
             }
         }
     }
 
-    public boolean isUpdating() {
-        return this.isUpdating.get();
+    public void newBlockedAmounts(final Zonky zonky, final SortedSet<BlockedAmount> blockedAmounts) {
+        for (final BlockedAmount ba : blockedAmounts) { // need to "replay" operations as they come in
+            newBlockedAmount(zonky, ba);
+        }
     }
 
-    public void update(final Zonky zonky) {
-        update(zonky, Portfolio.UpdateType.FULL);
+    public void newBlockedAmount(final Zonky zonky, final BlockedAmount blockedAmount) {
+        switch (blockedAmount.getCategory()) {
+            case INVESTMENT: // potential new investment detected
+            case SMP_BUY: // new participation purchase notified from within RoboZonky
+                investmentsPending.updateAndGet(pending -> {
+                    if (pending.stream().noneMatch(i -> i.getLoanId() == blockedAmount.getLoanId())) {
+                        final List<Investment> result = new ArrayList<>(investmentsPending.get());
+                        result.add(toInvestment(zonky, blockedAmount));
+                        return result;
+                    } else {
+                        return pending;
+                    }
+                });
+                return;
+            case SMP_SALE_FEE: // potential new participation sale detected
+                // before daily update is run, the newly sold participation will show as active
+                getActive()
+                        .filter(i -> i.getLoanId() == blockedAmount.getLoanId())
+                        .peek(i -> {
+                            final int balance = zonky.getWallet().getAvailableBalance().intValue();
+                            Events.fire(new InvestmentSoldEvent(i, balance));
+                        })
+                        .forEach(i -> {
+                            i.setIsOnSmp(false);
+                            i.setStatus(InvestmentStatus.SOLD);
+                        });
+                return;
+            default: // no other notable events
+                return;
+        }
+    }
+
+    public boolean isUpdating() {
+        return !this.ranOnce.get() || this.isUpdating.get();
     }
 
     public Stream<Investment> getActiveWithPaymentStatus(final Set<PaymentStatus> statuses) {
@@ -153,13 +191,7 @@ public enum Portfolio {
         investments.set(Collections.emptyList());
         loanCache.set(initSortedMap());
         updaters.clear();
-    }
-
-    public enum UpdateType {
-
-        FULL,
-        PARTIAL
-
+        ranOnce.set(false);
     }
 
 }

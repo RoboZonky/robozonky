@@ -37,7 +37,9 @@ import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.triceo.robozonky.api.remote.ControlApi;
+import com.github.triceo.robozonky.api.remote.entities.BlockedAmount;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
+import com.github.triceo.robozonky.api.remote.enums.TransactionCategory;
 import com.github.triceo.robozonky.api.strategies.LoanDescriptor;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
@@ -216,7 +218,8 @@ class Session implements AutoCloseable {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> l.item().getId() == i.getLoanId());
         balance = balance.subtract(i.getAmount());
-        Portfolio.INSTANCE.update(investor.getZonky(), Portfolio.UpdateType.PARTIAL);
+        final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getAmount(), TransactionCategory.INVESTMENT);
+        Portfolio.INSTANCE.newBlockedAmount(investor.getZonky(), b);
         portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }
 

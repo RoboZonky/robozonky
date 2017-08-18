@@ -35,6 +35,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
@@ -101,6 +102,7 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         events.put(SupportedListener.INVESTMENT_DELEGATED,
                    new InvestmentDelegatedEvent(recommendation, 200, "random"));
         events.put(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200, true));
+        events.put(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, 200));
         events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
         events.put(SupportedListener.INVESTMENT_REJECTED,
                    new InvestmentRejectedEvent(recommendation, 200, "random"));

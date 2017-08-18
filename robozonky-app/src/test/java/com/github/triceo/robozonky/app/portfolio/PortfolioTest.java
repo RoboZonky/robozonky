@@ -69,21 +69,12 @@ public class PortfolioTest {
 
     @Test
     public void updating() {
-        final Consumer<Zonky> fullUpdateNeeded = Mockito.mock(Consumer.class),
-                partialUpdateNeeded = Mockito.mock(Consumer.class);
-        Portfolio.INSTANCE.registerUpdater(fullUpdateNeeded);
-        Portfolio.INSTANCE.registerUpdater(partialUpdateNeeded, Portfolio.UpdateType.PARTIAL);
+        final Consumer<Zonky> updateNeeded = Mockito.mock(Consumer.class);
+        Portfolio.INSTANCE.registerUpdater(updateNeeded);
         final Zonky z = Mockito.mock(Zonky.class);
-        Assertions.assertThat(Portfolio.INSTANCE.isUpdating()).isFalse();
-        // partial update
-        Portfolio.INSTANCE.update(z, Portfolio.UpdateType.PARTIAL);
-        Mockito.verify(partialUpdateNeeded).accept(ArgumentMatchers.eq(z));
-        Mockito.verify(fullUpdateNeeded, Mockito.never()).accept(ArgumentMatchers.any());
-        Mockito.verify(z, Mockito.never()).getInvestments();
+        Assertions.assertThat(Portfolio.INSTANCE.isUpdating()).isTrue();
         Portfolio.INSTANCE.update(z);
-        // full update
-        Mockito.verify(partialUpdateNeeded, Mockito.times(2)).accept(ArgumentMatchers.eq(z));
-        Mockito.verify(fullUpdateNeeded).accept(ArgumentMatchers.eq(z));
+        Mockito.verify(updateNeeded).accept(ArgumentMatchers.eq(z));
         Mockito.verify(z).getInvestments();
         Assertions.assertThat(Portfolio.INSTANCE.isUpdating()).isFalse();
     }

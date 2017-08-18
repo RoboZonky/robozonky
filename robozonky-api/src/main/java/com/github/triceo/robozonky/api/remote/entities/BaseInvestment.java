@@ -89,4 +89,8 @@ abstract class BaseInvestment extends BaseEntity {
     public Optional<Loan> getLoan() {
         return Optional.ofNullable(loan);
     }
+
+    public void setStatus(final InvestmentStatus status) {
+        this.status = status;
+    }
 }

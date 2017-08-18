@@ -19,12 +19,21 @@ package com.github.triceo.robozonky.app.purchasing;
 import java.time.OffsetDateTime;
 
 import com.github.triceo.robozonky.app.authentication.Authenticated;
+import com.github.triceo.robozonky.app.portfolio.Portfolio;
+import com.github.triceo.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class PurchasingTest {
+
+    @Before
+    public void initPortfolio() {
+        final Zonky z = Mockito.mock(Zonky.class);
+        Portfolio.INSTANCE.update(z);
+    }
 
     @Test
     public void update() {

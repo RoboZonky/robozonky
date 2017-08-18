@@ -24,6 +24,7 @@ import com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.triceo.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.triceo.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.triceo.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
@@ -52,6 +53,17 @@ enum SupportedListener {
         @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new InvestmentMadeEventListener(properties);
+        }
+    },
+    INVESTMENT_SOLD {
+        @Override
+        public Class<? extends Event> getEventType() {
+            return InvestmentSoldEvent.class;
+        }
+
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new InvestmentSoldEventListener(properties);
         }
     },
     INVESTMENT_SKIPPED {
