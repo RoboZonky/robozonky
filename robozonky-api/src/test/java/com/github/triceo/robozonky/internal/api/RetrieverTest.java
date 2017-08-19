@@ -22,8 +22,16 @@ import java.util.function.Supplier;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class RetrieverTest {
+
+    @Test
+    public void throwing() {
+        final Supplier<Optional<String>> s = Mockito.mock(Supplier.class);
+        Mockito.doThrow(InterruptedException.class).when(s).get();
+        Assertions.assertThat(Retriever.retrieve(s)).isEmpty();
+    }
 
     @Test
     public void proper() {

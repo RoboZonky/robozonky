@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.github.triceo.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Rule;
@@ -36,9 +37,9 @@ public class SettingsTest {
 
     private static final class TemporalPredicate implements Predicate<TemporalAmount> {
 
-        private final int seconds;
+        private final long seconds;
 
-        public TemporalPredicate(final int seconds) {
+        public TemporalPredicate(final long seconds) {
             this.seconds = seconds;
         }
 
@@ -74,11 +75,17 @@ public class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(5 * 60));
             softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
                     .matches(new SettingsTest.TemporalPredicate(2 * 60));
+            Stream.of(Rating.values()).forEach(r -> {
+                softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
+                        .matches(new SettingsTest.TemporalPredicate(r.getCaptchaDelay().get(ChronoUnit.SECONDS)));
+            });
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
+            softly.assertThat(Settings.INSTANCE.getSuddenDeathDelay())
+                    .matches(new SettingsTest.TemporalPredicate(5 * 60));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
         });
     }
@@ -102,11 +109,17 @@ public class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(1000 * 60));
             softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
                     .matches(new SettingsTest.TemporalPredicate(1000));
+            Stream.of(Rating.values()).forEach(r -> {
+                softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
+                        .matches(new SettingsTest.TemporalPredicate(1000));
+            });
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(1000);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));
+            softly.assertThat(Settings.INSTANCE.getSuddenDeathDelay())
+                    .matches(new SettingsTest.TemporalPredicate(1000 * 60));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(1000);
         });
     }
