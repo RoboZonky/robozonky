@@ -31,8 +31,8 @@ final class InvestmentMadeEventListener extends AbstractEmailingListener<Investm
 
     @Override
     String getSubject(final InvestmentMadeEvent event) {
-        return "Nová investice - " + event.getInvestment().getAmount() + ",- Kč, půjčka č. " +
-                event.getInvestment().getLoanId();
+        final Investment i = event.getInvestment();
+        return "Nová investice - " + i.getAmount().intValue() + ",- Kč, půjčka č. " + i.getLoanId();
     }
 
     @Override

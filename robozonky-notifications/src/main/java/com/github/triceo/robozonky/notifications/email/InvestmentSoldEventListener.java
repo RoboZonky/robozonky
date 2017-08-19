@@ -31,8 +31,8 @@ final class InvestmentSoldEventListener extends AbstractEmailingListener<Investm
 
     @Override
     String getSubject(final InvestmentSoldEvent event) {
-        return "Participace prodána - " + event.getInvestment().getAmount() + ",- Kč, půjčka č. " +
-                event.getInvestment().getLoanId();
+        final Investment i = event.getInvestment();
+        return "Participace prodána - " + i.getRemainingPrincipal().intValue() + ",- Kč, půjčka č. " + i.getLoanId();
     }
 
     @Override
@@ -44,7 +44,7 @@ final class InvestmentSoldEventListener extends AbstractEmailingListener<Investm
     protected Map<String, Object> getData(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = new HashMap<>();
-        result.put("investedAmount", i.getAmount());
+        result.put("investedAmount", i.getRemainingPrincipal());
         result.put("loanId", i.getLoanId());
         result.put("loanRating", i.getRating().getCode());
         result.put("loanTerm", i.getLoanTermInMonth());
