@@ -24,7 +24,6 @@ import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.Rating;
 import com.github.triceo.robozonky.api.strategies.ParticipationDescriptor;
 
-// FIXME split into two classes based on primary and secondary marketplace
 public class Investment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;

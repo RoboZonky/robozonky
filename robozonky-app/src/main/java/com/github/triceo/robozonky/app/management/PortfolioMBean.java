@@ -28,8 +28,4 @@ public interface PortfolioMBean extends BaseMBean {
     Map<String, Integer> getInvestedAmountPerRating();
 
     Map<String, BigDecimal> getRatingShare();
-
-    int getExpectedYield();
-
-    BigDecimal getRelativeExpectedYield();
 }

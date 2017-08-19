@@ -76,8 +76,8 @@ public class Selling implements Consumer<Zonky> {
         }
     }
 
-    private void sell(final SellStrategy strategy, final Zonky zonky) { // FIXME dry run balance?
-        final PortfolioOverview portfolio = Portfolio.INSTANCE.calculateOverview(zonky);
+    private void sell(final SellStrategy strategy, final Zonky zonky) {
+        final PortfolioOverview portfolio = Portfolio.INSTANCE.calculateOverview(zonky, isDryRun);
         final Set<InvestmentDescriptor> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace()
                 .parallel()
                 .map(i -> getDescriptor(i, zonky))
@@ -88,7 +88,7 @@ public class Selling implements Consumer<Zonky> {
                 .map(r -> processInvestment(zonky, r))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        Events.fire(new SellingCompletedEvent(investmentsSold, Portfolio.INSTANCE.calculateOverview(zonky)));
+        Events.fire(new SellingCompletedEvent(investmentsSold, Portfolio.INSTANCE.calculateOverview(zonky, isDryRun)));
     }
 
     @Override

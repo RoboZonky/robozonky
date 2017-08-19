@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.investing;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +44,6 @@ import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.api.strategies.RecommendedLoan;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
-import com.github.triceo.robozonky.app.util.ApiUtil;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
@@ -62,6 +60,21 @@ class Session implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private static final AtomicReference<Session> INSTANCE = new AtomicReference<>(null);
+    private final List<LoanDescriptor> loansStillAvailable;
+    private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>();
+    private final Investor investor;
+    private final SessionState state;
+    private PortfolioOverview portfolioOverview;
+
+    private Session(final Set<LoanDescriptor> marketplace, final Investor.Builder proxy, final Zonky zonky) {
+        this.investor = proxy.build(zonky);
+        this.state = new SessionState(marketplace);
+        this.loansStillAvailable = marketplace.stream()
+                .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> l.item().getId() == l2.item().getId()))
+                .filter(l -> Portfolio.INSTANCE.getPending().noneMatch(i -> l.item().getId() == i.getLoanId()))
+                .collect(Collectors.toList());
+        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, investor.isDryRun());
+    }
 
     /**
      * Create a new instance of this class. Only one instance is expected to exist at a time.
@@ -93,36 +106,10 @@ class Session implements AutoCloseable {
             if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailable().isEmpty()) {
                 command.accept(session);
             }
-            final PortfolioOverview portfolio = session.getPortfolioOverview();
-            Session.LOGGER.info("Current value of portfolio is {} CZK, annual expected yield is {} % ({} CZK).",
-                                portfolio.getCzkInvested(),
-                                portfolio.getRelativeExpectedYield()
-                                        .scaleByPowerOfTen(2)
-                                        .setScale(2, RoundingMode.HALF_EVEN),
-                                portfolio.getCzkExpectedYield());
             final Collection<Investment> result = session.getResult();
-            Events.fire(new ExecutionCompletedEvent(result, portfolio));
+            Events.fire(new ExecutionCompletedEvent(result, session.getPortfolioOverview()));
             return Collections.unmodifiableCollection(result);
         }
-    }
-
-    private final List<LoanDescriptor> loansStillAvailable;
-    private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>();
-    private PortfolioOverview portfolioOverview;
-    private final Investor investor;
-    private BigDecimal balance;
-    private final SessionState state;
-
-    private Session(final Set<LoanDescriptor> marketplace, final Investor.Builder proxy, final Zonky zonky) {
-        this.investor = proxy.build(zonky);
-        this.balance = investor.isDryRun() ? ApiUtil.getDryRunBalance(zonky) : ApiUtil.getLiveBalance(zonky);
-        Session.LOGGER.info("Starting account balance: {} CZK.", balance);
-        this.state = new SessionState(marketplace);
-        this.loansStillAvailable = marketplace.stream()
-                .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> l.item().getId() == l2.item().getId()))
-                .filter(l -> Portfolio.INSTANCE.getPending().noneMatch(i -> l.item().getId() == i.getLoanId()))
-                .collect(Collectors.toList());
-        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
     }
 
     private synchronized void ensureOpen() {
@@ -167,7 +154,7 @@ class Session implements AutoCloseable {
         ensureOpen();
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
-        if (balance.intValue() < recommendation.amount().intValue()) {
+        if (portfolioOverview.getCzkAvailable() < recommendation.amount().intValue()) {
             // should not be allowed by the calling code
             return false;
         }
@@ -176,10 +163,11 @@ class Session implements AutoCloseable {
         final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         Session.LOGGER.debug("Response for loan {}: {}.", loanId, response);
         final String providerId = investor.getConfirmationProviderId().orElse("-");
+        final int balance = portfolioOverview.getCzkAvailable();
         switch (response.getType()) {
             case REJECTED:
                 return investor.getConfirmationProviderId().map(c -> {
-                    Events.fire(new InvestmentRejectedEvent(recommendation, balance.intValue(), providerId));
+                    Events.fire(new InvestmentRejectedEvent(recommendation, balance, providerId));
                     // rejected through a confirmation provider => forget
                     discard(loan);
                     return false;
@@ -191,7 +179,7 @@ class Session implements AutoCloseable {
                     return false;
                 });
             case DELEGATED:
-                Events.fire(new InvestmentDelegatedEvent(recommendation, balance.intValue(), providerId));
+                Events.fire(new InvestmentDelegatedEvent(recommendation, balance, providerId));
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
                     discard(loan);
@@ -204,7 +192,7 @@ class Session implements AutoCloseable {
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
                 final Investment i = new Investment(recommendation.descriptor().item(), confirmedAmount);
                 markSuccessfulInvestment(i);
-                Events.fire(new InvestmentMadeEvent(i, balance.intValue(), investor.isDryRun()));
+                Events.fire(new InvestmentMadeEvent(i, portfolioOverview.getCzkAvailable(), investor.isDryRun()));
                 return true;
             case SEEN_BEFORE:
                 Events.fire(new InvestmentSkippedEvent(recommendation));
@@ -217,10 +205,10 @@ class Session implements AutoCloseable {
     private synchronized void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> l.item().getId() == i.getLoanId());
-        balance = balance.subtract(i.getAmount());
         final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getAmount(), TransactionCategory.INVESTMENT);
         Portfolio.INSTANCE.newBlockedAmount(investor.getZonky(), b);
-        portfolioOverview = Portfolio.INSTANCE.calculateOverview(balance);
+        final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(i.getAmount());
+        portfolioOverview = Portfolio.INSTANCE.calculateOverview(newBalance);
     }
 
     private synchronized void discard(final LoanDescriptor loan) {

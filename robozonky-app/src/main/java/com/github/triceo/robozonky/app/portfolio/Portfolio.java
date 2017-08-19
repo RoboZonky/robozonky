@@ -43,6 +43,7 @@ import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 import com.github.triceo.robozonky.app.Events;
+import com.github.triceo.robozonky.app.util.ApiUtil;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
@@ -166,8 +167,9 @@ public enum Portfolio {
         return PortfolioOverview.calculate(balance, allInvestment);
     }
 
-    public PortfolioOverview calculateOverview(final Zonky zonky) {
-        return calculateOverview(zonky.getWallet().getAvailableBalance());
+    public PortfolioOverview calculateOverview(final Zonky zonky, final boolean isDryRun) {
+        final BigDecimal balance = isDryRun ? ApiUtil.getDryRunBalance(zonky) : ApiUtil.getLiveBalance(zonky);
+        return calculateOverview(balance);
     }
 
     public Loan getLoan(final Zonky zonky, final int loanId) {

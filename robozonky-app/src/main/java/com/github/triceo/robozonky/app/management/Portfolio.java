@@ -18,7 +18,6 @@ package com.github.triceo.robozonky.app.management;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,11 +35,8 @@ import com.github.triceo.robozonky.api.strategies.PortfolioOverview;
 
 public class Portfolio implements PortfolioMBean {
 
-    private static final Comparator<Rating> COMPARATOR =
-            Comparator.comparing(Rating::getExpectedYield).thenComparing(Rating::getCode);
-
     private static Stream<Rating> getRatingStream() {
-        return Stream.of(Rating.values()).sorted(Portfolio.COMPARATOR);
+        return Stream.of(Rating.values()).sorted();
     }
 
     private PortfolioOverview latestPortfolioOverview;
@@ -77,16 +73,6 @@ public class Portfolio implements PortfolioMBean {
                 .collect(Collectors.toMap(Rating::getCode,
                                           r -> get(p -> p.getShareOnInvestment(r), BigDecimal.ZERO), (r1, r2) -> r2,
                                           LinkedHashMap::new));
-    }
-
-    @Override
-    public int getExpectedYield() {
-        return get(PortfolioOverview::getCzkExpectedYield, 0);
-    }
-
-    @Override
-    public BigDecimal getRelativeExpectedYield() {
-        return get(PortfolioOverview::getRelativeExpectedYield, BigDecimal.ZERO);
     }
 
     @Override

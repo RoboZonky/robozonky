@@ -36,8 +36,6 @@ public class PortfolioTest {
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(1000);
         Mockito.when(portfolio.getCzkInvested()).thenReturn(10000);
-        Mockito.when(portfolio.getRelativeExpectedYield()).thenReturn(BigDecimal.ONE);
-        Mockito.when(portfolio.getCzkExpectedYield()).thenReturn(10000);
         Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.any())).thenReturn(BigDecimal.ONE);
         Mockito.when(portfolio.getCzkInvested(ArgumentMatchers.any())).thenReturn(1000);
         final Portfolio mbean = new Portfolio();
@@ -45,8 +43,6 @@ public class PortfolioTest {
         mbean.handle(evt);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(mbean.getAvailableBalance()).isEqualTo(portfolio.getCzkAvailable());
-            softly.assertThat(mbean.getExpectedYield()).isEqualTo(portfolio.getCzkExpectedYield());
-            softly.assertThat(mbean.getRelativeExpectedYield()).isEqualTo(portfolio.getRelativeExpectedYield());
             softly.assertThat(mbean.getInvestedAmount()).isEqualTo(portfolio.getCzkInvested());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
             Stream.of(Rating.values()).forEach(r -> {

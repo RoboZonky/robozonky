@@ -39,8 +39,6 @@ public class PortfolioOverviewTest {
             }
             softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(o.getCzkInvested()).isEqualTo(0);
-            softly.assertThat(o.getCzkExpectedYield()).isEqualTo(0);
-            softly.assertThat(o.getRelativeExpectedYield()).isEqualByComparingTo(BigDecimal.ZERO);
         });
     }
 
