@@ -52,7 +52,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final String username;
     private final boolean faultTolerant;
     private final Marketplace marketplace;
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(3, THREAD_FACTORY);
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, THREAD_FACTORY);
     private final TemporalAmount periodBetweenChecks;
     private final Collection<Daemon> daemons;
     private final CountDownLatch circuitBreaker;
