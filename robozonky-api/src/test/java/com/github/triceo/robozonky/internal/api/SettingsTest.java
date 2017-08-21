@@ -84,8 +84,6 @@ public class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
-            softly.assertThat(Settings.INSTANCE.getSuddenDeathDelay())
-                    .matches(new SettingsTest.TemporalPredicate(5 * 60));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
         });
     }
@@ -118,8 +116,6 @@ public class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));
-            softly.assertThat(Settings.INSTANCE.getSuddenDeathDelay())
-                    .matches(new SettingsTest.TemporalPredicate(1000 * 60));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(1000);
         });
     }

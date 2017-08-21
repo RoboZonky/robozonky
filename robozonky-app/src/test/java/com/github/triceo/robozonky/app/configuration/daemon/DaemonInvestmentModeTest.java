@@ -92,7 +92,6 @@ public class DaemonInvestmentModeTest {
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1))) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(d.getUsername()).isEqualTo(s.getUsername());
-                softly.assertThat(d.isDryRun()).isEqualTo(b.isDryRun());
                 softly.assertThat(d.isFaultTolerant()).isEqualTo(true);
             });
         }
@@ -109,10 +108,7 @@ public class DaemonInvestmentModeTest {
         try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, b, true, m, "",
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1))) {
             DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().countDown(); // don't block the thread
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(d.get()).isEqualTo(ReturnCode.OK);
-                softly.assertThat(Runtime.getRuntime().removeShutdownHook(d.getShutdownHook())).isTrue();
-            });
+            Assertions.assertThat(d.get()).isEqualTo(ReturnCode.OK);
         }
         Mockito.verify(m).close();
     }

@@ -19,8 +19,6 @@ package com.github.triceo.robozonky.common.remote;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.triceo.robozonky.api.remote.LoanApi;
-import com.github.triceo.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -28,16 +26,6 @@ import org.mockito.Mockito;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class PaginatedApiTest {
-
-    @Test
-    public void redirectAndLiveQuery() {
-        // FIXME will fail when Zonky API is down
-        final RoboZonkyFilter f = new RoboZonkyFilter();
-        final PaginatedApi<Loan, LoanApi> pa = new PaginatedApi<>(LoanApi.class, "http://api.zonky.cz", null);
-        final PaginatedResult<Loan> loans = pa.execute(LoanApi::items, Sort.unspecified(), 0, 10, f);
-        Assertions.assertThat(loans.getCurrentPageId()).isEqualTo(0);
-        Assertions.assertThat(loans.getTotalResultCount()).isGreaterThanOrEqualTo(0);
-    }
 
     @Test
     public void checkSort() {

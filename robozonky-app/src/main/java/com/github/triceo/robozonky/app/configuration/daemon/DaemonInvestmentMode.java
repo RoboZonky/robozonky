@@ -18,6 +18,7 @@ package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,33 +50,29 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
     private final String username;
-    private final boolean faultTolerant, dryRun;
+    private final boolean faultTolerant;
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(3, THREAD_FACTORY);
     private final TemporalAmount periodBetweenChecks;
-    private final SuddenDeathDetection suddenDeath;
+    private final Collection<Daemon> daemons;
     private final CountDownLatch circuitBreaker;
-    private final Thread shutdownHook;
 
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
                                 final Marketplace marketplace, final String strategyLocaion,
                                 final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
         this.username = auth.getSecretProvider().getUsername();
-        this.dryRun = builder.isDryRun();
         this.faultTolerant = isFaultTolerant;
         this.circuitBreaker = BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
-        this.shutdownHook = new DaemonShutdownHook(circuitBreaker);
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
+        Runtime.getRuntime().addShutdownHook(new DaemonShutdownHook(circuitBreaker));
         this.marketplace = marketplace;
         this.periodBetweenChecks = periodBetweenChecks;
+        final boolean dryRun = builder.isDryRun();
         Portfolio.INSTANCE.registerUpdater(new Selling(RefreshableSellStrategy.create(strategyLocaion), dryRun));
-        final Daemon investing = new Investing(auth, builder, marketplace,
-                                               RefreshableInvestmentStrategy.create(strategyLocaion),
-                                               maximumSleepPeriod);
-        final Daemon purchasing = new Purchasing(auth, RefreshablePurchaseStrategy.create(strategyLocaion),
-                                                 maximumSleepPeriod, dryRun
-        );
-        this.suddenDeath = new SuddenDeathDetection(circuitBreaker, investing, purchasing);
+        this.daemons = Arrays.asList(new Investing(auth, builder,
+                                                   marketplace, RefreshableInvestmentStrategy.create(strategyLocaion),
+                                                   maximumSleepPeriod),
+                                     new Purchasing(auth, RefreshablePurchaseStrategy.create(strategyLocaion),
+                                                    maximumSleepPeriod, dryRun));
     }
 
     static Map<Daemon, Long> getDelays(final Collection<Daemon> daemons, final long checkPeriodInSeconds) {
@@ -89,30 +86,21 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return result;
     }
 
-    Thread getShutdownHook() {
-        return shutdownHook;
-    }
-
     @Override
     public ReturnCode get() {
         try {
             final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
             LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
             // schedule the tasks some time apart so that the CPU is evenly utilized
-            getDelays(suddenDeath.getDaemonsToWatch(), checkPeriodInSeconds).forEach((daemon, delayInMillis) -> {
-                executor.scheduleWithFixedDelay(daemon, delayInMillis, checkPeriodInSeconds * 1000,
-                                                TimeUnit.MILLISECONDS);
+            getDelays(daemons, checkPeriodInSeconds).forEach((daemon, delayInMillis) -> {
+                executor.scheduleWithFixedDelay(daemon, delayInMillis, checkPeriodInSeconds, TimeUnit.SECONDS);
             });
-            executor.scheduleAtFixedRate(suddenDeath, 0, checkPeriodInSeconds, TimeUnit.SECONDS);
             // block until request to stop the app is received
             LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
             circuitBreaker.await();
             LOGGER.trace("Request to stop received.");
-            if (suddenDeath.isSuddenDeath()) {
-                throw new SuddenDeathException();
-            }
             return ReturnCode.OK;
-        } catch (final SuddenDeathException | InterruptedException ex) { // handle unexpected runtime error
+        } catch (final InterruptedException ex) { // handle unexpected runtime error
             LOGGER.error("Thread stack traces:");
             Thread.getAllStackTraces().forEach((key, value) -> {
                 LOGGER.error("Stack trace for thread {}: {}", key, Stream.of(value)
@@ -126,11 +114,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
     @Override
     public boolean isFaultTolerant() {
         return faultTolerant;
-    }
-
-    @Override
-    public boolean isDryRun() {
-        return dryRun;
     }
 
     @Override

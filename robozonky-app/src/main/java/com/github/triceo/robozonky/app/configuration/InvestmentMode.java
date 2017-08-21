@@ -25,8 +25,6 @@ public interface InvestmentMode extends Supplier<ReturnCode>,
 
     boolean isFaultTolerant();
 
-    boolean isDryRun();
-
     String getUsername();
 
     @Override

@@ -39,8 +39,7 @@ class TestOperatingMode extends OperatingMode {
                 return false;
             }
 
-            @Override
-            public boolean isDryRun() {
+            private boolean isDryRun() {
                 return false;
             }
 

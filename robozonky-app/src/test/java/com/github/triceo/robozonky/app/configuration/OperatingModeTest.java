@@ -44,7 +44,6 @@ public class OperatingModeTest {
         Assertions.assertThat(config).isPresent();
         final InvestmentMode result = config.get();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.isDryRun()).isFalse();
             softly.assertThat(result.isFaultTolerant()).isFalse();
             softly.assertThat(result.get()).isEqualTo(ReturnCode.OK);
         });
@@ -64,7 +63,6 @@ public class OperatingModeTest {
         final OperatingMode mode = new DaemonOperatingMode();
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
         Assertions.assertThat(config).isPresent();
-        Assertions.assertThat(config.get().isDryRun()).isTrue();
     }
 
     @Test
