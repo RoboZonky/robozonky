@@ -363,7 +363,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.6.2</version>
           <configuration>
             <compilerArgument>-Werror</compilerArgument>
             <compilerVersion>${java.version}</compilerVersion>
@@ -382,9 +382,9 @@
             <workingDirectory>${basedir}/target</workingDirectory>
           </configuration>
         </plugin>
-        <plugin> <!-- Otherwise we're hitting http://jira.codehaus.org/browse/MASSEMBLY-462 -->
+        <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.0</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
