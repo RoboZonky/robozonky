@@ -34,6 +34,7 @@ public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
 
     public PortfolioUpdater(final Authenticated authenticated) {
         this.authenticated = authenticated;
+        Portfolio.INSTANCE.registerUpdater(Delinquents.INSTANCE);
     }
 
     /**

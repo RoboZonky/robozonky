@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
 import com.github.triceo.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.enums.PaymentStatus;
+import com.github.triceo.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.triceo.robozonky.app.Events;
 import com.github.triceo.robozonky.common.remote.Zonky;
 import com.github.triceo.robozonky.internal.api.State;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Main entry point to the delinquency API.
  */
-public enum Delinquents {
+public enum Delinquents implements Consumer<Zonky> {
 
     INSTANCE; // cheap thread-safe singleton
 
@@ -71,6 +73,10 @@ public enum Delinquents {
         return d;
     }
 
+    private static Collection<Investment> getWithPaymentStatus(final PaymentStatuses target) {
+        return Portfolio.INSTANCE.getActiveWithPaymentStatus(target).collect(Collectors.toList());
+    }
+
     public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent) {
         update(zonky, presentlyDelinquent, Collections.emptyList());
     }
@@ -83,8 +89,8 @@ public enum Delinquents {
      * {@link PaymentStatus#getDelinquent()}
      * @param noLongerActive Loans that are no longer relevant. This corresponds to {@link PaymentStatus#getDone()}.
      */
-    public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent,
-                       final Collection<Investment> noLongerActive) {
+    void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent,
+                final Collection<Investment> noLongerActive) {
         LOGGER.debug("Updating delinquent loans.");
         final LocalDate now = LocalDate.now();
         final Collection<Delinquent> knownDelinquents = this.getDelinquents();
@@ -129,6 +135,12 @@ public enum Delinquents {
                             state.getValues(key).orElseThrow(() -> new IllegalStateException("Impossible."));
                     return add(loanId, rawDelinquencies);
                 }).collect(Collectors.toSet());
+    }
+
+    @Override
+    public void accept(final Zonky zonky) {
+        update(zonky, getWithPaymentStatus(PaymentStatus.getDelinquent()),
+               getWithPaymentStatus(PaymentStatus.getDone()));
     }
 
 }

@@ -70,6 +70,7 @@ public enum Portfolio {
     }
 
     public void registerUpdater(final Consumer<Zonky> updater) {
+        LOGGER.debug("Registering dependent: {}.", updater);
         updaters.add(updater);
     }
 
@@ -86,7 +87,7 @@ public enum Portfolio {
                 // and make updates based on which have been recently made or sold
                 newBlockedAmounts(zonky, new TreeSet<>(zonky.getBlockedAmounts().collect(Collectors.toSet())));
                 updaters.forEach((u) -> {
-                    LOGGER.trace("Running dependent: {}", u);
+                    LOGGER.trace("Running dependent: {}.", u);
                     u.accept(zonky);
                 });
                 LOGGER.trace("Finished.");
