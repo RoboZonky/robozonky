@@ -3,8 +3,10 @@ zapotřebí vhodně nastavit proměnnou prostředí JAVA_HOME tak, aby ukazovala
 
 "robozonky-systemd.service" nastaví RoboZonky jako službu pro systemd, tedy init systém operačních systémů podle Red
 Hatu, jako je např. Fedora. Patří uložit do "/etc/systemd/system". Služba předpokládá, že je RoboZonky nainstalován v
-adresáři "/usr/robozonky".
+adresáři "/usr/robozonky". Při použití automatického instalátoru jsou cesty upraveny a démon běží pod uživatelem
+robozonky ve skupině robozonky.
 
 "robozonky-upstart.conf" nastaví RoboZonky jako službu pro upstart, tedy init systém operačních systémů založených na
 Ubuntu. Patří uložit do "/etc/init". Tato služba funguje i na Synology a předpokládá, že je RoboZonky nainstalován v
-adresáři "/usr/robozonky".
+adresáři "/usr/robozonky". Při použití automatického instalátoru jsou cesty upraveny a démon běží pod uživatelem
+robozonky ve skupině robozonky.
