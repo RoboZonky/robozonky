@@ -17,7 +17,6 @@
 package com.github.triceo.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -33,14 +32,7 @@ import org.mockito.Mockito;
 
 public class DaemonInvestmentModeTest {
 
-    private static final class TestDaemon implements Daemon {
-
-        private final OffsetDateTime now = OffsetDateTime.now();
-
-        @Override
-        public OffsetDateTime getLastRunDateTime() {
-            return now;
-        }
+    private static final class TestDaemon implements Runnable {
 
         @Override
         public void run() {
@@ -50,17 +42,17 @@ public class DaemonInvestmentModeTest {
 
     @Test
     public void delays1() {
-        final Daemon d1 = new TestDaemon();
-        final Collection<Daemon> daemons = Arrays.asList(d1);
+        final Runnable d1 = new TestDaemon();
+        final Collection<Runnable> daemons = Arrays.asList(d1);
         Assertions.assertThat(DaemonInvestmentMode.getDelays(daemons, 1))
                 .containsEntry(d1, 1000L);
     }
 
     @Test
     public void delays2() {
-        final Daemon d1 = new TestDaemon();
-        final Daemon d2 = new TestDaemon();
-        final Collection<Daemon> daemons = Arrays.asList(d1, d2);
+        final Runnable d1 = new TestDaemon();
+        final Runnable d2 = new TestDaemon();
+        final Collection<Runnable> daemons = Arrays.asList(d1, d2);
         Assertions.assertThat(DaemonInvestmentMode.getDelays(daemons, 1))
                 .containsEntry(d1, 1000L)
                 .containsEntry(d2, 500L);
@@ -68,10 +60,10 @@ public class DaemonInvestmentModeTest {
 
     @Test
     public void delays3() {
-        final Daemon d1 = new TestDaemon();
-        final Daemon d2 = new TestDaemon();
-        final Daemon d3 = new TestDaemon();
-        final Collection<Daemon> daemons = Arrays.asList(d1, d2, d3);
+        final Runnable d1 = new TestDaemon();
+        final Runnable d2 = new TestDaemon();
+        final Runnable d3 = new TestDaemon();
+        final Collection<Runnable> daemons = Arrays.asList(d1, d2, d3);
         Assertions.assertThat(DaemonInvestmentMode.getDelays(daemons, 1))
                 .containsEntry(d1, 1000L)
                 .containsEntry(d2, 667L)

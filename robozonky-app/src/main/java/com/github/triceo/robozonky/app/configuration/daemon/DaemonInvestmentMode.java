@@ -54,7 +54,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, THREAD_FACTORY);
     private final TemporalAmount periodBetweenChecks;
-    private final Collection<Daemon> daemons;
+    private final Collection<Runnable> daemons;
     private final CountDownLatch circuitBreaker;
 
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
@@ -75,11 +75,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                                     maximumSleepPeriod, dryRun));
     }
 
-    static Map<Daemon, Long> getDelays(final Collection<Daemon> daemons, final long checkPeriodInSeconds) {
-        final Map<Daemon, Long> result = new LinkedHashMap<>(daemons.size());
+    static Map<Runnable, Long> getDelays(final Collection<Runnable> daemons, final long checkPeriodInSeconds) {
+        final Map<Runnable, Long> result = new LinkedHashMap<>(daemons.size());
         final long delay = (checkPeriodInSeconds * 1000) / daemons.size();
         long currentDelay = checkPeriodInSeconds * 1000;
-        for (final Daemon d : daemons) {
+        for (final Runnable d : daemons) {
             result.put(d, currentDelay);
             currentDelay -= delay;
         }
@@ -93,7 +93,9 @@ public class DaemonInvestmentMode implements InvestmentMode {
             LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
             // schedule the tasks some time apart so that the CPU is evenly utilized
             getDelays(daemons, checkPeriodInSeconds).forEach((daemon, delayInMillis) -> {
-                executor.scheduleWithFixedDelay(daemon, delayInMillis, checkPeriodInSeconds, TimeUnit.SECONDS);
+                LOGGER.trace("Scheduling {}.", daemon);
+                executor.scheduleWithFixedDelay(daemon, delayInMillis, checkPeriodInSeconds * 1000,
+                                                TimeUnit.MILLISECONDS);
             });
             // block until request to stop the app is received
             LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);

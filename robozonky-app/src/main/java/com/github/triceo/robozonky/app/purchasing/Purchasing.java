@@ -16,10 +16,8 @@
 
 package com.github.triceo.robozonky.app.purchasing;
 
-import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,18 +26,16 @@ import com.github.triceo.robozonky.api.remote.entities.Investment;
 import com.github.triceo.robozonky.api.remote.entities.Participation;
 import com.github.triceo.robozonky.api.strategies.PurchaseStrategy;
 import com.github.triceo.robozonky.app.authentication.Authenticated;
-import com.github.triceo.robozonky.app.configuration.daemon.Daemon;
 import com.github.triceo.robozonky.app.portfolio.Portfolio;
 import com.github.triceo.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Purchasing implements Daemon {
+public class Purchasing implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
     private final Authenticated authenticated;
-    private final AtomicReference<OffsetDateTime> lastRunDateTime = new AtomicReference<>();
     private final Function<Collection<Participation>, Collection<Investment>> investor;
 
     public Purchasing(final Authenticated auth, final Refreshable<PurchaseStrategy> strategy,
@@ -50,7 +46,6 @@ public class Purchasing implements Daemon {
 
     @Override
     public void run() {
-        lastRunDateTime.set(OffsetDateTime.now());
         try {
             if (!Portfolio.INSTANCE.isUpdating()) {
                 LOGGER.trace("Starting.");
@@ -64,10 +59,5 @@ public class Purchasing implements Daemon {
              */
             new DaemonRuntimeExceptionHandler().handle(t);
         }
-    }
-
-    @Override
-    public OffsetDateTime getLastRunDateTime() {
-        return lastRunDateTime.get();
     }
 }
