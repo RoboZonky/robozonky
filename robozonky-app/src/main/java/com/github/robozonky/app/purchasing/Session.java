@@ -35,7 +35,6 @@ import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -147,8 +146,7 @@ class Session implements AutoCloseable {
         final Participation participation = recommendation.descriptor().item();
         final boolean purchased = isDryRun || actualPurchase(participation);
         if (purchased) {
-            final Loan l = recommendation.descriptor().related();
-            final Investment i = new Investment(l, recommendation.amount().intValue());
+            final Investment i = new Investment(recommendation.descriptor());
             markSuccessfulPurchase(i);
             Events.fire(new InvestmentPurchasedEvent(i, portfolioOverview.getCzkAvailable(), isDryRun));
         }

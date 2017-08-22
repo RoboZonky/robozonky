@@ -71,7 +71,7 @@ public class Investment extends BaseInvestment {
         this.rating = loan.getRating();
         this.loanTermInMonth = loan.getTermInMonths();
         this.interestRate = loan.getInterestRate();
-        this.currentTerm = participation.getRemainingInstalmentCount();
+        this.currentTerm = loan.getTermInMonths();
         this.remainingMonths = participation.getRemainingInstalmentCount();
         this.remainingPrincipal = participation.getRemainingPrincipal();
         this.paymentStatus = PaymentStatus.OK;
