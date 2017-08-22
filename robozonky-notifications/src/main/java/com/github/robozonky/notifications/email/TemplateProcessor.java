@@ -40,10 +40,7 @@ enum TemplateProcessor {
         cfg.setLogTemplateExceptions(false);
         cfg.setTimeZone(TimeZone.getTimeZone(Defaults.ZONE_ID));
         cfg.setLocale(Defaults.LOCALE);
-        // don't give Freemarker an option to use any other encoding than the specified, ever
         cfg.setDefaultEncoding(charset.displayName());
-        cfg.setEncoding(cfg.getLocale(), cfg.getDefaultEncoding());
-        cfg.setOutputEncoding(cfg.getDefaultEncoding());
         return cfg;
     }
 
