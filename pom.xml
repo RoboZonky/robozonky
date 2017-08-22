@@ -17,7 +17,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.triceo.robozonky</groupId>
+  <groupId>com.github.robozonky</groupId>
   <artifactId>robozonky</artifactId>
   <version>4.0.0-SNAPSHOT</version>
   <modules>
@@ -49,72 +49,72 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-common</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-common</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type> <!-- Primary place for test utils -->
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-marketplaces</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-strategy-natural</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-integration-zonkoid</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-notifications</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-app</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-app</artifactId>
         <version>${project.version}</version>
         <classifier>dist</classifier>
         <type>zip</type>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-installer</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky.installer</groupId>
+        <groupId>com.github.robozonky.installer</groupId>
         <artifactId>robozonky-installer-panels</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky.installer</groupId>
+        <groupId>com.github.robozonky.installer</groupId>
         <artifactId>robozonky-installer-panels</artifactId>
         <version>${project.version}</version>
         <classifier>jar-with-dependencies</classifier>
       </dependency>
       <dependency>
-        <groupId>com.github.triceo.robozonky</groupId>
+        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-extensions</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -405,7 +405,7 @@
             <detectInlinedCode>true</detectInlinedCode>
             <mutationThreshold>85</mutationThreshold>
             <targetClasses>
-              <param>com.github.triceo.robozonky.*</param>
+              <param>com.github.robozonky.*</param>
             </targetClasses>
             <targetTests>
               <param>*Test</param> <!-- No IT -->
@@ -416,12 +416,11 @@
             </excludedMethods>
             <excludedClasses>
               <!-- Mostly getters; messing up stats -->
-              <param>com.github.triceo.robozonky.api.remote.entities.*</param>
-              <param>com.github.triceo.robozonky.api.notifications.*</param>
-              <param>com.github.triceo.robozonky.strategy.rules.facts.*</param>
+              <param>com.github.robozonky.api.remote.entities.*</param>
+              <param>com.github.robozonky.api.notifications.*</param>
               <!-- Generated code; out of our control -->
-              <param>com.github.triceo.robozonky.strategy.natural.*Lexer*</param>
-              <param>com.github.triceo.robozonky.strategy.natural.*Parser*</param>
+              <param>com.github.robozonky.strategy.natural.*Lexer*</param>
+              <param>com.github.robozonky.strategy.natural.*Parser*</param>
             </excludedClasses>
             <avoidCallsTo>
               <avoidCallsTo>java.util.logging</avoidCallsTo>
@@ -435,14 +434,13 @@
     </pluginManagement>
   </build>
   <scm>
-    <url>git@github.com:triceo/robozonky.git</url>
-    <connection>scm:git:git@github.com:triceo/robozonky.git</connection>
-    <developerConnection>scm:git:git@github.com:triceo/robozonky.git</developerConnection>
-    <tag>robozonky-4.0.0-beta-3</tag>
+    <url>git@github.com:RoboZonky/robozonky.git</url>
+    <connection>scm:git:git@github.com:RoboZonky/robozonky.git</connection>
+    <developerConnection>scm:git:git@github.com:RoboZonky/robozonky.git</developerConnection>
   </scm>
   <issueManagement>
     <system>github</system>
-    <url>https://github.com/triceo/robozonky/issues</url>
+    <url>https://github.com/RoboZonky/robozonky/issues</url>
   </issueManagement>
   <developers>
     <developer>
@@ -462,7 +460,7 @@
   </licenses>
   <ciManagement>
     <system>travis</system>
-    <url>https://travis-ci.org/triceo/robozonky</url>
+    <url>https://travis-ci.org/RoboZonky/robozonky</url>
   </ciManagement>
   <distributionManagement>
     <snapshotRepository>

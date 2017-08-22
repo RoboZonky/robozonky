@@ -89,20 +89,20 @@
       </configuration>
     </panel>
     <panel classname="TargetPanel">
-      <validator classname="com.github.triceo.robozonky.installer.panels.InstallDirValidator"/>
+      <validator classname="com.github.robozonky.installer.panels.InstallDirValidator"/>
     </panel>
     <panel classname="UserInputPanel" id="zonkyUserInput">
-      <validator classname="com.github.triceo.robozonky.installer.panels.ZonkySettingsValidator" />
+      <validator classname="com.github.robozonky.installer.panels.ZonkySettingsValidator"/>
     </panel>
     <panel classname="UserInputPanel" id="zonkoidUserInput" condition="enableZonkoidPanel">
-      <validator classname="com.github.triceo.robozonky.installer.panels.ZonkoidSettingsValidator" />
+      <validator classname="com.github.robozonky.installer.panels.ZonkoidSettingsValidator"/>
     </panel>
     <panel classname="UserInputPanel" id="emailUserInput" condition="enableEmailPanel">
-      <validator classname="com.github.triceo.robozonky.installer.panels.EmailSettingsValidator" />
+      <validator classname="com.github.robozonky.installer.panels.EmailSettingsValidator"/>
     </panel>
     <panel classname="UserInputPanel" id="jmxUserInput" condition="enableJmxPanel" />
     <panel classname="UserInputPanel" id="strategyUserInput">
-      <validator classname="com.github.triceo.robozonky.installer.panels.StrategySettingsValidator" />
+      <validator classname="com.github.robozonky.installer.panels.StrategySettingsValidator"/>
     </panel>
     <panel classname="InstallPanel"/>
     <panel classname="FinishPanel"/>
@@ -119,7 +119,7 @@
   </packs>
 
   <listeners>
-    <listener classname="com.github.triceo.robozonky.installer.panels.RoboZonkyInstallerListener" stage="install" />
+    <listener classname="com.github.robozonky.installer.panels.RoboZonkyInstallerListener" stage="install"/>
   </listeners>
 
 </izpack:installation>

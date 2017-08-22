@@ -6,9 +6,9 @@ grammar Tokens;
     import java.math.BigInteger;
     import java.util.Collection;
     import java.util.LinkedHashSet;
-    import com.github.triceo.robozonky.api.remote.enums.*;
-    import com.github.triceo.robozonky.api.remote.entities.*;
-    import com.github.triceo.robozonky.strategy.natural.*;
+    import com.github.robozonky.api.remote.enums.*;
+    import com.github.robozonky.api.remote.entities.*;
+    import com.github.robozonky.strategy.natural.*;
 }
 
 portfolioExpression returns [DefaultPortfolio result] :

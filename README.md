@@ -1,6 +1,6 @@
 # RoboZonky
 
-[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.github.triceo.robozonky/robozonky/badge.svg)](http://search.maven.org/#search|ga|1|robozonky-)
+[![Maven central](https://maven-badges.herokuapp.com/maven-central/com.github.robozonky/robozonky/badge.svg)](http://search.maven.org/#search|ga|1|robozonky-)
 [![Linux Build Status](https://travis-ci.org/RoboZonky/robozonky.svg)](https://travis-ci.org/RoboZonky/robozonky)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/o6983h25auupkt0p?svg=true)](https://ci.appveyor.com/project/triceo/robozonky-8acvb)
 

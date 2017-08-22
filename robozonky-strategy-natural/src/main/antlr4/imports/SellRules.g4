@@ -7,7 +7,7 @@ import CommonFilters, Tokens;
     import java.util.ArrayList;
     import java.util.Map;
     import java.util.HashMap;
-    import com.github.triceo.robozonky.strategy.natural.*;
+    import com.github.robozonky.strategy.natural.*;
 }
 
 sellFilterExpression returns [Collection<MarketplaceFilter> result]:

@@ -18,7 +18,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>robozonky</artifactId>
-    <groupId>com.github.triceo.robozonky</groupId>
+    <groupId>com.github.robozonky</groupId>
     <version>4.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -82,15 +82,15 @@
 
   <build>
     <plugins>
-      <!-- plugin>
+      <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
-        <version>0.8.0</version>
+        <version>0.9.2</version>
         <dependencies>
           <dependency>
             <groupId>org.revapi</groupId>
             <artifactId>revapi-java</artifactId>
-            <version>0.13.0</version>
+            <version>0.14.1</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -102,241 +102,11 @@
                   "filter": {
                     "packages": {
                       "regex": true,
-                      "exclude": ["com\\.github\\.triceo\\.robozonky\\.internal(\\..+)?"]
+                      "exclude": ["com\\.github\\.robozonky\\.internal(\\..+)?"]
                     }
                   }
                 },
                 "ignore": [
-                  {
-                    "code": "java.method.removed",
-                    "old": "method java.util.List<com.github.triceo.robozonky.api.remote.entities.Loan> com.github.triceo.robozonky.api.remote.Api::getLoans()",
-                    "package": "com.github.triceo.robozonky.api.remote",
-                    "classSimpleName": "Api",
-                    "methodName": "getLoans",
-                    "justification": "Name changed to items()."
-                  }, {
-                    "code": "java.method.addedToInterface",
-                    "new": "method java.util.List<T> com.github.triceo.robozonky.api.remote.EntityCollectionApi<T>::items() @ com.github.triceo.robozonky.api.remote.Api",
-                    "package": "com.github.triceo.robozonky.api.remote",
-                    "classSimpleName": "Api",
-                    "methodName": "items",
-                    "justification": "Formerly getLoans()."
-                  }, {
-                    "code": "java.class.removed",
-                    "old": "class com.github.triceo.robozonky.api.remote.ZonkyApi",
-                    "package": "com.github.triceo.robozonky.api.remote",
-                    "classSimpleName": "ZonkyApi",
-                    "justification": "Split into various individual APIs."
-                  }, {
-                    "code": "java.class.removed",
-                    "old": "class com.github.triceo.robozonky.api.remote.Api",
-                    "package": "com.github.triceo.robozonky.api.remote",
-                    "classSimpleName": "Api",
-                    "justification": "Replaced by EntityCollectionApi."
-                  }, {
-                    "code": "java.field.removedWithConstant",
-                    "old": "field com.github.triceo.robozonky.api.remote.ZonkyOAuthApi.OAUTH",
-                    "package": "com.github.triceo.robozonky.api.remote",
-                    "classSimpleName": "ZonkyOAuthApi",
-                    "fieldName": "OAUTH",
-                    "justification": "No longer necessary."
-                  }, {
-                    "code": "java.annotation.removed",
-                    "old": "method com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken com.github.triceo.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String, java.lang.String)",
-                    "new": "method com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken com.github.triceo.robozonky.api.remote.ZonkyOAuthApi::login(java.lang.String, java.lang.String, java.lang.String, java.lang.String)",
-                    "annotationType": "javax.ws.rs.Path",
-                    "justification": "No longer necessary."
-                  }, {
-                    "code": "java.annotation.removed",
-                    "old": "method com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken com.github.triceo.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String, java.lang.String)",
-                    "new": "method com.github.triceo.robozonky.api.remote.entities.ZonkyApiToken com.github.triceo.robozonky.api.remote.ZonkyOAuthApi::refresh(java.lang.String, java.lang.String, java.lang.String)",
-                    "annotationType": "javax.ws.rs.Path",
-                    "justification": "No longer necessary."
-                  }, {
-                    "code": "java.annotation.added",
-                    "old": "class com.github.triceo.robozonky.api.remote.ZonkyOAuthApi",
-                    "new": "class com.github.triceo.robozonky.api.remote.ZonkyOAuthApi",
-                    "annotationType": "javax.ws.rs.Path",
-                    "justification": "No longer necessary."
-                  }, {
-                    "code": "java.method.numberOfParametersChanged",
-                    "old": "method void com.github.triceo.robozonky.api.notifications.EventListener<E extends com.github.triceo.robozonky.api.notifications.Event>::handle(E)",
-                    "new": "method void com.github.triceo.robozonky.api.notifications.EventListener<E extends com.github.triceo.robozonky.api.notifications.Event>::handle(E, com.github.triceo.robozonky.api.notifications.SessionInfo)",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "EventListener",
-                    "methodName": "handle",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.numberOfParametersChanged",
-                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>(java.lang.String)",
-                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::<init>()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "RoboZonkyEndingEvent",
-                    "methodName": "<init>",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.RoboZonkyEndingEvent::getVersion()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "RoboZonkyEndingEvent",
-                    "methodName": "getVersion",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.numberOfParametersChanged",
-                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::<init>(java.lang.String)",
-                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::<init>()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "RoboZonkyInitializedEvent",
-                    "methodName": "<init>",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.RoboZonkyInitializedEvent::getVersion()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "RoboZonkyInitializedEvent",
-                    "methodName": "getVersion",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.numberOfParametersChanged",
-                    "old": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::<init>(java.lang.String)",
-                    "new": "method void com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::<init>()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "RoboZonkyStartingEvent",
-                    "methodName": "<init>",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.RoboZonkyStartingEvent::getVersion()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "RoboZonkyStartingEvent",
-                    "methodName": "getVersion",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.numberOfParametersChanged",
-                    "old": "method void com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::<init>(java.lang.String, java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, int)",
-                    "new": "method void com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::<init>(java.util.Collection<com.github.triceo.robozonky.api.remote.entities.Investment>, int)",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "ExecutionCompletedEvent",
-                    "methodName": "<init>",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.ExecutionCompletedEvent::getUsername()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "ExecutionCompletedEvent",
-                    "methodName": "getUsername",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.numberOfParametersChanged",
-                    "old": "method void com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::<init>(java.lang.String, java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, int)",
-                    "new": "method void com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::<init>(java.util.Collection<com.github.triceo.robozonky.api.strategies.LoanDescriptor>, int)",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "ExecutionStartedEvent",
-                    "methodName": "<init>",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method java.lang.String com.github.triceo.robozonky.api.notifications.ExecutionStartedEvent::getUsername()",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "ExecutionStartedEvent",
-                    "methodName": "getUsername",
-                    "justification": "SessionInfo is now part of EventListener."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method void com.github.triceo.robozonky.api.notifications.InvestmentMadeEvent::<init>(com.github.triceo.robozonky.api.remote.entities.Investment, int)",
-                    "package": "com.github.triceo.robozonky.api.notifications",
-                    "classSimpleName": "InvestmentMadeEvent",
-                    "methodName": "<init>",
-                    "justification": "Deprecated since 3.2.0"
-                  }, {
-                    "code": "java.field.removed",
-                    "old": "field com.github.triceo.robozonky.api.ReturnCode.ERROR_LOCK",
-                    "package": "com.github.triceo.robozonky.api",
-                    "classSimpleName": "ReturnCode",
-                    "fieldName": "ERROR_LOCK",
-                    "justification": "Previously deprecated for removal."
-                  }, {
-                    "code": "java.field.enumConstantOrderChanged",
-                    "old": "field com.github.triceo.robozonky.api.ReturnCode.ERROR_UNEXPECTED",
-                    "new": "field com.github.triceo.robozonky.api.ReturnCode.ERROR_UNEXPECTED",
-                    "oldOrdinal": "6",
-                    "newOrdinal": "5",
-                    "package": "com.github.triceo.robozonky.api",
-                    "classSimpleName": "ReturnCode",
-                    "fieldName": "ERROR_UNEXPECTED",
-                    "justification": "Takes place of ERROR_LOCK, which was previously deprecated for removal."
-                  }, {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method java.lang.String com.github.triceo.robozonky.api.remote.entities.Investment::getPaymentStatus()",
-                    "new": "method com.github.triceo.robozonky.api.remote.enums.PaymentStatus com.github.triceo.robozonky.api.remote.entities.Investment::getPaymentStatus()",
-                    "oldType": "java.lang.String",
-                    "newType": "com.github.triceo.robozonky.api.remote.enums.PaymentStatus",
-                    "package": "com.github.triceo.robozonky.api.remote.entities",
-                    "classSimpleName": "Investment",
-                    "methodName": "getPaymentStatus",
-                    "justification": "Implemented payment status as enum."
-                  }, {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method java.lang.String com.github.triceo.robozonky.api.remote.entities.MyInvestment::getStatus()",
-                    "new": "method com.github.triceo.robozonky.api.remote.enums.InvestmentStatus com.github.triceo.robozonky.api.remote.entities.BaseInvestment::getStatus() @ com.github.triceo.robozonky.api.remote.entities.MyInvestment",
-                    "oldType": "java.lang.String",
-                    "newType": "com.github.triceo.robozonky.api.remote.enums.InvestmentStatus",
-                    "package": "com.github.triceo.robozonky.api.remote.entities",
-                    "classSimpleName": "MyInvestment",
-                    "methodName": "getStatus",
-                    "justification": "Now inherits the same field from Investment."
-                  }, {
-                    "code": "java.field.enumConstantOrderChanged",
-                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.ACTIVE",
-                    "new": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.ACTIVE",
-                    "oldOrdinal": "2",
-                    "newOrdinal": "0",
-                    "package": "com.github.triceo.robozonky.api.remote.enums",
-                    "classSimpleName": "InvestmentStatus",
-                    "fieldName": "ACTIVE",
-                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }, {
-                    "code": "java.field.removed",
-                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.COVERED",
-                    "package": "com.github.triceo.robozonky.api.remote.enums",
-                    "classSimpleName": "InvestmentStatus",
-                    "fieldName": "COVERED",
-                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }, {
-                    "code": "java.field.removed",
-                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.PAID",
-                    "package": "com.github.triceo.robozonky.api.remote.enums",
-                    "classSimpleName": "InvestmentStatus",
-                    "fieldName": "PAID",
-                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }, {
-                    "code": "java.field.removed",
-                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.PAID_OFF",
-                    "package": "com.github.triceo.robozonky.api.remote.enums",
-                    "classSimpleName": "InvestmentStatus",
-                    "fieldName": "PAID_OFF",
-                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }, {
-                    "code": "java.field.removed",
-                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.SIGNED",
-                    "package": "com.github.triceo.robozonky.api.remote.enums",
-                    "classSimpleName": "InvestmentStatus",
-                    "fieldName": "SIGNED",
-                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }, {
-                    "code": "java.field.removed",
-                    "old": "field com.github.triceo.robozonky.api.remote.enums.InvestmentStatus.STOPPED",
-                    "package": "com.github.triceo.robozonky.api.remote.enums",
-                    "classSimpleName": "InvestmentStatus",
-                    "fieldName": "STOPPED",
-                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }, {
-                    "code": "java.class.removed",
-                    "old": "class com.github.triceo.robozonky.api.remote.enums.InvestmentStatuses",
-                    "package": "com.github.triceo.robozonky.api.remote.enums",
-                    "classSimpleName": "InvestmentStatuses",
-                    "justification": "Fixed InvestmentStatus to actually correspond to Zonky API."
-                  }
                 ]
               }
             }
@@ -349,7 +119,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin !--> <!-- FIXME reenable -->
+      </plugin>
     </plugins>
   </build>
 

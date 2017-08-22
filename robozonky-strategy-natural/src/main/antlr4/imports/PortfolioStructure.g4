@@ -4,7 +4,7 @@ import Tokens;
 
 @header {
     import java.math.BigInteger;
-    import com.github.triceo.robozonky.strategy.natural.*;
+    import com.github.robozonky.strategy.natural.*;
 }
 
 portfolioStructureExpression returns [Collection<PortfolioShare> result]:

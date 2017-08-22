@@ -17,7 +17,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <groupId>com.github.triceo.robozonky</groupId>
+    <groupId>com.github.robozonky</groupId>
     <artifactId>robozonky</artifactId>
     <version>4.0.0-SNAPSHOT</version>
   </parent>
@@ -27,35 +27,35 @@
   <name>RoboZonky: Command-line application</name>
 
   <properties>
-    <mainClass>com.github.triceo.robozonky.app.App</mainClass>
+    <mainClass>com.github.robozonky.app.App</mainClass>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-marketplaces</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-strategy-natural</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-integration-zonkoid</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-notifications</artifactId>
       <scope>runtime</scope>
     </dependency>
@@ -88,7 +88,7 @@
       <artifactId>logback-classic</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.triceo.robozonky</groupId>
+      <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-common</artifactId>
       <type>test-jar</type>
       <scope>test</scope>

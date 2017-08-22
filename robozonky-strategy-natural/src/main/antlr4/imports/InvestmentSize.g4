@@ -3,7 +3,7 @@ grammar InvestmentSize;
 import Tokens;
 
 @header {
-    import com.github.triceo.robozonky.strategy.natural.*;
+    import com.github.robozonky.strategy.natural.*;
 }
 
 investmentSizeExpression returns [Collection<InvestmentSize> result]:

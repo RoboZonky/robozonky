@@ -3,7 +3,7 @@ grammar Defaults;
 import Tokens;
 
 @header {
-    import com.github.triceo.robozonky.strategy.natural.*;
+    import com.github.robozonky.strategy.natural.*;
 }
 
 defaultExpression returns [DefaultValues result]:
