@@ -34,7 +34,6 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.slf4j.Logger;
@@ -89,8 +88,9 @@ public class NaturalLanguageStrategyService implements StrategyService {
     static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {
         final CharStream s = CharStreams.fromStream(strategy);
         final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
-        l.removeErrorListener(ConsoleErrorListener.INSTANCE); // prevent any sysout
+        l.removeErrorListeners(); // prevent any sysout
         final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(new CommonTokenStream(l));
+        p.removeErrorListeners(); // prevent any sysout
         p.addErrorListener(NaturalLanguageStrategyService.ERROR_LISTENER);
         return p.primaryExpression().result;
     }
