@@ -88,7 +88,7 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
         return versions.stream()
                 .filter(UpdateMonitor::isStable)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Impossible."));
+                .orElseThrow(() -> new IllegalStateException("No stable version found."));
     }
 
     static VersionIdentifier parseNodeList(final NodeList nodeList) {
