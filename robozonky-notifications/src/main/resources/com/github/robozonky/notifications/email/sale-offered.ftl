@@ -3,7 +3,7 @@ Participace s následujícími parametry byla právě vystavena na sekundární 
 - Číslo půjčky:                ${data.loanId?c}
 - Rating:                      ${data.loanRating}
 - Zbývá splátek:               ${data.loanTerm?c}
-- Hodnota participace:         ${data.investedAmount?c},- Kč
+- Hodnota participace:         ${data.investedAmount?string.currency}
 
 Informace o této půjčce jsou dostupné na následující adrese:
 ${data.loanUrl}

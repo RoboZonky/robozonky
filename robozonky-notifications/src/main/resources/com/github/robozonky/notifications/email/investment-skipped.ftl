@@ -4,7 +4,7 @@ Půjčka s následujícími parametry byla přeskočena:
 - Rating:                      ${data.loanRating}
 - Délka splácení:              ${data.loanTerm?c} měsíců
 - Požadovaná částka:           ${data.loanAmount?c},- Kč
-- Navržená výše investice:     ${data.loanRecommendation?c},- Kč
+- Navržená výše investice:     ${data.loanRecommendation?string.currency}
 
 Informace o této půjčce jsou dostupné na následující adrese:
 ${data.loanUrl}

@@ -43,7 +43,7 @@ final class SaleOfferedEventListener extends AbstractEmailingListener<SaleOffere
     protected Map<String, Object> getData(final SaleOfferedEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = new HashMap<>();
-        result.put("investedAmount", i.getAmount());
+        result.put("investedAmount", i.getRemainingPrincipal());
         result.put("loanId", i.getLoanId());
         result.put("loanRating", i.getRating().getCode());
         result.put("loanTerm", i.getRemainingMonths());

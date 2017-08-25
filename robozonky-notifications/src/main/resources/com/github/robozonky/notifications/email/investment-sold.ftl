@@ -2,11 +2,11 @@ Participace s následujícími parametry byla úspěšně prodána:
 
 - Číslo půjčky:                ${data.loanId?c}
 - Rating:                      ${data.loanRating}
-- Délka splácení:              ${data.loanTerm?c} měsíců
-- Investovaná částka:          ${data.investedAmount?c},- Kč
+- Zbývá splátek:               ${data.loanTerm?c}
+- Hodnota participace:         ${data.investedAmount?string.currency}
 
 Informace o této půjčce jsou dostupné na následující adrese:
 ${data.loanUrl}
 
-Nový zůstatek na Zonky účtu je ${data.newBalance?c},- Kč.
+Nový zůstatek na Zonky účtu je ${data.newBalance?string.currency}.
 

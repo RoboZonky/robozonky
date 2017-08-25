@@ -1,6 +1,7 @@
+<#setting locale="cs_CZ">
 <#if data.isDryRun?? && data.isDryRun>
 POZOR: RoboZonky běží ve zkušebním režimu. Následující informace slouží jen
-       pro demonstraci nastavení strategie a nejsou platné!
+pro demonstraci nastavení strategie a nejsou platné!
 ===============================================================================
 </#if>
 

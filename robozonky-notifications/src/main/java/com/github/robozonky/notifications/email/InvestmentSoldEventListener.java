@@ -47,7 +47,7 @@ final class InvestmentSoldEventListener extends AbstractEmailingListener<Investm
         result.put("investedAmount", i.getRemainingPrincipal());
         result.put("loanId", i.getLoanId());
         result.put("loanRating", i.getRating().getCode());
-        result.put("loanTerm", i.getLoanTermInMonth());
+        result.put("loanTerm", i.getRemainingMonths());
         result.put("loanUrl", getLoanUrl(i));
         result.put("newBalance", event.getFinalBalance());
         return result;

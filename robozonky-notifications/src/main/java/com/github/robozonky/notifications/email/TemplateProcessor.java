@@ -18,12 +18,10 @@ package com.github.robozonky.notifications.email;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 import com.github.robozonky.internal.api.Defaults;
 import freemarker.template.Configuration;
@@ -34,18 +32,14 @@ enum TemplateProcessor {
 
     INSTANCE;
 
-    static Configuration getFreemarkerConfiguration(final Charset charset) {
+    static Configuration getFreemarkerConfiguration() {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_26);
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
-        cfg.setTimeZone(TimeZone.getTimeZone(Defaults.ZONE_ID));
-        cfg.setLocale(Defaults.LOCALE);
-        cfg.setDefaultEncoding(charset.displayName());
         return cfg;
     }
 
-    private final Configuration config =
-            TemplateProcessor.getFreemarkerConfiguration(Defaults.CHARSET);
+    private final Configuration config = TemplateProcessor.getFreemarkerConfiguration();
 
     public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
