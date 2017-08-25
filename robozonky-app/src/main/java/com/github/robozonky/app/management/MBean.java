@@ -77,7 +77,7 @@ public enum MBean {
     static ObjectName assembleObjectName(final BaseMBean implementation) {
         try {
             final String className = implementation.getClass().getSimpleName();
-            return new ObjectName("com.github.triceo.robozonky:type=" + className);
+            return new ObjectName("com.github.robozonky:type=" + className);
         } catch (final MalformedObjectNameException ex) {
             MBean.LOGGER.warn("MBean '{}' will be ignored.", implementation.getClass(), ex);
             return null;
