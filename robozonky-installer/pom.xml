@@ -34,7 +34,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <version.org.codehaus.izpack>5.1.0</version.org.codehaus.izpack>
+    <version.org.codehaus.izpack>5.1.2</version.org.codehaus.izpack>
   </properties>
 
   <dependencyManagement>
