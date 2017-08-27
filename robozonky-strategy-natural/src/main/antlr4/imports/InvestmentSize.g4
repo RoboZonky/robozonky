@@ -8,7 +8,7 @@ import Tokens;
 
 investmentSizeExpression returns [Collection<InvestmentSize> result]:
  { Collection<InvestmentSize> result = new LinkedHashSet<>(); }
- (i=investmentSizeRatingExpression { result.add($i.result); })+
+ (i=investmentSizeRatingExpression { result.add($i.result); })*
  { $result = result; }
 ;
 
