@@ -16,11 +16,9 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
-import com.github.robozonky.api.remote.entities.Loan;
 
 final class InvestmentDelegatedEventListener extends AbstractEmailingListener<InvestmentDelegatedEvent> {
 
@@ -41,16 +39,9 @@ final class InvestmentDelegatedEventListener extends AbstractEmailingListener<In
 
     @Override
     protected Map<String, Object> getData(final InvestmentDelegatedEvent event) {
-        final Loan loan = event.getRecommendation().descriptor().item();
-        final Map<String, Object> result = new HashMap<>();
-        result.put("loanId", loan.getId());
-        result.put("loanRecommendation", event.getRecommendation().amount().intValue());
-        result.put("loanAmount", loan.getAmount());
-        result.put("loanRating", loan.getRating().getCode());
-        result.put("loanTerm", loan.getTermInMonths());
-        result.put("loanUrl", Loan.getUrlSafe(loan));
-        result.put("confirmationProviderId", event.getConfirmationProviderId());
+        final Map<String, Object> result = getLoanData(event.getRecommendation());
         result.put("newBalance", event.getBalance());
+        result.put("confirmationProviderId", event.getConfirmationProviderId());
         return result;
     }
 }

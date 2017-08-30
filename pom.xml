@@ -266,6 +266,7 @@
             <id>fail-on-pmd</id>
             <goals>
               <goal>check</goal>
+              <goal>cpd-check</goal>
             </goals>
           </execution>
         </executions>
@@ -393,7 +394,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>3.7</version>
+          <version>3.8</version>
         </plugin>
         <plugin>
           <groupId>org.pitest</groupId>

@@ -29,6 +29,7 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
@@ -58,6 +59,18 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         } else {
             throw new IllegalArgumentException("Not a valid e-mail address: " + username);
         }
+    }
+
+    protected static Map<String, Object> getLoanData(final RecommendedLoan l) {
+        final Loan loan = l.descriptor().item();
+        final Map<String, Object> result = new HashMap<>();
+        result.put("loanId", loan.getId());
+        result.put("loanRecommendation", l.amount());
+        result.put("loanAmount", loan.getAmount());
+        result.put("loanRating", loan.getRating().getCode());
+        result.put("loanTerm", loan.getTermInMonths());
+        result.put("loanUrl", Loan.getUrlSafe(loan));
+        return result;
     }
 
     protected static String getLoanUrl(final Investment i) {
