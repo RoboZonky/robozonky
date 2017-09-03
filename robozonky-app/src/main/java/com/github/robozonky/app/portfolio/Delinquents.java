@@ -16,7 +16,9 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -31,25 +33,28 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Main entry point to the delinquency API.
  */
-public enum Delinquents implements Consumer<Zonky> {
+public class Delinquents implements Consumer<Zonky> {
 
-    INSTANCE; // cheap thread-safe singleton
+    public static final Delinquents INSTANCE = new Delinquents();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquents.class);
+    private static final String LAST_UPDATE_PROPERTY_NAME = "lastUpdate";
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
 
     private static String toString(final Delinquency d) {
         return d.getFixedOn()
-                .map(fixedOn -> d.getDetectedOn() + TIME_SEPARATOR + fixedOn)
-                .orElse(d.getDetectedOn().toString());
+                .map(fixedOn -> d.getPaymentMissedDate() + TIME_SEPARATOR + fixedOn)
+                .orElse(d.getPaymentMissedDate().toString());
     }
 
     private static Stream<String> toString(final Delinquent d) {
@@ -115,6 +120,7 @@ public enum Delinquents implements Consumer<Zonky> {
                     .peek(d -> stateUpdate.set(String.valueOf(d.getLoanId()), toString(d)))
                     .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                     .collect(Collectors.toSet());
+            stateUpdate.set(LAST_UPDATE_PROPERTY_NAME, OffsetDateTime.now().toString());
             stateUpdate.call(); // persist state updates
             LOGGER.trace("Delinquency update finished.");
             // and notify of new delinquencies over all known thresholds
@@ -123,12 +129,20 @@ public enum Delinquents implements Consumer<Zonky> {
         LOGGER.trace("Done.");
     }
 
+    public OffsetDateTime getLastUpdateTimestamp() {
+        return State.forClass(this.getClass())
+                .getValue(LAST_UPDATE_PROPERTY_NAME)
+                .map(OffsetDateTime::parse)
+                .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
+    }
+
     /**
      * @return Active loans that are now, or at some point have been, currently tracked as delinquent.
      */
     public Collection<Delinquent> getDelinquents() {
         final State.ClassSpecificState state = State.forClass(this.getClass());
         return state.getKeys().stream()
+                .filter(StringUtils::isNumeric) // skip any non-loan metadata
                 .map(key -> {
                     final int loanId = Integer.parseInt(key);
                     final List<String> rawDelinquencies =

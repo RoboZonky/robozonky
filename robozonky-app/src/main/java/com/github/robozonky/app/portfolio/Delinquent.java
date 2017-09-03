@@ -39,7 +39,7 @@ public final class Delinquent {
      * @param loanId ID of the loan in question.
      * @param since The day that an instalment was first noticed overdue.
      */
-    Delinquent(final int loanId, final LocalDate since) {
+    public Delinquent(final int loanId, final LocalDate since) {
         this.loanId = loanId;
         this.delinquencies.put(since, new Delinquency(this, since));
     }
@@ -48,7 +48,7 @@ public final class Delinquent {
      * New delinquent loan with no delinquent instalments.
      * @param loanId ID of the loan in question.
      */
-    Delinquent(final int loanId) {
+    public Delinquent(final int loanId) {
         this.loanId = loanId;
     }
 

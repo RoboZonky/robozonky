@@ -16,9 +16,6 @@
 
 package com.github.robozonky.app.management;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,8 +31,6 @@ import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
@@ -47,7 +42,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.common.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -57,10 +52,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class JmxListenerServiceTest {
+public class JmxListenerServiceTest extends AbstractStateLeveragingTest {
 
     private static final String USERNAME = "someone@somewhere.cz";
-    private static final Supplier<Delinquency> DELINQUENCY = () -> (Delinquency) MBean.DELINQUENCY.getImplementation();
     private static final Supplier<OperationsMBean> OPERATIONS = () -> (Operations) MBean.OPERATIONS.getImplementation();
     private static final Supplier<RuntimeMBean> RUNTIME = () -> (Runtime) MBean.RUNTIME.getImplementation();
     private static final Supplier<PortfolioMBean> PORTFOLIO = () -> (Portfolio) MBean.PORTFOLIO.getImplementation();
@@ -76,30 +70,6 @@ public class JmxListenerServiceTest {
     public Consumer<SoftAssertions> assertionsBefore;
     @Parameterized.Parameter(3)
     public Consumer<SoftAssertions> assertionsAfter;
-
-    private static Object[] getParametersForLoanNowDelinquent() {
-        final Loan l = new Loan(1, 1000);
-        final LocalDate since = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID).toLocalDate();
-        final LoanNowDelinquentEvent evt = new LoanNowDelinquentEvent(l, since);
-        final Consumer<SoftAssertions> before = (softly) -> {
-            final Delinquency d = DELINQUENCY.get();
-            softly.assertThat(d.getAll()).isEmpty();
-            softly.assertThat(d.get10Plus()).isEmpty();
-            softly.assertThat(d.get30Plus()).isEmpty();
-            softly.assertThat(d.get60Plus()).isEmpty();
-            softly.assertThat(d.get90Plus()).isEmpty();
-        };
-        final Consumer<SoftAssertions> after = (softly) -> {
-            final Delinquency d = DELINQUENCY.get();
-            softly.assertThat(d.getAll()).containsKey(l.getId());
-            softly.assertThat(d.get10Plus()).containsKey(l.getId());
-            softly.assertThat(d.get30Plus()).containsKey(l.getId());
-            softly.assertThat(d.get60Plus()).containsKey(l.getId());
-            softly.assertThat(d.get90Plus()).containsKey(l.getId());
-            softly.assertThat(d.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
-        };
-        return new Object[]{evt.getClass(), evt, before, after};
-    }
 
     private static Object[] getParametersForExecutionCompleted() {
         final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
@@ -173,21 +143,6 @@ public class JmxListenerServiceTest {
         return new Object[]{evt.getClass(), evt, before, after};
     }
 
-    private static Object[] getParametersForNoLongerDelinquentLoan() {
-        final Loan l = new Loan(1, 1000);
-        final Event evt = new LoanNoLongerDelinquentEvent(l);
-        final Consumer<SoftAssertions> before = (softly) -> {
-            final DelinquencyMBean mbean = DELINQUENCY.get();
-            softly.assertThat(mbean.getAll()).isEmpty();
-        };
-        final Consumer<SoftAssertions> after = (softly) -> {
-            final DelinquencyMBean mbean = DELINQUENCY.get();
-            softly.assertThat(mbean.getAll()).isEmpty();
-            softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
-        };
-        return new Object[]{evt.getClass(), evt, before, after};
-    }
-
     private static Object[] getParametersForInvestmentMade() {
         final Loan l = new Loan(1, 1000);
         final Event evt = new InvestmentMadeEvent(new Investment(l, 200), 1000, false);
@@ -243,8 +198,6 @@ public class JmxListenerServiceTest {
                              JmxListenerServiceTest.getParametersForInvestmentDelegated(),
                              JmxListenerServiceTest.getParametersForInvestmentMade(),
                              JmxListenerServiceTest.getParametersForInvestmentRejected(),
-                             JmxListenerServiceTest.getParametersForLoanNowDelinquent(),
-                             JmxListenerServiceTest.getParametersForNoLongerDelinquentLoan(),
                              JmxListenerServiceTest.getParametersForSaleOffered(),
                              JmxListenerServiceTest.getParametersForInvestmentPurchased());
     }

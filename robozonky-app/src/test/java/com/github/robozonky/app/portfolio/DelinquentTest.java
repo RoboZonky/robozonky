@@ -54,7 +54,7 @@ public class DelinquentTest {
         final Delinquency active = d.getDelinquencies().findFirst().get();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(active.getParent()).isEqualTo(d);
-            softly.assertThat(active.getDetectedOn()).isEqualTo(since);
+            softly.assertThat(active.getPaymentMissedDate()).isEqualTo(since);
             softly.assertThat(active.getFixedOn()).isEmpty();
         });
     }
@@ -72,7 +72,7 @@ public class DelinquentTest {
         final Delinquency d1 = d.addDelinquency(since);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(d1.getParent()).isEqualTo(d);
-            softly.assertThat(d1.getDetectedOn()).isEqualTo(since);
+            softly.assertThat(d1.getPaymentMissedDate()).isEqualTo(since);
             softly.assertThat(d1.getFixedOn()).isEmpty();
             softly.assertThat(d.getActiveDelinquency()).contains(d1);
         });

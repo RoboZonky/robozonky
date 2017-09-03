@@ -23,11 +23,12 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAmount;
 
+import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
-public class DelinquencyTest {
+public class DelinquencyTest extends AbstractStateLeveragingTest {
 
     @Test
     public void endless() {
@@ -37,7 +38,7 @@ public class DelinquencyTest {
         final Duration duration = Duration.between(epoch.atStartOfDay(zone), now.atStartOfDay(zone));
         final Delinquency d = new Delinquency(null, epoch);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(d.getDetectedOn()).isEqualTo(epoch);
+            softly.assertThat(d.getPaymentMissedDate()).isEqualTo(epoch);
             softly.assertThat(d.getFixedOn()).isEmpty();
             softly.assertThat(d.getParent()).isNull();
             softly.assertThat(d.getDuration()).isLessThanOrEqualTo(duration);
@@ -59,7 +60,7 @@ public class DelinquencyTest {
         final Duration daysUntilFixed = Duration.between(epoch.atStartOfDay(zone), fixed.atStartOfDay(zone));
         final Delinquency d = new Delinquency(null, epoch, fixed);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(d.getDetectedOn()).isEqualTo(epoch);
+            softly.assertThat(d.getPaymentMissedDate()).isEqualTo(epoch);
             softly.assertThat(d.getFixedOn()).contains(fixed);
             softly.assertThat(d.getParent()).isNull();
             softly.assertThat(d.getDuration()).isEqualTo(daysUntilFixed);

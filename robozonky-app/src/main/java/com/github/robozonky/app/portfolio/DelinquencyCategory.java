@@ -89,7 +89,7 @@ enum DelinquencyCategory {
 
     private static LoanDelinquentEvent getEvent(final Delinquency d, final int threshold, final Zonky z) {
         final Loan loan = d.getParent().getLoan(z);
-        final LocalDate since = d.getDetectedOn();
+        final LocalDate since = d.getPaymentMissedDate();
         return getEventSupplier(threshold).apply(loan, since);
     }
 

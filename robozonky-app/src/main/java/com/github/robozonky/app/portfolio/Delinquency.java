@@ -29,28 +29,28 @@ import com.github.robozonky.internal.api.Defaults;
  */
 public final class Delinquency {
 
-    private final LocalDate detectedOn;
+    private final LocalDate paymentMissedDate;
     private final Delinquent parent;
     private LocalDate fixedOn;
 
     /**
      * Create a delinquency which is active, ie. instalment is currently overdue.
      * @param d The delinquent loan in question.
-     * @param detectedOn The day that this delinquency was noticed.
+     * @param paymentMissedDate The day that this delinquency was noticed.
      */
-    Delinquency(final Delinquent d, final LocalDate detectedOn) {
-        this(d, detectedOn, null);
+    Delinquency(final Delinquent d, final LocalDate paymentMissedDate) {
+        this(d, paymentMissedDate, null);
     }
 
     /**
      * Create a delinquency which is inactive, repaid.
      * @param d The delinquent loan in question.
-     * @param detectedOn The day that this delinquency was noticed.
+     * @param paymentMissedDate The day that this delinquency was noticed.
      * @param fixedOn The day that the outstanding instalment was paid back.
      */
-    Delinquency(final Delinquent d, final LocalDate detectedOn, final LocalDate fixedOn) {
+    Delinquency(final Delinquent d, final LocalDate paymentMissedDate, final LocalDate fixedOn) {
         this.parent = d;
-        this.detectedOn = detectedOn;
+        this.paymentMissedDate = paymentMissedDate;
         this.fixedOn = fixedOn;
     }
 
@@ -64,8 +64,8 @@ public final class Delinquency {
     /**
      * @return The day that this delinquency was first noticed.
      */
-    public LocalDate getDetectedOn() {
-        return detectedOn;
+    public LocalDate getPaymentMissedDate() {
+        return paymentMissedDate;
     }
 
     /**
@@ -90,14 +90,15 @@ public final class Delinquency {
     public Duration getDuration() {
         final ZoneId zone = Defaults.ZONE_ID;
         return getFixedOn()
-                .map(fixedOn -> Duration.between(detectedOn.atStartOfDay(zone), fixedOn.atStartOfDay(zone)))
-                .orElse(Duration.between(detectedOn.atStartOfDay(zone), LocalDate.now().atStartOfDay(zone)));
+                .map(fixedOn -> Duration.between(paymentMissedDate.atStartOfDay(zone), fixedOn.atStartOfDay(zone)))
+                .orElse(Duration.between(paymentMissedDate.atStartOfDay(zone), LocalDate.now().atStartOfDay(zone)));
     }
 
     /**
      * See {@link Object#equals(Object)}
      * @param o Other delinquency.
-     * @return Delinquencies are considered equal when they share {@link #getParent()} and {@link #getDetectedOn()}.
+     * @return Delinquencies are considered equal when they share {@link #getParent()} and
+     * {@link #getPaymentMissedDate()}.
      */
     @Override
     public boolean equals(final Object o) {
@@ -108,19 +109,19 @@ public final class Delinquency {
             return false;
         }
         final Delinquency that = (Delinquency) o;
-        return Objects.equals(detectedOn, that.detectedOn) &&
+        return Objects.equals(paymentMissedDate, that.paymentMissedDate) &&
                 Objects.equals(parent, that.parent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(detectedOn, parent);
+        return Objects.hash(paymentMissedDate, parent);
     }
 
     @Override
     public String toString() {
         return "Delinquency{" +
-                "detectedOn=" + detectedOn +
+                "paymentMissedDate=" + paymentMissedDate +
                 ", fixedOn=" + fixedOn +
                 '}';
     }

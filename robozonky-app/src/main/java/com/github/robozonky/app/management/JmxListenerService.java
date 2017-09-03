@@ -28,8 +28,6 @@ import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
@@ -75,12 +73,6 @@ public class JmxListenerService implements ListenerService {
         } else if (Objects.equals(eventType, InvestmentPurchasedEvent.class)) {
             final Operations bean = (Operations) MBean.OPERATIONS.getImplementation();
             return (event, sessionInfo) -> bean.handle((InvestmentPurchasedEvent) event);
-        } else if (Objects.equals(eventType, LoanNowDelinquentEvent.class)) {
-            final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
-            return (event, sessionInfo) -> bean.handle((LoanNowDelinquentEvent) event);
-        } else if (Objects.equals(eventType, LoanNoLongerDelinquentEvent.class)) {
-            final Delinquency bean = (Delinquency) MBean.DELINQUENCY.getImplementation();
-            return (event, sessionInfo) -> bean.handle((LoanNoLongerDelinquentEvent) event);
         } else {
             return null;
         }

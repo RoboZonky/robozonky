@@ -16,43 +16,33 @@
 
 package com.github.robozonky.app.management;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.internal.api.Defaults;
 
 class Delinquency implements DelinquencyMBean {
 
-    private final SortedMap<Integer, LocalDate> delinquents = new TreeMap<>();
-    private OffsetDateTime lastInvestmentRunTimestamp;
+    private final Delinquents source;
+
+    public Delinquency() {
+        this(Delinquents.INSTANCE);
+    }
+
+    // for testing purposes only
+    protected Delinquency(final Delinquents delinquents) {
+        this.source = delinquents;
+    }
 
     @Override
     public OffsetDateTime getLatestUpdatedDateTime() {
-        return this.lastInvestmentRunTimestamp;
-    }
-
-    void handle(final LoanNowDelinquentEvent event) {
-        delinquents.put(event.getLoan().getId(), event.getDelinquentSince());
-        handle((Event) event);
-    }
-
-    void handle(final LoanNoLongerDelinquentEvent event) {
-        delinquents.remove(event.getLoan().getId());
-        handle((Event) event);
-    }
-
-    private synchronized void handle(final Event event) {
-        this.lastInvestmentRunTimestamp = event.getCreatedOn();
+        return source.getLastUpdateTimestamp();
     }
 
     @Override
@@ -60,16 +50,19 @@ class Delinquency implements DelinquencyMBean {
         return getOlderThan(0);
     }
 
-    private Map<Integer, LocalDate> getOlderThan(final int thresholdInDays) {
+    /**
+     * Returns all loans that are presently delinquent.
+     * @param days Minimum number of days a loan is in delinquency in order to be reported. 0 returns all delinquents.
+     * @return All loans that are delinquent for more than the given number of days.
+     */
+    private Map<Integer, LocalDate> getOlderThan(final int days) {
         final ZoneId zone = Defaults.ZONE_ID;
         final ZonedDateTime now = LocalDate.now().atStartOfDay(zone);
-        final Duration expected = Duration.ofDays(thresholdInDays);
-        return delinquents.entrySet().stream()
-                .filter(e -> {
-                    final ZonedDateTime since = e.getValue().atStartOfDay(zone);
-                    final Duration actual = Duration.between(since, now);
-                    return (actual.compareTo(expected) >= 0);
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return source.getDelinquents().stream()
+                .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
+                .filter(d -> d.getPaymentMissedDate().atStartOfDay(zone).plusDays(days).isBefore(now))
+                .collect(Collectors.toMap(d -> d.getParent().getLoanId(),
+                                          com.github.robozonky.app.portfolio.Delinquency::getPaymentMissedDate));
     }
 
     @Override
