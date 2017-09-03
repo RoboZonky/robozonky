@@ -45,9 +45,14 @@ public class PortfolioTest {
             softly.assertThat(mbean.getAvailableBalance()).isEqualTo(portfolio.getCzkAvailable());
             softly.assertThat(mbean.getInvestedAmount()).isEqualTo(portfolio.getCzkInvested());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
-            Stream.of(Rating.values()).forEach(r -> {
-                softly.assertThat(mbean.getInvestedAmountPerRating()).containsEntry(r.getCode(), 1000);
-                softly.assertThat(mbean.getRatingShare()).containsEntry(r.getCode(), BigDecimal.ONE);
+            // checks for proper ordering of ratings
+            final String[] ratings = Stream.of(Rating.values()).map(Rating::getCode).toArray(String[]::new);
+            softly.assertThat(mbean.getInvestedAmountPerRating().keySet()).containsExactly(ratings);
+            softly.assertThat(mbean.getRatingShare().keySet()).containsExactly(ratings);
+            //checks correct values per rating
+            Stream.of(ratings).forEach(r -> {
+                softly.assertThat(mbean.getInvestedAmountPerRating()).containsEntry(r, 1000);
+                softly.assertThat(mbean.getRatingShare()).containsEntry(r, BigDecimal.ONE);
             });
         });
     }

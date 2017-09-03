@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,14 +39,19 @@ public class Portfolio implements PortfolioMBean {
     private PortfolioOverview latestPortfolioOverview;
     private OffsetDateTime latestUpdatedDateTime;
 
+    private static <T> BinaryOperator<T> throwingMerger() {
+        return (u, v) -> {
+            throw new IllegalStateException("Impossible.");
+        };
+    }
+
     private static Stream<Rating> getRatingStream() {
         return Stream.of(Rating.values()).sorted();
     }
 
     private static <T> Map<String, T> get(final Function<Rating, T> f) {
-        return Portfolio.getRatingStream().collect(Collectors.collectingAndThen(
-                Collectors.toMap(Rating::getCode, f),
-                LinkedHashMap::new));
+        return Portfolio.getRatingStream()
+                .collect(Collectors.toMap(Rating::getCode, f, Portfolio.throwingMerger(), LinkedHashMap::new));
     }
 
     private <T> T get(final Function<PortfolioOverview, T> getter, final T defaultValue) {
