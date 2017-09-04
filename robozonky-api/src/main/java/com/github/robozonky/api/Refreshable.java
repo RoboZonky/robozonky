@@ -213,8 +213,13 @@ public abstract class Refreshable<T> implements Runnable {
                 return;
             }
             // source changed, result needs to be refreshed
-            latestKnownSource.set(newSource);
             final Optional<T> maybeNewResult = transform(newSource);
+            /*
+             * only store new source if result actually refreshed, ie. did not throw; otherwise we're going to want to
+             * try again next time.
+             */
+            latestKnownSource.set(newSource);
+            // store result
             if (maybeNewResult.isPresent()) {
                 final T newResult = maybeNewResult.get();
                 storeResult(newResult);
