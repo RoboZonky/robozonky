@@ -194,8 +194,7 @@ class Session implements AutoCloseable {
                 markSuccessfulInvestment(i);
                 Events.fire(new InvestmentMadeEvent(i, portfolioOverview.getCzkAvailable(), investor.isDryRun()));
                 return true;
-            case SEEN_BEFORE:
-                Events.fire(new InvestmentSkippedEvent(recommendation));
+            case SEEN_BEFORE: // still protected by CAPTCHA
                 return false;
             default:
                 throw new IllegalStateException("Not possible.");
