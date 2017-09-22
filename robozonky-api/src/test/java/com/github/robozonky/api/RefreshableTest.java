@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -65,7 +66,10 @@ public class RefreshableTest {
     public void immutable() {
         final Refreshable<Void> r = Refreshable.createImmutable();
         r.run();
-        Assertions.assertThat(r.getLatest()).isEmpty();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.getLatest()).isEmpty();
+            softly.assertThat(r.isPaused()).isFalse();
+        });
     }
 
     @Test
@@ -164,12 +168,18 @@ public class RefreshableTest {
         final Refreshable<String> parent = new RefreshableString();
         parent.run();
         final Optional<String> before = parent.getLatest();
-        try (final Refreshable<String>.Pause p = parent.pause()) {
+        parent.pauseFor((r) -> {
+            Assertions.assertThat(parent.isPaused()).isTrue();
             parent.run(); // this will not be executed
             final Optional<String> after = parent.getLatest();
             Assertions.assertThat(before).isEqualTo(after);
-        } // pause is over, now the refresh should be run automatically
+            return null;
+        });
+        // pause is over, now the refresh should be run automatically
         final Optional<String> after = parent.getLatest();
-        Assertions.assertThat(before).isNotEqualTo(after);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(parent.isPaused()).isFalse();
+            softly.assertThat(before).isNotEqualTo(after);
+        });
     }
 }

@@ -33,12 +33,10 @@ public final class ConfirmationProviderLoader {
 
     static Optional<ConfirmationProvider> load(final String providerId,
                                                final Iterable<ConfirmationProviderService> loader) {
-        ConfirmationProviderLoader.LOGGER.trace("Looking up confirmation provider '{}'.", providerId);
+        ConfirmationProviderLoader.LOGGER.debug("Looking up confirmation provider '{}'.", providerId);
         return Util.toStream(loader)
-                .peek(cp ->
-                              ConfirmationProviderLoader.LOGGER.debug(
-                                      "Evaluating confirmation provider '{}' with '{}'.",
-                                      providerId, cp.getClass()))
+                .peek(cp -> ConfirmationProviderLoader.LOGGER.trace("Evaluating confirmation provider '{}' with '{}'.",
+                                                                    providerId, cp.getClass()))
                 .map(cp -> cp.find(providerId))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();

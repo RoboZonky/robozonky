@@ -16,14 +16,14 @@
 
 package com.github.robozonky.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Will retrieve external IP address of a computer running the application by querying a remote service.
@@ -31,6 +31,7 @@ import com.github.robozonky.internal.api.Defaults;
 public class LocalhostAddress extends Refreshable<String> {
 
     public static final Refreshable<String> INSTANCE = new LocalhostAddress();
+    private static final String CHECKIP_URL = "http://checkip.amazonaws.com";
 
     private LocalhostAddress() { // don't allow externally managed instances
         Scheduler.BACKGROUND_SCHEDULER.submit(this);
@@ -38,12 +39,11 @@ public class LocalhostAddress extends Refreshable<String> {
 
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
-        final String url = "http://checkip.amazonaws.com";
-        try (final BufferedReader in =
-                     new BufferedReader(new InputStreamReader(new URL(url).openStream(), Defaults.CHARSET))) {
-            final String s = in.readLine();
-            return () -> Optional.of(s);
-        } catch (final Exception ex) {
+        try {
+            final URL url = new URL(CHECKIP_URL);
+            final String contents = IOUtils.toString(url, Defaults.CHARSET).trim();
+            return () -> Optional.of(contents);
+        } catch (final IOException ex) {
             LOGGER.debug("Failed retrieving local host address.", ex);
             return () -> Optional.of("localhost");
         }

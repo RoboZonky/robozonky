@@ -22,7 +22,7 @@ import java.io.Reader;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import com.github.robozonky.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,11 @@ final class KeyStoreSecretProvider implements SecretProvider {
      * @return True if success.
      */
     private boolean set(final String alias, final Reader valueStream) {
-        return this.set(alias, IOUtils.toString(valueStream));
+        try {
+            return this.set(alias, IOUtils.toString(valueStream));
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Failed storing key " + alias, ex);
+        }
     }
 
     /**

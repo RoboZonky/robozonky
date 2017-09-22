@@ -20,7 +20,6 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
@@ -31,10 +30,10 @@ class PasswordBasedAccess implements Authenticated {
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordBasedAccess.class);
 
     static ZonkyApiToken trigger(final ApiProvider apis, final String username, final char... password) {
-        try (final OAuth oauth = apis.oauth()) {
+        return apis.oauth((oauth) -> {
             LOGGER.info("Authenticating as '{}', using password.", username);
             return oauth.login(username, password);
-        }
+        });
     }
 
     private final SecretProvider secrets;
@@ -48,14 +47,14 @@ class PasswordBasedAccess implements Authenticated {
     @Override
     public <T> T call(final Function<Zonky, T> op) {
         final ZonkyApiToken token = PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
-        try (final Zonky zonky = apis.authenticated(token)) {
+        return apis.authenticated(token, (zonky) -> {
             try {
                 return op.apply(zonky);
             } finally { // attempt to log out no matter what happens
                 LOGGER.info("Logging out.");
                 zonky.logout();
             }
-        }
+        });
     }
 
     @Override

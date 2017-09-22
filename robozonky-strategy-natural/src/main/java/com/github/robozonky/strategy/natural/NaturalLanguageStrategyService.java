@@ -16,8 +16,9 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -73,15 +74,20 @@ public class NaturalLanguageStrategyService implements StrategyService {
         }
     }
 
-    synchronized static ParsedStrategy parseWithAntlr(final String strategy) throws IOException {
+    synchronized static ParsedStrategy parseWithAntlr(final File strategy) throws IOException {
+        try (final InputStream s = new FileInputStream(strategy)) {
+            return NaturalLanguageStrategyService.parseWithAntlr(s);
+        }
+    }
+
+    private synchronized static ParsedStrategy parseOrCached(final String strategy) throws IOException {
         final Optional<ParsedStrategy> cached = getCached(strategy);
         if (cached.isPresent()) {
             return cached.get();
         }
-        try (final BufferedInputStream bis = new BufferedInputStream(
-                new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET)))) {
+        try (final InputStream bis = new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET))) {
             setCached(strategy, parseWithAntlr(bis));
-            return parseWithAntlr(strategy); // call itself again, making use of the cache
+            return parseOrCached(strategy); // call itself again, making use of the cache
         }
     }
 
@@ -98,7 +104,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
     @Override
     public Optional<InvestmentStrategy> toInvest(final String strategy) {
         try {
-            final ParsedStrategy s = parseWithAntlr(strategy);
+            final ParsedStrategy s = parseOrCached(strategy);
             return Optional.of(new NaturalLanguageInvestmentStrategy(s));
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
@@ -110,7 +116,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
     @Override
     public Optional<SellStrategy> toSell(final String strategy) {
         try {
-            final ParsedStrategy s = parseWithAntlr(strategy);
+            final ParsedStrategy s = parseOrCached(strategy);
             return Optional.of(new NaturalLanguageSellStrategy(s));
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
@@ -122,7 +128,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
     @Override
     public Optional<PurchaseStrategy> toPurchase(final String strategy) {
         try {
-            final ParsedStrategy s = parseWithAntlr(strategy);
+            final ParsedStrategy s = parseOrCached(strategy);
             return Optional.of(new NaturalLanguagePurchaseStrategy(s));
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",

@@ -124,26 +124,4 @@ public class NaturalLanguageInvestmentStrategyTest {
         });
     }
 
-    @Test
-    public void properlyRecommendingInvestmentSize() {
-        final BigDecimal loanAmount = BigDecimal.valueOf(100000.0);
-        final Loan mockLoan = Mockito.mock(Loan.class);
-        Mockito.when(mockLoan.getRating()).thenReturn(Rating.A);
-        Mockito.when(mockLoan.getRemainingInvestment()).thenReturn(loanAmount.doubleValue());
-        Mockito.when(mockLoan.getAmount()).thenReturn(loanAmount.doubleValue());
-
-        final ParsedStrategy s = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE);
-        final NaturalLanguageInvestmentStrategy overallStrategy = new NaturalLanguageInvestmentStrategy(s);
-        final int actualInvestment = overallStrategy.recommendInvestmentAmount(mockLoan, Integer.MAX_VALUE);
-        Assertions.assertThat(actualInvestment).isLessThanOrEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-
-        // with balance just a little less than the recommended investment
-        final int adjustedForBalance = overallStrategy.recommendInvestmentAmount(mockLoan, actualInvestment - 1);
-        Assertions.assertThat(adjustedForBalance).isLessThanOrEqualTo(actualInvestment);
-
-        // and make sure the recommendation is 200 times X, where X is a positive integer
-        final BigDecimal remainder = BigDecimal.valueOf(adjustedForBalance)
-                .remainder(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
-        Assertions.assertThat(remainder.intValue()).isEqualTo(0);
-    }
 }

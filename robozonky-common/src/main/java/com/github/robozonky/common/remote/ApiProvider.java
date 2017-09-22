@@ -17,6 +17,8 @@
 package com.github.robozonky.common.remote;
 
 import java.util.Collection;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.EntityCollectionApi;
@@ -41,6 +43,13 @@ public class ApiProvider {
 
     private static final String ZONKY_URL = "https://api.zonky.cz";
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+    private static <X> Function<X, Void> toFunction(final Consumer<X> f) {
+        return (x) -> {
+            f.accept(x);
+            return null;
+        };
+    }
 
     /**
      * Instantiate an API as a RESTEasy client proxy.
@@ -69,12 +78,19 @@ public class ApiProvider {
         return new PaginatedApi<>(api, url, token);
     }
 
+    private OAuth oauth() {
+        return new OAuth(this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter()));
+    }
+
     /**
      * Retrieve Zonky's OAuth endpoint.
-     * @return New API instance.
+     * @param operation Operation to execute over the endpoint.
+     * @return Return value of the operation.
      */
-    public OAuth oauth() {
-        return new OAuth(this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter()));
+    public <T> T oauth(final Function<OAuth, T> operation) {
+        try (final OAuth o = oauth()) {
+            return operation.apply(o);
+        }
     }
 
     protected <T> Collection<T> marketplace(final Class<? extends EntityCollectionApi<T>> target, final String url) {
@@ -93,9 +109,19 @@ public class ApiProvider {
         return this.marketplace(LoanApi.class, ApiProvider.ZONKY_URL);
     }
 
-    public Zonky authenticated(final ZonkyApiToken token) {
+    private Zonky authenticated(final ZonkyApiToken token) {
         return new Zonky(this.control(token), this.marketplace(token), this.secondaryMarketplace(token),
                          this.portfolio(token), this.wallet(token));
+    }
+
+    public void authenticated(final ZonkyApiToken token, final Consumer<Zonky> operation) {
+        authenticated(token, toFunction(operation));
+    }
+
+    public <T> T authenticated(final ZonkyApiToken token, final Function<Zonky, T> operation) {
+        try (final Zonky z = authenticated(token)) {
+            return operation.apply(z);
+        }
     }
 
     /**

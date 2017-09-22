@@ -19,7 +19,6 @@ package com.github.robozonky.app.version;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;
@@ -43,7 +42,7 @@ import javax.xml.xpath.XPathFactory;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -143,11 +142,10 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
         return () -> {
-            try (final InputStreamReader reader =
-                         new InputStreamReader(UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId))) {
-                final String result = IOUtils.toString(reader);
+            try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId)) {
+                final String result = IOUtils.toString(s, Defaults.CHARSET);
                 return Optional.of(result);
-            } catch (final Exception ex) {
+            } catch (final IOException ex) {
                 UpdateMonitor.LOGGER.debug("Failed reading source.", ex);
                 return Optional.empty();
             }

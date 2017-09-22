@@ -16,26 +16,33 @@
 
 package com.github.robozonky.common.remote;
 
+import java.util.function.Function;
+
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class ApiProviderTest {
 
+    private static final Function<OAuth, OAuth> AUTH_OPERATION = Mockito::spy;
+    private static final Function<Zonky, Zonky> ZONKY_OPERATION = Mockito::spy;
+    private static final char[] PASSWORD = new char[0];
+
     @Test
-    public void unathenticatedApis() {
+    public void unathenticatedApisProperlyClosed() {
         final ApiProvider provider = new ApiProvider();
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(provider.marketplace()).isNotNull();
-            Assertions.assertThat(provider.oauth()).isNotNull();
-        });
+        Assertions.assertThat(provider.marketplace()).isNotNull();
+        final OAuth spy = provider.oauth(AUTH_OPERATION);
+        Assertions.assertThatThrownBy(() -> spy.login("", PASSWORD)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void athenticatedApis() {
+    public void authenticatedApisProperlyClosed() {
         final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
         final ApiProvider provider = new ApiProvider();
-        Assertions.assertThat(provider.authenticated(token)).isNotNull();
+        final Zonky spy = provider.authenticated(token, ZONKY_OPERATION);
+        Assertions.assertThatThrownBy(spy::logout).isInstanceOf(IllegalStateException.class);
+
     }
 }

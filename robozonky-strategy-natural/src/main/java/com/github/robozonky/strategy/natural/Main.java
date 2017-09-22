@@ -16,17 +16,15 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * Simplifies testing of strategies by enabling parser to be launched directly from the command line.
  */
 public class Main {
 
-    public static void main(final String... args) {
+    public static void main(final String... args) throws IOException {
         if (args.length != 1) {
             throw new IllegalArgumentException("The application expects exactly one argument: the strategy file.");
         }
@@ -34,11 +32,7 @@ public class Main {
         if (!f.exists() || !f.canRead()) {
             throw new IllegalArgumentException("Can not read strategy file: " + f.getAbsolutePath());
         }
-        try (final InputStream s = new BufferedInputStream(new FileInputStream(f))) {
-            System.out.println("Will read: " + f.getAbsolutePath());
-            NaturalLanguageStrategyService.parseWithAntlr(s);
-        } catch (final Exception ex) {
-            throw new IllegalStateException("Failed parsing strategy.", ex);
-        }
+        System.out.println("Will read: " + f.getAbsolutePath());
+        NaturalLanguageStrategyService.parseWithAntlr(f);
     }
 }

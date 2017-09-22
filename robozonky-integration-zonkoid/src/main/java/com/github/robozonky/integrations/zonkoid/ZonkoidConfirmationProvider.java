@@ -30,7 +30,6 @@ import com.github.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -107,10 +106,10 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
 
     private static boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount,
                                                final String domain, final String protocol) {
-        try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
+        try (final CloseableHttpClient httpclient = HttpClients.createMinimal()) {
             ZonkoidConfirmationProvider.LOGGER.trace("Sending request.");
             final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, protocol, domain);
-            try (final CloseableHttpResponse response = httpclient.execute(post)) {
+            return httpclient.execute(post, (response) -> {
                 final int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode >= 200 && statusCode < 300) {
                     ZonkoidConfirmationProvider.LOGGER.debug("Response: {}", response.getStatusLine());
@@ -119,7 +118,7 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
                     ZonkoidConfirmationProvider.LOGGER.error("Unknown response: {}", response.getStatusLine());
                     return false;
                 }
-            }
+            });
         } catch (final Exception ex) {
             return ZonkoidConfirmationProvider.handleError(requestId, loanId, amount, domain, protocol, ex);
         }

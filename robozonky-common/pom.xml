@@ -33,8 +33,16 @@
       <artifactId>robozonky-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml</groupId>
+      <artifactId>jaxb-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

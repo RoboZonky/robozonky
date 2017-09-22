@@ -17,41 +17,26 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.util.IoTestUtil;
+import com.github.robozonky.internal.api.Defaults;
+import com.google.common.io.Files;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-// FIXME replace with new natural strategy
-@RunWith(Parameterized.class)
 public class RefreshableStrategyTest {
 
-    private static String getRoot() {
-        return IoTestUtil.findMainSource("assembly", "resources", "examples", "strategies");
-    }
+    private final File strategy;
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Object[][] getParameters() {
-        final String[] files = new String[]{
-                "robozonky-balanced.cfg", "robozonky-conservative.cfg", "robozonky-dynamic.cfg"
-        };
-        return Stream.of(files)
-                .map(f -> new File[]{new File(RefreshableStrategyTest.getRoot(), f)})
-                .collect(Collectors.toList())
-                .toArray(new Object[files.length][1]);
+    public RefreshableStrategyTest() throws IOException {
+        strategy = File.createTempFile("robozonky-strategy", ".cfg");
+        Files.write("Robot má udržovat konzervativní portfolio.", strategy, Defaults.CHARSET);
     }
-
-    @Parameterized.Parameter
-    public File strategy;
 
     @Test
     public void loadStrategyAsFile() throws InterruptedException {
@@ -67,14 +52,14 @@ public class RefreshableStrategyTest {
     }
 
     @Test
-    public void missingPurchaseStrategy() {
+    public void loadPurchaseStrategy() {
         final Refreshable<PurchaseStrategy> r = RefreshablePurchaseStrategy.create(strategy.getAbsolutePath());
-        Assertions.assertThat(r.getLatest()).isEmpty();
+        Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
-    public void missingSellStrategy() {
+    public void loadSellStrategy() {
         final Refreshable<SellStrategy> r = RefreshableSellStrategy.create(strategy.getAbsolutePath());
-        Assertions.assertThat(r.getLatest()).isEmpty();
+        Assertions.assertThat(r.getLatest()).isPresent();
     }
 }

@@ -31,12 +31,14 @@ import org.mockito.Mockito;
 
 public class CheckerTest {
 
+    private static final char[] SECRET = new char[0];
+
     @Test
     public void confirmationsMarketplaceFail() {
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
         Mockito.doThrow(new IllegalStateException("Testing")).when(provider).marketplace();
         final boolean result =
-                Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
+                Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", SECRET, () -> provider);
         Assertions.assertThat(result).isFalse();
     }
 
@@ -45,7 +47,7 @@ public class CheckerTest {
         final ApiProvider provider = Mockito.mock(ApiProvider.class);
         Mockito.when(provider.marketplace()).thenReturn(Collections.emptyList());
         final boolean result =
-                Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", new char[0], () -> provider);
+                Checker.confirmations(Mockito.mock(ConfirmationProvider.class), "", SECRET, () -> provider);
         Assertions.assertThat(result).isFalse();
     }
 
@@ -61,7 +63,7 @@ public class CheckerTest {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
                                             ArgumentMatchers.anyInt())).thenReturn(false);
-        final boolean result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
+        final boolean result = Checker.confirmations(cp, "", SECRET, CheckerTest::mockApiThatReturnsOneLoan);
         Assertions.assertThat(result).isFalse();
     }
 
@@ -70,7 +72,7 @@ public class CheckerTest {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
                                             ArgumentMatchers.anyInt())).thenReturn(false);
-        final boolean result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
+        final boolean result = Checker.confirmations(cp, "", SECRET, CheckerTest::mockApiThatReturnsOneLoan);
         Assertions.assertThat(result).isFalse();
     }
 
@@ -79,7 +81,7 @@ public class CheckerTest {
         final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
         Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
                                             ArgumentMatchers.anyInt())).thenReturn(false);
-        final boolean result = Checker.confirmations(cp, "", new char[0], () -> mockApiThatReturnsOneLoan());
+        final boolean result = Checker.confirmations(cp, "", SECRET, CheckerTest::mockApiThatReturnsOneLoan);
         Assertions.assertThat(result).isFalse();
     }
 
@@ -93,6 +95,11 @@ public class CheckerTest {
         final Refreshable<EventListener<RoboZonkyTestingEvent>> r = Refreshable.createImmutable(null);
         r.run();
         Assertions.assertThat(Checker.notifications("", Collections.singletonList(r))).isFalse();
+    }
+
+    @Test
+    public void notificationsEmptyByDefault() {
+        Assertions.assertThat(Checker.notifications("")).isFalse();
     }
 
     @Test

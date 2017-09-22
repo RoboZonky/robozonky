@@ -17,10 +17,11 @@
 package com.github.robozonky.installer.panels;
 
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
-import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
@@ -36,6 +37,36 @@ import org.mockito.Mockito;
 public class ZonkySettingsValidatorTest {
 
     private static final String USERNAME = "someone@somewhere.cz", PASSWORD = UUID.randomUUID().toString();
+
+    private static ZonkyApiToken mockToken(final ZonkyApiToken token) {
+        return token == null ? ArgumentMatchers.any() : ArgumentMatchers.eq(token);
+    }
+
+    private static ApiProvider mockApiProvider(final OAuth oauth, final ZonkyApiToken token, final Zonky zonky) {
+        final ApiProvider api = Mockito.mock(ApiProvider.class);
+        Mockito.when(api.oauth(ArgumentMatchers.any(Function.class))).then(i -> {
+            final Function f = i.getArgument(0);
+            return f.apply(oauth);
+        });
+        Mockito.doAnswer(i -> {
+            final Function f = i.getArgument(1);
+            return f.apply(zonky);
+        }).when(api).authenticated(mockToken(token), ArgumentMatchers.any(Function.class));
+        Mockito.doAnswer(i -> {
+            final Consumer f = i.getArgument(1);
+            f.accept(zonky);
+            return null;
+        }).when(api).authenticated(mockToken(token), ArgumentMatchers.any(Consumer.class));
+        return api;
+    }
+
+    private static ApiProvider mockApiProvider() {
+        return mockApiProvider(Mockito.mock(OAuth.class));
+    }
+
+    private static ApiProvider mockApiProvider(final OAuth oAuth) {
+        return mockApiProvider(oAuth, null, Mockito.mock(Zonky.class));
+    }
 
     @Test
     public void messages() {
@@ -58,14 +89,11 @@ public class ZonkySettingsValidatorTest {
     @Test
     public void properLogin() {
         // mock data
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
         final ZonkyApiToken token = Mockito.mock(ZonkyApiToken.class);
         final OAuth oauth = Mockito.mock(OAuth.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(token);
-        Mockito.when(provider.oauth()).thenReturn(oauth);
         final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(provider.authenticated(ArgumentMatchers.eq(token)))
-                .thenReturn(zonky);
+        final ApiProvider provider = mockApiProvider(oauth, token, zonky);
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
@@ -81,11 +109,10 @@ public class ZonkySettingsValidatorTest {
     @Test
     public void warning() {
         // mock data
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
-        final ZonkyOAuthApi oauth = Mockito.mock(ZonkyOAuthApi.class);
-        Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
-                                 ArgumentMatchers.any())).thenThrow(new IllegalStateException());
-        Mockito.when(provider.oauth()).thenReturn(Mockito.mock(OAuth.class));
+        final OAuth oauth = Mockito.mock(OAuth.class);
+        Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any())).thenThrow(
+                new IllegalStateException());
+        final ApiProvider provider = mockApiProvider(oauth);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);
@@ -97,11 +124,10 @@ public class ZonkySettingsValidatorTest {
     @Test
     public void error() {
         // mock data
-        final ApiProvider provider = Mockito.mock(ApiProvider.class);
         final OAuth oauth = Mockito.mock(OAuth.class);
         Mockito.when(oauth.login(ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenThrow(new ServerErrorException(Response.Status.INTERNAL_SERVER_ERROR));
-        Mockito.when(provider.oauth()).thenReturn(oauth);
+        final ApiProvider provider = mockApiProvider(oauth);
         final InstallData d = ZonkySettingsValidatorTest.mockInstallData();
         // execute SUT
         final ZonkySettingsValidator validator = new ZonkySettingsValidator(() -> provider);

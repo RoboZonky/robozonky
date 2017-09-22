@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.internal.api.Retriever;
@@ -179,12 +180,24 @@ public abstract class Refreshable<T> implements Runnable {
     }
 
     /**
-     * Will stop refreshing until {@link Refreshable.Pause#close()} is called. If multiple pause requests are active
-     * at the same time, both must be released before the refresh is started again.
-     * @return The {@link Refreshable.Pause} object to use to re-start the refresh.
+     * Will stop refreshing until the operation in question finishes. If multiple pause requests are active at the same
+     * time, both must finished before the refresh is started again.
+     * @param operation Operation to execute while the refreshable is paused.
+     * @return Result of the operation.
      */
-    public Refreshable<T>.Pause pause() {
-        return new Refreshable<T>.Pause(requestsToPause);
+    public <X> X pauseFor(final Function<Refreshable<T>, X> operation) {
+        requestsToPause.incrementAndGet();
+        try {
+            return operation.apply(this);
+        } finally {
+            if (requestsToPause.decrementAndGet() == 0 && refreshRequestedWhilePaused.get()) {
+                run();
+            }
+        }
+    }
+
+    public boolean isPaused() {
+        return requestsToPause.get() > 0;
     }
 
     private void storeResult(final T result) {
@@ -285,38 +298,6 @@ public abstract class Refreshable<T> implements Runnable {
          */
         default void valueChanged(final T oldValue, final T newValue) {
             // do nothing
-        }
-    }
-
-    public class Pause implements AutoCloseable {
-
-        private final AtomicInteger pauseCounter;
-        private final AtomicBoolean released = new AtomicBoolean(false);
-
-        private Pause(final AtomicInteger pauseCounter) {
-            this.pauseCounter = pauseCounter;
-            pauseCounter.incrementAndGet();
-        }
-
-        /**
-         * Restart the refresh. Subsequent calls have no effect.
-         */
-        @Override
-        public void close() {
-            if (released.getAndSet(true)) {
-                return;
-            }
-            // decrement counter
-            final int newCount = pauseCounter.decrementAndGet();
-            if (newCount > 0) {
-                return;
-            }
-            // counter now zero, refresh the resource if necessary
-            final boolean needsRefresh = refreshRequestedWhilePaused.getAndSet(false);
-            if (needsRefresh) {
-                LOGGER.trace("Refreshing after pause.");
-                Refreshable.this.run();
-            }
         }
     }
 

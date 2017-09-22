@@ -27,7 +27,6 @@ import javax.xml.bind.JAXBException;
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.secrets.SecretProvider;
 
 /**
@@ -49,8 +48,10 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
 
     private ZonkyApiToken withToken(final ZonkyApiToken token) {
         LOGGER.info("Authenticating as '{}', refreshing access token.", secrets.getUsername());
-        try (final OAuth oauth = apis.oauth()) {
-            return oauth.refresh(token);
+        try {
+            return apis.oauth((oauth) -> {
+                return oauth.refresh(token);
+            });
         } catch (final Exception ex) { // possibly just an expired token, retry with password
             LOGGER.debug("Failed refreshing access token, using password.", ex);
             return withPassword();

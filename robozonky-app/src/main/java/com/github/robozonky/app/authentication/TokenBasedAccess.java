@@ -44,15 +44,15 @@ class TokenBasedAccess implements Authenticated {
         Scheduler.BACKGROUND_SCHEDULER.submit(refreshableToken, refresh);
     }
 
+    Refreshable<ZonkyApiToken> getRefreshableToken() {
+        return refreshableToken;
+    }
+
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
         final ZonkyApiToken token = refreshableToken.getLatest()
                 .orElseThrow(() -> new ServiceUnavailableException("No API token available, authentication failed."));
-        try (final Refreshable.Pause p = refreshableToken.pause()) { // pause token refresh during this request
-            try (final Zonky zonky = apis.authenticated(token)) {
-                return operation.apply(zonky);
-            }
-        }
+        return refreshableToken.pauseFor((r) -> apis.authenticated(token, operation));
     }
 
     @Override

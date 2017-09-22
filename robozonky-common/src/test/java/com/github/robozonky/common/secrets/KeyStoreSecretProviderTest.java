@@ -23,7 +23,7 @@ import java.security.KeyStoreException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import com.github.robozonky.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;

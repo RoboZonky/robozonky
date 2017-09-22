@@ -22,7 +22,6 @@ import javax.ws.rs.ServerErrorException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
@@ -51,21 +50,21 @@ public class ZonkySettingsValidator extends AbstractValidator {
         final String username = Variables.ZONKY_USERNAME.getValue(installData);
         final String password = Variables.ZONKY_PASSWORD.getValue(installData);
         final ApiProvider p = apiSupplier.get();
-        try (final OAuth oauth = p.oauth()) {
-            LOGGER.info("Logging in.");
-            final ZonkyApiToken token = oauth.login(username, password.toCharArray());
-            LOGGER.info("Logging out.");
-            try (final Zonky z = p.authenticated(token)) {
-                z.logout();
+        return p.oauth((oauth) -> {
+            try {
+                LOGGER.info("Logging in.");
+                final ZonkyApiToken token = oauth.login(username, password.toCharArray());
+                LOGGER.info("Logging out.");
+                p.authenticated(token, Zonky::logout);
+                return DataValidator.Status.OK;
+            } catch (final ServerErrorException t) {
+                LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
+                return DataValidator.Status.ERROR;
+            } catch (final Exception t) {
+                LOGGER.log(Level.WARNING, "Failed logging in.", t);
+                return DataValidator.Status.WARNING;
             }
-            return DataValidator.Status.OK;
-        } catch (final ServerErrorException t) {
-            LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);
-            return DataValidator.Status.ERROR;
-        } catch (final Exception t) {
-            LOGGER.log(Level.WARNING, "Failed logging in.", t);
-            return DataValidator.Status.WARNING;
-        }
+        });
     }
 
     @Override

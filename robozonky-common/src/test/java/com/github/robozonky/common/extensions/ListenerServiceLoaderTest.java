@@ -23,6 +23,7 @@ import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.util.Scheduler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
@@ -53,5 +54,12 @@ public class ListenerServiceLoaderTest {
         Assertions.assertThat(r)
                 .last()
                 .has(new Condition<>(result -> !result.getLatest().isPresent(), "Does not exist"));
+    }
+
+    @Test
+    public void empty() {
+        final List<Refreshable<EventListener<RoboZonkyTestingEvent>>> r =
+                ListenerServiceLoader.load(RoboZonkyTestingEvent.class);
+        Assertions.assertThat(r).isEmpty(); // no providers registered by default
     }
 }

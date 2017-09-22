@@ -16,18 +16,17 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
+import org.apache.commons.io.IOUtils;
 
 abstract class RefreshableStrategy<T> extends Refreshable<T> {
 
@@ -52,9 +51,8 @@ abstract class RefreshableStrategy<T> extends Refreshable<T> {
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
         return () -> {
-            try (final BufferedReader r =
-                         new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
-                return Optional.of(r.lines().collect(Collectors.joining(System.lineSeparator())));
+            try (final InputStream s = url.openStream()) {
+                return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
             } catch (final IOException ex) {
                 LOGGER.warn("Failed reading strategy.", ex);
                 return Optional.empty();
