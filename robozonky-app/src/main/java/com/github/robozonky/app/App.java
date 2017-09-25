@@ -83,11 +83,10 @@ public class App {
     public static void main(final String... args) {
         App.LOGGER.debug("Current working directory is '{}'.", System.getProperty("user.dir"));
         Events.fire(new RoboZonkyStartingEvent());
-        App.LOGGER.debug("Running {} Java v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vendor"),
-                         System.getProperty("java.version"), System.getProperty("os.name"),
-                         System.getProperty("os.version"),
-                         System.getProperty("os.arch"), Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
-                         Charset.defaultCharset());
+        App.LOGGER.debug("Running {} {} v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vm.vendor"),
+                         System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
+                         System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
+                         Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.BACKGROUND_SCHEDULER.shutdown()));
         // check for new RoboZonky version every now and then
         Scheduler.BACKGROUND_SCHEDULER.submit(new UpdateMonitor(), Duration.ofHours(1));
