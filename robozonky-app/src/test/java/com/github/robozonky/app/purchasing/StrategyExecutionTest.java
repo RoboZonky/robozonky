@@ -19,7 +19,6 @@ package com.github.robozonky.app.purchasing;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -90,7 +89,7 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
         final Refreshable<PurchaseStrategy> r = Refreshable.createImmutable(null);
         r.run();
         final StrategyExecution exec = new StrategyExecution(r, null, Duration.ofMinutes(60), true);
-        Assertions.assertThat(exec.apply(Collections.singletonList(mock))).isEmpty();
+        Assertions.assertThat(exec.apply(Stream.of(mock))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).isEmpty();
@@ -119,7 +118,7 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
         Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final StrategyExecution exec = new StrategyExecution(ALL_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60),
                                                              true);
-        Assertions.assertThat(exec.apply(Collections.singletonList(mock))).isNotEmpty();
+        Assertions.assertThat(exec.apply(Stream.of(mock))).isNotEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).hasSize(5);
         SoftAssertions.assertSoftly(softly -> {
@@ -143,7 +142,7 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
         Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final StrategyExecution exec = new StrategyExecution(NONE_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60),
                                                              true);
-        Assertions.assertThat(exec.apply(Collections.singletonList(mock))).isEmpty();
+        Assertions.assertThat(exec.apply(Stream.of(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -159,10 +158,10 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
             final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
             return f.apply(mockApi());
         });
-        final StrategyExecution exec = new StrategyExecution(ALL_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60),
-                                                             true);
-        Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
+        final StrategyExecution exec =
+                new StrategyExecution(ALL_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60), true);
+        Assertions.assertThat(exec.apply(Stream.empty())).isEmpty();
         final List<Event> e = this.getNewEvents();
-        Assertions.assertThat(e).hasSize(0);
+        Assertions.assertThat(e).isEmpty();
     }
 }

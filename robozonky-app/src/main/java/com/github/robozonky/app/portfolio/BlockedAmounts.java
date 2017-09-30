@@ -18,6 +18,7 @@ package com.github.robozonky.app.portfolio;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -42,10 +43,10 @@ public enum BlockedAmounts {
         LOGGER.trace("Starting.");
         final Collection<BlockedAmount> presentBlockedAmounts = zonky.getBlockedAmounts().collect(Collectors.toList());
         final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
-        final Collection<BlockedAmount> difference = presentBlockedAmounts.stream()
+        final SortedSet<BlockedAmount> difference = presentBlockedAmounts.stream()
                 .filter(ba -> !previousBlockedAmounts.contains(ba))
-                .collect(Collectors.toSet());
-        Portfolio.INSTANCE.newBlockedAmounts(zonky, new TreeSet<>(difference));
+                .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
+        Portfolio.INSTANCE.newBlockedAmounts(zonky, difference);
         LOGGER.trace("Finished.");
     }
 

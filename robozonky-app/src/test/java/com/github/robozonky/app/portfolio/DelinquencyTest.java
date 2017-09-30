@@ -25,6 +25,7 @@ import java.time.temporal.TemporalAmount;
 
 import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
@@ -101,5 +102,12 @@ public class DelinquencyTest extends AbstractStateLeveragingTest {
             softly.assertThat(d1).isEqualTo(d2);
             softly.assertThat(d2).isEqualTo(d1);
         });
+    }
+
+    @Test
+    public void failsOnReset() {
+        final Delinquency d = new Delinquency(new Delinquent(1), LocalDate.now(), LocalDate.now());
+        Assertions.assertThatThrownBy(() -> d.setFixedOn(LocalDate.now()))
+                .isInstanceOf(IllegalStateException.class);
     }
 }

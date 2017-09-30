@@ -17,24 +17,35 @@
 package com.github.robozonky.app.portfolio;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
-
+    private static final TemporalAmount FOUR_HOURS = Duration.ofHours(4);
     private final Authenticated authenticated;
 
     public PortfolioUpdater(final Authenticated authenticated) {
         this.authenticated = authenticated;
         Portfolio.INSTANCE.registerUpdater(Delinquents.INSTANCE);
+    }
+
+    private static LocalDate getYesterdayIfAfter(final TemporalAmount timeFromMidnightToday) {
+        final Instant now = Instant.now();
+        final LocalDate today = now.atZone(Defaults.ZONE_ID).toLocalDate();
+        final Instant targetTimeToday = today.atStartOfDay(Defaults.ZONE_ID).plus(timeFromMidnightToday).toInstant();
+        return now.isAfter(targetTimeToday) ? today : today.minusDays(1);
     }
 
     /**
@@ -44,7 +55,7 @@ public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
      */
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
-        return () -> Optional.of(Util.getYesterdayIfAfter(Duration.ofHours(4)).toString());
+        return () -> Optional.of(getYesterdayIfAfter(FOUR_HOURS).toString());
     }
 
     @Override

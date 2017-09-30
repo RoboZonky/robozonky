@@ -80,7 +80,11 @@ public final class Delinquency {
      * @param fixedOn The day that the outstanding instalment was paid back.
      */
     public void setFixedOn(final LocalDate fixedOn) {
-        this.fixedOn = fixedOn;
+        if (this.fixedOn == null) {
+            this.fixedOn = fixedOn;
+        } else {
+            throw new IllegalStateException("Cannot re-set fixedOn.");
+        }
     }
 
     /**

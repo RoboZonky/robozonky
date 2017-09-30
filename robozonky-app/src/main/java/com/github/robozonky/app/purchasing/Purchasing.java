@@ -19,7 +19,7 @@ package com.github.robozonky.app.purchasing;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -35,28 +35,26 @@ public class Purchasing implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
-    private final Authenticated authenticated;
-    private final Function<Collection<Participation>, Collection<Investment>> investor;
+    private final Authenticated api;
+    private final Function<Stream<Participation>, Collection<Investment>> investor;
 
     public Purchasing(final Authenticated auth, final Refreshable<PurchaseStrategy> strategy,
                       final TemporalAmount maximumSleepPeriod, final boolean isDryRun) {
-        this.authenticated = auth;
-        this.investor = new StrategyExecution(strategy, authenticated, maximumSleepPeriod, isDryRun);
+        this.api = auth;
+        this.investor = new StrategyExecution(strategy, api, maximumSleepPeriod, isDryRun);
     }
 
     @Override
     public void run() {
+        if (Portfolio.INSTANCE.isUpdating()) { // don't update while reading information about portfolio
+            return;
+        }
         try {
-            if (!Portfolio.INSTANCE.isUpdating()) {
-                LOGGER.trace("Starting.");
-                authenticated.run(z -> investor.apply(z.getAvailableParticipations().collect(Collectors.toList())));
-                LOGGER.trace("Finished.");
-            }
+            LOGGER.trace("Starting.");
+            final Collection<Investment> bought = api.call(z -> investor.apply(z.getAvailableParticipations()));
+            LOGGER.trace("Finished; investments made: {}.", bought);
         } catch (final Throwable t) {
-            /*
-             * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
-             * care of errors stopping the thread.
-             */
+            // We catch Throwable so that we can inform users even about errors.
             new DaemonRuntimeExceptionHandler().handle(t);
         }
     }

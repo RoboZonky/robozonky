@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 class Activity {
 
     private static SortedSet<Integer> serialize(final Collection<Participation> items) {
-        final Set<Integer> result = items.stream().map(i -> i.getInvestmentId()).collect(Collectors.toSet());
+        final Set<Integer> result = items.stream().map(Participation::getInvestmentId).collect(Collectors.toSet());
         return new TreeSet<>(result);
     }
 

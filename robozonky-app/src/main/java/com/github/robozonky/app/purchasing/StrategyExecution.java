@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -34,7 +35,7 @@ import com.github.robozonky.util.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class StrategyExecution implements Function<Collection<Participation>, Collection<Investment>> {
+class StrategyExecution implements Function<Stream<Participation>, Collection<Investment>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyExecution.class);
 
@@ -64,17 +65,18 @@ class StrategyExecution implements Function<Collection<Participation>, Collectio
     }
 
     @Override
-    public Collection<Investment> apply(final Collection<Participation> items) {
+    public Collection<Investment> apply(final Stream<Participation> items) {
         return refreshableStrategy.getLatest()
                 .map(strategy -> {
-                    final Activity activity = new Activity(items, maximumSleepPeriod);
+                    final Collection<Participation> participations = items.collect(Collectors.toList());
+                    final Activity activity = new Activity(participations, maximumSleepPeriod);
                     if (activity.shouldSleep()) {
                         StrategyExecution.LOGGER.debug("Purchasing is asleep as there is nothing going on.");
                         return Collections.<Investment>emptyList();
                     }
                     StrategyExecution.LOGGER.debug("Sending following participations to purchasing: {}.",
-                                                   TextUtil.toString(items, p -> String.valueOf(p.getId())));
-                    final Collection<Investment> investments = invest(strategy, items);
+                                                   TextUtil.toString(participations, p -> String.valueOf(p.getId())));
+                    final Collection<Investment> investments = invest(strategy, participations);
                     activity.settle();
                     return investments;
                 }).orElseGet(() -> {

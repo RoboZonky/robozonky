@@ -23,12 +23,8 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlockedAmountsUpdater.class);
 
     private final Authenticated authenticated;
 

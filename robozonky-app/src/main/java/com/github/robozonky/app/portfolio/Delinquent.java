@@ -102,12 +102,11 @@ public final class Delinquent {
      * {@link Delinquency#equals(Object)}.
      */
     Delinquency addDelinquency(final LocalDate since) {
-        if (delinquencies.containsKey(since)) {
-            return delinquencies.get(since);
-        }
-        final Delinquency d = new Delinquency(this, since);
-        delinquencies.put(since, d);
-        return d;
+        return delinquencies.computeIfAbsent(since, this::newDelinquency);
+    }
+
+    private Delinquency newDelinquency(final LocalDate since) {
+        return new Delinquency(this, since);
     }
 
     /**
@@ -118,14 +117,9 @@ public final class Delinquent {
      * {@link Delinquency#equals(Object)}.
      */
     Delinquency addDelinquency(final LocalDate since, final LocalDate until) {
-        if (delinquencies.containsKey(since)) {
-            final Delinquency d = delinquencies.get(since);
-            d.setFixedOn(until);
-            return d;
-        }
-        final Delinquency d = new Delinquency(this, since, until);
-        delinquencies.put(since, d);
-        return d;
+        final Delinquency newDelinquency = addDelinquency(since);
+        newDelinquency.setFixedOn(until);
+        return newDelinquency;
     }
 
     /**

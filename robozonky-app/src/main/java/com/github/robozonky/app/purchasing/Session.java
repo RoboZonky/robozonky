@@ -69,8 +69,8 @@ class Session implements AutoCloseable {
         this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, dryRun);
     }
 
-    public synchronized static Session create(final Zonky api, final Collection<ParticipationDescriptor> marketplace,
-                                              final boolean dryRun) {
+    private synchronized static Session create(final Zonky api, final Collection<ParticipationDescriptor> marketplace,
+                                               final boolean dryRun) {
         if (Session.INSTANCE.get() != null) {
             throw new IllegalStateException("Purchasing session already exists.");
         }
