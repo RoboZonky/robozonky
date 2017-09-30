@@ -32,7 +32,7 @@ public class Investment extends BaseInvestment {
     private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate, nextPaymentDate, activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal,
-            expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor, smpFee;
+            expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor, smpFee, paidPenalty;
     private Rating rating;
 
     Investment() {
@@ -228,6 +228,11 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public BigDecimal getSmpSoldFor() {
         return smpSoldFor;
+    }
+
+    @XmlElement
+    public BigDecimal getPaidPenalty() {
+        return paidPenalty;
     }
 
     @XmlElement
