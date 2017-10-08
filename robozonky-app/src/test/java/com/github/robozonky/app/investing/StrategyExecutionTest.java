@@ -21,9 +21,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
@@ -36,50 +34,34 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class StrategyExecutionTest extends AbstractInvestingTest {
 
-    private static final InvestmentStrategy ALL_ACCEPTING_STRATEGY =
-            (available, portfolio) -> available.stream().map(d -> d.recommend(200).get());
-    private static final Refreshable<InvestmentStrategy> ALL_ACCEPTING_REFRESHABLE =
-            new Refreshable<InvestmentStrategy>() {
-                @Override
-                protected Supplier<Optional<String>> getLatestSource() {
-                    return () -> Optional.of("");
-                }
-
-                @Override
-                protected Optional<InvestmentStrategy> transform(final String source) {
-                    return Optional.of(ALL_ACCEPTING_STRATEGY);
-                }
-            };
-    private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY =
-            (available, portfolio) -> Stream.empty();
+    private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
+            ALL_ACCEPTING_STRATEGY = (loans, folio) -> loans.stream().map(d -> d.recommend(200).get());
     private static final Refreshable<InvestmentStrategy> NONE_ACCEPTING_REFRESHABLE =
-            new Refreshable<InvestmentStrategy>() {
-                @Override
-                protected Supplier<Optional<String>> getLatestSource() {
-                    return () -> Optional.of("");
-                }
-
-                @Override
-                protected Optional<InvestmentStrategy> transform(final String source) {
-                    return Optional.of(NONE_ACCEPTING_STRATEGY);
-                }
-            };
-
-    static {
-        ALL_ACCEPTING_REFRESHABLE.run();
-        NONE_ACCEPTING_REFRESHABLE.run();
-    }
+            Refreshable.createImmutable(NONE_ACCEPTING_STRATEGY), ALL_ACCEPTING_REFRESHABLE =
+            Refreshable.createImmutable(ALL_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi() {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
         return zonky;
+    }
+
+    private static void initRefreshable(final Refreshable<?> r) {
+        r.run();
+        Assertions.assertThat(r.getLatest()).isPresent();
+    }
+
+    @BeforeClass
+    public static void initRefreshables() {
+        initRefreshable(NONE_ACCEPTING_REFRESHABLE);
+        initRefreshable(ALL_ACCEPTING_REFRESHABLE);
     }
 
     @Test
