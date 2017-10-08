@@ -407,16 +407,6 @@
           </configuration>
         </plugin>
         <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${surefire.version}</version>
-          <configuration>
-            <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            <workingDirectory>${basedir}/target</workingDirectory>
-            <!-- Workaround so that we don't get CNFE on javax/annotation/Priority - see SUREFIRE-1424 for more. -->
-            <argLine>--add-modules java.base</argLine>
-          </configuration>
-        </plugin>
-        <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.1.0</version>
         </plugin>
@@ -467,6 +457,48 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>surefire-for-java8</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${surefire.version}</version>
+            <configuration>
+              <redirectTestOutputToFile>true</redirectTestOutputToFile>
+              <workingDirectory>${basedir}/target</workingDirectory>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>surefire-for-java9</id>
+      <activation>
+        <jdk>9</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${surefire.version}</version>
+            <configuration>
+              <redirectTestOutputToFile>true</redirectTestOutputToFile>
+              <workingDirectory>${basedir}/target</workingDirectory>
+              <!-- Workaround so that we don't get CNFE on javax/annotation/Priority - see SUREFIRE-1424 for more. -->
+              <argLine>--add-modules java.base</argLine>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <scm>
     <url>git@github.com:RoboZonky/robozonky.git</url>
     <connection>scm:git:git@github.com:RoboZonky/robozonky.git</connection>
