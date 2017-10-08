@@ -16,16 +16,16 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
 
 import com.github.robozonky.internal.api.Defaults;
 
 class Util {
 
-    public static LocalDate getYesterdayIfAfter(final Duration timeFromMidnightToday) {
+    public static LocalDate getYesterdayIfAfter(final TemporalAmount timeFromMidnightToday) {
         final Instant now = Instant.now();
         final LocalDate today = now.atZone(Defaults.ZONE_ID).toLocalDate();
         final ZonedDateTime targetTimeToday = today.atStartOfDay(Defaults.ZONE_ID).plus(timeFromMidnightToday);

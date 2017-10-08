@@ -17,8 +17,6 @@
 package com.github.robozonky.app.portfolio;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Optional;
@@ -26,7 +24,6 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +38,6 @@ public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
         Portfolio.INSTANCE.registerUpdater(Delinquents.INSTANCE);
     }
 
-    private static LocalDate getYesterdayIfAfter(final TemporalAmount timeFromMidnightToday) {
-        final Instant now = Instant.now();
-        final LocalDate today = now.atZone(Defaults.ZONE_ID).toLocalDate();
-        final Instant targetTimeToday = today.atStartOfDay(Defaults.ZONE_ID).plus(timeFromMidnightToday).toInstant();
-        return now.isAfter(targetTimeToday) ? today : today.minusDays(1);
-    }
-
     /**
      * Will only update once a day, after 4am. This is to make sure that the updates happen when all the overnight
      * transactions on Zonky have cleared.
@@ -55,7 +45,7 @@ public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
      */
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
-        return () -> Optional.of(getYesterdayIfAfter(FOUR_HOURS).toString());
+        return () -> Optional.of(Util.getYesterdayIfAfter(FOUR_HOURS).toString());
     }
 
     @Override
