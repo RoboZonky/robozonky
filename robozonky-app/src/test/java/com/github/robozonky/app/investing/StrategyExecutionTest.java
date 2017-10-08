@@ -79,11 +79,12 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
 
     @Test
     public void someItems() {
-        final Loan mock = new Loan(1, 200);
+        final int loanId = 1;
+        final Loan mock = new Loan(loanId, 100_000);
         final LoanDescriptor ld = new LoanDescriptor(mock);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky zonky = mockApi();
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(mock.getId()))).thenReturn(mock);
+        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(mock);
         final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
             final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);

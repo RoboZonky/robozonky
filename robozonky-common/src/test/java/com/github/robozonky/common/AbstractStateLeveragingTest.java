@@ -18,6 +18,7 @@ package com.github.robozonky.common;
 
 import java.io.File;
 
+import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.Scheduler;
 import org.junit.After;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public abstract class AbstractStateLeveragingTest {
 
     @After
     public void deleteState() {
-        final File f = new File("robozonky.state");
+        final File f = Settings.INSTANCE.getStateFile();
         AbstractStateLeveragingTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
     }
 }
