@@ -49,9 +49,7 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
     private ZonkyApiToken withToken(final ZonkyApiToken token) {
         LOGGER.info("Authenticating as '{}', refreshing access token.", secrets.getUsername());
         try {
-            return apis.oauth((oauth) -> {
-                return oauth.refresh(token);
-            });
+            return apis.oauth((oauth) -> oauth.refresh(token));
         } catch (final Exception ex) { // possibly just an expired token, retry with password
             LOGGER.debug("Failed refreshing access token, using password.", ex);
             return withPassword();
