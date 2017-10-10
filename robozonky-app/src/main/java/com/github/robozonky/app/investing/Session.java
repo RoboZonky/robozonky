@@ -35,10 +35,12 @@ import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -98,13 +100,23 @@ class Session implements AutoCloseable {
         return s;
     }
 
+    private void invest(final InvestmentStrategy strategy) {
+        boolean invested;
+        do {
+            invested = strategy.recommend(getAvailable(), getPortfolioOverview())
+                    .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
+                    .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
+        } while (invested);
+    }
+
+
     static Collection<Investment> invest(final Investor.Builder investor, final Zonky api,
-                                         final InvestmentCommand command) {
-        try (final Session session = Session.create(investor, api, command.getLoans())) {
+                                         final Collection<LoanDescriptor> loans, final InvestmentStrategy strategy) {
+        try (final Session session = Session.create(investor, api, loans)) {
             final int balance = session.getPortfolioOverview().getCzkAvailable();
-            Events.fire(new ExecutionStartedEvent(command.getLoans(), session.getPortfolioOverview()));
+            Events.fire(new ExecutionStartedEvent(loans, session.getPortfolioOverview()));
             if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailable().isEmpty()) {
-                command.accept(session);
+                session.invest(strategy);
             }
             final Collection<Investment> result = session.getResult();
             Events.fire(new ExecutionCompletedEvent(result, session.getPortfolioOverview()));

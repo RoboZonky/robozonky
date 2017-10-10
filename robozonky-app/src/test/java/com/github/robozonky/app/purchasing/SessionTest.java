@@ -41,8 +41,12 @@ import org.mockito.Mockito;
 public class SessionTest extends AbstractInvestingTest {
 
     private static Zonky mockZonky() {
+        return mockZonky(BigDecimal.ZERO);
+    }
+
+    private static Zonky mockZonky(final BigDecimal balance) {
         final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.ZERO, BigDecimal.ZERO));
+        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(balance, balance));
         return zonky;
     }
 
@@ -64,9 +68,8 @@ public class SessionTest extends AbstractInvestingTest {
                     .map(ParticipationDescriptor::recommend)
                     .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
         });
-        final InvestmentCommand c = new InvestmentCommand(s);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(mockZonky(), Collections.singleton(pd), c, true);
+        final Collection<Investment> i = Session.purchase(mockZonky(), Collections.singleton(pd), s, true);
         Assertions.assertThat(i).isEmpty();
         Assertions.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
             @Override
@@ -74,5 +77,26 @@ public class SessionTest extends AbstractInvestingTest {
                 return events.stream().noneMatch(e -> e instanceof PurchaseRequestedEvent);
             }
         });
+    }
+
+    @Test
+    public void proper() {
+        final Loan l = new Loan(1, 200);
+        final Participation p = Mockito.mock(Participation.class);
+        Mockito.when(p.getLoanId()).thenReturn(l.getId());
+        Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        final PurchaseStrategy s = Mockito.mock(PurchaseStrategy.class);
+        Mockito.when(s.recommend(ArgumentMatchers.any(), ArgumentMatchers.any())).thenAnswer(i -> {
+            final Collection<ParticipationDescriptor> participations = i.getArgument(0);
+            return participations.stream()
+                    .map(ParticipationDescriptor::recommend)
+                    .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+        });
+        final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
+        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
+        final Collection<Investment> i = Session.purchase(zonky, Collections.singleton(pd), s, true);
+        Assertions.assertThat(i).hasSize(1);
+        Assertions.assertThat(this.getNewEvents()).hasSize(5);
     }
 }

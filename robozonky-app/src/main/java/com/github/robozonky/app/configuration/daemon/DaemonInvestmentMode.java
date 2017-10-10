@@ -35,11 +35,9 @@ import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.InvestmentMode;
-import com.github.robozonky.app.investing.Investing;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.Selling;
-import com.github.robozonky.app.purchasing.Purchasing;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,11 +66,12 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.periodBetweenChecks = periodBetweenChecks;
         final boolean dryRun = builder.isDryRun();
         Portfolio.INSTANCE.registerUpdater(new Selling(RefreshableSellStrategy.create(strategyLocaion), dryRun));
-        this.daemons = Arrays.asList(new Investing(auth, builder,
-                                                   marketplace, RefreshableInvestmentStrategy.create(strategyLocaion),
-                                                   maximumSleepPeriod),
-                                     new Purchasing(auth, RefreshablePurchaseStrategy.create(strategyLocaion),
-                                                    maximumSleepPeriod, dryRun));
+        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder,
+                                                         marketplace,
+                                                         RefreshableInvestmentStrategy.create(strategyLocaion),
+                                                         maximumSleepPeriod),
+                                     new PurchasingDaemon(auth, RefreshablePurchaseStrategy.create(strategyLocaion),
+                                                          maximumSleepPeriod, dryRun));
     }
 
     static Map<Runnable, Long> getDelays(final Collection<Runnable> daemons, final long checkPeriodInSeconds) {
@@ -86,6 +85,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return result;
     }
 
+    private static Runnable wrapDaemonWithPortfolioWait(final Runnable daemon) {
+        return () -> {
+            if (Portfolio.INSTANCE.isUpdating()) { // don't update while reading information about portfolio
+                return;
+            }
+            daemon.run();
+        };
+    }
+
     @Override
     public ReturnCode get() {
         try {
@@ -94,7 +102,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
             // schedule the tasks some time apart so that the CPU is evenly utilized
             getDelays(daemons, checkPeriodInSeconds).forEach((daemon, delayInMillis) -> {
                 LOGGER.trace("Scheduling {}.", daemon);
-                executor.scheduleWithFixedDelay(daemon, delayInMillis, checkPeriodInSeconds * 1000,
+                final Runnable task = wrapDaemonWithPortfolioWait(daemon);
+                executor.scheduleWithFixedDelay(task, delayInMillis, checkPeriodInSeconds * 1000,
                                                 TimeUnit.MILLISECONDS);
             });
             // block until request to stop the app is received

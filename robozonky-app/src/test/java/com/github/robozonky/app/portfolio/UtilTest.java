@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.purchasing;
+package com.github.robozonky.app.portfolio;
 
-import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
+import java.time.Duration;
+import java.time.LocalDate;
+
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
-public class InvestmentCommandTest extends AbstractInvestingTest {
+public class UtilTest {
 
     @Test
-    public void empty() {
-        final Session sess = Mockito.mock(Session.class);
-        final PurchaseStrategy s = Mockito.mock(PurchaseStrategy.class);
-        final InvestmentCommand c = new InvestmentCommand(s);
-        c.accept(sess); // SUT
-        Mockito.verify(sess, Mockito.never()).purchase(ArgumentMatchers.any());
+    public void yesterday() {
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = today.minusDays(1);
+        Assertions.assertThat(Util.getYesterdayIfAfter(Duration.ZERO)).isEqualTo(today);
+        Assertions.assertThat(Util.getYesterdayIfAfter(Duration.ofHours(24))).isEqualTo(yesterday);
     }
+
 }

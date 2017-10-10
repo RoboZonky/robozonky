@@ -33,6 +33,14 @@ import org.slf4j.LoggerFactory;
 public class CommandLine {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
+    @ParametersDelegate
+    private AuthenticationCommandLineFragment authenticationFragment = new AuthenticationCommandLineFragment();
+    @ParametersDelegate
+    private TweaksCommandLineFragment tweaksFragment = new TweaksCommandLineFragment();
+    @ParametersDelegate
+    private ConfirmationCommandLineFragment confirmationFragment = new ConfirmationCommandLineFragment();
+    @Parameter(names = {"-h", "--help"}, help = true, description = "Print usage end exit.")
+    private boolean help;
 
     private static Optional<InvestmentMode> terminate(final ParameterException ex) {
         System.out.println(ex.getMessage()); // error will be shown to users on stdout
@@ -43,18 +51,6 @@ public class CommandLine {
         jc.usage();
         return Optional.empty();
     }
-
-    @ParametersDelegate
-    private AuthenticationCommandLineFragment authenticationFragment = new AuthenticationCommandLineFragment();
-
-    @ParametersDelegate
-    private TweaksCommandLineFragment tweaksFragment = new TweaksCommandLineFragment();
-
-    @ParametersDelegate
-    private ConfirmationCommandLineFragment confirmationFragment = new ConfirmationCommandLineFragment();
-
-    @Parameter(names = {"-h", "--help"}, help = true, description = "Print usage end exit.")
-    private boolean help;
 
     /**
      * Takes command-line arguments and converts them into an application configuration, printing command line usage
@@ -87,6 +83,10 @@ public class CommandLine {
         return cli.newApplicationConfiguration(mode);
     }
 
+    static String getScriptIdentifier() {
+        return System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
+    }
+
     private OperatingMode determineOperatingMode(final JCommander jc) throws ParameterException {
         final String parsedCommand = jc.getParsedCommand();
         if (parsedCommand == null) {
@@ -103,12 +103,9 @@ public class CommandLine {
     }
 
     private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
-        return SecretProviderFactory.getSecretProvider(this).flatMap(secrets -> Optional.ofNullable(mode).flatMap(
-                i -> i.configure(this, authenticationFragment.createAuthenticated(secrets))));
-    }
-
-    AuthenticationCommandLineFragment getAuthenticationFragment() {
-        return authenticationFragment;
+        return SecretProviderFactory.getSecretProvider(this.authenticationFragment)
+                .flatMap(secrets -> Optional.ofNullable(mode)
+                        .flatMap(i -> i.configure(this, authenticationFragment.createAuthenticated(secrets))));
     }
 
     TweaksCommandLineFragment getTweaksFragment() {
@@ -117,9 +114,5 @@ public class CommandLine {
 
     ConfirmationCommandLineFragment getConfirmationFragment() {
         return confirmationFragment;
-    }
-
-    static String getScriptIdentifier() {
-        return System.getProperty("os.name").contains("Windows") ? "robozonky.bat" : "robozonky.sh";
     }
 }

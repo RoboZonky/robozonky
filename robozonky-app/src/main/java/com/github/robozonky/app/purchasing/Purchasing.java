@@ -18,44 +18,46 @@ package com.github.robozonky.app.purchasing;
 
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.robozonky.app.util.StrategyExecutor;
+import com.github.robozonky.common.remote.Zonky;
 
-public class Purchasing implements Runnable {
+public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
+    private final Zonky zonky;
+    private final boolean dryRun;
 
-    private final Authenticated api;
-    private final Function<Stream<Participation>, Collection<Investment>> investor;
+    public Purchasing(final Refreshable<PurchaseStrategy> strategy, final Zonky zonky,
+                      final TemporalAmount maximumSleepPeriod, final boolean dryRun) {
+        super((l) -> new Activity(l, maximumSleepPeriod), strategy);
+        this.zonky = zonky;
+        this.dryRun = dryRun;
+    }
 
-    public Purchasing(final Authenticated auth, final Refreshable<PurchaseStrategy> strategy,
-                      final TemporalAmount maximumSleepPeriod, final boolean isDryRun) {
-        this.api = auth;
-        this.investor = new StrategyExecution(strategy, api, maximumSleepPeriod, isDryRun);
+    private static ParticipationDescriptor toDescriptor(final Participation p, final Zonky zonky) {
+        final Loan l = Portfolio.INSTANCE.getLoan(zonky, p.getLoanId());
+        return new ParticipationDescriptor(p, l);
     }
 
     @Override
-    public void run() {
-        if (Portfolio.INSTANCE.isUpdating()) { // don't update while reading information about portfolio
-            return;
-        }
-        try {
-            LOGGER.trace("Starting.");
-            final Collection<Investment> bought = api.call(z -> investor.apply(z.getAvailableParticipations()));
-            LOGGER.trace("Finished; investments made: {}.", bought);
-        } catch (final Throwable t) {
-            // We catch Throwable so that we can inform users even about errors.
-            new DaemonRuntimeExceptionHandler().handle(t);
-        }
+    protected int identify(final Participation item) {
+        return item.getId();
+    }
+
+    @Override
+    protected Collection<Investment> execute(final PurchaseStrategy strategy,
+                                             final Collection<Participation> marketplace) {
+        final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
+                .map(p -> toDescriptor(p, zonky))
+                .collect(Collectors.toList());
+        return Session.purchase(zonky, participations, strategy, dryRun);
     }
 }

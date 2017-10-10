@@ -55,7 +55,7 @@ public enum State {
     private final AtomicReference<Ini> stateFile = new AtomicReference<>(null);
     private final Supplier<Ini> stateFileSupplier = () -> {
         try {
-            final File stateLocation = State.getStateLocation();
+            final File stateLocation = Settings.INSTANCE.getStateFile();
             if (!stateLocation.exists()) {
                 LOGGER.debug("Creating state: {}.", stateLocation);
                 stateLocation.createNewFile();
@@ -74,10 +74,6 @@ public enum State {
      */
     public static State.ClassSpecificState forClass(final Class<?> clz) {
         return new State.ClassSpecificState(clz);
-    }
-
-    static File getStateLocation() {
-        return new File(System.getProperty("user.dir"), "robozonky.state");
     }
 
     private Ini getStateFile() {

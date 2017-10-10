@@ -30,14 +30,14 @@ public class UpdateMonitorTest {
 
     @Test
     public void checkRetrieval() throws Exception {
-        final UpdateMonitor v = new UpdateMonitor("com.github.triceo.robozonky", "robozonky-app");
+        final UpdateMonitor v = new UpdateMonitor("com.github.robozonky", "robozonky-app");
         v.run();
         Assertions.assertThat(v.getLatest()).isPresent();
     }
 
     @Test
     public void checkNonExistentUrl() throws Exception {
-        final UpdateMonitor v = new UpdateMonitor("com.github.triceo.robozonky", "robozonky-nonexistent");
+        final UpdateMonitor v = new UpdateMonitor("com.github.robozonky", "robozonky-nonexistent");
         v.run();
         Assertions.assertThat(v.getLatest()).isEmpty();
     }

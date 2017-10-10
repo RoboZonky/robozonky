@@ -34,31 +34,17 @@ final class SecretProviderFactory {
      * @param cli Command line interface coming from the application.
      * @return KeyStore-based secret provider or empty in case of a problem happened inside the keystore.
      */
-    public static Optional<SecretProvider> getSecretProvider(final CommandLine cli) {
-        final AuthenticationCommandLineFragment cliAuth = cli.getAuthenticationFragment();
-        final char[] password = cliAuth.getPassword();
-        return cliAuth.getKeystore().map(keystore -> {
+    public static Optional<SecretProvider> getSecretProvider(final AuthenticationCommandLineFragment cli) {
+        final char[] password = cli.getPassword();
+        return cli.getKeystore().map(keystore -> {
             try {
                 final KeyStoreHandler ksh = KeyStoreHandler.open(keystore, password);
                 return Optional.of(SecretProvider.keyStoreBased(ksh));
-            } catch (final IOException ex) {
+            } catch (final IOException | KeyStoreException ex) {
                 SecretProviderFactory.LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.<SecretProvider>empty();
-            } catch (final KeyStoreException ex) {
-                SecretProviderFactory.LOGGER.info("Can not use keystore.", ex);
-                return SecretProviderFactory.getFallbackSecretProvider(cli);
             }
-        }).orElseGet(() -> SecretProviderFactory.getFallbackSecretProvider(cli));
+        }).orElseGet(() -> Optional.of(SecretProvider.fallback(cli.getUsername().get(), cli.getPassword())));
     }
 
-    static Optional<SecretProvider> getFallbackSecretProvider(final CommandLine cli) {
-        final AuthenticationCommandLineFragment cliAuth = cli.getAuthenticationFragment();
-        return cliAuth.getKeystore().map(keyStore -> { // keystore is demanded but apparently unsupported, fail
-            SecretProviderFactory.LOGGER.error("No KeyStore support detected, yet it is demanded.");
-            return Optional.<SecretProvider>empty();
-        }).orElseGet(() -> { // keystore is optional, fall back to other means
-            SecretProviderFactory.LOGGER.warn("Keystore not being used, storing password insecurely.");
-            return Optional.of(SecretProvider.fallback(cliAuth.getUsername().get(), cliAuth.getPassword()));
-        });
-    }
 }

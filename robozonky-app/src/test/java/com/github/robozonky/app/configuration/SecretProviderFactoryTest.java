@@ -17,48 +17,53 @@
 package com.github.robozonky.app.configuration;
 
 import java.io.File;
+import java.security.KeyStoreException;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class SecretProviderFactoryTest {
 
-    private static CommandLine mockCli(final String username, final File file, final char... password) {
+    private static AuthenticationCommandLineFragment mockCli(final String username, final File file,
+                                                             final char... password) {
         final AuthenticationCommandLineFragment delegate = Mockito.mock(AuthenticationCommandLineFragment.class);
         Mockito.when(delegate.getUsername()).thenReturn(Optional.ofNullable(username));
         Mockito.when(delegate.getKeystore()).thenReturn(Optional.ofNullable(file));
         Mockito.when(delegate.getPassword()).thenReturn(password);
-        final CommandLine cli = Mockito.mock(CommandLine.class);
-        Mockito.when(cli.getAuthenticationFragment()).thenReturn(delegate);
-        return cli;
+        return delegate;
     }
 
     @Test
     public void nonexistentKeyStoreProvided() throws Exception {
         final File tmp = File.createTempFile("robozonky-", ".keystore");
         tmp.delete();
-        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, tmp, "password".toCharArray());
+        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(null, tmp,
+                                                                                        "password".toCharArray());
         Assertions.assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
     }
 
     @Test
     public void wrongFormatKeyStoreProvided() throws Exception {
-        final File tmp = File.createTempFile("robozonky-", ".keystore");
-        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, tmp, "password".toCharArray());
+        final File tmp = Mockito.mock(File.class);
+        Mockito.doThrow(KeyStoreException.class).when(tmp).exists();
+        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(null, tmp,
+                                                                                        "password".toCharArray());
         Assertions.assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();
     }
 
     @Test
-    public void fallbackDemandingKeystore() {
-        final CommandLine cli = SecretProviderFactoryTest.mockCli(null, new File(""));
-        Assertions.assertThat(SecretProviderFactory.getFallbackSecretProvider(cli)).isEmpty();
-    }
-
-    @Test
     public void fallbackSuccess() {
-        final CommandLine cli = SecretProviderFactoryTest.mockCli("user", null, "pass".toCharArray());
-        Assertions.assertThat(SecretProviderFactory.getFallbackSecretProvider(cli)).isNotEmpty();
+        final String username = "user", password = "pass";
+        final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(username, null,
+                                                                                        password.toCharArray());
+        Assertions.assertThat(SecretProviderFactory.getSecretProvider(cli))
+                .hasValueSatisfying(secret -> SoftAssertions.assertSoftly(softly -> {
+                    softly.assertThat(secret.getUsername()).isEqualTo(username);
+                    softly.assertThat(secret.getPassword()).containsExactly(password.toCharArray());
+                    softly.assertThat(secret.isPersistent()).isFalse();
+                }));
     }
 }

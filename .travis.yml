@@ -5,7 +5,9 @@ os:
   - linux
 jdk:
   - oraclejdk8
+  - oraclejdk9
 addons: # make sure we're using the latest Java as Travis default is quite old
   apt:
     packages:
       - oracle-java8-installer
+      - oracle-java9-installer

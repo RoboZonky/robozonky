@@ -30,6 +30,7 @@ import javax.ws.rs.NotFoundException;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
+import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
@@ -39,6 +40,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -79,15 +81,24 @@ class Session implements AutoCloseable {
         return s;
     }
 
+    private void purchase(final PurchaseStrategy strategy) {
+        boolean invested;
+        do {
+            invested = strategy.recommend(getAvailable(), getPortfolioOverview())
+                    .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
+                    .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
+        } while (invested);
+    }
+
     static Collection<Investment> purchase(final Zonky api, final Collection<ParticipationDescriptor> items,
-                                           final InvestmentCommand command, final boolean dryRun) {
+                                           final PurchaseStrategy strategy, final boolean dryRun) {
         try (final Session session = Session.create(api, items, dryRun)) {
             final Collection<ParticipationDescriptor> c = session.getAvailable();
             if (c.isEmpty()) {
                 return Collections.emptyList();
             }
             Events.fire(new PurchasingStartedEvent(c, session.getPortfolioOverview()));
-            command.accept(session);
+            session.purchase(strategy);
             final Collection<Investment> result = session.getResult();
             Events.fire(new PurchasingCompletedEvent(result, session.getPortfolioOverview()));
             return Collections.unmodifiableCollection(result);

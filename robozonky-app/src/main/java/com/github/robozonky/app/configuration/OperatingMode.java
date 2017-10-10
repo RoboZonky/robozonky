@@ -62,21 +62,19 @@ abstract class OperatingMode implements CommandLineFragment {
                                                                   final Investor.Builder builder);
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final Authenticated auth) {
-        final Optional<Credentials> cred = cli.getConfirmationFragment().getConfirmationCredentials().map(
-                value -> new Credentials(value, auth.getSecretProvider()));
-        final Optional<Investor.Builder> optionalBuilder = cred
-                .map(credentials -> this.getZonkyProxyBuilder(credentials, auth.getSecretProvider()))
-                .orElse(Optional.of(new Investor.Builder()));
-        return optionalBuilder
+        final SecretProvider secretProvider = auth.getSecretProvider();
+        return cli.getConfirmationFragment().getConfirmationCredentials()
+                .map(value -> new Credentials(value, secretProvider))
+                .map(credentials -> this.getZonkyProxyBuilder(credentials, secretProvider))
+                .orElse(Optional.of(new Investor.Builder()))
                 .map(builder -> {
                     if (cli.getTweaksFragment().isDryRunEnabled()) {
                         LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
                         builder.asDryRun();
                     }
-                    builder.asUser(auth.getSecretProvider().getUsername());
+                    builder.asUser(secretProvider.getUsername());
                     return this.getInvestmentMode(cli, auth, builder);
-                })
-                .orElse(Optional.empty());
+                }).orElse(Optional.empty());
     }
 
     public String toString() {

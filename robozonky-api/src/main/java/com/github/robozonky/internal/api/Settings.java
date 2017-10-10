@@ -39,40 +39,32 @@ public enum Settings {
 
     INSTANCE; // cheap thread-safe singleton
 
-    public enum Key {
-
-        DEBUG_ENABLE_EVENT_STORAGE("robozonky.debug.enable_event_storage"),
-        DEBUG_ENABLE_HTTP_RESPONSE_LOGGING("robozonky.debug.enable_http_response_logging"),
-        DEFAULTS_TOKEN_REFRESH("robozonky.default.token_refresh_seconds"),
-        DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),
-        DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
-        DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
-        DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
-        DEFAULTS_DRY_RUN_BALANCE("robozonky.default.dry_run_balance"),
-        DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size"),
-        CAPTCHA_DELAY_AAAAA("robozonky.aaaaa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AAAA("robozonky.aaaa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AAA("robozonky.aaa_loan_protection_seconds"),
-        CAPTCHA_DELAY_AA("robozonky.aa_loan_protection_seconds"),
-        CAPTCHA_DELAY_A("robozonky.a_loan_protection_seconds"),
-        CAPTCHA_DELAY_B("robozonky.b_loan_protection_seconds"),
-        CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
-        CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds");
-
-        private final String name;
-
-        Key(final String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-    }
-
     public static final String FILE_LOCATION_PROPERTY = "robozonky.properties.file";
     private final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
+    private final AtomicReference<Properties> properties = new AtomicReference<>();
+
+    private static Settings.Key getRatingKey(final Rating r) {
+        switch (r) {
+            case AAAAA:
+                return Settings.Key.CAPTCHA_DELAY_AAAAA;
+            case AAAA:
+                return Settings.Key.CAPTCHA_DELAY_AAAA;
+            case AAA:
+                return Settings.Key.CAPTCHA_DELAY_AAA;
+            case AA:
+                return Settings.Key.CAPTCHA_DELAY_AA;
+            case A:
+                return Settings.Key.CAPTCHA_DELAY_A;
+            case B:
+                return Settings.Key.CAPTCHA_DELAY_B;
+            case C:
+                return Settings.Key.CAPTCHA_DELAY_C;
+            case D:
+                return Settings.Key.CAPTCHA_DELAY_D;
+            default:
+                throw new IllegalStateException("Impossible");
+        }
+    }
 
     private Properties getProperties() {
         final String filename = System.getProperty(Settings.FILE_LOCATION_PROPERTY);
@@ -92,8 +84,6 @@ public enum Settings {
             throw new IllegalStateException("Cannot read properties.", ex);
         }
     }
-
-    private final AtomicReference<Properties> properties = new AtomicReference<>();
 
     /**
      * To be used purely for testing purposes.
@@ -190,29 +180,6 @@ public enum Settings {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 60));
     }
 
-    private Settings.Key getRatingKey(final Rating r) {
-        switch (r) {
-            case AAAAA:
-                return Settings.Key.CAPTCHA_DELAY_AAAAA;
-            case AAAA:
-                return Settings.Key.CAPTCHA_DELAY_AAAA;
-            case AAA:
-                return Settings.Key.CAPTCHA_DELAY_AAA;
-            case AA:
-                return Settings.Key.CAPTCHA_DELAY_AA;
-            case A:
-                return Settings.Key.CAPTCHA_DELAY_A;
-            case B:
-                return Settings.Key.CAPTCHA_DELAY_B;
-            case C:
-                return Settings.Key.CAPTCHA_DELAY_C;
-            case D:
-                return Settings.Key.CAPTCHA_DELAY_D;
-            default:
-                throw new IllegalStateException("Impossible");
-        }
-    }
-
     public TemporalAmount getCaptchaDelay(final Rating r) {
         return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Integer.parseInt(delay)), r.getCaptchaDelay());
     }
@@ -227,6 +194,44 @@ public enum Settings {
 
     public int getDefaultApiPageSize() {
         return get(Settings.Key.DEFAULTS_API_PAGE_SIZE, 100);
+    }
+
+    public File getStateFile() {
+        return get(Settings.Key.STATE_FILE_LOCATION, File::new,
+                   new File(System.getProperty("user.dir"), "robozonky.state"));
+    }
+
+    public enum Key {
+
+        DEBUG_ENABLE_EVENT_STORAGE("robozonky.debug.enable_event_storage"),
+        DEBUG_ENABLE_HTTP_RESPONSE_LOGGING("robozonky.debug.enable_http_response_logging"),
+        DEFAULTS_TOKEN_REFRESH("robozonky.default.token_refresh_seconds"),
+        DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),
+        DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
+        DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
+        DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
+        DEFAULTS_DRY_RUN_BALANCE("robozonky.default.dry_run_balance"),
+        DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size"),
+        CAPTCHA_DELAY_AAAAA("robozonky.aaaaa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AAAA("robozonky.aaaa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AAA("robozonky.aaa_loan_protection_seconds"),
+        CAPTCHA_DELAY_AA("robozonky.aa_loan_protection_seconds"),
+        CAPTCHA_DELAY_A("robozonky.a_loan_protection_seconds"),
+        CAPTCHA_DELAY_B("robozonky.b_loan_protection_seconds"),
+        CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
+        CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds"),
+        STATE_FILE_LOCATION("robozonky.state_file");
+
+        private final String name;
+
+        Key(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
     }
 
 }
