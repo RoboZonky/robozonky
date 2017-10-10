@@ -470,6 +470,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${surefire.version}</version>
             <configuration>
+              <reuseForks>false</reuseForks>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
               <workingDirectory>${basedir}/target</workingDirectory>
             </configuration>
@@ -488,6 +489,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${surefire.version}</version>
             <configuration>
+              <reuseForks>false</reuseForks>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
               <workingDirectory>${basedir}/target</workingDirectory>
               <!-- Workaround so that we don't get CNFE on javax/annotation/Priority - see SUREFIRE-1424 for more. -->
