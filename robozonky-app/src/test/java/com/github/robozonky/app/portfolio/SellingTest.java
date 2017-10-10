@@ -31,7 +31,6 @@ import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
@@ -83,7 +82,6 @@ public class SellingTest extends AbstractInvestingTest {
     private static Zonky mockApi(final Investment... investments) {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ZERO));
-        Mockito.when(zonky.getStatistics()).thenReturn(new Statistics());
         Mockito.when(zonky.getInvestments()).thenReturn(Stream.of(investments));
         Mockito.when(zonky.getLoan(ArgumentMatchers.anyInt())).thenReturn(Mockito.mock(Loan.class));
         return zonky;

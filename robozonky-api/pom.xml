@@ -111,6 +111,23 @@
                   }
                 },
                 "ignore": [
+                  {
+                    "code": "java.method.removed",
+                    "old": "method com.github.robozonky.api.remote.entities.Statistics com.github.robozonky.api.remote.PortfolioApi::statistics()",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "PortfolioApi",
+                    "methodName": "statistics",
+                    "elementKind": "method",
+                    "justification": "Zonky moved this API and we don't need it anymore."
+                  },
+                  {
+                    "code": "java.class.removed",
+                    "old": "class com.github.robozonky.api.remote.entities.Statistics",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "Statistics",
+                    "elementKind": "class",
+                    "justification": "Zonky moved this API and we don't need it anymore."
+                  }
                 ]
               }
             }
