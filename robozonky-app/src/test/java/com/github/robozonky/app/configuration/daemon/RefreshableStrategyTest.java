@@ -18,7 +18,6 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -31,35 +30,35 @@ import org.junit.Test;
 
 public class RefreshableStrategyTest {
 
-    private final File strategy;
-
-    public RefreshableStrategyTest() throws IOException {
-        strategy = File.createTempFile("robozonky-strategy", ".cfg");
+    private static File newStrategyFile() throws IOException {
+        final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
         Files.write("Robot má udržovat konzervativní portfolio.", strategy, Defaults.CHARSET);
+        return strategy;
     }
 
     @Test
-    public void loadStrategyAsFile() throws InterruptedException {
-        final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(strategy.getAbsolutePath());
+    public void loadStrategyAsFile() throws InterruptedException, IOException {
+        final Refreshable<InvestmentStrategy> r =
+                RefreshableInvestmentStrategy.create(newStrategyFile().getAbsolutePath());
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
-    public void loadStrategyAsUrl() throws MalformedURLException, InterruptedException {
-        final String url = strategy.toURI().toURL().toString();
+    public void loadStrategyAsUrl() throws IOException, InterruptedException {
+        final String url = newStrategyFile().toURI().toURL().toString();
         final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(url);
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
-    public void loadPurchaseStrategy() {
-        final Refreshable<PurchaseStrategy> r = RefreshablePurchaseStrategy.create(strategy.getAbsolutePath());
+    public void loadPurchaseStrategy() throws IOException {
+        final Refreshable<PurchaseStrategy> r = RefreshablePurchaseStrategy.create(newStrategyFile().getAbsolutePath());
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
-    public void loadSellStrategy() {
-        final Refreshable<SellStrategy> r = RefreshableSellStrategy.create(strategy.getAbsolutePath());
+    public void loadSellStrategy() throws IOException {
+        final Refreshable<SellStrategy> r = RefreshableSellStrategy.create(newStrategyFile().getAbsolutePath());
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 }

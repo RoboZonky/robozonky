@@ -31,20 +31,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.app.configuration.daemon.MarketplaceActivity;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Decides whether or not the application should fall asleep because of general marketplace inactivity. Uses two sources
- * of data to make the decision: the marketplace, and the app's internal state concerning the last time the marketplace
- * was checked.
- * <p>
- * In order for the state to be persisted, the App needs to eventually call {@link #settle()} after calling
- * {@link #shouldSleep()}.
- */
-class Activity {
+class Activity implements MarketplaceActivity {
 
     private static SortedSet<Integer> serialize(final Collection<Participation> items) {
         final Set<Integer> result = items.stream().map(Participation::getInvestmentId).collect(Collectors.toSet());
@@ -101,10 +94,7 @@ class Activity {
         return !now.isEmpty();
     }
 
-    /**
-     * Whether or not the application should fall asleep and not make any further contact with API.
-     * @return True if no further contact should be made during this run of the app.
-     */
+    @Override
     public boolean shouldSleep() {
         final OffsetDateTime lastKnownAction = Activity.getLatestMarketplaceAction();
         final boolean shouldSleep;
@@ -120,9 +110,7 @@ class Activity {
         return shouldSleep;
     }
 
-    /**
-     * Persists the new marketplace state following a {@link #shouldSleep()} call.
-     */
+    @Override
     public void settle() {
         this.settler.getAndSet(Activity.DO_NOTHING).run();
     }

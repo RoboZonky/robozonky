@@ -18,58 +18,34 @@ package com.github.robozonky.app.investing;
 
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.github.robozonky.api.Refreshable;
-import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.robozonky.app.util.StrategyExecutor;
+import com.github.robozonky.common.remote.Zonky;
 
-public class Investing implements Runnable {
+public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Investing.class);
+    private final Zonky zonky;
+    private final Investor.Builder investor;
 
-    private final Marketplace marketplace;
-
-    public Investing(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
-                     final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod) {
-        this.marketplace = marketplace;
-        final Function<Collection<LoanDescriptor>, Collection<Investment>> investor =
-                new StrategyExecution(builder, strategy, auth, maximumSleepPeriod);
-        marketplace.registerListener((loans) -> {
-            if (loans == null) {
-                investor.apply(Collections.emptyList());
-            } else {
-                final Collection<LoanDescriptor> descriptors = loans.stream()
-                        .map(LoanDescriptor::new)
-                        .collect(Collectors.toList());
-                investor.apply(descriptors);
-            }
-        });
+    public Investing(final Investor.Builder investor, final Refreshable<InvestmentStrategy> strategy,
+                     final Zonky zonky, final TemporalAmount maximumSleepPeriod) {
+        super((l) -> new Activity(l, maximumSleepPeriod), strategy);
+        this.zonky = zonky;
+        this.investor = investor;
     }
 
     @Override
-    public void run() {
-        try {
-            if (!Portfolio.INSTANCE.isUpdating()) {
-                LOGGER.trace("Starting.");
-                marketplace.run();
-                LOGGER.trace("Finished.");
-            }
-        } catch (final Throwable t) {
-            /*
-             * We catch Throwable so that we can inform users even about errors. Sudden death detection will take
-             * care of errors stopping the thread.
-             */
-            new DaemonRuntimeExceptionHandler().handle(t);
-        }
+    protected int identify(final LoanDescriptor item) {
+        return item.item().getId();
+    }
+
+    @Override
+    protected Collection<Investment> execute(final InvestmentStrategy strategy,
+                                             final Collection<LoanDescriptor> marketplace) {
+        return Session.invest(investor, zonky, marketplace, strategy);
     }
 }
