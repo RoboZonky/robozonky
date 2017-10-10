@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -78,7 +77,6 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         Mockito.when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
         Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
-        Mockito.when(zonky.getStatistics()).thenReturn(new Statistics());
         return zonky;
     }
 

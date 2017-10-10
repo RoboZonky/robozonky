@@ -32,7 +32,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.SellRequest;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
@@ -121,11 +120,6 @@ public class Zonky implements AutoCloseable {
      */
     public Stream<BlockedAmount> getBlockedAmounts() {
         return Zonky.getStream(walletApi);
-    }
-
-    public Statistics getStatistics() { // may be null when the user has a fresh Zonky account
-        final Statistics s = portfolioApi.execute(PortfolioApi::statistics);
-        return (s == null) ? new Statistics() : s;
     }
 
     /**

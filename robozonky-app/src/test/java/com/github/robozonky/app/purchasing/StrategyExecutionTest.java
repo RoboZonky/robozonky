@@ -35,7 +35,6 @@ import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -103,7 +102,6 @@ public class StrategyExecutionTest extends AbstractInvestingTest {
                     return new Loan(id, 200);
                 });
         Mockito.when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
-        Mockito.when(zonky.getStatistics()).thenReturn(new Statistics());
         return zonky;
     }
 

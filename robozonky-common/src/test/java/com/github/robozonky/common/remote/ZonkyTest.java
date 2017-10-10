@@ -30,7 +30,6 @@ import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -186,20 +185,4 @@ public class ZonkyTest {
         }
     }
 
-    @Test
-    public void statistics() {
-        final ControlApi control = Mockito.mock(ControlApi.class);
-        final Api<ControlApi> ca = mockApi(control);
-        Assertions.assertThat(ca.isClosed()).isFalse();
-        final PaginatedApi<Loan, LoanApi> la = mockApi();
-        final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
-        final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
-        final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        Mockito.when(pa.execute((Function<PortfolioApi, Statistics>) ArgumentMatchers.any()))
-                .thenReturn(Mockito.mock(Statistics.class));
-        try (final Zonky z = new Zonky(ca, la, sa, pa, wa)) {
-            final Statistics s = z.getStatistics();
-            Assertions.assertThat(s).isNotNull();
-        }
-    }
 }
