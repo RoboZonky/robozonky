@@ -16,9 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.xml.bind.annotation.XmlTransient;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.github.robozonky.internal.api.ToStringBuilder;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -28,20 +33,33 @@ import org.slf4j.LoggerFactory;
  */
 abstract class BaseEntity {
 
+    private static final Set<String> CHANGES_ALREADY_NOTIFIED = new HashSet<>(0);
+    @XmlTransient
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+    private synchronized boolean hasBeenCalledBefore(final String key) {
+        final String id = this.getClass().getCanonicalName() + ":" + key;
+        if (CHANGES_ALREADY_NOTIFIED.contains(id)) {
+            return true;
+        }
+        CHANGES_ALREADY_NOTIFIED.add(id);
+        return false;
+    }
+
     @JsonAnyGetter
     void handleUnknownGetter(final String key) {
-        LoggerFactory.getLogger(this.getClass()).debug("Trying to get value of unknown property '{}'."
-                                                               + " Indicates an unexpected API change, RoboZonky may " +
-                                                               "misbehave.",
-                                                       key);
+        if (!hasBeenCalledBefore(key)) {
+            LOGGER.warn("Trying to get value of unknown property '{}'. Indicates an unexpected API change, " +
+                                "RoboZonky may misbehave.", key);
+        }
     }
 
     @JsonAnySetter
     void handleUnknownSetter(final String key, final Object value) {
-        LoggerFactory.getLogger(this.getClass()).debug("Trying to set value '{}' to an unknown property '{}'."
-                                                               + " Indicates an unexpected API change, RoboZonky may " +
-                                                               "misbehave.",
-                                                       value, key);
+        if (!hasBeenCalledBefore(key)) {
+            LOGGER.warn("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change, " +
+                                "RoboZonky may misbehave.", value, key);
+        }
     }
 
     @Override
