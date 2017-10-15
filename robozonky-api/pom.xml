@@ -127,6 +127,26 @@
                     "classSimpleName": "Statistics",
                     "elementKind": "class",
                     "justification": "Zonky moved this API and we don't need it anymore."
+                  },{
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "parameter java.util.Optional<T> com.github.robozonky.api.Refreshable<T>::getLatest(===java.time.temporal.TemporalAmount===)",
+                    "new": "parameter java.util.Optional<T> com.github.robozonky.api.Refreshable<T>::getLatest(===java.time.Duration===)",
+                    "oldType": "java.time.temporal.TemporalAmount",
+                    "newType": "java.time.Duration",
+                    "package": "com.github.robozonky.api",
+                    "classSimpleName": "Refreshable",
+                    "methodName": "getLatest",
+                    "parameterIndex": "0",
+                    "elementKind": "parameter",
+                    "justification": "Use of TemporalAmount discouraged by the JDK."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method T com.github.robozonky.api.Refreshable<T>::getLatestBlocking()",
+                    "package": "com.github.robozonky.api",
+                    "classSimpleName": "Refreshable",
+                    "methodName": "getLatestBlocking",
+                    "elementKind": "method",
+                    "justification": "No longer used anywhere in the code."
                   }
                 ]
               }

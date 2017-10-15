@@ -104,38 +104,6 @@ public class RefreshableTest {
         Assertions.assertThat(r.getLatest()).isNotEmpty();
     }
 
-    @Test(timeout = 5000)
-    public void waitsForValue() {
-        final String initial = "initial";
-        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
-        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
-        r.registerListener(l);
-        // set and remove value
-        r.run();
-        Mockito.verify(l, Mockito.times(1)).valueSet(RefreshableTest.transform(initial));
-        r.setLatestSource(null);
-        r.run();
-        Mockito.verify(l, Mockito.times(1)).valueUnset(RefreshableTest.transform(initial));
-        // wait for new value
-        RefreshableTest.LOGGER.info("Scheduling.");
-        RefreshableTest.EXECUTOR.schedule(() -> {
-            RefreshableTest.LOGGER.info("Executing.");
-            r.setLatestSource(initial);
-            r.run();
-            RefreshableTest.LOGGER.info("Executed.");
-        }, 1, TimeUnit.SECONDS); // execute only after the assertion is called
-        RefreshableTest.LOGGER.info("Blocking until value is found.");
-        Assertions.assertThat(r.getLatestBlocking()).isNotEmpty();
-        RefreshableTest.LOGGER.info("Found.");
-        // and now change the value
-        final String otherValue = "other";
-        r.setLatestSource(otherValue);
-        r.run();
-        Assertions.assertThat(r.getLatestBlocking()).isEqualTo(RefreshableTest.transform(otherValue));
-        Mockito.verify(l, Mockito.times(1))
-                .valueChanged(RefreshableTest.transform(initial), RefreshableTest.transform(otherValue));
-    }
-
     @Test
     public void registersListeners() {
         final Refreshable<Void> r = Refreshable.createImmutable();
@@ -161,6 +129,49 @@ public class RefreshableTest {
         protected Optional<String> transform(final String source) {
             return Optional.of(source);
         }
+    }
+
+    @Test(timeout = 5000)
+    public void waitsForValue() {
+        final String initial = "initial";
+        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
+        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
+        r.registerListener(l);
+        // wait for new value
+        RefreshableTest.LOGGER.info("Scheduling.");
+        RefreshableTest.EXECUTOR.schedule(() -> {
+            RefreshableTest.LOGGER.info("Executing.");
+            r.setLatestSource(initial);
+            r.run();
+            RefreshableTest.LOGGER.info("Executed.");
+        }, 1, TimeUnit.SECONDS); // execute only after the assertion is called
+        RefreshableTest.LOGGER.info("Blocking until value is found.");
+        Assertions.assertThat(r.getLatest()).isNotEmpty();
+        // and now change the value
+        final String otherValue = "other";
+        r.setLatestSource(otherValue);
+        r.run();
+        Assertions.assertThat(r.getLatest()).contains(RefreshableTest.transform(otherValue));
+    }
+
+    @Test
+    public void checkListeners() {
+        final String initial = "initial";
+        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
+        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
+        r.registerListener(l);
+        r.setLatestSource(initial);
+        r.run();
+        Mockito.verify(l, Mockito.times(1)).valueSet(RefreshableTest.transform(initial));
+        final String otherValue = "other";
+        r.setLatestSource(otherValue);
+        r.run();
+        Mockito.verify(l, Mockito.times(1))
+                .valueChanged(RefreshableTest.transform(initial), RefreshableTest.transform(otherValue));
+        r.setLatestSource(null);
+        r.run();
+        Mockito.verify(l, Mockito.times(1))
+                .valueUnset(RefreshableTest.transform(otherValue));
     }
 
     @Test
