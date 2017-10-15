@@ -16,15 +16,13 @@
 
 package com.github.robozonky.api;
 
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,7 +44,6 @@ import org.slf4j.LoggerFactory;
 public abstract class Refreshable<T> implements Runnable {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final Semaphore valueIsMissing = new Semaphore(1);
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
     private final AtomicInteger requestsToPause = new AtomicInteger(0);
@@ -58,7 +55,6 @@ public abstract class Refreshable<T> implements Runnable {
     private final Collection<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
     public Refreshable() {
-        this.valueIsMissing.acquireUninterruptibly();
         this.registerListener(new UpdateNotification()); // log changes to resource
     }
 
@@ -116,34 +112,25 @@ public abstract class Refreshable<T> implements Runnable {
     protected abstract Optional<T> transform(final String source);
 
     /**
-     * Will block until {@link #getLatest()} is able to return a non-empty result.
-     * @return The return of {@link #getLatest()}'s optional.
-     */
-    public T getLatestBlocking() {
-        try {
-            valueIsMissing.acquireUninterruptibly();
-            return cachedResult.get();
-        } finally {
-            valueIsMissing.release();
-        }
-    }
-
-    /**
      * Will block until {@link #run()} has finished at least once or until time runs out.
      * @param waitFor How long to wait for.
      * @return Empty if the source could not be parsed, if wait timed out or if the wait operation was interrupted.
      */
-    public Optional<T> getLatest(final TemporalAmount waitFor) {
+    public Optional<T> getLatest(final Duration waitFor) {
         try {
-            if (completionAssurance.await(waitFor.get(ChronoUnit.SECONDS), TimeUnit.SECONDS)) {
+            final long millisToWaitFor = waitFor.toMillis();
+            LOGGER.trace("Waiting for up to {} millis: {}.", millisToWaitFor, this);
+            if (completionAssurance.await(millisToWaitFor, TimeUnit.MILLISECONDS)) {
                 return Optional.ofNullable(cachedResult.get());
             } else {
-                LOGGER.debug("Acquire failed.");
+                LOGGER.debug("Acquire failed: {}.", this);
                 return Optional.empty();
             }
         } catch (final InterruptedException ex) {
-            LOGGER.debug("Wait interrupted.", ex);
+            LOGGER.debug("Wait interrupted: {}.", this, ex);
             return Optional.empty();
+        } finally {
+            LOGGER.trace("Wait over: {}.", this);
         }
     }
 
@@ -152,12 +139,7 @@ public abstract class Refreshable<T> implements Runnable {
      * @return Empty if the source could not be parsed or if the wait operation was interrupted.
      */
     public Optional<T> getLatest() {
-        try {
-            completionAssurance.await();
-            return Optional.ofNullable(cachedResult.get());
-        } catch (final InterruptedException e) {
-            return Optional.empty();
-        }
+        return getLatest(Duration.ofMillis(Long.MAX_VALUE));
     }
 
     /**
@@ -166,7 +148,7 @@ public abstract class Refreshable<T> implements Runnable {
      * @return False if already registered.
      */
     public boolean registerListener(final Refreshable.RefreshListener<T> listener) {
-        LOGGER.trace("Registering listener {}.", listener);
+        LOGGER.trace("Registering listener {}: {}.", listener, this);
         return this.listeners.add(listener);
     }
 
@@ -188,9 +170,14 @@ public abstract class Refreshable<T> implements Runnable {
     public <X> X pauseFor(final Function<Refreshable<T>, X> operation) {
         requestsToPause.incrementAndGet();
         try {
+            LOGGER.trace("Pausing: {}.", this);
             return operation.apply(this);
         } finally {
-            if (requestsToPause.decrementAndGet() == 0 && refreshRequestedWhilePaused.get()) {
+            LOGGER.trace("Releasing: {}.", this);
+            final boolean isPaused = requestsToPause.decrementAndGet() > 0;
+            final boolean needsRefresh = refreshRequestedWhilePaused.getAndSet(false);
+            if (!isPaused && needsRefresh) {
+                LOGGER.trace("Executing in lieu: {}.", this);
                 run();
             }
         }
@@ -203,15 +190,13 @@ public abstract class Refreshable<T> implements Runnable {
     private void storeResult(final T result) {
         final T previous = cachedResult.getAndSet(result);
         if (Objects.equals(previous, result)) {
-            LOGGER.trace("Value not changed.");
+            LOGGER.trace("Value not changed: {}.", this);
             return;
         }
         if (previous == null && result != null) { // value newly available
             this.listeners.forEach(l -> l.valueSet(result));
-            valueIsMissing.release();
         } else if (previous != null && result == null) { // value lost
             this.listeners.forEach(l -> l.valueUnset(previous));
-            valueIsMissing.acquireUninterruptibly();
         } else { // value changed
             this.listeners.forEach(l -> l.valueChanged(previous, result));
         }
@@ -222,7 +207,7 @@ public abstract class Refreshable<T> implements Runnable {
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
             if (Objects.equals(newSource, latestKnownSource.get())) {
-                LOGGER.trace("Source not changed.");
+                LOGGER.trace("Source not changed: {}.", this);
                 return;
             }
             // source changed, result needs to be refreshed
@@ -253,7 +238,7 @@ public abstract class Refreshable<T> implements Runnable {
     public void run() {
         if (requestsToPause.get() > 0) {
             refreshRequestedWhilePaused.set(true);
-            LOGGER.trace("Paused, no refresh.");
+            LOGGER.trace("Paused, not refreshing: {}.", this);
             return;
         }
         try {
@@ -305,17 +290,17 @@ public abstract class Refreshable<T> implements Runnable {
 
         @Override
         public void valueSet(final T newValue) {
-            LOGGER.trace("New value: {}.", newValue);
+            LOGGER.trace("New value '{}': {}.", newValue, this);
         }
 
         @Override
         public void valueUnset(final T oldValue) {
-            LOGGER.trace("Value removed.");
+            LOGGER.trace("Value removed: {}.", this);
         }
 
         @Override
         public void valueChanged(final T oldValue, final T newValue) {
-            LOGGER.trace("Value changed: {}.", newValue);
+            LOGGER.trace("Value changed to '{}': {}.", newValue, this);
         }
     }
 }
