@@ -23,18 +23,18 @@ import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.StrategyExecutor;
-import com.github.robozonky.common.remote.Zonky;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
-    private final Zonky zonky;
+    private final Authenticated auth;
     private final Investor.Builder investor;
 
     public Investing(final Investor.Builder investor, final Refreshable<InvestmentStrategy> strategy,
-                     final Zonky zonky, final TemporalAmount maximumSleepPeriod) {
+                     final Authenticated auth, final TemporalAmount maximumSleepPeriod) {
         super((l) -> new Activity(l, maximumSleepPeriod), strategy);
-        this.zonky = zonky;
+        this.auth = auth;
         this.investor = investor;
     }
 
@@ -46,6 +46,6 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     @Override
     protected Collection<Investment> execute(final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
-        return Session.invest(investor, zonky, marketplace, strategy);
+        return auth.call(zonky -> Session.invest(investor, zonky, marketplace, strategy));
     }
 }

@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
-import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +28,9 @@ abstract class DaemonOperation implements Runnable {
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private final Authenticated api;
-    private final Consumer<Zonky> investor;
+    private final Consumer<Authenticated> investor;
 
-    protected DaemonOperation(final Authenticated auth, final Consumer<Zonky> operation) {
+    protected DaemonOperation(final Authenticated auth, final Consumer<Authenticated> operation) {
         this.api = auth;
         this.investor = operation;
     }
@@ -40,7 +39,7 @@ abstract class DaemonOperation implements Runnable {
     public void run() {
         try {
             LOGGER.trace("Starting.");
-            api.run(investor);
+            investor.accept(api);
             LOGGER.trace("Finished.");
         } catch (final Throwable t) {
             // we catch Throwable so that we can inform users even about errors

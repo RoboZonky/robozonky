@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.AbstractInvestingTest;
-import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -31,7 +30,7 @@ public class DaemonOperationTest extends AbstractInvestingTest {
 
     private static final class CustomOperation extends DaemonOperation {
 
-        public CustomOperation(final Authenticated auth, final Consumer<Zonky> operation) {
+        public CustomOperation(final Authenticated auth, final Consumer<Authenticated> operation) {
             super(auth, operation);
         }
     }
@@ -47,11 +46,10 @@ public class DaemonOperationTest extends AbstractInvestingTest {
 
     @Test
     public void standard() {
-        final Zonky z = Mockito.mock(Zonky.class);
-        final Consumer<Zonky> operation = zonky -> Assertions.assertThat(zonky).isSameAs(z);
         final Authenticated a = Mockito.mock(Authenticated.class);
+        final Consumer<Authenticated> operation = Mockito.mock(Consumer.class);
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
-        Mockito.verify(a).run(ArgumentMatchers.eq(operation));
+        Mockito.verify(operation).accept(ArgumentMatchers.eq(a));
     }
 }

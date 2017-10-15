@@ -18,6 +18,8 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.Refreshable;
@@ -30,19 +32,38 @@ import com.github.robozonky.app.investing.Investor;
 
 class InvestingDaemon extends DaemonOperation {
 
+    private static final class InitializingInvestor implements Consumer<Authenticated> {
+
+        private final AtomicBoolean registered = new AtomicBoolean(false);
+        private final Consumer<Authenticated> core;
+
+        public InitializingInvestor(final Investor.Builder builder,
+                                    final Marketplace marketplace, final Refreshable<InvestmentStrategy> strategy,
+                                    final TemporalAmount maximumSleepPeriod) {
+            this.core = (auth) -> {
+                if (!registered.getAndSet(true)) { // only register the listener once
+                    marketplace.registerListener((loans) -> {
+                        if (loans == null) {
+                            return;
+                        }
+                        final Collection<LoanDescriptor> descriptors = loans.stream()
+                                .map(LoanDescriptor::new)
+                                .collect(Collectors.toList());
+                        new Investing(builder, strategy, auth, maximumSleepPeriod).apply(descriptors);
+                    });
+                }
+                marketplace.run();
+            };
+        }
+
+        @Override
+        public void accept(final Authenticated zonky) {
+            core.accept(zonky);
+        }
+    }
+
     public InvestingDaemon(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
                            final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod) {
-        super(auth, zonky -> {
-            marketplace.registerListener((loans) -> {
-                if (loans == null) {
-                    return;
-                }
-                final Collection<LoanDescriptor> descriptors = loans.stream()
-                        .map(LoanDescriptor::new)
-                        .collect(Collectors.toList());
-                new Investing(builder, strategy, zonky, maximumSleepPeriod).apply(descriptors);
-            });
-            marketplace.run();
-        });
+        super(auth, new InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod));
     }
 }

@@ -18,16 +18,20 @@ package com.github.robozonky.app.investing;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;
@@ -76,7 +80,12 @@ public class InvestingTest extends AbstractInvestingTest {
     @Test
     public void noItems() {
         final Investor.Builder builder = new Investor.Builder().asDryRun();
-        final Investing exec = new Investing(builder, ALL_ACCEPTING_REFRESHABLE, mockApi(), Duration.ofMinutes(60));
+        final Authenticated auth = Mockito.mock(Authenticated.class);
+        Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
+            final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
+            return f.apply(mockApi());
+        });
+        final Investing exec = new Investing(builder, ALL_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60));
         Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
     }
 
@@ -88,7 +97,12 @@ public class InvestingTest extends AbstractInvestingTest {
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky zonky = mockApi();
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(mock);
-        final Investing exec = new Investing(builder, NONE_ACCEPTING_REFRESHABLE, zonky, Duration.ofMinutes(60));
+        final Authenticated auth = Mockito.mock(Authenticated.class);
+        Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
+            final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
+            return f.apply(zonky);
+        });
+        final Investing exec = new Investing(builder, NONE_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60));
         Assertions.assertThat(exec.apply(Collections.singleton(ld))).isEmpty();
     }
 }
