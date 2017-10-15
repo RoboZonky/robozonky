@@ -63,6 +63,7 @@ public class Loan extends BaseEntity {
     private Collection<Photo> photos = Collections.emptyList();
     private BigDecimal investmentRate = BigDecimal.ZERO;
     private MyInvestment myInvestment;
+    private OtherInvestments myOtherInvestments;
     private MainIncomeType mainIncomeType = MainIncomeType.OTHERS_MAIN;
     private Region region = Region.UNKNOWN;
     private Purpose purpose = Purpose.JINE;
@@ -190,6 +191,11 @@ public class Loan extends BaseEntity {
     @XmlElement
     public Collection<Photo> getPhotos() {
         return photos;
+    }
+
+    @XmlElement
+    public OtherInvestments getMyOtherInvestments() {
+        return myOtherInvestments;
     }
 
     @XmlElement
