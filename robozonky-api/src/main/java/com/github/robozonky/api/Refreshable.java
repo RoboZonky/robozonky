@@ -148,7 +148,6 @@ public abstract class Refreshable<T> implements Runnable {
      * @return False if already registered.
      */
     public boolean registerListener(final Refreshable.RefreshListener<T> listener) {
-        LOGGER.trace("Registering listener {}: {}.", listener, this);
         return this.listeners.add(listener);
     }
 
