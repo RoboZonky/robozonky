@@ -16,7 +16,6 @@
 
 package com.github.robozonky.integrations.zonkoid;
 
-import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -105,15 +104,6 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
         }
     }
 
-    private static String readResponse(final HttpEntity entity) {
-        try (final ByteArrayOutputStream outstream = new ByteArrayOutputStream()) {
-            entity.writeTo(outstream);
-            return new String(outstream.toByteArray(), Defaults.CHARSET);
-        } catch (final Exception e) { // don't even log the exception as it's entirely uninteresting
-            return null;
-        }
-    }
-
     private static boolean requestConfirmation(final RequestId requestId, final int loanId, final int amount,
                                                final String domain, final String protocol) {
         try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -121,13 +111,13 @@ public class ZonkoidConfirmationProvider implements ConfirmationProvider {
             final HttpPost post = ZonkoidConfirmationProvider.getRequest(requestId, loanId, amount, protocol, domain);
             return httpclient.execute(post, (response) -> {
                 final int statusCode = response.getStatusLine().getStatusCode();
-                if (statusCode >= 200 && statusCode < 300) {
+                if (Util.isHttpSuccess(statusCode)) {
                     ZonkoidConfirmationProvider.LOGGER.debug("Response: '{}'", response.getStatusLine());
                     return true;
                 } else {
                     ZonkoidConfirmationProvider.LOGGER.error("Unknown response: '{}' (Body: '{}')",
                                                              response.getStatusLine(),
-                                                             readResponse(response.getEntity()));
+                                                             Util.readEntity(response.getEntity()));
                     return false;
                 }
             });
