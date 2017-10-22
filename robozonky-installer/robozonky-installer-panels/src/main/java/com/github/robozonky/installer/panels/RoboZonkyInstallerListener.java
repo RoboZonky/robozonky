@@ -20,22 +20,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.installer.panels.scripts.RunScriptGenerator;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.notifications.email.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
@@ -206,7 +202,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final CommandLinePart commandLine = new CommandLinePart()
                     .setOption("@" + cliConfigFile.getAbsolutePath())
                     .setProperty(Settings.FILE_LOCATION_PROPERTY, SETTINGS_FILE.getAbsolutePath())
-                    .setEnvironmentVariable("JAVA_HOME", Variables.JAVA_HOME.getValue(DATA));
+                    .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
             Stream.of(strategy, emailConfig, jmxConfig, credentials, logging)
@@ -229,65 +225,15 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    private String assembleJavaOpts(final CommandLinePart commandLine, final String javaOptsPrefix) {
-        final Stream<String> properties = commandLine.getProperties().entrySet().stream()
-                .map(e -> "-D" + e.getKey() + '=' + e.getValue());
-        final Stream<String> jvmArgs = commandLine.getJvmArguments().entrySet().stream()
-                .map(e -> '-' + e.getValue().map(v -> e.getKey() + ' ' + v).orElse(e.getKey()));
-        return Stream.concat(jvmArgs, properties).collect(Collectors.joining(" ", javaOptsPrefix, "\""));
-    }
-
-    private Collection<String> getScript(final CommandLinePart commandLine,
-                                         final BiFunction<String, String, String> envConverter,
-                                         final String javaOptsPrefix) {
-        final Collection<String> result = new ArrayList<>();
-        commandLine.getEnvironmentVariables().forEach((k, v) -> result.add(envConverter.apply(k, v)));
-        result.add(assembleJavaOpts(commandLine, javaOptsPrefix));
-        return result;
-    }
-
-    private String createScript(final CommandLinePart commandLine, final String name) {
-        final File subexecutable = new File(DIST_PATH, name);
-        subexecutable.setExecutable(true);
-        return subexecutable.getAbsolutePath() + " " + commandLine.convertOptions();
-    }
-
-    private Collection<String> getCommonScript(final CommandLinePart commandLine,
-                                               final BiFunction<String, String, String> envConverter,
-                                               final String javaOptsPrefix, final String scriptName) {
-        final Collection<String> result = this.getScript(commandLine, envConverter, javaOptsPrefix);
-        result.add(this.createScript(commandLine, scriptName));
-        return result;
-    }
-
-    private Collection<String> getWindowsScript(final CommandLinePart commandLine) {
-        return this.getCommonScript(commandLine, (s, s2) -> "set \"" + s + "=" + s2 + "\"",
-                                    "set \"JAVA_OPTS=%JAVA_OPTS% ", "robozonky.bat");
-    }
-
-    private Collection<String> getUnixScript(final CommandLinePart commandLine) {
-        final Collection<String> result = new ArrayList<>();
-        result.add("#!/bin/bash");
-        result.addAll(this.getCommonScript(commandLine, (s, s2) -> "export " + s + "=\"" + s2 + "\"",
-                                           "export JAVA_OPTS=\"$JAVA_OPTS ", "robozonky.sh"));
-        return result;
-    }
-
     void prepareRunScript(final CommandLinePart commandLine) {
         if (System.getProperty("java.version").startsWith("1.8")) { // use G1GC on Java 8
             commandLine.setJvmArgument("XX:+UseG1GC");
-        } else { // Java 9 or newer; pre-modularization
-            commandLine.setJvmArgument("-add-modules", "java.xml.bind");
         }
         final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
-        final Collection<String> lines = isWindows ? getWindowsScript(commandLine) : getUnixScript(commandLine);
-        try {
-            final File file = new File(INSTALL_PATH, isWindows ? "run.bat" : "run.sh");
-            Files.write(file.toPath(), lines, Charset.defaultCharset());
-            file.setExecutable(true);
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed writing executable.", ex);
-        }
+        final Function<CommandLinePart, File> generator = isWindows ?
+                RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
+                : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
+        generator.apply(commandLine);
     }
 
     CommandLinePart prepareLogging() {

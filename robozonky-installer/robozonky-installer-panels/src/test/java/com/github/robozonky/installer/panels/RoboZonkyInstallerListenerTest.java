@@ -61,6 +61,8 @@ public class RoboZonkyInstallerListenerTest {
 
     private static InstallData mockData() {
         final InstallData data = RoboZonkyInstallerListenerTest.mockBaseData();
+        Mockito.when(data.getVariable(Variables.JAVA_HOME.getKey()))
+                .thenReturn(System.getProperty("JAVA_HOME"));
         Mockito.when(data.getVariable(Variables.STRATEGY_TYPE.getKey()))
                 .thenReturn("file");
         Mockito.when(data.getVariable(Variables.STRATEGY_SOURCE.getKey()))
