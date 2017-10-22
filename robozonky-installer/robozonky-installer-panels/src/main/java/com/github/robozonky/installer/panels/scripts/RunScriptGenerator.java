@@ -30,18 +30,19 @@ import freemarker.template.TemplateException;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
-    private final File configFile;
+    private final File configFile, distributionDirectory;
 
-    protected RunScriptGenerator(final File configFile) {
+    protected RunScriptGenerator(final File distributionDirectory, final File configFile) {
         this.configFile = configFile;
+        this.distributionDirectory = distributionDirectory;
     }
 
-    public static Function<CommandLinePart, File> forWindows(final File configFile) {
-        return new WindowsRunScriptGenerator(configFile);
+    public static Function<CommandLinePart, File> forWindows(final File distributionDirectory, final File configFile) {
+        return new WindowsRunScriptGenerator(distributionDirectory, configFile);
     }
 
-    public static Function<CommandLinePart, File> forUnix(final File configFile) {
-        return new UnixRunScriptGenerator(configFile);
+    public static Function<CommandLinePart, File> forUnix(final File distributionDirectory, final File configFile) {
+        return new UnixRunScriptGenerator(distributionDirectory, configFile);
     }
 
     private static String assembleJavaOpts(final CommandLinePart commandLine) {
@@ -49,7 +50,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
                 .map(e -> "-D" + e.getKey() + '=' + e.getValue());
         final Stream<String> jvmArgs = commandLine.getJvmArguments().entrySet().stream()
                 .map(e -> '-' + e.getValue().map(v -> e.getKey() + ' ' + v).orElse(e.getKey()));
-        return Stream.concat(jvmArgs, properties).collect(Collectors.joining(" ", "\"", "\""));
+        return Stream.concat(jvmArgs, properties).collect(Collectors.joining(" "));
     }
 
     protected abstract File getRunScript(final File parentFolder);
@@ -58,7 +59,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
                            final Function<String, String> finisher) {
         try {
             final String result = TemplateProcessor.INSTANCE.process(templateName, new HashMap<String, Object>() {{
-                this.put("root", configFile.getParentFile().getAbsolutePath());
+                this.put("root", distributionDirectory.getAbsolutePath());
                 this.put("options", configFile.getAbsolutePath());
                 this.put("javaOpts", assembleJavaOpts(commandLine));
                 this.put("envVars", commandLine.getEnvironmentVariables());

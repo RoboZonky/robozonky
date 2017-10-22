@@ -231,8 +231,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
         final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
         final Function<CommandLinePart, File> generator = isWindows ?
-                RunScriptGenerator.forWindows(CLI_CONFIG_FILE)
-                : RunScriptGenerator.forUnix(CLI_CONFIG_FILE);
+                RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
+                : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
         generator.apply(commandLine);
     }
 

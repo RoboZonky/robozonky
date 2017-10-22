@@ -67,14 +67,15 @@ public class RunScriptGeneratorTest {
     @Test
     public void windows() throws IOException {
         final File optionsFile = getTempFile().getAbsoluteFile();
+        final File root = optionsFile.getParentFile();
         final CommandLinePart cli = getCommandLine();
         final Function<CommandLinePart, File> generator =
-                RunScriptGenerator.forWindows(optionsFile);
+                RunScriptGenerator.forWindows(root, optionsFile);
         final String result = new String(Files.readAllBytes(generator.apply(cli).toPath()));
         common(cli, result);
         Assertions.assertThat(result)
                 .as("Missing executable file call.")
-                .contains(optionsFile.getParent() + "\\robozonky.bat @" + optionsFile.getAbsolutePath());
+                .contains(root + "\\robozonky.bat @" + optionsFile.getAbsolutePath());
         // assert all environment variables present
         SoftAssertions.assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
             final String arg = var + "=" + value;
@@ -86,14 +87,15 @@ public class RunScriptGeneratorTest {
     @Test
     public void unix() throws IOException {
         final File optionsFile = getTempFile().getAbsoluteFile();
+        final File root = optionsFile.getParentFile();
         final CommandLinePart cli = getCommandLine();
         final Function<CommandLinePart, File> generator =
-                RunScriptGenerator.forUnix(optionsFile);
+                RunScriptGenerator.forUnix(root, optionsFile);
         final String result = new String(Files.readAllBytes(generator.apply(cli).toPath()));
         common(cli, result);
         Assertions.assertThat(result)
                 .as("Missing executable file call.")
-                .contains(optionsFile.getParent() + "/robozonky.sh @" + optionsFile.getAbsolutePath());
+                .contains(root + "/robozonky.sh @" + optionsFile.getAbsolutePath());
         // assert all environment variables present
         SoftAssertions.assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
             final String arg = var + "=\"" + value + "\"";

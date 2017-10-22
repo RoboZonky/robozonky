@@ -22,8 +22,8 @@ import com.github.robozonky.installer.panels.CommandLinePart;
 
 final class UnixRunScriptGenerator extends RunScriptGenerator {
 
-    public UnixRunScriptGenerator(final File configFile) {
-        super(configFile);
+    public UnixRunScriptGenerator(final File distributionDirectory, final File configFile) {
+        super(distributionDirectory, configFile);
     }
 
     @Override

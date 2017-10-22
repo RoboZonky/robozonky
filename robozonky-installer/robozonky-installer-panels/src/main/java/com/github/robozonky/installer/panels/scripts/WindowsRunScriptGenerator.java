@@ -25,8 +25,8 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     private static final Pattern UNIX_NEWLINES = Pattern.compile("(\n)+");
 
-    public WindowsRunScriptGenerator(final File configFile) {
-        super(configFile);
+    public WindowsRunScriptGenerator(final File distributionDirectory, final File configFile) {
+        super(distributionDirectory, configFile);
     }
 
     @Override
