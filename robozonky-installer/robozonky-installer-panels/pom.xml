@@ -58,6 +58,10 @@
       <artifactId>logback-classic</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-common</artifactId>
       <type>test-jar</type>
