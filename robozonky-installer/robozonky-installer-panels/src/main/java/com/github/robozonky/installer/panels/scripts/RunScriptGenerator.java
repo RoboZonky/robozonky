@@ -18,6 +18,7 @@ package com.github.robozonky.installer.panels.scripts;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -26,20 +27,20 @@ import java.util.stream.Stream;
 import com.github.robozonky.installer.panels.CommandLinePart;
 import freemarker.template.TemplateException;
 
-public abstract class AbstractRunScriptGenerator implements Function<CommandLinePart, String> {
+public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
     private final File distributionFolder, configFile;
 
-    protected AbstractRunScriptGenerator(final File distributionFolder, final File configFile) {
+    protected RunScriptGenerator(final File distributionFolder, final File configFile) {
         this.distributionFolder = distributionFolder;
         this.configFile = configFile;
     }
 
-    public static AbstractRunScriptGenerator forWindows(final File distributionFolder, final File configFile) {
+    public static Function<CommandLinePart, File> forWindows(final File distributionFolder, final File configFile) {
         return new WindowsRunScriptGenerator(distributionFolder, configFile);
     }
 
-    public static AbstractRunScriptGenerator forUnix(final File distributionFolder, final File configFile) {
+    public static Function<CommandLinePart, File> forUnix(final File distributionFolder, final File configFile) {
         return new UnixRunScriptGenerator(distributionFolder, configFile);
     }
 
@@ -51,19 +52,28 @@ public abstract class AbstractRunScriptGenerator implements Function<CommandLine
         return Stream.concat(jvmArgs, properties).collect(Collectors.joining(" ", "\"", "\""));
     }
 
-    public abstract File getRunScript(final File parentFolder);
+    protected abstract File getRunScript(final File parentFolder);
 
-    protected String process(final CommandLinePart commandLine, final String templateName) {
-        commandLine.setScript(this.getRunScript(distributionFolder));
+    protected File process(final CommandLinePart commandLine, final String templateName,
+                           final Function<String, String> finisher) {
         try {
-            return TemplateProcessor.INSTANCE.process(templateName, new HashMap<String, Object>() {{
-                this.put("script", commandLine.getScript().getAbsolutePath());
+            final File runScript = this.getRunScript(distributionFolder);
+            final String result = TemplateProcessor.INSTANCE.process(templateName, new HashMap<String, Object>() {{
+                this.put("script", runScript.getAbsolutePath());
                 this.put("options", configFile.getAbsolutePath());
                 this.put("javaOpts", assembleJavaOpts(commandLine));
                 this.put("envVars", commandLine.getEnvironmentVariables());
             }});
+            final File target = this.getRunScript(distributionFolder);
+            Files.write(target.toPath(), finisher.apply(result).getBytes());
+            target.setExecutable(true);
+            return target;
         } catch (final IOException | TemplateException e) {
             throw new IllegalStateException("Failed creating run script.", e);
         }
+    }
+
+    protected File process(final CommandLinePart commandLine, final String templateName) {
+        return process(commandLine, templateName, Function.identity());
     }
 }

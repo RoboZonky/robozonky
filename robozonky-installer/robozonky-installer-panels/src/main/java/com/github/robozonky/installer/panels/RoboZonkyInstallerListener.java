@@ -20,18 +20,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.installer.panels.scripts.AbstractRunScriptGenerator;
+import com.github.robozonky.installer.panels.scripts.RunScriptGenerator;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.notifications.email.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
@@ -230,16 +230,10 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             commandLine.setJvmArgument("XX:+UseG1GC");
         }
         final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
-        final AbstractRunScriptGenerator generator = isWindows ?
-                AbstractRunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
-                : AbstractRunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
-        try {
-            final File target = generator.getRunScript(INSTALL_PATH);
-            Files.write(target.toPath(), generator.apply(commandLine).getBytes());
-            target.setExecutable(true);
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed writing executable.", ex);
-        }
+        final Function<CommandLinePart, File> generator = isWindows ?
+                RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
+                : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
+        generator.apply(commandLine);
     }
 
     CommandLinePart prepareLogging() {

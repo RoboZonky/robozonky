@@ -20,19 +20,19 @@ import java.io.File;
 
 import com.github.robozonky.installer.panels.CommandLinePart;
 
-final class UnixRunScriptGenerator extends AbstractRunScriptGenerator {
+final class UnixRunScriptGenerator extends RunScriptGenerator {
 
     public UnixRunScriptGenerator(final File distributionFolder, final File configFile) {
         super(distributionFolder, configFile);
     }
 
     @Override
-    public String apply(final CommandLinePart commandLine) {
+    public File apply(final CommandLinePart commandLine) {
         return process(commandLine, "unix.ftl");
     }
 
     @Override
-    public File getRunScript(final File parentFolder) {
-        return new File(parentFolder, "run.sh");
+    protected File getRunScript(final File parentFolder) {
+        return new File(parentFolder, "robozonky.sh");
     }
 }

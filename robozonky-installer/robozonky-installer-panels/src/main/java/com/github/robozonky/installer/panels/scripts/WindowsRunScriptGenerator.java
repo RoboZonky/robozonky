@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 import com.github.robozonky.installer.panels.CommandLinePart;
 
-final class WindowsRunScriptGenerator extends AbstractRunScriptGenerator {
+final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     private static final Pattern UNIX_NEWLINES = Pattern.compile("(\n)+");
 
@@ -30,13 +30,12 @@ final class WindowsRunScriptGenerator extends AbstractRunScriptGenerator {
     }
 
     @Override
-    public String apply(final CommandLinePart commandLine) {
-        final String templated = process(commandLine, "windows.ftl");
-        return UNIX_NEWLINES.matcher(templated).replaceAll("\r\n");
+    public File apply(final CommandLinePart commandLine) {
+        return process(commandLine, "windows.ftl", s -> UNIX_NEWLINES.matcher(s).replaceAll("\r\n"));
     }
 
     @Override
-    public File getRunScript(final File parentFolder) {
-        return new File(parentFolder, "run.bat");
+    protected File getRunScript(final File parentFolder) {
+        return new File(parentFolder, "robozonky.bat");
     }
 }
