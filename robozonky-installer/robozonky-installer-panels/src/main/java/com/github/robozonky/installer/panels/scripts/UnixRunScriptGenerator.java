@@ -28,7 +28,7 @@ final class UnixRunScriptGenerator extends RunScriptGenerator {
 
     @Override
     public File apply(final CommandLinePart commandLine) {
-        return process(commandLine, "unix.ftl");
+        return process(commandLine, "run.sh.ftl");
     }
 
     @Override

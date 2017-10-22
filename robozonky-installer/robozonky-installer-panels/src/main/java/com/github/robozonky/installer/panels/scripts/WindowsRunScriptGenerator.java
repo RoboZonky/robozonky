@@ -31,7 +31,7 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     @Override
     public File apply(final CommandLinePart commandLine) {
-        return process(commandLine, "windows.ftl", s -> UNIX_NEWLINES.matcher(s).replaceAll("\r\n"));
+        return process(commandLine, "run.bat.ftl", s -> UNIX_NEWLINES.matcher(s).replaceAll("\r\n"));
     }
 
     @Override
