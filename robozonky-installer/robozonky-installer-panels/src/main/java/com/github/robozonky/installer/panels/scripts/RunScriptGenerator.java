@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.installer.panels.CommandLinePart;
+import com.github.robozonky.internal.api.Defaults;
 import freemarker.template.TemplateException;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
@@ -63,7 +64,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
                 this.put("envVars", commandLine.getEnvironmentVariables());
             }});
             final File target = this.getRunScript(configFile.getParentFile());
-            Files.write(target.toPath(), finisher.apply(result).getBytes());
+            Files.write(target.toPath(), finisher.apply(result).getBytes(Defaults.CHARSET));
             target.setExecutable(true);
             return target;
         } catch (final IOException | TemplateException e) {
