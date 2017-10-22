@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.panels;
+package com.github.robozonky.installer.panels.scripts;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
+
+import com.github.robozonky.installer.panels.CommandLinePart;
 
 final class UnixRunScriptGenerator extends AbstractRunScriptGenerator {
 
-    public UnixRunScriptGenerator(final File distributionFolder) {
-        super(distributionFolder);
+    public UnixRunScriptGenerator(final File distributionFolder, final File configFile) {
+        super(distributionFolder, configFile);
     }
 
     @Override
     public String apply(final CommandLinePart commandLine) {
-        final Collection<String> result = new ArrayList<>();
-        result.add("#!/bin/bash");
-        result.addAll(this.getCommonScript(commandLine, (s, s2) -> "export " + s + "=\"" + s2 + "\"",
-                                           "export JAVA_OPTS=\"$JAVA_OPTS ", "robozonky.sh"));
-        return result.stream().collect(Collectors.joining("\n"));
+        return process(commandLine, "unix.ftl");
     }
 
     @Override

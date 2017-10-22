@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.panels;
+package com.github.robozonky.installer.panels.scripts;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.stream.Collectors;
 
+import com.github.robozonky.installer.panels.CommandLinePart;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -46,14 +46,10 @@ public class AbstractRunScriptGeneratorTest {
         return cli;
     }
 
-    private static void common(final CommandLinePart cli, final String result) {
-        // assert all options present
-        SoftAssertions.assertSoftly(softly -> cli.getOptions().forEach((option, arguments) -> {
-            final String arg = option + " " + arguments.stream()
-                    .map(argument -> "\"" + argument + "\"")
-                    .collect(Collectors.joining(" "));
-            softly.assertThat(result).as("Missing option.").contains(arg.trim());
-        }));
+    private static void common(final CommandLinePart cli, final String result, final File optionsFile) {
+        Assertions.assertThat(result)
+                .as("Missing executable file call.")
+                .contains(cli.getScript().getAbsolutePath() + " @" + optionsFile.getAbsolutePath());
         // assert all jvm arguments present
         SoftAssertions.assertSoftly(softly -> cli.getJvmArguments().forEach((var, value) -> {
             if (value.isPresent()) {
@@ -69,10 +65,10 @@ public class AbstractRunScriptGeneratorTest {
         }));
     }
 
-    private static void test(final UnixRunScriptGenerator generator) {
+    private static void test(final UnixRunScriptGenerator generator, final File optionsFile) {
         final CommandLinePart cli = getCommandLine();
         final String result = generator.apply(cli);
-        common(cli, result);
+        common(cli, result, optionsFile);
         // assert all environment variables present
         SoftAssertions.assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
             final String arg = var + "=\"" + value + "\"";
@@ -81,10 +77,10 @@ public class AbstractRunScriptGeneratorTest {
         Assertions.assertThat(result).doesNotContain("\r\n");
     }
 
-    private static void test(final WindowsRunScriptGenerator generator) {
+    private static void test(final WindowsRunScriptGenerator generator, final File optionsFile) {
         final CommandLinePart cli = getCommandLine();
         final String result = generator.apply(cli);
-        common(cli, result);
+        common(cli, result, optionsFile);
         // assert all environment variables present
         SoftAssertions.assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
             final String arg = var + "=" + value;
@@ -95,11 +91,13 @@ public class AbstractRunScriptGeneratorTest {
 
     @Test
     public void windows() {
-        test(new WindowsRunScriptGenerator(getTempFile().getParentFile()));
+        final File optionsFile = getTempFile();
+        test(new WindowsRunScriptGenerator(getTempFile().getParentFile(), optionsFile), optionsFile);
     }
 
     @Test
     public void unix() {
-        test(new UnixRunScriptGenerator(getTempFile().getParentFile()));
+        final File optionsFile = getTempFile();
+        test(new UnixRunScriptGenerator(getTempFile().getParentFile(), optionsFile), optionsFile);
     }
 }

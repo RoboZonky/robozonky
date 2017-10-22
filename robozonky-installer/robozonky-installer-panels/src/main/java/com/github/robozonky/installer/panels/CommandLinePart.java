@@ -36,6 +36,16 @@ public class CommandLinePart {
     private final Map<String, String> properties = new LinkedHashMap<>();
     private final Map<String, String> environmentVariables = new LinkedHashMap<>();
     private final Map<String, Optional<String>> jvmArguments = new LinkedHashMap<>();
+    private File script;
+
+    public File getScript() {
+        return script;
+    }
+
+    public CommandLinePart setScript(final File script) {
+        this.script = script;
+        return this;
+    }
 
     public CommandLinePart setOption(final String key, final String... value) {
         this.options.put(key, Collections.unmodifiableCollection(Arrays.asList(value)));

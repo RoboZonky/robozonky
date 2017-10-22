@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.installer.panels.scripts.AbstractRunScriptGenerator;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.notifications.email.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
@@ -229,8 +230,9 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             commandLine.setJvmArgument("XX:+UseG1GC");
         }
         final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
-        final AbstractRunScriptGenerator generator =
-                isWindows ? new WindowsRunScriptGenerator(DIST_PATH) : new UnixRunScriptGenerator(DIST_PATH);
+        final AbstractRunScriptGenerator generator = isWindows ?
+                AbstractRunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
+                : AbstractRunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
         try {
             final File target = generator.getRunScript(INSTALL_PATH);
             Files.write(target.toPath(), generator.apply(commandLine).getBytes());

@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.panels;
+package com.github.robozonky.installer.panels.scripts;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
+
+import com.github.robozonky.installer.panels.CommandLinePart;
 
 final class WindowsRunScriptGenerator extends AbstractRunScriptGenerator {
 
-    public WindowsRunScriptGenerator(final File distributionFolder) {
-        super(distributionFolder);
+    private static final Pattern UNIX_NEWLINES = Pattern.compile("(\n)+");
+
+    public WindowsRunScriptGenerator(final File distributionFolder, final File configFile) {
+        super(distributionFolder, configFile);
     }
 
     @Override
     public String apply(final CommandLinePart commandLine) {
-        final Collection<String> result = this.getCommonScript(commandLine, (s, s2) -> "set \"" + s + "=" + s2 + "\"",
-                                                               "set \"JAVA_OPTS=%JAVA_OPTS% ", "robozonky.bat");
-        return result.stream().collect(Collectors.joining("\r\n"));
+        final String templated = process(commandLine, "windows.ftl");
+        return UNIX_NEWLINES.matcher(templated).replaceAll("\r\n");
     }
 
     @Override
