@@ -68,8 +68,7 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
      * @return Stream to read the Maven Central metadata from.
      * @throws IOException Network communications failure.
      */
-    private static InputStream getMavenCentralData(final String groupId, final String artifactId)
-            throws IOException {
+    private static InputStream getMavenCentralData(final String groupId, final String artifactId) throws IOException {
         final StringJoiner joiner = new StringJoiner(UpdateMonitor.URL_SEPARATOR);
         joiner.add("https://repo1.maven.org/maven2");
         joiner.add(Arrays.stream(UpdateMonitor.PATTERN_DOT.split(groupId))
@@ -145,7 +144,7 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
             try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId)) {
                 final String result = IOUtils.toString(s, Defaults.CHARSET);
                 return Optional.of(result);
-            } catch (final IOException ex) {
+            } catch (final Exception ex) {
                 UpdateMonitor.LOGGER.debug("Failed reading source.", ex);
                 return Optional.empty();
             }
