@@ -19,6 +19,7 @@ package com.github.robozonky.installer.panels.scripts;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.function.Function;
 
 import com.github.robozonky.installer.panels.CommandLinePart;
 import org.assertj.core.api.Assertions;
@@ -63,28 +64,17 @@ public class RunScriptGeneratorTest {
         }));
     }
 
-    private static void test(final UnixRunScriptGenerator generator, final File optionsFile) throws IOException {
+    @Test
+    public void windows() throws IOException {
+        final File optionsFile = getTempFile().getAbsoluteFile();
         final CommandLinePart cli = getCommandLine();
+        final Function<CommandLinePart, File> generator =
+                RunScriptGenerator.forWindows(optionsFile);
         final String result = new String(Files.readAllBytes(generator.apply(cli).toPath()));
         common(cli, result);
         Assertions.assertThat(result)
                 .as("Missing executable file call.")
-                .contains("robozonky.sh @" + optionsFile.getAbsolutePath());
-        // assert all environment variables present
-        SoftAssertions.assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
-            final String arg = var + "=\"" + value + "\"";
-            softly.assertThat(result).as("Missing env var.").contains(arg);
-        }));
-        Assertions.assertThat(result).doesNotContain("\r\n");
-    }
-
-    private static void test(final WindowsRunScriptGenerator generator, final File optionsFile) throws IOException {
-        final CommandLinePart cli = getCommandLine();
-        final String result = new String(Files.readAllBytes(generator.apply(cli).toPath()));
-        common(cli, result);
-        Assertions.assertThat(result)
-                .as("Missing executable file call.")
-                .contains("robozonky.bat @" + optionsFile.getAbsolutePath());
+                .contains(optionsFile.getParent() + "\\robozonky.bat @" + optionsFile.getAbsolutePath());
         // assert all environment variables present
         SoftAssertions.assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
             final String arg = var + "=" + value;
@@ -94,14 +84,21 @@ public class RunScriptGeneratorTest {
     }
 
     @Test
-    public void windows() throws IOException {
-        final File optionsFile = getTempFile();
-        test(new WindowsRunScriptGenerator(getTempFile().getParentFile(), optionsFile), optionsFile);
-    }
-
-    @Test
     public void unix() throws IOException {
-        final File optionsFile = getTempFile();
-        test(new UnixRunScriptGenerator(getTempFile().getParentFile(), optionsFile), optionsFile);
+        final File optionsFile = getTempFile().getAbsoluteFile();
+        final CommandLinePart cli = getCommandLine();
+        final Function<CommandLinePart, File> generator =
+                RunScriptGenerator.forUnix(optionsFile);
+        final String result = new String(Files.readAllBytes(generator.apply(cli).toPath()));
+        common(cli, result);
+        Assertions.assertThat(result)
+                .as("Missing executable file call.")
+                .contains(optionsFile.getParent() + "/robozonky.sh @" + optionsFile.getAbsolutePath());
+        // assert all environment variables present
+        SoftAssertions.assertSoftly(softly -> cli.getEnvironmentVariables().forEach((var, value) -> {
+            final String arg = var + "=\"" + value + "\"";
+            softly.assertThat(result).as("Missing env var.").contains(arg);
+        }));
+        Assertions.assertThat(result).doesNotContain("\r\n");
     }
 }

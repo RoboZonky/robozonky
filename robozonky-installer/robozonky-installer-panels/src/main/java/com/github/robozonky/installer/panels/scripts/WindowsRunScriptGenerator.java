@@ -25,8 +25,8 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     private static final Pattern UNIX_NEWLINES = Pattern.compile("(\n)+");
 
-    public WindowsRunScriptGenerator(final File distributionFolder, final File configFile) {
-        super(distributionFolder, configFile);
+    public WindowsRunScriptGenerator(final File configFile) {
+        super(configFile);
     }
 
     @Override
@@ -36,6 +36,6 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     @Override
     protected File getRunScript(final File parentFolder) {
-        return new File(parentFolder, "robozonky.bat");
+        return new File(parentFolder, "run.bat");
     }
 }

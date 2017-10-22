@@ -29,19 +29,18 @@ import freemarker.template.TemplateException;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
-    private final File distributionFolder, configFile;
+    private final File configFile;
 
-    protected RunScriptGenerator(final File distributionFolder, final File configFile) {
-        this.distributionFolder = distributionFolder;
+    protected RunScriptGenerator(final File configFile) {
         this.configFile = configFile;
     }
 
-    public static Function<CommandLinePart, File> forWindows(final File distributionFolder, final File configFile) {
-        return new WindowsRunScriptGenerator(distributionFolder, configFile);
+    public static Function<CommandLinePart, File> forWindows(final File configFile) {
+        return new WindowsRunScriptGenerator(configFile);
     }
 
-    public static Function<CommandLinePart, File> forUnix(final File distributionFolder, final File configFile) {
-        return new UnixRunScriptGenerator(distributionFolder, configFile);
+    public static Function<CommandLinePart, File> forUnix(final File configFile) {
+        return new UnixRunScriptGenerator(configFile);
     }
 
     private static String assembleJavaOpts(final CommandLinePart commandLine) {
@@ -57,14 +56,13 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
     protected File process(final CommandLinePart commandLine, final String templateName,
                            final Function<String, String> finisher) {
         try {
-            final File runScript = this.getRunScript(distributionFolder);
             final String result = TemplateProcessor.INSTANCE.process(templateName, new HashMap<String, Object>() {{
-                this.put("script", runScript.getAbsolutePath());
+                this.put("root", configFile.getParentFile().getAbsolutePath());
                 this.put("options", configFile.getAbsolutePath());
                 this.put("javaOpts", assembleJavaOpts(commandLine));
                 this.put("envVars", commandLine.getEnvironmentVariables());
             }});
-            final File target = this.getRunScript(distributionFolder);
+            final File target = this.getRunScript(configFile.getParentFile());
             Files.write(target.toPath(), finisher.apply(result).getBytes());
             target.setExecutable(true);
             return target;

@@ -202,7 +202,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final CommandLinePart commandLine = new CommandLinePart()
                     .setOption("@" + cliConfigFile.getAbsolutePath())
                     .setProperty(Settings.FILE_LOCATION_PROPERTY, SETTINGS_FILE.getAbsolutePath())
-                    .setEnvironmentVariable("JAVA_HOME", Variables.JAVA_HOME.getValue(DATA));
+                    .setEnvironmentVariable("JAVA_HOME", "");
             // now proceed to set all system properties and settings
             final Properties settings = new Properties();
             Stream.of(strategy, emailConfig, jmxConfig, credentials, logging)
@@ -231,8 +231,8 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
         final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
         final Function<CommandLinePart, File> generator = isWindows ?
-                RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
-                : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
+                RunScriptGenerator.forWindows(CLI_CONFIG_FILE)
+                : RunScriptGenerator.forUnix(CLI_CONFIG_FILE);
         generator.apply(commandLine);
     }
 
