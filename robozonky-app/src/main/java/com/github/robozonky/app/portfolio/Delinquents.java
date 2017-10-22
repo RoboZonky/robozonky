@@ -27,8 +27,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
@@ -82,6 +84,10 @@ public class Delinquents implements Consumer<Zonky> {
         return Portfolio.INSTANCE.getActiveWithPaymentStatus(target).collect(Collectors.toList());
     }
 
+    private static boolean related(final Delinquent d, final Investment i) {
+        return d.getLoanId() == i.getLoanId();
+    }
+
     public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent) {
         update(zonky, presentlyDelinquent, Collections.emptyList());
     }
@@ -101,15 +107,28 @@ public class Delinquents implements Consumer<Zonky> {
         final Collection<Delinquent> knownDelinquents = this.getDelinquents();
         knownDelinquents.stream()
                 .filter(Delinquent::hasActiveDelinquency) // only care about present delinquents
-                .filter(d -> presentlyDelinquent.stream().noneMatch(i -> d.getLoanId() == i.getLoanId()))
+                .peek(d -> System.out.println(d))
+                .filter(d -> presentlyDelinquent.stream().noneMatch(i -> related(d, i)))
+                .peek(d -> System.out.println(d))
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
+                .peek(d -> System.out.println(d))
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
+                .peek(d -> System.out.println(d))
                 .map(Delinquency::getParent)
-                .forEach(d -> Events.fire(new LoanNoLongerDelinquentEvent(d.getLoan(zonky)))); // notify
+                .peek(d -> System.out.println(d))
+                .forEach(d -> {  // notify
+                    final Loan loan = d.getLoan(zonky);
+                    final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
+                    if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
+                        Events.fire(new LoanDefaultedEvent(loan, since));
+                    } else {
+                        Events.fire(new LoanNoLongerDelinquentEvent(loan, since));
+                    }
+                });
         final Stream<Delinquent> stillDelinquent = knownDelinquents.stream()
-                .filter(d -> noLongerActive.stream().noneMatch(i -> d.getLoanId() == i.getLoanId()));
+                .filter(d -> noLongerActive.stream().noneMatch(i -> related(d, i)));
         final Stream<Delinquent> newDelinquents = presentlyDelinquent.stream()
-                .filter(i -> knownDelinquents.stream().noneMatch(d -> d.getLoanId() == i.getLoanId()))
+                .filter(i -> knownDelinquents.stream().noneMatch(d -> related(d, i)))
                 .map(i -> new Delinquent(i.getLoanId(), i.getNextPaymentDate().toLocalDate()));
         synchronized (this) { // store to the state file
             LOGGER.trace("Starting delinquency update.");
@@ -156,5 +175,4 @@ public class Delinquents implements Consumer<Zonky> {
         update(zonky, getWithPaymentStatus(PaymentStatus.getDelinquent()),
                getWithPaymentStatus(PaymentStatus.getDone()));
     }
-
 }

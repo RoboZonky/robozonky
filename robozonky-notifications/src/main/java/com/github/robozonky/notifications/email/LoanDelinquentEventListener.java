@@ -17,7 +17,6 @@
 package com.github.robozonky.notifications.email;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
@@ -48,12 +47,7 @@ class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquen
     @Override
     protected Map<String, Object> getData(final LoanDelinquentEvent event) {
         final Loan loan = event.getLoan();
-        final Map<String, Object> result = new HashMap<>();
-        result.put("loanId", loan.getId());
-        result.put("loanAmount", loan.getAmount());
-        result.put("loanRating", loan.getRating().getCode());
-        result.put("loanTerm", loan.getTermInMonths());
-        result.put("loanUrl", Loan.getUrlSafe(loan));
+        final Map<String, Object> result = getLoanData(loan);
         result.put("since", Date.from(event.getDelinquentSince().atStartOfDay(Defaults.ZONE_ID).toInstant()));
         return result;
     }

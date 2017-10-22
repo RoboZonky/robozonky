@@ -19,7 +19,9 @@ package com.github.robozonky.notifications.email;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -61,15 +63,24 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         }
     }
 
-    protected static Map<String, Object> getLoanData(final RecommendedLoan l) {
-        final Loan loan = l.descriptor().item();
+    protected static Date toDate(final LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay(Defaults.ZONE_ID).toInstant());
+    }
+
+    protected static Map<String, Object> getLoanData(final Loan loan) {
         final Map<String, Object> result = new HashMap<>();
         result.put("loanId", loan.getId());
-        result.put("loanRecommendation", l.amount());
         result.put("loanAmount", loan.getAmount());
         result.put("loanRating", loan.getRating().getCode());
         result.put("loanTerm", loan.getTermInMonths());
         result.put("loanUrl", Loan.getUrlSafe(loan));
+        return result;
+    }
+
+    protected static Map<String, Object> getLoanData(final RecommendedLoan l) {
+        final Loan loan = l.descriptor().item();
+        final Map<String, Object> result = getLoanData(loan);
+        result.put("loanRecommendation", l.amount());
         return result;
     }
 

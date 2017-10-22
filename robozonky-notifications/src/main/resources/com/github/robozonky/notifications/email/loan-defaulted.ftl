@@ -1,4 +1,4 @@
-Půjčka s následujícími parametry nově není v prodlení:
+Půjčka s následujícími parametry byla zesplatněna:
 
 - Číslo půjčky:                ${data.loanId?c}
 - Rating:                      ${data.loanRating}

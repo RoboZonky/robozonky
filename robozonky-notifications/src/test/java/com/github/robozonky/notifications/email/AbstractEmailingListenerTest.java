@@ -36,6 +36,7 @@ import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
@@ -107,7 +108,9 @@ public abstract class AbstractEmailingListenerTest extends AbstractStateLeveragi
         events.put(SupportedListener.INVESTMENT_REJECTED,
                    new InvestmentRejectedEvent(recommendation, 200, "random"));
         events.put(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
-                   new LoanNoLongerDelinquentEvent(loan));
+                   new LoanNoLongerDelinquentEvent(loan, LocalDate.now()));
+        events.put(SupportedListener.LOAN_DEFAULTED,
+                   new LoanDefaultedEvent(loan, LocalDate.now()));
         events.put(SupportedListener.LOAN_NOW_DELINQUENT,
                    new LoanNowDelinquentEvent(loan, LocalDate.now()));
         events.put(SupportedListener.LOAN_DELINQUENT_10_PLUS,

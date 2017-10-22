@@ -133,14 +133,8 @@
     <field type="check" variable="isLoanDelinquent10PlusEnabled">
       <spec txt="Půjčka je více než 10 dní v prodlení." set="true"/>
     </field>
-    <field type="check" variable="isLoanDelinquent30PlusEnabled">
-      <spec txt="Půjčka je více než 30 dní v prodlení." set="false"/>
-    </field>
-    <field type="check" variable="isLoanDelinquent60PlusEnabled">
-      <spec txt="Půjčka je více než 60 dní v prodlení." set="false"/>
-    </field>
-    <field type="check" variable="isLoanDelinquent90PlusEnabled">
-      <spec txt="Půjčka je více než 90 dní v prodlení, pravděpodobný default." set="true"/>
+    <field type="check" variable="isLoanDefaultedEnabled">
+      <spec txt="Půjčka byla zesplatněna." set="true"/>
     </field>
     <field type="check" variable="isLoanNoLongerDelinquentEnabled">
       <spec txt="Půjčka již není v prodlení." set="true"/>

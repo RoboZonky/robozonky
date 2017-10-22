@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Random;
 
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
@@ -95,6 +96,40 @@ public class DelinquentsTest extends AbstractInvestingTest {
         Assertions.assertThat(this.getNewEvents().get(2)).isInstanceOf(LoanDelinquent30DaysOrMoreEvent.class);
         Assertions.assertThat(this.getNewEvents().get(3)).isInstanceOf(LoanDelinquent60DaysOrMoreEvent.class);
         Assertions.assertThat(this.getNewEvents().get(4)).isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
+    }
+
+    @Test
+    public void noLongerDelinquent() {
+        final Loan l = new Loan(RANDOM.nextInt(10000), 200);
+        final Investment i = Mockito.spy(new Investment(l, 200));
+        Mockito.doReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)).when(i).getNextPaymentDate();
+        final Zonky zonky = Mockito.mock(Zonky.class);
+        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
+        // register delinquence
+        Delinquents.INSTANCE.update(zonky, Collections.singleton(i));
+        this.readPreexistingEvents(); // ignore events just emitted
+        // the investment is no longer delinquent
+        Delinquents.INSTANCE.update(zonky, Collections.emptyList());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
+        });
+    }
+
+    @Test
+    public void defaulted() {
+        final Loan l = new Loan(RANDOM.nextInt(10000), 200);
+        final Investment i = Mockito.spy(new Investment(l, 200));
+        Mockito.doReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)).when(i).getNextPaymentDate();
+        final Zonky zonky = Mockito.mock(Zonky.class);
+        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
+        // register delinquence
+        Delinquents.INSTANCE.update(zonky, Collections.singleton(i));
+        this.readPreexistingEvents(); // ignore events just emitted
+        // the investment is defaulted
+        Delinquents.INSTANCE.update(zonky, Collections.emptyList(), Collections.singletonList(i));
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
+        });
     }
 
     @After

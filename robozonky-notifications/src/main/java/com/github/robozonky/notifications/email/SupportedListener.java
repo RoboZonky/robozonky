@@ -25,6 +25,7 @@ import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
@@ -185,6 +186,17 @@ enum SupportedListener {
         @Override
         Class<? extends Event> getEventType() {
             return LoanNoLongerDelinquentEvent.class;
+        }
+    },
+    LOAN_DEFAULTED {
+        @Override
+        protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
+            return new LoanDefaultedEventListener(properties);
+        }
+
+        @Override
+        Class<? extends Event> getEventType() {
+            return LoanDefaultedEvent.class;
         }
     },
     BALANCE_ON_TARGET {

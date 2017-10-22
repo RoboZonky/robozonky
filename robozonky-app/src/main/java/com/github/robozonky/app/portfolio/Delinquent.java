@@ -75,10 +75,18 @@ public final class Delinquent {
         if (delinquencies.isEmpty()) {
             return Optional.empty();
         }
-        final Delinquency latestDelinquency = delinquencies.get(delinquencies.lastKey());
-        return latestDelinquency.getFixedOn()
-                .map(d -> Optional.<Delinquency>empty())
-                .orElse(Optional.of(latestDelinquency));
+        return getLatestDelinquency().flatMap(d -> d.getFixedOn().isPresent() ? Optional.empty() : Optional.of(d));
+    }
+
+    /**
+     * Retrieve the latest delinquency recorded for this delinquent, be it active or not.
+     * @return Empty when no delinquencies at all.
+     */
+    public Optional<Delinquency> getLatestDelinquency() {
+        if (delinquencies.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(delinquencies.get(delinquencies.lastKey()));
     }
 
     /**

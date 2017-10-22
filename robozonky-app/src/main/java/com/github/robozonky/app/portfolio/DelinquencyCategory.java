@@ -47,7 +47,7 @@ enum DelinquencyCategory {
     MILD(10),
     SEVERE(30),
     CRITICAL(60),
-    DEFAULTED(90);
+    HOPELESS(90);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
     private final int thresholdInDays;
