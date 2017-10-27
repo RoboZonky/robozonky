@@ -30,12 +30,12 @@ defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
 ;
 
 targetPortfolioSizeExpression returns [int result] :
-    'Cílová zůstatková částka je ' maximumInvestmentInCzk=intExpr ' ' KC DOT
+    'Cílová zůstatková částka je ' maximumInvestmentInCzk=intExpr KC DOT
     {$result = $maximumInvestmentInCzk.result;}
 ;
 
 targetBalanceExpression returns [int result] :
-    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=intExpr ' ' KC DOT
+    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=intExpr KC DOT
     {$result = $balance.result;}
 ;
 

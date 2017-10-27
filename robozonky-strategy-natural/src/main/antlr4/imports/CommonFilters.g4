@@ -104,7 +104,7 @@ amountCondition returns [LoanAmountCondition result]:
         (c1 = amountConditionRangeOpen { $result = $c1.result; })
         | (c2 = amountConditionRangeClosedLeft { $result = $c2.result; })
         | (c3 = amountConditionRangeClosedRight { $result = $c3.result; })
-    ) ' ' KC
+    ) KC
 ;
 
 amountConditionRangeOpen returns [LoanAmountCondition result]:

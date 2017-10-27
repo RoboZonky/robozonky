@@ -57,7 +57,7 @@ investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
             { $result = new DefaultInvestmentSize($max.result); })
         | (' ' min=intExpr UP_TO max=intExpr
             { $result = new DefaultInvestmentSize($min.result, $max.result); })
-    ) ' ' KC DOT
+    ) KC DOT
 ;
 
 regionExpression returns [Region result] :
@@ -147,7 +147,7 @@ PURPOSE_VZDELANI                : 'vzdělání';
 PURPOSE_ZDRAVI                  : 'zdraví';
 
 // shared strings
-KC        : 'Kč' ;
+KC        : TABS 'Kč' ;
 DOT       : '.' ;
 DELIM     : '- ' ;
 UP_TO     : ' až ';
@@ -159,13 +159,15 @@ MORE_THAN : 'přesahuje ';
 OTHER     : 'jiné';
 
 // basic types
-INTEGER : DIGIT+ ;
+TABS    : TAB+;
+INTEGER : DIGIT+;
 FLOAT   : DIGIT+ COMMA DIGIT+;
 
 // skip whitespace and comments
 COMMENT     : ('#' ~( '\r' | '\n' )*) -> skip;
-WHITESPACE  : (' '|'\r'|'\n'|'\t') -> channel(HIDDEN);
+WHITESPACE  : ('\r'|'\n') -> skip;
 
+fragment TAB: (' ' | '\t');
 fragment DIGIT: [0-9];
 fragment COMMA: ',';
 
