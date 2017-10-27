@@ -34,7 +34,7 @@ ratingCondition returns [MarketplaceFilterCondition result]:
 ;
 
 ratingExpression returns [Rating result] :
-    r=(RATING_AAAAA | RATING_AAAA | RATING_AAA | RATING_AA | RATING_A | RATING_B | RATING_C | RATING_D)
+    r=RATING
     { $result = Rating.findByCode($r.getText()); }
 ;
 
@@ -51,55 +51,49 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
 
 investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
     (
-        (' ' amount=INTEGER
-            { $result = new DefaultInvestmentSize(Integer.parseInt($amount.getText()),
-                Integer.parseInt($amount.getText())); })
-        | (UP_TO maximumInvestmentInCzk=INTEGER
-            { $result = new DefaultInvestmentSize(Integer.parseInt($maximumInvestmentInCzk.getText())); })
-        | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
-            { $result = new DefaultInvestmentSize(Integer.parseInt($minimumInvestmentInCzk.getText()),
-                Integer.parseInt($maximumInvestmentInCzk.getText())); })
-    ) ' ' KC DOT
+        (amount=intExpr
+            { $result = new DefaultInvestmentSize($amount.result, $amount.result); })
+        | ('až' max=intExpr
+            { $result = new DefaultInvestmentSize($max.result); })
+        | (min=intExpr UP_TO max=intExpr
+            { $result = new DefaultInvestmentSize($min.result, $max.result); })
+    ) KC DOT
 ;
 
 regionExpression returns [Region result] :
-    r=(REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P |
-        REGION_S | REGION_T | REGION_U | REGION_Z)
-    { $result = Region.findByCode($r.getText()); }
+    r=REGION {
+        $result = Region.findByCode($r.getText());
+    }
 ;
 
 incomeExpression returns [MainIncomeType result] :
-    r=(INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION | INCOME_MATERNITY_LEAVE
-        | INCOME_STUDENT | INCOME_UNEMPLOYED | INCOME_LIBERAL_PROFESSION | OTHER )
-    { $result = MainIncomeType.findByCode($r.getText()); }
+    r=(INCOME | OTHER) {
+        $result = MainIncomeType.findByCode($r.getText());
+    }
 ;
 
 purposeExpression returns [Purpose result] :
-    r=(PURPOSE_AUTO_MOTO | PURPOSE_CESTOVANI | PURPOSE_DOMACNOST | PURPOSE_ELEKTRONIKA | PURPOSE_REFINANCOVANI_PUJCEK
-        | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI | PURPOSE_ZDRAVI | OTHER)
-    { $result = Purpose.findByCode($r.getText()); }
+    r=(PURPOSE | OTHER) {
+        $result = Purpose.findByCode($r.getText());
+    }
 ;
 
-floatExpression returns [BigDecimal result] :
+floatExpr returns [BigDecimal result] :
     f=FLOAT {
         final String replaced = $f.getText().replaceFirst("\\Q,\\E", ".");
         $result = new BigDecimal(replaced);
     }
 ;
 
-// shared strings
-KC        : 'Kč' ;
-DOT       : '.' ;
-DELIM     : '- ' ;
-UP_TO     : ' až ';
-IS        : 'je ';
-OR        : ' nebo ';
-OR_COMMA  : COMMA ' ';
-LESS_THAN : 'nedosahuje ';
-MORE_THAN : 'přesahuje ';
-OTHER     : 'jiné';
+intExpr returns [int result] :
+    i=INTEGER {
+        $result = Integer.parseInt($i.getText());
+    }
+;
 
 // regions
+REGION   : (REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P
+            | REGION_S | REGION_T | REGION_U | REGION_Z);
 REGION_A : 'Praha';
 REGION_B : 'Jihomoravský';
 REGION_C : 'Jihočeský';
@@ -116,6 +110,7 @@ REGION_U : 'Ústecký';
 REGION_Z : 'Zlínský';
 
 // ratings
+RATING       : (RATING_AAAAA | RATING_AAAA | RATING_AAA | RATING_AA | RATING_A | RATING_B | RATING_C | RATING_D);
 RATING_AAAAA : 'A**';
 RATING_AAAA  : 'A*';
 RATING_AAA   : 'A++';
@@ -126,6 +121,9 @@ RATING_C     : 'C';
 RATING_D     : 'D';
 
 // main income types
+INCOME                      : (INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION
+                                | INCOME_MATERNITY_LEAVE | INCOME_STUDENT | INCOME_UNEMPLOYED
+                                | INCOME_LIBERAL_PROFESSION);
 INCOME_EMPLOYMENT           : 'zaměstnanec';
 INCOME_ENTREPRENEUR         : 'podnikatel';
 INCOME_LIBERAL_PROFESSION   : 'svobodné povolání';
@@ -136,6 +134,9 @@ INCOME_STUDENT              : 'student';
 INCOME_UNEMPLOYED           : 'bez zaměstnání';
 
 // loan purpose types
+PURPOSE                         : (PURPOSE_AUTO_MOTO | PURPOSE_CESTOVANI | PURPOSE_DOMACNOST | PURPOSE_ELEKTRONIKA
+                                    | PURPOSE_REFINANCOVANI_PUJCEK | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI
+                                    | PURPOSE_ZDRAVI);
 PURPOSE_AUTO_MOTO               : 'auto-moto';
 PURPOSE_CESTOVANI               : 'cestování';
 PURPOSE_DOMACNOST               : 'domácnost';
@@ -145,13 +146,26 @@ PURPOSE_VLASTNI_PROJEKT         : 'vlastní projekt';
 PURPOSE_VZDELANI                : 'vzdělání';
 PURPOSE_ZDRAVI                  : 'zdraví';
 
+// shared strings
+KC        : ' Kč' ;
+DOT       : '.' ;
+DELIM     : '- ' ;
+UP_TO     : ' až ';
+IS        : 'je ';
+OR        : ' nebo ';
+OR_COMMA  : COMMA ' ';
+LESS_THAN : 'nedosahuje ';
+MORE_THAN : 'přesahuje ';
+OTHER     : 'jiné';
+
 // basic types
-INTEGER : DIGIT+ ;
-FLOAT   : DIGIT+ COMMA DIGIT+;
+INTEGER    : DIGIT+;
+FLOAT      : DIGIT+ COMMA DIGIT+;
 
 // skip whitespace and comments
-COMMENT     : ('#' ~( '\r' | '\n' )*) -> skip;
-WHITESPACE  : (' '|'\r'|'\n'|'\t') -> channel(HIDDEN);
+COMMENT     : '#' ~[\r\n]* NEWLINE -> skip ;
+NEWLINE     : ('\r'? '\n') -> skip;
+WHITESPACE  : [ \t]+ -> skip;
 
 fragment DIGIT: [0-9];
 fragment COMMA: ',';

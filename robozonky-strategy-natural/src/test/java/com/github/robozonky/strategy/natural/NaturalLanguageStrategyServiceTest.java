@@ -74,6 +74,13 @@ public class NaturalLanguageStrategyServiceTest {
     }
 
     @Test
+    public void complexWithWhitespace() throws IOException {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("complex-whitespace");
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
+    }
+
+    @Test
     public void simplest() throws IOException {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("simplest");
         final String str = IOUtils.toString(s, Defaults.CHARSET);

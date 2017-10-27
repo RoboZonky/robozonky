@@ -13,7 +13,7 @@ investmentSizeExpression returns [Collection<InvestmentSize> result]:
 ;
 
 investmentSizeRatingExpression returns [InvestmentSize result] :
-    'Do úvěrů v ratingu ' r=ratingExpression ' investovat' i=investmentSizeRatingSubExpression {
+    'Do úvěrů v ratingu ' r=ratingExpression 'investovat ' i=investmentSizeRatingSubExpression {
         $result = new InvestmentSize($r.result, $i.result);
     }
 ;
