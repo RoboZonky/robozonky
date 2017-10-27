@@ -62,18 +62,18 @@ termCondition returns [LoanTermCondition result]:
 ;
 
 termConditionRangeOpen returns [LoanTermCondition result]:
-    IS min=INTEGER UP_TO max=INTEGER
-    { $result = new LoanTermCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
+    IS min=intExpr UP_TO max=intExpr
+    { $result = new LoanTermCondition($min.result, $max.result); }
 ;
 
 termConditionRangeClosedLeft returns [LoanTermCondition result]:
-    MORE_THAN min=INTEGER
-    { $result = new LoanTermCondition(Integer.parseInt($min.getText()) + 1); }
+    MORE_THAN min=intExpr
+    { $result = new LoanTermCondition($min.result + 1); }
 ;
 
 termConditionRangeClosedRight returns [LoanTermCondition result]:
-    LESS_THAN max=INTEGER
-    { $result = new LoanTermCondition(0, Integer.parseInt($max.getText()) - 1); }
+    LESS_THAN max=intExpr
+    { $result = new LoanTermCondition(0, $max.result - 1); }
 ;
 
 interestCondition returns [LoanInterestRateCondition result]:
@@ -85,17 +85,17 @@ interestCondition returns [LoanInterestRateCondition result]:
 ;
 
 interestConditionRangeOpen returns [LoanInterestRateCondition result]:
-    IS min=floatExpression UP_TO max=floatExpression
+    IS min=floatExpr UP_TO max=floatExpr
     { $result = new LoanInterestRateCondition($min.result, $max.result); }
 ;
 
 interestConditionRangeClosedLeft returns [LoanInterestRateCondition result]:
-    MORE_THAN min=floatExpression
+    MORE_THAN min=floatExpr
     { $result = new LoanInterestRateCondition(LoanInterestRateCondition.moreThan($min.result)); }
 ;
 
 interestConditionRangeClosedRight returns [LoanInterestRateCondition result]:
-    LESS_THAN max=floatExpression
+    LESS_THAN max=floatExpr
     { $result = new LoanInterestRateCondition(BigDecimal.ZERO, LoanInterestRateCondition.lessThan($max.result)); }
 ;
 
@@ -108,16 +108,16 @@ amountCondition returns [LoanAmountCondition result]:
 ;
 
 amountConditionRangeOpen returns [LoanAmountCondition result]:
-    IS min=INTEGER UP_TO max=INTEGER
-    { $result = new LoanAmountCondition(Integer.parseInt($min.getText()), Integer.parseInt($max.getText())); }
+    IS min=intExpr UP_TO max=intExpr
+    { $result = new LoanAmountCondition($min.result, $max.result); }
 ;
 
 amountConditionRangeClosedLeft returns [LoanAmountCondition result]:
-    MORE_THAN min=INTEGER
-    { $result = new LoanAmountCondition(Integer.parseInt($min.getText()) + 1); }
+    MORE_THAN min=intExpr
+    { $result = new LoanAmountCondition($min.result + 1); }
 ;
 
 amountConditionRangeClosedRight returns [LoanAmountCondition result]:
-    LESS_THAN max=INTEGER
-    { $result = new LoanAmountCondition(0, Integer.parseInt($max.getText()) - 1); }
+    LESS_THAN max=intExpr
+    { $result = new LoanAmountCondition(0, $max.result - 1); }
 ;

@@ -51,36 +51,43 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
 
 investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
     (
-        (' ' amount=INTEGER
-            { $result = new DefaultInvestmentSize(Integer.parseInt($amount.getText()),
-                Integer.parseInt($amount.getText())); })
-        | (UP_TO maximumInvestmentInCzk=INTEGER
-            { $result = new DefaultInvestmentSize(Integer.parseInt($maximumInvestmentInCzk.getText())); })
-        | (' ' minimumInvestmentInCzk=INTEGER UP_TO maximumInvestmentInCzk=INTEGER
-            { $result = new DefaultInvestmentSize(Integer.parseInt($minimumInvestmentInCzk.getText()),
-                Integer.parseInt($maximumInvestmentInCzk.getText())); })
+        (' ' amount=intExpr
+            { $result = new DefaultInvestmentSize($amount.result, $amount.result); })
+        | (UP_TO max=intExpr
+            { $result = new DefaultInvestmentSize($max.result); })
+        | (' ' min=intExpr UP_TO max=intExpr
+            { $result = new DefaultInvestmentSize($min.result, $max.result); })
     ) ' ' KC DOT
 ;
 
 regionExpression returns [Region result] :
-    r=REGION
-    { $result = Region.findByCode($r.getText()); }
+    r=REGION {
+        $result = Region.findByCode($r.getText());
+    }
 ;
 
 incomeExpression returns [MainIncomeType result] :
-    r=(INCOME | OTHER)
-    { $result = MainIncomeType.findByCode($r.getText()); }
+    r=(INCOME | OTHER) {
+        $result = MainIncomeType.findByCode($r.getText());
+    }
 ;
 
 purposeExpression returns [Purpose result] :
-    r=(PURPOSE | OTHER)
-    { $result = Purpose.findByCode($r.getText()); }
+    r=(PURPOSE | OTHER) {
+        $result = Purpose.findByCode($r.getText());
+    }
 ;
 
-floatExpression returns [BigDecimal result] :
+floatExpr returns [BigDecimal result] :
     f=FLOAT {
         final String replaced = $f.getText().replaceFirst("\\Q,\\E", ".");
         $result = new BigDecimal(replaced);
+    }
+;
+
+intExpr returns [int result] :
+    i=INTEGER {
+        $result = Integer.parseInt($i.getText());
     }
 ;
 

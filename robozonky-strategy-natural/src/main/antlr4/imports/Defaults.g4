@@ -24,19 +24,19 @@ defaultInvestmentSizeExpression returns [DefaultInvestmentSize result] :
 
 defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
     'Investovat maximálně '
-        maximumInvestmentInCzk=INTEGER
-        { $result = new DefaultInvestmentShare(Integer.parseInt($maximumInvestmentInCzk.getText())); }
+        maximumInvestmentInCzk=intExpr
+        { $result = new DefaultInvestmentShare($maximumInvestmentInCzk.result); }
     ' % výše úvěru' DOT
 ;
 
 targetPortfolioSizeExpression returns [int result] :
-    'Cílová zůstatková částka je ' maximumInvestmentInCzk=INTEGER ' ' KC DOT
-    {$result = Integer.parseInt($maximumInvestmentInCzk.getText());}
+    'Cílová zůstatková částka je ' maximumInvestmentInCzk=intExpr ' ' KC DOT
+    {$result = $maximumInvestmentInCzk.result;}
 ;
 
 targetBalanceExpression returns [int result] :
-    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=INTEGER ' ' KC DOT
-    {$result = Integer.parseInt($balance.getText());}
+    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=intExpr ' ' KC DOT
+    {$result = $balance.result;}
 ;
 
 confirmationExpression returns [MarketplaceFilterCondition result] :
