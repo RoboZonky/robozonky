@@ -53,7 +53,7 @@ public class Loan extends BaseEntity {
         return providedUrl == null ? Loan.LOAN_URL_SUPPLIER.apply(l.getId()) : providedUrl;
     }
 
-    private boolean topped, covered, published;
+    private boolean topped, covered, published, questionsAllowed;
     private int id, termInMonths, investmentsCount, questionsCount, userId;
     private double amount, remainingInvestment;
     private String name, nickName, story, url;
@@ -186,6 +186,11 @@ public class Loan extends BaseEntity {
     @XmlElement
     public int getQuestionsCount() {
         return questionsCount;
+    }
+
+    @XmlElement
+    public boolean isQuestionsAllowed() {
+        return questionsAllowed;
     }
 
     @XmlElement
