@@ -17,9 +17,12 @@
 package com.github.robozonky.internal.api;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.slf4j.Logger;
 
 public class ToStringBuilder {
 
@@ -43,13 +46,17 @@ public class ToStringBuilder {
 
         private static final int MAX_STRING_LENGTH = 70;
 
+        // ignore passwords and loggers
+        private static final List<Class<?>> IGNORED_TYPES = Arrays.asList(char[].class, Logger.class);
+
         public CustomReflectionToStringBuilder(final Object o) {
             super(o);
         }
 
         @Override
-        protected boolean accept(final Field field) { // ignore passwords
-            return super.accept(field) && (!Objects.equals(field.getType(), char[].class));
+        protected boolean accept(final Field field) {
+            return super.accept(field) &&
+                    IGNORED_TYPES.stream().noneMatch(type -> Objects.equals(field.getType(), type));
         }
 
         @Override
