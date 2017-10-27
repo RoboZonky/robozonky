@@ -6,10 +6,10 @@
 # Povinná sekce.
 - Obecná nastavení
 Robot má udržovat prázdné portfolio.
-Cílová zůstatková částka je                         100000 Kč.
-Běžná výše investice je                                200 Kč.
-Investovat maximálně                                     1 % výše úvěru.
-Investovat pouze pokud disponibilní zůstatek přesáhne 1000 Kč.
+Cílová zůstatková částka je                           100000 Kč.
+Běžná výše investice je                                  200 Kč.
+Investovat maximálně                                       1 % výše úvěru.
+Investovat pouze pokud disponibilní zůstatek přesáhne   1000 Kč.
 Potvrzovat mobilem investice do úvěrů, kde rating je horší než A.
 
 # Volitelná sekce.

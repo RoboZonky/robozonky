@@ -14,7 +14,7 @@ portfolioStructureExpression returns [Collection<PortfolioShare> result]:
 ;
 
 portfolioStructureRatingExpression returns [PortfolioShare result] :
-    'Prostředky v ratingu ' r=ratingExpression ' tvoří ' (
+    'Prostředky v ratingu ' r=ratingExpression 'tvoří' (
         ( maximumInvestmentInCzk=intExpr
             { $result = new PortfolioShare($r.result, $maximumInvestmentInCzk.result); })
         | ( minimumInvestmentInCzk=intExpr UP_TO maximumInvestmentInCzk=intExpr

@@ -17,7 +17,7 @@ defaultExpression returns [DefaultValues result]:
 ;
 
 defaultInvestmentSizeExpression returns [DefaultInvestmentSize result] :
-    'Běžná výše investice je' i=investmentSizeRatingSubExpression {
+    'Běžná výše investice je ' i=investmentSizeRatingSubExpression {
          $result = $i.result;
     }
 ;

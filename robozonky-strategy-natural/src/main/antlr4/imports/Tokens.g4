@@ -51,11 +51,11 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
 
 investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
     (
-        (' ' amount=intExpr
+        (amount=intExpr
             { $result = new DefaultInvestmentSize($amount.result, $amount.result); })
-        | (UP_TO max=intExpr
+        | ('až' max=intExpr
             { $result = new DefaultInvestmentSize($max.result); })
-        | (' ' min=intExpr UP_TO max=intExpr
+        | (min=intExpr UP_TO max=intExpr
             { $result = new DefaultInvestmentSize($min.result, $max.result); })
     ) KC DOT
 ;
@@ -159,12 +159,13 @@ MORE_THAN : 'přesahuje ';
 OTHER     : 'jiné';
 
 // basic types
-INTEGER : DIGIT+;
-FLOAT   : DIGIT+ COMMA DIGIT+;
+INTEGER    : DIGIT+;
+FLOAT      : DIGIT+ COMMA DIGIT+;
 
 // skip whitespace and comments
 COMMENT     : '#' ~[\r\n]* NEWLINE -> skip ;
 NEWLINE     : ('\r'? '\n') -> skip;
+WHITESPACE  : ' '+ -> skip;
 
 fragment DIGIT: [0-9];
 fragment COMMA: ',';
