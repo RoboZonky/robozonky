@@ -165,7 +165,7 @@ FLOAT      : DIGIT+ COMMA DIGIT+;
 // skip whitespace and comments
 COMMENT     : '#' ~[\r\n]* NEWLINE -> skip ;
 NEWLINE     : ('\r'? '\n') -> skip;
-WHITESPACE  : ' '+ -> skip;
+WHITESPACE  : [ \t]+ -> skip;
 
 fragment DIGIT: [0-9];
 fragment COMMA: ',';
