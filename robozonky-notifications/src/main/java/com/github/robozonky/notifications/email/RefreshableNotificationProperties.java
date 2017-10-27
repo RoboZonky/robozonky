@@ -35,16 +35,15 @@ import org.slf4j.LoggerFactory;
 
 public class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
 
+    public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
+    static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
     private static String readUrl(final URL url) throws IOException {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
             return r.lines().collect(Collectors.joining(System.lineSeparator()));
         }
     }
-
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
-    static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
-    public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
 
     @Override
     public Optional<NotificationProperties> transform(final String source) {

@@ -25,17 +25,15 @@ import java.util.Properties;
 class NotificationProperties {
 
     static final String HOURLY_LIMIT = "hourlyMaxEmails";
-
-    static String getCompositePropertyName(final SupportedListener listener, final String property) {
-        return listener.getLabel() + "." + property;
-    }
-
     final protected Properties properties;
     private final Counter globalCounter;
-
     public NotificationProperties(final Properties source) {
         this.properties = source;
         this.globalCounter = new Counter("global", this.getGlobalHourlyLimit(), Duration.ofHours(1));
+    }
+
+    static String getCompositePropertyName(final SupportedListener listener, final String property) {
+        return listener.getLabel() + "." + property;
     }
 
     protected Properties getProperties() {

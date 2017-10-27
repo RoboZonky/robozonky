@@ -20,7 +20,7 @@ import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 
-final class InvestmentRejectedEventListener extends AbstractEmailingListener<InvestmentRejectedEvent> {
+class InvestmentRejectedEventListener extends AbstractEmailingListener<InvestmentRejectedEvent> {
 
     public InvestmentRejectedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
@@ -39,7 +39,7 @@ final class InvestmentRejectedEventListener extends AbstractEmailingListener<Inv
 
     @Override
     protected Map<String, Object> getData(final InvestmentRejectedEvent event) {
-        final Map<String, Object> result = getLoanData(event.getRecommendation());
+        final Map<String, Object> result = Util.getLoanData(event.getRecommendation());
         result.put("newBalance", event.getBalance());
         return result;
     }

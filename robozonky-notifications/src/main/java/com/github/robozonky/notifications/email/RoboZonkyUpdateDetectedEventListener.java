@@ -21,7 +21,7 @@ import java.util.Map;
 
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 
-final class RoboZonkyUpdateDetectedEventListener extends AbstractEmailingListener<RoboZonkyUpdateDetectedEvent> {
+class RoboZonkyUpdateDetectedEventListener extends AbstractEmailingListener<RoboZonkyUpdateDetectedEvent> {
 
     public RoboZonkyUpdateDetectedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);

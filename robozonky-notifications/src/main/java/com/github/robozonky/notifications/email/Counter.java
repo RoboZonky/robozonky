@@ -34,21 +34,6 @@ final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
     private static final State.ClassSpecificState STATE = State.forClass(Counter.class);
-
-    private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
-        final Stream<String> result = timestamps.stream().map(OffsetDateTime::toString);
-        return Counter.STATE.newBatch().set(id, result).call();
-    }
-
-    private static Collection<OffsetDateTime> load(final String id) {
-        return Counter.STATE.getValues(id)
-                .map(value -> value.stream()
-                        .map(String::trim)
-                        .map(OffsetDateTime::parse)
-                        .collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
-    }
-
     private final String id;
     private final int maxItems;
     private final TemporalAmount period;
@@ -63,6 +48,20 @@ final class Counter {
         this.maxItems = maxItems;
         this.period = period;
         this.timestamps = new LinkedHashSet<>(Counter.load(id));
+    }
+
+    private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
+        final Stream<String> result = timestamps.stream().map(OffsetDateTime::toString);
+        return Counter.STATE.newBatch().set(id, result).call();
+    }
+
+    private static Collection<OffsetDateTime> load(final String id) {
+        return Counter.STATE.getValues(id)
+                .map(value -> value.stream()
+                        .map(String::trim)
+                        .map(OffsetDateTime::parse)
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
     }
 
     /**

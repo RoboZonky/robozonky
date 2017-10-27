@@ -20,10 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 
-final class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent> {
+class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent> {
 
     public SaleOfferedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
@@ -47,13 +46,8 @@ final class SaleOfferedEventListener extends AbstractEmailingListener<SaleOffere
         result.put("loanId", i.getLoanId());
         result.put("loanRating", i.getRating().getCode());
         result.put("loanTerm", i.getRemainingMonths());
-        result.put("loanUrl", AbstractEmailingListener.getLoanUrl(i));
+        result.put("loanUrl", Util.getLoanUrl(i));
         result.put("isDryRun", event.isDryRun());
         return result;
-    }
-
-    @Override
-    public void handle(final SaleOfferedEvent event, final SessionInfo sessionInfo) {
-        super.handle(event, sessionInfo);
     }
 }

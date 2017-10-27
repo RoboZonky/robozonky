@@ -27,6 +27,7 @@ class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquen
 
     public LoanDelinquentEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
+        registerFinisher(event -> DelinquencyTracker.INSTANCE.setDelinquent(event.getLoan()));
     }
 
     @Override
@@ -47,7 +48,7 @@ class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquen
     @Override
     protected Map<String, Object> getData(final LoanDelinquentEvent event) {
         final Loan loan = event.getLoan();
-        final Map<String, Object> result = getLoanData(loan);
+        final Map<String, Object> result = Util.getLoanData(loan);
         result.put("since", Date.from(event.getDelinquentSince().atStartOfDay(Defaults.ZONE_ID).toInstant()));
         return result;
     }

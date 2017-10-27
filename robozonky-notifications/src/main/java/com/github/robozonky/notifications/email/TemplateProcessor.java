@@ -32,14 +32,14 @@ enum TemplateProcessor {
 
     INSTANCE;
 
+    private final Configuration config = TemplateProcessor.getFreemarkerConfiguration();
+
     static Configuration getFreemarkerConfiguration() {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_26);
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
         return cfg;
     }
-
-    private final Configuration config = TemplateProcessor.getFreemarkerConfiguration();
 
     public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {

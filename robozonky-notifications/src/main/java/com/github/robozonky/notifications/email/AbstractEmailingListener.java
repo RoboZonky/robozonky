@@ -16,22 +16,17 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.Duration;
-import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
@@ -42,59 +37,19 @@ import org.slf4j.LoggerFactory;
 
 abstract class AbstractEmailingListener<T extends Event> implements EventListener<T> {
 
-    private static final String AT = "@";
-    private static final Pattern COMPILE = Pattern.compile("\\Q" + AbstractEmailingListener.AT + "\\E");
+    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Counter emailsOfThisType;
+    private final ListenerSpecificNotificationProperties properties;
+    private final Collection<Consumer<T>> finishers = new LinkedHashSet<>(0);
 
-    private static String cutMiddle(final String text) {
-        if (text.length() < 3) {
-            return text;
-        } else {
-            return text.charAt(0) + "..." + text.charAt(text.length() - 1);
-        }
-    }
-
-    private static String obfuscateEmailAddress(final String username) {
-        if (username.contains(AbstractEmailingListener.AT)) {
-            final String[] parts = AbstractEmailingListener.COMPILE.split(username.toLowerCase());
-            return AbstractEmailingListener.cutMiddle(parts[0].trim()) + AbstractEmailingListener.AT
-                    + AbstractEmailingListener.cutMiddle(parts[1].trim());
-        } else {
-            throw new IllegalArgumentException("Not a valid e-mail address: " + username);
-        }
-    }
-
-    protected static Date toDate(final LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay(Defaults.ZONE_ID).toInstant());
-    }
-
-    protected static Map<String, Object> getLoanData(final Loan loan) {
-        final Map<String, Object> result = new HashMap<>();
-        result.put("loanId", loan.getId());
-        result.put("loanAmount", loan.getAmount());
-        result.put("loanRating", loan.getRating().getCode());
-        result.put("loanTerm", loan.getTermInMonths());
-        result.put("loanUrl", Loan.getUrlSafe(loan));
-        return result;
-    }
-
-    protected static Map<String, Object> getLoanData(final RecommendedLoan l) {
-        final Loan loan = l.descriptor().item();
-        final Map<String, Object> result = getLoanData(loan);
-        result.put("loanRecommendation", l.amount());
-        return result;
-    }
-
-    protected static String getLoanUrl(final Investment i) {
-        // convert investment safely to URL, using dummy loan if necessary
-        final Loan l = i.getLoan().orElseGet(() -> new Loan(i.getLoanId(), Defaults.MINIMUM_INVESTMENT_IN_CZK));
-        return Loan.getUrlSafe(l);
-    }
-
-    static String stackTraceToString(final Throwable t) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        t.printStackTrace(pw);
-        return sw.toString();
+    public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
+        this.properties = properties;
+        this.emailsOfThisType = new Counter(this.getClass().getSimpleName(),
+                                            properties.getListenerSpecificHourlyEmailLimit());
+        this.registerFinisher(evt -> { // increase spam-prevention counters
+            emailsOfThisType.increase();
+            this.properties.getGlobalCounter().increase();
+        });
     }
 
     private static Email createNewEmail(final NotificationProperties properties) throws EmailException {
@@ -112,14 +67,12 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return email;
     }
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final Counter emailsOfThisType;
-    private final ListenerSpecificNotificationProperties properties;
+    protected void registerFinisher(final Consumer<T> finisher) {
+        this.finishers.add(finisher);
+    }
 
-    public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
-        this.properties = properties;
-        this.emailsOfThisType = new Counter(this.getClass().getSimpleName(),
-                                            properties.getListenerSpecificHourlyEmailLimit());
+    int countFinishers() {
+        return this.finishers.size();
     }
 
     boolean shouldSendEmail(final T event) {
@@ -135,13 +88,12 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     }
 
     Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
-        final Map<String, Object> eventSpecific = this.getData(event);
-        final Map<String, Object> userInfoMap = new HashMap<>();
-        userInfoMap.put("userName", AbstractEmailingListener.obfuscateEmailAddress(sessionInfo.getUserName()));
-        userInfoMap.put("userAgent", sessionInfo.getUserAgent());
-        final Map<String, Object> result = new HashMap<>(eventSpecific);
-        result.put("session", userInfoMap);
-        return result;
+        return new HashMap<String, Object>(this.getData(event)) {{
+            put("session", new HashMap<String, Object>() {{
+                put("userName", Util.obfuscateEmailAddress(sessionInfo.getUserName()));
+                put("userAgent", sessionInfo.getUserAgent());
+            }});
+        }};
     }
 
     @Override
@@ -159,8 +111,14 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
                              email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
                              email.getSmtpPort(), properties.getSmtpUsername());
                 email.send();
-                emailsOfThisType.increase();
-                this.properties.getGlobalCounter().increase();
+                // perform finishers after the e-mail has been sent
+                finishers.forEach(f -> {
+                    try {
+                        f.accept(event);
+                    } catch (final Exception ex) {
+                        LOGGER.trace("Finisher failed.", ex);
+                    }
+                });
             } catch (final Exception ex) {
                 throw new RuntimeException("Failed processing event.", ex);
             }

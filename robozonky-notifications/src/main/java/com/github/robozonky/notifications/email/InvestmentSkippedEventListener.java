@@ -20,7 +20,7 @@ import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 
-final class InvestmentSkippedEventListener extends AbstractEmailingListener<InvestmentSkippedEvent> {
+class InvestmentSkippedEventListener extends AbstractEmailingListener<InvestmentSkippedEvent> {
 
     public InvestmentSkippedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
@@ -38,6 +38,6 @@ final class InvestmentSkippedEventListener extends AbstractEmailingListener<Inve
 
     @Override
     protected Map<String, Object> getData(final InvestmentSkippedEvent event) {
-        return getLoanData(event.getRecommendation());
+        return Util.getLoanData(event.getRecommendation());
     }
 }

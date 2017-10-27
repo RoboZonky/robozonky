@@ -16,21 +16,22 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.io.IOException;
-
-import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.internal.api.Defaults;
-import freemarker.template.TemplateException;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class TemplateProcessorTest extends AbstractEmailingListenerTest {
+public class UtilTest {
 
     @Test
-    public void processingWithoutErrors() throws IOException, TemplateException {
-        final String s = TemplateProcessor.INSTANCE.process(this.listener.getTemplateFileName(),
-                                                            this.listener.getData(event, new SessionInfo(
-                                                                    "someone@somewhere.net")));
-        Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
+    public void emailObfuscation() {
+        Assertions.assertThat(Util.obfuscateEmailAddress("someone@somewhere.net")).isEqualTo("s...e@s...t");
+        Assertions.assertThat(Util.obfuscateEmailAddress("ab@cd")).isEqualTo("a...b@c...d");
+        // too short to obfuscate
+        Assertions.assertThat(Util.obfuscateEmailAddress("a@b")).isEqualTo("a@b");
+    }
+
+    @Test
+    public void stackTrace() {
+        final String result = Util.stackTraceToString(new IllegalStateException());
+        Assertions.assertThat(result).contains("IllegalStateException");
     }
 }

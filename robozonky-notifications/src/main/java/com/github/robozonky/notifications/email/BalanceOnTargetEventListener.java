@@ -23,13 +23,13 @@ import java.util.OptionalInt;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
 
-public class BalanceOnTargetEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {
+class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingListener<ExecutionStartedEvent> {
 
     private final int targetBalance;
     private boolean shouldSendEmail = false;
 
     public BalanceOnTargetEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(properties);
+        super((ExecutionStartedEvent e) -> e.getPortfolioOverview().getCzkAvailable(), properties);
         this.targetBalance = properties.getListenerSpecificIntProperty("targetBalance", 200);
     }
 
@@ -50,10 +50,10 @@ public class BalanceOnTargetEventListener extends AbstractEmailingListener<Execu
 
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
-        final Map<String, Object> result = new HashMap<>();
-        result.put("newBalance", event.getPortfolioOverview().getCzkAvailable());
-        result.put("targetBalance", targetBalance);
-        return result;
+        return new HashMap<String, Object>() {{
+            put("newBalance", getNewBalance(event));
+            put("targetBalance", targetBalance);
+        }};
     }
 
     @Override
@@ -66,8 +66,6 @@ public class BalanceOnTargetEventListener extends AbstractEmailingListener<Execu
         } else {
             this.shouldSendEmail = false;
         }
-        // set the new threshold
-        BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
         // and continue with event-processing, possibly eventually sending the e-mail
         super.handle(event, sessionInfo);
     }

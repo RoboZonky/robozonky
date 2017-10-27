@@ -43,7 +43,7 @@ class RoboZonkyCrashedEventListener extends AbstractEmailingListener<RoboZonkyCr
         result.put("returnCodeName", event.getReturnCode().name());
         result.put("returnCodeId", event.getReturnCode().getCode());
         result.put("isCauseKnown", event.getCause().isPresent());
-        event.getCause().ifPresent(cause -> result.put("cause", stackTraceToString(cause)));
+        event.getCause().ifPresent(cause -> result.put("cause", Util.stackTraceToString(cause)));
         return result;
     }
 }

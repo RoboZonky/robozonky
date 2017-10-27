@@ -16,15 +16,12 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
-import com.github.robozonky.api.remote.entities.Loan;
 
-public class LoanDefaultedEventListener extends AbstractEmailingListener<LoanDefaultedEvent> {
+class LoanDefaultedEventListener extends AbstractLoanTerminatedEmailingListener<LoanDefaultedEvent> {
 
     public LoanDefaultedEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(properties);
+        super(LoanDefaultedEvent::getLoan, LoanDefaultedEvent::getDelinquentSince, properties);
     }
 
     @Override
@@ -35,13 +32,5 @@ public class LoanDefaultedEventListener extends AbstractEmailingListener<LoanDef
     @Override
     String getTemplateFileName() {
         return "loan-defaulted.ftl";
-    }
-
-    @Override
-    protected Map<String, Object> getData(final LoanDefaultedEvent event) {
-        final Loan loan = event.getLoan();
-        final Map<String, Object> result = getLoanData(loan);
-        result.put("since", toDate(event.getDelinquentSince()));
-        return result;
     }
 }

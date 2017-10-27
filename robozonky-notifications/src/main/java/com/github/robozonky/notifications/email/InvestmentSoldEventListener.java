@@ -16,17 +16,15 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 
-final class InvestmentSoldEventListener extends AbstractEmailingListener<InvestmentSoldEvent> {
+class InvestmentSoldEventListener extends AbstractBalanceRegisteringEmailingListener<InvestmentSoldEvent> {
 
     public InvestmentSoldEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(properties);
+        super(InvestmentSoldEvent::getFinalBalance, properties);
     }
 
     @Override
@@ -43,19 +41,9 @@ final class InvestmentSoldEventListener extends AbstractEmailingListener<Investm
     @Override
     protected Map<String, Object> getData(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
-        final Map<String, Object> result = new HashMap<>();
+        final Map<String, Object> result = Util.getLoanData(i);
         result.put("investedAmount", i.getRemainingPrincipal());
-        result.put("loanId", i.getLoanId());
-        result.put("loanRating", i.getRating().getCode());
-        result.put("loanTerm", i.getRemainingMonths());
-        result.put("loanUrl", getLoanUrl(i));
-        result.put("newBalance", event.getFinalBalance());
+        result.put("newBalance", getNewBalance(event));
         return result;
-    }
-
-    @Override
-    public void handle(final InvestmentSoldEvent event, final SessionInfo sessionInfo) {
-        BalanceTracker.INSTANCE.setLastKnownBalance(event.getFinalBalance());
-        super.handle(event, sessionInfo);
     }
 }

@@ -16,15 +16,12 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Loan;
 
-public class LoanNoLongerDelinquentEventListener extends AbstractEmailingListener<LoanNoLongerDelinquentEvent> {
+class LoanNoLongerDelinquentEventListener extends AbstractLoanTerminatedEmailingListener<LoanNoLongerDelinquentEvent> {
 
     public LoanNoLongerDelinquentEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(properties);
+        super(LoanNoLongerDelinquentEvent::getLoan, LoanNoLongerDelinquentEvent::getDelinquentSince, properties);
     }
 
     @Override
@@ -35,13 +32,5 @@ public class LoanNoLongerDelinquentEventListener extends AbstractEmailingListene
     @Override
     String getTemplateFileName() {
         return "loan-not-delinquent.ftl";
-    }
-
-    @Override
-    protected Map<String, Object> getData(final LoanNoLongerDelinquentEvent event) {
-        final Loan loan = event.getLoan();
-        final Map<String, Object> result = getLoanData(loan);
-        result.put("since", toDate(event.getDelinquentSince()));
-        return result;
     }
 }

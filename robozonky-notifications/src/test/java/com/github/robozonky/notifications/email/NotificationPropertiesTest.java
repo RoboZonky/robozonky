@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import com.github.robozonky.api.Refreshable;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,18 +36,6 @@ public class NotificationPropertiesTest {
             NotificationPropertiesTest.class.getResource("notifications-enabled.cfg");
     private static final URL WINDOWS_ENCODED =
             NotificationPropertiesTest.class.getResource("notifications-windows-encoding.cfg");
-
-    private static final class TestingProperties extends NotificationProperties {
-
-        TestingProperties(final Properties source) {
-            super(source);
-        }
-
-        @Override
-        protected int getGlobalHourlyLimit() {
-            return Integer.MAX_VALUE;
-        }
-    }
 
     private static Optional<NotificationProperties> getProperties() {
         final Refreshable<NotificationProperties> r = new RefreshableNotificationProperties();
@@ -94,5 +83,19 @@ public class NotificationPropertiesTest {
         final Optional<NotificationProperties> np = NotificationPropertiesTest.getProperties();
         Assertions.assertThat(np).isPresent();
         Assertions.assertThat(np.get().isEnabled()).isTrue();
+    }
+
+    @Test
+    public void equality() {
+        final Properties p = new Properties();
+        final NotificationProperties n = new NotificationProperties(p);
+        final NotificationProperties n2 = new NotificationProperties(p);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(n).isNotEqualTo(null);
+            softly.assertThat(n).isNotEqualTo("some string");
+            softly.assertThat(n).isEqualTo(n);
+            softly.assertThat(n2).isEqualTo(n);
+            softly.assertThat(n).isEqualTo(n2);
+        });
     }
 }
