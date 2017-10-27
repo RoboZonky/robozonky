@@ -34,7 +34,7 @@ ratingCondition returns [MarketplaceFilterCondition result]:
 ;
 
 ratingExpression returns [Rating result] :
-    r=(RATING_AAAAA | RATING_AAAA | RATING_AAA | RATING_AA | RATING_A | RATING_B | RATING_C | RATING_D)
+    r=RATING
     { $result = Rating.findByCode($r.getText()); }
 ;
 
@@ -63,20 +63,17 @@ investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
 ;
 
 regionExpression returns [Region result] :
-    r=(REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P |
-        REGION_S | REGION_T | REGION_U | REGION_Z)
+    r=REGION
     { $result = Region.findByCode($r.getText()); }
 ;
 
 incomeExpression returns [MainIncomeType result] :
-    r=(INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION | INCOME_MATERNITY_LEAVE
-        | INCOME_STUDENT | INCOME_UNEMPLOYED | INCOME_LIBERAL_PROFESSION | OTHER )
+    r=(INCOME | OTHER)
     { $result = MainIncomeType.findByCode($r.getText()); }
 ;
 
 purposeExpression returns [Purpose result] :
-    r=(PURPOSE_AUTO_MOTO | PURPOSE_CESTOVANI | PURPOSE_DOMACNOST | PURPOSE_ELEKTRONIKA | PURPOSE_REFINANCOVANI_PUJCEK
-        | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI | PURPOSE_ZDRAVI | OTHER)
+    r=(PURPOSE | OTHER)
     { $result = Purpose.findByCode($r.getText()); }
 ;
 
@@ -87,19 +84,9 @@ floatExpression returns [BigDecimal result] :
     }
 ;
 
-// shared strings
-KC        : 'Kč' ;
-DOT       : '.' ;
-DELIM     : '- ' ;
-UP_TO     : ' až ';
-IS        : 'je ';
-OR        : ' nebo ';
-OR_COMMA  : COMMA ' ';
-LESS_THAN : 'nedosahuje ';
-MORE_THAN : 'přesahuje ';
-OTHER     : 'jiné';
-
 // regions
+REGION   : (REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P
+            | REGION_S | REGION_T | REGION_U | REGION_Z);
 REGION_A : 'Praha';
 REGION_B : 'Jihomoravský';
 REGION_C : 'Jihočeský';
@@ -116,6 +103,7 @@ REGION_U : 'Ústecký';
 REGION_Z : 'Zlínský';
 
 // ratings
+RATING       : (RATING_AAAAA | RATING_AAAA | RATING_AAA | RATING_AA | RATING_A | RATING_B | RATING_C | RATING_D);
 RATING_AAAAA : 'A**';
 RATING_AAAA  : 'A*';
 RATING_AAA   : 'A++';
@@ -126,6 +114,9 @@ RATING_C     : 'C';
 RATING_D     : 'D';
 
 // main income types
+INCOME                      : (INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION
+                                | INCOME_MATERNITY_LEAVE | INCOME_STUDENT | INCOME_UNEMPLOYED
+                                | INCOME_LIBERAL_PROFESSION);
 INCOME_EMPLOYMENT           : 'zaměstnanec';
 INCOME_ENTREPRENEUR         : 'podnikatel';
 INCOME_LIBERAL_PROFESSION   : 'svobodné povolání';
@@ -136,6 +127,9 @@ INCOME_STUDENT              : 'student';
 INCOME_UNEMPLOYED           : 'bez zaměstnání';
 
 // loan purpose types
+PURPOSE                         : (PURPOSE_AUTO_MOTO | PURPOSE_CESTOVANI | PURPOSE_DOMACNOST | PURPOSE_ELEKTRONIKA
+                                    | PURPOSE_REFINANCOVANI_PUJCEK | PURPOSE_VLASTNI_PROJEKT | PURPOSE_VZDELANI
+                                    | PURPOSE_ZDRAVI);
 PURPOSE_AUTO_MOTO               : 'auto-moto';
 PURPOSE_CESTOVANI               : 'cestování';
 PURPOSE_DOMACNOST               : 'domácnost';
@@ -144,6 +138,18 @@ PURPOSE_REFINANCOVANI_PUJCEK    : 'refinancování půjček';
 PURPOSE_VLASTNI_PROJEKT         : 'vlastní projekt';
 PURPOSE_VZDELANI                : 'vzdělání';
 PURPOSE_ZDRAVI                  : 'zdraví';
+
+// shared strings
+KC        : 'Kč' ;
+DOT       : '.' ;
+DELIM     : '- ' ;
+UP_TO     : ' až ';
+IS        : 'je ';
+OR        : ' nebo ';
+OR_COMMA  : COMMA ' ';
+LESS_THAN : 'nedosahuje ';
+MORE_THAN : 'přesahuje ';
+OTHER     : 'jiné';
 
 // basic types
 INTEGER : DIGIT+ ;
