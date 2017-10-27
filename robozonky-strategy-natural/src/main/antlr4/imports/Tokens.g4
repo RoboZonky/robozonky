@@ -147,7 +147,7 @@ PURPOSE_VZDELANI                : 'vzdělání';
 PURPOSE_ZDRAVI                  : 'zdraví';
 
 // shared strings
-KC        : TABS 'Kč' ;
+KC        : ' Kč' ;
 DOT       : '.' ;
 DELIM     : '- ' ;
 UP_TO     : ' až ';
@@ -159,15 +159,13 @@ MORE_THAN : 'přesahuje ';
 OTHER     : 'jiné';
 
 // basic types
-TABS    : TAB+;
 INTEGER : DIGIT+;
 FLOAT   : DIGIT+ COMMA DIGIT+;
 
 // skip whitespace and comments
-COMMENT     : ('#' ~( '\r' | '\n' )*) -> skip;
-WHITESPACE  : ('\r'|'\n') -> skip;
+COMMENT     : '#' ~[\r\n]* NEWLINE -> skip ;
+NEWLINE     : ('\r'? '\n') -> skip;
 
-fragment TAB: (' ' | '\t');
 fragment DIGIT: [0-9];
 fragment COMMA: ',';
 
