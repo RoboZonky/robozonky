@@ -65,6 +65,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
 import com.icegreen.greenmail.junit.GreenMailRule;
+import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import freemarker.template.TemplateException;
 import org.assertj.core.api.Assertions;
@@ -81,19 +82,31 @@ import org.mockito.Mockito;
 public class EmailingListenerTest extends AbstractStateLeveragingTest {
 
     @Rule
-    public final GreenMailRule greenMail = new GreenMailRule(ServerSetupTest.SMTP);
+    public final GreenMailRule greenMail = new GreenMailRule(getServerSetup());
+
     @Rule
     public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
             RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
             NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
+
     private final EmailListenerService service = new EmailListenerService();
+
     @Parameterized.Parameter(1)
     public AbstractEmailingListener<Event> listener;
+
     @Parameterized.Parameter(2)
     public Event event;
     // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
+
     @Parameterized.Parameter
     public SupportedListener listenerType;
+
+    private static ServerSetup getServerSetup() {
+        final ServerSetup setup = ServerSetupTest.SMTP;
+        setup.setServerStartupTimeout(5000);
+        setup.setVerbose(true);
+        return setup;
+    }
 
     private static NotificationProperties getNotificationProperties() {
         System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
