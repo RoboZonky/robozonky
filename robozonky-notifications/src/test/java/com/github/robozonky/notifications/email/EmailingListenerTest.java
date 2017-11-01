@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.mail.internet.MimeMessage;
@@ -81,23 +83,19 @@ import org.mockito.Mockito;
 @RunWith(Parameterized.class)
 public class EmailingListenerTest extends AbstractStateLeveragingTest {
 
+    private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
     @Rule
     public final GreenMailRule greenMail = new GreenMailRule(getServerSetup());
-
     @Rule
     public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
             RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
             NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
-
     private final EmailListenerService service = new EmailListenerService();
-
     @Parameterized.Parameter(1)
     public AbstractEmailingListener<Event> listener;
-
+    // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
     @Parameterized.Parameter(2)
     public Event event;
-    // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
-
     @Parameterized.Parameter
     public SupportedListener listenerType;
 
@@ -238,6 +236,45 @@ public class EmailingListenerTest extends AbstractStateLeveragingTest {
     @Test
     public void reportingEnabledHaveListeners() {
         Assertions.assertThat(getListener(this.event.getClass()).getLatest()).isPresent();
+    }
+
+    @Test
+    public void spamProtectionAvailable() throws IOException {
+        final Properties props = new Properties();
+        props.load(NotificationPropertiesTest.class.getResourceAsStream("notifications-enabled.cfg"));
+        int sendCount = 1;
+        props.setProperty("hourlyMaxEmails", String.valueOf(sendCount)); // spam protection
+        final ListenerSpecificNotificationProperties p =
+                new ListenerSpecificNotificationProperties(SupportedListener.TESTING,
+                                                           new NotificationProperties(props));
+        final Consumer<RoboZonkyTestingEvent> c = Mockito.mock(Consumer.class);
+        final TestingEmailingListener l = new TestingEmailingListener(p);
+        l.registerFinisher(c);
+        Assertions.assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
+        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
+        Mockito.verify(c, Mockito.times(sendCount)).accept(ArgumentMatchers.any());
+        Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(sendCount);
+        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
+        // e-mail not re-sent, finisher not called again
+        Mockito.verify(c, Mockito.times(sendCount)).accept(ArgumentMatchers.any());
+        Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(sendCount);
+    }
+
+    private static final class TestingEmailingListener extends AbstractEmailingListener<RoboZonkyTestingEvent> {
+
+        public TestingEmailingListener(final ListenerSpecificNotificationProperties properties) {
+            super(properties);
+        }
+
+        @Override
+        String getSubject(final RoboZonkyTestingEvent event) {
+            return "No actual subject";
+        }
+
+        @Override
+        String getTemplateFileName() {
+            return "testing.ftl";
+        }
     }
 }
 
