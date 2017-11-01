@@ -28,7 +28,14 @@ abstract class AbstractRelativeRangeCondition extends MarketplaceFilterCondition
     private final Function<Wrapper, Number> sumAccessor, partAccessor;
     private final Number minInclusive, maxInclusive;
 
-    private BigDecimal getActualValue(final Number sum, final Number percentage) {
+    private void assertIsInRange(final Number percentage) {
+        final double num = Util.toBigDecimal(percentage).doubleValue();
+        if (num < 0 || num > 100) {
+            throw new IllegalArgumentException("Relative value must be in range of <0; 100> %, but was " + percentage);
+        }
+    }
+
+    private static BigDecimal getActualValue(final Number sum, final Number percentage) {
         final BigDecimal s = Util.toBigDecimal(sum);
         final BigDecimal p = Util.toBigDecimal(percentage);
         return s.multiply(p).scaleByPowerOfTen(-2);
@@ -37,6 +44,8 @@ abstract class AbstractRelativeRangeCondition extends MarketplaceFilterCondition
     protected AbstractRelativeRangeCondition(final Function<Wrapper, Number> sumAccessor,
                                              final Function<Wrapper, Number> partAccessor,
                                              final Number minValueInclusive, final Number maxValueInclusive) {
+        assertIsInRange(minValueInclusive);
+        assertIsInRange(maxValueInclusive);
         this.sumAccessor = sumAccessor;
         this.partAccessor = partAccessor;
         this.minInclusive = minValueInclusive;
