@@ -20,24 +20,61 @@ import java.util.Collections;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
+import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class UpdateMonitorTest {
 
+    private ClientAndServer server;
+    private String serverUrl;
+
+    @Before
+    public void startServer() {
+        server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
+        serverUrl = "http://127.0.0.1:" + server.getPort();
+    }
+
+    @After
+    public void stopServer() {
+        server.stop();
+    }
+
     @Test
     public void checkRetrieval() throws Exception {
-        final UpdateMonitor v = new UpdateMonitor("com.github.robozonky", "robozonky-app");
+        server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
+                .respond(HttpResponse.response().withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                                                                  "<metadata>\n" +
+                                                                  "  <groupId>com.github.robozonky</groupId>\n" +
+                                                                  "  <artifactId>robozonky</artifactId>\n" +
+                                                                  "  <versioning>\n" +
+                                                                  "    <latest>4.0.1</latest>\n" +
+                                                                  "    <release>4.0.1</release>\n" +
+                                                                  "    <versions>\n" +
+                                                                  "      <version>4.0.0-cr-1</version>\n" +
+                                                                  "      <version>4.0.0</version>\n" +
+                                                                  "      <version>4.0.1</version>\n" +
+                                                                  "    </versions>\n" +
+                                                                  "    <lastUpdated>20171015201449</lastUpdated>\n" +
+                                                                  "  </versioning>\n" +
+                                                                  "</metadata>"));
+        final UpdateMonitor v = new UpdateMonitor(serverUrl);
         v.run();
         Assertions.assertThat(v.getLatest()).isPresent();
     }
 
     @Test
     public void checkNonExistentUrl() throws Exception {
-        final UpdateMonitor v = new UpdateMonitor("com.github.robozonky", "robozonky-nonexistent");
+        server.when(HttpRequest.request()).respond(HttpResponse.notFoundResponse());
+        final UpdateMonitor v = new UpdateMonitor(serverUrl, "com.github.robozonky", "robozonky-nonexistent");
         v.run();
         Assertions.assertThat(v.getLatest()).isEmpty();
     }

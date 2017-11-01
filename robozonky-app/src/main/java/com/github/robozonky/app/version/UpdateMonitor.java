@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -52,7 +51,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Retrieve latest released version from Maven Central. By default will check
- * https://repo1.maven.org/maven2/com/github/triceo/robozonky/robozonky/maven-metadata.xml.
+ * https://repo1.maven.org/maven2/com/github/robozonky/robozonky/maven-metadata.xml.
  */
 public class UpdateMonitor extends Refreshable<VersionIdentifier> {
 
@@ -61,20 +60,41 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
     private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
     private static final Pattern PATTERN_STABLE_VERSION = Pattern.compile("\\A[1-9][0-9]*\\.[0-9]+\\.[0-9]+\\z");
 
+    private final String groupId, artifactId, mavenCentralHostname;
+
+    UpdateMonitor(final String server) {
+        this(server, "com.github.robozonky", "robozonky"); // RoboZonky's parent POM
+    }
+
+    UpdateMonitor(final String server, final String groupId, final String artifactId) {
+        this.mavenCentralHostname = server;
+        this.groupId = groupId;
+        this.artifactId = artifactId;
+        this.registerListener(new UpdateNotification());
+    }
+
+    public UpdateMonitor() {
+        this("https://repo1.maven.org");
+    }
+
     /**
      * Assemble the Maven Central metadata URL from the given groupId and artifactId.
      * @param groupId Group ID in question.
      * @param artifactId Artifact ID in question.
+     * @param hostname Maven Central hostname, such as "https://repo1.maven.org"
      * @return Stream to read the Maven Central metadata from.
      * @throws IOException Network communications failure.
      */
-    private static InputStream getMavenCentralData(final String groupId, final String artifactId) throws IOException {
-        final StringJoiner joiner = new StringJoiner(UpdateMonitor.URL_SEPARATOR);
-        joiner.add("https://repo1.maven.org/maven2");
-        joiner.add(Arrays.stream(UpdateMonitor.PATTERN_DOT.split(groupId))
-                           .collect(Collectors.joining(UpdateMonitor.URL_SEPARATOR)));
-        joiner.add(artifactId);
-        joiner.add("maven-metadata.xml");
+    private static InputStream getMavenCentralData(final String groupId, final String artifactId,
+                                                   final String hostname) throws IOException {
+        final StringJoiner joiner = new StringJoiner(UpdateMonitor.URL_SEPARATOR)
+                .add(hostname)
+                .add("maven2");
+        for (final String pkg : UpdateMonitor.PATTERN_DOT.split(groupId)) {
+            joiner.add(pkg);
+        }
+        joiner.add(artifactId)
+                .add("maven-metadata.xml");
         return new URL(joiner.toString()).openStream();
     }
 
@@ -125,29 +145,16 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
         return UpdateMonitor.parseNodeList((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
     }
 
-    private final String groupId, artifactId;
-
-    // for testing purposes only
-    UpdateMonitor(final String groupId, final String artifactId) {
-        this.groupId = groupId;
-        this.artifactId = artifactId;
-    }
-
-    public UpdateMonitor() {
-        this("com.github.robozonky", "robozonky"); // RoboZonky's parent POM
-        this.registerListener(new UpdateNotification());
-    }
-
     @Override
     protected Supplier<Optional<String>> getLatestSource() {
         return () -> {
-            try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId)) {
-                final String result = IOUtils.toString(s, Defaults.CHARSET);
-                return Optional.of(result);
+            try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                         this.mavenCentralHostname)) {
+                return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
             } catch (final Throwable ex) {
                 /*
-                 * Java 9 occasionally and unpredictably throws "j.l.NCDFE: Could not initialize class
-                 * sun.security.ssl.SSLContextImpl$DefaultSSLContext"
+                 * Java 9 on Travis occasionally and unpredictably throws "j.l.NCDFE: Could not initialize class
+                 * sun.security.ssl.SSLContextImpl$DefaultSSLContext" when communicating over HTTPS
                  */
                 UpdateMonitor.LOGGER.debug("Failed reading source.", ex);
                 return Optional.empty();
