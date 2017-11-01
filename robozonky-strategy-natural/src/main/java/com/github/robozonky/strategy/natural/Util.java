@@ -31,7 +31,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class Util {
+public class Util {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
@@ -71,4 +71,9 @@ class Util {
         }
         return true;
     }
+
+    public static BigDecimal toBigDecimal(final Number num) {
+        return new BigDecimal(num.toString());
+    }
+
 }

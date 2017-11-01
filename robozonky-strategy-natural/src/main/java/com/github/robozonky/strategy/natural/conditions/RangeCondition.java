@@ -19,11 +19,9 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.math.BigDecimal;
 import java.util.function.Function;
 
-public class RangeCondition<T> implements Condition<T> {
+import com.github.robozonky.strategy.natural.Util;
 
-    private static BigDecimal toBigDecimal(final Number num) {
-        return BigDecimal.valueOf(num.doubleValue());
-    }
+public class RangeCondition<T> implements Condition<T> {
 
     private final Function<T, Number> targetAccessor;
     private final BigDecimal minInclusive, maxInclusive;
@@ -31,8 +29,8 @@ public class RangeCondition<T> implements Condition<T> {
     public RangeCondition(final Function<T, Number> targetAccessor, final Number minValueInclusive,
                           final Number maxValueInclusive) {
         this.targetAccessor = targetAccessor;
-        final BigDecimal min = toBigDecimal(minValueInclusive);
-        final BigDecimal max = toBigDecimal(maxValueInclusive);
+        final BigDecimal min = Util.toBigDecimal(minValueInclusive);
+        final BigDecimal max = Util.toBigDecimal(maxValueInclusive);
         this.minInclusive = min.min(max);
         this.maxInclusive = min.max(max);
     }
@@ -47,7 +45,7 @@ public class RangeCondition<T> implements Condition<T> {
 
     @Override
     public boolean test(final T item) {
-        final BigDecimal target = toBigDecimal(targetAccessor.apply(item));
+        final BigDecimal target = Util.toBigDecimal(targetAccessor.apply(item));
         return target.compareTo(minInclusive) >= 0 && target.compareTo(maxInclusive) <= 0;
     }
 }
