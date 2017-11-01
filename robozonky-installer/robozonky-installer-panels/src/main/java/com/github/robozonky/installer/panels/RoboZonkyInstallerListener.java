@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -230,10 +229,15 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             commandLine.setJvmArgument("XX:+UseG1GC");
         }
         final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
-        final Function<CommandLinePart, File> generator = isWindows ?
+        final RunScriptGenerator generator = isWindows ?
                 RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
                 : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
-        generator.apply(commandLine);
+        final File runScript = generator.apply(commandLine);
+        final File distRunScript = generator.getChildRunScript();
+        Stream.of(runScript, distRunScript).forEach(script -> {
+            LOGGER.info("Making executable: " + script);
+            script.setExecutable(true);
+        });
     }
 
     CommandLinePart prepareLogging() {

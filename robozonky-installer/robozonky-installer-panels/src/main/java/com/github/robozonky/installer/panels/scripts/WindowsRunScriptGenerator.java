@@ -35,7 +35,7 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
     }
 
     @Override
-    protected File getRunScript(final File parentFolder) {
-        return new File(parentFolder, "run.bat");
+    public File getChildRunScript() {
+        return new File(this.getRootFolder(), "run.bat");
     }
 }

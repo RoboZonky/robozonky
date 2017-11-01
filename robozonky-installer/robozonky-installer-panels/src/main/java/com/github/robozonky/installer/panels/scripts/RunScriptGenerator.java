@@ -37,11 +37,11 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
         this.distributionDirectory = distributionDirectory;
     }
 
-    public static Function<CommandLinePart, File> forWindows(final File distributionDirectory, final File configFile) {
+    public static RunScriptGenerator forWindows(final File distributionDirectory, final File configFile) {
         return new WindowsRunScriptGenerator(distributionDirectory, configFile);
     }
 
-    public static Function<CommandLinePart, File> forUnix(final File distributionDirectory, final File configFile) {
+    public static RunScriptGenerator forUnix(final File distributionDirectory, final File configFile) {
         return new UnixRunScriptGenerator(distributionDirectory, configFile);
     }
 
@@ -53,7 +53,11 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
         return Stream.concat(jvmArgs, properties).collect(Collectors.joining(" "));
     }
 
-    protected abstract File getRunScript(final File parentFolder);
+    protected File getRootFolder() {
+        return this.configFile.getParentFile();
+    }
+
+    public abstract File getChildRunScript();
 
     protected File process(final CommandLinePart commandLine, final String templateName,
                            final Function<String, String> finisher) {
@@ -64,9 +68,8 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
                 this.put("javaOpts", assembleJavaOpts(commandLine));
                 this.put("envVars", commandLine.getEnvironmentVariables());
             }});
-            final File target = this.getRunScript(configFile.getParentFile());
+            final File target = this.getChildRunScript();
             Files.write(target.toPath(), finisher.apply(result).getBytes(Defaults.CHARSET));
-            target.setExecutable(true);
             return target;
         } catch (final IOException | TemplateException e) {
             throw new IllegalStateException("Failed creating run script.", e);
