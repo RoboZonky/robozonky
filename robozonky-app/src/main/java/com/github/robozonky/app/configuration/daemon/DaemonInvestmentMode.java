@@ -65,12 +65,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.marketplace = marketplace;
         this.periodBetweenChecks = periodBetweenChecks;
         final boolean dryRun = builder.isDryRun();
-        Portfolio.INSTANCE.registerUpdater(new Selling(RefreshableSellStrategy.create(strategyLocaion), dryRun));
-        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder,
-                                                         marketplace,
-                                                         RefreshableInvestmentStrategy.create(strategyLocaion),
+        Portfolio.INSTANCE.registerUpdater(new Selling(new RefreshableSellStrategy(strategyLocaion), dryRun));
+        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace,
+                                                         new RefreshableInvestmentStrategy(strategyLocaion),
                                                          maximumSleepPeriod),
-                                     new PurchasingDaemon(auth, RefreshablePurchaseStrategy.create(strategyLocaion),
+                                     new PurchasingDaemon(auth, new RefreshablePurchaseStrategy(strategyLocaion),
                                                           maximumSleepPeriod, dryRun));
     }
 

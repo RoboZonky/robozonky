@@ -16,24 +16,14 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.net.URL;
 import java.util.Optional;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.common.extensions.StrategyLoader;
-import com.github.robozonky.util.Scheduler;
 
 final class RefreshableInvestmentStrategy extends RefreshableStrategy<InvestmentStrategy> {
 
-    public static Refreshable<InvestmentStrategy> create(final String maybeUrl) {
-        final Refreshable<InvestmentStrategy> result =
-                new RefreshableInvestmentStrategy(convertToUrl(maybeUrl));
-        Scheduler.BACKGROUND_SCHEDULER.submit(result);
-        return result;
-    }
-
-    private RefreshableInvestmentStrategy(final URL target) {
+    public RefreshableInvestmentStrategy(final String target) {
         super(target);
     }
 

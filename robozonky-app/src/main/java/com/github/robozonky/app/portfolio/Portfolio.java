@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -53,10 +52,13 @@ public enum Portfolio {
 
     INSTANCE;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final AtomicReference<List<Investment>> investments = new AtomicReference<>(Collections.emptyList()),
             investmentsPending = new AtomicReference<>(Collections.emptyList());
     private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>(initSortedMap());
+    /**
+     * Never iterate over directly, always use {@link #getUpdaters()}.
+     */
     private final Set<Consumer<Zonky>> updaters = new CopyOnWriteArraySet<>();
     private final AtomicBoolean ranOnce = new AtomicBoolean(false), isUpdating = new AtomicBoolean(false);
 
@@ -67,6 +69,16 @@ public enum Portfolio {
     private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
         final Loan l = getLoan(zonky, blockedAmount.getLoanId());
         return new Investment(l, blockedAmount.getAmount().intValue());
+    }
+
+    private Stream<Consumer<Zonky>> getUpdaters() {
+        /*
+         * core updaters to get the full picture. checks for blocked amounts immediately after every update of the
+         * portfolio, also checks for delinquencies.
+         */
+        final Stream<Consumer<Zonky>> core = Stream.of(BlockedAmounts.INSTANCE, Delinquents.INSTANCE);
+        final Stream<Consumer<Zonky>> external = updaters.stream();
+        return Stream.concat(core, external);
     }
 
     public void registerUpdater(final Consumer<Zonky> updater) {
@@ -84,9 +96,7 @@ public enum Portfolio {
                 loanCache.set(initSortedMap());
                 // read all investments from Zonky
                 investments.set(zonky.getInvestments().collect(Collectors.toList()));
-                // and make updates based on which have been recently made or sold
-                newBlockedAmounts(zonky, new TreeSet<>(zonky.getBlockedAmounts().collect(Collectors.toSet())));
-                updaters.forEach((u) -> {
+                getUpdaters().forEach((u) -> {
                     LOGGER.trace("Running dependent: {}.", u);
                     u.accept(zonky);
                 });
@@ -101,9 +111,7 @@ public enum Portfolio {
     }
 
     public void newBlockedAmounts(final Zonky zonky, final SortedSet<BlockedAmount> blockedAmounts) {
-        for (final BlockedAmount ba : blockedAmounts) { // need to "replay" operations as they come in
-            newBlockedAmount(zonky, ba);
-        }
+        blockedAmounts.forEach(ba -> newBlockedAmount(zonky, ba));
     }
 
     public void newBlockedAmount(final Zonky zonky, final BlockedAmount blockedAmount) {

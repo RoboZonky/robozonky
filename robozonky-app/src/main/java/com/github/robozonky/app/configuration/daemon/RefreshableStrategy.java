@@ -26,9 +26,21 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.Scheduler;
 import org.apache.commons.io.IOUtils;
 
 abstract class RefreshableStrategy<T> extends Refreshable<T> {
+
+    private final URL url;
+
+    protected RefreshableStrategy(final String target) {
+        this(convertToUrl(target));
+    }
+
+    private RefreshableStrategy(final URL target) {
+        this.url = target;
+        Scheduler.inBackground().submit(this);
+    }
 
     protected static URL convertToUrl(final String maybeUrl) {
         try {
@@ -40,12 +52,6 @@ abstract class RefreshableStrategy<T> extends Refreshable<T> {
                 throw new IllegalStateException("Cannot load strategy " + maybeUrl, e1);
             }
         }
-    }
-
-    private final URL url;
-
-    protected RefreshableStrategy(final URL target) {
-        this.url = target;
     }
 
     @Override

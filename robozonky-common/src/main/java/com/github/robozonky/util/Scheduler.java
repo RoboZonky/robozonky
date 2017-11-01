@@ -16,6 +16,7 @@
 
 package com.github.robozonky.util;
 
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashSet;
@@ -27,23 +28,30 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import com.github.robozonky.internal.api.Settings;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Scheduler {
 
+    private static final LazyInitializer<Scheduler> BACKGROUND_SCHEDULER = new LazyInitializer<Scheduler>() {
+        @Override
+        protected Scheduler initialize() throws ConcurrentException {
+            /*
+             * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks
+             * will have finished on the executor and if some of them are long-running, this will hurt robot's startup
+             * time.
+             */
+            return new Scheduler(2);
+        }
+    };
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
     private static final TemporalAmount REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
-    /*
-     * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks will
-     * have finished on the executor and if some of them are long-running, this will hurt robot's startup time.
-     */
-    public static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(2);
-
     private final Supplier<ScheduledExecutorService> executorProvider;
-    private ScheduledExecutorService executor;
     private final Set<Runnable> submitted = new LinkedHashSet<>();
+    private ScheduledExecutorService executor;
 
     public Scheduler() {
         this(1);
@@ -54,15 +62,30 @@ public class Scheduler {
         this.executor = executorProvider.get();
     }
 
+    public static Scheduler inBackground() {
+        try {
+            return BACKGROUND_SCHEDULER.get();
+        } catch (final ConcurrentException ex) {
+            throw new IllegalStateException("Should not happen.", ex);
+        }
+    }
+
     public void submit(final Runnable toSchedule) {
         this.submit(toSchedule, Scheduler.REFRESH);
     }
 
     public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
+        submit(toSchedule, delayInBetween, Duration.ZERO);
+    }
+
+    public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween,
+                       final TemporalAmount firstDelay) {
+        final long firstDelayInSeconds = firstDelay.get(ChronoUnit.SECONDS);
         final long delayInSeconds = delayInBetween.get(ChronoUnit.SECONDS);
-        Scheduler.LOGGER.debug("Scheduling {} every {} seconds.", toSchedule, delayInSeconds);
+        Scheduler.LOGGER.debug("Scheduling {} every {} seconds, starting in {} seconds.", toSchedule, delayInSeconds,
+                               firstDelayInSeconds);
         this.submitted.add(toSchedule);
-        executor.scheduleWithFixedDelay(toSchedule, 0, delayInSeconds, TimeUnit.SECONDS);
+        executor.scheduleWithFixedDelay(toSchedule, firstDelayInSeconds, delayInSeconds, TimeUnit.SECONDS);
     }
 
     public boolean isSubmitted(final Runnable refreshable) {

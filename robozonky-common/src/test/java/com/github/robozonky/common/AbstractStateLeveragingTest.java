@@ -30,7 +30,7 @@ public abstract class AbstractStateLeveragingTest {
 
     @After
     public void reinitScheduler() {
-        Scheduler.BACKGROUND_SCHEDULER.reinit();
+        Scheduler.inBackground().reinit();
     }
 
     @After

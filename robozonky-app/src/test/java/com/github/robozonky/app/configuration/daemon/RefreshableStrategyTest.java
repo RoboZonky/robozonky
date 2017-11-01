@@ -39,26 +39,26 @@ public class RefreshableStrategyTest {
     @Test
     public void loadStrategyAsFile() throws InterruptedException, IOException {
         final Refreshable<InvestmentStrategy> r =
-                RefreshableInvestmentStrategy.create(newStrategyFile().getAbsolutePath());
+                new RefreshableInvestmentStrategy(newStrategyFile().getAbsolutePath());
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
     public void loadStrategyAsUrl() throws IOException, InterruptedException {
         final String url = newStrategyFile().toURI().toURL().toString();
-        final Refreshable<InvestmentStrategy> r = RefreshableInvestmentStrategy.create(url);
+        final Refreshable<InvestmentStrategy> r = new RefreshableInvestmentStrategy(url);
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
     public void loadPurchaseStrategy() throws IOException {
-        final Refreshable<PurchaseStrategy> r = RefreshablePurchaseStrategy.create(newStrategyFile().getAbsolutePath());
+        final Refreshable<PurchaseStrategy> r = new RefreshablePurchaseStrategy(newStrategyFile().getAbsolutePath());
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 
     @Test
     public void loadSellStrategy() throws IOException {
-        final Refreshable<SellStrategy> r = RefreshableSellStrategy.create(newStrategyFile().getAbsolutePath());
+        final Refreshable<SellStrategy> r = new RefreshableSellStrategy(newStrategyFile().getAbsolutePath());
         Assertions.assertThat(r.getLatest()).isPresent();
     }
 }

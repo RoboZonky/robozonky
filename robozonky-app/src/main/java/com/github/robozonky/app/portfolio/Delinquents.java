@@ -53,6 +53,10 @@ public class Delinquents implements Consumer<Zonky> {
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
 
+    private Delinquents() {
+        // singleton
+    }
+
     private static String toString(final Delinquency d) {
         return d.getFixedOn()
                 .map(fixedOn -> d.getPaymentMissedDate() + TIME_SEPARATOR + fixedOn)

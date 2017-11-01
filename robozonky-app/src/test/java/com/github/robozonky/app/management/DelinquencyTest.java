@@ -24,7 +24,7 @@ import com.github.robozonky.app.portfolio.Delinquent;
 import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -35,12 +35,13 @@ public class DelinquencyTest extends AbstractStateLeveragingTest {
     @Test
     public void empty() {
         final Delinquency d = new Delinquency();
-        Assertions.assertThat(d.getLatestUpdatedDateTime()).isEqualTo(EPOCH);
-        Assertions.assertThat(d.getAll()).isEmpty();
-        Assertions.assertThat(d.get10Plus()).isEmpty();
-        Assertions.assertThat(d.get30Plus()).isEmpty();
-        Assertions.assertThat(d.get60Plus()).isEmpty();
-        Assertions.assertThat(d.get90Plus()).isEmpty();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(d.getAll()).isEmpty();
+            softly.assertThat(d.get10Plus()).isEmpty();
+            softly.assertThat(d.get30Plus()).isEmpty();
+            softly.assertThat(d.get60Plus()).isEmpty();
+            softly.assertThat(d.get90Plus()).isEmpty();
+        });
     }
 
     @Test
@@ -50,12 +51,15 @@ public class DelinquencyTest extends AbstractStateLeveragingTest {
         Mockito.when(mock.getLastUpdateTimestamp()).thenReturn(OffsetDateTime.now());
         Mockito.when(mock.getDelinquents()).thenReturn(Collections.singletonList(delinquent));
         final Delinquency d = new Delinquency(mock);
-        Assertions.assertThat(d.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
-        Assertions.assertThat(d.getAll()).containsOnlyKeys(delinquent.getLoanId());
-        Assertions.assertThat(d.get10Plus()).containsOnlyKeys(delinquent.getLoanId());
-        Assertions.assertThat(d.get30Plus()).containsOnlyKeys(delinquent.getLoanId());
-        Assertions.assertThat(d.get60Plus()).containsOnlyKeys(delinquent.getLoanId());
-        Assertions.assertThat(d.get90Plus()).containsOnlyKeys(delinquent.getLoanId());
+        final int loanId = delinquent.getLoanId();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(d.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
+            softly.assertThat(d.getAll()).containsOnlyKeys(loanId);
+            softly.assertThat(d.get10Plus()).containsOnlyKeys(loanId);
+            softly.assertThat(d.get30Plus()).containsOnlyKeys(loanId);
+            softly.assertThat(d.get60Plus()).containsOnlyKeys(loanId);
+            softly.assertThat(d.get90Plus()).containsOnlyKeys(loanId);
+        });
     }
 }
 

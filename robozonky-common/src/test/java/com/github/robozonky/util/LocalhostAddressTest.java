@@ -23,7 +23,7 @@ public class LocalhostAddressTest {
 
     @Test
     public void isSubmitted() {
-        Assertions.assertThat(Scheduler.BACKGROUND_SCHEDULER.isSubmitted(LocalhostAddress.INSTANCE)).isTrue();
+        Assertions.assertThat(Scheduler.inBackground().isSubmitted(LocalhostAddress.INSTANCE)).isTrue();
     }
 
     @Test

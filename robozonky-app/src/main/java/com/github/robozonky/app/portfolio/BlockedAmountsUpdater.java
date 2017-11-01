@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
 
-public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
+class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 
     private final Authenticated authenticated;
 
@@ -39,7 +39,7 @@ public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        authenticated.run(BlockedAmounts.INSTANCE::update);
+        authenticated.run(BlockedAmounts.INSTANCE);
         return Optional.of(OffsetDateTime.now());
     }
 }

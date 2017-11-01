@@ -46,7 +46,7 @@ class TokenBasedAccess implements Authenticated {
         this.refreshableToken = new RefreshableZonkyApiToken(apis, secrets);
         final long refreshSeconds = Math.max(60, refreshAfter.get(ChronoUnit.SECONDS) - 60);
         final TemporalAmount refresh = Duration.ofSeconds(refreshSeconds);
-        Scheduler.BACKGROUND_SCHEDULER.submit(refreshableToken, refresh);
+        Scheduler.inBackground().submit(refreshableToken, refresh);
         this.emergencyTokenRefresh = Duration.ofSeconds(Math.max(1, refreshSeconds / 5));
     }
 

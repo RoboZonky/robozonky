@@ -34,7 +34,7 @@ public class LocalhostAddress extends Refreshable<String> {
     private static final String CHECKIP_URL = "http://checkip.amazonaws.com";
 
     private LocalhostAddress() { // don't allow externally managed instances
-        Scheduler.BACKGROUND_SCHEDULER.submit(this);
+        Scheduler.inBackground().submit(this);
     }
 
     @Override
