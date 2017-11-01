@@ -95,4 +95,5 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c5=storyCondition { $result = $c5.result; }
     | c6=termCondition { $result = $c6.result; }
     | c8=interestCondition { $result = $c8.result; }
+    | c9=relativeTermCondition { $result = $c9.result; }
 ;

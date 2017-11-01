@@ -54,8 +54,9 @@ Ignorovat úvěr, kde: výše je   100000 až  150000 Kč.
 Ignorovat úvěr, kde: výše přesahuje       200000 Kč.
 
 Ignorovat úvěr, kde:          rating je horší než A+; úrok nedosahuje 5,0 % p.a.; klient je bez zaměstnání nebo důchodce.
-Ignorovat participaci, kde:   délka přesahuje 36 měsíců.
-Ignorovat vše, kde:           délka přesahuje 36 měsíců.
+Ignorovat participaci, kde:   délka přesahuje   36 měsíců.
+Ignorovat participaci, kde:   délka přesahuje   20 % původní délky.
+Ignorovat vše, kde:           délka přesahuje   36 měsíců.
 
 
 - Prodej participací
