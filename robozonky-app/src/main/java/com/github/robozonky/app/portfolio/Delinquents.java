@@ -107,15 +107,10 @@ public class Delinquents implements Consumer<Zonky> {
         final Collection<Delinquent> knownDelinquents = this.getDelinquents();
         knownDelinquents.stream()
                 .filter(Delinquent::hasActiveDelinquency) // only care about present delinquents
-                .peek(d -> System.out.println(d))
                 .filter(d -> presentlyDelinquent.stream().noneMatch(i -> related(d, i)))
-                .peek(d -> System.out.println(d))
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
-                .peek(d -> System.out.println(d))
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
-                .peek(d -> System.out.println(d))
                 .map(Delinquency::getParent)
-                .peek(d -> System.out.println(d))
                 .forEach(d -> {  // notify
                     final Loan loan = d.getLoan(zonky);
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
