@@ -31,7 +31,7 @@ class PasswordBasedAccess implements Authenticated {
 
     static ZonkyApiToken trigger(final ApiProvider apis, final String username, final char... password) {
         return apis.oauth((oauth) -> {
-            LOGGER.info("Authenticating as '{}', using password.", username);
+            LOGGER.trace("Authenticating as '{}', using password.", username);
             return oauth.login(username, password);
         });
     }
@@ -51,7 +51,7 @@ class PasswordBasedAccess implements Authenticated {
             try {
                 return op.apply(zonky);
             } finally { // attempt to log out no matter what happens
-                LOGGER.info("Logging out.");
+                LOGGER.trace("Logging out.");
                 zonky.logout();
             }
         });

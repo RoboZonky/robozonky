@@ -28,12 +28,17 @@ import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.util.Scheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class TokenBasedAccess implements Authenticated {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
 
     private final Refreshable<ZonkyApiToken> refreshableToken;
     private final SecretProvider secrets;
     private final ApiProvider apis;
+    private final TemporalAmount emergencyTokenRefresh;
 
     TokenBasedAccess(final ApiProvider apis, final SecretProvider secrets, final TemporalAmount refreshAfter) {
         this.apis = apis;
@@ -42,16 +47,32 @@ class TokenBasedAccess implements Authenticated {
         final long refreshSeconds = Math.max(60, refreshAfter.get(ChronoUnit.SECONDS) - 60);
         final TemporalAmount refresh = Duration.ofSeconds(refreshSeconds);
         Scheduler.BACKGROUND_SCHEDULER.submit(refreshableToken, refresh);
+        this.emergencyTokenRefresh = Duration.ofSeconds(Math.max(1, refreshSeconds / 5));
     }
 
     Refreshable<ZonkyApiToken> getRefreshableToken() {
         return refreshableToken;
     }
 
+    private ZonkyApiToken getToken() {
+        return refreshableToken.getLatest()
+                .orElseThrow(() -> new ServiceUnavailableException("No API token available, authentication failed."));
+    }
+
+    private ZonkyApiToken getFreshToken() {
+        final ZonkyApiToken token = getToken();
+        if (token.willExpireIn(emergencyTokenRefresh)) {
+            LOGGER.debug("Emergency refresh to prevent token from going stale on {}.", token.getExpiresOn());
+            refreshableToken.run();
+            return getToken();
+        } else {
+            return token;
+        }
+    }
+
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
-        final ZonkyApiToken token = refreshableToken.getLatest()
-                .orElseThrow(() -> new ServiceUnavailableException("No API token available, authentication failed."));
+        final ZonkyApiToken token = getFreshToken();
         return refreshableToken.pauseFor((r) -> apis.authenticated(token, operation));
     }
 
