@@ -47,8 +47,8 @@ secondaryMarketplaceFilter returns [MarketplaceFilter result]:
 
 jointMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
     { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
-    (c1=primaryMarketplaceFilterCondition { result.add($c1.result); } '; ')*
-    c2=primaryMarketplaceFilterCondition { result.add($c2.result); } DOT
+    (c1=jointMarketplaceFilterCondition { result.add($c1.result); } '; ')*
+    c2=jointMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
