@@ -76,6 +76,29 @@ termConditionRangeClosedRight returns [LoanTermCondition result]:
     { $result = new LoanTermCondition(0, $max.result - 1); }
 ;
 
+relativeTermCondition returns [RelativeLoanTermCondition result]:
+    'délka ' (
+        (c1 = relativeTermConditionRangeOpen { $result = $c1.result; })
+        | (c2 = relativeTermConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = relativeTermConditionRangeClosedRight { $result = $c3.result; })
+    ) ' % původní délky'
+;
+
+relativeTermConditionRangeOpen returns [RelativeLoanTermCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = new RelativeLoanTermCondition($min.result, $max.result); }
+;
+
+relativeTermConditionRangeClosedLeft returns [RelativeLoanTermCondition result]:
+    MORE_THAN min=intExpr
+    { $result = new RelativeLoanTermCondition($min.result + 1); }
+;
+
+relativeTermConditionRangeClosedRight returns [RelativeLoanTermCondition result]:
+    LESS_THAN max=intExpr
+    { $result = new RelativeLoanTermCondition(0, $max.result - 1); }
+;
+
 interestCondition returns [LoanInterestRateCondition result]:
     'úrok ' (
         (c1 = interestConditionRangeOpen { $result = $c1.result; })
