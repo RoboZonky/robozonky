@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,7 +73,11 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
                 .map(l -> { // recommend amount to invest per strategy
                     final int recommendedAmount = recommender.apply(l.item(), balance);
-                    return l.recommend(recommendedAmount, needsConfirmation(l));
+                    if (recommendedAmount > 0) {
+                        return l.recommend(recommendedAmount, needsConfirmation(l));
+                    } else {
+                        return Optional.<RecommendedLoan>empty();
+                    }
                 }).flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));
     }
 }
