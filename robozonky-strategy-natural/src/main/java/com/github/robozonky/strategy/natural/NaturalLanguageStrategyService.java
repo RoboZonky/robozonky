@@ -17,8 +17,6 @@
 package com.github.robozonky.strategy.natural;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -71,12 +69,6 @@ public class NaturalLanguageStrategyService implements StrategyService {
             return Optional.of(CACHE.get(strategy));
         } else {
             return Optional.empty();
-        }
-    }
-
-    synchronized static ParsedStrategy parseWithAntlr(final File strategy) throws IOException {
-        try (final InputStream s = new FileInputStream(strategy)) {
-            return NaturalLanguageStrategyService.parseWithAntlr(s);
         }
     }
 
