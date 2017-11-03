@@ -74,16 +74,28 @@ public class RoboZonkyFilter implements ClientRequestFilter,
         this.logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 
+    private String getResponseEntity(final ClientResponseContext clientResponseContext) throws IOException {
+        if (shouldLogEntity(clientResponseContext)) {
+            final InterceptingInputStream s = new InterceptingInputStream(clientResponseContext.getEntityStream());
+            clientResponseContext.setEntityStream(s);
+            logger.debug("Response body is: {}", s.getContents());
+            return s.getContents();
+        } else {
+            return "";
+        }
+    }
+
     @Override
     public void filter(final ClientRequestContext clientRequestContext,
                        final ClientResponseContext clientResponseContext) throws IOException {
         this.logger.debug("HTTP {} Response from {}: {} {}.", clientRequestContext.getMethod(),
                           clientRequestContext.getUri(), clientResponseContext.getStatus(),
                           clientResponseContext.getStatusInfo().getReasonPhrase());
-        if (shouldLogEntity(clientResponseContext)) {
-            final InterceptingInputStream s = new InterceptingInputStream(clientResponseContext.getEntityStream());
-            clientResponseContext.setEntityStream(s);
-            logger.debug("Response body is: {}", s.getContents());
+        final String responseEntity = getResponseEntity(clientResponseContext);
+        if (clientResponseContext.getStatus() == 400) {
+            if (responseEntity.contains("invalid_token")) { // Zonky is dumb and throws 400 when it should throw 401
+                clientResponseContext.setStatus(401);
+            }
         }
         responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
                 .filter(e -> e.getValue().size() > 0)

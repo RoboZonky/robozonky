@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -90,6 +91,7 @@ public class PortfolioTest {
     private static final Investment mock(final PaymentStatus paymentStatus) {
         final Investment i = mock(true, false);
         Mockito.when(i.getPaymentStatus()).thenReturn(paymentStatus);
+        Mockito.when(i.getNextPaymentDate()).thenReturn(OffsetDateTime.now());
         return i;
     }
 

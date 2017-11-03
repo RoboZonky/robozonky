@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.function.Function;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.robozonky.api.Refreshable;
@@ -34,11 +35,10 @@ import org.slf4j.LoggerFactory;
 class TokenBasedAccess implements Authenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
-
+    private static final TemporalAmount EMERGENCY_REFRESH_INTERVAL = Duration.ofSeconds(5);
     private final Refreshable<ZonkyApiToken> refreshableToken;
     private final SecretProvider secrets;
     private final ApiProvider apis;
-    private final TemporalAmount emergencyTokenRefresh;
 
     TokenBasedAccess(final ApiProvider apis, final SecretProvider secrets, final TemporalAmount refreshAfter) {
         this.apis = apis;
@@ -47,7 +47,6 @@ class TokenBasedAccess implements Authenticated {
         final long refreshSeconds = Math.max(60, refreshAfter.get(ChronoUnit.SECONDS) - 60);
         final TemporalAmount refresh = Duration.ofSeconds(refreshSeconds);
         Scheduler.inBackground().submit(refreshableToken, refresh);
-        this.emergencyTokenRefresh = Duration.ofSeconds(Math.max(1, refreshSeconds / 5));
     }
 
     Refreshable<ZonkyApiToken> getRefreshableToken() {
@@ -61,7 +60,7 @@ class TokenBasedAccess implements Authenticated {
 
     private ZonkyApiToken getFreshToken() {
         final ZonkyApiToken token = getToken();
-        if (token.willExpireIn(emergencyTokenRefresh)) {
+        if (token.willExpireIn(EMERGENCY_REFRESH_INTERVAL)) {
             LOGGER.debug("Emergency refresh to prevent token from going stale on {}.", token.getExpiresOn());
             refreshableToken.run();
             return getToken();
@@ -72,8 +71,21 @@ class TokenBasedAccess implements Authenticated {
 
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
-        final ZonkyApiToken token = getFreshToken();
-        return refreshableToken.pauseFor((r) -> apis.authenticated(token, operation));
+        return call(operation, 1);
+    }
+
+    public <T> T call(final Function<Zonky, T> operation, final int attemptNo) {
+        try {
+            final ZonkyApiToken token = getFreshToken();
+            return refreshableToken.pauseFor((r) -> apis.authenticated(token, operation));
+        } catch (final NotAuthorizedException ex) {
+            if (attemptNo >= 3) {
+                throw new IllegalStateException("There was a severe authorization problem.", ex);
+            } else {
+                LOGGER.debug("Request failed due to expired token, will retry #" + attemptNo, ex);
+                return call(operation, attemptNo + 1);
+            }
+        }
     }
 
     @Override

@@ -18,18 +18,19 @@ package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,7 +44,6 @@ import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.util.ApiUtil;
-import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,17 +53,30 @@ public enum Portfolio {
     INSTANCE;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
-    private final AtomicReference<List<Investment>> investments = new AtomicReference<>(Collections.emptyList()),
-            investmentsPending = new AtomicReference<>(Collections.emptyList());
-    private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>(initSortedMap());
+    private final AtomicReference<Collection<Investment>> investments = new AtomicReference<>(),
+            investmentsPending = new AtomicReference<>();
+    private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>();
     /**
      * Never iterate over directly, always use {@link #getUpdaters()}.
      */
     private final Set<Consumer<Zonky>> updaters = new CopyOnWriteArraySet<>();
     private final AtomicBoolean ranOnce = new AtomicBoolean(false), isUpdating = new AtomicBoolean(false);
 
-    private static <R, S> SortedMap<R, S> initSortedMap() {
-        return new ConcurrentSkipListMap<>();
+    Portfolio() {
+        reset();
+    }
+
+    private static <T> Stream<T> getStream(final AtomicReference<Collection<T>> source,
+                                           final Function<Stream<T>, Stream<T>> modifier) {
+        if (source.get() == null) {
+            return Stream.empty();
+        } else {
+            return modifier.apply(source.get().stream());
+        }
+    }
+
+    private static <T> Stream<T> getStream(final AtomicReference<Collection<T>> source) {
+        return getStream(source, Function.identity());
     }
 
     private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
@@ -93,19 +106,16 @@ public enum Portfolio {
         } else {
             try {
                 LOGGER.trace("Started.");
-                loanCache.set(initSortedMap());
-                // read all investments from Zonky
+                init();
                 investments.set(zonky.getInvestments().collect(Collectors.toList()));
                 getUpdaters().forEach((u) -> {
                     LOGGER.trace("Running dependent: {}.", u);
                     u.accept(zonky);
                 });
                 LOGGER.trace("Finished.");
-            } catch (final Throwable t) { // users should know
-                new DaemonRuntimeExceptionHandler().handle(t);
-            } finally {
-                this.isUpdating.set(false);
                 this.ranOnce.set(true);
+            } finally { // never end if a intermediate state
+                this.isUpdating.set(false);
             }
         }
     }
@@ -119,13 +129,14 @@ public enum Portfolio {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchase notified from within RoboZonky
                 investmentsPending.updateAndGet(pending -> {
-                    if (pending.stream().noneMatch(i -> i.getLoanId() == blockedAmount.getLoanId())) {
-                        final List<Investment> result = new ArrayList<>(investmentsPending.get());
-                        result.add(toInvestment(zonky, blockedAmount));
-                        return result;
-                    } else {
-                        return pending;
+                    final Investment newcomer = toInvestment(zonky, blockedAmount);
+                    if (pending == null) {
+                        return new ArrayList<>(Collections.singleton(newcomer)); // must be a modifiable collection...
                     }
+                    if (pending.stream().noneMatch(i -> i.getLoanId() == blockedAmount.getLoanId())) {
+                        pending.add(newcomer); // ... because here it gets modified
+                    }
+                    return pending;
                 });
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
@@ -163,11 +174,11 @@ public enum Portfolio {
     }
 
     public Stream<Investment> getActive() {
-        return investments.get().stream().filter(i -> i.getStatus() == InvestmentStatus.ACTIVE);
+        return getStream(investments, s -> s.filter((Investment i) -> i.getStatus() == InvestmentStatus.ACTIVE));
     }
 
     public Stream<Investment> getPending() {
-        return investmentsPending.get().stream();
+        return getStream(investmentsPending);
     }
 
     public PortfolioOverview calculateOverview(final BigDecimal balance) {
@@ -194,15 +205,20 @@ public enum Portfolio {
         return Optional.ofNullable(loanCache.get().get(loanId));
     }
 
+    private void init() {
+        investments.set(null);
+        investmentsPending.set(null);
+        loanCache.set(new TreeMap<>());
+    }
+
     /**
      * For test purposes only.
      */
     public void reset() {
-        investmentsPending.set(Collections.emptyList());
-        investments.set(Collections.emptyList());
-        loanCache.set(initSortedMap());
+        init();
         updaters.clear();
         ranOnce.set(false);
+        isUpdating.set(false);
     }
 
 }

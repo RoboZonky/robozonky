@@ -57,8 +57,20 @@ public interface Authenticated {
         return new PasswordBasedAccess(apis, data);
     }
 
+    /**
+     * Execute an operation using on the Zonky server.
+     * @param operation Operation to execute. Should be as stateless as possible, since it may be executed repeatedly
+     * in response to stale auth token issues.
+     * @param <T> Return type of the operation.
+     * @return Whatever the operation returned.
+     */
     <T> T call(Function<Zonky, T> operation);
 
+    /**
+     * Execute an operation using on the Zonky server.
+     * @param operation Operation to execute. Should be as stateless as possible, since it may be executed repeatedly
+     * in response to stale auth token issues.
+     */
     default void run(final Consumer<Zonky> operation) {
         call(z -> {
             operation.accept(z);

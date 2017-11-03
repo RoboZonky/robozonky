@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,12 +56,17 @@ public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        // don't execute blocked amounts update while the core portfolio is updating
-        return Optional.of(blockedAmountsUpdater.pauseFor(x -> {
-            LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
-            authenticated.run(Portfolio.INSTANCE::update);
-            LOGGER.info("RoboZonky resumed.");
-            return OffsetDateTime.now();
-        }));
+        try {
+            // don't execute blocked amounts update while the core portfolio is updating
+            return Optional.of(blockedAmountsUpdater.pauseFor(x -> {
+                LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
+                authenticated.run(Portfolio.INSTANCE::update);
+                LOGGER.info("RoboZonky resumed.");
+                return OffsetDateTime.now();
+            }));
+        } catch (final Throwable t) {
+            new DaemonRuntimeExceptionHandler().handle(t);
+            return Optional.empty();
+        }
     }
 }
