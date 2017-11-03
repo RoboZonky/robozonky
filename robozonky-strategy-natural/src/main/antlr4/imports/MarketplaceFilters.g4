@@ -27,6 +27,13 @@ marketplaceFilterExpression returns [Map<Boolean, Collection<MarketplaceFilter>>
     )*
 ;
 
+sellFilterExpression returns [Collection<MarketplaceFilter> result]:
+    { $result = new ArrayList<>(); }
+    (
+        (j=sellMarketplaceFilter { $result.add($j.result); })
+    )*
+;
+
 jointMarketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
     'Ignorovat vše, kde: ' r=jointMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
@@ -42,6 +49,12 @@ primaryMarketplaceFilter returns [MarketplaceFilter result]:
 secondaryMarketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
     'Ignorovat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
+    ('(Ale ne když: ' s=secondaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
+;
+
+sellMarketplaceFilter returns [MarketplaceFilter result]:
+    { $result = new MarketplaceFilter(); }
+    'Prodat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
     ('(Ale ne když: ' s=secondaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
@@ -96,4 +109,6 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c6=termCondition { $result = $c6.result; }
     | c8=interestCondition { $result = $c8.result; }
     | c9=relativeTermCondition { $result = $c9.result; }
+    | c10=elapsedTermCondition { $result = $c10.result; }
+    | c11=elapsedRelativeTermCondition { $result = $c11.result; }
 ;

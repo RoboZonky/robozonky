@@ -99,6 +99,52 @@ relativeTermConditionRangeClosedRight returns [RelativeLoanTermCondition result]
     { $result = new RelativeLoanTermCondition(0, $max.result - 1); }
 ;
 
+elapsedTermCondition returns [ElapsedLoanTermCondition result]:
+    'uhrazeno ' (
+        (c1 = elapsedTermConditionRangeOpen { $result = $c1.result; })
+        | (c2 = elapsedTermConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = elapsedTermConditionRangeClosedRight { $result = $c3.result; })
+    ) ' splátek'
+;
+
+elapsedTermConditionRangeOpen returns [ElapsedLoanTermCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = new ElapsedLoanTermCondition($min.result, $max.result); }
+;
+
+elapsedTermConditionRangeClosedLeft returns [ElapsedLoanTermCondition result]:
+    'více než' min=intExpr
+    { $result = new ElapsedLoanTermCondition($min.result + 1); }
+;
+
+elapsedTermConditionRangeClosedRight returns [ElapsedLoanTermCondition result]:
+    'méně než' max=intExpr
+    { $result = new ElapsedLoanTermCondition(0, $max.result - 1); }
+;
+
+elapsedRelativeTermCondition returns [RelativeElapsedLoanTermCondition result]:
+    'uhrazeno ' (
+        (c1 = elapsedRelativeTermConditionRangeOpen { $result = $c1.result; })
+        | (c2 = elapsedRelativeTermConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = elapsedRelativeTermConditionRangeClosedRight { $result = $c3.result; })
+    ) ' % splátek'
+;
+
+elapsedRelativeTermConditionRangeOpen returns [RelativeElapsedLoanTermCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = new RelativeElapsedLoanTermCondition($min.result, $max.result); }
+;
+
+elapsedRelativeTermConditionRangeClosedLeft returns [RelativeElapsedLoanTermCondition result]:
+    'více než' min=intExpr
+    { $result = new RelativeElapsedLoanTermCondition($min.result + 1); }
+;
+
+elapsedRelativeTermConditionRangeClosedRight returns [RelativeElapsedLoanTermCondition result]:
+    'méně než' max=intExpr
+    { $result = new RelativeElapsedLoanTermCondition(0, $max.result - 1); }
+;
+
 interestCondition returns [LoanInterestRateCondition result]:
     'úrok ' (
         (c1 = interestConditionRangeOpen { $result = $c1.result; })
