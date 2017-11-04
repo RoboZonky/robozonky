@@ -29,8 +29,12 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
 import com.github.robozonky.common.remote.Zonky;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
     private final Zonky zonky;
     private final boolean dryRun;
@@ -57,6 +61,14 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
                 .map(p -> toDescriptor(p, zonky))
+                .filter(d -> { // never re-purchase what was once sold
+                    final Loan l = d.related();
+                    final boolean wasSoldBefore = Portfolio.INSTANCE.wasOnceSold(l);
+                    if (wasSoldBefore) {
+                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", l.getId());
+                    }
+                    return !wasSoldBefore;
+                })
                 .collect(Collectors.toList());
         return Session.purchase(zonky, participations, strategy, dryRun);
     }

@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,6 +46,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.util.ApiUtil;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,8 @@ public enum Portfolio {
     INSTANCE;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
+    private final State.ClassSpecificState STATE = State.forClass(this.getClass());
+    private final String STATE_KEY = "sold";
     private final AtomicReference<Collection<Investment>> investments = new AtomicReference<>(),
             investmentsPending = new AtomicReference<>();
     private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>();
@@ -107,7 +111,9 @@ public enum Portfolio {
             try {
                 LOGGER.trace("Started.");
                 init();
-                investments.set(zonky.getInvestments().collect(Collectors.toList()));
+                final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
+                investments.set(online);
+                LOGGER.debug("Loaded {} investments from Zonky.", online.size());
                 getUpdaters().forEach((u) -> {
                     LOGGER.trace("Running dependent: {}.", u);
                     u.accept(zonky);
@@ -124,7 +130,15 @@ public enum Portfolio {
         blockedAmounts.forEach(ba -> newBlockedAmount(zonky, ba));
     }
 
+    public boolean wasOnceSold(final Loan loan) {
+        // first find the loan in question, then check if it's being sold or was already sold
+        return getStream(investments)
+                .filter(i -> i.getLoanId() == loan.getId())
+                .anyMatch(i -> i.isOnSmp() || i.getStatus() == InvestmentStatus.SOLD);
+    }
+
     public void newBlockedAmount(final Zonky zonky, final BlockedAmount blockedAmount) {
+        final Predicate<Investment> equalsBlockedAmount = i -> i.getLoanId() == blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchase notified from within RoboZonky
@@ -133,7 +147,7 @@ public enum Portfolio {
                     if (pending == null) {
                         return new ArrayList<>(Collections.singleton(newcomer)); // must be a modifiable collection...
                     }
-                    if (pending.stream().noneMatch(i -> i.getLoanId() == blockedAmount.getLoanId())) {
+                    if (pending.stream().noneMatch(equalsBlockedAmount)) {
                         pending.add(newcomer); // ... because here it gets modified
                     }
                     return pending;
@@ -142,8 +156,8 @@ public enum Portfolio {
             case SMP_SALE_FEE: // potential new participation sale detected
                 // before daily update is run, the newly sold participation will show as active
                 getActive()
-                        .filter(i -> i.getLoanId() == blockedAmount.getLoanId())
-                        .peek(i -> {
+                        .filter(equalsBlockedAmount)
+                        .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
                             final int balance = zonky.getWallet().getAvailableBalance().intValue();
                             Events.fire(new InvestmentSoldEvent(i, balance));
                         })

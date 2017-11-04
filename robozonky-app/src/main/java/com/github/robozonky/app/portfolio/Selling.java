@@ -65,7 +65,7 @@ public class Selling implements Consumer<Zonky> {
             } else {
                 LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
                 zonky.sell(i);
-                i.setIsOnSmp(true);
+                i.setIsOnSmp(true); // send the investment to secondary marketplace; Portfolio class may use it later
                 LOGGER.trace("Request over.");
             }
             Events.fire(new SaleOfferedEvent(i, isDryRun)); // only executes on actual successful sale
@@ -78,8 +78,7 @@ public class Selling implements Consumer<Zonky> {
 
     private void sell(final SellStrategy strategy, final Zonky zonky) {
         final PortfolioOverview portfolio = Portfolio.INSTANCE.calculateOverview(zonky, isDryRun);
-        final Set<InvestmentDescriptor> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace()
-                .parallel()
+        final Set<InvestmentDescriptor> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace().parallel()
                 .map(i -> getDescriptor(i, zonky))
                 .collect(Collectors.toSet());
         Events.fire(new SellingStartedEvent(eligible, portfolio));

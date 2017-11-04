@@ -86,8 +86,8 @@ public class PurchasingTest extends AbstractInvestingTest {
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(e.get(0)).isInstanceOf(PurchasingStartedEvent.class);
-            softly.assertThat(e.get(1)).isInstanceOf(PurchasingCompletedEvent.class);
+            softly.assertThat(e).first().isInstanceOf(PurchasingStartedEvent.class);
+            softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
         });
     }
 
