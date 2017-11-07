@@ -48,6 +48,9 @@ class Activity {
     };
     private static final Logger LOGGER = LoggerFactory.getLogger(Activity.class);
     private static final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+    /**
+     * @see Settings#getCaptchaDelay().
+     */
     private static final TemporalAmount CAPTCHA_DELAY = Settings.INSTANCE.getCaptchaDelay();
     private final TemporalAmount sleepInterval;
     private final Collection<LoanDescriptor> recentLoansDescending;

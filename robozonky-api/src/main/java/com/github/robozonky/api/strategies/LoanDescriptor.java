@@ -26,7 +26,6 @@ import java.util.Optional;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
      * @return Present if loan protected by CAPTCHA, otherwise empty.
      */
     public Optional<OffsetDateTime> getLoanCaptchaProtectionEndDateTime() {
-        final TemporalAmount captchaDelay = Settings.INSTANCE.getCaptchaDelay(loan.getRating());
+        final TemporalAmount captchaDelay = loan.getRating().getCaptchaDelay();
         if (captchaDelay.get(ChronoUnit.SECONDS) == 0) {
             return Optional.empty();
         } else {

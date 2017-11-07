@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractEventsAndStateLeveragingTest;
+import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -66,6 +67,8 @@ public class ActivityTest extends AbstractEventsAndStateLeveragingTest {
 
     @Test
     public void doesTakeIntoAccountClosedPeriod() throws IOException {
+        System.setProperty(Settings.Key.CAPTCHA_DELAY_AAAAA.getName(), "0"); // disable CAPTCHA for AAAAA rating
+        System.setProperty(Settings.Key.CAPTCHA_DELAY_C.getName(), "120"); // enable CAPTCHA for C rating
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp = OffsetDateTime.now();
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
