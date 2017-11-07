@@ -74,10 +74,11 @@ public class SettingsTest {
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
                     .matches(new SettingsTest.TemporalPredicate(5 * 60));
             softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
-                    .matches(new SettingsTest.TemporalPredicate(2 * 60));
+                    .matches(new SettingsTest.TemporalPredicate(0));
             Stream.of(Rating.values()).forEach(r -> {
                 softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
-                        .matches(new SettingsTest.TemporalPredicate(r.getCaptchaDelay().get(ChronoUnit.SECONDS)));
+                        .as(r.toString())
+                        .matches(new SettingsTest.TemporalPredicate(0));
             });
             softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())

@@ -181,11 +181,17 @@ public enum Settings {
     }
 
     public TemporalAmount getCaptchaDelay(final Rating r) {
-        return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Integer.parseInt(delay)), r.getCaptchaDelay());
+        return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Integer.parseInt(delay)), getCaptchaDelay());
     }
 
+    /**
+     * The default delay for CAPTCHA protected loans. Right now, it is 0 due to the fact that no loans are protected by
+     * CAPTCHA. If this ever changes, the delay MUST be increased here, as other bits of code - such as marketplace
+     * activity detection - depend on it.
+     * @return Duration of CAPTCHA protection for a standard loan.
+     */
     public TemporalAmount getCaptchaDelay() {
-        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 120));
+        return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 0));
     }
 
     public int getDefaultDryRunBalance() {

@@ -34,13 +34,19 @@ import com.github.robozonky.app.AbstractEventsAndStateLeveragingTest;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.api.Settings;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.mockito.Mockito;
 
 public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
+    @Rule
+    public final RestoreSystemProperties properties = new RestoreSystemProperties();
+    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
 
     protected static Loan mockLoan(final int loanId) {
         final Loan loan = Mockito.mock(Loan.class);
@@ -65,8 +71,10 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
     protected static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
         final Loan loan = AbstractInvestingTest.mockLoan(loanId);
         if (withCaptcha) {
+            System.setProperty(Settings.Key.CAPTCHA_DELAY_D.getName(), "120"); // enable CAPTCHA for the rating
             Mockito.when(loan.getRating()).thenReturn(Rating.D);
         } else {
+            System.setProperty(Settings.Key.CAPTCHA_DELAY_AAAAA.getName(), "0"); // disable CAPTCHA for the rating
             Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
         }
         return new LoanDescriptor(loan);
@@ -85,8 +93,6 @@ public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest 
                 .filter(e -> !previouslyExistingEvents.contains(e))
                 .collect(Collectors.toList());
     }
-
-    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
 
     @Before
     @After
