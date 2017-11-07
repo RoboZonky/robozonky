@@ -66,12 +66,15 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
-import com.icegreen.greenmail.junit.GreenMailRule;
+import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import freemarker.template.TemplateException;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
@@ -84,8 +87,8 @@ import org.mockito.Mockito;
 public class EmailingListenerTest extends AbstractStateLeveragingTest {
 
     private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
-    @Rule
-    public final GreenMailRule greenMail = new GreenMailRule(getServerSetup());
+
+    private static final GreenMail EMAIL = new GreenMail(getServerSetup());
     @Rule
     public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
             RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
@@ -98,6 +101,22 @@ public class EmailingListenerTest extends AbstractStateLeveragingTest {
     public Event event;
     @Parameterized.Parameter
     public SupportedListener listenerType;
+
+    @BeforeClass
+    public static void startEmailing() {
+        EMAIL.start();
+    }
+
+    @AfterClass
+    public static void stopEmailing() {
+        EMAIL.stop();
+    }
+
+    @Before
+    @After
+    public void resetEmailing() {
+        EMAIL.reset();
+    }
 
     private static ServerSetup getServerSetup() {
         final ServerSetup setup = ServerSetupTest.SMTP;
@@ -206,8 +225,8 @@ public class EmailingListenerTest extends AbstractStateLeveragingTest {
         Assertions.assertThat(this.event).isInstanceOf(this.listenerType.getEventType());
         l.handle(this.event, new SessionInfo("someone@somewhere.net"));
         Assertions.assertThat(l.getData(this.event)).isNotNull();
-        Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(1);
-        final MimeMessage m = greenMail.getReceivedMessages()[0];
+        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(1);
+        final MimeMessage m = EMAIL.getReceivedMessages()[0];
         Assertions.assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
         Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(l.getSubject(this.event));
         Assertions.assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
@@ -253,11 +272,11 @@ public class EmailingListenerTest extends AbstractStateLeveragingTest {
         Assertions.assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
         l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
         Mockito.verify(c, Mockito.times(sendCount)).accept(ArgumentMatchers.any());
-        Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(sendCount);
+        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(sendCount);
         l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
         // e-mail not re-sent, finisher not called again
         Mockito.verify(c, Mockito.times(sendCount)).accept(ArgumentMatchers.any());
-        Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(sendCount);
+        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(sendCount);
     }
 
     private static final class TestingEmailingListener extends AbstractEmailingListener<RoboZonkyTestingEvent> {
