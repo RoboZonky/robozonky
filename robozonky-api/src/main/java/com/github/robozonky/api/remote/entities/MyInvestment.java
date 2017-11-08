@@ -18,6 +18,20 @@ package com.github.robozonky.api.remote.entities;
 
 import javax.xml.bind.annotation.XmlElement;
 
+/**
+ * Used to represent a participation in the authenticated bit of the API. Even 
+ * though the confusing name, this participation is also used to represent
+ * participations of other users for a given loan.
+ *
+ * Beware, though, since selling a participation on the secondary marketplace
+ * will result in that participation being replaced in the list of participations
+ * under any given loan with a new one. So, while most of the participations will
+ * have a creation date close to loan publishing date, occasionally some will be
+ * much newer, indicating SMP transaction.
+ *
+ * To the best of our knowledge, there is no other way to detect such transactions
+ * made by other users.
+ */
 public class MyInvestment extends BaseInvestment {
 
     private int investorId;
