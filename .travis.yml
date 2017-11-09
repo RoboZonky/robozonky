@@ -1,5 +1,5 @@
 install: true
-script: "MAVEN_OPTS=\"-Xmx512m\" JAVA_OPTS=\"-Xmx512m\" mvn -T 1C --batch-mode clean post-integration-test"
+script: "MAVEN_OPTS=\"-Xmx512m\" JAVA_OPTS=\"-Xmx512m\" mvn --batch-mode clean post-integration-test"
 language: java
 os:
   - linux

@@ -13,8 +13,8 @@ install:
   - cmd: mvn --version
   - cmd: java -version
 build_script:
-  - mvn -T 1C --batch-mode post-integration-test -DskipTests
+  - mvn --batch-mode post-integration-test -DskipTests
 test_script:
-  - mvn -T 1C --batch-mode post-integration-test
+  - mvn --batch-mode post-integration-test
 cache:
   - C:\Users\appveyor\.m2
