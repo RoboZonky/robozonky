@@ -82,6 +82,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class EmailingListenerTest extends AbstractStateLeveragingTest {
@@ -109,13 +110,17 @@ public class EmailingListenerTest extends AbstractStateLeveragingTest {
 
     @AfterClass
     public static void stopEmailing() {
-        EMAIL.stop();
+        try {
+            EMAIL.stop();
+        } catch (final Exception ex) {
+            LoggerFactory.getLogger(EmailingListenerTest.class).warn("Failed stopping e-mail server.", ex);
+        }
     }
 
     @Before
     @After
-    public void resetEmailing() {
-        EMAIL.reset();
+    public void resetEmailing() throws Exception {
+        EMAIL.purgeEmailFromAllMailboxes();
     }
 
     private static ServerSetup getServerSetup() {
