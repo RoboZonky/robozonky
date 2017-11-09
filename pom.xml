@@ -30,6 +30,7 @@
     <module>robozonky-installer</module>
     <module>robozonky-common</module>
     <module>robozonky-strategy-natural</module>
+    <module>robozonky-test</module>
   </modules>
   <packaging>pom</packaging>
   <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -60,9 +61,8 @@
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-common</artifactId>
+        <artifactId>robozonky-test</artifactId>
         <version>${project.version}</version>
-        <type>test-jar</type> <!-- Primary place for test utils -->
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -220,31 +220,26 @@
         <groupId>org.junit.vintage</groupId>
         <artifactId>junit-vintage-engine</artifactId>
         <version>4.12.0-RC3</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
         <version>2.10.0</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
         <version>3.8.0</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.github.stefanbirkner</groupId>
         <artifactId>system-rules</artifactId>
         <version>1.16.1</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-netty</artifactId>
         <version>3.10.4</version>
-        <scope>test</scope>
         <exclusions> <!-- Was messing up tests -->
           <exclusion>
             <groupId>xerces</groupId>

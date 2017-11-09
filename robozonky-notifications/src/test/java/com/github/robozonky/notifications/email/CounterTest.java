@@ -19,7 +19,7 @@ package com.github.robozonky.notifications.email;
 import java.time.Duration;
 import java.util.UUID;
 
-import com.github.robozonky.common.AbstractStateLeveragingTest;
+import com.github.robozonky.test.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

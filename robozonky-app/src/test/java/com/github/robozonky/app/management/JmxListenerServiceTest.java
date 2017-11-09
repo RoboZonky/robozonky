@@ -42,7 +42,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.common.AbstractStateLeveragingTest;
+import com.github.robozonky.test.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;

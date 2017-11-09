@@ -21,7 +21,7 @@ import java.util.Properties;
 import java.util.function.Function;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.common.AbstractStateLeveragingTest;
+import com.github.robozonky.test.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

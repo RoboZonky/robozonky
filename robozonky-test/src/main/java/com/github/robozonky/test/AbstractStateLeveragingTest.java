@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common;
+package com.github.robozonky.test;
 
 import java.io.File;
 

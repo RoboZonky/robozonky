@@ -22,8 +22,8 @@ import java.util.Collections;
 
 import com.github.robozonky.app.portfolio.Delinquent;
 import com.github.robozonky.app.portfolio.Delinquents;
-import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.test.AbstractStateLeveragingTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;

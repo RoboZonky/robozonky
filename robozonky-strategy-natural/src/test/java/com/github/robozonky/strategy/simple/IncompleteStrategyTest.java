@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.IoTestUtil;
+import com.github.robozonky.test.IoTestUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;

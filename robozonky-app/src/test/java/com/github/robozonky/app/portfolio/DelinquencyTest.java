@@ -23,8 +23,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAmount;
 
-import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.test.AbstractStateLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
