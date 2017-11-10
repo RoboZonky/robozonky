@@ -24,12 +24,12 @@ import java.time.ZoneId;
 import java.time.temporal.TemporalAmount;
 
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.test.AbstractStateLeveragingTest;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
-public class DelinquencyTest extends AbstractStateLeveragingTest {
+public class DelinquencyTest extends AbstractRoboZonkyTest {
 
     @Test
     public void endless() {

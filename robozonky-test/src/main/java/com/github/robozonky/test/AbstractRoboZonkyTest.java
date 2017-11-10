@@ -19,23 +19,31 @@ package com.github.robozonky.test;
 import java.io.File;
 
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.After;
+import org.junit.Before;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractStateLeveragingTest {
+/**
+ * This is a suggested parent class for all RoboZonky tests using this module. It will make sure to clear shared state
+ * before and after each state, so that tests don't have unexpected and well-hidden dependencies.
+ */
+public abstract class AbstractRoboZonkyTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStateLeveragingTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRoboZonkyTest.class);
 
+    @Before
     @After
     public void reinitScheduler() {
-        Scheduler.inBackground().reinit();
+        Mockito.reset(TestingSchedulerService.MOCK_SERVICE);
     }
 
+    @Before
     @After
     public void deleteState() {
         final File f = Settings.INSTANCE.getStateFile();
-        AbstractStateLeveragingTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
+        AbstractRoboZonkyTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
     }
 }

@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.StringJoiner;
 
 public class IoTestUtil {
 
@@ -41,27 +39,5 @@ public class IoTestUtil {
             }
         }
         return f;
-    }
-
-    private static final String ROOT = new StringJoiner(File.separator).add("src").add("main").toString();
-
-    public static String findMainSource() {
-        final File current = new File(System.getProperty("user.dir")).getAbsoluteFile();
-        final File f = new File(current, IoTestUtil.ROOT);
-        if (f.exists()) {
-            return f.getAbsolutePath();
-        }
-        final File f2 = new File(current.getParent(), IoTestUtil.ROOT); // in case we're running from /target
-        if (f2.exists()) {
-            return f2.getAbsolutePath();
-        }
-        throw new IllegalStateException("Oops.");
-    }
-
-    public static String findMainSource(String... subfolders) {
-        final StringJoiner sj = new StringJoiner(File.separator);
-        sj.add(IoTestUtil.findMainSource());
-        Arrays.stream(subfolders).forEach(sj::add);
-        return sj.toString();
     }
 }

@@ -65,7 +65,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.test.AbstractStateLeveragingTest;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -85,7 +85,7 @@ import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
-public class EmailingListenerTest extends AbstractStateLeveragingTest {
+public class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
 

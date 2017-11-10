@@ -29,7 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
-public class AppRuntimeExceptionHandlerTest extends AbstractEventsAndStateLeveragingTest {
+public class AppRuntimeExceptionHandlerTest extends AbstractEventLeveragingRoboZonkyTest {
 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();

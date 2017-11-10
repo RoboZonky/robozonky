@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadFactory;
  * The only actual providers for this service should be coming from robozonky-test module, as the sole purpose of this
  * service is to facilitate testing on RoboZonky's background tasks.
  */
-public final class SchedulerServiceLoader {
+final class SchedulerServiceLoader {
 
     private static final ServiceLoader<SchedulerService> LOADER = ServiceLoader.load(SchedulerService.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));

@@ -26,7 +26,7 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class RobozonkyStartupNotifierTest extends AbstractEventsAndStateLeveragingTest {
+public class RobozonkyStartupNotifierTest extends AbstractEventLeveragingRoboZonkyTest {
 
     @Test
     public void properEventsFired() {
