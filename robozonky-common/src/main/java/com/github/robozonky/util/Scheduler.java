@@ -21,9 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -47,10 +45,9 @@ public class Scheduler {
         }
     };
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
     private static final TemporalAmount REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Supplier<ScheduledExecutorService> executorProvider;
-    private final Set<Runnable> submitted = new LinkedHashSet<>();
+    private final Set<Runnable> submitted = new LinkedHashSet<>(0);
     private ScheduledExecutorService executor;
 
     public Scheduler() {
@@ -58,11 +55,11 @@ public class Scheduler {
     }
 
     public Scheduler(final int poolSize) {
-        this.executorProvider = () -> Executors.newScheduledThreadPool(poolSize, Scheduler.THREAD_FACTORY);
+        this.executorProvider = () -> SchedulerServiceLoader.load().newScheduledExecutorService(poolSize);
         this.executor = executorProvider.get();
     }
 
-    public static Scheduler inBackground() {
+    public static synchronized Scheduler inBackground() {
         try {
             return BACKGROUND_SCHEDULER.get();
         } catch (final ConcurrentException ex) {
@@ -84,8 +81,8 @@ public class Scheduler {
         final long delayInSeconds = delayInBetween.get(ChronoUnit.SECONDS);
         Scheduler.LOGGER.debug("Scheduling {} every {} seconds, starting in {} seconds.", toSchedule, delayInSeconds,
                                firstDelayInSeconds);
-        this.submitted.add(toSchedule);
         executor.scheduleWithFixedDelay(toSchedule, firstDelayInSeconds, delayInSeconds, TimeUnit.SECONDS);
+        this.submitted.add(toSchedule);
     }
 
     public boolean isSubmitted(final Runnable refreshable) {

@@ -24,39 +24,39 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class FileUtilsTest {
+public class FileUtilTest {
 
     @Test
     public void processFaultyFiles() {
         final File f = Mockito.mock(File.class);
         Mockito.doThrow(MalformedURLException.class).when(f).toURI();
-        Assertions.assertThat(FileUtils.filesToUrls(f)).isEmpty();
+        Assertions.assertThat(FileUtil.filesToUrls(f)).isEmpty();
     }
 
     @Test
     public void lookupNonexistentFolder() {
-        Assertions.assertThat(FileUtils.findFolder("target")).isPresent();
+        Assertions.assertThat(FileUtil.findFolder("target")).isPresent();
     }
 
     @Test
     public void lookupExistingFileAsFolder() {
-        Assertions.assertThat(FileUtils.findFolder("pom.xml")).isEmpty();
+        Assertions.assertThat(FileUtil.findFolder("pom.xml")).isEmpty();
     }
 
     @Test
     public void someUrls() throws IOException {
         File f = File.createTempFile("robozonky-", ".testing");
-        Assertions.assertThat(FileUtils.filesToUrls(f)).contains(f.toURI().toURL());
+        Assertions.assertThat(FileUtil.filesToUrls(f)).contains(f.toURI().toURL());
     }
 
     @Test
     public void nullUrls() {
-        Assertions.assertThatThrownBy(() -> FileUtils.filesToUrls((File[]) null))
+        Assertions.assertThatThrownBy(() -> FileUtil.filesToUrls((File[]) null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void emptyUrls() {
-        Assertions.assertThat(FileUtils.filesToUrls(new File[0])).isEmpty();
+        Assertions.assertThat(FileUtil.filesToUrls(new File[0])).isEmpty();
     }
 }

@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.marketplaces.MarketplaceService;
 import com.github.robozonky.common.secrets.Credentials;
+import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ public final class MarketplaceLoader {
 
     static Optional<Marketplace> load(final Credentials credentials, final Iterable<MarketplaceService> loader) {
         MarketplaceLoader.LOGGER.trace("Looking up marketplace '{}'.", credentials.getToolId());
-        return Util.toStream(loader)
+        return StreamUtil.toStream(loader)
                 .map(service -> MarketplaceLoader.processMarketplace(service, credentials))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();

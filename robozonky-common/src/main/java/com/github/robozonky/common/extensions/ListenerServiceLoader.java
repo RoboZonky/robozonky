@@ -25,6 +25,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public final class ListenerServiceLoader {
     static <T extends Event> List<Refreshable<EventListener<T>>> load(final Class<T> eventType,
                                                                       final Iterable<ListenerService> loader,
                                                                       final Scheduler scheduler) {
-        return Util.toStream(loader)
+        return StreamUtil.toStream(loader)
                 .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
                 .map(s -> s.findListener(eventType))
                 .peek(scheduler::submit)
