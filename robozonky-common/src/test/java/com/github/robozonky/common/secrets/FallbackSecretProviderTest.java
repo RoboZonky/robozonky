@@ -21,7 +21,6 @@ import java.io.StringReader;
 import java.util.UUID;
 
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.util.Scheduler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -31,11 +30,6 @@ public class FallbackSecretProviderTest {
 
     private static final String USR = "username";
     private static final String PWD = "password";
-
-    @After
-    public void reinitScheduler() {
-        Scheduler.inBackground().reinit();
-    }
 
     @After
     public void deleteState() {
