@@ -54,7 +54,7 @@ public class Loan extends BaseEntity {
     }
 
     private boolean topped, covered, published, questionsAllowed;
-    private int id, termInMonths, investmentsCount, questionsCount, userId;
+    private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount;
     private double amount, remainingInvestment;
     private String name, nickName, story, url;
     private BigDecimal interestRate = BigDecimal.ZERO;
@@ -181,6 +181,11 @@ public class Loan extends BaseEntity {
     @XmlElement
     public int getInvestmentsCount() {
         return investmentsCount;
+    }
+
+    @XmlElement
+    public int getActiveLoansCount() {
+        return activeLoansCount;
     }
 
     @XmlElement
