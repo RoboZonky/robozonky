@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.mockito.Mockito;
 
-public class AppTest extends AbstractEventsAndStateLeveragingTest {
+public class AppTest extends AbstractEventLeveragingRoboZonkyTest {
 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();

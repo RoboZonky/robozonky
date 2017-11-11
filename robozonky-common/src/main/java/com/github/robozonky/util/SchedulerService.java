@@ -16,20 +16,13 @@
 
 package com.github.robozonky.util;
 
-import com.github.robozonky.api.Refreshable;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import java.util.concurrent.ScheduledExecutorService;
 
-public class SchedulerTest {
+/**
+ * Pluggable {@link ScheduledExecutorService} for the purposes of testing what RoboZonky does with background tasks.
+ * Load with {@link SchedulerServiceLoader}.
+ */
+public interface SchedulerService {
 
-    private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
-
-    @Test
-    public void lifecycle() {
-        final Scheduler s = new Scheduler();
-        Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
-        s.submit(REFRESHABLE);
-        Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
-        s.shutdown();
-    }
+    ScheduledExecutorService newScheduledExecutorService(final int parallelism);
 }

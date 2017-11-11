@@ -16,18 +16,26 @@
 
 package com.github.robozonky.common.secrets;
 
+import java.io.File;
 import java.io.StringReader;
 import java.util.UUID;
 
-import com.github.robozonky.common.AbstractStateLeveragingTest;
+import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.After;
 import org.junit.Test;
 
-public class FallbackSecretProviderTest extends AbstractStateLeveragingTest {
+public class FallbackSecretProviderTest {
 
     private static final String USR = "username";
     private static final String PWD = "password";
+
+    @After
+    public void deleteState() {
+        final File f = Settings.INSTANCE.getStateFile();
+        f.delete();
+    }
 
     @Test
     public void setUsernameAndPassword() {

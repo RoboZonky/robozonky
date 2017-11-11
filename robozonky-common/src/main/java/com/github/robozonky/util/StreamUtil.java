@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.extensions;
+package com.github.robozonky.util;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-class Util {
+public class StreamUtil {
 
     public static <T> Stream<T> toStream(final Iterable<T> loader) {
         return StreamSupport.stream(loader.spliterator(), false);

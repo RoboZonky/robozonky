@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.test.schedulers;
 
-import com.github.robozonky.api.Refreshable;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import java.util.concurrent.ScheduledExecutorService;
 
-public class SchedulerTest {
+import com.github.robozonky.util.SchedulerService;
+import org.mockito.Mockito;
 
-    private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
+public class TestingSchedulerService implements SchedulerService {
 
-    @Test
-    public void lifecycle() {
-        final Scheduler s = new Scheduler();
-        Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
-        s.submit(REFRESHABLE);
-        Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
-        s.shutdown();
+    public static final ScheduledExecutorService MOCK_SERVICE = Mockito.spy(new TestingScheduledExecutorService());
+
+    @Override
+    public ScheduledExecutorService newScheduledExecutorService(final int parallelism) {
+        return MOCK_SERVICE;
     }
 }

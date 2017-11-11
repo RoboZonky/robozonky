@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.extensions;
+package com.github.robozonky.util;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,12 +23,12 @@ import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class UtilTest {
+public class StreamUtilTest {
 
     @Test
     public void notParallel() {
         final Collection<String> c = Collections.emptyList();
-        final Stream<String> s = Util.toStream(c);
+        final Stream<String> s = StreamUtil.toStream(c);
         Assertions.assertThat(s.isParallel()).isFalse();
     }
 }

@@ -31,9 +31,9 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileUtils {
+public class FileUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
     public static Optional<File> findFolder(final String folderName) {
         try {
@@ -43,7 +43,7 @@ public class FileUtils {
                     .filter(f -> Objects.equals(f.getName(), folderName))
                     .findFirst();
         } catch (final IOException ex) {
-            FileUtils.LOGGER.warn("Exception while walking file tree.", ex);
+            FileUtil.LOGGER.warn("Exception while walking file tree.", ex);
             return Optional.empty();
         }
     }
@@ -57,7 +57,7 @@ public class FileUtils {
                     try {
                         return Optional.of(f.toURI().toURL());
                     } catch (final MalformedURLException e) {
-                        FileUtils.LOGGER.debug("Skipping file: '{}'.", f, e);
+                        FileUtil.LOGGER.debug("Skipping file: '{}'.", f, e);
                         return Optional.empty();
                     }
                 }).flatMap(o -> o.map(u -> Stream.of((URL) u)).orElse(Stream.empty()))

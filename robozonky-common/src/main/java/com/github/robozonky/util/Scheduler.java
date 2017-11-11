@@ -21,36 +21,26 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import com.github.robozonky.internal.api.Settings;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Scheduler {
 
-    private static final LazyInitializer<Scheduler> BACKGROUND_SCHEDULER = new LazyInitializer<Scheduler>() {
-        @Override
-        protected Scheduler initialize() throws ConcurrentException {
-            /*
-             * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks
-             * will have finished on the executor and if some of them are long-running, this will hurt robot's startup
-             * time.
-             */
-            return new Scheduler(2);
-        }
-    };
+    /*
+     * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks
+     * will have finished on the executor and if some of them are long-running, this will hurt robot's startup
+     * time.
+     */
+    private static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(2);
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
     private static final TemporalAmount REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Supplier<ScheduledExecutorService> executorProvider;
-    private final Set<Runnable> submitted = new LinkedHashSet<>();
+    private final Set<Runnable> submitted = new LinkedHashSet<>(0);
     private ScheduledExecutorService executor;
 
     public Scheduler() {
@@ -58,16 +48,12 @@ public class Scheduler {
     }
 
     public Scheduler(final int poolSize) {
-        this.executorProvider = () -> Executors.newScheduledThreadPool(poolSize, Scheduler.THREAD_FACTORY);
+        this.executorProvider = () -> SchedulerServiceLoader.load().newScheduledExecutorService(poolSize);
         this.executor = executorProvider.get();
     }
 
-    public static Scheduler inBackground() {
-        try {
-            return BACKGROUND_SCHEDULER.get();
-        } catch (final ConcurrentException ex) {
-            throw new IllegalStateException("Should not happen.", ex);
-        }
+    public static synchronized Scheduler inBackground() {
+        return BACKGROUND_SCHEDULER;
     }
 
     public void submit(final Runnable toSchedule) {
@@ -84,8 +70,8 @@ public class Scheduler {
         final long delayInSeconds = delayInBetween.get(ChronoUnit.SECONDS);
         Scheduler.LOGGER.debug("Scheduling {} every {} seconds, starting in {} seconds.", toSchedule, delayInSeconds,
                                firstDelayInSeconds);
-        this.submitted.add(toSchedule);
         executor.scheduleWithFixedDelay(toSchedule, firstDelayInSeconds, delayInSeconds, TimeUnit.SECONDS);
+        this.submitted.add(toSchedule);
     }
 
     public boolean isSubmitted(final Runnable refreshable) {
@@ -97,21 +83,4 @@ public class Scheduler {
         executor.shutdownNow();
     }
 
-    public boolean isShutdown() {
-        return executor.isShutdown();
-    }
-
-    /**
-     * Re-start the scheduler following {@link #shutdown()}. This is only to help with testing.
-     * @return True of re-initialization happened.
-     */
-    public boolean reinit() {
-        if (!isShutdown()) {
-            Scheduler.LOGGER.debug("Not reinitializing scheduler as it is not yet shut down.");
-            return false;
-        }
-        this.submitted.clear();
-        this.executor = executorProvider.get();
-        return true;
-    }
 }

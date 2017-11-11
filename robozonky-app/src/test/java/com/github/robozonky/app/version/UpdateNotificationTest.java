@@ -22,14 +22,14 @@ import java.util.Objects;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
-import com.github.robozonky.app.AbstractEventsAndStateLeveragingTest;
+import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
 import com.github.robozonky.app.Events;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class UpdateNotificationTest extends AbstractEventsAndStateLeveragingTest {
+public class UpdateNotificationTest extends AbstractEventLeveragingRoboZonkyTest {
 
     @Test
     public void valueChangeDelegates() {

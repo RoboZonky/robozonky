@@ -19,11 +19,11 @@ package com.github.robozonky.notifications.email;
 import java.time.Duration;
 import java.util.UUID;
 
-import com.github.robozonky.common.AbstractStateLeveragingTest;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class CounterTest extends AbstractStateLeveragingTest {
+public class CounterTest extends AbstractRoboZonkyTest {
 
     @Test
     public void testTiming() throws InterruptedException {

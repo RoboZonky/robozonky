@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.ConfirmationProviderService;
+import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public final class ConfirmationProviderLoader {
     static Optional<ConfirmationProvider> load(final String providerId,
                                                final Iterable<ConfirmationProviderService> loader) {
         ConfirmationProviderLoader.LOGGER.debug("Looking up confirmation provider '{}'.", providerId);
-        return Util.toStream(loader)
+        return StreamUtil.toStream(loader)
                 .peek(cp -> ConfirmationProviderLoader.LOGGER.trace("Evaluating confirmation provider '{}' with '{}'.",
                                                                     providerId, cp.getClass()))
                 .map(cp -> cp.find(providerId))

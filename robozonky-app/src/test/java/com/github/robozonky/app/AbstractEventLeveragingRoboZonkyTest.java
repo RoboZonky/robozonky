@@ -16,13 +16,13 @@
 
 package com.github.robozonky.app;
 
-import com.github.robozonky.common.AbstractStateLeveragingTest;
 import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 
-public abstract class AbstractEventsAndStateLeveragingTest extends AbstractStateLeveragingTest {
+public abstract class AbstractEventLeveragingRoboZonkyTest extends AbstractRoboZonkyTest {
 
     @Rule
     public final ProvideSystemProperty property =

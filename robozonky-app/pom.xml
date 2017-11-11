@@ -89,8 +89,7 @@
     </dependency>
     <dependency>
       <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-common</artifactId>
-      <type>test-jar</type>
+      <artifactId>robozonky-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -25,6 +25,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
+import com.github.robozonky.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public final class StrategyLoader {
 
     static <T> Optional<T> load(final String strategy, final Iterable<StrategyService> loader,
                                 final BiFunction<StrategyService, String, Optional<T>> provider) {
-        return Util.toStream(loader)
+        return StreamUtil.toStream(loader)
                 .map(iss -> StrategyLoader.processStrategyService(iss, strategy, provider))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .findFirst();

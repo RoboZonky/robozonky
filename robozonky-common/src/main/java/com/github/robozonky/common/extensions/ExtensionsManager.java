@@ -22,7 +22,7 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.ServiceLoader;
 
-import com.github.robozonky.util.FileUtils;
+import com.github.robozonky.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +39,12 @@ enum ExtensionsManager {
     ClassLoader retrieveExtensionClassLoader(final File extensionsFolder) {
         this.LOGGER.debug("Using extensions folder: '{}'.", extensionsFolder.getAbsolutePath());
         final Collection<URL> urls =
-                FileUtils.filesToUrls(extensionsFolder.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar")));
+                FileUtil.filesToUrls(extensionsFolder.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar")));
         return new URLClassLoader(urls.toArray(new URL[urls.size()]));
     }
 
     ClassLoader retrieveExtensionClassLoader(final String folderName) {
-        return FileUtils.findFolder(folderName)
+        return FileUtil.findFolder(folderName)
                 .map(this::retrieveExtensionClassLoader)
                 .orElseGet(() -> {
                     this.LOGGER.debug("Extensions folder not found.");

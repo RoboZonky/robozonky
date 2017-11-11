@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.AbstractEventsAndStateLeveragingTest;
+import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
@@ -41,7 +41,7 @@ import org.junit.Rule;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.mockito.Mockito;
 
-public class AbstractInvestingTest extends AbstractEventsAndStateLeveragingTest {
+public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest {
 
     private static final Random RANDOM = new Random(0);
     @Rule

@@ -21,11 +21,11 @@ import java.util.Properties;
 import java.util.function.Function;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.common.AbstractStateLeveragingTest;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class AbstractBalanceRegisteringEmailingListenerTest extends AbstractStateLeveragingTest {
+public class AbstractBalanceRegisteringEmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static final int RESULT = 123456;
     private static final Function<RoboZonkyTestingEvent, Integer> F = (e) -> RESULT;
