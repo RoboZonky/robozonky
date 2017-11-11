@@ -19,6 +19,7 @@ package com.github.robozonky.strategy.natural;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,6 +39,7 @@ public class ParsedStrategy {
     private final Map<Rating, PortfolioShare> portfolio;
     private final Map<Rating, InvestmentSize> investmentSizes;
     private final Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters, sellFilters;
+    private RoboZonkyVersion minimumVersion;
 
     public ParsedStrategy(final DefaultPortfolio portfolio) {
         this(portfolio, Collections.emptyMap());
@@ -95,6 +97,14 @@ public class ParsedStrategy {
 
     public int getMaximumInvestmentSizeInCzk() {
         return defaults.getTargetPortfolioSize();
+    }
+
+    public Optional<RoboZonkyVersion> getMinimumVersion() {
+        return Optional.ofNullable(minimumVersion);
+    }
+
+    public void setMinimumVersion(final RoboZonkyVersion minimumVersion) {
+        this.minimumVersion = minimumVersion;
     }
 
     public int getMinimumShare(final Rating rating) {
@@ -170,8 +180,9 @@ public class ParsedStrategy {
     public String toString() {
         return "ParsedStrategy{" +
                 "defaults=" + defaults +
-                ", portfolio=" + portfolio +
                 ", investmentSizes=" + investmentSizes +
+                ", minimumVersion=" + minimumVersion +
+                ", portfolio=" + portfolio +
                 ", primaryMarketplaceFilters=" + primaryMarketplaceFilters +
                 ", secondaryMarketplaceFilters=" + secondaryMarketplaceFilters +
                 ", sellFilters=" + sellFilters +

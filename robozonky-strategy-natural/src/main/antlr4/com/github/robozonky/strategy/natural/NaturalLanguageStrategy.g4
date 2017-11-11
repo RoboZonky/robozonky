@@ -13,11 +13,23 @@ import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters;
 }
 
 primaryExpression returns [ParsedStrategy result] :
+
+    v=minimumVersionExpression?
+
     (
         ( s=portfolioExpression { $result = new ParsedStrategy($s.result); })
         | ( c=complexExpression { $result = $c.result; })
-    )
+    ) {
+        // only set version when the optional expression was actually present
+        if ($ctx.minimumVersionExpression() != null) $result.setMinimumVersion($v.result);
+    }
     EOF
+;
+
+minimumVersionExpression returns [RoboZonkyVersion result] :
+    'Tato strategie vyžaduje RoboZonky ve verzi ' major=intExpr DOT minor=intExpr DOT micro=intExpr ' nebo pozdější.' {
+        $result = new RoboZonkyVersion($major.result, $minor.result, $micro.result);
+    }
 ;
 
 complexExpression returns [ParsedStrategy result] :

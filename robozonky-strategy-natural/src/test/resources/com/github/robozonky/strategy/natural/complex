@@ -2,6 +2,7 @@
 # =================================
 # První tři sekce se vztahují na všechny investice s výjimkou těch, které odpovídají pravidlům ve čtvrté sekci.
 # Řádky začínající na '#' jsou vysvětlující komentáře a nejsou povinné. Strategie bude fungovat i bez nich.
+Tato strategie vyžaduje RoboZonky ve verzi 4.1.0 nebo pozdější.
 
 # Povinná sekce.
 - Obecná nastavení

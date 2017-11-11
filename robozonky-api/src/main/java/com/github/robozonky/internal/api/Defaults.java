@@ -34,6 +34,9 @@ public final class Defaults {
     public static final int MAXIMUM_INVESTMENT_IN_CZK = 5000;
     public static final int MINIMUM_INVESTMENT_IN_CZK = 200;
     public static final int MINIMUM_INVESTMENT_INCREMENT_IN_CZK = 200;
+    /**
+     * Will be null when running from IDE, Maven Surefire etc.; no JAR information at the time.
+     */
     public static final String ROBOZONKY_VERSION = Defaults.class.getPackage().getImplementationVersion();
     public static final String ROBOZONKY_URL = "http://www.robozonky.cz";
     public static final String ROBOZONKY_USER_AGENT =

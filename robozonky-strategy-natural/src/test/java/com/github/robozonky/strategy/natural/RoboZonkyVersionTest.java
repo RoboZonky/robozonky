@@ -1,0 +1,48 @@
+/*
+ * Copyright 2017 The RoboZonky Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.robozonky.strategy.natural;
+
+import org.assertj.core.api.SoftAssertions;
+import org.junit.Test;
+
+public class RoboZonkyVersionTest {
+
+    @Test
+    public void comparator() {
+        final RoboZonkyVersion current = new RoboZonkyVersion("4.1.0");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(current).isGreaterThan(new RoboZonkyVersion("3.9.9"));
+            softly.assertThat(current).isEqualByComparingTo(current);
+            softly.assertThat(current).isLessThan(new RoboZonkyVersion("4.1.1"));
+            softly.assertThat(current).isLessThan(new RoboZonkyVersion("4.2.0"));
+            softly.assertThat(current).isLessThan(new RoboZonkyVersion("5.4.3"));
+        });
+    }
+
+    @Test
+    public void equality() {
+        final RoboZonkyVersion current = new RoboZonkyVersion("4.1.0");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(current).isEqualTo(current);
+            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0"));
+            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-SNAPSHOT")); // SNAPSHOTs do not matter
+            softly.assertThat(current).isNotEqualTo(null);
+            softly.assertThat(current).isNotEqualTo("something");
+            softly.assertThat(current).isNotEqualTo(new RoboZonkyVersion("4.1.1"));
+        });
+    }
+}

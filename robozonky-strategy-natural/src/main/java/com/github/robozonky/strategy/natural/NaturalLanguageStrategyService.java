@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -93,39 +94,46 @@ public class NaturalLanguageStrategyService implements StrategyService {
         return p.primaryExpression().result;
     }
 
-    @Override
-    public Optional<InvestmentStrategy> toInvest(final String strategy) {
+    private static boolean isSupported(final ParsedStrategy s) {
+        final String currentVersion = Defaults.ROBOZONKY_VERSION;
+        if (currentVersion == null) { // means latest snapshot; see javadoc for Defaults.ROBOZONKY_VERSION
+            return true;
+        }
+        final RoboZonkyVersion current = new RoboZonkyVersion(currentVersion);
+        return s.getMinimumVersion()
+                .map(minimum -> current.compareTo(minimum) >= 0)
+                .orElse(true);
+    }
+
+    private static <T> Optional<T> getStrategy(final String strategy, final Function<ParsedStrategy, T> constructor) {
         try {
             final ParsedStrategy s = parseOrCached(strategy);
-            return Optional.of(new NaturalLanguageInvestmentStrategy(s));
+            if (isSupported(s)) {
+                return Optional.of(constructor.apply(s));
+            } else {
+                LOGGER.warn("Strategy only supports RoboZonky {} or later. Please upgrade.",
+                            s.getMinimumVersion().get());
+                return Optional.empty();
+            }
         } catch (final Exception ex) {
             NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
                                                         ex.getMessage());
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<InvestmentStrategy> toInvest(final String strategy) {
+        return getStrategy(strategy, NaturalLanguageInvestmentStrategy::new);
     }
 
     @Override
     public Optional<SellStrategy> toSell(final String strategy) {
-        try {
-            final ParsedStrategy s = parseOrCached(strategy);
-            return Optional.of(new NaturalLanguageSellStrategy(s));
-        } catch (final Exception ex) {
-            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
-                                                        ex.getMessage());
-            return Optional.empty();
-        }
+        return getStrategy(strategy, NaturalLanguageSellStrategy::new);
     }
 
     @Override
     public Optional<PurchaseStrategy> toPurchase(final String strategy) {
-        try {
-            final ParsedStrategy s = parseOrCached(strategy);
-            return Optional.of(new NaturalLanguagePurchaseStrategy(s));
-        } catch (final Exception ex) {
-            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
-                                                        ex.getMessage());
-            return Optional.empty();
-        }
+        return getStrategy(strategy, NaturalLanguagePurchaseStrategy::new);
     }
 }
