@@ -16,7 +16,6 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
@@ -41,12 +40,7 @@ class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent
     @Override
     protected Map<String, Object> getData(final SaleOfferedEvent event) {
         final Investment i = event.getInvestment();
-        final Map<String, Object> result = new HashMap<>();
-        result.put("investedAmount", i.getRemainingPrincipal());
-        result.put("loanId", i.getLoanId());
-        result.put("loanRating", i.getRating().getCode());
-        result.put("loanTerm", i.getRemainingMonths());
-        result.put("loanUrl", Util.getLoanUrl(i));
+        final Map<String, Object> result = Util.getLoanData(i);
         result.put("isDryRun", event.isDryRun());
         return result;
     }

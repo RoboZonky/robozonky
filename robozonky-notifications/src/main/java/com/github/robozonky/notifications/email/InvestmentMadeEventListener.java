@@ -42,7 +42,6 @@ class InvestmentMadeEventListener extends AbstractBalanceRegisteringEmailingList
     protected Map<String, Object> getData(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = Util.getLoanData(i);
-        result.put("investedAmount", i.getAmount());
         result.put("isDryRun", event.isDryRun());
         result.put("newBalance", getNewBalance(event));
         return result;

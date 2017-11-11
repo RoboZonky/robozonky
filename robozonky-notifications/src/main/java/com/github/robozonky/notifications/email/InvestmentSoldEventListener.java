@@ -42,7 +42,6 @@ class InvestmentSoldEventListener extends AbstractBalanceRegisteringEmailingList
     protected Map<String, Object> getData(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = Util.getLoanData(i);
-        result.put("investedAmount", i.getRemainingPrincipal());
         result.put("newBalance", getNewBalance(event));
         return result;
     }

@@ -56,7 +56,10 @@ class Util {
     }
 
     public static Map<String, Object> getLoanData(final Investment i) {
-        return getLoanData(i.getLoan().orElseThrow(IllegalStateException::new));
+        final Map<String, Object> loanData = getLoanData(i.getLoan().orElseThrow(IllegalStateException::new));
+        loanData.put("loanTermRemaining", i.getRemainingMonths());
+        loanData.put("investedAmount", i.getRemainingPrincipal());
+        return loanData;
     }
 
     public static String getLoanUrl(final Investment i) {
