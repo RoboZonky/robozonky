@@ -1,6 +1,6 @@
 grammar NaturalLanguageStrategy;
 
-import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters, SellRules;
+import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters;
 
 @header {
     import java.math.BigDecimal;
