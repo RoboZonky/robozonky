@@ -4,7 +4,6 @@
   padding: 0.5rem!important;
 }
 
-
 /* Make text in range slider labels non-selectable */
 
 .rangeSliderValue {
@@ -12,9 +11,23 @@
   -moz-user-select: none!important;
 }
 
-
 /* Workaround for https://github.com/RoboZonky/natural-strategy-setup/issues/8 */
 
 [id$=Card]:not([style*=overflow]) {
   height: 100%!important;
+}
+
+/*
+ To make selected conditions in FilterCreationModal better distinguishable I put them in a fieldset.
+ But bootstrap disables fieldset borders, so reenable them.
+*/
+
+.condition-row {
+  margin-bottom: 0px;
+}
+
+.condition-row.active {
+  border: solid 1px lightgrey !important;
+  padding: 5px;
+  margin-bottom: 8px;
 }
