@@ -127,7 +127,7 @@ public abstract class Refreshable<T> implements Runnable {
                 return Optional.empty();
             }
         } catch (final InterruptedException ex) {
-            LOGGER.debug("Wait interrupted: {}.", this, ex);
+            LOGGER.debug("Wait interrupted: {} (Reason: {}).", this, ex.getMessage());
             return Optional.empty();
         } finally {
             LOGGER.trace("Wait over: {}.", this);
