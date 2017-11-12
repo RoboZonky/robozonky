@@ -89,7 +89,7 @@ public class App {
                          Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
         App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.inBackground().shutdown()));
         // check for new RoboZonky version every now and then
-        Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofHours(1));
+        Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
         // read the command line and call the runtime
         final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try { // call core code
