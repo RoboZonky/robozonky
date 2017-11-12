@@ -26,7 +26,6 @@ import com.github.robozonky.internal.api.Defaults;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.event.InstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
-import org.apache.commons.lang3.SystemUtils;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -275,22 +274,10 @@ public class RoboZonkyInstallerListenerTest {
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.sh"))
                     .exists()
                     .has(new Condition<>(File::canExecute, "Is executable"));
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf")).exists();
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
-        if (SystemUtils.IS_OS_LINUX) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(
-                        new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service")).exists();
-                softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf")).exists();
-            });
-        } else {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(
-                        new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service")).doesNotExist();
-                softly.assertThat(
-                        new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf")).doesNotExist();
-            });
-        }
         Mockito.verify(progress, times(1)).startAction(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt());
         Mockito.verify(progress, times(7))
                 .nextStep(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), ArgumentMatchers.eq(1));
