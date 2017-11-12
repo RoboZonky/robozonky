@@ -32,7 +32,7 @@ enum TemplateProcessor {
     private final Configuration config = TemplateProcessor.getFreemarkerConfiguration();
 
     static Configuration getFreemarkerConfiguration() {
-        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_26);
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
         return cfg;

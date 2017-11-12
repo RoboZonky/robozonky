@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,7 +31,8 @@ import freemarker.template.TemplateException;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
-    private final File configFile, distributionDirectory;
+    private static final Logger LOGGER = Logger.getLogger(RunScriptGenerator.class.getSimpleName());
+    protected final File configFile, distributionDirectory;
 
     protected RunScriptGenerator(final File distributionDirectory, final File configFile) {
         this.configFile = configFile;
@@ -57,6 +59,8 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
         return this.configFile.getParentFile();
     }
 
+    protected abstract File getRunScript();
+
     public abstract File getChildRunScript();
 
     protected File process(final CommandLinePart commandLine, final String templateName,
@@ -68,8 +72,9 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
                 this.put("javaOpts", assembleJavaOpts(commandLine));
                 this.put("envVars", commandLine.getEnvironmentVariables());
             }});
-            final File target = this.getChildRunScript();
+            final File target = this.getRunScript();
             Files.write(target.toPath(), finisher.apply(result).getBytes(Defaults.CHARSET));
+            LOGGER.info("Generated run script: " + target.getAbsolutePath());
             return target;
         } catch (final IOException | TemplateException e) {
             throw new IllegalStateException("Failed creating run script.", e);

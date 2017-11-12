@@ -22,17 +22,24 @@ import com.github.robozonky.installer.panels.CommandLinePart;
 
 final class UnixRunScriptGenerator extends RunScriptGenerator {
 
+    private static final String EXEC_NAME = "robozonky-exec.sh";
+
     public UnixRunScriptGenerator(final File distributionDirectory, final File configFile) {
         super(distributionDirectory, configFile);
     }
 
     @Override
     public File apply(final CommandLinePart commandLine) {
-        return process(commandLine, "run.sh.ftl");
+        return process(commandLine, EXEC_NAME + ".ftl");
+    }
+
+    @Override
+    protected File getRunScript() {
+        return new File(this.getRootFolder(), EXEC_NAME);
     }
 
     @Override
     public File getChildRunScript() {
-        return new File(this.getRootFolder(), "run.sh");
+        return new File(distributionDirectory, "robozonky.sh");
     }
 }

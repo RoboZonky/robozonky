@@ -26,10 +26,14 @@ import com.github.robozonky.internal.api.Defaults;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.event.InstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
+import org.apache.commons.lang3.SystemUtils;
+import org.assertj.core.api.Condition;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -39,6 +43,10 @@ public class RoboZonkyInstallerListenerTest {
 
     private static final String ZONKY_PASSWORD = UUID.randomUUID().toString();
     private static final String ZONKY_USERNAME = "user@zonky.cz";
+
+    @Rule
+    public final RestoreSystemProperties propertiesRestore = new RestoreSystemProperties();
+    private final InstallData data = RoboZonkyInstallerListenerTest.mockData();
 
     private static File newFile(final boolean withContent) {
         try {
@@ -61,10 +69,8 @@ public class RoboZonkyInstallerListenerTest {
 
     private static InstallData mockData() {
         final InstallData data = RoboZonkyInstallerListenerTest.mockBaseData();
-        Mockito.when(data.getVariable(Variables.JAVA_HOME.getKey()))
-                .thenReturn(System.getProperty("JAVA_HOME"));
-        Mockito.when(data.getVariable(Variables.STRATEGY_TYPE.getKey()))
-                .thenReturn("file");
+        Mockito.when(data.getVariable(Variables.JAVA_HOME.getKey())).thenReturn(System.getProperty("JAVA_HOME"));
+        Mockito.when(data.getVariable(Variables.STRATEGY_TYPE.getKey())).thenReturn("file");
         Mockito.when(data.getVariable(Variables.STRATEGY_SOURCE.getKey()))
                 .thenReturn(RoboZonkyInstallerListenerTest.newFile(true).getAbsolutePath());
         Mockito.when(data.getVariable(Variables.ZONKY_USERNAME.getKey()))
@@ -79,19 +85,6 @@ public class RoboZonkyInstallerListenerTest {
         return data;
     }
 
-    private final InstallData data = RoboZonkyInstallerListenerTest.mockData();
-
-    @Before
-    public void createStructure() throws IOException {
-        final File installDir = new File(Variables.INSTALL_PATH.getValue(data));
-        final File distDir = new File(installDir, "Dist/");
-        distDir.mkdirs();
-        final File logback = new File(distDir, "logback.xml");
-        logback.createNewFile();
-        final File strategy = new File(Variables.STRATEGY_SOURCE.getValue(data));
-        strategy.createNewFile();
-    }
-
     private static void deleteDir(final File file) {
         final File[] contents = file.listFiles();
         if (contents != null) {
@@ -100,6 +93,20 @@ public class RoboZonkyInstallerListenerTest {
             }
         }
         file.delete();
+    }
+
+    @Before
+    public void createStructure() throws IOException {
+        final File installDir = new File(Variables.INSTALL_PATH.getValue(data));
+        if (installDir.exists()) {
+            RoboZonkyInstallerListenerTest.deleteDir(installDir);
+        }
+        final File distDir = new File(installDir, "Dist/");
+        distDir.mkdirs();
+        final File logback = new File(distDir, "logback.xml");
+        logback.createNewFile();
+        final File strategy = new File(Variables.STRATEGY_SOURCE.getValue(data));
+        strategy.createNewFile();
     }
 
     @After
@@ -257,17 +264,33 @@ public class RoboZonkyInstallerListenerTest {
         final ProgressListener progress = Mockito.mock(ProgressListener.class);
         // execute SUT
         RoboZonkyInstallerListener.setInstallData(data);
-        final InstallerListener listener = new RoboZonkyInstallerListener();
+        final InstallerListener listener = new RoboZonkyInstallerListener(RoboZonkyInstallerListener.OS.LINUX);
         listener.afterPacks(Collections.emptyList(), progress);
         // test
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "logback.xml")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli")).exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.bat")).doesNotExist();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.sh")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.bat")).doesNotExist();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.sh"))
+                    .exists()
+                    .has(new Condition<>(File::canExecute, "Is executable"));
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
+        if (SystemUtils.IS_OS_LINUX) {
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat(
+                        new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service")).exists();
+                softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf")).exists();
+            });
+        } else {
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat(
+                        new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service")).doesNotExist();
+                softly.assertThat(
+                        new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf")).doesNotExist();
+            });
+        }
         Mockito.verify(progress, times(1)).startAction(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt());
         Mockito.verify(progress, times(7))
                 .nextStep(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), ArgumentMatchers.eq(1));
@@ -278,18 +301,23 @@ public class RoboZonkyInstallerListenerTest {
     public void progressWindows() {
         final ProgressListener progress = Mockito.mock(ProgressListener.class);
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        Mockito.when(localData.getVariable(Variables.IS_WINDOWS.getKey())).thenReturn("true");
         // execute SUT
         RoboZonkyInstallerListener.setInstallData(localData);
-        final InstallerListener listener = new RoboZonkyInstallerListener();
+        final InstallerListener listener = new RoboZonkyInstallerListener(RoboZonkyInstallerListener.OS.WINDOWS);
         listener.afterPacks(Collections.emptyList(), progress);
         // test
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "logback.xml")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties")).exists();
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli")).exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.sh")).doesNotExist();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "run.bat")).exists();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.sh")).doesNotExist();
+            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.bat"))
+                    .exists()
+                    .has(new Condition<>(File::canExecute, "Is executable"));
+            softly.assertThat(
+                    new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service")).doesNotExist();
+            softly.assertThat(
+                    new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf")).doesNotExist();
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE).exists();
         });
         Mockito.verify(progress, times(1)).startAction(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt());

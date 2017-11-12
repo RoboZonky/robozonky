@@ -75,11 +75,6 @@
     </condition>
   </conditions>
 
-  <dynamicvariables>
-    <variable name="isWindowsInstall" value="false" condition="!izpack.windowsinstall" />
-    <variable name="isWindowsInstall" value="true" condition="izpack.windowsinstall" />
-  </dynamicvariables>
-
   <panels>
     <panel classname="HelloPanel"/>
     <panel classname="LicencePanel">

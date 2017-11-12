@@ -24,6 +24,7 @@ import com.github.robozonky.installer.panels.CommandLinePart;
 final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     private static final Pattern UNIX_NEWLINES = Pattern.compile("(\n)+");
+    private static final String EXEC_NAME = "robozonky-exec.bat";
 
     public WindowsRunScriptGenerator(final File distributionDirectory, final File configFile) {
         super(distributionDirectory, configFile);
@@ -31,11 +32,17 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
     @Override
     public File apply(final CommandLinePart commandLine) {
-        return process(commandLine, "run.bat.ftl", s -> UNIX_NEWLINES.matcher(s).replaceAll("\r\n"));
+        return process(commandLine, EXEC_NAME + ".ftl", s -> UNIX_NEWLINES.matcher(s).replaceAll("\r\n"));
+    }
+
+    @Override
+    protected File getRunScript() {
+        return new File(this.getRootFolder(), EXEC_NAME);
     }
 
     @Override
     public File getChildRunScript() {
-        return new File(this.getRootFolder(), "run.bat");
+        return new File(distributionDirectory, "robozonky.bat");
     }
 }
+

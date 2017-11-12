@@ -31,20 +31,45 @@ import java.util.stream.Stream;
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.installer.panels.scripts.RunScriptGenerator;
+import com.github.robozonky.installer.panels.scripts.ServiceGenerator;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.notifications.email.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
+import org.apache.commons.lang3.SystemUtils;
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
+    enum OS {
+        WINDOWS,
+        LINUX,
+        OTHER
+    }
+
     private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
     private static InstallData DATA;
+    private OS operatingSystem = OS.OTHER;
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
             CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
+
+    public RoboZonkyInstallerListener() {
+        if (SystemUtils.IS_OS_LINUX) {
+            operatingSystem = OS.LINUX;
+        } else if (SystemUtils.IS_OS_WINDOWS) {
+            operatingSystem = OS.WINDOWS;
+        }
+    }
+
+    /**
+     * Testing OS-specific behavior was proving very difficult, this constructor takes all of that pain away.
+     * @param os Fake operating system used for testing.
+     */
+    RoboZonkyInstallerListener(final OS os) {
+        operatingSystem = os;
+    }
 
     /**
      * This is a dirty ugly hack to workaround a bug in IZPack's Picocontainer. If we had the proper constructor to
@@ -224,12 +249,18 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
+    void prepareLinuxServices(final File runScript) {
+        for (final ServiceGenerator serviceGenerator : ServiceGenerator.values()) {
+            final File result = serviceGenerator.apply(runScript);
+            LOGGER.info("Generated " + result + " as a " + serviceGenerator + " service.");
+        }
+    }
+
     void prepareRunScript(final CommandLinePart commandLine) {
         if (System.getProperty("java.version").startsWith("1.8")) { // use G1GC on Java 8
             commandLine.setJvmArgument("XX:+UseG1GC");
         }
-        final boolean isWindows = Boolean.valueOf(Variables.IS_WINDOWS.getValue(DATA));
-        final RunScriptGenerator generator = isWindows ?
+        final RunScriptGenerator generator = operatingSystem == OS.WINDOWS ?
                 RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
                 : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
         final File runScript = generator.apply(commandLine);
@@ -238,6 +269,9 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             LOGGER.info("Making executable: " + script);
             script.setExecutable(true);
         });
+        if (operatingSystem == OS.LINUX) {
+            prepareLinuxServices(runScript);
+        }
     }
 
     CommandLinePart prepareLogging() {
