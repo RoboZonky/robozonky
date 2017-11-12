@@ -35,19 +35,21 @@ enum TemplateProcessor {
     private final Configuration config = TemplateProcessor.getFreemarkerConfiguration();
 
     static Configuration getFreemarkerConfiguration() {
-        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_26);
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
+        cfg.setDefaultEncoding(Defaults.CHARSET.displayName());
         return cfg;
     }
 
     public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
-        final Map<String, Object> data = new HashMap<>();
-        data.put("timestamp", Date.from(Instant.now()));
-        data.put("robozonkyUrl", Defaults.ROBOZONKY_URL);
-        data.put("embed", embeddedTemplate);
-        data.put("data", embeddedData);
+        final Map<String, Object> data = new HashMap<String, Object>() {{
+            put("timestamp", Date.from(Instant.now()));
+            put("robozonkyUrl", Defaults.ROBOZONKY_URL);
+            put("embed", embeddedTemplate);
+            put("data", embeddedData);
+        }};
         final Template template = this.config.getTemplate("core.ftl");
         final StringWriter sw = new StringWriter();
         template.process(data, sw);

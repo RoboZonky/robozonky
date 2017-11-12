@@ -104,12 +104,11 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
             try {
                 final Email email = AbstractEmailingListener.createNewEmail(properties);
                 email.setSubject(this.getSubject(event));
-                email.setMsg(
-                        TemplateProcessor.INSTANCE.process(this.getTemplateFileName(),
-                                                           this.getData(event, sessionInfo)));
-                LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.",
-                             email.getSubject(), email.getFromAddress(), email.getToAddresses(), email.getHostName(),
-                             email.getSmtpPort(), properties.getSmtpUsername());
+                email.setMsg(TemplateProcessor.INSTANCE.process(this.getTemplateFileName(),
+                                                                this.getData(event, sessionInfo)));
+                LOGGER.debug("Will send '{}' from {} to {} through {}:{} as {}.", email.getSubject(),
+                             email.getFromAddress(), email.getToAddresses(), email.getHostName(), email.getSmtpPort(),
+                             properties.getSmtpUsername());
                 email.send();
                 // perform finishers after the e-mail has been sent
                 finishers.forEach(f -> {
