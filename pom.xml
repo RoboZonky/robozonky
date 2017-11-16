@@ -464,10 +464,8 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${surefire.version}</version>
-            <configuration>
-              <reuseForks>false</reuseForks>
-              <redirectTestOutputToFile>true</redirectTestOutputToFile>
-              <workingDirectory>${basedir}/target</workingDirectory>
+            <configuration>  <!-- Only run PITest on the primary platform; takes long and occasionally fails. -->
+              <skip>true</skip>
             </configuration>
           </plugin>
         </plugins>
@@ -489,13 +487,6 @@
               <workingDirectory>${basedir}/target</workingDirectory>
               <!-- Workaround so that we don't get CNFE on javax/annotation/Priority - see SUREFIRE-1424 for more. -->
               <argLine>--add-modules java.base</argLine>
-            </configuration>
-          </plugin>
-          <plugin> <!-- Only run PITest on the primary platform; takes long and occasionally fails. -->
-            <groupId>org.pitest</groupId>
-            <artifactId>pitest-maven</artifactId>
-            <configuration>
-              <skip>true</skip>
             </configuration>
           </plugin>
         </plugins>
