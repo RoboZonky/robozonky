@@ -16,9 +16,10 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -39,7 +40,8 @@ import org.slf4j.LoggerFactory;
 public class NaturalLanguageStrategyService implements StrategyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageStrategyService.class);
-    private static final Map<String, ParsedStrategy> CACHE = new HashMap<>(1);
+    private static final AtomicReference<Map<String, ParsedStrategy>> CACHE =
+            new AtomicReference<>(Collections.emptyMap());
 
     private static final ANTLRErrorListener ERROR_LISTENER = new BaseErrorListener() {
 
@@ -56,14 +58,13 @@ public class NaturalLanguageStrategyService implements StrategyService {
         }
     };
 
-    private synchronized static void setCached(final String strategy, final ParsedStrategy parsed) {
-        CACHE.clear();
-        CACHE.put(strategy, parsed);
+    private static void setCached(final String strategy, final ParsedStrategy parsed) {
+        CACHE.set(Collections.singletonMap(strategy, parsed));
         LOGGER.debug("Cached strategy: {}.", parsed);
     }
 
-    private synchronized static Optional<ParsedStrategy> getCached(final String strategy) {
-        return Optional.ofNullable(CACHE.get(strategy));
+    private static Optional<ParsedStrategy> getCached(final String strategy) {
+        return Optional.ofNullable(CACHE.get().get(strategy));
     }
 
     private synchronized static ParsedStrategy parseOrCached(final String strategy) {
