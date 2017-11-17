@@ -16,12 +16,10 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -42,7 +40,8 @@ import org.slf4j.LoggerFactory;
 public class NaturalLanguageStrategyService implements StrategyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageStrategyService.class);
-    private static final Map<String, ParsedStrategy> CACHE = new HashMap<>(1);
+    private static final AtomicReference<Map<String, ParsedStrategy>> CACHE =
+            new AtomicReference<>(Collections.emptyMap());
 
     private static final ANTLRErrorListener ERROR_LISTENER = new BaseErrorListener() {
 
@@ -59,33 +58,26 @@ public class NaturalLanguageStrategyService implements StrategyService {
         }
     };
 
-    private synchronized static void setCached(final String strategy, final ParsedStrategy parsed) {
-        CACHE.clear();
-        CACHE.put(strategy, parsed);
+    private static void setCached(final String strategy, final ParsedStrategy parsed) {
+        CACHE.set(Collections.singletonMap(strategy, parsed));
         LOGGER.debug("Cached strategy: {}.", parsed);
     }
 
-    private synchronized static Optional<ParsedStrategy> getCached(final String strategy) {
-        if (CACHE.containsKey(strategy)) {
-            return Optional.of(CACHE.get(strategy));
-        } else {
-            return Optional.empty();
-        }
+    private static Optional<ParsedStrategy> getCached(final String strategy) {
+        return Optional.ofNullable(CACHE.get().get(strategy));
     }
 
-    private synchronized static ParsedStrategy parseOrCached(final String strategy) throws IOException {
-        final Optional<ParsedStrategy> cached = getCached(strategy);
-        if (cached.isPresent()) {
-            return cached.get();
-        }
-        try (final InputStream bis = new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET))) {
-            setCached(strategy, parseWithAntlr(bis));
+    private synchronized static ParsedStrategy parseOrCached(final String strategy) {
+        return getCached(strategy).orElseGet(() -> {
+            LOGGER.trace("Parsing started.");
+            final ParsedStrategy parsed = parseWithAntlr(CharStreams.fromString(strategy));
+            LOGGER.trace("Parsing finished.");
+            setCached(strategy, parsed);
             return parseOrCached(strategy); // call itself again, making use of the cache
-        }
+        });
     }
 
-    static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {
-        final CharStream s = CharStreams.fromStream(strategy);
+    static ParsedStrategy parseWithAntlr(final CharStream s) {
         final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
         l.removeErrorListeners(); // prevent any sysout
         final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(new CommonTokenStream(l));

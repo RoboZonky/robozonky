@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
@@ -30,14 +31,11 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
 
     public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private static String readUrl(final URL url) throws IOException {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {
@@ -46,8 +44,8 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
     }
 
     @Override
-    public Optional<NotificationProperties> transform(final String source) {
-        try (final ByteArrayInputStream baos = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
+    protected Optional<NotificationProperties> transform(final String source) {
+        try (final InputStream baos = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET))) {
             final Properties p = new Properties();
             p.load(baos);
             return Optional.of(new NotificationProperties(p));
@@ -58,7 +56,7 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
     }
 
     @Override
-    public Supplier<Optional<String>> getLatestSource() {
+    protected Supplier<Optional<String>> getLatestSource() {
         return this::getPropertiesContents;
     }
 
@@ -75,18 +73,13 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
             }
         }
         final File defaultConfigFile = RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION;
-        if (defaultConfigFile.canRead()) {
-            try {
-                LOGGER.debug("Read config file {}.", defaultConfigFile.getAbsolutePath());
-                final URL u = defaultConfigFile.toURI().toURL();
-                final String content = RefreshableNotificationProperties.readUrl(u);
-                return Optional.of(content);
-            } catch (final IOException ex) {
-                LOGGER.debug("Failed reading configuration file {}.", defaultConfigFile, ex);
-                return Optional.empty();
-            }
-        } else {
-            LOGGER.debug("No configuration file found.");
+        LOGGER.debug("Read config file {}.", defaultConfigFile.getAbsolutePath());
+        try {
+            final URL u = defaultConfigFile.toURI().toURL();
+            final String content = RefreshableNotificationProperties.readUrl(u);
+            return Optional.of(content);
+        } catch (final IOException ex) {
+            LOGGER.debug("Failed reading configuration file {}.", defaultConfigFile, ex);
             return Optional.empty();
         }
     }

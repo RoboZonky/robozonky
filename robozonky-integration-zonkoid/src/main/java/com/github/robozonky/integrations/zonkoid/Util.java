@@ -17,6 +17,7 @@
 package com.github.robozonky.integrations.zonkoid;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.http.HttpEntity;
@@ -27,7 +28,7 @@ class Util {
         try (final ByteArrayOutputStream outstream = new ByteArrayOutputStream()) {
             entity.writeTo(outstream);
             return new String(outstream.toByteArray(), Defaults.CHARSET);
-        } catch (final Exception e) { // don't even log the exception as it's entirely uninteresting
+        } catch (final IOException e) { // don't even log the exception as it's entirely uninteresting
             return null;
         }
     }

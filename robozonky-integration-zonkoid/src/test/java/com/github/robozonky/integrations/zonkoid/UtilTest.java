@@ -45,7 +45,7 @@ public class UtilTest {
     @Test
     public void responseFails() throws IOException {
         final HttpEntity e = Mockito.mock(HttpEntity.class);
-        Mockito.doThrow(new IllegalStateException()).when(e).writeTo(ArgumentMatchers.any());
+        Mockito.doThrow(IOException.class).when(e).writeTo(ArgumentMatchers.any());
         Assertions.assertThat(Util.readEntity(e)).isNull();
     }
 

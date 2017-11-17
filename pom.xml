@@ -470,6 +470,13 @@
               <workingDirectory>${basedir}/target</workingDirectory>
             </configuration>
           </plugin>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <configuration>  <!-- Only run PITest on the primary platform; takes long and occasionally fails. -->
+              <skip>true</skip>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -489,13 +496,6 @@
               <workingDirectory>${basedir}/target</workingDirectory>
               <!-- Workaround so that we don't get CNFE on javax/annotation/Priority - see SUREFIRE-1424 for more. -->
               <argLine>--add-modules java.base</argLine>
-            </configuration>
-          </plugin>
-          <plugin> <!-- Only run PITest on the primary platform; takes long and occasionally fails. -->
-            <groupId>org.pitest</groupId>
-            <artifactId>pitest-maven</artifactId>
-            <configuration>
-              <skip>true</skip>
             </configuration>
           </plugin>
         </plugins>
