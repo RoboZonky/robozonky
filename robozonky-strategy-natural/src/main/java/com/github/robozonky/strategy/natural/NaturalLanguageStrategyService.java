@@ -69,7 +69,9 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     private synchronized static ParsedStrategy parseOrCached(final String strategy) {
         return getCached(strategy).orElseGet(() -> {
+            LOGGER.trace("Parsing started.");
             final ParsedStrategy parsed = parseWithAntlr(CharStreams.fromString(strategy));
+            LOGGER.trace("Parsing finished.");
             setCached(strategy, parsed);
             return parseOrCached(strategy); // call itself again, making use of the cache
         });
