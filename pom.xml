@@ -462,8 +462,8 @@
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${surefire.version}</version>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
             <configuration>  <!-- Only run PITest on the primary platform; takes long and occasionally fails. -->
               <skip>true</skip>
             </configuration>
