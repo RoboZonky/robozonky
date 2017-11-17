@@ -16,9 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -66,26 +63,18 @@ public class NaturalLanguageStrategyService implements StrategyService {
     }
 
     private synchronized static Optional<ParsedStrategy> getCached(final String strategy) {
-        if (CACHE.containsKey(strategy)) {
-            return Optional.of(CACHE.get(strategy));
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(CACHE.get(strategy));
     }
 
-    private synchronized static ParsedStrategy parseOrCached(final String strategy) throws IOException {
-        final Optional<ParsedStrategy> cached = getCached(strategy);
-        if (cached.isPresent()) {
-            return cached.get();
-        }
-        try (final InputStream bis = new ByteArrayInputStream(strategy.getBytes(Defaults.CHARSET))) {
-            setCached(strategy, parseWithAntlr(bis));
+    private synchronized static ParsedStrategy parseOrCached(final String strategy) {
+        return getCached(strategy).orElseGet(() -> {
+            final ParsedStrategy parsed = parseWithAntlr(CharStreams.fromString(strategy));
+            setCached(strategy, parsed);
             return parseOrCached(strategy); // call itself again, making use of the cache
-        }
+        });
     }
 
-    static ParsedStrategy parseWithAntlr(final InputStream strategy) throws IOException {
-        final CharStream s = CharStreams.fromStream(strategy);
+    static ParsedStrategy parseWithAntlr(final CharStream s) {
         final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
         l.removeErrorListeners(); // prevent any sysout
         final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(new CommonTokenStream(l));
