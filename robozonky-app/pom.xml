@@ -28,6 +28,7 @@
 
   <properties>
     <mainClass>com.github.robozonky.app.App</mainClass>
+    <project.automatic.module.name>com.github.robozonky.app</project.automatic.module.name>
   </properties>
 
   <dependencies>

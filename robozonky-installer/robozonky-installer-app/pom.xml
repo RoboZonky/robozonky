@@ -38,6 +38,7 @@
     <izpack.dir.app>${basedir}/src/main/izpack</izpack.dir.app>
     <staging.dir>${project.build.directory}/staging</staging.dir>
     <staging.dir.app>${staging.dir}/appfiles</staging.dir.app>
+    <project.automatic.module.name>com.github.robozonky.installer.app</project.automatic.module.name>
   </properties>
 
   <dependencies>

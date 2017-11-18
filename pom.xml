@@ -38,10 +38,17 @@
   <url>http://www.robozonky.cz/</url>
 
   <properties>
-    <project.automatic.module.name>${project.groupId}.${project.artifactId}</project.automatic.module.name>
+    <!-- Default encoding is UTF-8, no matter what platform we're on. -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
+    <!-- Minimal supported JDK version is 1.8; preferred is 9 though. -->
     <java.version>1.8</java.version>
+    <!--
+      Default Java 9 automatic module name; modules may override to comply with the module system spec.
+      The RoboZonky-specific rule is that this must match the top-level package in the JAR.
+    -->
+    <project.automatic.module.name>${project.groupId}.${project.artifactId}</project.automatic.module.name>
+    <!-- Various dependency versions to be used later. -->
     <surefire.version>2.20.1</surefire.version>
     <version.org.jboss.resteasy>3.1.4.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.25</version.org.slf4j>
@@ -118,7 +125,7 @@
         <artifactId>robozonky-extensions</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <!-- RESTEasy -->
+      <!-- JAX-RS. -->
       <dependency>
         <groupId>org.jboss.spec.javax.ws.rs</groupId>
         <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
@@ -139,7 +146,7 @@
         <artifactId>resteasy-client</artifactId>
         <version>${version.org.jboss.resteasy}</version>
         <exclusions>
-          <exclusion> <!-- needs to be replaced by SLF4J -->
+          <exclusion> <!-- Needs to be replaced by SLF4J. -->
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
           </exclusion>
@@ -150,7 +157,7 @@
         <artifactId>httpclient</artifactId>
         <version>4.5.3</version>
         <exclusions>
-          <exclusion> <!-- needs to be replaced by SLF4J -->
+          <exclusion> <!-- Needs to be replaced by SLF4J. -->
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
           </exclusion>
@@ -161,7 +168,7 @@
         <artifactId>commons-io</artifactId>
         <version>2.6</version>
       </dependency>
-      <!-- Email notifications -->
+      <!-- Email notifications. -->
       <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
@@ -178,7 +185,7 @@
         <version>1.5.5</version>
         <scope>test</scope>
       </dependency>
-      <!-- Java 9 does not open this anymore -->
+      <!-- Java 9 does not open this anymore. -->
       <dependency>
         <groupId>org.glassfish.jaxb</groupId>
         <artifactId>jaxb-runtime</artifactId>
@@ -189,13 +196,13 @@
         <artifactId>activation</artifactId>
         <version>1.1.1</version>
       </dependency>
-      <!-- Misc -->
+      <!-- Misc. -->
       <dependency>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
         <version>${version.org.antlr}</version>
       </dependency>
-      <dependency> <!-- RoboZonky version comparisons -->
+      <dependency> <!-- RoboZonky version comparisons. -->
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-artifact</artifactId>
         <version>3.3.9</version>
@@ -215,7 +222,7 @@
         <artifactId>commons-lang3</artifactId>
         <version>3.7</version>
       </dependency>
-      <!-- testing -->
+      <!-- Testing. -->
       <dependency>
         <groupId>org.junit.vintage</groupId>
         <artifactId>junit-vintage-engine</artifactId>
@@ -241,13 +248,13 @@
         <artifactId>mockserver-netty</artifactId>
         <version>3.12</version>
       </dependency>
-      <!-- Logging -->
+      <!-- Logging. -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${version.org.slf4j}</version>
       </dependency>
-      <dependency> <!-- commons-logging needs to be excluded everywhere in favor of this -->
+      <dependency> <!-- commons-logging needs to be excluded everywhere in favor of this, -->
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
         <version>${version.org.slf4j}</version>
@@ -346,11 +353,11 @@
           <version>3.0.2</version>
           <configuration>
             <archive>
-              <manifest> <!-- Will be used to read RoboZonky version at runtime code -->
+              <manifest> <!-- Will be used to read RoboZonky version at runtime code. -->
                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                 <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
               </manifest>
-              <manifestEntries> <!-- Stable automatic module name on Java 9 -->
+              <manifestEntries>
                 <Automatic-Module-Name>${project.automatic.module.name}</Automatic-Module-Name>
               </manifestEntries>
             </archive>
@@ -420,18 +427,15 @@
             <targetClasses>
               <param>com.github.robozonky.*</param>
             </targetClasses>
-            <targetTests>
-              <param>*Test</param> <!-- No IT -->
-            </targetTests>
             <excludedMethods>
               <param>hashCode</param>
               <param>toString</param>
             </excludedMethods>
             <excludedClasses>
-              <!-- Mostly getters; messing up stats -->
+              <!-- Mostly getters; messing up stats. -->
               <param>com.github.robozonky.api.remote.entities.*</param>
               <param>com.github.robozonky.api.notifications.*</param>
-              <!-- Generated code; out of our control -->
+              <!-- Generated code; out of our control. -->
               <param>com.github.robozonky.strategy.natural.*Lexer*</param>
               <param>com.github.robozonky.strategy.natural.*Parser*</param>
             </excludedClasses>

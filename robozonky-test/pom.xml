@@ -26,6 +26,10 @@
   <artifactId>robozonky-test</artifactId>
   <name>RoboZonky: Utility module in support of testing</name>
 
+  <properties>
+    <project.automatic.module.name>com.github.robozonky.test</project.automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>

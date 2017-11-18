@@ -27,6 +27,10 @@
 
   <name>RoboZonky: Code shared between various modules</name>
 
+  <properties>
+    <project.automatic.module.name>com.github.robozonky.common</project.automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
