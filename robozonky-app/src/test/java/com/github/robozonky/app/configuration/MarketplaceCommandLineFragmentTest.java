@@ -16,8 +16,7 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
+import java.time.Duration;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -25,16 +24,23 @@ import org.junit.Test;
 public class MarketplaceCommandLineFragmentTest {
 
     @Test
-    public void durationBetweenChecks() {
+    public void delayBetweenPrimaryMarketplaceChecks() {
         final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
-        final TemporalAmount a = f.getDelayBetweenChecks();
-        Assertions.assertThat(a.get(ChronoUnit.SECONDS)).isEqualTo(f.delayBetweenChecks);
+        final Duration a = f.getPrimaryMarketplaceCheckDelay();
+        Assertions.assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
+    }
+
+    @Test
+    public void delayBetweenSecondaryMarketplaceChecks() {
+        final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
+        final Duration a = f.getSecondaryMarketplaceCheckDelay();
+        Assertions.assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
     }
 
     @Test
     public void durationForSleeping() {
         final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
-        final TemporalAmount a = f.getMaximumSleepDuration();
-        Assertions.assertThat(a.get(ChronoUnit.SECONDS)).isEqualTo(f.maximumSleepDuration * 60);
+        final Duration a = f.getMaximumSleepDuration();
+        Assertions.assertThat(a).isEqualByComparingTo(Duration.ofMinutes(60));
     }
 }

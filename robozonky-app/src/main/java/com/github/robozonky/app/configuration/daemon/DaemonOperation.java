@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.authentication.Authenticated;
@@ -27,12 +28,19 @@ abstract class DaemonOperation implements Runnable {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
+    private final Duration refreshInterval;
     private final Authenticated api;
     private final Consumer<Authenticated> investor;
 
-    protected DaemonOperation(final Authenticated auth, final Consumer<Authenticated> operation) {
+    protected DaemonOperation(final Authenticated auth, final Consumer<Authenticated> operation,
+                              final Duration refreshInterval) {
         this.api = auth;
         this.investor = operation;
+        this.refreshInterval = refreshInterval;
+    }
+
+    public Duration getRefreshInterval() {
+        return this.refreshInterval;
     }
 
     @Override

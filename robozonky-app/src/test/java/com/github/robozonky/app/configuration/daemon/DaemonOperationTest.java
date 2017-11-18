@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -31,7 +32,7 @@ public class DaemonOperationTest extends AbstractInvestingTest {
     private static final class CustomOperation extends DaemonOperation {
 
         public CustomOperation(final Authenticated auth, final Consumer<Authenticated> operation) {
-            super(auth, operation);
+            super(auth, operation, Duration.ofSeconds(1));
         }
     }
 
@@ -51,5 +52,6 @@ public class DaemonOperationTest extends AbstractInvestingTest {
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
         Mockito.verify(operation).accept(ArgumentMatchers.eq(a));
+        Assertions.assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }

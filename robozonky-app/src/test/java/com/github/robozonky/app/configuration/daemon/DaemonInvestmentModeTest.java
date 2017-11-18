@@ -17,8 +17,6 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collection;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.marketplaces.Marketplace;
@@ -41,36 +39,6 @@ public class DaemonInvestmentModeTest {
     }
 
     @Test
-    public void delays1() {
-        final Runnable d1 = new TestDaemon();
-        final Collection<Runnable> daemons = Arrays.asList(d1);
-        Assertions.assertThat(DaemonInvestmentMode.getDelays(daemons, 1))
-                .containsEntry(d1, 1000L);
-    }
-
-    @Test
-    public void delays2() {
-        final Runnable d1 = new TestDaemon();
-        final Runnable d2 = new TestDaemon();
-        final Collection<Runnable> daemons = Arrays.asList(d1, d2);
-        Assertions.assertThat(DaemonInvestmentMode.getDelays(daemons, 1))
-                .containsEntry(d1, 1000L)
-                .containsEntry(d2, 500L);
-    }
-
-    @Test
-    public void delays3() {
-        final Runnable d1 = new TestDaemon();
-        final Runnable d2 = new TestDaemon();
-        final Runnable d3 = new TestDaemon();
-        final Collection<Runnable> daemons = Arrays.asList(d1, d2, d3);
-        Assertions.assertThat(DaemonInvestmentMode.getDelays(daemons, 1))
-                .containsEntry(d1, 1000L)
-                .containsEntry(d2, 667L)
-                .containsEntry(d3, 334L);
-    }
-
-    @Test
     public void constructor() throws Exception {
         // setup username provider
         final SecretProvider s = SecretProvider.fallback("username");
@@ -81,7 +49,8 @@ public class DaemonInvestmentModeTest {
         // setup marketplace
         final Marketplace m = Mockito.mock(Marketplace.class);
         try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, b, true, m, "",
-                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1))) {
+                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1),
+                                                                     Duration.ofSeconds(1))) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(d.getUsername()).isEqualTo(s.getUsername());
                 softly.assertThat(d.isFaultTolerant()).isEqualTo(true);
@@ -98,7 +67,8 @@ public class DaemonInvestmentModeTest {
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final Marketplace m = Mockito.mock(Marketplace.class);
         try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, b, true, m, "",
-                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1))) {
+                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1),
+                                                                     Duration.ofSeconds(1))) {
             DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().countDown(); // don't block the thread
             Assertions.assertThat(d.get()).isEqualTo(ReturnCode.OK);
         }

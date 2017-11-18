@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.time.temporal.TemporalAmount;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -37,9 +37,8 @@ class InvestingDaemon extends DaemonOperation {
         private final AtomicBoolean registered = new AtomicBoolean(false);
         private final Consumer<Authenticated> core;
 
-        public InitializingInvestor(final Investor.Builder builder,
-                                    final Marketplace marketplace, final Refreshable<InvestmentStrategy> strategy,
-                                    final TemporalAmount maximumSleepPeriod) {
+        public InitializingInvestor(final Investor.Builder builder, final Marketplace marketplace,
+                                    final Refreshable<InvestmentStrategy> strategy, final Duration maximumSleepPeriod) {
             this.core = (auth) -> {
                 if (!registered.getAndSet(true)) { // only register the listener once
                     marketplace.registerListener((loans) -> {
@@ -63,7 +62,8 @@ class InvestingDaemon extends DaemonOperation {
     }
 
     public InvestingDaemon(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
-                           final Refreshable<InvestmentStrategy> strategy, final TemporalAmount maximumSleepPeriod) {
-        super(auth, new InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod));
+                           final Refreshable<InvestmentStrategy> strategy, final Duration maximumSleepPeriod,
+                           final Duration refreshPeriod) {
+        super(auth, new InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod), refreshPeriod);
     }
 }

@@ -16,18 +16,16 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,37 +49,25 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final boolean faultTolerant;
     private final Marketplace marketplace;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, THREAD_FACTORY);
-    private final TemporalAmount periodBetweenChecks;
-    private final Collection<Runnable> daemons;
+    private final Collection<DaemonOperation> daemons;
     private final CountDownLatch circuitBreaker;
 
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
-                                final Marketplace marketplace, final String strategyLocaion,
-                                final TemporalAmount maximumSleepPeriod, final TemporalAmount periodBetweenChecks) {
+                                final Marketplace marketplace, final String strategyLocation,
+                                final Duration maximumSleepPeriod, final Duration primaryMarketplaceCheckPeriod,
+                                final Duration secondaryMarketplaceCheckPerid) {
         this.username = auth.getSecretProvider().getUsername();
         this.faultTolerant = isFaultTolerant;
         this.circuitBreaker = BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
         Runtime.getRuntime().addShutdownHook(new DaemonShutdownHook(circuitBreaker));
         this.marketplace = marketplace;
-        this.periodBetweenChecks = periodBetweenChecks;
         final boolean dryRun = builder.isDryRun();
-        Portfolio.INSTANCE.registerUpdater(new Selling(new RefreshableSellStrategy(strategyLocaion), dryRun));
+        Portfolio.INSTANCE.registerUpdater(new Selling(new RefreshableSellStrategy(strategyLocation), dryRun));
         this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace,
-                                                         new RefreshableInvestmentStrategy(strategyLocaion),
-                                                         maximumSleepPeriod),
-                                     new PurchasingDaemon(auth, new RefreshablePurchaseStrategy(strategyLocaion),
-                                                          maximumSleepPeriod, dryRun));
-    }
-
-    static Map<Runnable, Long> getDelays(final Collection<Runnable> daemons, final long checkPeriodInSeconds) {
-        final Map<Runnable, Long> result = new LinkedHashMap<>(daemons.size());
-        final long delay = (checkPeriodInSeconds * 1000) / daemons.size();
-        long currentDelay = checkPeriodInSeconds * 1000;
-        for (final Runnable d : daemons) {
-            result.put(d, currentDelay);
-            currentDelay -= delay;
-        }
-        return result;
+                                                         new RefreshableInvestmentStrategy(strategyLocation),
+                                                         maximumSleepPeriod, primaryMarketplaceCheckPeriod),
+                                     new PurchasingDaemon(auth, new RefreshablePurchaseStrategy(strategyLocation),
+                                                          maximumSleepPeriod, secondaryMarketplaceCheckPerid, dryRun));
     }
 
     private static Runnable wrapDaemonWithPortfolioWait(final Runnable daemon) {
@@ -96,14 +82,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
     @Override
     public ReturnCode get() {
         try {
-            final long checkPeriodInSeconds = this.periodBetweenChecks.get(ChronoUnit.SECONDS);
-            LOGGER.debug("Scheduling marketplace checks {} seconds apart.", checkPeriodInSeconds);
             // schedule the tasks some time apart so that the CPU is evenly utilized
-            getDelays(daemons, checkPeriodInSeconds).forEach((daemon, delayInMillis) -> {
-                LOGGER.trace("Scheduling {}.", daemon);
-                final Runnable task = wrapDaemonWithPortfolioWait(daemon);
-                executor.scheduleWithFixedDelay(task, delayInMillis, checkPeriodInSeconds * 1000,
-                                                TimeUnit.MILLISECONDS);
+            final LongAdder daemonCount = new LongAdder();
+            daemons.forEach(d -> {
+                final long refreshInterval = d.getRefreshInterval().getSeconds() * 1000;
+                final long initialDelay = daemonCount.sum() * 250; // schedule daemons quarter second apart
+                final Runnable task = wrapDaemonWithPortfolioWait(d);
+                LOGGER.trace("Scheduling {} every {} ms, starting in {} ms.", d, refreshInterval, initialDelay);
+                executor.scheduleWithFixedDelay(task, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
+                daemonCount.increment(); // increment the counter so that the next daemon is scheduled with
             });
             // block until request to stop the app is received
             LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);

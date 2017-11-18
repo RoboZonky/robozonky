@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.time.temporal.TemporalAmount;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -29,10 +29,10 @@ import com.github.robozonky.app.purchasing.Purchasing;
 class PurchasingDaemon extends DaemonOperation {
 
     public PurchasingDaemon(final Authenticated auth, final Refreshable<PurchaseStrategy> strategy,
-                            final TemporalAmount maximumSleepPeriod, final boolean isDryRun) {
+                            final Duration maximumSleepPeriod, final Duration refreshPeriod, final boolean isDryRun) {
         super(auth, api -> api.run(zonky -> {
             final Collection<Participation> p = zonky.getAvailableParticipations().collect(Collectors.toList());
             new Purchasing(strategy, zonky, maximumSleepPeriod, isDryRun).apply(p);
-        }));
+        }), refreshPeriod);
     }
 }

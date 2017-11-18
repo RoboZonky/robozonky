@@ -23,6 +23,7 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -34,10 +35,11 @@ public class InvestmentDaemonTest {
         final Authenticated a = Mockito.mock(Authenticated.class);
         final Marketplace m = Mockito.mock(Marketplace.class);
         final Refreshable<InvestmentStrategy> r = Refreshable.createImmutable(null);
-        InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, r, Duration.ZERO);
+        InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, r, Duration.ZERO, Duration.ofSeconds(1));
         d.run();
         d.run();
         Mockito.verify(m, Mockito.times(2)).run();
         Mockito.verify(m, Mockito.times(1)).registerListener(ArgumentMatchers.any());
+        Assertions.assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }

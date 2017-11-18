@@ -33,23 +33,24 @@ import com.github.robozonky.util.Scheduler;
 class DaemonOperatingMode extends OperatingMode {
 
     @ParametersDelegate
-    MarketplaceCommandLineFragment marketplaceFragment = new MarketplaceCommandLineFragment();
+    MarketplaceCommandLineFragment marketplace = new MarketplaceCommandLineFragment();
 
     @ParametersDelegate
-    StrategyCommandLineFragment strategyFragment = new StrategyCommandLineFragment();
+    StrategyCommandLineFragment strategy = new StrategyCommandLineFragment();
 
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
         final boolean isFaultTolerant = cli.getTweaksFragment().isFaultTolerant();
-        final Credentials cred = new Credentials(marketplaceFragment.getMarketplaceCredentials(),
+        final Credentials cred = new Credentials(marketplace.getMarketplaceCredentials(),
                                                  auth.getSecretProvider());
         return MarketplaceLoader.load(cred)
-                .map(marketplace -> {
-                    final InvestmentMode m = new DaemonInvestmentMode(auth, builder, isFaultTolerant, marketplace,
-                                                                      strategyFragment.getStrategyLocation(),
-                                                                      marketplaceFragment.getMaximumSleepDuration(),
-                                                                      marketplaceFragment.getDelayBetweenChecks());
+                .map(marketplaceImpl -> {
+                    final InvestmentMode m = new DaemonInvestmentMode(auth, builder, isFaultTolerant, marketplaceImpl,
+                                                                      strategy.getStrategyLocation(),
+                                                                      marketplace.getMaximumSleepDuration(),
+                                                                      marketplace.getPrimaryMarketplaceCheckDelay(),
+                                                                      marketplace.getSecondaryMarketplaceCheckDelay());
                     // only schedule internal data updates after daemon had a chance to initialize
                     Scheduler.inBackground().submit(new PortfolioUpdater(auth), Duration.ofHours(1));
                     return Optional.of(m);
