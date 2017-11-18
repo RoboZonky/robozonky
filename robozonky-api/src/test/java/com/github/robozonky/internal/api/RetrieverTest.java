@@ -29,7 +29,7 @@ public class RetrieverTest {
     @Test
     public void throwing() {
         final Supplier<Optional<String>> s = Mockito.mock(Supplier.class);
-        Mockito.doThrow(InterruptedException.class).when(s).get();
+        Mockito.doThrow(IllegalStateException.class).when(s).get();
         Assertions.assertThat(Retriever.retrieve(s)).isEmpty();
     }
 

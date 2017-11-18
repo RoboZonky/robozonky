@@ -46,7 +46,7 @@ public class Retriever<T> implements ForkJoinPool.ManagedBlocker {
         try {
             ForkJoinPool.managedBlock(retriever);
             return retriever.getValue();
-        } catch (final InterruptedException ex) {
+        } catch (final Exception ex) {
             Retriever.LOGGER.warn("Failed retrieving {}.", retriever);
             return Optional.empty();
         }

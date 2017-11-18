@@ -17,7 +17,6 @@
 package com.github.robozonky.app.configuration;
 
 import java.io.File;
-import java.security.KeyStoreException;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -47,8 +46,7 @@ public class SecretProviderFactoryTest {
 
     @Test
     public void wrongFormatKeyStoreProvided() throws Exception {
-        final File tmp = Mockito.mock(File.class);
-        Mockito.doThrow(KeyStoreException.class).when(tmp).exists();
+        final File tmp = File.createTempFile("robozonky-", ".keystore"); // empty key store
         final AuthenticationCommandLineFragment cli = SecretProviderFactoryTest.mockCli(null, tmp,
                                                                                         "password".toCharArray());
         Assertions.assertThat(SecretProviderFactory.getSecretProvider(cli)).isEmpty();

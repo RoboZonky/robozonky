@@ -19,6 +19,8 @@ package com.github.robozonky.util;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -27,9 +29,10 @@ import org.mockito.Mockito;
 public class FileUtilTest {
 
     @Test
-    public void processFaultyFiles() {
+    public void processFaultyFiles() throws MalformedURLException, URISyntaxException {
+        final URI uri = new URI("wrongproto://thisiswrong");
         final File f = Mockito.mock(File.class);
-        Mockito.doThrow(MalformedURLException.class).when(f).toURI();
+        Mockito.when(f.toURI()).thenReturn(uri);
         Assertions.assertThat(FileUtil.filesToUrls(f)).isEmpty();
     }
 
