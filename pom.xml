@@ -48,6 +48,8 @@
       The RoboZonky-specific rule is that this must match the top-level package in the JAR.
     -->
     <project.automatic.module.name>${project.groupId}.${project.artifactId}</project.automatic.module.name>
+    <!-- Expected Maven version to execute the build against. -->
+    <version.org.apache.maven>3.5.2</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
     <surefire.version>2.20.1</surefire.version>
     <version.org.jboss.resteasy>3.1.4.Final</version.org.jboss.resteasy>
@@ -205,7 +207,7 @@
       <dependency> <!-- RoboZonky version comparisons. -->
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-artifact</artifactId>
-        <version>3.3.9</version>
+        <version>${version.org.apache.maven}</version>
       </dependency>
       <dependency>
         <groupId>com.beust</groupId>
