@@ -17,11 +17,19 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
 import javax.xml.bind.annotation.XmlElement;
 
 public class OtherInvestments extends BaseEntity {
 
     private BigDecimal amount;
+    private Collection<String> otherBorrowerNicknames = Collections.emptyList();
+
+    @XmlElement
+    public Collection<String> getOtherBorrowerNicknames() {
+        return otherBorrowerNicknames;
+    }
 
     @XmlElement
     public BigDecimal getAmount() {
