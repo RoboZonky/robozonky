@@ -21,6 +21,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,14 +57,15 @@ class Delinquency implements DelinquencyMBean {
      * @param days Minimum number of days a loan is in delinquency in order to be reported. 0 returns all delinquents.
      * @return All loans that are delinquent for more than the given number of days.
      */
-    private Map<Integer, LocalDate> getOlderThan(final int days) {
+    private SortedMap<Integer, LocalDate> getOlderThan(final int days) {
         final ZoneId zone = Defaults.ZONE_ID;
         final ZonedDateTime now = LocalDate.now().atStartOfDay(zone);
         return source.getDelinquents().stream()
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .filter(d -> d.getPaymentMissedDate().atStartOfDay(zone).plusDays(days).isBefore(now))
-                .collect(Collectors.toMap(d -> d.getParent().getLoanId(),
-                                          com.github.robozonky.app.portfolio.Delinquency::getPaymentMissedDate));
+                .collect(Collectors.collectingAndThen(Collectors.toMap(d -> d.getParent().getLoanId(),
+                                                                       d -> d.getPaymentMissedDate()),
+                                                      TreeMap::new));
     }
 
     @Override
