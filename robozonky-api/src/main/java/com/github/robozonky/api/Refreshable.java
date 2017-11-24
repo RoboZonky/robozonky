@@ -39,6 +39,10 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The aim of this class is to be scheduled using a {@link ScheduledExecutorService}, while another thread is calling
  * {@link #getLatest()} to retrieve the latest version of the resource.
+ * <p>
+ * Only use this class if you need to periodically refresh a given remote resource and have the latest version of the
+ * resource available as a variable. Using this class for any other background checks will bring needless complexity
+ * that could be avoided by just scheduling a {@link Runnable} through {@link ScheduledExecutorService}.
  * @param <T> Type of the resource.
  */
 public abstract class Refreshable<T> implements Runnable {

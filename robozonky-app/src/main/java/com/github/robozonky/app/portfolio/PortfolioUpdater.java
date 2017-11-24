@@ -19,20 +19,16 @@ package com.github.robozonky.app.portfolio;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
+public class PortfolioUpdater implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
-    private static final TemporalAmount FOUR_HOURS = Duration.ofHours(4);
     private final Authenticated authenticated;
     private final BlockedAmountsUpdater blockedAmountsUpdater;
 
@@ -44,29 +40,18 @@ public class PortfolioUpdater extends Refreshable<OffsetDateTime> {
         Scheduler.inBackground().submit(blockedAmountsUpdater, oneHour, oneHour);
     }
 
-    /**
-     * Will only update once a day, after 4am. This is to make sure that the updates happen when all the overnight
-     * transactions on Zonky have cleared.
-     * @return
-     */
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
-        return () -> Optional.of(Util.getYesterdayIfAfter(FOUR_HOURS).toString());
-    }
-
-    @Override
-    protected Optional<OffsetDateTime> transform(final String source) {
+    public void run() {
         try {
             // don't execute blocked amounts update while the core portfolio is updating
-            return Optional.of(blockedAmountsUpdater.pauseFor(x -> {
+            blockedAmountsUpdater.pauseFor(x -> {
                 LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
                 authenticated.run(Portfolio.INSTANCE::update);
                 LOGGER.info("RoboZonky resumed.");
                 return OffsetDateTime.now();
-            }));
+            });
         } catch (final Throwable t) {
             new DaemonRuntimeExceptionHandler().handle(t);
-            return Optional.empty();
         }
     }
 }

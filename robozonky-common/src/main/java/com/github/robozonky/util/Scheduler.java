@@ -60,6 +60,11 @@ public class Scheduler {
         this.submit(toSchedule, Scheduler.REFRESH);
     }
 
+    public void run(final Runnable toRun) {
+        Scheduler.LOGGER.debug("Scheduling {} immediately.", toRun);
+        executor.submit(toRun);
+    }
+
     public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
         submit(toSchedule, delayInBetween, Duration.ZERO);
     }

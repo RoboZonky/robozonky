@@ -17,6 +17,8 @@
 package com.github.robozonky.app.configuration;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
@@ -38,6 +40,19 @@ class DaemonOperatingMode extends OperatingMode {
     @ParametersDelegate
     StrategyCommandLineFragment strategy = new StrategyCommandLineFragment();
 
+    private static LocalDateTime getNextFourAM(final LocalDateTime now) {
+        final LocalDateTime fourAM = LocalTime.of(4, 0).atDate(now.toLocalDate());
+        if (fourAM.isAfter(now)) {
+            return fourAM;
+        }
+        return fourAM.plusDays(1);
+    }
+
+    private static Duration timeUntil4am(final LocalDateTime now) {
+        final LocalDateTime nextFourAm = getNextFourAM(now);
+        return Duration.between(now, nextFourAm);
+    }
+
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
@@ -52,7 +67,11 @@ class DaemonOperatingMode extends OperatingMode {
                                                                       marketplace.getPrimaryMarketplaceCheckDelay(),
                                                                       marketplace.getSecondaryMarketplaceCheckDelay());
                     // only schedule internal data updates after daemon had a chance to initialize
-                    Scheduler.inBackground().submit(new PortfolioUpdater(auth), Duration.ofHours(1));
+                    final PortfolioUpdater updater = new PortfolioUpdater(auth);
+                    // schedule the first run immediately...
+                    Scheduler.inBackground().run(updater);
+                    // ... and then run every 12 hours at 4 am
+                    Scheduler.inBackground().submit(updater, Duration.ofHours(12), timeUntil4am(LocalDateTime.now()));
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }
