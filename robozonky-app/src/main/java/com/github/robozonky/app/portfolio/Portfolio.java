@@ -46,7 +46,6 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.util.ApiUtil;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +54,6 @@ public enum Portfolio {
     INSTANCE;
 
     private final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
-    private final State.ClassSpecificState STATE = State.forClass(this.getClass());
-    private final String STATE_KEY = "sold";
     private final AtomicReference<Collection<Investment>> investments = new AtomicReference<>(),
             investmentsPending = new AtomicReference<>();
     private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>();
