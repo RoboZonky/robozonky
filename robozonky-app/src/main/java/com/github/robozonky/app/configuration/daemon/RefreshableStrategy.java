@@ -26,10 +26,9 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.Scheduler;
 import org.apache.commons.io.IOUtils;
 
-abstract class RefreshableStrategy<T> extends Refreshable<T> {
+class RefreshableStrategy extends Refreshable<String> {
 
     private final URL url;
 
@@ -39,7 +38,6 @@ abstract class RefreshableStrategy<T> extends Refreshable<T> {
 
     private RefreshableStrategy(final URL target) {
         this.url = target;
-        Scheduler.inBackground().submit(this);
     }
 
     protected static URL convertToUrl(final String maybeUrl) {
@@ -64,5 +62,10 @@ abstract class RefreshableStrategy<T> extends Refreshable<T> {
                 return Optional.empty();
             }
         };
+    }
+
+    @Override
+    protected Optional<String> transform(final String source) {
+        return Optional.of(source);
     }
 }

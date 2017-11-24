@@ -16,6 +16,8 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 
 import com.github.robozonky.api.ReturnCode;
@@ -23,6 +25,8 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.internal.api.Defaults;
+import com.google.common.io.Files;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -30,12 +34,12 @@ import org.mockito.Mockito;
 
 public class DaemonInvestmentModeTest {
 
-    private static final class TestDaemon implements Runnable {
+    private static final String MINIMAL_STRATEGY = "Robot má udržovat konzervativní portfolio.";
 
-        @Override
-        public void run() {
-            // no need to do anything
-        }
+    private static File newStrategyFile() throws IOException {
+        final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
+        Files.write(MINIMAL_STRATEGY, strategy, Defaults.CHARSET);
+        return strategy;
     }
 
     @Test
@@ -74,4 +78,38 @@ public class DaemonInvestmentModeTest {
         }
         Mockito.verify(m).close();
     }
+
+    @Test
+    public void loadStrategyAsFile() throws InterruptedException, IOException {
+        final StrategyProvider r = DaemonInvestmentMode.initStrategy(newStrategyFile().getAbsolutePath());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isPresent();
+            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToPurchase()).isPresent();
+        });
+    }
+
+    @Test
+    public void loadWrongStrategyAsFile() throws InterruptedException, IOException {
+        final File tmp = File.createTempFile("robozonky-", ".cfg");
+        final StrategyProvider r = DaemonInvestmentMode.initStrategy(tmp.getAbsolutePath());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isEmpty();
+            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getToPurchase()).isEmpty();
+        });
+    }
+
+    @Test
+    public void loadStrategyAsUrl() throws IOException, InterruptedException {
+        final String url = newStrategyFile().toURI().toURL().toString();
+        final StrategyProvider r = DaemonInvestmentMode.initStrategy(url);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isPresent();
+            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToPurchase()).isPresent();
+        });
+    }
+
+
 }

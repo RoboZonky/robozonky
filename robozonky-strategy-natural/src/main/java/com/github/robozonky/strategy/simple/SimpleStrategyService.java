@@ -20,9 +20,9 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,14 +38,14 @@ import com.github.robozonky.strategy.natural.DefaultInvestmentShare;
 import com.github.robozonky.strategy.natural.DefaultPortfolio;
 import com.github.robozonky.strategy.natural.DefaultValues;
 import com.github.robozonky.strategy.natural.InvestmentSize;
-import com.github.robozonky.strategy.natural.LoanAmountCondition;
-import com.github.robozonky.strategy.natural.LoanRatingEnumeratedCondition;
-import com.github.robozonky.strategy.natural.LoanTermCondition;
-import com.github.robozonky.strategy.natural.MarketplaceFilter;
-import com.github.robozonky.strategy.natural.MarketplaceFilterCondition;
 import com.github.robozonky.strategy.natural.NaturalLanguageInvestmentStrategy;
 import com.github.robozonky.strategy.natural.ParsedStrategy;
 import com.github.robozonky.strategy.natural.PortfolioShare;
+import com.github.robozonky.strategy.natural.conditions.LoanAmountCondition;
+import com.github.robozonky.strategy.natural.conditions.LoanRatingEnumeratedCondition;
+import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,12 +56,12 @@ public class SimpleStrategyService implements StrategyService {
 
     private static int getMinimumBalance(final ImmutableConfiguration config) {
         return StrategyFileProperty.MINIMUM_BALANCE.getValue(config::getInt)
-                .orElseThrow(() -> new IllegalStateException("Minimum balance is missing."));
+                .orElseThrow(() -> new IllegalStateException("Minimum balance is missing"));
     }
 
     private static int getTargetPortfolioSize(final ImmutableConfiguration config) {
         return StrategyFileProperty.MAXIMUM_INVESTMENT.getValue(config::getInt)
-                .orElseThrow(() -> new IllegalStateException("Maximum investment is missing."));
+                .orElseThrow(() -> new IllegalStateException("Maximum investment is missing"));
     }
 
     private static int getInvestmentShare(final ImmutableConfiguration config) {
@@ -101,12 +101,12 @@ public class SimpleStrategyService implements StrategyService {
                 .forEach(c::add);
         d.setConfirmationCondition(c);
         // assemble strategy
-        final Collection<InvestmentSize> investmentSizes = Stream.of(Rating.values())
-                .map(r -> {
+        final Map<Rating, InvestmentSize> investmentSizes = Stream.of(Rating.values())
+                .collect(Collectors.toMap(Function.identity(), r -> {
                     final int min = StrategyFileProperty.MINIMUM_LOAN_AMOUNT.getValue(r, config::getInt);
                     final int max = StrategyFileProperty.MAXIMUM_LOAN_AMOUNT.getValue(r, config::getInt);
-                    return new InvestmentSize(r, min, max);
-                }).collect(Collectors.toList());
+                    return new InvestmentSize(min, max);
+                }));
         final Collection<PortfolioShare> portfolio = Stream.of(Rating.values())
                 .map(r -> {
                     final int min =
@@ -157,14 +157,11 @@ public class SimpleStrategyService implements StrategyService {
                 });
         // put all filters together
         final Collection<MarketplaceFilter> filters = Stream.of(s1, s2, s3, s4)
-                .flatMap(s -> s)
+                .flatMap(Function.identity())
                 .flatMap(s -> s.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toList());
-        final Map<Boolean, Collection<MarketplaceFilter>> resultingFilters = new HashMap<>(2);
-        resultingFilters.put(true, filters);
-        resultingFilters.put(false, Collections.emptyList()); // no secondary marketplace support
         // and create the strategy
-        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, resultingFilters,
+        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, filters, Collections.emptyList(),
                                                     Collections.emptyList());
         LOGGER.debug("Converted strategy: {}.", p);
         final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);

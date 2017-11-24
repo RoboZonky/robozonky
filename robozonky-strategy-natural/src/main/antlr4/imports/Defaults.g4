@@ -4,6 +4,7 @@ import Tokens;
 
 @header {
     import com.github.robozonky.strategy.natural.*;
+    import com.github.robozonky.strategy.natural.conditions.*;
 }
 
 defaultExpression returns [DefaultValues result]:
@@ -16,7 +17,7 @@ defaultExpression returns [DefaultValues result]:
  (c=confirmationExpression { $result.setConfirmationCondition($c.result); })?
 ;
 
-defaultInvestmentSizeExpression returns [DefaultInvestmentSize result] :
+defaultInvestmentSizeExpression returns [InvestmentSize result] :
     'Běžná výše investice je ' i=investmentSizeRatingSubExpression {
          $result = $i.result;
     }

@@ -21,10 +21,11 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -34,7 +35,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -43,9 +43,9 @@ public class InvestingTest extends AbstractInvestingTest {
 
     private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
             ALL_ACCEPTING_STRATEGY = (loans, folio) -> loans.stream().map(d -> d.recommend(200).get());
-    private static final Refreshable<InvestmentStrategy> NONE_ACCEPTING_REFRESHABLE =
-            Refreshable.createImmutable(NONE_ACCEPTING_STRATEGY), ALL_ACCEPTING_REFRESHABLE =
-            Refreshable.createImmutable(ALL_ACCEPTING_STRATEGY);
+    private static final Supplier<Optional<InvestmentStrategy>> NONE_ACCEPTING =
+            () -> Optional.of(NONE_ACCEPTING_STRATEGY),
+            ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi() {
         final Zonky zonky = Mockito.mock(Zonky.class);
@@ -53,24 +53,11 @@ public class InvestingTest extends AbstractInvestingTest {
         return zonky;
     }
 
-    private static void initRefreshable(final Refreshable<?> r) {
-        r.run();
-        Assertions.assertThat(r.getLatest()).isPresent();
-    }
-
-    @BeforeClass
-    public static void initRefreshables() {
-        initRefreshable(NONE_ACCEPTING_REFRESHABLE);
-        initRefreshable(ALL_ACCEPTING_REFRESHABLE);
-    }
-
     @Test
     public void noStrategy() {
         final Loan loan = new Loan(1, 2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Refreshable<InvestmentStrategy> r = Refreshable.createImmutable(null);
-        r.run();
-        final Investing exec = new Investing(null, r, null, Duration.ofMinutes(60));
+        final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
         Assertions.assertThat(exec.apply(Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
@@ -85,7 +72,7 @@ public class InvestingTest extends AbstractInvestingTest {
             final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
             return f.apply(mockApi());
         });
-        final Investing exec = new Investing(builder, ALL_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60));
+        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
         Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
     }
 
@@ -102,7 +89,7 @@ public class InvestingTest extends AbstractInvestingTest {
             final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
             return f.apply(zonky);
         });
-        final Investing exec = new Investing(builder, NONE_ACCEPTING_REFRESHABLE, auth, Duration.ofMinutes(60));
+        final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));
         Assertions.assertThat(exec.apply(Collections.singleton(ld))).isEmpty();
     }
 }

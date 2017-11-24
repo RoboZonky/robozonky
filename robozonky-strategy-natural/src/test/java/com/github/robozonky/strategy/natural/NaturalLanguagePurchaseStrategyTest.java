@@ -31,6 +31,8 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -68,8 +70,9 @@ public class NaturalLanguagePurchaseStrategyTest {
     public void unacceptablePortfolioDueToOverInvestment() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
-        final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyList(),
-                                                    Collections.emptyMap(), Collections.emptyList());
+        final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
+                                                    Collections.emptyList(), Collections.emptyList(),
+                                                    Collections.emptyList());
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
@@ -88,9 +91,8 @@ public class NaturalLanguagePurchaseStrategyTest {
                 return true;
             }
         }));
-        final ParsedStrategy p =
-                new ParsedStrategy(DefaultPortfolio.PROGRESSIVE,
-                                   Collections.singletonMap(Boolean.FALSE, Collections.singleton(filter)));
+        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptyList(),
+                                                    Collections.singleton(filter));
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());

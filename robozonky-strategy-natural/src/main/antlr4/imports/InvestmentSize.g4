@@ -3,17 +3,23 @@ grammar InvestmentSize;
 import Tokens;
 
 @header {
+    import java.util.Map;
+    import java.util.EnumMap;
     import com.github.robozonky.strategy.natural.*;
 }
 
-investmentSizeExpression returns [Collection<InvestmentSize> result]:
- { Collection<InvestmentSize> result = new LinkedHashSet<>(); }
- (i=investmentSizeRatingExpression { result.add($i.result); })*
- { $result = result; }
+investmentSizeExpression returns [Map<Rating, InvestmentSize> result]
+    @init {
+        final EnumMap<Rating, InvestmentSize> result = new EnumMap<>(Rating.class);
+    }:
+    (i=investmentSizeRatingExpression { result.put($i.rating, $i.size); })* {
+        $result = result;
+    }
 ;
 
-investmentSizeRatingExpression returns [InvestmentSize result] :
+investmentSizeRatingExpression returns [Rating rating, InvestmentSize size] :
     'Do úvěrů v ratingu ' r=ratingExpression 'investovat ' i=investmentSizeRatingSubExpression {
-        $result = new InvestmentSize($r.result, $i.result);
+        $rating = $r.result;
+        $size = $i.result;
     }
 ;

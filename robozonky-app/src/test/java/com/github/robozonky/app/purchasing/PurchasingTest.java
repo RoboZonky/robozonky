@@ -20,9 +20,10 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
@@ -34,7 +35,6 @@ import com.github.robozonky.app.investing.AbstractInvestingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -43,15 +43,8 @@ public class PurchasingTest extends AbstractInvestingTest {
 
     private static final PurchaseStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
             ALL_ACCEPTING_STRATEGY = (available, portfolio) -> available.stream().map(d -> d.recommend().get());
-    private static final Refreshable<PurchaseStrategy> ALL_ACCEPTING_REFRESHABLE =
-            Refreshable.createImmutable(ALL_ACCEPTING_STRATEGY), NONE_ACCEPTING_REFRESHABLE =
-            Refreshable.createImmutable(NONE_ACCEPTING_STRATEGY);
-
-    @BeforeClass
-    public static void init() {
-        ALL_ACCEPTING_REFRESHABLE.run();
-        NONE_ACCEPTING_REFRESHABLE.run();
-    }
+    private static final Supplier<Optional<PurchaseStrategy>> ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY),
+            NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi() {
         final Zonky zonky = Mockito.mock(Zonky.class);
@@ -67,9 +60,7 @@ public class PurchasingTest extends AbstractInvestingTest {
     @Test
     public void noStrategy() {
         final Participation mock = Mockito.mock(Participation.class);
-        final Refreshable<PurchaseStrategy> r = Refreshable.createImmutable(null);
-        r.run();
-        final Purchasing exec = new Purchasing(r, null, Duration.ofMinutes(60), true);
+        final Purchasing exec = new Purchasing(Optional::empty, null, Duration.ofMinutes(60), true);
         Assertions.assertThat(exec.apply(Collections.singleton(mock))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
@@ -81,7 +72,7 @@ public class PurchasingTest extends AbstractInvestingTest {
         final Zonky zonky = mockApi();
         final Participation mock = Mockito.mock(Participation.class);
         Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
-        final Purchasing exec = new Purchasing(NONE_ACCEPTING_REFRESHABLE, zonky, Duration.ofMinutes(60), true);
+        final Purchasing exec = new Purchasing(NONE_ACCEPTING, zonky, Duration.ofMinutes(60), true);
         Assertions.assertThat(exec.apply(Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).hasSize(2);
@@ -94,7 +85,7 @@ public class PurchasingTest extends AbstractInvestingTest {
     @Test
     public void noItems() {
         final Purchasing exec =
-                new Purchasing(ALL_ACCEPTING_REFRESHABLE, mockApi(), Duration.ofMinutes(60), true);
+                new Purchasing(ALL_ACCEPTING, mockApi(), Duration.ofMinutes(60), true);
         Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).isEmpty();

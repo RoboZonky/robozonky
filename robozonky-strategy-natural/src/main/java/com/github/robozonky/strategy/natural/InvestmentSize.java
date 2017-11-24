@@ -16,28 +16,41 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.api.Defaults;
 
-public class InvestmentSize extends DefaultInvestmentSize {
+public class InvestmentSize {
 
-    private final Rating rating;
+    private final int minimumInvestmentInCzk, maximumInvestmentInCzk;
 
-    public InvestmentSize(final Rating r, final int min, final int max) {
-        super(min, max);
-        this.rating = r;
+    public InvestmentSize() {
+        this(Defaults.MAXIMUM_INVESTMENT_IN_CZK);
     }
 
-    public InvestmentSize(final Rating r, final int max) {
-        super(max);
-        this.rating = r;
+    public InvestmentSize(final int maximumInvestmentInCzk) {
+        this(0, maximumInvestmentInCzk);
     }
 
-    public InvestmentSize(final Rating r, final DefaultInvestmentSize def) {
-        super(def.getMinimumInvestmentInCzk(), def.getMaximumInvestmentInCzk());
-        this.rating = r;
+    public InvestmentSize(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
+        this.minimumInvestmentInCzk = Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk);
+        this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
+        if (this.maximumInvestmentInCzk > Defaults.MAXIMUM_INVESTMENT_IN_CZK) {
+            throw new IllegalStateException("Maximum investment can not be more than 5000 CZK.");
+        }
     }
 
-    public Rating getRating() {
-        return rating;
+    public int getMinimumInvestmentInCzk() {
+        return minimumInvestmentInCzk;
+    }
+
+    public int getMaximumInvestmentInCzk() {
+        return maximumInvestmentInCzk;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultInvestmentSize{" +
+                "minimumInvestmentInCzk=" + minimumInvestmentInCzk +
+                ", maximumInvestmentInCzk=" + maximumInvestmentInCzk +
+                '}';
     }
 }

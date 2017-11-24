@@ -35,9 +35,9 @@ public class InvestmentSizeRecommenderTest {
         // no filters, as the SUT doesn't do filtering; no portfolio, as that is not used either
         final DefaultValues defaults = new DefaultValues(DefaultPortfolio.EMPTY);
         defaults.setInvestmentShare(new DefaultInvestmentShare(MAXIMUM_SHARE));
-        final InvestmentSize target = new InvestmentSize(LOAN.getRating(), MAXIMUM_INVESTMENT);
-        return new ParsedStrategy(defaults, Collections.emptyList(), Collections.singletonList(target),
-                                  Collections.emptyMap(), Collections.emptyList());
+        final InvestmentSize target = new InvestmentSize(MAXIMUM_INVESTMENT);
+        return new ParsedStrategy(defaults, Collections.emptyList(), Collections.singletonMap(LOAN.getRating(), target),
+                                  Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     }
 
     @Test

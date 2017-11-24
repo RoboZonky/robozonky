@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
@@ -47,37 +46,9 @@ public class SellingTest extends AbstractInvestingTest {
 
     private static final SellStrategy ALL_ACCEPTING_STRATEGY =
             (available, portfolio) -> available.stream().map(d -> d.recommend().get());
-    private static final SellStrategy NONE_ACCEPTING_STRATEGY =
-            (available, portfolio) -> Stream.empty();
-    private static final Refreshable<SellStrategy> ALL_ACCEPTING_REFRESHABLE =
-            new Refreshable<SellStrategy>() {
-                @Override
-                protected Supplier<Optional<String>> getLatestSource() {
-                    return () -> Optional.of("");
-                }
-
-                @Override
-                protected Optional<SellStrategy> transform(final String source) {
-                    return Optional.of(ALL_ACCEPTING_STRATEGY);
-                }
-            };
-    private static final Refreshable<SellStrategy> NONE_ACCEPTING_REFRESHABLE =
-            new Refreshable<SellStrategy>() {
-                @Override
-                protected Supplier<Optional<String>> getLatestSource() {
-                    return () -> Optional.of("");
-                }
-
-                @Override
-                protected Optional<SellStrategy> transform(final String source) {
-                    return Optional.of(NONE_ACCEPTING_STRATEGY);
-                }
-            };
-
-    static { // no need to have to do this in the tests
-        ALL_ACCEPTING_REFRESHABLE.run();
-        NONE_ACCEPTING_REFRESHABLE.run();
-    }
+    private static final SellStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty();
+    private static final Supplier<Optional<SellStrategy>> ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY),
+            NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi(final Investment... investments) {
         final Zonky zonky = Mockito.mock(Zonky.class);
@@ -97,9 +68,7 @@ public class SellingTest extends AbstractInvestingTest {
 
     @Test
     public void noSaleDueToNoStrategy() {
-        final Refreshable<SellStrategy> r = Refreshable.createImmutable(null);
-        r.run();
-        new Selling(r, true).accept(null);
+        new Selling(Optional::empty, true).accept(null);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(0);
     }
@@ -107,7 +76,7 @@ public class SellingTest extends AbstractInvestingTest {
     @Test
     public void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = mockApi();
-        new Selling(ALL_ACCEPTING_REFRESHABLE, true).accept(zonky);
+        new Selling(ALL_ACCEPTING, true).accept(zonky);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -122,7 +91,7 @@ public class SellingTest extends AbstractInvestingTest {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
         Portfolio.INSTANCE.update(zonky); // load investments
-        new Selling(NONE_ACCEPTING_REFRESHABLE, true).accept(zonky);
+        new Selling(NONE_ACCEPTING, true).accept(zonky);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -136,7 +105,7 @@ public class SellingTest extends AbstractInvestingTest {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
         Portfolio.INSTANCE.update(zonky); // load investments
-        new Selling(ALL_ACCEPTING_REFRESHABLE, isDryRun).accept(zonky);
+        new Selling(ALL_ACCEPTING, isDryRun).accept(zonky);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(5);
         SoftAssertions.assertSoftly(softly -> {

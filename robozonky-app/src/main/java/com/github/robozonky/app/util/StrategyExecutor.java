@@ -18,9 +18,10 @@ package com.github.robozonky.app.util;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.app.configuration.daemon.MarketplaceActivity;
 import com.github.robozonky.util.TextUtil;
@@ -31,13 +32,13 @@ public abstract class StrategyExecutor<T, S> implements Function<Collection<T>, 
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private final Refreshable<S> refreshableStrategy;
+    private final Supplier<Optional<S>> strategyProvider;
     private final Function<Collection<T>, MarketplaceActivity> activityProvider;
 
     protected StrategyExecutor(final Function<Collection<T>, MarketplaceActivity> activity,
-                               final Refreshable<S> strategy) {
+                               final Supplier<Optional<S>> strategy) {
         this.activityProvider = activity;
-        this.refreshableStrategy = strategy;
+        this.strategyProvider = strategy;
     }
 
     protected abstract int identify(final T item);
@@ -58,7 +59,7 @@ public abstract class StrategyExecutor<T, S> implements Function<Collection<T>, 
 
     @Override
     public Collection<Investment> apply(final Collection<T> marketplace) {
-        return refreshableStrategy.getLatest()
+        return strategyProvider.get()
                 .map(strategy -> invest(strategy, marketplace))
                 .orElseGet(() -> {
                     LOGGER.info("Asleep as there is no strategy.");

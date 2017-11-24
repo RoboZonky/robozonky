@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 public class DefaultInvestmentShare {
 
-    private final int minimumShareInPercent = 0;
+    private static final int MINIMUM_SHARE_IN_PERCENT = 0;
     private final int maximumShareInPercent;
 
     public DefaultInvestmentShare() {
@@ -27,7 +27,7 @@ public class DefaultInvestmentShare {
 
     public DefaultInvestmentShare(final int maximumShareInPercent) {
         this.maximumShareInPercent = maximumShareInPercent;
-        if (maximumShareInPercent < minimumShareInPercent) {
+        if (maximumShareInPercent < MINIMUM_SHARE_IN_PERCENT) {
             throw new IllegalArgumentException("Maximum share must be at least 0.");
         } else if (maximumShareInPercent > 100) {
             throw new IllegalArgumentException("Maximum share must be 100 at most.");
@@ -35,7 +35,7 @@ public class DefaultInvestmentShare {
     }
 
     public int getMinimumShareInPercent() {
-        return minimumShareInPercent;
+        return MINIMUM_SHARE_IN_PERCENT;
     }
 
     public int getMaximumShareInPercent() {
@@ -45,7 +45,7 @@ public class DefaultInvestmentShare {
     @Override
     public String toString() {
         return "DefaultInvestmentShare{" +
-                "minimumShareInPercent=" + minimumShareInPercent +
+                "minimumShareInPercent=" + MINIMUM_SHARE_IN_PERCENT +
                 ", maximumShareInPercent=" + maximumShareInPercent +
                 '}';
     }

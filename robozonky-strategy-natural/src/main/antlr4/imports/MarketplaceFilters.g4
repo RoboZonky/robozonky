@@ -8,21 +8,22 @@ import CommonFilters, Tokens;
     import java.util.Map;
     import java.util.HashMap;
     import com.github.robozonky.strategy.natural.*;
+    import com.github.robozonky.strategy.natural.conditions.*;
 }
 
-marketplaceFilterExpression returns [Map<Boolean, Collection<MarketplaceFilter>> result]:
-    { $result = new HashMap<>();
-      $result.put(true, new ArrayList<>());
-      $result.put(false, new ArrayList<>());
-    }
+marketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, Collection<MarketplaceFilter> secondary]
+    @init {
+        $primary = new ArrayList<>();
+        $secondary = new ArrayList<>();
+    } :
     (
         (j=jointMarketplaceFilter {
-            $result.get(true).add($j.result);
-            $result.get(false).add($j.result);
+            $primary.add($j.result);
+            $secondary.add($j.result);
         }) | (p=primaryMarketplaceFilter {
-            $result.get(true).add($p.result);
+            $primary.add($p.result);
         }) | (s=secondaryMarketplaceFilter {
-            $result.get(false).add($s.result);
+            $secondary.add($s.result);
         })
     )*
 ;

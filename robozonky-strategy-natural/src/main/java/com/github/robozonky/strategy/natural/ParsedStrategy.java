@@ -28,6 +28,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,30 +43,35 @@ public class ParsedStrategy {
     private RoboZonkyVersion minimumVersion;
 
     public ParsedStrategy(final DefaultPortfolio portfolio) {
-        this(portfolio, Collections.emptyMap());
+        this(portfolio, Collections.emptyList());
     }
 
-    ParsedStrategy(final DefaultPortfolio portfolio, final Map<Boolean, Collection<MarketplaceFilter>> filters) {
-        this(portfolio, filters, Collections.emptyList());
+    ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> primaryMarketplaceFilters) {
+        this(portfolio, primaryMarketplaceFilters, Collections.emptyList());
     }
 
-    ParsedStrategy(final DefaultPortfolio portfolio, final Map<Boolean, Collection<MarketplaceFilter>> filters,
+    ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
+                   final Collection<MarketplaceFilter> secondaryMarketplaceFilters) {
+        this(portfolio, primaryMarketplaceFilters, secondaryMarketplaceFilters, Collections.emptyList());
+    }
+
+    ParsedStrategy(final DefaultPortfolio portfolio, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
+                   final Collection<MarketplaceFilter> secondaryMarketplaceFilters,
                    final Collection<MarketplaceFilter> sellFilters) {
-        this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyList(), filters, sellFilters);
+        this(new DefaultValues(portfolio), Collections.emptyList(), Collections.emptyMap(), primaryMarketplaceFilters,
+             secondaryMarketplaceFilters, sellFilters);
     }
 
-    public ParsedStrategy(final DefaultValues defaults,
-                          final Collection<PortfolioShare> portfolio,
-                          final Collection<InvestmentSize> investmentSizes,
-                          final Map<Boolean, Collection<MarketplaceFilter>> marketplaceFilters,
+    public ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
+                          final Map<Rating, InvestmentSize> investmentSizes,
+                          final Collection<MarketplaceFilter> primaryMarketplaceFilters,
+                          final Collection<MarketplaceFilter> secondaryMarketplaceFilters,
                           final Collection<MarketplaceFilter> sellFilters) {
         this.defaults = defaults;
-        this.portfolio = portfolio.stream()
-                .collect(Collectors.toMap(PortfolioShare::getRating, Function.identity()));
-        this.investmentSizes = investmentSizes.stream()
-                .collect(Collectors.toMap(InvestmentSize::getRating, Function.identity()));
-        this.primaryMarketplaceFilters = marketplaceFilters.getOrDefault(true, Collections.emptyList());
-        this.secondaryMarketplaceFilters = marketplaceFilters.getOrDefault(false, Collections.emptyList());
+        this.portfolio = portfolio.stream().collect(Collectors.toMap(PortfolioShare::getRating, Function.identity()));
+        this.investmentSizes = investmentSizes;
+        this.primaryMarketplaceFilters = primaryMarketplaceFilters;
+        this.secondaryMarketplaceFilters = secondaryMarketplaceFilters;
         this.sellFilters = sellFilters;
         final int shareSum = sumMinimalShares();
         if (shareSum > 100) {
@@ -73,6 +79,18 @@ public class ParsedStrategy {
         } else if (shareSum < 100) {
             ParsedStrategy.LOGGER.info("Sum of minimal rating shares in the portfolio is less than 100 %.");
         }
+    }
+
+    private static boolean matchesAnyFilter(final Wrapper item, final Stream<MarketplaceFilter> filters,
+                                            final String logMessage) {
+        return filters.filter(f -> f.test(item))
+                .peek(f -> ParsedStrategy.LOGGER.debug(logMessage, item.getIdentifier(), f))
+                .findFirst()
+                .isPresent();
+    }
+
+    private static boolean matchesNoFilter(final Wrapper item, final Collection<MarketplaceFilter> filters) {
+        return !matchesAnyFilter(item, filters.stream(), "{} ignored, matched {}.");
     }
 
     private int sumMinimalShares() {
@@ -123,54 +141,39 @@ public class ParsedStrategy {
         }
     }
 
+    private InvestmentSize getInvestmentSize(final Rating rating) {
+        return investmentSizes.getOrDefault(rating, defaults.getInvestmentSize());
+    }
+
     public int getMinimumInvestmentSizeInCzk(final Rating rating) {
-        if (investmentSizes.containsKey(rating)) {
-            return investmentSizes.get(rating).getMinimumInvestmentInCzk();
-        } else { // no minimum share specified; use default
-            return defaults.getInvestmentSize().getMinimumInvestmentInCzk();
-        }
+        return getInvestmentSize(rating).getMinimumInvestmentInCzk();
     }
 
     public int getMaximumInvestmentSizeInCzk(final Rating rating) {
-        if (investmentSizes.containsKey(rating)) {
-            return investmentSizes.get(rating).getMaximumInvestmentInCzk();
-        } else { // no maximum share specified; use default
-            return defaults.getInvestmentSize().getMaximumInvestmentInCzk();
-        }
-    }
-
-    private boolean doesNotMatchMarketplaceFilter(final Wrapper item, final boolean isSecondaryMarket) {
-        final Collection<MarketplaceFilter> filters =
-                isSecondaryMarket ? secondaryMarketplaceFilters : primaryMarketplaceFilters;
-        return !filters.stream()
-                .filter(f -> f.test(item))
-                .peek(f -> ParsedStrategy.LOGGER.debug("{} ignored, matched {}.", item.getIdentifier(), f))
-                .findFirst()
-                .isPresent();
+        return getInvestmentSize(rating).getMaximumInvestmentInCzk();
     }
 
     private boolean matchesAnySellFilter(final Wrapper item) {
-        return sellFilters.stream()
-                .filter(f -> f.test(item))
-                .peek(f -> ParsedStrategy.LOGGER.debug("{} matched {}.", item.getIdentifier(), f))
-                .findFirst()
-                .isPresent();
+        return matchesAnyFilter(item, sellFilters.stream(), "{} matched {}.");
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
-        return items.parallelStream().filter(i -> doesNotMatchMarketplaceFilter(new Wrapper(i.item()), false));
+        return items.stream().filter(i -> {
+            final Wrapper w = new Wrapper(i.item());
+            return matchesNoFilter(w, primaryMarketplaceFilters);
+        });
     }
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(
             final Collection<ParticipationDescriptor> items) {
-        return items.parallelStream().filter(i -> {
+        return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
-            return doesNotMatchMarketplaceFilter(w, true);
+            return matchesNoFilter(w, secondaryMarketplaceFilters);
         });
     }
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
-        return items.parallelStream().filter(i -> {
+        return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
             return matchesAnySellFilter(w);
         });

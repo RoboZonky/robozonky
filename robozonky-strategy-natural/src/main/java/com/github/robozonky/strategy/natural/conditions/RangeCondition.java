@@ -18,10 +18,11 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.github.robozonky.strategy.natural.Util;
 
-public class RangeCondition<T> implements Condition<T> {
+class RangeCondition<T> implements Predicate<T> {
 
     private final Function<T, Number> targetAccessor;
     private final BigDecimal minInclusive, maxInclusive;

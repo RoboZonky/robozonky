@@ -22,6 +22,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -60,8 +61,7 @@ public class ParsedStrategyTest {
         // now add a filter and see no loans applicable
         final MarketplaceFilter f = Mockito.mock(MarketplaceFilter.class);
         Mockito.when(f.test(ArgumentMatchers.eq(new Wrapper(loan)))).thenReturn(true);
-        final ParsedStrategy strategy2 =
-                new ParsedStrategy(portfolio, Collections.singletonMap(Boolean.TRUE, Collections.singleton(f)));
+        final ParsedStrategy strategy2 = new ParsedStrategy(portfolio, Collections.singleton(f));
         Assertions.assertThat(strategy2.getApplicableLoans(Collections.singletonList(ld))).isEmpty();
     }
 
@@ -70,8 +70,8 @@ public class ParsedStrategyTest {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
         final PortfolioShare share = new PortfolioShare(Rating.D, 50, 100);
-        final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
-                                                           Collections.emptyList(), Collections.emptyMap(),
+        final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share), Collections.emptyMap(),
+                                                           Collections.emptyList(), Collections.emptyList(),
                                                            Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumShare(Rating.D)).isEqualTo(50);
@@ -83,9 +83,10 @@ public class ParsedStrategyTest {
     public void investmentSizes() {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
-        final InvestmentSize size = new InvestmentSize(Rating.D, 600, 1000);
+        final InvestmentSize size = new InvestmentSize(600, 1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(),
-                                                           Collections.singleton(size), Collections.emptyMap(),
+                                                           Collections.singletonMap(Rating.D, size),
+                                                           Collections.emptyList(), Collections.emptyList(),
                                                            Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.D)).isEqualTo(600);

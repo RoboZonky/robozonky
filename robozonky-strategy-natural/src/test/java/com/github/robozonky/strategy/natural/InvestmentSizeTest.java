@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
@@ -26,7 +25,7 @@ public class InvestmentSizeTest {
 
     @Test
     public void regular() {
-        final InvestmentSize s = new InvestmentSize(Rating.A, InvestmentSizeTest.MIN, InvestmentSizeTest.MAX);
+        final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MIN, InvestmentSizeTest.MAX);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MIN);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
@@ -35,7 +34,7 @@ public class InvestmentSizeTest {
 
     @Test
     public void switched() {
-        final InvestmentSize s = new InvestmentSize(Rating.A, InvestmentSizeTest.MAX, InvestmentSizeTest.MIN);
+        final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX, InvestmentSizeTest.MIN);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MIN);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
@@ -44,7 +43,7 @@ public class InvestmentSizeTest {
 
     @Test
     public void omitted() {
-        final InvestmentSize s = new InvestmentSize(Rating.A, InvestmentSizeTest.MAX);
+        final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(0);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);

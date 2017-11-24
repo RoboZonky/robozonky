@@ -20,8 +20,9 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class EnumeratedCondition<T, S> implements Condition<T> {
+class EnumeratedCondition<T, S> implements Predicate<T> {
 
     private final Function<T, S> targetAccessor;
     private final Set<S> allowedValues;
@@ -29,10 +30,6 @@ public class EnumeratedCondition<T, S> implements Condition<T> {
     public EnumeratedCondition(final Function<T, S> targetAccessor, final Collection<S> allowedValues) {
         this.targetAccessor = targetAccessor;
         this.allowedValues = new LinkedHashSet<>(allowedValues);
-    }
-
-    public Set<S> getAllowedValues() {
-        return allowedValues;
     }
 
     @Override

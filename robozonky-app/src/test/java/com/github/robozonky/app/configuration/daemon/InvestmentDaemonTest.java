@@ -17,8 +17,9 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -34,8 +35,8 @@ public class InvestmentDaemonTest {
     public void standard() {
         final Authenticated a = Mockito.mock(Authenticated.class);
         final Marketplace m = Mockito.mock(Marketplace.class);
-        final Refreshable<InvestmentStrategy> r = Refreshable.createImmutable(null);
-        InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, r, Duration.ZERO, Duration.ofSeconds(1));
+        final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
+        InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, s, Duration.ZERO, Duration.ofSeconds(1));
         d.run();
         d.run();
         Mockito.verify(m, Mockito.times(2)).run();

@@ -18,12 +18,13 @@ package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 public class DefaultValues {
 
     private final DefaultPortfolio portfolio;
     private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
-    private DefaultInvestmentSize investmentSize = new DefaultInvestmentSize();
+    private InvestmentSize investmentSize = new InvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private MarketplaceFilterCondition confirmationCondition = new MarketplaceFilterCondition() {
         // by default, do not confirm anything ever
@@ -68,15 +69,11 @@ public class DefaultValues {
         this.investmentShare = investmentShare;
     }
 
-    public MarketplaceFilterCondition getConfirmationCondition() {
-        return confirmationCondition;
-    }
-
-    public DefaultInvestmentSize getInvestmentSize() {
+    public InvestmentSize getInvestmentSize() {
         return investmentSize;
     }
 
-    public void setInvestmentSize(final DefaultInvestmentSize investmentSize) {
+    public void setInvestmentSize(final InvestmentSize investmentSize) {
         if (investmentSize == null) {
             throw new IllegalArgumentException("Default investment size must be provided.");
         }

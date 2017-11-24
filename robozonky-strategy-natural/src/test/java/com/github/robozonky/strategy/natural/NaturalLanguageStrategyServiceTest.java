@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -64,6 +65,28 @@ public class NaturalLanguageStrategyServiceTest {
         final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("only-whitespace");
         final String str = IOUtils.toString(s, Defaults.CHARSET);
         Assertions.assertThat(strategyProvider.apply(str)).isEmpty();
+    }
+
+    @Test
+    public void newlines() { // test all forms of line endings known to man
+        final String str = new String("Robot má udržovat balancované portfolio.\n \r \r\n");
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
+    }
+
+    @Test
+    public void windows1250WindowsNewlines() throws IOException {
+        // https://github.com/RoboZonky/robozonky/issues/181#issuecomment-346653495
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("newlines-ansi-windows");
+        final String str = IOUtils.toString(s, Charset.forName("windows-1250"));
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
+    }
+
+    @Test
+    public void windows1250UnixNewlines() throws IOException {
+        // https://github.com/RoboZonky/robozonky/issues/181#issuecomment-346653495
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("newlines-ansi-unix");
+        final String str = IOUtils.toString(s, Charset.forName("windows-1250"));
+        Assertions.assertThat(strategyProvider.apply(str)).isPresent();
     }
 
     @Test

@@ -79,7 +79,7 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
             final String content = RefreshableNotificationProperties.readUrl(u);
             return Optional.of(content);
         } catch (final IOException ex) {
-            LOGGER.debug("Failed reading configuration file {}.", defaultConfigFile, ex);
+            LOGGER.debug("Failed reading configuration file {}.", defaultConfigFile);
             return Optional.empty();
         }
     }

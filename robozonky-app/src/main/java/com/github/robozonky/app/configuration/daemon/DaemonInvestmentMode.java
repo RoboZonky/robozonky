@@ -37,6 +37,7 @@ import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
+import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,22 +53,30 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final Collection<DaemonOperation> daemons;
     private final CountDownLatch circuitBreaker;
 
+    static StrategyProvider initStrategy(final String strategyLocation) {
+        final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
+        final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
+        strategy.registerListener(sp);
+        Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
+        return sp;
+    }
+
     public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
                                 final Marketplace marketplace, final String strategyLocation,
                                 final Duration maximumSleepPeriod, final Duration primaryMarketplaceCheckPeriod,
-                                final Duration secondaryMarketplaceCheckPerid) {
+                                final Duration secondaryMarketplaceCheckPeriod) {
         this.username = auth.getSecretProvider().getUsername();
         this.faultTolerant = isFaultTolerant;
         this.circuitBreaker = BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
         Runtime.getRuntime().addShutdownHook(new DaemonShutdownHook(circuitBreaker));
         this.marketplace = marketplace;
         final boolean dryRun = builder.isDryRun();
-        Portfolio.INSTANCE.registerUpdater(new Selling(new RefreshableSellStrategy(strategyLocation), dryRun));
-        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace,
-                                                         new RefreshableInvestmentStrategy(strategyLocation),
+        final StrategyProvider sp = initStrategy(strategyLocation);
+        Portfolio.INSTANCE.registerUpdater(new Selling(sp::getToSell, dryRun));
+        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, sp::getToInvest,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
-                                     new PurchasingDaemon(auth, new RefreshablePurchaseStrategy(strategyLocation),
-                                                          maximumSleepPeriod, secondaryMarketplaceCheckPerid, dryRun));
+                                     new PurchasingDaemon(auth, sp::getToPurchase, maximumSleepPeriod,
+                                                          secondaryMarketplaceCheckPeriod, dryRun));
     }
 
     private static Runnable wrapDaemonWithPortfolioWait(final Runnable daemon) {

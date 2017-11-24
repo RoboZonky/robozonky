@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
@@ -44,10 +44,10 @@ public class Selling implements Consumer<Zonky> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 
-    private final Refreshable<SellStrategy> strategy;
+    private final Supplier<Optional<SellStrategy>> strategy;
     private final boolean isDryRun;
 
-    public Selling(final Refreshable<SellStrategy> strategy, final boolean isDryRun) {
+    public Selling(final Supplier<Optional<SellStrategy>> strategy, final boolean isDryRun) {
         this.strategy = strategy;
         this.isDryRun = isDryRun;
     }
@@ -92,6 +92,6 @@ public class Selling implements Consumer<Zonky> {
 
     @Override
     public void accept(final Zonky zonky) {
-        strategy.getLatest().ifPresent(s -> sell(s, zonky));
+        strategy.get().ifPresent(s -> sell(s, zonky));
     }
 }

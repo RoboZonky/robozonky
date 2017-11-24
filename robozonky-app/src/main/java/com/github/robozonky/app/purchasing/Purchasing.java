@@ -18,9 +18,10 @@ package com.github.robozonky.app.purchasing;
 
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -39,7 +40,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     private final Zonky zonky;
     private final boolean dryRun;
 
-    public Purchasing(final Refreshable<PurchaseStrategy> strategy, final Zonky zonky,
+    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Zonky zonky,
                       final TemporalAmount maximumSleepPeriod, final boolean dryRun) {
         super((l) -> new Activity(l, maximumSleepPeriod), strategy);
         this.zonky = zonky;

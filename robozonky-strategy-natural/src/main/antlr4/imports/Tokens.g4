@@ -9,6 +9,7 @@ grammar Tokens;
     import com.github.robozonky.api.remote.enums.*;
     import com.github.robozonky.api.remote.entities.*;
     import com.github.robozonky.strategy.natural.*;
+    import com.github.robozonky.strategy.natural.conditions.*;
 }
 
 portfolioExpression returns [DefaultPortfolio result] :
@@ -49,14 +50,14 @@ ratingEnumeratedExpression returns [Collection<Rating> result]:
     r3=ratingExpression { $result.add($r3.result); }
 ;
 
-investmentSizeRatingSubExpression returns [DefaultInvestmentSize result] :
+investmentSizeRatingSubExpression returns [InvestmentSize result] :
     (
         (amount=intExpr
-            { $result = new DefaultInvestmentSize($amount.result, $amount.result); })
+            { $result = new InvestmentSize($amount.result, $amount.result); })
         | ('až' max=intExpr
-            { $result = new DefaultInvestmentSize($max.result); })
+            { $result = new InvestmentSize($max.result); })
         | (min=intExpr UP_TO max=intExpr
-            { $result = new DefaultInvestmentSize($min.result, $max.result); })
+            { $result = new InvestmentSize($min.result, $max.result); })
     ) KC DOT
 ;
 
@@ -164,7 +165,7 @@ FLOAT      : DIGIT+ COMMA DIGIT+;
 
 // skip whitespace and comments
 COMMENT     : '#' ~[\r\n]* NEWLINE -> skip ;
-NEWLINE     : ('\r'? '\n') -> skip;
+NEWLINE     : ('\r\n' | '\r' | '\n') -> skip;
 WHITESPACE  : [ \t]+ -> skip;
 
 fragment DIGIT: [0-9];

@@ -18,8 +18,9 @@ package com.github.robozonky.app.investing;
 
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -31,7 +32,7 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     private final Authenticated auth;
     private final Investor.Builder investor;
 
-    public Investing(final Investor.Builder investor, final Refreshable<InvestmentStrategy> strategy,
+    public Investing(final Investor.Builder investor, final Supplier<Optional<InvestmentStrategy>> strategy,
                      final Authenticated auth, final TemporalAmount maximumSleepPeriod) {
         super((l) -> new Activity(l, maximumSleepPeriod), strategy);
         this.auth = auth;

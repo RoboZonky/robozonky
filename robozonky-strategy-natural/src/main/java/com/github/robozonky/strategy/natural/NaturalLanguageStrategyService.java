@@ -48,13 +48,9 @@ public class NaturalLanguageStrategyService implements StrategyService {
         @Override
         public void syntaxError(final Recognizer<?, ?> recognizer, final Object offendingSymbol, final int line,
                                 final int charPositionInLine, final String msg, final RecognitionException e) {
-            String sourceName = recognizer.getInputStream().getSourceName();
-            if (!sourceName.isEmpty()) {
-                sourceName = String.format("%s:%d:%d: ", sourceName, line, charPositionInLine);
-            }
-            final String error = sourceName + "line " + line + ":" + charPositionInLine + " " + msg
-                    + ", offending symbol: " + offendingSymbol;
-            throw new IllegalStateException("Syntax error: " + error, e);
+            final String error = "Syntax error at " + line + ":" + charPositionInLine + ", offending symbol "
+                    + offendingSymbol + ", message: " + msg;
+            throw new IllegalStateException(error, e);
         }
     };
 
@@ -91,9 +87,8 @@ public class NaturalLanguageStrategyService implements StrategyService {
         if (currentVersion == null) { // means latest snapshot; see javadoc for Defaults.ROBOZONKY_VERSION
             return true;
         }
-        final RoboZonkyVersion current = new RoboZonkyVersion(currentVersion);
         return s.getMinimumVersion()
-                .map(minimum -> current.compareTo(minimum) >= 0)
+                .map(minimum -> new RoboZonkyVersion(currentVersion).compareTo(minimum) >= 0)
                 .orElse(true);
     }
 
@@ -102,16 +97,13 @@ public class NaturalLanguageStrategyService implements StrategyService {
             final ParsedStrategy s = parseOrCached(strategy);
             if (isSupported(s)) {
                 return Optional.of(constructor.apply(s));
-            } else {
-                LOGGER.warn("Strategy only supports RoboZonky {} or later. Please upgrade.",
-                            s.getMinimumVersion().get());
-                return Optional.empty();
             }
+            LOGGER.warn("Strategy only supports RoboZonky {} or later. Please upgrade.", s.getMinimumVersion().get());
         } catch (final Exception ex) {
-            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, OK if using different: {}.",
+            NaturalLanguageStrategyService.LOGGER.debug("Failed parsing strategy, may try others. Reason: {}.",
                                                         ex.getMessage());
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
