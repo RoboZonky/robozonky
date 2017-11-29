@@ -62,7 +62,8 @@ public class PurchasingTest extends AbstractInvestingTest {
     public void noStrategy() {
         final Participation mock = Mockito.mock(Participation.class);
         final Purchasing exec = new Purchasing(Optional::empty, null, Duration.ofMinutes(60), true);
-        Assertions.assertThat(exec.apply(new Portfolio(), Collections.singleton(mock))).isEmpty();
+        final Portfolio portfolio = Mockito.mock(Portfolio.class);
+        Assertions.assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).isEmpty();
@@ -74,7 +75,9 @@ public class PurchasingTest extends AbstractInvestingTest {
         final Participation mock = Mockito.mock(Participation.class);
         Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final Purchasing exec = new Purchasing(NONE_ACCEPTING, zonky, Duration.ofMinutes(60), true);
-        Assertions.assertThat(exec.apply(new Portfolio(), Collections.singleton(mock))).isEmpty();
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present."));
+        Assertions.assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -85,9 +88,12 @@ public class PurchasingTest extends AbstractInvestingTest {
 
     @Test
     public void noItems() {
+        final Zonky zonky = mockApi();
         final Purchasing exec =
-                new Purchasing(ALL_ACCEPTING, mockApi(), Duration.ofMinutes(60), true);
-        Assertions.assertThat(exec.apply(new Portfolio(), Collections.emptyList())).isEmpty();
+                new Purchasing(ALL_ACCEPTING, zonky, Duration.ofMinutes(60), true);
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present."));
+        Assertions.assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).isEmpty();
     }

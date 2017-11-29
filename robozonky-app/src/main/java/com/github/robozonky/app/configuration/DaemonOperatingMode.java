@@ -68,8 +68,8 @@ class DaemonOperatingMode extends OperatingMode {
                                                                       marketplace.getSecondaryMarketplaceCheckDelay());
                     // only schedule internal data updates after daemon had a chance to initialize
                     final PortfolioUpdater updater = new PortfolioUpdater(auth);
-                    // schedule the first run immediately...
-                    Scheduler.inBackground().run(updater);
+                    // run the first iteration immediately...
+                    updater.run();
                     // ... and then run every 12 hours at 4 am
                     Scheduler.inBackground().submit(updater, Duration.ofHours(12), timeUntil4am(LocalDateTime.now()));
                     return Optional.of(m);

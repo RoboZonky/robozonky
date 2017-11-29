@@ -34,7 +34,7 @@ public class DaemonOperationTest extends AbstractInvestingTest {
     private static final class CustomOperation extends DaemonOperation {
 
         public CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
-            super(auth, () -> Optional.of(new Portfolio()), operation, Duration.ofSeconds(1));
+            super(auth, () -> Optional.of(Mockito.mock(Portfolio.class)), operation, Duration.ofSeconds(1));
         }
     }
 

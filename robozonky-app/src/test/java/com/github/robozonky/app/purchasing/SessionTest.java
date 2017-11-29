@@ -53,8 +53,10 @@ public class SessionTest extends AbstractInvestingTest {
 
     @Test
     public void empty() {
-        final Collection<Investment> i = Session.purchase(new Portfolio(), mockZonky(), Collections.emptyList(), null,
-                                                          true);
+        final Zonky z = mockZonky();
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.emptyList(), null, true);
         Assertions.assertThat(i).isEmpty();
     }
 
@@ -71,7 +73,10 @@ public class SessionTest extends AbstractInvestingTest {
                     .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
         });
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(new Portfolio(), mockZonky(), Collections.singleton(pd), s,
+        final Zonky z = mockZonky();
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd), s,
                                                           true);
         Assertions.assertThat(i).isEmpty();
         Assertions.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
@@ -97,8 +102,10 @@ public class SessionTest extends AbstractInvestingTest {
         });
         final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(new Portfolio(), zonky, Collections.singleton(pd), s, true);
+        final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd), s, true);
         Assertions.assertThat(i).hasSize(1);
         Assertions.assertThat(this.getNewEvents()).hasSize(5);
     }

@@ -37,8 +37,9 @@ public class InvestmentDaemonTest {
         final Authenticated a = Mockito.mock(Authenticated.class);
         final Marketplace m = Mockito.mock(Marketplace.class);
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
-        InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, s, () -> Optional.of(new Portfolio()),
-                                                Duration.ZERO, Duration.ofSeconds(1));
+        InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, s,
+                                                () -> Optional.of(Mockito.mock(Portfolio.class)), Duration.ZERO,
+                                                Duration.ofSeconds(1));
         d.run();
         d.run();
         Mockito.verify(m, Mockito.times(2)).run();

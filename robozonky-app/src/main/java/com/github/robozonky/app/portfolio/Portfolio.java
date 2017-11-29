@@ -19,16 +19,12 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -50,76 +46,51 @@ import org.slf4j.LoggerFactory;
 
 public class Portfolio {
 
-    public static final Portfolio INSTANCE = new Portfolio();
+    private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
+    private final Collection<Investment> investments, investmentsPending = new ArrayList<>(0);
+    private final SortedMap<Integer, Loan> loanCache = new TreeMap<>();
 
-    private final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
-    private final AtomicReference<Collection<Investment>> investments = new AtomicReference<>(),
-            investmentsPending = new AtomicReference<>();
-    private final AtomicReference<SortedMap<Integer, Loan>> loanCache = new AtomicReference<>();
-    /**
-     * Never iterate over directly, always use {@link #getUpdaters()}.
-     */
-    private final Set<PortfolioBased> updaters = new CopyOnWriteArraySet<>();
-    private final AtomicBoolean ranOnce = new AtomicBoolean(false), isUpdating = new AtomicBoolean(false);
-
-    public Portfolio() {
-        reset();
+    public Portfolio(final Collection<Investment> investments) {
+        this.investments = new ArrayList<>(investments);
     }
 
-    private static <T> Stream<T> getStream(final AtomicReference<Collection<T>> source,
-                                           final Function<Stream<T>, Stream<T>> modifier) {
-        if (source.get() == null) {
-            return Stream.empty();
-        } else {
-            return modifier.apply(source.get().stream());
+    public static Optional<Portfolio> create(final Zonky zonky, final Stream<PortfolioBased> updaters) {
+        try {
+            LOGGER.trace("Started.");
+            final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
+            final Portfolio p = new Portfolio(online);
+            LOGGER.debug("Loaded {} investments from Zonky.", online.size());
+            updaters.forEach((u) -> {
+                LOGGER.trace("Running dependent: {}.", u);
+                u.accept(p, zonky);
+            });
+            LOGGER.trace("Finished.");
+            return Optional.of(p);
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed loading Zonky portfolio.", ex);
+            return Optional.empty();
         }
     }
 
-    private static <T> Stream<T> getStream(final AtomicReference<Collection<T>> source) {
+    public static Optional<Portfolio> create(final Zonky zonky) {
+        return create(zonky, Stream.empty());
+    }
+
+    private static <T> Stream<T> getStream(final Collection<T> source, final Function<Stream<T>, Stream<T>> modifier) {
+        if (source == null || source.isEmpty()) {
+            return Stream.empty();
+        } else {
+            return modifier.apply(source.stream());
+        }
+    }
+
+    private static <T> Stream<T> getStream(final Collection<T> source) {
         return getStream(source, Function.identity());
     }
 
     private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
         final Loan l = getLoan(zonky, blockedAmount.getLoanId());
         return new Investment(l, blockedAmount.getAmount().intValue());
-    }
-
-    private Stream<PortfolioBased> getUpdaters() {
-        /*
-         * core updaters to get the full picture. checks for blocked amounts immediately after every update of the
-         * portfolio, also checks for delinquencies.
-         */
-        final Stream<PortfolioBased> core = Stream.of(BlockedAmounts.INSTANCE, Delinquents.INSTANCE);
-        final Stream<PortfolioBased> external = updaters.stream();
-        return Stream.concat(core, external);
-    }
-
-    public void registerUpdater(final PortfolioBased updater) {
-        LOGGER.debug("Registering dependent: {}.", updater);
-        updaters.add(updater);
-    }
-
-    public void update(final Zonky zonky) {
-        if (this.isUpdating.getAndSet(true)) {
-            LOGGER.trace("Update ignored due to already being updated.");
-            return;
-        } else {
-            try {
-                LOGGER.trace("Started.");
-                init();
-                final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
-                investments.set(online);
-                LOGGER.debug("Loaded {} investments from Zonky.", online.size());
-                getUpdaters().forEach((u) -> {
-                    LOGGER.trace("Running dependent: {}.", u);
-                    u.accept(this, zonky);
-                });
-                LOGGER.trace("Finished.");
-                this.ranOnce.set(true);
-            } finally { // never end if a intermediate state
-                this.isUpdating.set(false);
-            }
-        }
     }
 
     public void newBlockedAmounts(final Zonky zonky, final SortedSet<BlockedAmount> blockedAmounts) {
@@ -138,16 +109,10 @@ public class Portfolio {
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchase notified from within RoboZonky
-                investmentsPending.updateAndGet(pending -> {
-                    final Investment newcomer = toInvestment(zonky, blockedAmount);
-                    if (pending == null) {
-                        return new ArrayList<>(Collections.singleton(newcomer)); // must be a modifiable collection...
-                    }
-                    if (pending.stream().noneMatch(equalsBlockedAmount)) {
-                        pending.add(newcomer); // ... because here it gets modified
-                    }
-                    return pending;
-                });
+                final Investment newcomer = toInvestment(zonky, blockedAmount);
+                if (investmentsPending.stream().noneMatch(equalsBlockedAmount)) {
+                    investmentsPending.add(newcomer); // ... because here it gets modified
+                }
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
                 // before daily update is run, the newly sold participation will show as active
@@ -165,10 +130,6 @@ public class Portfolio {
             default: // no other notable events
                 return;
         }
-    }
-
-    public boolean isUpdating() {
-        return !this.ranOnce.get() || this.isUpdating.get();
     }
 
     public Stream<Investment> getActiveWithPaymentStatus(final Set<PaymentStatus> statuses) {
@@ -203,7 +164,7 @@ public class Portfolio {
     }
 
     public Loan getLoan(final Zonky zonky, final int loanId) {
-        return loanCache.get().compute(loanId, (key, value) -> {
+        return loanCache.compute(loanId, (key, value) -> {
             if (value != null) {
                 return value;
             }
@@ -212,23 +173,6 @@ public class Portfolio {
     }
 
     public Optional<Loan> getLoan(final int loanId) {
-        return Optional.ofNullable(loanCache.get().get(loanId));
+        return Optional.ofNullable(loanCache.get(loanId));
     }
-
-    private void init() {
-        investments.set(null);
-        investmentsPending.set(null);
-        loanCache.set(new TreeMap<>());
-    }
-
-    /**
-     * For test purposes only.
-     */
-    public void reset() {
-        init();
-        updaters.clear();
-        ranOnce.set(false);
-        isUpdating.set(false);
-    }
-
 }

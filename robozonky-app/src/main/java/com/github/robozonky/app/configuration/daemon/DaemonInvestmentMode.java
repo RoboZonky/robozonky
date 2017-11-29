@@ -19,7 +19,6 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,7 +26,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,7 +34,7 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioUpdater;
 import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;
@@ -74,8 +72,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.marketplace = marketplace;
         final boolean dryRun = builder.isDryRun();
         final StrategyProvider sp = initStrategy(strategyLocation);
-        Portfolio.INSTANCE.registerUpdater(new Selling(sp::getToSell, dryRun));
-        final Supplier<Optional<Portfolio>> p = () -> Optional.of(Portfolio.INSTANCE);
+        final PortfolioUpdater p = new PortfolioUpdater(auth);
+        p.registerUpdater(new Selling(sp::getToSell, dryRun));
         this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, sp::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
                                      new PurchasingDaemon(auth, sp::getToPurchase, p, maximumSleepPeriod,

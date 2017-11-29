@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.robozonky.api.notifications.Event;
@@ -31,7 +30,6 @@ import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -56,7 +54,9 @@ public class SessionTest extends AbstractInvestingTest {
         final Zonky zonky = AbstractInvestingTest.harmlessZonky(10_000);
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
-        try (final Session it = Session.create(new Portfolio(), new Investor.Builder(), zonky, lds)) {
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session it = Session.create(portfolio, new Investor.Builder(), zonky, lds)) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(it.getAvailable())
                         .isNotSameAs(lds)
@@ -64,7 +64,7 @@ public class SessionTest extends AbstractInvestingTest {
                 softly.assertThat(it.getResult()).isEmpty();
             });
             // no new sessions should be allowed before the current one is disposed of
-            Assertions.assertThatThrownBy(() -> Session.create(new Portfolio(), new Investor.Builder(), zonky, lds))
+            Assertions.assertThatThrownBy(() -> Session.create(portfolio, new Investor.Builder(), zonky, lds))
                     .isInstanceOf(IllegalStateException.class);
         }
     }
@@ -80,31 +80,13 @@ public class SessionTest extends AbstractInvestingTest {
         // setup APIs
         final Zonky zonky = AbstractInvestingTest.harmlessZonky(10_000);
         // test that the loan is not available
-        try (final Session it = Session.create(new Portfolio(), new Investor.Builder(), zonky, lds)) {
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session it = Session.create(portfolio, new Investor.Builder(), zonky, lds)) {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(it.getAvailable())
                         .hasSize(1)
                         .doesNotContain(ld);
-                softly.assertThat(it.getResult()).isEmpty();
-            });
-        }
-    }
-
-    @Test
-    public void registeringPreexistingInvestments() {
-        final int loanId = 1;
-        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor(loanId);
-        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
-        // setup APIs
-        final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
-        final BlockedAmount ba = new BlockedAmount(loanId, BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
-        Mockito.when(z.getBlockedAmounts()).thenReturn(Stream.of(ba));
-        Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.item());
-        final Portfolio p = new Portfolio();
-        p.update(z); // make sure data from API is loaded
-        try (final Session it = Session.create(p, new Investor.Builder(), z, lds)) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailable()).hasSize(1).doesNotContain(ld);
                 softly.assertThat(it.getResult()).isEmpty();
             });
         }
@@ -119,7 +101,9 @@ public class SessionTest extends AbstractInvestingTest {
         final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptorWithoutCaptcha();
         Mockito.when(z.getLoan(ArgumentMatchers.eq(ld.item().getId()))).thenReturn(ld.item());
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
-        try (final Session it = Session.create(new Portfolio(), new Investor.Builder(), z, lds)) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session it = Session.create(portfolio, new Investor.Builder(), z, lds)) {
             it.invest(ld.recommend(BigDecimal.valueOf(amount)).get());
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(it.getAvailable()).isNotEmpty().doesNotContain(ld);
@@ -133,8 +117,10 @@ public class SessionTest extends AbstractInvestingTest {
     public void underBalance() {
         // setup APIs
         final Zonky z = AbstractInvestingTest.harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
         // run test
-        try (final Session it = Session.create(new Portfolio(), new Investor.Builder(), z, Collections.emptyList())) {
+        try (final Session it = Session.create(portfolio, new Investor.Builder(), z, Collections.emptyList())) {
             final Optional<RecommendedLoan> recommendation = AbstractInvestingTest.mockLoanDescriptor()
                     .recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
             final boolean result = it.invest(recommendation.get());
@@ -150,7 +136,9 @@ public class SessionTest extends AbstractInvestingTest {
         final Zonky z = AbstractInvestingTest.harmlessZonky(0);
         final RecommendedLoan recommendation =
                 AbstractInvestingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
-        try (final Session t = Session.create(new Portfolio(), new Investor.Builder(), z,
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, new Investor.Builder(), z,
                                               Collections.singletonList(recommendation.descriptor()))) {
             final boolean result = t.invest(recommendation);
             // verify result
@@ -169,7 +157,9 @@ public class SessionTest extends AbstractInvestingTest {
         Mockito.doThrow(thrown).when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        try (final Session t = Session.create(new Portfolio(), b, z, Collections.emptyList())) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
             Assertions.assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
         }
     }
@@ -184,7 +174,9 @@ public class SessionTest extends AbstractInvestingTest {
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        try (final Session t = Session.create(new Portfolio(), b, z, Collections.emptyList())) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -209,7 +201,9 @@ public class SessionTest extends AbstractInvestingTest {
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        try (final Session t = Session.create(new Portfolio(), b, z, availableLoans)) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, b, z, availableLoans)) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -234,7 +228,9 @@ public class SessionTest extends AbstractInvestingTest {
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        try (final Session t = Session.create(new Portfolio(), b, z, availableLoans)) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, b, z, availableLoans)) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -260,7 +256,9 @@ public class SessionTest extends AbstractInvestingTest {
         Mockito.doReturn(Optional.empty()).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        try (final Session t = Session.create(new Portfolio(), b, z, availableLoans)) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, b, z, availableLoans)) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isFalse();
         }
@@ -287,7 +285,9 @@ public class SessionTest extends AbstractInvestingTest {
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        try (final Session t = Session.create(new Portfolio(), b, z, Collections.emptyList())) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
             final boolean result = t.invest(r);
             Assertions.assertThat(result).isTrue();
             final List<Investment> investments = t.getResult();
@@ -311,14 +311,16 @@ public class SessionTest extends AbstractInvestingTest {
     public void exclusivity() {
         final Zonky z = AbstractInvestingTest.harmlessZonky(10_000);
         final Investor.Builder b = new Investor.Builder();
-        try (final Session t = Session.create(new Portfolio(), b, z, Collections.emptyList())) {
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
             Assertions.assertThat(t).isNotNull();
             // verify second session fails
-            Assertions.assertThatThrownBy(() -> Session.create(new Portfolio(), b, z, Collections.emptyList()))
+            Assertions.assertThatThrownBy(() -> Session.create(portfolio, b, z, Collections.emptyList()))
                     .isExactlyInstanceOf(IllegalStateException.class);
         }
         // and verify sessions are properly closed
-        try (final Session t2 = Session.create(new Portfolio(), b, AbstractInvestingTest.harmlessZonky(0),
+        try (final Session t2 = Session.create(portfolio, b, AbstractInvestingTest.harmlessZonky(0),
                                                Collections.emptyList())) {
             Assertions.assertThat(t2).isNotNull();
         }
