@@ -19,6 +19,7 @@ package com.github.robozonky.app.portfolio;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.Optional;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
@@ -35,7 +36,7 @@ public class PortfolioUpdater implements Runnable {
     public PortfolioUpdater(final Authenticated authenticated) {
         this.authenticated = authenticated;
         // register periodic blocked amounts update, so that we catch Zonky operations performed outside of the robot
-        this.blockedAmountsUpdater = new BlockedAmountsUpdater(authenticated);
+        this.blockedAmountsUpdater = new BlockedAmountsUpdater(authenticated, () -> Optional.of(Portfolio.INSTANCE));
         final TemporalAmount oneHour = Duration.ofHours(1);
         Scheduler.inBackground().submit(blockedAmountsUpdater, oneHour, oneHour);
     }

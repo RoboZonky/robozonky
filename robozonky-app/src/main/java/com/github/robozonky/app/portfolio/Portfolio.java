@@ -48,9 +48,9 @@ import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public enum Portfolio {
+public class Portfolio {
 
-    INSTANCE;
+    public static final Portfolio INSTANCE = new Portfolio();
 
     private final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final AtomicReference<Collection<Investment>> investments = new AtomicReference<>(),
@@ -62,7 +62,7 @@ public enum Portfolio {
     private final Set<PortfolioBased> updaters = new CopyOnWriteArraySet<>();
     private final AtomicBoolean ranOnce = new AtomicBoolean(false), isUpdating = new AtomicBoolean(false);
 
-    Portfolio() {
+    public Portfolio() {
         reset();
     }
 

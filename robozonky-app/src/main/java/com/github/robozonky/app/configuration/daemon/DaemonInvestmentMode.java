@@ -19,6 +19,7 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,6 +27,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,19 +75,11 @@ public class DaemonInvestmentMode implements InvestmentMode {
         final boolean dryRun = builder.isDryRun();
         final StrategyProvider sp = initStrategy(strategyLocation);
         Portfolio.INSTANCE.registerUpdater(new Selling(sp::getToSell, dryRun));
-        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, sp::getToInvest,
+        final Supplier<Optional<Portfolio>> p = () -> Optional.of(Portfolio.INSTANCE);
+        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, sp::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
-                                     new PurchasingDaemon(auth, sp::getToPurchase, maximumSleepPeriod,
+                                     new PurchasingDaemon(auth, sp::getToPurchase, p, maximumSleepPeriod,
                                                           secondaryMarketplaceCheckPeriod, dryRun));
-    }
-
-    private static Runnable wrapDaemonWithPortfolioWait(final Runnable daemon) {
-        return () -> {
-            if (Portfolio.INSTANCE.isUpdating()) { // don't update while reading information about portfolio
-                return;
-            }
-            daemon.run();
-        };
     }
 
     @Override
@@ -96,9 +90,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
             daemons.forEach(d -> {
                 final long refreshInterval = d.getRefreshInterval().getSeconds() * 1000;
                 final long initialDelay = daemonCount.sum() * 250; // schedule daemons quarter second apart
-                final Runnable task = wrapDaemonWithPortfolioWait(d);
                 LOGGER.trace("Scheduling {} every {} ms, starting in {} ms.", d, refreshInterval, initialDelay);
-                executor.scheduleWithFixedDelay(task, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
+                executor.scheduleWithFixedDelay(d, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
                 daemonCount.increment(); // increment the counter so that the next daemon is scheduled with
             });
             // block until request to stop the app is received

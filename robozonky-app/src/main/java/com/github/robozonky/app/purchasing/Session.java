@@ -62,21 +62,25 @@ class Session implements AutoCloseable {
     private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>();
     private final Zonky zonky;
     private final boolean isDryRun;
+    private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
-    private Session(final Set<ParticipationDescriptor> marketplace, final Zonky zonky, final boolean dryRun) {
+    private Session(final Portfolio portfolio, final Set<ParticipationDescriptor> marketplace, final Zonky zonky,
+                    final boolean dryRun) {
         this.zonky = zonky;
         this.isDryRun = dryRun;
         this.stillAvailable = new ArrayList<>(marketplace);
-        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, dryRun);
+        this.portfolio = portfolio;
+        this.portfolioOverview = portfolio.calculateOverview(zonky, dryRun);
     }
 
-    private synchronized static Session create(final Zonky api, final Collection<ParticipationDescriptor> marketplace,
+    private synchronized static Session create(final Portfolio portfolio, final Zonky api,
+                                               final Collection<ParticipationDescriptor> marketplace,
                                                final boolean dryRun) {
         if (Session.INSTANCE.get() != null) {
             throw new IllegalStateException("Purchasing session already exists.");
         }
-        final Session s = new Session(new LinkedHashSet<>(marketplace), api, dryRun);
+        final Session s = new Session(portfolio, new LinkedHashSet<>(marketplace), api, dryRun);
         Session.INSTANCE.set(s);
         return s;
     }
@@ -90,9 +94,10 @@ class Session implements AutoCloseable {
         } while (invested);
     }
 
-    static Collection<Investment> purchase(final Zonky api, final Collection<ParticipationDescriptor> items,
+    static Collection<Investment> purchase(final Portfolio portfolio, final Zonky api,
+                                           final Collection<ParticipationDescriptor> items,
                                            final PurchaseStrategy strategy, final boolean dryRun) {
-        try (final Session session = Session.create(api, items, dryRun)) {
+        try (final Session session = Session.create(portfolio, api, items, dryRun)) {
             final Collection<ParticipationDescriptor> c = session.getAvailable();
             if (c.isEmpty()) {
                 return Collections.emptyList();
@@ -169,9 +174,9 @@ class Session implements AutoCloseable {
         final int id = i.getLoanId();
         stillAvailable.removeIf(l -> l.item().getLoanId() == id);
         final BigDecimal amount = i.getAmount();
-        Portfolio.INSTANCE.newBlockedAmount(zonky, new BlockedAmount(id, amount, TransactionCategory.SMP_BUY));
+        portfolio.newBlockedAmount(zonky, new BlockedAmount(id, amount, TransactionCategory.SMP_BUY));
         final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(amount);
-        portfolioOverview = Portfolio.INSTANCE.calculateOverview(newBalance);
+        portfolioOverview = portfolio.calculateOverview(newBalance);
     }
 
     @Override

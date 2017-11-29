@@ -26,57 +26,40 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class PortfolioTest {
 
-    @Before
-    @After
-    public void reset() {
-        Portfolio.INSTANCE.reset();
-    }
-
     @Test
     public void cache() {
         final int loanId = 1;
         final Loan loan = new Loan(loanId, 200);
-        Assertions.assertThat(Portfolio.INSTANCE.getLoan(loanId)).isEmpty();
+        final Portfolio instance = new Portfolio();
+        Assertions.assertThat(instance.getLoan(loanId)).isEmpty();
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(loan);
         // load into cache
-        Assertions.assertThat(Portfolio.INSTANCE.getLoan(z, loanId)).isSameAs(loan);
-        Assertions.assertThat(Portfolio.INSTANCE.getLoan(loanId)).contains(loan);
+        Assertions.assertThat(instance.getLoan(z, loanId)).isSameAs(loan);
+        Assertions.assertThat(instance.getLoan(loanId)).contains(loan);
         // make sure item is not reloaded form the API
         Mockito.when(z.getLoan(ArgumentMatchers.anyInt())).thenReturn(null);
-        Assertions.assertThat(Portfolio.INSTANCE.getLoan(z, loanId)).isSameAs(loan);
-        Assertions.assertThat(Portfolio.INSTANCE.getLoan(loanId)).contains(loan);
-    }
-
-    @Test
-    public void resetting() {
-        Portfolio.INSTANCE.reset();
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(Portfolio.INSTANCE.getActive()).isEmpty();
-            softly.assertThat(Portfolio.INSTANCE.getPending()).isEmpty();
-            softly.assertThat(Portfolio.INSTANCE.getLoan(1)).isEmpty();
-        });
+        Assertions.assertThat(instance.getLoan(z, loanId)).isSameAs(loan);
+        Assertions.assertThat(instance.getLoan(loanId)).contains(loan);
     }
 
     @Test
     public void updating() {
+        final Portfolio instance = new Portfolio();
         final PortfolioBased updateNeeded = Mockito.mock(PortfolioBased.class);
-        Portfolio.INSTANCE.registerUpdater(updateNeeded);
+        instance.registerUpdater(updateNeeded);
         final Zonky z = Mockito.mock(Zonky.class);
-        Assertions.assertThat(Portfolio.INSTANCE.isUpdating()).isTrue();
-        Portfolio.INSTANCE.update(z);
-        Mockito.verify(updateNeeded).accept(ArgumentMatchers.eq(Portfolio.INSTANCE), ArgumentMatchers.eq(z));
+        Assertions.assertThat(instance.isUpdating()).isTrue();
+        instance.update(z);
+        Mockito.verify(updateNeeded).accept(ArgumentMatchers.eq(instance), ArgumentMatchers.eq(z));
         Mockito.verify(z).getInvestments();
-        Assertions.assertThat(Portfolio.INSTANCE.isUpdating()).isFalse();
+        Assertions.assertThat(instance.isUpdating()).isFalse();
     }
 
     private static final Investment mock(final boolean isEligible, final boolean isOnSmp) {
@@ -108,10 +91,10 @@ public class PortfolioTest {
         final Investment i4 = mockSold(); // ignored because sold
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4));
-        Portfolio.INSTANCE.update(z);
+        final Portfolio instance = new Portfolio();
+        instance.update(z);
         final PaymentStatuses p = PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE);
-        Assertions.assertThat(Portfolio.INSTANCE.getActiveWithPaymentStatus(p))
-                .containsExactly(i, i2);
+        Assertions.assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
     }
 
     @Test
@@ -123,7 +106,8 @@ public class PortfolioTest {
         final Investment i5 = mockSold(); // ignored because sold
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4, i5));
-        Portfolio.INSTANCE.update(z);
-        Assertions.assertThat(Portfolio.INSTANCE.getActiveForSecondaryMarketplace()).containsExactly(i2);
+        final Portfolio instance = new Portfolio();
+        instance.update(z);
+        Assertions.assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
     }
 }

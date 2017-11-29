@@ -66,16 +66,19 @@ class Session implements AutoCloseable {
     private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>();
     private final Investor investor;
     private final SessionState state;
+    private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
-    private Session(final Set<LoanDescriptor> marketplace, final Investor.Builder proxy, final Zonky zonky) {
+    private Session(final Portfolio portfolio, final Set<LoanDescriptor> marketplace, final Investor.Builder proxy,
+                    final Zonky zonky) {
         this.investor = proxy.build(zonky);
         this.state = new SessionState(marketplace);
         this.loansStillAvailable = marketplace.stream()
                 .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> l.item().getId() == l2.item().getId()))
-                .filter(l -> Portfolio.INSTANCE.getPending().noneMatch(i -> l.item().getId() == i.getLoanId()))
+                .filter(l -> portfolio.getPending().noneMatch(i -> l.item().getId() == i.getLoanId()))
                 .collect(Collectors.toList());
-        this.portfolioOverview = Portfolio.INSTANCE.calculateOverview(zonky, investor.isDryRun());
+        this.portfolio = portfolio;
+        this.portfolioOverview = portfolio.calculateOverview(zonky, investor.isDryRun());
     }
 
     /**
@@ -90,12 +93,12 @@ class Session implements AutoCloseable {
      * @return
      * @throws IllegalStateException When another {@link Session} instance was not {@link #close()}d.
      */
-    public synchronized static Session create(final Investor.Builder investor, final Zonky api,
-                                              final Collection<LoanDescriptor> marketplace) {
+    public synchronized static Session create(final Portfolio portfolio, final Investor.Builder investor,
+                                              final Zonky api, final Collection<LoanDescriptor> marketplace) {
         if (Session.INSTANCE.get() != null) {
             throw new IllegalStateException("Investment session already exists.");
         }
-        final Session s = new Session(new LinkedHashSet<>(marketplace), investor, api);
+        final Session s = new Session(portfolio, new LinkedHashSet<>(marketplace), investor, api);
         Session.INSTANCE.set(s);
         return s;
     }
@@ -109,10 +112,9 @@ class Session implements AutoCloseable {
         } while (invested);
     }
 
-
-    static Collection<Investment> invest(final Investor.Builder investor, final Zonky api,
+    static Collection<Investment> invest(final Portfolio portfolio, final Investor.Builder investor, final Zonky api,
                                          final Collection<LoanDescriptor> loans, final InvestmentStrategy strategy) {
-        try (final Session session = Session.create(investor, api, loans)) {
+        try (final Session session = Session.create(portfolio, investor, api, loans)) {
             final int balance = session.getPortfolioOverview().getCzkAvailable();
             Events.fire(new ExecutionStartedEvent(loans, session.getPortfolioOverview()));
             if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailable().isEmpty()) {
@@ -217,9 +219,9 @@ class Session implements AutoCloseable {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> l.item().getId() == i.getLoanId());
         final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getAmount(), TransactionCategory.INVESTMENT);
-        Portfolio.INSTANCE.newBlockedAmount(investor.getZonky(), b);
+        portfolio.newBlockedAmount(investor.getZonky(), b);
         final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(i.getAmount());
-        portfolioOverview = Portfolio.INSTANCE.calculateOverview(newBalance);
+        portfolioOverview = portfolio.calculateOverview(newBalance);
     }
 
     private synchronized void discard(final LoanDescriptor loan) {

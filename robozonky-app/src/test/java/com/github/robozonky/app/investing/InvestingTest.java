@@ -33,6 +33,7 @@ import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -58,7 +59,7 @@ public class InvestingTest extends AbstractInvestingTest {
         final Loan loan = new Loan(1, 2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(Collections.singletonList(ld))).isEmpty();
+        Assertions.assertThat(exec.apply(new Portfolio(), Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).isEmpty();
@@ -73,7 +74,7 @@ public class InvestingTest extends AbstractInvestingTest {
             return f.apply(mockApi());
         });
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
+        Assertions.assertThat(exec.apply(new Portfolio(), Collections.emptyList())).isEmpty();
     }
 
     @Test
@@ -90,6 +91,6 @@ public class InvestingTest extends AbstractInvestingTest {
             return f.apply(zonky);
         });
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(Collections.singleton(ld))).isEmpty();
+        Assertions.assertThat(exec.apply(new Portfolio(), Collections.singleton(ld))).isEmpty();
     }
 }

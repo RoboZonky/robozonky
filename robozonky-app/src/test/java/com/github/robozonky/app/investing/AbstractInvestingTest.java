@@ -18,25 +18,16 @@ package com.github.robozonky.app.investing;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
-import com.github.robozonky.app.Events;
-import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.mockito.Mockito;
@@ -46,7 +37,6 @@ public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest 
     private static final Random RANDOM = new Random(0);
     @Rule
     public final RestoreSystemProperties properties = new RestoreSystemProperties();
-    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
 
     protected static Loan mockLoan(final int loanId) {
         final Loan loan = Mockito.mock(Loan.class);
@@ -88,20 +78,4 @@ public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest 
         return zonky;
     }
 
-    protected List<Event> getNewEvents() {
-        return Events.getFired().stream()
-                .filter(e -> !previouslyExistingEvents.contains(e))
-                .collect(Collectors.toList());
-    }
-
-    @Before
-    @After
-    public void clearPortfolioTracker() {
-        Portfolio.INSTANCE.reset();
-    }
-
-    @Before
-    public void readPreexistingEvents() {
-        previouslyExistingEvents.addAll(Events.getFired());
-    }
 }

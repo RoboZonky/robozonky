@@ -25,6 +25,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
@@ -45,8 +46,8 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     }
 
     @Override
-    protected Collection<Investment> execute(final InvestmentStrategy strategy,
+    protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
-        return auth.call(zonky -> Session.invest(investor, zonky, marketplace, strategy));
+        return auth.call(zonky -> Session.invest(portfolio, investor, zonky, marketplace, strategy));
     }
 }

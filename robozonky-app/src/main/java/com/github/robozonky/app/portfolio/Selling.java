@@ -51,8 +51,8 @@ public class Selling implements PortfolioBased {
         this.isDryRun = isDryRun;
     }
 
-    private InvestmentDescriptor getDescriptor(final Investment i, final Zonky zonky) {
-        return new InvestmentDescriptor(i, Portfolio.INSTANCE.getLoan(zonky, i.getLoanId()));
+    private InvestmentDescriptor getDescriptor(final Portfolio portfolio, final Investment i, final Zonky zonky) {
+        return new InvestmentDescriptor(i, portfolio.getLoan(zonky, i.getLoanId()));
     }
 
     private Optional<Investment> processInvestment(final Zonky zonky, final RecommendedInvestment r) {
@@ -78,7 +78,7 @@ public class Selling implements PortfolioBased {
     private void sell(final Portfolio portfolio, final SellStrategy strategy, final Zonky zonky) {
         final PortfolioOverview overview = portfolio.calculateOverview(zonky, isDryRun);
         final Set<InvestmentDescriptor> eligible = portfolio.getActiveForSecondaryMarketplace().parallel()
-                .map(i -> getDescriptor(i, zonky))
+                .map(i -> getDescriptor(portfolio, i, zonky))
                 .collect(Collectors.toSet());
         Events.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)

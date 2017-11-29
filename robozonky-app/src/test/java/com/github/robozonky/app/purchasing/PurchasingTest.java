@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -61,7 +62,7 @@ public class PurchasingTest extends AbstractInvestingTest {
     public void noStrategy() {
         final Participation mock = Mockito.mock(Participation.class);
         final Purchasing exec = new Purchasing(Optional::empty, null, Duration.ofMinutes(60), true);
-        Assertions.assertThat(exec.apply(Collections.singleton(mock))).isEmpty();
+        Assertions.assertThat(exec.apply(new Portfolio(), Collections.singleton(mock))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).isEmpty();
@@ -73,7 +74,7 @@ public class PurchasingTest extends AbstractInvestingTest {
         final Participation mock = Mockito.mock(Participation.class);
         Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final Purchasing exec = new Purchasing(NONE_ACCEPTING, zonky, Duration.ofMinutes(60), true);
-        Assertions.assertThat(exec.apply(Collections.singleton(mock))).isEmpty();
+        Assertions.assertThat(exec.apply(new Portfolio(), Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -86,7 +87,7 @@ public class PurchasingTest extends AbstractInvestingTest {
     public void noItems() {
         final Purchasing exec =
                 new Purchasing(ALL_ACCEPTING, mockApi(), Duration.ofMinutes(60), true);
-        Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
+        Assertions.assertThat(exec.apply(new Portfolio(), Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).isEmpty();
     }

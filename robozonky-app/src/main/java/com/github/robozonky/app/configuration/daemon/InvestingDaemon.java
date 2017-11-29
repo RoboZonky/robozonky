@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -30,18 +30,19 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investing;
 import com.github.robozonky.app.investing.Investor;
+import com.github.robozonky.app.portfolio.Portfolio;
 
 class InvestingDaemon extends DaemonOperation {
 
-    private static final class InitializingInvestor implements Consumer<Authenticated> {
+    private static final class InitializingInvestor implements BiConsumer<Portfolio, Authenticated> {
 
         private final AtomicBoolean registered = new AtomicBoolean(false);
-        private final Consumer<Authenticated> core;
+        private final BiConsumer<Portfolio, Authenticated> core;
 
         public InitializingInvestor(final Investor.Builder builder, final Marketplace marketplace,
                                     final Supplier<Optional<InvestmentStrategy>> strategy,
                                     final Duration maximumSleepPeriod) {
-            this.core = (auth) -> {
+            this.core = (portfolio, auth) -> {
                 if (!registered.getAndSet(true)) { // only register the listener once
                     marketplace.registerListener((loans) -> {
                         if (loans == null) {
@@ -50,7 +51,7 @@ class InvestingDaemon extends DaemonOperation {
                         final Collection<LoanDescriptor> descriptors = loans.stream()
                                 .map(LoanDescriptor::new)
                                 .collect(Collectors.toList());
-                        new Investing(builder, strategy, auth, maximumSleepPeriod).apply(descriptors);
+                        new Investing(builder, strategy, auth, maximumSleepPeriod).apply(portfolio, descriptors);
                     });
                 }
                 marketplace.run();
@@ -58,14 +59,16 @@ class InvestingDaemon extends DaemonOperation {
         }
 
         @Override
-        public void accept(final Authenticated zonky) {
-            core.accept(zonky);
+        public void accept(final Portfolio portfolio, Authenticated zonky) {
+            core.accept(portfolio, zonky);
         }
     }
 
     public InvestingDaemon(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
-                           final Supplier<Optional<InvestmentStrategy>> strategy, final Duration maximumSleepPeriod,
+                           final Supplier<Optional<InvestmentStrategy>> strategy,
+                           final Supplier<Optional<Portfolio>> portfolio, final Duration maximumSleepPeriod,
                            final Duration refreshPeriod) {
-        super(auth, new InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod), refreshPeriod);
+        super(auth, portfolio,
+              new InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod), refreshPeriod);
     }
 }

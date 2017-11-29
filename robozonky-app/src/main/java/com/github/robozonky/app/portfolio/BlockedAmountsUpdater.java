@@ -27,9 +27,11 @@ import com.github.robozonky.app.authentication.Authenticated;
 class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 
     private final Authenticated authenticated;
+    private final Supplier<Optional<Portfolio>> portfolio;
 
-    public BlockedAmountsUpdater(final Authenticated authenticated) {
+    public BlockedAmountsUpdater(final Authenticated authenticated, final Supplier<Optional<Portfolio>> portfolio) {
         this.authenticated = authenticated;
+        this.portfolio = portfolio;
     }
 
     @Override
@@ -39,7 +41,7 @@ class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        authenticated.run(zonky -> BlockedAmounts.INSTANCE.accept(Portfolio.INSTANCE, zonky));
+        portfolio.get().ifPresent(folio -> authenticated.run(zonky -> BlockedAmounts.INSTANCE.accept(folio, zonky)));
         return Optional.of(OffsetDateTime.now());
     }
 }
