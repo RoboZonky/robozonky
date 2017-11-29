@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Main entry point to the delinquency API.
  */
-public class Delinquents implements PortfolioBased {
+public class Delinquents implements PortfolioDependant {
 
     public static final Delinquents INSTANCE = new Delinquents();
 

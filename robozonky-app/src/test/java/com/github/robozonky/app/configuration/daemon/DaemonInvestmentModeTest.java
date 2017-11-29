@@ -24,6 +24,7 @@ import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
+import com.github.robozonky.app.portfolio.PortfolioUpdater;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;
@@ -52,7 +53,7 @@ public class DaemonInvestmentModeTest {
         final Investor.Builder b = new Investor.Builder().asDryRun();
         // setup marketplace
         final Marketplace m = Mockito.mock(Marketplace.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, b, true, m, "",
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
             SoftAssertions.assertSoftly(softly -> {
@@ -70,7 +71,7 @@ public class DaemonInvestmentModeTest {
         Mockito.when(a.getSecretProvider()).thenReturn(s);
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final Marketplace m = Mockito.mock(Marketplace.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, b, true, m, "",
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
             DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().countDown(); // don't block the thread

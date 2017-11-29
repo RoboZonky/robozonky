@@ -24,14 +24,19 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
 
-class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
+public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 
     private final Authenticated authenticated;
     private final Supplier<Optional<Portfolio>> portfolio;
+    private final PortfolioDependant instance = new BlockedAmounts();
 
     public BlockedAmountsUpdater(final Authenticated authenticated, final Supplier<Optional<Portfolio>> portfolio) {
         this.authenticated = authenticated;
         this.portfolio = portfolio;
+    }
+
+    public PortfolioDependant getDependant() {
+        return instance;
     }
 
     @Override
@@ -41,7 +46,7 @@ class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        portfolio.get().ifPresent(folio -> authenticated.run(zonky -> BlockedAmounts.INSTANCE.accept(folio, zonky)));
+        portfolio.get().ifPresent(folio -> authenticated.run(zonky -> getDependant().accept(folio, zonky)));
         return Optional.of(OffsetDateTime.now());
     }
 }

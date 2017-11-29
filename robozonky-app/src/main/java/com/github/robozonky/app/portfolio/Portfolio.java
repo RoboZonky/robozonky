@@ -54,7 +54,7 @@ public class Portfolio {
         this.investments = new ArrayList<>(investments);
     }
 
-    public static Optional<Portfolio> create(final Zonky zonky, final Stream<PortfolioBased> updaters) {
+    public static Optional<Portfolio> create(final Zonky zonky, final Stream<PortfolioDependant> updaters) {
         try {
             LOGGER.trace("Started.");
             final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());

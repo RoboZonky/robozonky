@@ -61,9 +61,10 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return sp;
     }
 
-    public DaemonInvestmentMode(final Authenticated auth, final Investor.Builder builder, final boolean isFaultTolerant,
-                                final Marketplace marketplace, final String strategyLocation,
-                                final Duration maximumSleepPeriod, final Duration primaryMarketplaceCheckPeriod,
+    public DaemonInvestmentMode(final Authenticated auth, final PortfolioUpdater p, final Investor.Builder builder,
+                                final boolean isFaultTolerant, final Marketplace marketplace,
+                                final String strategyLocation, final Duration maximumSleepPeriod,
+                                final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.username = auth.getSecretProvider().getUsername();
         this.faultTolerant = isFaultTolerant;
@@ -72,8 +73,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.marketplace = marketplace;
         final boolean dryRun = builder.isDryRun();
         final StrategyProvider sp = initStrategy(strategyLocation);
-        final PortfolioUpdater p = new PortfolioUpdater(auth);
-        p.registerUpdater(new Selling(sp::getToSell, dryRun));
+        p.registerDependant(new Selling(sp::getToSell, dryRun)); // run sell strategy with every portfolio update
         this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, sp::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
                                      new PurchasingDaemon(auth, sp::getToPurchase, p, maximumSleepPeriod,

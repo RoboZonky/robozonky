@@ -21,6 +21,6 @@ import java.util.function.BiConsumer;
 import com.github.robozonky.common.remote.Zonky;
 
 @FunctionalInterface
-public interface PortfolioBased extends BiConsumer<Portfolio, Zonky> {
+public interface PortfolioDependant extends BiConsumer<Portfolio, Zonky> {
 
 }

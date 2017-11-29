@@ -39,7 +39,7 @@ import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Selling implements PortfolioBased {
+public class Selling implements PortfolioDependant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 

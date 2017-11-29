@@ -28,16 +28,14 @@ import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BlockedAmounts implements PortfolioBased {
-
-    public static final BlockedAmounts INSTANCE = new BlockedAmounts();
+class BlockedAmounts implements PortfolioDependant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockedAmounts.class);
 
-    private final AtomicReference<Collection<BlockedAmount>> blockedAmounts = new AtomicReference<>(new ArrayList<>(0));
+    private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
+            new AtomicReference<>(new ArrayList<>(0));
 
-    private BlockedAmounts() {
-        // singleton
+    BlockedAmounts() {
     }
 
     public void accept(final Portfolio portfolio, final Zonky zonky) {
