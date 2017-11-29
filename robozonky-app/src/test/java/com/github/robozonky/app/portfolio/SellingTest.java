@@ -68,7 +68,7 @@ public class SellingTest extends AbstractInvestingTest {
 
     @Test
     public void noSaleDueToNoStrategy() {
-        new Selling(Optional::empty, true).accept(null);
+        new Selling(Optional::empty, true).accept(Portfolio.INSTANCE, null);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(0);
     }
@@ -76,7 +76,7 @@ public class SellingTest extends AbstractInvestingTest {
     @Test
     public void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = mockApi();
-        new Selling(ALL_ACCEPTING, true).accept(zonky);
+        new Selling(ALL_ACCEPTING, true).accept(Portfolio.INSTANCE, zonky);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -91,7 +91,7 @@ public class SellingTest extends AbstractInvestingTest {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
         Portfolio.INSTANCE.update(zonky); // load investments
-        new Selling(NONE_ACCEPTING, true).accept(zonky);
+        new Selling(NONE_ACCEPTING, true).accept(Portfolio.INSTANCE, zonky);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -105,7 +105,7 @@ public class SellingTest extends AbstractInvestingTest {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
         Portfolio.INSTANCE.update(zonky); // load investments
-        new Selling(ALL_ACCEPTING, isDryRun).accept(zonky);
+        new Selling(ALL_ACCEPTING, isDryRun).accept(Portfolio.INSTANCE, zonky);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(5);
         SoftAssertions.assertSoftly(softly -> {

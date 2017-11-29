@@ -29,7 +29,6 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -60,7 +59,7 @@ public enum Portfolio {
     /**
      * Never iterate over directly, always use {@link #getUpdaters()}.
      */
-    private final Set<Consumer<Zonky>> updaters = new CopyOnWriteArraySet<>();
+    private final Set<PortfolioBased> updaters = new CopyOnWriteArraySet<>();
     private final AtomicBoolean ranOnce = new AtomicBoolean(false), isUpdating = new AtomicBoolean(false);
 
     Portfolio() {
@@ -85,17 +84,17 @@ public enum Portfolio {
         return new Investment(l, blockedAmount.getAmount().intValue());
     }
 
-    private Stream<Consumer<Zonky>> getUpdaters() {
+    private Stream<PortfolioBased> getUpdaters() {
         /*
          * core updaters to get the full picture. checks for blocked amounts immediately after every update of the
          * portfolio, also checks for delinquencies.
          */
-        final Stream<Consumer<Zonky>> core = Stream.of(BlockedAmounts.INSTANCE, Delinquents.INSTANCE);
-        final Stream<Consumer<Zonky>> external = updaters.stream();
+        final Stream<PortfolioBased> core = Stream.of(BlockedAmounts.INSTANCE, Delinquents.INSTANCE);
+        final Stream<PortfolioBased> external = updaters.stream();
         return Stream.concat(core, external);
     }
 
-    public void registerUpdater(final Consumer<Zonky> updater) {
+    public void registerUpdater(final PortfolioBased updater) {
         LOGGER.debug("Registering dependent: {}.", updater);
         updaters.add(updater);
     }
@@ -113,7 +112,7 @@ public enum Portfolio {
                 LOGGER.debug("Loaded {} investments from Zonky.", online.size());
                 getUpdaters().forEach((u) -> {
                     LOGGER.trace("Running dependent: {}.", u);
-                    u.accept(zonky);
+                    u.accept(this, zonky);
                 });
                 LOGGER.trace("Finished.");
                 this.ranOnce.set(true);

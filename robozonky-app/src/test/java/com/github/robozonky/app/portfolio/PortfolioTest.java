@@ -17,7 +17,6 @@
 package com.github.robozonky.app.portfolio;
 
 import java.time.OffsetDateTime;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Investment;
@@ -70,12 +69,12 @@ public class PortfolioTest {
 
     @Test
     public void updating() {
-        final Consumer<Zonky> updateNeeded = Mockito.mock(Consumer.class);
+        final PortfolioBased updateNeeded = Mockito.mock(PortfolioBased.class);
         Portfolio.INSTANCE.registerUpdater(updateNeeded);
         final Zonky z = Mockito.mock(Zonky.class);
         Assertions.assertThat(Portfolio.INSTANCE.isUpdating()).isTrue();
         Portfolio.INSTANCE.update(z);
-        Mockito.verify(updateNeeded).accept(ArgumentMatchers.eq(z));
+        Mockito.verify(updateNeeded).accept(ArgumentMatchers.eq(Portfolio.INSTANCE), ArgumentMatchers.eq(z));
         Mockito.verify(z).getInvestments();
         Assertions.assertThat(Portfolio.INSTANCE.isUpdating()).isFalse();
     }

@@ -22,7 +22,6 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Main entry point to the delinquency API.
  */
-public class Delinquents implements Consumer<Zonky> {
+public class Delinquents implements PortfolioBased {
 
     public static final Delinquents INSTANCE = new Delinquents();
 
@@ -84,8 +83,9 @@ public class Delinquents implements Consumer<Zonky> {
         return d;
     }
 
-    private static Collection<Investment> getWithPaymentStatus(final PaymentStatuses target) {
-        return Portfolio.INSTANCE.getActiveWithPaymentStatus(target).collect(Collectors.toList());
+    private static Collection<Investment> getWithPaymentStatus(final Portfolio portfolio,
+                                                               final PaymentStatuses target) {
+        return portfolio.getActiveWithPaymentStatus(target).collect(Collectors.toList());
     }
 
     private static boolean related(final Delinquent d, final Investment i) {
@@ -170,8 +170,8 @@ public class Delinquents implements Consumer<Zonky> {
     }
 
     @Override
-    public void accept(final Zonky zonky) {
-        update(zonky, getWithPaymentStatus(PaymentStatus.getDelinquent()),
-               getWithPaymentStatus(PaymentStatus.getDone()));
+    public void accept(final Portfolio portfolio, final Zonky zonky) {
+        update(zonky, getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
+               getWithPaymentStatus(portfolio, PaymentStatus.getDone()));
     }
 }

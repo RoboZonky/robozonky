@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
@@ -29,7 +28,7 @@ import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BlockedAmounts implements Consumer<Zonky> {
+class BlockedAmounts implements PortfolioBased {
 
     public static final BlockedAmounts INSTANCE = new BlockedAmounts();
 
@@ -41,14 +40,14 @@ class BlockedAmounts implements Consumer<Zonky> {
         // singleton
     }
 
-    public void accept(final Zonky zonky) {
+    public void accept(final Portfolio portfolio, final Zonky zonky) {
         LOGGER.trace("Starting.");
         final Collection<BlockedAmount> presentBlockedAmounts = zonky.getBlockedAmounts().collect(Collectors.toList());
         final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
         final SortedSet<BlockedAmount> difference = presentBlockedAmounts.stream()
                 .filter(ba -> !previousBlockedAmounts.contains(ba))
                 .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
-        Portfolio.INSTANCE.newBlockedAmounts(zonky, difference);
+        portfolio.newBlockedAmounts(zonky, difference);
         LOGGER.trace("Finished.");
     }
 }

@@ -19,7 +19,6 @@ package com.github.robozonky.app.portfolio;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,7 +39,7 @@ import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Selling implements Consumer<Zonky> {
+public class Selling implements PortfolioBased {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 
@@ -76,22 +75,22 @@ public class Selling implements Consumer<Zonky> {
         }
     }
 
-    private void sell(final SellStrategy strategy, final Zonky zonky) {
-        final PortfolioOverview portfolio = Portfolio.INSTANCE.calculateOverview(zonky, isDryRun);
-        final Set<InvestmentDescriptor> eligible = Portfolio.INSTANCE.getActiveForSecondaryMarketplace().parallel()
+    private void sell(final Portfolio portfolio, final SellStrategy strategy, final Zonky zonky) {
+        final PortfolioOverview overview = portfolio.calculateOverview(zonky, isDryRun);
+        final Set<InvestmentDescriptor> eligible = portfolio.getActiveForSecondaryMarketplace().parallel()
                 .map(i -> getDescriptor(i, zonky))
                 .collect(Collectors.toSet());
-        Events.fire(new SellingStartedEvent(eligible, portfolio));
-        final Collection<Investment> investmentsSold = strategy.recommend(eligible, portfolio)
+        Events.fire(new SellingStartedEvent(eligible, overview));
+        final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
                 .peek(r -> Events.fire(new SaleRecommendedEvent(r)))
                 .map(r -> processInvestment(zonky, r))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        Events.fire(new SellingCompletedEvent(investmentsSold, Portfolio.INSTANCE.calculateOverview(zonky, isDryRun)));
+        Events.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview(zonky, isDryRun)));
     }
 
     @Override
-    public void accept(final Zonky zonky) {
-        strategy.get().ifPresent(s -> sell(s, zonky));
+    public void accept(final Portfolio portfolio, final Zonky zonky) {
+        strategy.get().ifPresent(s -> sell(portfolio, s, zonky));
     }
 }
