@@ -104,6 +104,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
                         .collect(Collectors.joining(System.lineSeparator())));
             });
             throw new IllegalStateException(ex);
+        } finally {
+            executor.shutdownNow();
         }
     }
 
