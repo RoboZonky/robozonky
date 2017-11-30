@@ -108,7 +108,33 @@ class TestingScheduledExecutorService implements ScheduledExecutorService {
     @Override
     public Future<?> submit(final Runnable runnable) {
         execute(runnable);
-        return null;
+        return new Future<Object>() {
+            @Override
+            public boolean cancel(final boolean mayInterruptIfRunning) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isCancelled() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public Object get() throws InterruptedException, ExecutionException {
+                return null;
+            }
+
+            @Override
+            public Object get(final long timeout,
+                              final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                return null;
+            }
+        };
     }
 
     @Override
@@ -137,6 +163,10 @@ class TestingScheduledExecutorService implements ScheduledExecutorService {
 
     @Override
     public void execute(final Runnable runnable) {
-        runnable.run();
+        try {
+            runnable.run();
+        } catch (final Exception ex) {
+            LOGGER.warn("Task execution failed.", ex);
+        }
     }
 }

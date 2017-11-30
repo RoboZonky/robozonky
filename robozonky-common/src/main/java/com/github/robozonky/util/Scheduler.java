@@ -21,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -60,9 +61,9 @@ public class Scheduler {
         this.submit(toSchedule, Scheduler.REFRESH);
     }
 
-    public void run(final Runnable toRun) {
+    public Future<?> run(final Runnable toRun) {
         Scheduler.LOGGER.debug("Scheduling {} immediately.", toRun);
-        executor.submit(toRun);
+        return executor.submit(toRun);
     }
 
     public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween) {

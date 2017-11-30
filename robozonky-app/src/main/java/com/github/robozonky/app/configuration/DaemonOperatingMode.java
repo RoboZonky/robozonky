@@ -20,6 +20,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
@@ -83,11 +85,23 @@ class DaemonOperatingMode extends OperatingMode {
                     // initialize SessionInfo before the robot potentially sends the first notification
                     Events.fire(new RoboZonkyInitializedEvent(), new SessionInfo(secretProvider.getUsername()));
                     // only schedule internal data updates after daemon had a chance to initialize...
-                    updater.run();
-                    // ... and then run them every 12 hours at 4 am
-                    Scheduler.inBackground().submit(updater, Duration.ofHours(12), timeUntil4am(LocalDateTime.now()));
+                    final Scheduler scheduler = Scheduler.inBackground();
+                    final Future<?> f = scheduler.run(updater);
+                    try {
+                        /*
+                         * wait for the update to finish; has to be done in this roundabout way, so that integration
+                         * tests can substitute this operation, which would otherwise call a live Zonky API, by a no-op
+                         * via the pluggable scheduler mechanism.
+                         */
+                        f.get();
+                    } catch (final ExecutionException | InterruptedException ex) {
+                        LOGGER.error("Failed updating portfolio.", ex);
+                        return Optional.<InvestmentMode>empty();
+                    }
+                    // ... and then run the update every 12 hours, starting at 4 a.m.
+                    scheduler.submit(updater, Duration.ofHours(12), timeUntil4am(LocalDateTime.now()));
                     // also run blocked amounts update every now and then to detect changes made outside of the robot
-                    Scheduler.inBackground().submit(bau, Duration.ofHours(1));
+                    scheduler.submit(bau, Duration.ofHours(1));
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }

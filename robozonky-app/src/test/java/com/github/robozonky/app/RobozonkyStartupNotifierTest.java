@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -32,7 +34,9 @@ public class RobozonkyStartupNotifierTest extends AbstractEventLeveragingRoboZon
         Assertions.assertThat(result).isPresent();
         final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
         result.get().accept(r);
+        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyEndingEvent.class);
         final ShutdownHook.Result r2 = new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null);
         result.get().accept(r2);
+        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyCrashedEvent.class);
     }
 }
