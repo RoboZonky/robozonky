@@ -34,7 +34,6 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.app.portfolio.PortfolioUpdater;
 import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;

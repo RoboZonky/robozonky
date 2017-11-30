@@ -24,7 +24,6 @@ import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.app.portfolio.PortfolioUpdater;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;

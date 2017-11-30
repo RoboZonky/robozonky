@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

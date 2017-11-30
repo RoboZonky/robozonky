@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioDependant;
 
 public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 

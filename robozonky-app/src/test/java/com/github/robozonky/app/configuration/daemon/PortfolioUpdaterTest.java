@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
 import java.util.Optional;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

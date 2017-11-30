@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,20 +48,21 @@ public class PortfolioUpdater implements Runnable,
 
     @Override
     public void run() {
-        try {
-            LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
-            final Portfolio folio = portfolio.updateAndGet(p -> authenticated.call(Portfolio::create).orElse(null));
-            if (folio != null) {
-                // execute every dependant with its own authentication, to prevent token timeouts
-                dependants.forEach((d) -> {
-                    LOGGER.trace("Running dependant: {}.", d);
-                    d.accept(folio, authenticated);
-                });
-            }
-            LOGGER.info("RoboZonky resumed.");
-        } catch (final Throwable t) {
-            new DaemonRuntimeExceptionHandler().handle(t);
+        LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
+        final Portfolio folio = portfolio.updateAndGet(p -> authenticated.call(Portfolio::create).orElse(null));
+        if (folio == null) {
+            return;
         }
+        // execute every dependant with its own authentication, to prevent token timeouts
+        dependants.forEach(d -> {
+            LOGGER.trace("Running dependant: {}.", d);
+            try {
+                d.accept(folio, authenticated);
+            } catch (final Throwable t) {
+                new DaemonRuntimeExceptionHandler().handle(t);
+            }
+        });
+        LOGGER.info("RoboZonky resumed.");
     }
 
     @Override
