@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.app.authentication.Authenticated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,14 +38,15 @@ class BlockedAmounts implements PortfolioDependant {
     BlockedAmounts() {
     }
 
-    public void accept(final Portfolio portfolio, final Zonky zonky) {
+    public void accept(final Portfolio portfolio, final Authenticated auth) {
         LOGGER.trace("Starting.");
-        final Collection<BlockedAmount> presentBlockedAmounts = zonky.getBlockedAmounts().collect(Collectors.toList());
+        final Collection<BlockedAmount> presentBlockedAmounts =
+                auth.call(zonky -> zonky.getBlockedAmounts().collect(Collectors.toList()));
         final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
         final SortedSet<BlockedAmount> difference = presentBlockedAmounts.stream()
                 .filter(ba -> !previousBlockedAmounts.contains(ba))
                 .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
-        portfolio.newBlockedAmounts(zonky, difference);
+        auth.run(zonky -> portfolio.newBlockedAmounts(zonky, difference));
         LOGGER.trace("Finished.");
     }
 }

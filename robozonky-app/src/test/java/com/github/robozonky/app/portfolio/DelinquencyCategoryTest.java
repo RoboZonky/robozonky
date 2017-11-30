@@ -69,17 +69,19 @@ public class DelinquencyCategoryTest extends AbstractInvestingTest {
         // store a delinquent loan
         final Delinquent d = new Delinquent(loanId);
         final Delinquency dy = d.addDelinquency(LocalDate.now().minus(minimumMatchingDuration));
-        Assertions.assertThat(category.update(Collections.singleton(dy), zonky)).containsExactly(loanId);
+        Assertions.assertThat(category.update(Collections.singleton(dy), mockAuthentication(zonky)))
+                .containsExactly(loanId);
         final List<Event> events = this.getNewEvents();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(events).hasSize(1);
             softly.assertThat(events).first().isInstanceOf(LoanDelinquentEvent.class);
         });
         // attempt to store it again, making sure no event is fired
-        Assertions.assertThat(category.update(Collections.singleton(dy), zonky)).containsExactly(loanId);
+        Assertions.assertThat(category.update(Collections.singleton(dy), mockAuthentication(zonky)))
+                .containsExactly(loanId);
         Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
         // now update with no delinquents, making sure nothing is returned
-        Assertions.assertThat(category.update(Collections.emptyList(), zonky)).isEmpty();
+        Assertions.assertThat(category.update(Collections.emptyList(), mockAuthentication(zonky))).isEmpty();
         Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
     }
 }

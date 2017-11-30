@@ -19,6 +19,7 @@ package com.github.robozonky.app.investing;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Loan;
@@ -26,7 +27,9 @@ import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -76,6 +79,20 @@ public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest 
         Mockito.when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
         Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
         return zonky;
+    }
+
+    protected static Authenticated mockAuthentication(final Zonky zonky) {
+        return new Authenticated() {
+            @Override
+            public <T> T call(final Function<Zonky, T> operation) {
+                return operation.apply(zonky);
+            }
+
+            @Override
+            public SecretProvider getSecretProvider() {
+                return SecretProvider.fallback("someone", "password".toCharArray());
+            }
+        };
     }
 
 }

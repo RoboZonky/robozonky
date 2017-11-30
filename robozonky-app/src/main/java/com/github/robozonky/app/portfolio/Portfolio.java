@@ -56,15 +56,9 @@ public class Portfolio {
 
     public static Optional<Portfolio> create(final Zonky zonky, final Stream<PortfolioDependant> updaters) {
         try {
-            LOGGER.trace("Started.");
             final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
             final Portfolio p = new Portfolio(online);
             LOGGER.debug("Loaded {} investments from Zonky.", online.size());
-            updaters.forEach((u) -> {
-                LOGGER.trace("Running dependent: {}.", u);
-                u.accept(p, zonky);
-            });
-            LOGGER.trace("Finished.");
             return Optional.of(p);
         } catch (final Exception ex) {
             LOGGER.warn("Failed loading Zonky portfolio.", ex);

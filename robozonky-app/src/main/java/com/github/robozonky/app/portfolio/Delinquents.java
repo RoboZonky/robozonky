@@ -33,7 +33,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
@@ -92,19 +92,19 @@ public class Delinquents implements PortfolioDependant {
         return d.getLoanId() == i.getLoanId();
     }
 
-    public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent) {
-        update(zonky, presentlyDelinquent, Collections.emptyList());
+    public void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent) {
+        update(auth, presentlyDelinquent, Collections.emptyList());
     }
 
     /**
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
-     * @param zonky The API that will be used to retrieve the loan instances.
+     * @param auth The API that will be used to retrieve the loan instances.
      * @param presentlyDelinquent Loans that currently have overdue instalments. This corresponds to
      * {@link PaymentStatus#getDelinquent()}
      * @param noLongerActive Loans that are no longer relevant. This corresponds to {@link PaymentStatus#getDone()}.
      */
-    void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent,
+    void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent,
                 final Collection<Investment> noLongerActive) {
         LOGGER.debug("Updating delinquent loans.");
         final LocalDate now = LocalDate.now();
@@ -116,7 +116,7 @@ public class Delinquents implements PortfolioDependant {
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
                 .map(Delinquency::getParent)
                 .forEach(d -> {  // notify
-                    final Loan loan = d.getLoan(zonky);
+                    final Loan loan = auth.call(d::getLoan);
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
                         Events.fire(new LoanDefaultedEvent(loan, since));
@@ -142,7 +142,7 @@ public class Delinquents implements PortfolioDependant {
             stateUpdate.call(); // persist state updates
             LOGGER.trace("Delinquency update finished.");
             // and notify of new delinquencies over all known thresholds
-            Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, zonky));
+            Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, auth));
         }
         LOGGER.trace("Done.");
     }
@@ -170,8 +170,8 @@ public class Delinquents implements PortfolioDependant {
     }
 
     @Override
-    public void accept(final Portfolio portfolio, final Zonky zonky) {
-        update(zonky, getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
+    public void accept(final Portfolio portfolio, final Authenticated auth) {
+        update(auth, getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
                getWithPaymentStatus(portfolio, PaymentStatus.getDone()));
     }
 }

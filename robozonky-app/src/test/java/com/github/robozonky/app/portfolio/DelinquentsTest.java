@@ -60,21 +60,21 @@ public class DelinquentsTest extends AbstractInvestingTest {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         // make sure new delinquences are reported and stored
-        Delinquents.INSTANCE.update(zonky, Collections.singleton(i));
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.singleton(i));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(Delinquents.INSTANCE.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(1);
         });
         Assertions.assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
         // make sure delinquences are persisted even when there are none present
-        Delinquents.INSTANCE.update(zonky, Collections.emptyList());
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(Delinquents.INSTANCE.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(2);
         });
         Assertions.assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanNoLongerDelinquentEvent.class);
         // and when they are no longer active, they're gone for good
-        Delinquents.INSTANCE.update(zonky, Collections.emptyList(), Collections.singleton(i));
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.emptyList(), Collections.singleton(i));
         Assertions.assertThat(Delinquents.INSTANCE.getDelinquents()).hasSize(0);
     }
 
@@ -86,7 +86,7 @@ public class DelinquentsTest extends AbstractInvestingTest {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         // make sure new delinquences are reported and stored
-        Delinquents.INSTANCE.update(zonky, Collections.singleton(i));
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.singleton(i));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(Delinquents.INSTANCE.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(5);
@@ -106,10 +106,10 @@ public class DelinquentsTest extends AbstractInvestingTest {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         // register delinquence
-        Delinquents.INSTANCE.update(zonky, Collections.singleton(i));
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.singleton(i));
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is no longer delinquent
-        Delinquents.INSTANCE.update(zonky, Collections.emptyList());
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
         });
@@ -123,17 +123,15 @@ public class DelinquentsTest extends AbstractInvestingTest {
         final Zonky zonky = Mockito.mock(Zonky.class);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         // register delinquence
-        Delinquents.INSTANCE.update(zonky, Collections.singleton(i));
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.singleton(i));
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is defaulted
-        Delinquents.INSTANCE.update(zonky, Collections.emptyList(), Collections.singletonList(i));
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
-        });
+        Delinquents.INSTANCE.update(mockAuthentication(zonky), Collections.emptyList(), Collections.singletonList(i));
+        Assertions.assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
     }
 
     @After
     public void clean() {
-        Delinquents.INSTANCE.update(Mockito.mock(Zonky.class), Collections.emptyList());
+        Delinquents.INSTANCE.update(mockAuthentication(Mockito.mock(Zonky.class)), Collections.emptyList());
     }
 }

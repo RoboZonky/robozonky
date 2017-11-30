@@ -46,7 +46,7 @@ public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
 
     @Override
     protected Optional<OffsetDateTime> transform(final String source) {
-        portfolio.get().ifPresent(folio -> authenticated.run(zonky -> getDependant().accept(folio, zonky)));
+        portfolio.get().ifPresent(folio -> getDependant().accept(folio, authenticated));
         return Optional.of(OffsetDateTime.now());
     }
 }

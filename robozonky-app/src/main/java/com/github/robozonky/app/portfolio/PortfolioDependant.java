@@ -18,9 +18,9 @@ package com.github.robozonky.app.portfolio;
 
 import java.util.function.BiConsumer;
 
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.app.authentication.Authenticated;
 
 @FunctionalInterface
-public interface PortfolioDependant extends BiConsumer<Portfolio, Zonky> {
+public interface PortfolioDependant extends BiConsumer<Portfolio, Authenticated> {
 
 }

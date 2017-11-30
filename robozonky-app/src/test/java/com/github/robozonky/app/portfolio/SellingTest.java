@@ -78,7 +78,7 @@ public class SellingTest extends AbstractInvestingTest {
         final Zonky zonky = mockApi();
         final Portfolio portfolio = Portfolio.create(zonky)
                 .orElseThrow(() -> new AssertionError("Should have been present."));
-        new Selling(ALL_ACCEPTING, true).accept(portfolio, zonky);
+        new Selling(ALL_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -94,7 +94,7 @@ public class SellingTest extends AbstractInvestingTest {
         final Zonky zonky = mockApi(i);
         final Portfolio portfolio = Portfolio.create(zonky)
                 .orElseThrow(() -> new AssertionError("Should have been present."));
-        new Selling(NONE_ACCEPTING, true).accept(portfolio, zonky);
+        new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -109,7 +109,7 @@ public class SellingTest extends AbstractInvestingTest {
         final Zonky zonky = mockApi(i);
         final Portfolio portfolio = Portfolio.create(zonky)
                 .orElseThrow(() -> new AssertionError("Should have been present."));
-        new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, zonky);
+        new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(5);
         SoftAssertions.assertSoftly(softly -> {
