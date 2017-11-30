@@ -75,6 +75,7 @@ class TokenBasedAccess implements Authenticated {
     }
 
     public <T> T call(final Function<Zonky, T> operation, final int attemptNo) {
+        LOGGER.trace("Executing {}, attempt #{}.", operation, attemptNo);
         try {
             final ZonkyApiToken token = getFreshToken();
             return refreshableToken.pauseFor((r) -> apis.authenticated(token, operation));
@@ -82,9 +83,11 @@ class TokenBasedAccess implements Authenticated {
             if (attemptNo >= 3) {
                 throw new IllegalStateException("There was a severe authorization problem.", ex);
             } else {
-                LOGGER.debug("Request failed due to expired token, will retry #" + attemptNo, ex);
+                LOGGER.debug("Request failed due to expired token, will retry #" + attemptNo);
                 return call(operation, attemptNo + 1);
             }
+        } finally {
+            LOGGER.trace("Done with {}, attempt #{}.", operation, attemptNo);
         }
     }
 

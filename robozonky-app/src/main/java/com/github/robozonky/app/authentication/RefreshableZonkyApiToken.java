@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import javax.ws.rs.BadRequestException;
 import javax.xml.bind.JAXBException;
 
 import com.github.robozonky.api.Refreshable;
@@ -50,8 +51,8 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
         LOGGER.info("Authenticating as '{}', refreshing access token.", secrets.getUsername());
         try {
             return apis.oauth((oauth) -> oauth.refresh(token));
-        } catch (final Exception ex) { // possibly just an expired token, retry with password
-            LOGGER.debug("Failed refreshing access token, using password.", ex);
+        } catch (final BadRequestException ex) { // possibly just an expired token, retry with password
+            LOGGER.debug("Failed refreshing access token, using password.");
             return withPassword();
         }
     }
@@ -73,6 +74,7 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
                     .orElseGet(this::withPassword); // first run = password-based auth
             try { // store token so that it can be retrieved back in case of daemon restart
                 secrets.setToken(RefreshableZonkyApiToken.tokenToReader(newToken));
+                LOGGER.debug("New token stored, expires on {}.", newToken.getExpiresOn());
             } catch (final JAXBException ex) {
                 LOGGER.debug("Failed storing token into secure storage, may need to use password next time.", ex);
             }
