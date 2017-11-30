@@ -30,7 +30,7 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
@@ -41,7 +41,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class DelinquentsTest extends AbstractInvestingTest {
+public class DelinquentsTest extends AbstractZonkyLeveragingTest {
 
     private final static Random RANDOM = new Random(0);
 

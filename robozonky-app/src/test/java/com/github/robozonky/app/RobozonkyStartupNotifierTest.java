@@ -25,7 +25,7 @@ import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class RobozonkyStartupNotifierTest extends AbstractEventLeveragingRoboZonkyTest {
+public class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
 
     @Test
     public void properEventsFired() {

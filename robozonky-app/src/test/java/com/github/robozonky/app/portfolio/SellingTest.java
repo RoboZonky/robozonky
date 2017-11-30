@@ -33,7 +33,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -42,7 +42,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.verification.VerificationMode;
 
-public class SellingTest extends AbstractInvestingTest {
+public class SellingTest extends AbstractZonkyLeveragingTest {
 
     private static final SellStrategy ALL_ACCEPTING_STRATEGY =
             (available, portfolio) -> available.stream().map(d -> d.recommend().get());

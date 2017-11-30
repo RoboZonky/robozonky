@@ -24,14 +24,14 @@ import java.util.Collections;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
+import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class ActivityTest extends AbstractEventLeveragingRoboZonkyTest {
+public class ActivityTest extends AbstractEventLeveragingTest {
 
     private static final int SLEEP_PERIOD_MINUTES = 60;
 

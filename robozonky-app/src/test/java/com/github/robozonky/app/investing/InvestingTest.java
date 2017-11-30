@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
@@ -40,7 +41,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class InvestingTest extends AbstractInvestingTest {
+public class InvestingTest extends AbstractZonkyLeveragingTest {
 
     private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
             ALL_ACCEPTING_STRATEGY = (loans, folio) -> loans.stream().map(d -> d.recommend(200).get());
@@ -59,7 +60,7 @@ public class InvestingTest extends AbstractInvestingTest {
         final Loan loan = new Loan(1, 2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
-        final Zonky z = AbstractInvestingTest.harmlessZonky(1000);
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
         Assertions.assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
@@ -70,7 +71,7 @@ public class InvestingTest extends AbstractInvestingTest {
 
     @Test
     public void noItems() {
-        final Zonky z = AbstractInvestingTest.harmlessZonky(1000);
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
         final Investor.Builder builder = new Investor.Builder().asDryRun();

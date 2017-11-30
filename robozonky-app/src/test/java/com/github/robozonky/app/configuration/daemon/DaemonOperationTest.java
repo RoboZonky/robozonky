@@ -21,15 +21,15 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
 import com.github.robozonky.app.portfolio.Portfolio;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class DaemonOperationTest extends AbstractInvestingTest {
+public class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     private static final class CustomOperation extends DaemonOperation {
 

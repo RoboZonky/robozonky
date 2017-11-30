@@ -20,8 +20,8 @@ import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.Test;
@@ -29,7 +29,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
-public class BlockedAmountsTest extends AbstractInvestingTest {
+public class BlockedAmountsTest extends AbstractZonkyLeveragingTest {
 
     private final BlockedAmount BA1 = new BlockedAmount(1, BigDecimal.valueOf(200)),
             BA2 = new BlockedAmount(2, BigDecimal.valueOf(1000)),

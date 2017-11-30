@@ -24,12 +24,12 @@ import javax.ws.rs.WebApplicationException;
 
 import com.github.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
-import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
+import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.Events;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class DaemonRuntimeExceptionHandlerTest extends AbstractEventLeveragingRoboZonkyTest {
+public class DaemonRuntimeExceptionHandlerTest extends AbstractEventLeveragingTest {
 
     private final RuntimeExceptionHandler handler = new DaemonRuntimeExceptionHandler();
 

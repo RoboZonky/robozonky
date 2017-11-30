@@ -31,7 +31,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class PurchasingTest extends AbstractInvestingTest {
+public class PurchasingTest extends AbstractZonkyLeveragingTest {
 
     private static final PurchaseStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
             ALL_ACCEPTING_STRATEGY = (available, portfolio) -> available.stream().map(d -> d.recommend().get());

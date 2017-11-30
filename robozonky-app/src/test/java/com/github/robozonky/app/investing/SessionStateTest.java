@@ -20,15 +20,16 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class SessionStateTest extends AbstractInvestingTest {
+public class SessionStateTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void discardPersistence() {
-        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
-        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
+        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         // ignore the loan and persist
         final SessionState it = new SessionState(lds);
         it.discard(ld);
@@ -42,8 +43,8 @@ public class SessionStateTest extends AbstractInvestingTest {
 
     @Test
     public void skipPersistence() {
-        final LoanDescriptor ld = AbstractInvestingTest.mockLoanDescriptor();
-        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractInvestingTest.mockLoanDescriptor());
+        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
+        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         // skip the loan and persist
         final SessionState it = new SessionState(lds);
         it.skip(ld);

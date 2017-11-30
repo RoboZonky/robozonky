@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class EventsTest extends AbstractEventLeveragingRoboZonkyTest {
+public class EventsTest extends AbstractEventLeveragingTest {
 
     @Test
     public void firingAndFailing() {

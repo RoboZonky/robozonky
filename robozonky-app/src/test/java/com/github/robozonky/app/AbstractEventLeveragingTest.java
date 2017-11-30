@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 
-public abstract class AbstractEventLeveragingRoboZonkyTest extends AbstractRoboZonkyTest {
+public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
     @Rule
     public final ProvideSystemProperty property =

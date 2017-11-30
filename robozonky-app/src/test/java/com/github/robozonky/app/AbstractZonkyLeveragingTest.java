@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.investing;
+package com.github.robozonky.app;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -26,20 +26,15 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.mockito.Mockito;
 
-public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest {
+public class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
-    @Rule
-    public final RestoreSystemProperties properties = new RestoreSystemProperties();
 
     protected static Loan mockLoan(final int loanId) {
         final Loan loan = Mockito.mock(Loan.class);
@@ -50,19 +45,19 @@ public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest 
     }
 
     protected static LoanDescriptor mockLoanDescriptor() {
-        return AbstractInvestingTest.mockLoanDescriptor(AbstractInvestingTest.RANDOM.nextInt());
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt());
     }
 
     protected static LoanDescriptor mockLoanDescriptor(final int loanId) {
-        return AbstractInvestingTest.mockLoanDescriptor(loanId, true);
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(loanId, true);
     }
 
     protected static LoanDescriptor mockLoanDescriptorWithoutCaptcha() {
-        return AbstractInvestingTest.mockLoanDescriptor(AbstractInvestingTest.RANDOM.nextInt(), false);
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt(), false);
     }
 
     protected static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
-        final Loan loan = AbstractInvestingTest.mockLoan(loanId);
+        final Loan loan = AbstractZonkyLeveragingTest.mockLoan(loanId);
         if (withCaptcha) {
             System.setProperty(Settings.Key.CAPTCHA_DELAY_D.getName(), "120"); // enable CAPTCHA for the rating
             Mockito.when(loan.getRating()).thenReturn(Rating.D);
@@ -94,5 +89,4 @@ public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest 
             }
         };
     }
-
 }
