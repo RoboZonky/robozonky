@@ -23,6 +23,9 @@ import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
+import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.robozonky.api.notifications.SessionInfo;
+import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.investing.Investor;
@@ -31,6 +34,7 @@ import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.app.portfolio.PortfolioUpdater;
 import com.github.robozonky.common.extensions.MarketplaceLoader;
 import com.github.robozonky.common.secrets.Credentials;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.util.Scheduler;
 
 @Parameters(commandNames = "daemon", commandDescription = "Constantly checks marketplaces, invests based on strategy.")
@@ -59,8 +63,8 @@ class DaemonOperatingMode extends OperatingMode {
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
         final boolean isFaultTolerant = cli.getTweaksFragment().isFaultTolerant();
-        final Credentials cred = new Credentials(marketplace.getMarketplaceCredentials(),
-                                                 auth.getSecretProvider());
+        final SecretProvider secretProvider = auth.getSecretProvider();
+        final Credentials cred = new Credentials(marketplace.getMarketplaceCredentials(), secretProvider);
         return MarketplaceLoader.load(cred)
                 .map(marketplaceImpl -> {
                     final PortfolioUpdater updater = new PortfolioUpdater(auth);
@@ -74,6 +78,8 @@ class DaemonOperatingMode extends OperatingMode {
                                                                       marketplace.getMaximumSleepDuration(),
                                                                       marketplace.getPrimaryMarketplaceCheckDelay(),
                                                                       marketplace.getSecondaryMarketplaceCheckDelay());
+                    // initialize SessionInfo before the robot potentially sends the first notification
+                    Events.fire(new RoboZonkyInitializedEvent(), new SessionInfo(secretProvider.getUsername()));
                     // only schedule internal data updates after daemon had a chance to initialize...
                     updater.run();
                     // ... and then run them every 12 hours at 4 am

@@ -69,7 +69,7 @@ public class App {
     static ReturnCode execute(final InvestmentMode mode, final AtomicBoolean faultTolerant) {
         App.SHUTDOWN_HOOKS.register(new ShutdownEnabler());
         App.SHUTDOWN_HOOKS.register(new Management());
-        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier(mode.getUsername()));
+        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
         faultTolerant.set(mode.isFaultTolerant());
         return App.execute(mode);
     }
