@@ -16,17 +16,14 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 
-public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
+public class BlockedAmountsUpdater implements Runnable {
 
     private final Authenticated authenticated;
     private final Supplier<Optional<Portfolio>> portfolio;
@@ -42,13 +39,7 @@ public class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
-        return () -> Optional.of(UUID.randomUUID().toString()); // update every time
-    }
-
-    @Override
-    protected Optional<OffsetDateTime> transform(final String source) {
-        portfolio.get().ifPresent(folio -> getDependant().accept(folio, authenticated));
-        return Optional.of(OffsetDateTime.now());
+    public void run() {
+        portfolio.get().ifPresent(folio -> instance.accept(folio, authenticated));
     }
 }
