@@ -48,13 +48,12 @@ public class PortfolioUpdater implements Runnable,
     public void run() {
         try {
             LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
-            portfolio.set(authenticated.call(Portfolio::create).orElse(null));
-            final Portfolio folio = portfolio.get();
+            final Portfolio folio = portfolio.updateAndGet(p -> authenticated.call(Portfolio::create).orElse(null));
             if (folio != null) {
                 // execute every dependant with its own authentication, to prevent token timeouts
-                dependants.forEach((u) -> {
-                    LOGGER.trace("Running dependant: {}.", u);
-                    u.accept(folio, authenticated);
+                dependants.forEach((d) -> {
+                    LOGGER.trace("Running dependant: {}.", d);
+                    d.accept(folio, authenticated);
                 });
             }
             LOGGER.info("RoboZonky resumed.");

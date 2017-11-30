@@ -16,6 +16,30 @@
 
 package com.github.robozonky.app.portfolio;
 
-public class PortfolioUpdaterTest {
+import java.util.Optional;
+
+import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.common.remote.Zonky;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+
+public class PortfolioUpdaterTest extends AbstractInvestingTest {
+
+    @Test
+    public void updatingDependants() {
+        final Zonky z = harmlessZonky(10_000);
+        final Authenticated a = Mockito.spy(mockAuthentication(z));
+        final PortfolioDependant dependant = Mockito.mock(PortfolioDependant.class);
+        final PortfolioUpdater instance = new PortfolioUpdater(a);
+        instance.registerDependant(dependant);
+        instance.run();
+        Mockito.verify(a).call(ArgumentMatchers.any()); // this is the call to update Portfolio
+        final Optional<Portfolio> result = instance.get();
+        // make sure that the dependants were called with the proper value of Portfolio
+        Mockito.verify(dependant).accept(ArgumentMatchers.eq(result.get()), ArgumentMatchers.eq(a));
+    }
+
 
 }

@@ -16,8 +16,8 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,7 +33,7 @@ class BlockedAmounts implements PortfolioDependant {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockedAmounts.class);
 
     private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
-            new AtomicReference<>(new ArrayList<>(0));
+            new AtomicReference<>(Collections.emptyList());
 
     BlockedAmounts() {
     }
