@@ -72,7 +72,9 @@ class DaemonOperatingMode extends OperatingMode {
                     // run update of blocked amounts automatically with every portfolio update
                     updater.registerDependant(bau.getDependant());
                     // update delinquents automatically with every portfolio update
-                    updater.registerDependant(Delinquents.INSTANCE);
+                    updater.registerDependant(new Delinquents((loanId, zonky) -> updater.get()
+                            .map(portfolio -> portfolio.getLoan(zonky, loanId))
+                            .orElseThrow(() -> new IllegalStateException("Cannot call on empty portfolio."))));
                     final InvestmentMode m = new DaemonInvestmentMode(auth, updater, builder, isFaultTolerant,
                                                                       marketplaceImpl, strategy.getStrategyLocation(),
                                                                       marketplace.getMaximumSleepDuration(),

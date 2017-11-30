@@ -89,8 +89,7 @@ enum DelinquencyCategory {
         }
     }
 
-    private static LoanDelinquentEvent getEvent(final Delinquency d, final int threshold, final Zonky z) {
-        final Loan loan = d.getParent().getLoan(z);
+    private static LoanDelinquentEvent getEvent(final Delinquency d, final Loan loan, final int threshold) {
         final LocalDate since = d.getPaymentMissedDate();
         return getEventSupplier(threshold).apply(loan, since);
     }
@@ -110,9 +109,11 @@ enum DelinquencyCategory {
      * Update internal state trackers and send events if necessary.
      * @param delinquencies Active delinquencies - ie. payments that are, right now, overdue.
      * @param auth Authenticated API to be used for retrieving loan data.
+     * @param loanProvider Used to retrieve loans either from the Zonky API or from some cache.
      * @return IDs of loans that are being tracked in this category.
      */
-    public Collection<Integer> update(final Collection<Delinquency> delinquencies, final Authenticated auth) {
+    public Collection<Integer> update(final Collection<Delinquency> delinquencies, final Authenticated auth,
+                                      final BiFunction<Integer, Zonky, Loan> loanProvider) {
         LOGGER.trace("Updating {}.", this);
         final Collection<Delinquency> activeAndPresent = delinquencies.stream()
                 .filter(d -> !d.getFixedOn().isPresent())
@@ -128,7 +129,8 @@ enum DelinquencyCategory {
                 .filter(d -> isOverThreshold(d, thresholdInDays))
                 .filter(d -> activeHistorical.stream().noneMatch(i -> d.getParent().getLoanId() == i))
                 .peek(d -> {
-                    final Event e = auth.call(zonky -> getEvent(d, thresholdInDays, zonky));
+                    final Loan l = auth.call(zonky -> loanProvider.apply(d.getParent().getLoanId(), zonky));
+                    final Event e = auth.call(zonky -> getEvent(d, l, thresholdInDays));
                     Events.fire(e);
                 })
                 .map(d -> d.getParent().getLoanId());
@@ -138,6 +140,10 @@ enum DelinquencyCategory {
         state.newBatch().set(fieldName, toIdString(result.stream())).call();
         LOGGER.trace("Update over.");
         return result;
+    }
+
+    public Collection<Integer> update(final Collection<Delinquency> delinquencies, final Authenticated auth) {
+        return update(delinquencies, auth, (loanId, zonky) -> zonky.getLoan(loanId));
     }
 
 }

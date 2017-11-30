@@ -22,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,6 +35,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
@@ -45,15 +47,19 @@ import org.slf4j.LoggerFactory;
  */
 public class Delinquents implements PortfolioDependant {
 
-    public static final Delinquents INSTANCE = new Delinquents();
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquents.class);
     private static final String LAST_UPDATE_PROPERTY_NAME = "lastUpdate";
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
 
-    private Delinquents() {
-        // singleton
+    private final BiFunction<Integer, Zonky, Loan> loanProvider;
+
+    public Delinquents() {
+        this((loanId, zonky) -> zonky.getLoan(loanId));
+    }
+
+    public Delinquents(final BiFunction<Integer, Zonky, Loan> loanProvider) {
+        this.loanProvider = loanProvider;
     }
 
     private static String toString(final Delinquency d) {
@@ -116,7 +122,7 @@ public class Delinquents implements PortfolioDependant {
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
                 .map(Delinquency::getParent)
                 .forEach(d -> {  // notify
-                    final Loan loan = auth.call(d::getLoan);
+                    final Loan loan = auth.call(z -> loanProvider.apply(d.getLoanId(), z));
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
                         Events.fire(new LoanDefaultedEvent(loan, since));
@@ -142,7 +148,7 @@ public class Delinquents implements PortfolioDependant {
             stateUpdate.call(); // persist state updates
             LOGGER.trace("Delinquency update finished.");
             // and notify of new delinquencies over all known thresholds
-            Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, auth));
+            Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, auth, loanProvider));
         }
         LOGGER.trace("Done.");
     }
@@ -155,7 +161,7 @@ public class Delinquents implements PortfolioDependant {
     }
 
     /**
-     * @return Active loans that are now, or at some point have been, currently tracked as delinquent.
+     * @return Active loans that are now, or at some point have been, tracked as delinquent.
      */
     public Collection<Delinquent> getDelinquents() {
         final State.ClassSpecificState state = State.forClass(this.getClass());

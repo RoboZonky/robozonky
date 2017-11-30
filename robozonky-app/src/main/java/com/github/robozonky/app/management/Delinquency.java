@@ -34,7 +34,7 @@ class Delinquency implements DelinquencyMBean {
     private final Delinquents source;
 
     public Delinquency() {
-        this(Delinquents.INSTANCE);
+        this(new Delinquents());
     }
 
     // for testing purposes only

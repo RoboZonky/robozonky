@@ -18,27 +18,11 @@ package com.github.robozonky.app.portfolio;
 
 import java.time.LocalDate;
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
 public class DelinquentTest {
-
-    @Test
-    public void loanRetrieval() {
-        final int loanId = 1;
-        final Delinquent d = new Delinquent(loanId);
-        final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(new Loan(loanId, 200));
-        final Loan l = d.getLoan(zonky);
-        Mockito.verify(zonky).getLoan(ArgumentMatchers.eq(loanId));
-        Assertions.assertThat(l).isNotNull();
-        Assertions.assertThat(l.getId()).isEqualTo(loanId);
-    }
 
     @Test
     public void withActiveDelinquency() {
