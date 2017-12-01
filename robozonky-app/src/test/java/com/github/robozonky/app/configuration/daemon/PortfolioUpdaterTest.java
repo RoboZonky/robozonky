@@ -32,7 +32,7 @@ public class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     @Test
     public void updatingDependants() {
         final Zonky z = harmlessZonky(10_000);
-        final Authenticated a = Mockito.spy(mockAuthentication(z));
+        final Authenticated a = mockAuthentication(z);
         final PortfolioDependant dependant = Mockito.mock(PortfolioDependant.class);
         final PortfolioUpdater instance = new PortfolioUpdater(a);
         instance.registerDependant(dependant);

@@ -19,6 +19,7 @@ package com.github.robozonky.app;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -30,6 +31,7 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
@@ -77,16 +79,18 @@ public class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
     }
 
     protected static Authenticated mockAuthentication(final Zonky zonky) {
-        return new Authenticated() {
-            @Override
-            public <T> T call(final Function<Zonky, T> operation) {
-                return operation.apply(zonky);
-            }
-
-            @Override
-            public SecretProvider getSecretProvider() {
-                return SecretProvider.fallback("someone", "password".toCharArray());
-            }
-        };
+        final Authenticated auth = Mockito.mock(Authenticated.class);
+        Mockito.when(auth.getSecretProvider())
+                .thenReturn(SecretProvider.fallback("someone", "password".toCharArray()));
+        Mockito.doAnswer(invocation -> {
+            final Function<Zonky, Object> operation = invocation.getArgument(0);
+            return operation.apply(zonky);
+        }).when(auth).call(ArgumentMatchers.any());
+        Mockito.doAnswer(invocation -> {
+            final Consumer<Zonky> operation = invocation.getArgument(0);
+            operation.accept(zonky);
+            return null;
+        }).when(auth).run(ArgumentMatchers.any());
+        return auth;
     }
 }
