@@ -68,7 +68,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.username = auth.getSecretProvider().getUsername();
         this.faultTolerant = isFaultTolerant;
         this.circuitBreaker = BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
-        Runtime.getRuntime().addShutdownHook(new DaemonShutdownHook(circuitBreaker));
         this.marketplace = marketplace;
         final boolean dryRun = builder.isDryRun();
         final StrategyProvider sp = initStrategy(strategyLocation);
@@ -82,6 +81,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
     @Override
     public ReturnCode get() {
         try {
+            // register shutdown hook that will kill the daemon threads when app shutdown is requested
+            Runtime.getRuntime().addShutdownHook(new DaemonShutdownHook(circuitBreaker));
             // schedule the tasks some time apart so that the CPU is evenly utilized
             final LongAdder daemonCount = new LongAdder();
             daemons.forEach(d -> {
