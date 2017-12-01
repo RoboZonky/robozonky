@@ -28,9 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import com.github.robozonky.internal.api.Retriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +78,8 @@ public abstract class Refreshable<T> implements Runnable {
         return new Refreshable<I>() {
 
             @Override
-            protected Supplier<Optional<String>> getLatestSource() {
-                return () -> Optional.of("");
+            protected Optional<String> getLatestSource() {
+                return Optional.of("");
             }
 
             @Override
@@ -100,12 +98,11 @@ public abstract class Refreshable<T> implements Runnable {
      * Result of this method will be used to fetch the latest resource state. While {@link #run()} is being
      * executed, if the result of the call no longer {@link #equals(Object)} its value from previous call,
      * {@link #transform(String)} will be called, resulting in {@link #getLatest()} changing its return value.
-     * <p>
-     * The result of this method will be treated as a blocking operation, assuming it contains I/O calls.
+     *
      * @return Method to retrieve identifier for the content. If empty, {@link #transform(String)} will not be called
      * and {@link #getLatest()} will become empty.
      */
-    protected abstract Supplier<Optional<String>> getLatestSource();
+    protected abstract Optional<String> getLatestSource();
 
     /**
      * Transform resource source into a new version of the resource. This method will be called when a fresh resource
@@ -206,7 +203,7 @@ public abstract class Refreshable<T> implements Runnable {
     }
 
     private synchronized void runLocked() {
-        final Optional<String> maybeNewSource = Retriever.retrieve(this.getLatestSource());
+        final Optional<String> maybeNewSource = this.getLatestSource();
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
             if (Objects.equals(newSource, latestKnownSource.get())) {

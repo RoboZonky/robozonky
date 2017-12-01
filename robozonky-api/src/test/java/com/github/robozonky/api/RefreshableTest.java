@@ -21,7 +21,6 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -52,8 +51,8 @@ public class RefreshableTest {
         }
 
         @Override
-        protected Supplier<Optional<String>> getLatestSource() {
-            return () -> Optional.ofNullable(latestSource);
+        protected Optional<String> getLatestSource() {
+            return Optional.ofNullable(latestSource);
         }
 
         @Override
@@ -121,8 +120,8 @@ public class RefreshableTest {
         }
 
         @Override
-        protected Supplier<Optional<String>> getLatestSource() {
-            return () -> Optional.of(UUID.randomUUID().toString());
+        protected Optional<String> getLatestSource() {
+            return Optional.of(UUID.randomUUID().toString());
         }
 
         @Override

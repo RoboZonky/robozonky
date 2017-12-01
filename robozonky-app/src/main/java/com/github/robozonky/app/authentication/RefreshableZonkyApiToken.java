@@ -21,7 +21,6 @@ import java.io.StringReader;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 import javax.ws.rs.BadRequestException;
 import javax.xml.bind.JAXBException;
 
@@ -62,8 +61,8 @@ class RefreshableZonkyApiToken extends Refreshable<ZonkyApiToken> {
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
-        return () -> Optional.of(UUID.randomUUID().toString()); // refresh every time it is scheduled
+    protected Optional<String> getLatestSource() {
+        return Optional.of(UUID.randomUUID().toString()); // refresh every time it is scheduled
     }
 
     @Override

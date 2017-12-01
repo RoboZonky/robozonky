@@ -19,7 +19,6 @@ package com.github.robozonky.util;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
@@ -38,14 +37,14 @@ public class LocalhostAddress extends Refreshable<String> {
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
+    protected Optional<String> getLatestSource() {
         try {
             final URL url = new URL(CHECKIP_URL);
             final String contents = IOUtils.toString(url, Defaults.CHARSET).trim();
-            return () -> Optional.of(contents);
+            return Optional.of(contents);
         } catch (final IOException ex) {
             LOGGER.debug("Failed retrieving local host address.", ex);
-            return () -> Optional.of("localhost");
+            return Optional.of("localhost");
         }
     }
 

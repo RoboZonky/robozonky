@@ -155,6 +155,17 @@
                     "methodName": "getLatestBlocking",
                     "elementKind": "method",
                     "justification": "No longer used anywhere in the code."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method java.util.function.Supplier<java.util.Optional<java.lang.String>> com.github.robozonky.api.Refreshable<T>::getLatestSource()",
+                    "new": "method java.util.Optional<java.lang.String> com.github.robozonky.api.Refreshable<T>::getLatestSource()",
+                    "oldType": "java.util.function.Supplier<java.util.Optional<java.lang.String>>",
+                    "newType": "java.util.Optional<java.lang.String>",
+                    "package": "com.github.robozonky.api",
+                    "classSimpleName": "Refreshable",
+                    "methodName": "getLatestSource",
+                    "elementKind": "method",
+                    "justification": "Simplification of a Refreshable threading model."
                   }
                 ]
               }

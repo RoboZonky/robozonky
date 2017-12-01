@@ -18,7 +18,6 @@ package com.github.robozonky.notifications.email;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
@@ -36,9 +35,9 @@ class RefreshableEventListener<T extends Event> extends Refreshable<EventListene
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
+    protected Optional<String> getLatestSource() {
         properties.run();
-        return () -> properties.getLatest().map(Object::toString);
+        return properties.getLatest().map(Object::toString);
     }
 
     @Override
