@@ -18,6 +18,7 @@ package com.github.robozonky.notifications.email;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
@@ -26,23 +27,23 @@ import com.github.robozonky.api.notifications.EventListener;
 
 class RefreshableEventListener<T extends Event> extends Refreshable<EventListener<T>> {
 
-    private final RefreshableNotificationProperties properties;
+    private final Supplier<Optional<NotificationProperties>> properties;
     private final Class<T> eventType;
 
-    public RefreshableEventListener(final RefreshableNotificationProperties properties, final Class<T> eventType) {
+    public RefreshableEventListener(final Supplier<Optional<NotificationProperties>> properties,
+                                    final Class<T> eventType) {
         this.properties = properties;
         this.eventType = eventType;
     }
 
     @Override
     protected Optional<String> getLatestSource() {
-        properties.run();
-        return properties.getLatest().map(Object::toString);
+        return properties.get().map(Object::toString);
     }
 
     @Override
     protected Optional<EventListener<T>> transform(final String source) {
-        final Optional<NotificationProperties> optionalProps = properties.getLatest();
+        final Optional<NotificationProperties> optionalProps = properties.get();
         return optionalProps.flatMap(props -> {
             if (!props.isEnabled()) {
                 LOGGER.debug("E-mail notifications disabled in settings.");

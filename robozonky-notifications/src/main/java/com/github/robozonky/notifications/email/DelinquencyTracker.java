@@ -56,8 +56,4 @@ enum DelinquencyTracker {
         return DelinquencyTracker.STATE.getValue(loanToId(loan)).isPresent();
     }
 
-    boolean reset() {
-        return DelinquencyTracker.STATE.newBatch(true).call();
-    }
-
 }

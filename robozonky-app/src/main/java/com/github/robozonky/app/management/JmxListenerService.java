@@ -80,6 +80,10 @@ public class JmxListenerService implements ListenerService {
 
     @Override
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
-        return Refreshable.createImmutable(JmxListenerService.newListener(eventType));
+        final EventListener<T> listener = JmxListenerService.newListener(eventType);
+        if (listener == null) {
+            return null;
+        }
+        return Refreshable.createImmutable(listener);
     }
 }

@@ -17,6 +17,7 @@
 package com.github.robozonky.notifications.email;
 
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.internal.api.State;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -27,7 +28,7 @@ public class DelinquencyTrackerTest {
     @After
     @Before
     public void reset() {
-        DelinquencyTracker.INSTANCE.reset();
+        State.forClass(DelinquencyTracker.class).newBatch(true).call();
     }
 
     @Test
@@ -47,7 +48,7 @@ public class DelinquencyTrackerTest {
         final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
         Assertions.assertThat(t.setDelinquent(l)).isTrue();
         Assertions.assertThat(t.setDelinquent(l)).isFalse();
-        t.reset();
+        this.reset();
         Assertions.assertThat(t.isDelinquent(l)).isFalse();
     }
 

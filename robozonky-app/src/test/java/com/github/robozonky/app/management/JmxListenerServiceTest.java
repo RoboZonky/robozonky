@@ -221,8 +221,8 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     public void setInvalid() {
         final JmxListenerService service = new JmxListenerService();
         final Refreshable<EventListener<RoboZonkyEndingEvent>> r = service.findListener(RoboZonkyEndingEvent.class);
-        r.run();
-        Assertions.assertThat(r.getLatest()).isEmpty();
+        Assertions.assertThat(r).isNull();
+        ;
     }
 
     @After

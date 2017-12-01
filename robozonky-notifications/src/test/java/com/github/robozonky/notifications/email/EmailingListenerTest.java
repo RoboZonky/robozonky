@@ -65,6 +65,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.internal.api.State;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -221,7 +222,7 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     @After
     public void resetDelinquencyTracker() { // to make sure the tests always return consistent results
-        DelinquencyTracker.INSTANCE.reset();
+        State.forClass(DelinquencyTracker.class).newBatch(true).call();
     }
 
     @Test
@@ -249,12 +250,6 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         final Refreshable<EventListener<T>> refreshable = service.findListener(eventType);
         refreshable.run();
         return refreshable;
-    }
-
-    @Test
-    public void noPropertiesNoListeners() {
-        System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, "");
-        Assertions.assertThat(getListener(this.event.getClass()).getLatest()).isEmpty();
     }
 
     @Test
