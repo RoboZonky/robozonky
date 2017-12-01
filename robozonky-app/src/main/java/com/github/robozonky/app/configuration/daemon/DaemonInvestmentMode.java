@@ -51,6 +51,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, THREAD_FACTORY);
     private final Collection<DaemonOperation> daemons;
     private final CountDownLatch circuitBreaker;
+    private final PortfolioUpdater portfolioUpdater;
 
     static StrategyProvider initStrategy(final String strategyLocation) {
         final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
@@ -71,11 +72,21 @@ public class DaemonInvestmentMode implements InvestmentMode {
         this.marketplace = marketplace;
         final boolean dryRun = builder.isDryRun();
         final StrategyProvider sp = initStrategy(strategyLocation);
+        this.portfolioUpdater = p;
         p.registerDependant(new Selling(sp::getToSell, dryRun)); // run sell strategy with every portfolio update
         this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, sp::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
                                      new PurchasingDaemon(auth, sp::getToPurchase, p, maximumSleepPeriod,
                                                           secondaryMarketplaceCheckPeriod, dryRun));
+    }
+
+    private Runnable wrapDaemonWithPortfolioWait(final Runnable daemon) {
+        return () -> {
+            if (portfolioUpdater.isUpdating()) { // don't update while reading information about portfolio
+                return;
+            }
+            daemon.run();
+        };
     }
 
     @Override
@@ -89,7 +100,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
                 final long refreshInterval = d.getRefreshInterval().getSeconds() * 1000;
                 final long initialDelay = daemonCount.sum() * 250; // schedule daemons quarter second apart
                 LOGGER.trace("Scheduling {} every {} ms, starting in {} ms.", d, refreshInterval, initialDelay);
-                executor.scheduleWithFixedDelay(d, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
+                final Runnable task = wrapDaemonWithPortfolioWait(d);
+                executor.scheduleWithFixedDelay(task, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
                 daemonCount.increment(); // increment the counter so that the next daemon is scheduled with
             });
             // block until request to stop the app is received

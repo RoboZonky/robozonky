@@ -19,6 +19,7 @@ package com.github.robozonky.app.configuration.daemon;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -36,6 +37,7 @@ public class PortfolioUpdater implements Runnable,
     private final Authenticated authenticated;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
     private final Set<PortfolioDependant> dependants = new CopyOnWriteArraySet<>();
+    private final AtomicBoolean updating = new AtomicBoolean(false);
 
     public PortfolioUpdater(final Authenticated authenticated) {
         this.authenticated = authenticated;
@@ -46,22 +48,31 @@ public class PortfolioUpdater implements Runnable,
         dependants.add(updater);
     }
 
+    public boolean isUpdating() {
+        return updating.get();
+    }
+
     @Override
     public void run() {
         LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
-        final Portfolio folio = portfolio.updateAndGet(p -> authenticated.call(Portfolio::create).orElse(null));
-        if (folio == null) {
-            return;
-        }
-        // execute every dependant with its own authentication, to prevent token timeouts
-        dependants.forEach(d -> {
-            LOGGER.trace("Running dependant: {}.", d);
-            try {
-                d.accept(folio, authenticated);
-            } catch (final Throwable t) {
-                new DaemonRuntimeExceptionHandler().handle(t);
+        updating.set(true);
+        try {
+            final Portfolio folio = portfolio.updateAndGet(p -> authenticated.call(Portfolio::create).orElse(null));
+            if (folio == null) {
+                return;
             }
-        });
+            // execute every dependant with its own authentication, to prevent token timeouts
+            dependants.forEach(d -> {
+                LOGGER.trace("Running dependant: {}.", d);
+                try {
+                    d.accept(folio, authenticated);
+                } catch (final Throwable t) {
+                    new DaemonRuntimeExceptionHandler().handle(t);
+                }
+            });
+        } finally {
+            updating.set(false);
+        }
         LOGGER.info("RoboZonky resumed.");
     }
 
