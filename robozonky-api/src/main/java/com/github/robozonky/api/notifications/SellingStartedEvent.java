@@ -33,6 +33,7 @@ public final class SellingStartedEvent extends Event {
 
     public SellingStartedEvent(final Collection<InvestmentDescriptor> descriptors,
                                final PortfolioOverview portfolioOverview) {
+        super("descriptors");
         this.descriptors = Collections.unmodifiableCollection(descriptors);
         this.portfolioOverview = portfolioOverview;
     }

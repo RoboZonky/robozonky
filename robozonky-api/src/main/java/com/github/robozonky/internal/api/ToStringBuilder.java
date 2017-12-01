@@ -17,24 +17,30 @@
 package com.github.robozonky.internal.api;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 
 public class ToStringBuilder {
 
+    private static final String[] EXCLUDE_FIELDS = new String[0];
     private final ReflectionToStringBuilder builder;
 
     public ToStringBuilder(final Object o, final String... excludeFields) {
+        final String[] fieldExclusions = Stream.concat(Stream.of("password"), Stream.of(excludeFields))
+                .distinct()
+                .toArray(String[]::new);
         this.builder = new ToStringBuilder.CustomReflectionToStringBuilder(o)
-                .setExcludeFieldNames(excludeFields);
+                .setExcludeFieldNames(fieldExclusions);
     }
 
     public ToStringBuilder(final Object o) {
-        this(o, "password");
+        this(o, EXCLUDE_FIELDS);
     }
 
     @Override
@@ -55,7 +61,7 @@ public class ToStringBuilder {
 
         @Override
         protected boolean accept(final Field field) {
-            return super.accept(field) &&
+            return super.accept(field) && !Modifier.isStatic(field.getModifiers()) &&
                     IGNORED_TYPES.stream().noneMatch(type -> Objects.equals(field.getType(), type));
         }
 

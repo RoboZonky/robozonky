@@ -17,6 +17,8 @@
 package com.github.robozonky.api.notifications;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collection;
 
 import com.github.robozonky.internal.api.ToStringBuilder;
 
@@ -28,12 +30,19 @@ import com.github.robozonky.internal.api.ToStringBuilder;
  */
 public abstract class Event {
 
+    private static final String[] TO_STRING_IGNORED_FIELDS = new String[0];
     private final OffsetDateTime creationDateTime = OffsetDateTime.now();
+    private final Collection<String> toStringIgnoredFields;
 
-    public Event() {
+    protected Event(final String... toStringIgnoredFields) {
         if (!this.getClass().getSimpleName().endsWith("Event")) { // guarantee for dependent code
             throw new IllegalStateException("Event subclass' names must end with 'Event'.");
         }
+        this.toStringIgnoredFields = Arrays.asList(toStringIgnoredFields);
+    }
+
+    public Event() {
+        this(TO_STRING_IGNORED_FIELDS);
     }
 
     public OffsetDateTime getCreatedOn() {
@@ -42,6 +51,7 @@ public abstract class Event {
 
     @Override
     public final String toString() {
-        return new ToStringBuilder(this).toString();
+        final String[] ignored = toStringIgnoredFields.toArray(new String[toStringIgnoredFields.size()]);
+        return new ToStringBuilder(this, ignored).toString();
     }
 }

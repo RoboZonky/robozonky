@@ -32,12 +32,13 @@ public final class ExecutionStartedEvent extends Event {
     private final PortfolioOverview portfolioOverview;
 
     public ExecutionStartedEvent(final Collection<LoanDescriptor> loanDescriptors, final PortfolioOverview portfolio) {
+        super("loanDescriptors");
         this.loanDescriptors = Collections.unmodifiableCollection(loanDescriptors);
         this.portfolioOverview = portfolio;
     }
 
     /**
-     * @return Loans found on the marketplace that are available for robotic investment, not protected by CAPTCHA.
+     * @return Loans found on the marketplace that are available for robotic investment.
      */
     public Collection<LoanDescriptor> getLoanDescriptors() {
         return this.loanDescriptors;

@@ -33,6 +33,7 @@ public final class PurchasingStartedEvent extends Event {
 
     public PurchasingStartedEvent(final Collection<ParticipationDescriptor> descriptors,
                                   final PortfolioOverview portfolioOverview) {
+        super("descriptors");
         this.descriptors = Collections.unmodifiableCollection(descriptors);
         this.portfolioOverview = portfolioOverview;
     }
