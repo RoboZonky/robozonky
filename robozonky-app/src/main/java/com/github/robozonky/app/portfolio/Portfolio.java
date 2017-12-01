@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -48,7 +48,7 @@ public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Collection<Investment> investments, investmentsPending = new ArrayList<>(0);
-    private final SortedMap<Integer, Loan> loanCache = new TreeMap<>();
+    private final ConcurrentMap<Integer, Loan> loanCache = new ConcurrentHashMap<>();
 
     public Portfolio() {
         this(Collections.emptyList());
