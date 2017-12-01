@@ -53,12 +53,12 @@ class TokenBasedAccess implements Authenticated {
         return refreshableToken;
     }
 
-    private ZonkyApiToken getToken() {
+    private synchronized ZonkyApiToken getToken() {
         return refreshableToken.getLatest()
                 .orElseThrow(() -> new ServiceUnavailableException("No API token available, authentication failed."));
     }
 
-    private ZonkyApiToken getFreshToken() {
+    private synchronized ZonkyApiToken getFreshToken() { // no point in making multiple threads refresh the same token
         final ZonkyApiToken token = getToken();
         if (token.willExpireIn(EMERGENCY_REFRESH_INTERVAL)) {
             LOGGER.debug("Emergency refresh to prevent token from going stale on {}.", token.getExpiresOn());
@@ -78,7 +78,7 @@ class TokenBasedAccess implements Authenticated {
         LOGGER.trace("Executing {}, attempt #{}.", operation, attemptNo);
         try {
             final ZonkyApiToken token = getFreshToken();
-            return refreshableToken.pauseFor((r) -> apis.authenticated(token, operation));
+            return refreshableToken.pauseFor(r -> apis.authenticated(token, operation));
         } catch (final NotAuthorizedException ex) {
             if (attemptNo >= 3) {
                 throw new IllegalStateException("There was a severe authorization problem.", ex);

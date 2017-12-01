@@ -177,11 +177,11 @@ public abstract class Refreshable<T> implements Runnable {
             return operation.apply(this);
         } finally {
             LOGGER.trace("Releasing: {}.", this);
-            final boolean isPaused = requestsToPause.decrementAndGet() > 0;
-            final boolean needsRefresh = refreshRequestedWhilePaused.getAndSet(false);
-            if (!isPaused && needsRefresh) {
-                LOGGER.trace("Executing in lieu: {}.", this);
-                run();
+            if (requestsToPause.decrementAndGet() == 0) {
+                if (refreshRequestedWhilePaused.getAndSet(false)) {
+                    LOGGER.trace("Executing in lieu: {}.", this);
+                    run();
+                }
             }
         }
     }
