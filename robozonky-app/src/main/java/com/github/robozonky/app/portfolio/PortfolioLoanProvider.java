@@ -34,6 +34,6 @@ class PortfolioLoanProvider implements LoanProvider {
     public Loan apply(final Integer loanId, final Zonky zonky) {
         return portfolio.get()
                 .map(portfolio -> portfolio.getLoan(zonky, loanId))
-                .orElseThrow(() -> new IllegalStateException("Cannot call on empty portfolio."));
+                .orElse(new ZonkyLoanProvider().apply(loanId, zonky));
     }
 }

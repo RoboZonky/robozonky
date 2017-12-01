@@ -31,9 +31,11 @@ public class PortfolioLoanProviderTest {
     @Test
     public void noPortfolio() {
         final Supplier<Optional<Portfolio>> portfolioProvider = Optional::empty;
+        final Zonky zonky = Mockito.mock(Zonky.class);
+        final Loan l = new Loan(1, 200);
+        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
         final LoanProvider p = new PortfolioLoanProvider(portfolioProvider);
-        Assertions.assertThatThrownBy(() -> p.apply(0, Mockito.mock(Zonky.class)))
-                .isInstanceOf(IllegalStateException.class);
+        Assertions.assertThat(p.apply(l.getId(), zonky)).isSameAs(l);
     }
 
     @Test
