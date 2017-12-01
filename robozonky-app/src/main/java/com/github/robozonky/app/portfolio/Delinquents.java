@@ -22,7 +22,8 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +36,6 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
@@ -52,13 +52,17 @@ public class Delinquents implements PortfolioDependant {
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
 
-    private final BiFunction<Integer, Zonky, Loan> loanProvider;
+    private final LoanProvider loanProvider;
 
     public Delinquents() {
-        this((loanId, zonky) -> zonky.getLoan(loanId));
+        this(new ZonkyLoanProvider());
     }
 
-    public Delinquents(final BiFunction<Integer, Zonky, Loan> loanProvider) {
+    public Delinquents(final Supplier<Optional<Portfolio>> portfolioProvider) {
+        this(new PortfolioLoanProvider(portfolioProvider));
+    }
+
+    private Delinquents(final LoanProvider loanProvider) {
         this.loanProvider = loanProvider;
     }
 
@@ -98,7 +102,7 @@ public class Delinquents implements PortfolioDependant {
         return d.getLoanId() == i.getLoanId();
     }
 
-    public void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent) {
+    void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent) {
         update(auth, presentlyDelinquent, Collections.emptyList());
     }
 
@@ -114,7 +118,7 @@ public class Delinquents implements PortfolioDependant {
                 final Collection<Investment> noLongerActive) {
         LOGGER.debug("Updating delinquent loans.");
         final LocalDate now = LocalDate.now();
-        final Collection<Delinquent> knownDelinquents = this.getDelinquents();
+        final Collection<Delinquent> knownDelinquents = getDelinquents();
         knownDelinquents.stream()
                 .filter(Delinquent::hasActiveDelinquency) // only care about present delinquents
                 .filter(d -> presentlyDelinquent.stream().noneMatch(i -> related(d, i)))
@@ -153,9 +157,12 @@ public class Delinquents implements PortfolioDependant {
         LOGGER.trace("Done.");
     }
 
-    public OffsetDateTime getLastUpdateTimestamp() {
-        return State.forClass(this.getClass())
-                .getValue(LAST_UPDATE_PROPERTY_NAME)
+    private static State.ClassSpecificState getState() {
+        return State.forClass(Delinquents.class);
+    }
+
+    public static OffsetDateTime getLastUpdateTimestamp() {
+        return getState().getValue(LAST_UPDATE_PROPERTY_NAME)
                 .map(OffsetDateTime::parse)
                 .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
     }
@@ -163,8 +170,8 @@ public class Delinquents implements PortfolioDependant {
     /**
      * @return Active loans that are now, or at some point have been, tracked as delinquent.
      */
-    public Collection<Delinquent> getDelinquents() {
-        final State.ClassSpecificState state = State.forClass(this.getClass());
+    public static Collection<Delinquent> getDelinquents() {
+        final State.ClassSpecificState state = getState();
         return state.getKeys().stream()
                 .filter(StringUtils::isNumeric) // skip any non-loan metadata
                 .map(key -> {

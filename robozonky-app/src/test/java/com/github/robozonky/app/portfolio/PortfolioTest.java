@@ -24,13 +24,15 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class PortfolioTest {
+public class PortfolioTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void cache() {
@@ -38,7 +40,7 @@ public class PortfolioTest {
         final Loan loan = new Loan(loanId, 200);
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(loan);
-        final Portfolio instance = Portfolio.create(z, Stream.empty())
+        final Portfolio instance = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present."));
         Assertions.assertThat(instance.getLoan(loanId)).isEmpty();
         // load into cache
@@ -79,7 +81,7 @@ public class PortfolioTest {
         final Investment i4 = mockSold(); // ignored because sold
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4));
-        final Portfolio instance = Portfolio.create(z, Stream.empty())
+        final Portfolio instance = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present."));
         final PaymentStatuses p = PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE);
         Assertions.assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
@@ -94,8 +96,27 @@ public class PortfolioTest {
         final Investment i5 = mockSold(); // ignored because sold
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4, i5));
-        final Portfolio instance = Portfolio.create(z, Stream.empty())
+        final Portfolio instance = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present."));
         Assertions.assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
+    }
+
+    @Test
+    public void liveBalance() {
+        final Portfolio instance = new Portfolio();
+        final int balance = 10_000;
+        final Zonky zonky = harmlessZonky(balance);
+        Assertions.assertThat(instance.calculateOverview(zonky, false).getCzkAvailable())
+                .isEqualTo(balance);
+    }
+
+    @Test
+    public void dryRunBalance() {
+        final Portfolio instance = new Portfolio();
+        final int balance = 10_000;
+        final Zonky zonky = harmlessZonky(balance - 1);
+        System.setProperty(Settings.Key.DEFAULTS_DRY_RUN_BALANCE.getName(), String.valueOf(balance));
+        Assertions.assertThat(instance.calculateOverview(zonky, true).getCzkAvailable())
+                .isEqualTo(balance);
     }
 }

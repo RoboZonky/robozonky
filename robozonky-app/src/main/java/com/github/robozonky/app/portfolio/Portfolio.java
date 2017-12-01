@@ -19,11 +19,11 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -50,11 +50,15 @@ public class Portfolio {
     private final Collection<Investment> investments, investmentsPending = new ArrayList<>(0);
     private final SortedMap<Integer, Loan> loanCache = new TreeMap<>();
 
+    public Portfolio() {
+        this(Collections.emptyList());
+    }
+
     public Portfolio(final Collection<Investment> investments) {
         this.investments = new ArrayList<>(investments);
     }
 
-    public static Optional<Portfolio> create(final Zonky zonky, final Stream<PortfolioDependant> updaters) {
+    public static Optional<Portfolio> create(final Zonky zonky) {
         try {
             final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
             final Portfolio p = new Portfolio(online);
@@ -64,10 +68,6 @@ public class Portfolio {
             LOGGER.warn("Failed loading Zonky portfolio.", ex);
             return Optional.empty();
         }
-    }
-
-    public static Optional<Portfolio> create(final Zonky zonky) {
-        return create(zonky, Stream.empty());
     }
 
     private static <T> Stream<T> getStream(final Collection<T> source, final Function<Stream<T>, Stream<T>> modifier) {
@@ -85,10 +85,6 @@ public class Portfolio {
     private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
         final Loan l = getLoan(zonky, blockedAmount.getLoanId());
         return new Investment(l, blockedAmount.getAmount().intValue());
-    }
-
-    public void newBlockedAmounts(final Zonky zonky, final SortedSet<BlockedAmount> blockedAmounts) {
-        blockedAmounts.forEach(ba -> newBlockedAmount(zonky, ba));
     }
 
     public boolean wasOnceSold(final Loan loan) {

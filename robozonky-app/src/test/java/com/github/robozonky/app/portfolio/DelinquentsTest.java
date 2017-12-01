@@ -49,7 +49,7 @@ public class DelinquentsTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void empty() {
-        Assertions.assertThat(instance.getDelinquents()).isEmpty();
+        Assertions.assertThat(Delinquents.getDelinquents()).isEmpty();
         Assertions.assertThat(this.getNewEvents()).isEmpty();
     }
 
@@ -63,20 +63,20 @@ public class DelinquentsTest extends AbstractZonkyLeveragingTest {
         // make sure new delinquences are reported and stored
         instance.update(mockAuthentication(zonky), Collections.singleton(i));
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(instance.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(1);
         });
         Assertions.assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
         // make sure delinquences are persisted even when there are none present
         instance.update(mockAuthentication(zonky), Collections.emptyList());
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(instance.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(2);
         });
         Assertions.assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanNoLongerDelinquentEvent.class);
         // and when they are no longer active, they're gone for good
         instance.update(mockAuthentication(zonky), Collections.emptyList(), Collections.singleton(i));
-        Assertions.assertThat(instance.getDelinquents()).hasSize(0);
+        Assertions.assertThat(Delinquents.getDelinquents()).hasSize(0);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class DelinquentsTest extends AbstractZonkyLeveragingTest {
         // make sure new delinquences are reported and stored
         instance.update(mockAuthentication(zonky), Collections.singleton(i));
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(instance.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(5);
         });
         Assertions.assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);

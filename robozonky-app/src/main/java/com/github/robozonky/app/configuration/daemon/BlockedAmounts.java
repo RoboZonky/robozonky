@@ -48,7 +48,7 @@ class BlockedAmounts implements PortfolioDependant {
         final SortedSet<BlockedAmount> difference = presentBlockedAmounts.stream()
                 .filter(ba -> !previousBlockedAmounts.contains(ba))
                 .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
-        auth.run(zonky -> portfolio.newBlockedAmounts(zonky, difference));
+        auth.run(zonky -> difference.stream().forEach(ba -> portfolio.newBlockedAmount(zonky, ba)));
         LOGGER.trace("Finished.");
     }
 }

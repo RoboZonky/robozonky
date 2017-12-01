@@ -44,9 +44,8 @@ public class BlockedAmountsTest extends AbstractZonkyLeveragingTest {
         final BlockedAmounts blockedAmounts = new BlockedAmounts();
         // verify the first two blocked amounts were registered
         blockedAmounts.accept(p, auth);
-        Mockito.verify(p).newBlockedAmounts(ArgumentMatchers.eq(zonky),
-                                            ArgumentMatchers.argThat(arg -> arg.contains(BA1) && arg.contains(BA2)
-                                                    && arg.size() == 2));
+        Mockito.verify(p).newBlockedAmount(ArgumentMatchers.eq(zonky), ArgumentMatchers.eq(BA1));
+        Mockito.verify(p).newBlockedAmount(ArgumentMatchers.eq(zonky), ArgumentMatchers.eq(BA2));
         // verify only the new blocked amount was registered, and that it only happened the first time
         Mockito.reset(p);
         Mockito.when(zonky.getBlockedAmounts())
@@ -54,7 +53,6 @@ public class BlockedAmountsTest extends AbstractZonkyLeveragingTest {
         blockedAmounts.accept(p, auth);
         blockedAmounts.accept(p, auth);
         Mockito.verify(p, Mockito.times(1))
-                .newBlockedAmounts(ArgumentMatchers.eq(zonky),
-                                   ArgumentMatchers.argThat(arg -> arg.contains(BA3) && arg.size() == 1));
+                .newBlockedAmount(ArgumentMatchers.eq(zonky), ArgumentMatchers.eq(BA3));
     }
 }
