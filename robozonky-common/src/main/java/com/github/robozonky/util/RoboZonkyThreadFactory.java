@@ -34,7 +34,7 @@ public class RoboZonkyThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(final Runnable runnable) {
-        final String name = threadGroup.getName() + "-thread-" + nextThreadNumber.getAndIncrement();
+        final String name = threadGroup.getName() + "-" + nextThreadNumber.getAndIncrement();
         return new Thread(threadGroup, runnable, name);
     }
 }
