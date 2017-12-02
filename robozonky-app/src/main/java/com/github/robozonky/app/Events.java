@@ -114,28 +114,8 @@ public enum Events {
                 .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()));
     }
 
-    /**
-     * Distribute a particular event to all listeners that have been added and not yet removed for that particular
-     * event. This MUST NOT be called by users and is not part of the public API.
-     * <p>
-     * The listeners may be executed in parallel, no execution order guarantees are given. When this method returns,
-     * all listeners' {@link EventListener#handle(Event, SessionInfo)} method will have returned. Will use the
-     * internal {@link SessionInfo} instance for that.
-     * @param event Event to distribute.
-     * @param sessionInfo If not null, internal {@link SessionInfo} instance will be updated.
-     * @param <E> Event type to distribute.
-     */
-    public synchronized static <E extends Event> void fire(final E event, final SessionInfo sessionInfo) {
-        if (sessionInfo != null) {
-            Events.SESSION_INFO = sessionInfo;
-        }
-        final Class<E> eventClass = (Class<E>) event.getClass();
-        Events.LOGGER.debug("Firing {}.", eventClass);
-        Events.INSTANCE.getListeners(eventClass).parallel().forEach(l -> Events.fire(event, l, Events.SESSION_INFO));
-        Events.LOGGER.trace("Fired {}.", event);
-        if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
-            Events.EVENTS_FIRED.add(event);
-        }
+    public static void initialize(final SessionInfo info) {
+        Events.SESSION_INFO = info;
     }
 
     /**
@@ -151,7 +131,13 @@ public enum Events {
      */
     @SuppressWarnings("unchecked")
     public static <E extends Event> void fire(final E event) {
-        Events.fire(event, null);
+        final Class<E> eventClass = (Class<E>) event.getClass();
+        Events.LOGGER.debug("Firing {}.", eventClass);
+        Events.INSTANCE.getListeners(eventClass).parallel().forEach(l -> Events.fire(event, l, Events.SESSION_INFO));
+        Events.LOGGER.trace("Fired {}.", event);
+        if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
+            Events.EVENTS_FIRED.add(event);
+        }
     }
 
     /**
