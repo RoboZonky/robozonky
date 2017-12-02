@@ -20,13 +20,18 @@ import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.ListenerService;
+import com.github.robozonky.util.Scheduler;
 
 public final class EmailListenerService implements ListenerService {
 
-    private final RefreshableNotificationProperties properties = new RefreshableNotificationProperties();
+    private static final RefreshableNotificationProperties PROPERTIES = new RefreshableNotificationProperties();
 
     @Override
     public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
-        return new RefreshableEventListener<>(properties, eventType);
+        final Scheduler s = Scheduler.inBackground();
+        if (!s.isSubmitted(PROPERTIES)) {
+            s.submit(PROPERTIES);
+        }
+        return new RefreshableEventListener<>(PROPERTIES::getLatest, eventType);
     }
 }

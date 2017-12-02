@@ -19,12 +19,16 @@ package com.github.robozonky.app.configuration.daemon;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.marketplaces.Marketplace;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;
 import org.assertj.core.api.Assertions;
@@ -32,7 +36,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class DaemonInvestmentModeTest {
+public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
     private static final String MINIMAL_STRATEGY = "Robot má udržovat konzervativní portfolio.";
 
@@ -44,43 +48,63 @@ public class DaemonInvestmentModeTest {
 
     @Test
     public void constructor() throws Exception {
-        // setup username provider
-        final SecretProvider s = SecretProvider.fallback("username");
-        final Authenticated a = Mockito.mock(Authenticated.class);
-        Mockito.when(a.getSecretProvider()).thenReturn(s);
+        final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
         // setup dry run determination
         final Investor.Builder b = new Investor.Builder().asDryRun();
         // setup marketplace
         final Marketplace m = Mockito.mock(Marketplace.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, b, true, m, "",
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(d.getUsername()).isEqualTo(s.getUsername());
-                softly.assertThat(d.isFaultTolerant()).isEqualTo(true);
-            });
+            Assertions.assertThat(d.isFaultTolerant()).isTrue();
         }
         Mockito.verify(m).close();
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void get() throws Exception {
-        final SecretProvider s = SecretProvider.fallback("username");
-        final Authenticated a = Mockito.mock(Authenticated.class);
-        Mockito.when(a.getSecretProvider()).thenReturn(s);
+        final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final Marketplace m = Mockito.mock(Marketplace.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, b, true, m, "",
+        final ExecutorService e = Executors.newFixedThreadPool(1);
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
-            DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().countDown(); // don't block the thread
-            Assertions.assertThat(d.get()).isEqualTo(ReturnCode.OK);
+            final Future<ReturnCode> f = e.submit(d::get);
+            while (DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get() == null) {
+                // do nothing while the parallel task is initializing
+            }
+            Thread.sleep(1000); // wait for the code to reach the circuit breaker
+            DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get().countDown(); // send request to terminate
+            Assertions.assertThat(f.get()).isEqualTo(ReturnCode.OK);
+        } finally {
+            e.shutdownNow();
         }
         Mockito.verify(m).close();
     }
 
+    @Test(timeout = 5000)
+    public void getInterrupted() throws Exception {
+        final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
+        final Investor.Builder b = new Investor.Builder().asDryRun();
+        final Marketplace m = Mockito.mock(Marketplace.class);
+        final ExecutorService e = Executors.newFixedThreadPool(1);
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
+                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1),
+                                                                     Duration.ofSeconds(1))) {
+            final Future<ReturnCode> f = e.submit(d::get);
+            while (DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get() == null) {
+                // do nothing while the parallel task is initializing
+            }
+            Thread.sleep(1000); // wait for the code to reach the circuit breaker
+            f.cancel(true); // make sure it finishes even in an exceptional situation
+        } finally {
+            e.shutdownNow();
+        }
+        Mockito.verify(m).close();
+    }
     @Test
-    public void loadStrategyAsFile() throws InterruptedException, IOException {
+    public void loadStrategyAsFile() throws IOException {
         final StrategyProvider r = DaemonInvestmentMode.initStrategy(newStrategyFile().getAbsolutePath());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
@@ -90,7 +114,7 @@ public class DaemonInvestmentModeTest {
     }
 
     @Test
-    public void loadWrongStrategyAsFile() throws InterruptedException, IOException {
+    public void loadWrongStrategyAsFile() throws IOException {
         final File tmp = File.createTempFile("robozonky-", ".cfg");
         final StrategyProvider r = DaemonInvestmentMode.initStrategy(tmp.getAbsolutePath());
         SoftAssertions.assertSoftly(softly -> {
@@ -101,7 +125,7 @@ public class DaemonInvestmentModeTest {
     }
 
     @Test
-    public void loadStrategyAsUrl() throws IOException, InterruptedException {
+    public void loadStrategyAsUrl() throws IOException {
         final String url = newStrategyFile().toURI().toURL().toString();
         final StrategyProvider r = DaemonInvestmentMode.initStrategy(url);
         SoftAssertions.assertSoftly(softly -> {

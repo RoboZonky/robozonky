@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioDependant;
 
-class BlockedAmountsUpdater extends Refreshable<OffsetDateTime> {
+public class BlockedAmountsUpdater implements Runnable {
 
     private final Authenticated authenticated;
+    private final Supplier<Optional<Portfolio>> portfolio;
+    private final PortfolioDependant instance = new BlockedAmounts();
 
-    public BlockedAmountsUpdater(final Authenticated authenticated) {
+    public BlockedAmountsUpdater(final Authenticated authenticated, final Supplier<Optional<Portfolio>> portfolio) {
         this.authenticated = authenticated;
+        this.portfolio = portfolio;
+    }
+
+    public PortfolioDependant getDependant() {
+        return instance;
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
-        return () -> Optional.of(UUID.randomUUID().toString()); // update every time
-    }
-
-    @Override
-    protected Optional<OffsetDateTime> transform(final String source) {
-        authenticated.run(BlockedAmounts.INSTANCE);
-        return Optional.of(OffsetDateTime.now());
+    public void run() {
+        portfolio.get().ifPresent(folio -> instance.accept(folio, authenticated));
     }
 }

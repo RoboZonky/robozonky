@@ -16,21 +16,41 @@
 
 package com.github.robozonky.app;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 
-public abstract class AbstractEventLeveragingRoboZonkyTest extends AbstractRoboZonkyTest {
+public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
     @Rule
     public final ProvideSystemProperty property =
             new ProvideSystemProperty(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE.getName(), "true");
 
+    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
+
     @After
     public void clear() {
         Events.getFired().clear();
         Events.INSTANCE.registries.clear();
+    }
+
+    protected List<Event> getNewEvents() {
+        return Events.getFired().stream()
+                .filter(e -> !previouslyExistingEvents.contains(e))
+                .collect(Collectors.toList());
+    }
+
+    @Before
+    public void readPreexistingEvents() {
+        previouslyExistingEvents.addAll(Events.getFired());
     }
 }

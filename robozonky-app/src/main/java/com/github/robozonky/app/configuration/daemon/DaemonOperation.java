@@ -17,9 +17,12 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +33,14 @@ abstract class DaemonOperation implements Runnable {
 
     private final Duration refreshInterval;
     private final Authenticated api;
-    private final Consumer<Authenticated> investor;
+    private final Supplier<Optional<Portfolio>> portfolio;
+    private final BiConsumer<Portfolio, Authenticated> investor;
 
-    protected DaemonOperation(final Authenticated auth, final Consumer<Authenticated> operation,
-                              final Duration refreshInterval) {
+    protected DaemonOperation(final Authenticated auth, final Supplier<Optional<Portfolio>> portfolio,
+                              final BiConsumer<Portfolio, Authenticated> operation, final Duration refreshInterval) {
         this.api = auth;
         this.investor = operation;
+        this.portfolio = portfolio;
         this.refreshInterval = refreshInterval;
     }
 
@@ -47,7 +52,9 @@ abstract class DaemonOperation implements Runnable {
     public void run() {
         try {
             LOGGER.trace("Starting.");
-            investor.accept(api);
+            final Portfolio p =
+                    portfolio.get().orElseThrow(() -> new IllegalStateException("Portfolio not properly initialized."));
+            investor.accept(p, api);
             LOGGER.trace("Finished.");
         } catch (final Throwable t) {
             // we catch Throwable so that we can inform users even about errors

@@ -17,6 +17,7 @@
 package com.github.robozonky.common.extensions;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ public final class ListenerServiceLoader {
         return StreamUtil.toStream(loader)
                 .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
                 .map(s -> s.findListener(eventType))
+                .filter(Objects::nonNull)
                 .peek(scheduler::submit)
                 .collect(Collectors.toList());
     }

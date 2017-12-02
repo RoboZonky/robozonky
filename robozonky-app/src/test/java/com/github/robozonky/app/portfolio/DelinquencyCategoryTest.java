@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -40,7 +40,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 @RunWith(Parameterized.class)
-public class DelinquencyCategoryTest extends AbstractInvestingTest {
+public class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> parameters() {
@@ -69,17 +69,19 @@ public class DelinquencyCategoryTest extends AbstractInvestingTest {
         // store a delinquent loan
         final Delinquent d = new Delinquent(loanId);
         final Delinquency dy = d.addDelinquency(LocalDate.now().minus(minimumMatchingDuration));
-        Assertions.assertThat(category.update(Collections.singleton(dy), zonky)).containsExactly(loanId);
+        Assertions.assertThat(category.update(Collections.singleton(dy), mockAuthentication(zonky)))
+                .containsExactly(loanId);
         final List<Event> events = this.getNewEvents();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(events).hasSize(1);
             softly.assertThat(events).first().isInstanceOf(LoanDelinquentEvent.class);
         });
         // attempt to store it again, making sure no event is fired
-        Assertions.assertThat(category.update(Collections.singleton(dy), zonky)).containsExactly(loanId);
+        Assertions.assertThat(category.update(Collections.singleton(dy), mockAuthentication(zonky)))
+                .containsExactly(loanId);
         Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
         // now update with no delinquents, making sure nothing is returned
-        Assertions.assertThat(category.update(Collections.emptyList(), zonky)).isEmpty();
+        Assertions.assertThat(category.update(Collections.emptyList(), mockAuthentication(zonky))).isEmpty();
         Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
     }
 }

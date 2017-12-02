@@ -19,16 +19,18 @@ package com.github.robozonky.app.util;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.app.configuration.daemon.MarketplaceActivity;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.util.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class StrategyExecutor<T, S> implements Function<Collection<T>, Collection<Investment>> {
+public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>, Collection<Investment>> {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -43,24 +45,26 @@ public abstract class StrategyExecutor<T, S> implements Function<Collection<T>, 
 
     protected abstract int identify(final T item);
 
-    protected abstract Collection<Investment> execute(final S strategy, final Collection<T> marketplace);
+    protected abstract Collection<Investment> execute(final Portfolio portfolio, final S strategy,
+                                                      final Collection<T> marketplace);
 
-    private Collection<Investment> invest(final S strategy, final Collection<T> marketplace) {
+    private Collection<Investment> invest(final Portfolio portfolio, final S strategy,
+                                          final Collection<T> marketplace) {
         final MarketplaceActivity activity = activityProvider.apply(marketplace);
         if (activity.shouldSleep()) {
             LOGGER.debug("Asleep as there is nothing going on.");
             return Collections.emptyList();
         }
         LOGGER.debug("Sent: {}.", TextUtil.toString(marketplace, l -> String.valueOf(identify(l))));
-        final Collection<Investment> investments = execute(strategy, marketplace);
+        final Collection<Investment> investments = execute(portfolio, strategy, marketplace);
         activity.settle();
         return investments;
     }
 
     @Override
-    public Collection<Investment> apply(final Collection<T> marketplace) {
+    public Collection<Investment> apply(final Portfolio portfolio, final Collection<T> marketplace) {
         return strategyProvider.get()
-                .map(strategy -> invest(strategy, marketplace))
+                .map(strategy -> invest(portfolio, strategy, marketplace))
                 .orElseGet(() -> {
                     LOGGER.info("Asleep as there is no strategy.");
                     return Collections.emptyList();

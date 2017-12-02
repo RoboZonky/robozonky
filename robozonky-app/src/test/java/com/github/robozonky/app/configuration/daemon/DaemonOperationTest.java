@@ -17,22 +17,24 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.portfolio.Portfolio;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class DaemonOperationTest extends AbstractInvestingTest {
+public class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     private static final class CustomOperation extends DaemonOperation {
 
-        public CustomOperation(final Authenticated auth, final Consumer<Authenticated> operation) {
-            super(auth, operation, Duration.ofSeconds(1));
+        public CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
+            super(auth, () -> Optional.of(Mockito.mock(Portfolio.class)), operation, Duration.ofSeconds(1));
         }
     }
 
@@ -48,10 +50,10 @@ public class DaemonOperationTest extends AbstractInvestingTest {
     @Test
     public void standard() {
         final Authenticated a = Mockito.mock(Authenticated.class);
-        final Consumer<Authenticated> operation = Mockito.mock(Consumer.class);
+        final BiConsumer<Portfolio, Authenticated> operation = Mockito.mock(BiConsumer.class);
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
-        Mockito.verify(operation).accept(ArgumentMatchers.eq(a));
+        Mockito.verify(operation).accept(ArgumentMatchers.any(), ArgumentMatchers.eq(a));
         Assertions.assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }

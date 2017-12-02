@@ -109,7 +109,9 @@ class ShutdownHook {
         ShutdownHook.LOGGER.debug("RoboZonky terminating with '{}' return code.", result.getReturnCode());
         while (!stack.isEmpty()) {
             try {
-                stack.pop().accept(result);
+                final Consumer<Result> h = stack.pop();
+                LOGGER.trace("Executing {}.", h);
+                h.accept(result);
             } catch (final RuntimeException ex) {
                 ShutdownHook.LOGGER.warn("Failed to call state handler.", ex);
             }

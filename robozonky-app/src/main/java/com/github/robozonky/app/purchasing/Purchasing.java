@@ -47,9 +47,9 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
         this.dryRun = dryRun;
     }
 
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Zonky zonky) {
-        final Loan l = Portfolio.INSTANCE.getLoan(zonky, p.getLoanId());
-        return new ParticipationDescriptor(p, l);
+    private static ParticipationDescriptor toDescriptor(final Portfolio portfolio, final Participation p,
+                                                        final Zonky zonky) {
+        return new ParticipationDescriptor(p, portfolio.getLoan(zonky, p.getLoanId()));
     }
 
     @Override
@@ -58,19 +58,19 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     }
 
     @Override
-    protected Collection<Investment> execute(final PurchaseStrategy strategy,
+    protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .map(p -> toDescriptor(p, zonky))
+                .map(p -> toDescriptor(portfolio, p, zonky))
                 .filter(d -> { // never re-purchase what was once sold
                     final Loan l = d.related();
-                    final boolean wasSoldBefore = Portfolio.INSTANCE.wasOnceSold(l);
+                    final boolean wasSoldBefore = portfolio.wasOnceSold(l);
                     if (wasSoldBefore) {
                         LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", l.getId());
                     }
                     return !wasSoldBefore;
                 })
                 .collect(Collectors.toList());
-        return Session.purchase(zonky, participations, strategy, dryRun);
+        return Session.purchase(portfolio, zonky, participations, strategy, dryRun);
     }
 }

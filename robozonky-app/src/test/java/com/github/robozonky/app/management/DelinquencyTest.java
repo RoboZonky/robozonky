@@ -18,15 +18,14 @@ package com.github.robozonky.app.management;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Collections;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.github.robozonky.app.portfolio.Delinquent;
-import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class DelinquencyTest extends AbstractRoboZonkyTest {
 
@@ -46,14 +45,11 @@ public class DelinquencyTest extends AbstractRoboZonkyTest {
 
     @Test
     public void something() {
-        final Delinquents mock = Mockito.mock(Delinquents.class);
         final Delinquent delinquent = new Delinquent(1, EPOCH.toLocalDate());
-        Mockito.when(mock.getLastUpdateTimestamp()).thenReturn(OffsetDateTime.now());
-        Mockito.when(mock.getDelinquents()).thenReturn(Collections.singletonList(delinquent));
-        final Delinquency d = new Delinquency(mock);
+        final Supplier<Stream<Delinquent>> supplier = () -> Stream.of(delinquent);
+        final Delinquency d = new Delinquency(supplier);
         final int loanId = delinquent.getLoanId();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(d.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
             softly.assertThat(d.getAll()).containsOnlyKeys(loanId);
             softly.assertThat(d.get10Plus()).containsOnlyKeys(loanId);
             softly.assertThat(d.get30Plus()).containsOnlyKeys(loanId);

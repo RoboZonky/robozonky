@@ -39,16 +39,11 @@ class TestOperatingMode extends OperatingMode {
                 return false;
             }
 
-            @Override
-            public String getUsername() {
-                return auth.getSecretProvider().getUsername();
-            }
-
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
             @Override
             public ReturnCode get() {
-                LOGGER.info("Notification sent: {}.", Checker.notifications(getUsername()));
+                LOGGER.info("Notification sent: {}.", auth.getSecretProvider().getUsername());
                 return builder.getConfirmationUsed().map(c -> builder.getConfirmationRequestUsed()
                         .map(r -> {
                             LOGGER.info("Confirmation received: {}.",

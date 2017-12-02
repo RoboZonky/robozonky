@@ -18,10 +18,11 @@ package com.github.robozonky.app.investing;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class StaticInvestorTest extends AbstractInvestingTest {
+public class StaticInvestorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void investmentFromAmountlessConfirmation() {

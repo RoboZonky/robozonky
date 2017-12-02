@@ -14,39 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.investing;
+package com.github.robozonky.app;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.AbstractEventLeveragingRoboZonkyTest;
-import com.github.robozonky.app.Events;
-import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest {
+public class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
-    @Rule
-    public final RestoreSystemProperties properties = new RestoreSystemProperties();
-    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
 
     protected static Loan mockLoan(final int loanId) {
         final Loan loan = Mockito.mock(Loan.class);
@@ -57,19 +47,19 @@ public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest 
     }
 
     protected static LoanDescriptor mockLoanDescriptor() {
-        return AbstractInvestingTest.mockLoanDescriptor(AbstractInvestingTest.RANDOM.nextInt());
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt());
     }
 
     protected static LoanDescriptor mockLoanDescriptor(final int loanId) {
-        return AbstractInvestingTest.mockLoanDescriptor(loanId, true);
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(loanId, true);
     }
 
     protected static LoanDescriptor mockLoanDescriptorWithoutCaptcha() {
-        return AbstractInvestingTest.mockLoanDescriptor(AbstractInvestingTest.RANDOM.nextInt(), false);
+        return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt(), false);
     }
 
     protected static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
-        final Loan loan = AbstractInvestingTest.mockLoan(loanId);
+        final Loan loan = AbstractZonkyLeveragingTest.mockLoan(loanId);
         if (withCaptcha) {
             System.setProperty(Settings.Key.CAPTCHA_DELAY_D.getName(), "120"); // enable CAPTCHA for the rating
             Mockito.when(loan.getRating()).thenReturn(Rating.D);
@@ -88,20 +78,19 @@ public class AbstractInvestingTest extends AbstractEventLeveragingRoboZonkyTest 
         return zonky;
     }
 
-    protected List<Event> getNewEvents() {
-        return Events.getFired().stream()
-                .filter(e -> !previouslyExistingEvents.contains(e))
-                .collect(Collectors.toList());
-    }
-
-    @Before
-    @After
-    public void clearPortfolioTracker() {
-        Portfolio.INSTANCE.reset();
-    }
-
-    @Before
-    public void readPreexistingEvents() {
-        previouslyExistingEvents.addAll(Events.getFired());
+    protected static Authenticated mockAuthentication(final Zonky zonky) {
+        final Authenticated auth = Mockito.mock(Authenticated.class);
+        Mockito.when(auth.getSecretProvider())
+                .thenReturn(SecretProvider.fallback("someone", "password".toCharArray()));
+        Mockito.doAnswer(invocation -> {
+            final Function<Zonky, Object> operation = invocation.getArgument(0);
+            return operation.apply(zonky);
+        }).when(auth).call(ArgumentMatchers.any());
+        Mockito.doAnswer(invocation -> {
+            final Consumer<Zonky> operation = invocation.getArgument(0);
+            operation.accept(zonky);
+            return null;
+        }).when(auth).run(ArgumentMatchers.any());
+        return auth;
     }
 }

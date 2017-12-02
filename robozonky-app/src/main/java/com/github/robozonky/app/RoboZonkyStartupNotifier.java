@@ -23,7 +23,6 @@ import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +35,10 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RoboZonkyStartupNotifier.class);
 
-    private final String username;
-
-    public RoboZonkyStartupNotifier(final String username) {
-        this.username = username;
-    }
-
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
         RoboZonkyStartupNotifier.LOGGER.info("===== RoboZonky v{} at your service! =====", Defaults.ROBOZONKY_VERSION);
-        Events.fire(new RoboZonkyInitializedEvent(), new SessionInfo(username));
+        Events.fire(new RoboZonkyInitializedEvent());
         return Optional.of((result) -> {
             if (result.getReturnCode() == ReturnCode.OK) {
                 Events.fire(new RoboZonkyEndingEvent());

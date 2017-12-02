@@ -33,7 +33,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.investing.AbstractInvestingTest;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -42,7 +42,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.verification.VerificationMode;
 
-public class SellingTest extends AbstractInvestingTest {
+public class SellingTest extends AbstractZonkyLeveragingTest {
 
     private static final SellStrategy ALL_ACCEPTING_STRATEGY =
             (available, portfolio) -> available.stream().map(d -> d.recommend().get());
@@ -68,7 +68,7 @@ public class SellingTest extends AbstractInvestingTest {
 
     @Test
     public void noSaleDueToNoStrategy() {
-        new Selling(Optional::empty, true).accept(null);
+        new Selling(Optional::empty, true).accept(Mockito.mock(Portfolio.class), null);
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(0);
     }
@@ -76,7 +76,9 @@ public class SellingTest extends AbstractInvestingTest {
     @Test
     public void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = mockApi();
-        new Selling(ALL_ACCEPTING, true).accept(zonky);
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present."));
+        new Selling(ALL_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -90,8 +92,9 @@ public class SellingTest extends AbstractInvestingTest {
     public void noSaleDueToStrategyForbidding() {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
-        Portfolio.INSTANCE.update(zonky); // load investments
-        new Selling(NONE_ACCEPTING, true).accept(zonky);
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present."));
+        new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
         SoftAssertions.assertSoftly(softly -> {
@@ -104,8 +107,9 @@ public class SellingTest extends AbstractInvestingTest {
     private void saleMade(final boolean isDryRun) {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
-        Portfolio.INSTANCE.update(zonky); // load investments
-        new Selling(ALL_ACCEPTING, isDryRun).accept(zonky);
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present."));
+        new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(5);
         SoftAssertions.assertSoftly(softly -> {

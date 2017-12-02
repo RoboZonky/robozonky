@@ -62,12 +62,6 @@ class Util {
         return loanData;
     }
 
-    public static String getLoanUrl(final Investment i) {
-        // convert investment safely to URL, using dummy loan if necessary
-        final Loan l = i.getLoan().orElseGet(() -> new Loan(i.getLoanId(), Defaults.MINIMUM_INVESTMENT_IN_CZK));
-        return Loan.getUrlSafe(l);
-    }
-
     public static String stackTraceToString(final Throwable t) {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);

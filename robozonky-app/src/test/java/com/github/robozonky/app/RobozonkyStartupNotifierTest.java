@@ -26,12 +26,11 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class RobozonkyStartupNotifierTest extends AbstractEventLeveragingRoboZonkyTest {
+public class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
 
     @Test
     public void properEventsFired() {
-        final String username = "username";
-        final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier(username);
+        final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier();
         final Optional<Consumer<ShutdownHook.Result>> result = rzsn.get();
         Assertions.assertThat(result).isPresent();
         Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);

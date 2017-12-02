@@ -23,9 +23,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.common.remote.Zonky;
-
 /**
  * Represents a loan that, either now or at some point in the past, had at least one overdue instalment.
  */
@@ -57,15 +54,6 @@ public final class Delinquent {
      */
     public int getLoanId() {
         return loanId;
-    }
-
-    /**
-     * Retrieve from remote Zonky server the {@link Loan} identified by {@link #getLoanId()}.
-     * @param zonky Authenticated API to retrieve the loan.
-     * @return The delinquent loan.
-     */
-    public Loan getLoan(final Zonky zonky) {
-        return zonky.getLoan(loanId);
     }
 
     /**

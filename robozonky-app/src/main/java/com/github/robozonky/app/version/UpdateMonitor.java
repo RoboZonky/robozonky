@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -146,20 +145,18 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
-        return () -> {
-            try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
-                                                                         this.mavenCentralHostname)) {
-                return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
-            } catch (final Throwable ex) {
-                /*
-                 * Java 9 on Travis occasionally and unpredictably throws "j.l.NCDFE: Could not initialize class
-                 * sun.security.ssl.SSLContextImpl$DefaultSSLContext" when communicating over HTTPS
-                 */
-                UpdateMonitor.LOGGER.debug("Failed reading source.", ex);
-                return Optional.empty();
-            }
-        };
+    protected Optional<String> getLatestSource() {
+        try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
+                                                                     this.mavenCentralHostname)) {
+            return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
+        } catch (final Throwable ex) {
+            /*
+             * Java 9 on Travis occasionally and unpredictably throws "j.l.NCDFE: Could not initialize class
+             * sun.security.ssl.SSLContextImpl$DefaultSSLContext" when communicating over HTTPS
+             */
+            UpdateMonitor.LOGGER.debug("Failed reading source.", ex);
+            return Optional.empty();
+        }
     }
 
     @Override

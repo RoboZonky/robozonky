@@ -23,28 +23,30 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.app.portfolio.Delinquent;
 import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.internal.api.Defaults;
 
 class Delinquency implements DelinquencyMBean {
 
-    private final Delinquents source;
+    private final Supplier<Stream<Delinquent>> source;
 
     public Delinquency() {
-        this(Delinquents.INSTANCE);
+        this(() -> Delinquents.getDelinquents().stream());
     }
 
     // for testing purposes only
-    protected Delinquency(final Delinquents delinquents) {
+    protected Delinquency(final Supplier<Stream<Delinquent>> delinquents) {
         this.source = delinquents;
     }
 
     @Override
     public OffsetDateTime getLatestUpdatedDateTime() {
-        return source.getLastUpdateTimestamp();
+        return Delinquents.getLastUpdateTimestamp();
     }
 
     @Override
@@ -60,7 +62,7 @@ class Delinquency implements DelinquencyMBean {
     private SortedMap<Integer, LocalDate> getOlderThan(final int days) {
         final ZoneId zone = Defaults.ZONE_ID;
         final ZonedDateTime now = LocalDate.now().atStartOfDay(zone);
-        return source.getDelinquents().stream()
+        return source.get()
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .filter(d -> d.getPaymentMissedDate().atStartOfDay(zone).plusDays(days).isBefore(now))
                 .collect(Collectors.collectingAndThen(Collectors.toMap(d -> d.getParent().getLoanId(),

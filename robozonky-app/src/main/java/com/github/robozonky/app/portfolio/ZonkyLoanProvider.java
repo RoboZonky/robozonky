@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * Do not, in any way, change FQN of any of the classes in this package. It would result in losing delinquency state
- * that had potentially been accumulating for months.
- *
- * Classes throughout this package reference the {@link com.github.robozonky.app.authentication.Authenticated} class
- * instead of being provided directly with the {@link com.github.robozonky.common.remote.Zonky} API instance. This is
- * because using the former helps us avoid having to deal with Zonky token refresh during the typically very long
- * operations performed by classes in this package.
- */
 package com.github.robozonky.app.portfolio;
+
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.common.remote.Zonky;
+
+class ZonkyLoanProvider implements LoanProvider {
+
+    @Override
+    public Loan apply(final Integer loanId, final Zonky zonky) {
+        return zonky.getLoan(loanId);
+    }
+}

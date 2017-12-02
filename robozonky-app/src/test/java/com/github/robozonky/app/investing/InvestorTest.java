@@ -23,6 +23,7 @@ import java.util.Collections;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
@@ -77,7 +78,7 @@ import org.mockito.Mockito;
  * This test aims to test all of these various states.
  */
 @RunWith(Parameterized.class)
-public class InvestorTest extends AbstractInvestingTest {
+public class InvestorTest extends AbstractZonkyLeveragingTest {
 
     private enum ProxyType {
 

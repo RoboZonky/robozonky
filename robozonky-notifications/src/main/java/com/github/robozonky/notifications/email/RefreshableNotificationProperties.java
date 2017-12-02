@@ -25,7 +25,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.Refreshable;
@@ -56,11 +55,7 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
-        return this::getPropertiesContents;
-    }
-
-    private Optional<String> getPropertiesContents() {
+    protected Optional<String> getLatestSource() {
         final String propValue =
                 Settings.INSTANCE.get(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, (String) null);
         if (propValue != null) { // attempt to read from the URL specified by the property

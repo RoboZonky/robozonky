@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app.portfolio;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.common.remote.Zonky;
 
-public interface InvestmentMode extends Supplier<ReturnCode>,
-                                        AutoCloseable {
+class PortfolioLoanProvider implements LoanProvider {
 
-    boolean isFaultTolerant();
+    private final Supplier<Optional<Portfolio>> portfolio;
+
+    public PortfolioLoanProvider(final Supplier<Optional<Portfolio>> portfolio) {
+        this.portfolio = portfolio;
+    }
 
     @Override
-    default void close() throws Exception {
-        // no need to do anything
+    public Loan apply(final Integer loanId, final Zonky zonky) {
+        return portfolio.get()
+                .map(portfolio -> portfolio.getLoan(zonky, loanId))
+                .orElse(new ZonkyLoanProvider().apply(loanId, zonky));
     }
 }

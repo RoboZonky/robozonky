@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
@@ -53,15 +52,13 @@ class RefreshableStrategy extends Refreshable<String> {
     }
 
     @Override
-    protected Supplier<Optional<String>> getLatestSource() {
-        return () -> {
-            try (final InputStream s = url.openStream()) {
-                return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
-            } catch (final IOException ex) {
-                LOGGER.warn("Failed reading strategy.", ex);
-                return Optional.empty();
-            }
-        };
+    protected Optional<String> getLatestSource() {
+        try (final InputStream s = url.openStream()) {
+            return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
+        } catch (final IOException ex) {
+            LOGGER.warn("Failed reading strategy.", ex);
+            return Optional.empty();
+        }
     }
 
     @Override

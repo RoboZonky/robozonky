@@ -22,7 +22,8 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
@@ -44,17 +45,25 @@ import org.slf4j.LoggerFactory;
 /**
  * Main entry point to the delinquency API.
  */
-public class Delinquents implements Consumer<Zonky> {
-
-    public static final Delinquents INSTANCE = new Delinquents();
+public class Delinquents implements PortfolioDependant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquents.class);
     private static final String LAST_UPDATE_PROPERTY_NAME = "lastUpdate";
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
 
-    private Delinquents() {
-        // singleton
+    private final LoanProvider loanProvider;
+
+    public Delinquents() {
+        this(new ZonkyLoanProvider());
+    }
+
+    public Delinquents(final Supplier<Optional<Portfolio>> portfolioProvider) {
+        this(new PortfolioLoanProvider(portfolioProvider));
+    }
+
+    private Delinquents(final LoanProvider loanProvider) {
+        this.loanProvider = loanProvider;
     }
 
     private static String toString(final Delinquency d) {
@@ -84,31 +93,32 @@ public class Delinquents implements Consumer<Zonky> {
         return d;
     }
 
-    private static Collection<Investment> getWithPaymentStatus(final PaymentStatuses target) {
-        return Portfolio.INSTANCE.getActiveWithPaymentStatus(target).collect(Collectors.toList());
+    private static Collection<Investment> getWithPaymentStatus(final Portfolio portfolio,
+                                                               final PaymentStatuses target) {
+        return portfolio.getActiveWithPaymentStatus(target).collect(Collectors.toList());
     }
 
     private static boolean related(final Delinquent d, final Investment i) {
         return d.getLoanId() == i.getLoanId();
     }
 
-    public void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent) {
-        update(zonky, presentlyDelinquent, Collections.emptyList());
+    void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent) {
+        update(auth, presentlyDelinquent, Collections.emptyList());
     }
 
     /**
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
-     * @param zonky The API that will be used to retrieve the loan instances.
+     * @param auth The API that will be used to retrieve the loan instances.
      * @param presentlyDelinquent Loans that currently have overdue instalments. This corresponds to
      * {@link PaymentStatus#getDelinquent()}
      * @param noLongerActive Loans that are no longer relevant. This corresponds to {@link PaymentStatus#getDone()}.
      */
-    void update(final Zonky zonky, final Collection<Investment> presentlyDelinquent,
+    void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent,
                 final Collection<Investment> noLongerActive) {
         LOGGER.debug("Updating delinquent loans.");
         final LocalDate now = LocalDate.now();
-        final Collection<Delinquent> knownDelinquents = this.getDelinquents();
+        final Collection<Delinquent> knownDelinquents = getDelinquents();
         knownDelinquents.stream()
                 .filter(Delinquent::hasActiveDelinquency) // only care about present delinquents
                 .filter(d -> presentlyDelinquent.stream().noneMatch(i -> related(d, i)))
@@ -116,7 +126,7 @@ public class Delinquents implements Consumer<Zonky> {
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
                 .map(Delinquency::getParent)
                 .forEach(d -> {  // notify
-                    final Loan loan = d.getLoan(zonky);
+                    final Loan loan = auth.call(z -> loanProvider.apply(d.getLoanId(), z));
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
                         Events.fire(new LoanDefaultedEvent(loan, since));
@@ -142,23 +152,26 @@ public class Delinquents implements Consumer<Zonky> {
             stateUpdate.call(); // persist state updates
             LOGGER.trace("Delinquency update finished.");
             // and notify of new delinquencies over all known thresholds
-            Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, zonky));
+            Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, auth, loanProvider));
         }
         LOGGER.trace("Done.");
     }
 
-    public OffsetDateTime getLastUpdateTimestamp() {
-        return State.forClass(this.getClass())
-                .getValue(LAST_UPDATE_PROPERTY_NAME)
+    private static State.ClassSpecificState getState() {
+        return State.forClass(Delinquents.class);
+    }
+
+    public static OffsetDateTime getLastUpdateTimestamp() {
+        return getState().getValue(LAST_UPDATE_PROPERTY_NAME)
                 .map(OffsetDateTime::parse)
                 .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
     }
 
     /**
-     * @return Active loans that are now, or at some point have been, currently tracked as delinquent.
+     * @return Active loans that are now, or at some point have been, tracked as delinquent.
      */
-    public Collection<Delinquent> getDelinquents() {
-        final State.ClassSpecificState state = State.forClass(this.getClass());
+    public static Collection<Delinquent> getDelinquents() {
+        final State.ClassSpecificState state = getState();
         return state.getKeys().stream()
                 .filter(StringUtils::isNumeric) // skip any non-loan metadata
                 .map(key -> {
@@ -170,8 +183,8 @@ public class Delinquents implements Consumer<Zonky> {
     }
 
     @Override
-    public void accept(final Zonky zonky) {
-        update(zonky, getWithPaymentStatus(PaymentStatus.getDelinquent()),
-               getWithPaymentStatus(PaymentStatus.getDone()));
+    public void accept(final Portfolio portfolio, final Authenticated auth) {
+        update(auth, getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
+               getWithPaymentStatus(portfolio, PaymentStatus.getDone()));
     }
 }

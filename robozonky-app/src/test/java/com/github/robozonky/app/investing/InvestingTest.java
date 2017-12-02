@@ -32,14 +32,16 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class InvestingTest extends AbstractInvestingTest {
+public class InvestingTest extends AbstractZonkyLeveragingTest {
 
     private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
             ALL_ACCEPTING_STRATEGY = (loans, folio) -> loans.stream().map(d -> d.recommend(200).get());
@@ -58,7 +60,10 @@ public class InvestingTest extends AbstractInvestingTest {
         final Loan loan = new Loan(1, 2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(Collections.singletonList(ld))).isEmpty();
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        Assertions.assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
         Assertions.assertThat(events).isEmpty();
@@ -66,14 +71,17 @@ public class InvestingTest extends AbstractInvestingTest {
 
     @Test
     public void noItems() {
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
+        final Portfolio portfolio = Portfolio.create(z)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
             final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
-            return f.apply(mockApi());
+            return f.apply(z);
         });
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(Collections.emptyList())).isEmpty();
+        Assertions.assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
     }
 
     @Test
@@ -83,6 +91,8 @@ public class InvestingTest extends AbstractInvestingTest {
         final LoanDescriptor ld = new LoanDescriptor(mock);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky zonky = mockApi();
+        final Portfolio portfolio = Portfolio.create(zonky)
+                .orElseThrow(() -> new AssertionError("Should have been present,"));
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(mock);
         final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
@@ -90,6 +100,6 @@ public class InvestingTest extends AbstractInvestingTest {
             return f.apply(zonky);
         });
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(Collections.singleton(ld))).isEmpty();
+        Assertions.assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
     }
 }
