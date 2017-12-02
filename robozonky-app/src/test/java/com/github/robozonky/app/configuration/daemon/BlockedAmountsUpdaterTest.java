@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app.configuration.daemon;
 
-import java.util.function.Supplier;
+import java.util.Optional;
 
-import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.authentication.Authenticated;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-public interface InvestmentMode extends Supplier<ReturnCode>,
-                                        AutoCloseable {
+public class BlockedAmountsUpdaterTest {
 
-    boolean isFaultTolerant();
-
-    @Override
-    default void close() throws Exception {
-        // no need to do anything
+    @Test
+    public void hasDependant() {
+        final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(Mockito.mock(Authenticated.class), Optional::empty);
+        Assertions.assertThat(bau.getDependant()).isInstanceOf(BlockedAmounts.class);
     }
 }

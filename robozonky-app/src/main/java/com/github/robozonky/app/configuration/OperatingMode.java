@@ -19,6 +19,8 @@ package com.github.robozonky.app.configuration;
 import java.util.Optional;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
+import com.github.robozonky.api.notifications.SessionInfo;
+import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
@@ -63,6 +65,9 @@ abstract class OperatingMode implements CommandLineFragment {
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final Authenticated auth) {
         final SecretProvider secretProvider = auth.getSecretProvider();
+        // initialize SessionInfo before the robot potentially sends the first notification
+        Events.initialize(new SessionInfo(secretProvider.getUsername()));
+        // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secretProvider))
                 .map(credentials -> this.getZonkyProxyBuilder(credentials, secretProvider))

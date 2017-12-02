@@ -18,16 +18,14 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.LongAdder;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.marketplaces.Marketplace;
@@ -42,33 +40,20 @@ import org.slf4j.LoggerFactory;
 
 public class DaemonInvestmentMode implements InvestmentMode {
 
-    public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO = new AtomicReference<>(new CountDownLatch(1));
+    public static final AtomicReference<CountDownLatch> BLOCK_UNTIL_ZERO = new AtomicReference<>(null);
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzDaemon"));
-    private final String username;
     private final boolean faultTolerant;
     private final Marketplace marketplace;
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, THREAD_FACTORY);
-    private final Collection<DaemonOperation> daemons;
-    private final CountDownLatch circuitBreaker;
+    private final List<DaemonOperation> daemons;
     private final PortfolioUpdater portfolioUpdater;
-
-    static StrategyProvider initStrategy(final String strategyLocation) {
-        final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
-        final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
-        strategy.registerListener(sp);
-        Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
-        return sp;
-    }
 
     public DaemonInvestmentMode(final Authenticated auth, final PortfolioUpdater p, final Investor.Builder builder,
                                 final boolean isFaultTolerant, final Marketplace marketplace,
                                 final String strategyLocation, final Duration maximumSleepPeriod,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.username = auth.getSecretProvider().getUsername();
         this.faultTolerant = isFaultTolerant;
-        this.circuitBreaker = BLOCK_UNTIL_ZERO.updateAndGet(l -> l.getCount() == 0 ? new CountDownLatch(1) : l);
         this.marketplace = marketplace;
         final boolean dryRun = builder.isDryRun();
         final StrategyProvider sp = initStrategy(strategyLocation);
@@ -80,43 +65,48 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                                           secondaryMarketplaceCheckPeriod, dryRun));
     }
 
-    private Runnable wrapDaemonWithPortfolioWait(final Runnable daemon) {
-        return () -> {
-            if (portfolioUpdater.isUpdating()) { // don't update while reading information about portfolio
-                return;
-            }
-            daemon.run();
-        };
+    static StrategyProvider initStrategy(final String strategyLocation) {
+        final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
+        final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
+        strategy.registerListener(sp);
+        Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
+        return sp;
+    }
+
+    private void executeDaemons(final ScheduledExecutorService executor) {
+        IntStream.range(0, daemons.size()).boxed().forEach(daemonId -> {
+            final DaemonOperation d = daemons.get(daemonId);
+            final long initialDelay = daemonId * 250; // quarter second apart
+            final long refreshInterval = d.getRefreshInterval().getSeconds() * 1000;
+            final Runnable task = new Skippable(d, portfolioUpdater::isUpdating);
+            LOGGER.trace("Scheduling {} every {} ms, starting in {} ms.", task, refreshInterval, initialDelay);
+            executor.scheduleWithFixedDelay(task, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
+        });
+    }
+
+    private static CountDownLatch setupCircuitBreaker() {
+        final CountDownLatch circuitBreaker = BLOCK_UNTIL_ZERO.updateAndGet(l -> new CountDownLatch(1));
+        Runtime.getRuntime().addShutdownHook(new DaemonShutdownHook(circuitBreaker));
+        return circuitBreaker;
     }
 
     @Override
     public ReturnCode get() {
+        final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, THREAD_FACTORY);
         try {
             // register shutdown hook that will kill the daemon threads when app shutdown is requested
-            Runtime.getRuntime().addShutdownHook(new DaemonShutdownHook(circuitBreaker));
-            // schedule the tasks some time apart so that the CPU is evenly utilized
-            final LongAdder daemonCount = new LongAdder();
-            daemons.forEach(d -> {
-                final long refreshInterval = d.getRefreshInterval().getSeconds() * 1000;
-                final long initialDelay = daemonCount.sum() * 250; // schedule daemons quarter second apart
-                LOGGER.trace("Scheduling {} every {} ms, starting in {} ms.", d, refreshInterval, initialDelay);
-                final Runnable task = wrapDaemonWithPortfolioWait(d);
-                executor.scheduleWithFixedDelay(task, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
-                daemonCount.increment(); // increment the counter so that the next daemon is scheduled with
-            });
+            final CountDownLatch circuitBreaker = setupCircuitBreaker();
+            // schedule the tasks
+            executeDaemons(executor);
             // block until request to stop the app is received
             LOGGER.trace("Will wait for request to stop on {}.", circuitBreaker);
             circuitBreaker.await();
             LOGGER.trace("Request to stop received.");
+            // signal the end of standard operation
             return ReturnCode.OK;
         } catch (final InterruptedException ex) { // handle unexpected runtime error
-            LOGGER.error("Thread stack traces:");
-            Thread.getAllStackTraces().forEach((key, value) -> {
-                LOGGER.error("Stack trace for thread {}: {}", key, Stream.of(value)
-                        .map(StackTraceElement::toString)
-                        .collect(Collectors.joining(System.lineSeparator())));
-            });
-            throw new IllegalStateException(ex);
+            LOGGER.error("Daemon interrupted.", ex);
+            return ReturnCode.ERROR_UNEXPECTED;
         } finally {
             executor.shutdownNow();
         }
@@ -128,14 +118,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
     public void close() throws Exception {
-        LOGGER.trace("Shutting down executor.");
-        this.executor.shutdownNow();
         LOGGER.trace("Closing marketplace.");
         this.marketplace.close();
     }

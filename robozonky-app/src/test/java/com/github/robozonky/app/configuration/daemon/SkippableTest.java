@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app.configuration.daemon;
 
-import java.util.function.Supplier;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-import com.github.robozonky.api.ReturnCode;
+public class SkippableTest {
 
-public interface InvestmentMode extends Supplier<ReturnCode>,
-                                        AutoCloseable {
+    @Test
+    public void skips() {
+        final Runnable r = Mockito.mock(Runnable.class);
+        final Skippable s = new Skippable(r, () -> true);
+        s.run();
+        Mockito.verify(r, Mockito.never()).run();
+    }
 
-    boolean isFaultTolerant();
-
-    @Override
-    default void close() throws Exception {
-        // no need to do anything
+    @Test
+    public void doesNotSkip() {
+        final Runnable r = Mockito.mock(Runnable.class);
+        final Skippable s = new Skippable(r, () -> false);
+        s.run();
+        Mockito.verify(r, Mockito.times(1)).run();
     }
 }

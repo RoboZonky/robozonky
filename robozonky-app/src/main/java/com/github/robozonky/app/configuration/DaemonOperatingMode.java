@@ -25,8 +25,6 @@ import java.util.concurrent.Future;
 
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
-import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.BlockedAmountsUpdater;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
@@ -79,8 +77,6 @@ class DaemonOperatingMode extends OperatingMode {
                                                                       marketplace.getMaximumSleepDuration(),
                                                                       marketplace.getPrimaryMarketplaceCheckDelay(),
                                                                       marketplace.getSecondaryMarketplaceCheckDelay());
-                    // initialize SessionInfo before the robot potentially sends the first notification
-                    Events.initialize(new SessionInfo(secretProvider.getUsername()));
                     // only schedule internal data updates after daemon had a chance to initialize...
                     final Scheduler scheduler = Scheduler.inBackground();
                     final Future<?> f = scheduler.run(updater);

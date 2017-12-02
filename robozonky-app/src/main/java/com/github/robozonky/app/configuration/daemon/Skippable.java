@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
+package com.github.robozonky.app.configuration.daemon;
 
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.ReturnCode;
+final class Skippable implements Runnable {
 
-public interface InvestmentMode extends Supplier<ReturnCode>,
-                                        AutoCloseable {
+    private final Supplier<Boolean> shouldBeSkipped;
+    private final Runnable toRun;
 
-    boolean isFaultTolerant();
+    public Skippable(final Runnable toRun, final Supplier<Boolean> shouldBeSkipped) {
+        this.shouldBeSkipped = shouldBeSkipped;
+        this.toRun = toRun;
+    }
 
     @Override
-    default void close() throws Exception {
-        // no need to do anything
+    public void run() {
+        if (shouldBeSkipped.get()) {
+            return;
+        }
+        toRun.run();
+    }
+
+    @Override
+    public String toString() {
+        return "Skippable{" +
+                "toRun=" + toRun +
+                '}';
     }
 }

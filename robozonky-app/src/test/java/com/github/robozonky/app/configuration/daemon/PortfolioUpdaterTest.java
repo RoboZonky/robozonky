@@ -23,6 +23,7 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Zonky;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -35,12 +36,14 @@ public class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         final Authenticated a = mockAuthentication(z);
         final PortfolioDependant dependant = Mockito.mock(PortfolioDependant.class);
         final PortfolioUpdater instance = new PortfolioUpdater(a);
+        Assertions.assertThat(instance.isUpdating()).isFalse();
         instance.registerDependant(dependant);
         instance.run();
         Mockito.verify(a).call(ArgumentMatchers.any()); // this is the call to update Portfolio
         final Optional<Portfolio> result = instance.get();
         // make sure that the dependants were called with the proper value of Portfolio
         Mockito.verify(dependant).accept(ArgumentMatchers.eq(result.get()), ArgumentMatchers.eq(a));
+        Assertions.assertThat(instance.isUpdating()).isFalse();
     }
 
 

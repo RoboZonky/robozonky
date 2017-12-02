@@ -44,14 +44,12 @@ class InvestingDaemon extends DaemonOperation {
                                     final Duration maximumSleepPeriod) {
             this.core = (portfolio, auth) -> {
                 if (!registered.getAndSet(true)) { // only register the listener once
+                    final Investing i = new Investing(builder, strategy, auth, maximumSleepPeriod);
                     marketplace.registerListener((loans) -> {
-                        if (loans == null) {
-                            return;
-                        }
                         final Collection<LoanDescriptor> descriptors = loans.stream()
                                 .map(LoanDescriptor::new)
                                 .collect(Collectors.toList());
-                        new Investing(builder, strategy, auth, maximumSleepPeriod).apply(portfolio, descriptors);
+                        i.apply(portfolio, descriptors);
                     });
                 }
                 marketplace.run();
@@ -59,7 +57,7 @@ class InvestingDaemon extends DaemonOperation {
         }
 
         @Override
-        public void accept(final Portfolio portfolio, Authenticated zonky) {
+        public void accept(final Portfolio portfolio, final Authenticated zonky) {
             core.accept(portfolio, zonky);
         }
     }
