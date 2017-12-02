@@ -15,12 +15,15 @@
  */
 
 /**
- * Do not, in any way, change FQN of any of the classes in this package. It would result in losing delinquency state
- * that had potentially been accumulating for months.
- *
+ * This package contains classes that maintain and manipulate RoboZonky's internal representation of the user's
+ * portfolio. They are typically stateful and their instances are kept for the entire lifetime of the daemon.
+ * <p>
  * Classes throughout this package reference the {@link com.github.robozonky.app.authentication.Authenticated} class
  * instead of being provided directly with the {@link com.github.robozonky.common.remote.Zonky} API instance. This is
  * because using the former helps us avoid having to deal with Zonky token refresh during the typically very long
  * operations performed by classes in this package.
+ * <p>
+ * Do not, in any way, change FQN of any of the classes in this package. It would result in losing delinquency state
+ * that had potentially been accumulating for months.
  */
 package com.github.robozonky.app.portfolio;

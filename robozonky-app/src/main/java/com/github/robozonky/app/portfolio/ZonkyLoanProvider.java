@@ -19,6 +19,9 @@ package com.github.robozonky.app.portfolio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.common.remote.Zonky;
 
+/**
+ * Will directly query {@link Zonky} for {@link Loan} instances.
+ */
 class ZonkyLoanProvider implements LoanProvider {
 
     @Override

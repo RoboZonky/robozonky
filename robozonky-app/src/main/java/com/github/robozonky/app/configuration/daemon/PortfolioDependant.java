@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
-import java.util.function.BiFunction;
+import java.util.function.BiConsumer;
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 
 /**
- * Denotes a function that is capable of retrieving a {@link Loan} from some source, be it remote or local. To that end,
- * it will use {@link Integer} ID of the loan and, optionally, instance of the {@link Zonky} API to contact the remote
- * server.
+ * Represents code to be executed after a successful portfolio update, administered from within this package.
  */
 @FunctionalInterface
-interface LoanProvider extends BiFunction<Integer, Zonky, Loan> {
+public interface PortfolioDependant extends BiConsumer<Portfolio, Authenticated> {
 
 }

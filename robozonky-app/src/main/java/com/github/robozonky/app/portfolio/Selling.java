@@ -35,11 +35,16 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.configuration.daemon.PortfolioDependant;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Implements selling of {@link Investment}s on the secondary marketplace. Use {@link #Selling(Supplier, boolean)} as
+ * entry point.
+ */
 public class Selling implements PortfolioDependant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
@@ -47,6 +52,10 @@ public class Selling implements PortfolioDependant {
     private final Supplier<Optional<SellStrategy>> strategy;
     private final boolean isDryRun;
 
+    /**
+     * @param strategy Will be used to retrieve the strategy when needed.
+     * @param isDryRun Whether or not to actually perform the remote selling operation or to just pretend.
+     */
     public Selling(final Supplier<Optional<SellStrategy>> strategy, final boolean isDryRun) {
         this.strategy = strategy;
         this.isDryRun = isDryRun;
@@ -96,6 +105,12 @@ public class Selling implements PortfolioDependant {
         Events.fire(new SellingCompletedEvent(investmentsSold, newPortfolioOverview(portfolio, isDryRun, auth)));
     }
 
+    /**
+     * Execute the strategy on a given portfolio. Won't do anything if the supplier in
+     * {@link #Selling(Supplier, boolean)} returns and empty {@link Optional}.
+     * @param portfolio Portfolio of investments to choose from.
+     * @param auth Will be used to create remote connections to the Zonky server.
+     */
     @Override
     public void accept(final Portfolio portfolio, final Authenticated auth) {
         strategy.get().ifPresent(s -> sell(portfolio, s, auth));

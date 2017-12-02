@@ -16,20 +16,15 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.PortfolioDependant;
 
 public class BlockedAmountsUpdater implements Runnable {
 
     private final Authenticated authenticated;
-    private final Supplier<Optional<Portfolio>> portfolio;
+    private final PortfolioSupplier portfolio;
     private final PortfolioDependant instance = new BlockedAmounts();
 
-    public BlockedAmountsUpdater(final Authenticated authenticated, final Supplier<Optional<Portfolio>> portfolio) {
+    public BlockedAmountsUpdater(final Authenticated authenticated, final PortfolioSupplier portfolio) {
         this.authenticated = authenticated;
         this.portfolio = portfolio;
     }

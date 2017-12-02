@@ -16,17 +16,18 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.app.configuration.daemon.PortfolioSupplier;
 import com.github.robozonky.common.remote.Zonky;
 
+/**
+ * Will retrieve {@link Loan}s from {@link Portfolio#getLoan(Zonky, int)}, falling back to {@link ZonkyLoanProvider}.
+ */
 class PortfolioLoanProvider implements LoanProvider {
 
-    private final Supplier<Optional<Portfolio>> portfolio;
+    private final PortfolioSupplier portfolio;
 
-    public PortfolioLoanProvider(final Supplier<Optional<Portfolio>> portfolio) {
+    public PortfolioLoanProvider(final PortfolioSupplier portfolio) {
         this.portfolio = portfolio;
     }
 

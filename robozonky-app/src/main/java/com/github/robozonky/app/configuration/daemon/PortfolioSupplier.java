@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
-import java.util.function.BiConsumer;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 
+/**
+ * Represents a supplier of {@link Portfolio}, allowing for cases where the {@link Portfolio} update has failed and
+ * therefore there is no instance to supply.
+ */
 @FunctionalInterface
-public interface PortfolioDependant extends BiConsumer<Portfolio, Authenticated> {
+public interface PortfolioSupplier extends Supplier<Optional<Portfolio>> {
 
 }

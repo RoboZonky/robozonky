@@ -22,13 +22,13 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -36,6 +36,8 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.configuration.daemon.PortfolioDependant;
+import com.github.robozonky.app.configuration.daemon.PortfolioSupplier;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Main entry point to the delinquency API.
+ * Historical record of which {@link Investment}s have been delinquent and when. Instances of this class (obtained via
+ * {@link #Delinquents()} update shared state (implemented via {@link State}) which can then be retrieved through static
+ * methods, such as {@link #getDelinquents()} and {@link #getLastUpdateTimestamp()}.
  */
 public class Delinquents implements PortfolioDependant {
 
@@ -54,12 +58,19 @@ public class Delinquents implements PortfolioDependant {
 
     private final LoanProvider loanProvider;
 
+    /**
+     * Creates an instance of this class which will use {@link ZonkyLoanProvider} to retrieve {@link Loan}s.
+     */
     public Delinquents() {
         this(new ZonkyLoanProvider());
     }
 
-    public Delinquents(final Supplier<Optional<Portfolio>> portfolioProvider) {
-        this(new PortfolioLoanProvider(portfolioProvider));
+    /**
+     * Creates an instance of this class which will use {@link PortfolioLoanProvider} to retrieve {@link Loan}s.
+     * @param portfolioSupplier Will be used to retrieve the portfolio when needed.
+     */
+    public Delinquents(final PortfolioSupplier portfolioSupplier) {
+        this(new PortfolioLoanProvider(portfolioSupplier));
     }
 
     private Delinquents(final LoanProvider loanProvider) {
@@ -100,6 +111,35 @@ public class Delinquents implements PortfolioDependant {
 
     private static boolean related(final Delinquent d, final Investment i) {
         return d.getLoanId() == i.getLoanId();
+    }
+
+    private static State.ClassSpecificState getState() {
+        return State.forClass(Delinquents.class);
+    }
+
+    /**
+     * Retrieve the time when the internal state of this class was modified.
+     * @return {@link Instant#EPOCH} when no internal state.
+     */
+    public static OffsetDateTime getLastUpdateTimestamp() {
+        return getState().getValue(LAST_UPDATE_PROPERTY_NAME)
+                .map(OffsetDateTime::parse)
+                .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
+    }
+
+    /**
+     * @return Active loans that are now, or at some point have been, tracked as delinquent.
+     */
+    public static Collection<Delinquent> getDelinquents() {
+        final State.ClassSpecificState state = getState();
+        return state.getKeys().stream()
+                .filter(StringUtils::isNumeric) // skip any non-loan metadata
+                .map(key -> {
+                    final int loanId = Integer.parseInt(key);
+                    final List<String> rawDelinquencies =
+                            state.getValues(key).orElseThrow(() -> new IllegalStateException("Impossible."));
+                    return add(loanId, rawDelinquencies);
+                }).collect(Collectors.toSet());
     }
 
     void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent) {
@@ -157,31 +197,15 @@ public class Delinquents implements PortfolioDependant {
         LOGGER.trace("Done.");
     }
 
-    private static State.ClassSpecificState getState() {
-        return State.forClass(Delinquents.class);
-    }
-
-    public static OffsetDateTime getLastUpdateTimestamp() {
-        return getState().getValue(LAST_UPDATE_PROPERTY_NAME)
-                .map(OffsetDateTime::parse)
-                .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
-    }
-
     /**
-     * @return Active loans that are now, or at some point have been, tracked as delinquent.
+     * Will use the remote server to update information about the current delinquency status of {@link Investment}s of
+     * the current user. It will register {@link Investment}s that are now delinquent and were not before, and also
+     * detect {@link Investment}s which were delinquent before and are now back to normal. It will also fire the
+     * appropriate {@link Event}s, such as {@link LoanDelinquentEvent}, {@link LoanNoLongerDelinquentEvent} etc.
+     * @param portfolio Will be used to load information about existing investments.
+     * @param auth Will be used to query additional information about {@link Loan}s, using the method supplied in the
+     * constructor.
      */
-    public static Collection<Delinquent> getDelinquents() {
-        final State.ClassSpecificState state = getState();
-        return state.getKeys().stream()
-                .filter(StringUtils::isNumeric) // skip any non-loan metadata
-                .map(key -> {
-                    final int loanId = Integer.parseInt(key);
-                    final List<String> rawDelinquencies =
-                            state.getValues(key).orElseThrow(() -> new IllegalStateException("Impossible."));
-                    return add(loanId, rawDelinquencies);
-                }).collect(Collectors.toSet());
-    }
-
     @Override
     public void accept(final Portfolio portfolio, final Authenticated auth) {
         update(auth, getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),

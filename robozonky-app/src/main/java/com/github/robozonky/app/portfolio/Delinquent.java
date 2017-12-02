@@ -128,7 +128,7 @@ public final class Delinquent {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Delinquent)) {
             return false;
         }
         final Delinquent that = (Delinquent) o;

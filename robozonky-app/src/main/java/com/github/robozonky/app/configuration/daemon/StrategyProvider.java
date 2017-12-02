@@ -28,7 +28,7 @@ import com.github.robozonky.common.extensions.StrategyLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class StrategyProvider implements Refreshable.RefreshListener<String> {
+final class StrategyProvider implements Refreshable.RefreshListener<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyProvider.class);
 

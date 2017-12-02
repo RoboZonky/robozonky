@@ -17,9 +17,7 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -33,10 +31,10 @@ abstract class DaemonOperation implements Runnable {
 
     private final Duration refreshInterval;
     private final Authenticated api;
-    private final Supplier<Optional<Portfolio>> portfolio;
+    private final PortfolioSupplier portfolio;
     private final BiConsumer<Portfolio, Authenticated> investor;
 
-    protected DaemonOperation(final Authenticated auth, final Supplier<Optional<Portfolio>> portfolio,
+    protected DaemonOperation(final Authenticated auth, final PortfolioSupplier portfolio,
                               final BiConsumer<Portfolio, Authenticated> operation, final Duration refreshInterval) {
         this.api = auth;
         this.investor = operation;

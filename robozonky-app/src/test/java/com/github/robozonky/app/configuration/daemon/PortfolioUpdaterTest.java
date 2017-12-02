@@ -21,7 +21,6 @@ import java.util.Optional;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;

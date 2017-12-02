@@ -25,13 +25,12 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.purchasing.Purchasing;
 
 class PurchasingDaemon extends DaemonOperation {
 
     public PurchasingDaemon(final Authenticated auth, final Supplier<Optional<PurchaseStrategy>> strategy,
-                            final Supplier<Optional<Portfolio>> portfolio, final Duration maximumSleepPeriod,
+                            final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
                             final Duration refreshPeriod, final boolean isDryRun) {
         super(auth, portfolio, (folio, api) -> api.run(zonky -> {
             final Collection<Participation> p = zonky.getAvailableParticipations().collect(Collectors.toList());

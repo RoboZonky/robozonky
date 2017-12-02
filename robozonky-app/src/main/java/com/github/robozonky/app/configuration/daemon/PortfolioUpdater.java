@@ -21,17 +21,15 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PortfolioUpdater implements Runnable,
-                                         Supplier<Optional<Portfolio>> {
+                                         PortfolioSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
     private final Authenticated authenticated;

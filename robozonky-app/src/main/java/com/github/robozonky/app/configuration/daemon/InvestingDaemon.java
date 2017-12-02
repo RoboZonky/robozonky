@@ -64,7 +64,7 @@ class InvestingDaemon extends DaemonOperation {
 
     public InvestingDaemon(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
                            final Supplier<Optional<InvestmentStrategy>> strategy,
-                           final Supplier<Optional<Portfolio>> portfolio, final Duration maximumSleepPeriod,
+                           final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
                            final Duration refreshPeriod) {
         super(auth, portfolio,
               new InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod), refreshPeriod);

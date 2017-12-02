@@ -17,9 +17,9 @@
 package com.github.robozonky.app.portfolio;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.app.configuration.daemon.PortfolioSupplier;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -30,7 +30,7 @@ public class PortfolioLoanProviderTest {
 
     @Test
     public void noPortfolio() {
-        final Supplier<Optional<Portfolio>> portfolioProvider = Optional::empty;
+        final PortfolioSupplier portfolioProvider = Optional::empty;
         final Zonky zonky = Mockito.mock(Zonky.class);
         final Loan l = new Loan(1, 200);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
@@ -40,7 +40,7 @@ public class PortfolioLoanProviderTest {
 
     @Test
     public void proper() {
-        final Supplier<Optional<Portfolio>> portfolioProvider = () -> Optional.of(new Portfolio());
+        final PortfolioSupplier portfolioProvider = () -> Optional.of(new Portfolio());
         final Zonky zonky = Mockito.mock(Zonky.class);
         final Loan l = new Loan(1, 200);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
