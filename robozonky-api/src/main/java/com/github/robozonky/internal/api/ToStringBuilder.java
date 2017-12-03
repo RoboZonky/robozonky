@@ -28,19 +28,15 @@ import org.slf4j.Logger;
 
 public class ToStringBuilder {
 
-    private static final String[] EXCLUDE_FIELDS = new String[0];
     private final ReflectionToStringBuilder builder;
 
     public ToStringBuilder(final Object o, final String... excludeFields) {
-        final String[] fieldExclusions = Stream.concat(Stream.of("password"), Stream.of(excludeFields))
+        final String[] fieldExclusions = Stream.concat(Stream.of("password", "toStringIgnoredFields"),
+                                                       Arrays.stream(excludeFields))
                 .distinct()
                 .toArray(String[]::new);
         this.builder = new ToStringBuilder.CustomReflectionToStringBuilder(o)
                 .setExcludeFieldNames(fieldExclusions);
-    }
-
-    public ToStringBuilder(final Object o) {
-        this(o, EXCLUDE_FIELDS);
     }
 
     @Override

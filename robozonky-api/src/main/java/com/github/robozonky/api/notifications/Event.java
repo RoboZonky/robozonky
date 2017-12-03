@@ -30,7 +30,6 @@ import com.github.robozonky.internal.api.ToStringBuilder;
  */
 public abstract class Event {
 
-    private static final String[] TO_STRING_IGNORED_FIELDS = new String[0];
     private final OffsetDateTime creationDateTime = OffsetDateTime.now();
     private final Collection<String> toStringIgnoredFields;
 
@@ -39,10 +38,6 @@ public abstract class Event {
             throw new IllegalStateException("Event subclass' names must end with 'Event'.");
         }
         this.toStringIgnoredFields = Arrays.asList(toStringIgnoredFields);
-    }
-
-    public Event() {
-        this(TO_STRING_IGNORED_FIELDS);
     }
 
     public OffsetDateTime getCreatedOn() {
