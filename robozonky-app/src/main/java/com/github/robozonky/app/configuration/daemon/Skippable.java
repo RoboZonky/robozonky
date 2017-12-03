@@ -18,7 +18,12 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 final class Skippable implements Runnable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Skippable.class);
 
     private final Supplier<Boolean> shouldBeSkipped;
     private final Runnable toRun;
@@ -30,10 +35,14 @@ final class Skippable implements Runnable {
 
     @Override
     public void run() {
+        LOGGER.trace("Checking whether to run the update.");
         if (shouldBeSkipped.get()) {
+            LOGGER.trace("Not running the update.");
             return;
         }
+        LOGGER.trace("Running the update.");
         toRun.run();
+        LOGGER.trace("Update finished.");
     }
 
     @Override
