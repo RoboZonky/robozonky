@@ -166,7 +166,28 @@
                     "methodName": "getLatestSource",
                     "elementKind": "method",
                     "justification": "Simplification of a Refreshable threading model."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.Event::<init>()",
+                    "new": "method void com.github.robozonky.api.notifications.Event::<init>(java.lang.String[])",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "Event",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "This makes no practical difference, the varargs may be missing."
+                  }, {
+                    "code": "java.method.visibilityReduced",
+                    "old": "method void com.github.robozonky.api.notifications.Event::<init>()",
+                    "new": "method void com.github.robozonky.api.notifications.Event::<init>(java.lang.String[])",
+                    "oldVisibility": "public",
+                    "newVisibility": "protected",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "Event",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "This makes no practical difference; the class was abstract anyway."
                   }
+
                 ]
               }
             }
