@@ -50,6 +50,7 @@ public abstract class Refreshable<T> implements Runnable {
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
     private final AtomicInteger requestsToPause = new AtomicInteger(0);
     private final AtomicBoolean refreshRequestedWhilePaused = new AtomicBoolean(false);
+    private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
     /**
      * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
      */
@@ -202,7 +203,7 @@ public abstract class Refreshable<T> implements Runnable {
         }
     }
 
-    private synchronized void runLocked() {
+    private void runLocked() {
         final Optional<String> maybeNewSource = this.getLatestSource();
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
@@ -239,15 +240,16 @@ public abstract class Refreshable<T> implements Runnable {
         if (requestsToPause.get() > 0) {
             refreshRequestedWhilePaused.set(true);
             LOGGER.trace("Paused, not refreshing: {}.", this);
-            return;
-        }
-        try {
+        } else if (refreshInProgress.getAndSet(true)) {
+            LOGGER.trace("Not refreshing due to refresh already in progress: {}", this);
+        } else try {
             LOGGER.trace("Starting {}.", this);
             runLocked();
         } catch (final Exception ex) {
             LOGGER.warn("Refresh failed: {}.", this, ex);
         } finally {
             completionAssurance.countDown();
+            this.refreshInProgress.set(false);
             LOGGER.trace("Finished {}.", this);
         }
     }
