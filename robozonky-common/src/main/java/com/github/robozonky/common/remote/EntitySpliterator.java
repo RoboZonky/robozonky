@@ -72,12 +72,12 @@ final class EntitySpliterator<T> implements Spliterator<T> {
         this.paginated = paginated;
     }
 
-    private synchronized boolean hasMore() {
+    private boolean hasMore() {
         return currentElementId < this.paginated.getTotalItemCount();
     }
 
     @Override
-    public synchronized boolean tryAdvance(final Consumer consumer) {
+    public boolean tryAdvance(final Consumer consumer) {
         if (currentPage.isEmpty()) {
             if (this.hasMore()) {
                 this.readNewPage();
@@ -96,7 +96,7 @@ final class EntitySpliterator<T> implements Spliterator<T> {
      * Read a new page into the spliterator.
      * @return Old page.
      */
-    private synchronized Collection<T> readNewPage() {
+    private Collection<T> readNewPage() {
         final Collection<T> old = Collections.unmodifiableCollection(this.currentPage);
         if (this.paginated.nextPage()) {
             this.currentPage = new ArrayDeque<>(this.paginated.getItemsOnPage());
@@ -107,7 +107,7 @@ final class EntitySpliterator<T> implements Spliterator<T> {
     }
 
     @Override
-    public synchronized Spliterator trySplit() {
+    public Spliterator trySplit() {
         if (currentPage.isEmpty()) {
             if (this.hasMore()) { // read in a new page and then split
                 this.readNewPage();
@@ -119,7 +119,7 @@ final class EntitySpliterator<T> implements Spliterator<T> {
     }
 
     @Override
-    public synchronized long estimateSize() {
+    public long estimateSize() {
         return this.paginated.getTotalItemCount() - this.currentElementId;
     }
 

@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,27 +44,16 @@ import org.slf4j.LoggerFactory;
  * Using this class, only store transient information that, if deleted by a system restart or a similar occasion, would
  * not cause a crash of the application.
  */
-public enum State {
+public class State {
 
-    INSTANCE; // cheap thread-safe singleton
-
-    private final Logger LOGGER = LoggerFactory.getLogger(State.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(State.class);
     private static final String DELIMITER = ";";
     private static final Pattern SPLIT_BY_DELIMITER = Pattern.compile("\\Q" + DELIMITER + "\\E");
-    private final AtomicReference<Ini> stateFile = new AtomicReference<>(null);
-    private final Supplier<Ini> stateFileSupplier = () -> {
-        try {
-            final File stateLocation = Settings.INSTANCE.getStateFile();
-            if (!stateLocation.exists()) {
-                LOGGER.debug("Creating state: {}.", stateLocation);
-                stateLocation.createNewFile();
-            }
-            LOGGER.debug("Reading state: {}.", stateLocation);
-            return new Ini(stateLocation);
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed initializing state.", ex);
-        }
-    };
+    private final Ini stateFile = getStateFile();
+
+    private State() {
+        // no external instances
+    }
 
     /**
      * Get state storage for a particular class.
@@ -77,17 +65,27 @@ public enum State {
     }
 
     private Ini getStateFile() {
-        return stateFile.updateAndGet(file -> file == null ? stateFileSupplier.get() : file);
+        try {
+            final File stateLocation = Settings.INSTANCE.getStateFile();
+            if (!stateLocation.exists()) {
+                LOGGER.debug("Creating state: {}.", stateLocation);
+                stateLocation.createNewFile();
+            }
+            LOGGER.debug("Reading state: {}.", stateLocation);
+            return new Ini(stateLocation);
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Failed initializing state.", ex);
+        }
     }
 
     boolean containskey(final String section, final String key) {
-        final boolean hasSection = getStateFile().keySet().contains(section);
-        return hasSection && getStateFile().get(section).containsKey(key);
+        final boolean hasSection = stateFile.keySet().contains(section);
+        return hasSection && stateFile.get(section).containsKey(key);
     }
 
     Optional<String> getValue(final String section, final String key) {
         if (this.containskey(section, key)) {
-            final String value = getStateFile().get(section, key, String.class);
+            final String value = stateFile.get(section, key, String.class);
             if (value.trim().length() == 0) {
                 return Optional.empty();
             }
@@ -98,8 +96,8 @@ public enum State {
     }
 
     Collection<String> getKeys(final String section) {
-        if (getStateFile().containsKey(section)) {
-            return new HashSet<>(getStateFile().get(section).keySet());
+        if (stateFile.containsKey(section)) {
+            return new HashSet<>(stateFile.get(section).keySet());
         } else {
             return Collections.emptySet();
         }
@@ -107,8 +105,7 @@ public enum State {
 
     private boolean store() {
         try {
-            getStateFile().store();
-            this.stateFile.set(null); // reload file when state is next used
+            stateFile.store();
             return true;
         } catch (final IOException ex) {
             LOGGER.warn("Failed storing state.", ex);
@@ -118,16 +115,16 @@ public enum State {
 
     void unsetValue(final String section, final String key) {
         if (this.containskey(section, key)) {
-            getStateFile().get(section).remove(key);
+            stateFile.get(section).remove(key);
         }
     }
 
     void setValue(final String section, final String key, final String value) {
-        getStateFile().put(section, key, value);
+        stateFile.put(section, key, value);
     }
 
     void unsetValues(final String section) {
-        getStateFile().remove(section);
+        stateFile.remove(section);
     }
 
     /**
@@ -136,18 +133,19 @@ public enum State {
      */
     public static class Batch implements Callable<Boolean> {
 
-        private final Collection<Consumer<State.ClassSpecificState>> actions = new ArrayList<>();
+        private final Collection<BiConsumer<State, State.ClassSpecificState>> actions = new ArrayList<>(0);
         private final State.ClassSpecificState state;
 
         private Batch(final State.ClassSpecificState state, final boolean fresh) {
             this.state = state;
-            if (fresh) {
-                actions.add(State.ClassSpecificState::reset);
+            if (fresh) { // first action is to reset the class-specific state
+                actions.add((internalState, classSpecificState) ->
+                                    internalState.unsetValues(classSpecificState.classIdentifier));
             }
         }
 
         public State.Batch set(final String key, final String value) {
-            actions.add((state) -> state.setValue(key, value));
+            actions.add((state, classSpecificState) -> classSpecificState.setValue(state, key, value));
             return this;
         }
 
@@ -156,16 +154,17 @@ public enum State {
         }
 
         public State.Batch unset(final String key) {
-            actions.add((state) -> state.unsetValue(key));
+            actions.add((state, classSpecificState) -> classSpecificState.unsetValue(state, key));
             return this;
         }
 
         @Override
         public Boolean call() {
-            synchronized (State.INSTANCE) {
-                actions.forEach(a -> a.accept(state));
-                return State.INSTANCE.store();
-            }
+            final State internal = new State();
+            actions.forEach(a -> a.accept(internal, state));
+            final boolean result = internal.store();
+            state.refresh();
+            return result;
         }
     }
 
@@ -175,9 +174,15 @@ public enum State {
     public static class ClassSpecificState {
 
         private final String classIdentifier;
+        private final AtomicReference<State> cache = new AtomicReference<>();
 
         ClassSpecificState(final Class<?> clz) {
             this.classIdentifier = clz.getName();
+            this.refresh();
+        }
+
+        void refresh() {
+            cache.set(new State());
         }
 
         public State.Batch newBatch() {
@@ -194,9 +199,7 @@ public enum State {
          * @return Present if the storage contains a value for the key.
          */
         public Optional<String> getValue(final String key) {
-            synchronized (State.INSTANCE) {
-                return State.INSTANCE.getValue(this.classIdentifier, key);
-            }
+            return cache.get().getValue(this.classIdentifier, key);
         }
 
         public Optional<List<String>> getValues(final String key) {
@@ -208,9 +211,7 @@ public enum State {
          * @return Unique key values.
          */
         public Collection<String> getKeys() {
-            synchronized (State.INSTANCE) {
-                return State.INSTANCE.getKeys(this.classIdentifier);
-            }
+            return cache.get().getKeys(this.classIdentifier);
         }
 
         /**
@@ -218,24 +219,23 @@ public enum State {
          * @param key Key to store the value under.
          * @param value The value to store.
          */
-        void setValue(final String key, final String value) {
-            State.INSTANCE.setValue(this.classIdentifier, key, value);
+        void setValue(final State state, final String key, final String value) {
+            state.setValue(this.classIdentifier, key, value);
         }
 
         /**
          * Remove the value associated with a given key, so that {@link #getValue(String)} will be empty.
          * @param key Key to disassociate.
          */
-        void unsetValue(final String key) {
-            State.INSTANCE.unsetValue(this.classIdentifier, key);
+        void unsetValue(final State state, final String key) {
+            state.unsetValue(this.classIdentifier, key);
         }
 
         /**
          * Remove all values for this class-specific state storage.
          */
-        void reset() {
-            State.INSTANCE.unsetValues(classIdentifier);
+        public void reset() {
+            newBatch(true).call();
         }
     }
-
 }

@@ -28,7 +28,7 @@ class SortImpl<S> implements Sort<S> {
         this.ordering.put(first, ascending);
     }
 
-    private synchronized String getOrdering() {
+    private String getOrdering() {
         return ordering.entrySet().stream()
                 .map(e -> {
                     final String field = e.getKey().id();
@@ -37,7 +37,7 @@ class SortImpl<S> implements Sort<S> {
     }
 
     @Override
-    public synchronized SortImpl<S> thenBy(final Field<S> field, final boolean ascending) {
+    public SortImpl<S> thenBy(final Field<S> field, final boolean ascending) {
         if (ordering.containsKey(field)) {
             throw new IllegalArgumentException("Field already used: " + field);
         }

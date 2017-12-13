@@ -26,8 +26,6 @@ enum DelinquencyTracker {
 
     INSTANCE; // fast thread-safe singleton
 
-    private static final State.ClassSpecificState STATE = State.forClass(DelinquencyTracker.class);
-
     private static String loanToId(final Loan loan) {
         return String.valueOf(loan.getId());
     }
@@ -36,7 +34,7 @@ enum DelinquencyTracker {
         if (this.isDelinquent(loan)) {
             return false;
         }
-        return DelinquencyTracker.STATE
+        return State.forClass(DelinquencyTracker.class)
                 .newBatch()
                 .set(loanToId(loan), OffsetDateTime.now(Defaults.ZONE_ID).toString())
                 .call();
@@ -46,14 +44,14 @@ enum DelinquencyTracker {
         if (!this.isDelinquent(loan)) {
             return false;
         }
-        return DelinquencyTracker.STATE
+        return State.forClass(DelinquencyTracker.class)
                 .newBatch()
                 .unset(loanToId(loan))
                 .call();
     }
 
     public boolean isDelinquent(final Loan loan) {
-        return DelinquencyTracker.STATE.getValue(loanToId(loan)).isPresent();
+        return State.forClass(DelinquencyTracker.class).getValue(loanToId(loan)).isPresent();
     }
 
 }

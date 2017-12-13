@@ -18,7 +18,7 @@ package com.github.robozonky.marketplaces;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.marketplaces.Marketplace;
@@ -27,18 +27,18 @@ import com.github.robozonky.common.remote.ApiProvider;
 
 abstract class AbstractMarketplace implements Marketplace {
 
-    private final Collection<Consumer<Collection<Loan>>> loanListeners = new LinkedHashSet<>(0);
+    private final Collection<Consumer<Collection<Loan>>> loanListeners = new CopyOnWriteArraySet<>();
     private final ApiProvider apis = this.api();
 
     protected abstract ApiProvider api();
 
     @Override
-    public synchronized boolean registerListener(final Consumer<Collection<Loan>> listener) {
+    public boolean registerListener(final Consumer<Collection<Loan>> listener) {
         return this.loanListeners.add(listener);
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
         final Collection<Loan> loans = apis.marketplace();
         loanListeners.forEach(l -> l.accept(loans == null ? Collections.emptyList() : loans));
     }

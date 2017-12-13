@@ -20,31 +20,22 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.marketplaces.Marketplace;
-import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class InvestmentDaemonTest {
+public class PurchasingDaemonTest {
 
     @Test
     public void standard() {
         final Authenticated a = Mockito.mock(Authenticated.class);
-        final Marketplace m = Mockito.mock(Marketplace.class);
-        final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
-        final InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, s,
-                                                      () -> Optional.of(Mockito.mock(Portfolio.class)), Duration.ZERO,
-                                                      Duration.ofSeconds(1));
+        final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
+        final PurchasingDaemon d = new PurchasingDaemon(a, s, () -> Optional.of(Mockito.mock(Portfolio.class)),
+                                                        Duration.ZERO, Duration.ofSeconds(1), true);
         d.run();
-        Mockito.verify(m, Mockito.times(1)).registerListener(ArgumentMatchers.any());
-        d.run();
-        Mockito.verify(m, Mockito.times(1)).registerListener(ArgumentMatchers.any()); // still 1
-        Mockito.verify(m, Mockito.times(2)).run();
-        Assertions.assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
+        Mockito.verify(a, Mockito.times(1)).run(ArgumentMatchers.notNull());
     }
 }

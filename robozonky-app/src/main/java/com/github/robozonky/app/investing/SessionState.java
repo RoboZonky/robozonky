@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -81,29 +83,29 @@ class SessionState {
         SessionState.writeInvestments(SessionState.SEEN_INVESTMENTS_ID, seenInvestments);
     }
 
-    private final Collection<LoanDescriptor> discardedLoans, seenLoans;
+    private final Set<LoanDescriptor> discardedLoans, seenLoans;
 
     public SessionState(final Collection<LoanDescriptor> marketplace) {
-        discardedLoans = SessionState.readUntouchableInvestments(marketplace);
+        discardedLoans = new CopyOnWriteArraySet<>(SessionState.readUntouchableInvestments(marketplace));
         SessionState.LOGGER.debug("Loans previously discarded: {}", discardedLoans);
-        seenLoans = SessionState.readSeenInvestments(marketplace);
+        seenLoans = new CopyOnWriteArraySet<>(SessionState.readSeenInvestments(marketplace));
         SessionState.LOGGER.debug("Loans previously seen: {}", seenLoans);
     }
 
-    public synchronized Collection<LoanDescriptor> getDiscardedLoans() {
+    public Collection<LoanDescriptor> getDiscardedLoans() {
         return Collections.unmodifiableCollection(discardedLoans);
     }
 
-    public synchronized Collection<LoanDescriptor> getSeenLoans() {
+    public Collection<LoanDescriptor> getSeenLoans() {
         return Collections.unmodifiableCollection(seenLoans);
     }
 
-    synchronized void discard(final LoanDescriptor loan) {
+    void discard(final LoanDescriptor loan) {
         this.discardedLoans.add(loan);
         SessionState.writeUntouchableInvestments(this.discardedLoans);
     }
 
-    synchronized void skip(final LoanDescriptor loan) {
+    void skip(final LoanDescriptor loan) {
         this.seenLoans.add(loan);
         SessionState.writeSeenInvestments(this.seenLoans);
     }

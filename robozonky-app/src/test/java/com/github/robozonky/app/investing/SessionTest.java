@@ -20,17 +20,25 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
+import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.robozonky.api.notifications.LoanRecommendedEvent;
+import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -57,40 +65,46 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         final Portfolio portfolio = Portfolio.create(zonky)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session it = Session.create(portfolio, new Investor.Builder(), zonky, lds)) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailable())
-                        .isNotSameAs(lds)
-                        .containsExactly(ld);
-                softly.assertThat(it.getResult()).isEmpty();
-            });
-            // no new sessions should be allowed before the current one is disposed of
-            Assertions.assertThatThrownBy(() -> Session.create(portfolio, new Investor.Builder(), zonky, lds))
-                    .isInstanceOf(IllegalStateException.class);
-        }
+        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), new Investor.Builder(), zonky);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(it.getAvailable())
+                    .isNotSameAs(lds)
+                    .containsExactly(ld);
+            softly.assertThat(it.getResult()).isEmpty();
+        });
     }
 
     @Test
     public void discardingInvestments() {
-        final int loanId = 1;
+        final int loanId = 1, loanId2 = 2;
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor(loanId);
-        final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
+        final LoanDescriptor ld2 = AbstractZonkyLeveragingTest.mockLoanDescriptor(loanId2);
+        final Collection<LoanDescriptor> lds = Arrays.asList(ld, ld2, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         // discard the loan
         final SessionState sst = new SessionState(lds);
         sst.discard(ld);
         // setup APIs
         final Zonky zonky = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        // test that the loan is not available
+        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId2))).thenReturn(ld2.item());
+        // prepare portfolio that has the other loan as pending
         final Portfolio portfolio = Portfolio.create(zonky)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session it = Session.create(portfolio, new Investor.Builder(), zonky, lds)) {
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailable())
-                        .hasSize(1)
-                        .doesNotContain(ld);
-                softly.assertThat(it.getResult()).isEmpty();
-            });
-        }
+        portfolio.newBlockedAmount(zonky, new BlockedAmount(loanId2, BigDecimal.valueOf(200),
+                                                            TransactionCategory.SMP_BUY));
+        // test that the loans are not available
+        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), new Investor.Builder(), zonky);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(it.getAvailable())
+                    .hasSize(1)
+                    .doesNotContain(ld, ld2);
+            softly.assertThat(it.getResult()).isEmpty();
+        });
+    }
+
+    private InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
+        return (l, p) -> l.stream()
+                .filter(i -> i.item().getId() == loanToRecommend)
+                .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
     }
 
     @Test
@@ -100,18 +114,27 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         // run test
         final int amount = 200;
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptorWithoutCaptcha();
-        Mockito.when(z.getLoan(ArgumentMatchers.eq(ld.item().getId()))).thenReturn(ld.item());
+        final int loanId = ld.item().getId();
+        Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.item());
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session it = Session.create(portfolio, new Investor.Builder(), z, lds)) {
-            it.invest(ld.recommend(BigDecimal.valueOf(amount)).get());
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(it.getAvailable()).isNotEmpty().doesNotContain(ld);
-                softly.assertThat(it.getResult()).hasSize(1);
-                softly.assertAll();
-            });
-        }
+        final Portfolio portfolio = Mockito.spy(Portfolio.create(z)
+                                                        .orElseThrow(
+                                                                () -> new AssertionError("Should have been present,")));
+        final Collection<Investment> i = Session.invest(portfolio, new Investor.Builder(), z, lds,
+                                                        mockStrategy(loanId, amount));
+        // check that one investment was made
+        Assertions.assertThat(i).hasSize(1);
+        final List<Event> newEvents = this.getNewEvents();
+        Assertions.assertThat(newEvents).hasSize(5);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(newEvents.get(0)).isInstanceOf(ExecutionStartedEvent.class);
+            softly.assertThat(newEvents.get(1)).isInstanceOf(LoanRecommendedEvent.class);
+            softly.assertThat(newEvents.get(2)).isInstanceOf(InvestmentRequestedEvent.class);
+            softly.assertThat(newEvents.get(3)).isInstanceOf(InvestmentMadeEvent.class);
+            softly.assertThat(newEvents.get(4)).isInstanceOf(ExecutionCompletedEvent.class);
+        });
+        Mockito.verify(portfolio).newBlockedAmount(ArgumentMatchers.eq(z),
+                                                   ArgumentMatchers.argThat(a -> a.getLoanId() == loanId));
     }
 
     @Test
@@ -121,13 +144,12 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
         // run test
-        try (final Session it = Session.create(portfolio, new Investor.Builder(), z, Collections.emptyList())) {
-            final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
-                    .recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
-            final boolean result = it.invest(recommendation.get());
-            // verify result
-            Assertions.assertThat(result).isFalse();
-        }
+        final Session it = new Session(portfolio, Collections.emptySet(), new Investor.Builder(), z);
+        final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
+                .recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
+        final boolean result = it.invest(recommendation.get());
+        // verify result
+        Assertions.assertThat(result).isFalse();
         final List<Event> newEvents = this.getNewEvents();
         Assertions.assertThat(newEvents).isEmpty();
     }
@@ -139,12 +161,11 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
                 AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, new Investor.Builder(), z,
-                                              Collections.singletonList(recommendation.descriptor()))) {
-            final boolean result = t.invest(recommendation);
-            // verify result
-            Assertions.assertThat(result).isFalse();
-        }
+        final Session t = new Session(portfolio, Collections.singleton(recommendation.descriptor()),
+                                      new Investor.Builder(), z);
+        final boolean result = t.invest(recommendation);
+        // verify result
+        Assertions.assertThat(result).isFalse();
         final List<Event> newEvents = this.getNewEvents();
         Assertions.assertThat(newEvents).isEmpty();
     }
@@ -160,9 +181,8 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
-            Assertions.assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
-        }
+        final Session t = new Session(portfolio, Collections.emptySet(), b, z);
+        Assertions.assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
     }
 
     @Test
@@ -177,10 +197,9 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
-            final boolean result = t.invest(r);
-            Assertions.assertThat(result).isFalse();
-        }
+        final Session t = new Session(portfolio, Collections.emptySet(), b, z);
+        final boolean result = t.invest(r);
+        Assertions.assertThat(result).isFalse();
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         Assertions.assertThat(newEvents).hasSize(2);
@@ -204,10 +223,9 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, b, z, availableLoans)) {
-            final boolean result = t.invest(r);
-            Assertions.assertThat(result).isFalse();
-        }
+        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
+        final boolean result = t.invest(r);
+        Assertions.assertThat(result).isFalse();
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         Assertions.assertThat(newEvents).hasSize(2);
@@ -231,10 +249,9 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, b, z, availableLoans)) {
-            final boolean result = t.invest(r);
-            Assertions.assertThat(result).isFalse();
-        }
+        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
+        final boolean result = t.invest(r);
+        Assertions.assertThat(result).isFalse();
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         Assertions.assertThat(newEvents).hasSize(2);
@@ -259,10 +276,9 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, b, z, availableLoans)) {
-            final boolean result = t.invest(r);
-            Assertions.assertThat(result).isFalse();
-        }
+        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
+        final boolean result = t.invest(r);
+        Assertions.assertThat(result).isFalse();
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         Assertions.assertThat(newEvents).hasSize(2);
@@ -288,13 +304,12 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z)
                 .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
-            final boolean result = t.invest(r);
-            Assertions.assertThat(result).isTrue();
-            final List<Investment> investments = t.getResult();
-            Assertions.assertThat(investments).hasSize(1);
-            Assertions.assertThat(investments.get(0).getAmount().intValue()).isEqualTo(amountToInvest);
-        }
+        final Session t = new Session(portfolio, Collections.emptySet(), b, z);
+        final boolean result = t.invest(r);
+        Assertions.assertThat(result).isTrue();
+        final List<Investment> investments = t.getResult();
+        Assertions.assertThat(investments).hasSize(1);
+        Assertions.assertThat(investments.get(0).getAmount().intValue()).isEqualTo(amountToInvest);
         // validate event sequence
         final List<Event> newEvents = this.getNewEvents();
         Assertions.assertThat(newEvents).hasSize(2);
@@ -308,22 +323,4 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
                 .isEqualTo(oldBalance - amountToInvest);
     }
 
-    @Test
-    public void exclusivity() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        final Investor.Builder b = new Investor.Builder();
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
-        try (final Session t = Session.create(portfolio, b, z, Collections.emptyList())) {
-            Assertions.assertThat(t).isNotNull();
-            // verify second session fails
-            Assertions.assertThatThrownBy(() -> Session.create(portfolio, b, z, Collections.emptyList()))
-                    .isExactlyInstanceOf(IllegalStateException.class);
-        }
-        // and verify sessions are properly closed
-        try (final Session t2 = Session.create(portfolio, b, AbstractZonkyLeveragingTest.harmlessZonky(0),
-                                               Collections.emptyList())) {
-            Assertions.assertThat(t2).isNotNull();
-        }
-    }
 }

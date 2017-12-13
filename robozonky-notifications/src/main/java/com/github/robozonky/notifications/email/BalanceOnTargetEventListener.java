@@ -26,16 +26,10 @@ import com.github.robozonky.api.notifications.SessionInfo;
 class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingListener<ExecutionStartedEvent> {
 
     private final int targetBalance;
-    private boolean shouldSendEmail = false;
 
     public BalanceOnTargetEventListener(final ListenerSpecificNotificationProperties properties) {
         super((ExecutionStartedEvent e) -> e.getPortfolioOverview().getCzkAvailable(), properties);
         this.targetBalance = properties.getListenerSpecificIntProperty("targetBalance", 200);
-    }
-
-    @Override
-    boolean shouldSendEmail(final ExecutionStartedEvent event) {
-        return super.shouldSendEmail(event) && this.shouldSendEmail;
     }
 
     @Override
@@ -61,12 +55,13 @@ class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingLis
         // figure out whether or not the balance is over the threshold
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance();
         final int newBalance = event.getPortfolioOverview().getCzkAvailable();
-        if (newBalance >= targetBalance) {
-            this.shouldSendEmail = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() < targetBalance;
+        final boolean balanceNowExceeded = newBalance >= targetBalance;
+        final boolean wasFineLastTime = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() < targetBalance;
+        if (balanceNowExceeded && wasFineLastTime) {
+            // and continue with event-processing, possibly eventually sending the e-mail
+            super.handle(event, sessionInfo);
         } else {
-            this.shouldSendEmail = false;
+            LOGGER.debug("Will not send e-mail.");
         }
-        // and continue with event-processing, possibly eventually sending the e-mail
-        super.handle(event, sessionInfo);
     }
 }

@@ -179,22 +179,25 @@ public class Delinquents implements PortfolioDependant {
         final Stream<Delinquent> newDelinquents = presentlyDelinquent.stream()
                 .filter(i -> knownDelinquents.stream().noneMatch(d -> related(d, i)))
                 .map(i -> new Delinquent(i.getLoanId(), i.getNextPaymentDate().toLocalDate()));
-        synchronized (this) { // store to the state file
-            LOGGER.trace("Starting delinquency update.");
-            final State.ClassSpecificState state = State.forClass(this.getClass());
-            final State.Batch stateUpdate = state.newBatch(true);
-            // update state of delinquents
-            final Collection<Delinquency> allPresent = Stream.concat(stillDelinquent, newDelinquents)
-                    .peek(d -> stateUpdate.set(String.valueOf(d.getLoanId()), toString(d)))
-                    .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
-                    .collect(Collectors.toSet());
-            stateUpdate.set(LAST_UPDATE_PROPERTY_NAME, OffsetDateTime.now().toString());
-            stateUpdate.call(); // persist state updates
-            LOGGER.trace("Delinquency update finished.");
-            // and notify of new delinquencies over all known thresholds
-            Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, auth, loanProvider));
-        }
+        store(auth, newDelinquents, stillDelinquent);
         LOGGER.trace("Done.");
+    }
+
+    private void store(final Authenticated auth, final Stream<Delinquent> newDelinquents,
+                       final Stream<Delinquent> stillDelinquent) {
+        LOGGER.trace("Starting delinquency update.");
+        final State.ClassSpecificState state = State.forClass(this.getClass());
+        final State.Batch stateUpdate = state.newBatch(true);
+        // update state of delinquents
+        final Collection<Delinquency> allPresent = Stream.concat(stillDelinquent, newDelinquents)
+                .peek(d -> stateUpdate.set(String.valueOf(d.getLoanId()), toString(d)))
+                .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
+                .collect(Collectors.toSet());
+        stateUpdate.set(LAST_UPDATE_PROPERTY_NAME, OffsetDateTime.now().toString());
+        stateUpdate.call(); // persist state updates
+        LOGGER.trace("Delinquency update finished.");
+        // and notify of new delinquencies over all known thresholds
+        Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, auth, loanProvider));
     }
 
     /**

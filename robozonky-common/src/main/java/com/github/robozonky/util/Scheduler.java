@@ -53,7 +53,7 @@ public class Scheduler {
         this.executor = executorProvider.get();
     }
 
-    public static synchronized Scheduler inBackground() {
+    public static Scheduler inBackground() {
         return BACKGROUND_SCHEDULER;
     }
 

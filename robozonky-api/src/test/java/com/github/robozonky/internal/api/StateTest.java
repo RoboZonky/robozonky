@@ -46,8 +46,9 @@ public class StateTest {
         final State.Batch b = state.newBatch();
         final String key = UUID.randomUUID().toString(), value = UUID.randomUUID().toString(),
                 key2 = UUID.randomUUID().toString(), value2 = UUID.randomUUID().toString();
-        b.set(key, value).set(key2, value2);
-        b.call();
+        b.set(key, value)
+                .set(key2, value2)
+                .call();
         // read stored
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(state.getValue(key)).contains(value);

@@ -19,6 +19,7 @@ package com.github.robozonky.app.authentication;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.ServiceUnavailableException;
@@ -36,6 +37,7 @@ class TokenBasedAccess implements Authenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
     private static final TemporalAmount EMERGENCY_REFRESH_INTERVAL = Duration.ofSeconds(5);
+    private final ReentrantLock exclusiveRefresh = new ReentrantLock(true);
     private final Refreshable<ZonkyApiToken> refreshableToken;
     private final SecretProvider secrets;
     private final ApiProvider apis;
@@ -53,19 +55,25 @@ class TokenBasedAccess implements Authenticated {
         return refreshableToken;
     }
 
-    private synchronized ZonkyApiToken getToken() {
+    private ZonkyApiToken getToken() {
         return refreshableToken.getLatest()
                 .orElseThrow(() -> new ServiceUnavailableException("No API token available, authentication failed."));
     }
 
-    private synchronized ZonkyApiToken getFreshToken() { // no point in making multiple threads refresh the same token
-        final ZonkyApiToken token = getToken();
-        if (token.willExpireIn(EMERGENCY_REFRESH_INTERVAL)) {
-            LOGGER.debug("Emergency refresh to prevent token from going stale on {}.", token.getExpiresOn());
-            refreshableToken.run();
-            return getToken();
-        } else {
-            return token;
+    private ZonkyApiToken getFreshToken() {
+        exclusiveRefresh.lock();
+        try {
+            // no point in making multiple threads refresh the same token
+            final ZonkyApiToken token = getToken();
+            if (token.willExpireIn(EMERGENCY_REFRESH_INTERVAL)) {
+                LOGGER.debug("Emergency refresh to prevent token from going stale on {}.", token.getExpiresOn());
+                refreshableToken.run();
+                return getToken();
+            } else {
+                return token;
+            }
+        } finally {
+            exclusiveRefresh.unlock();
         }
     }
 

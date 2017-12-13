@@ -193,9 +193,9 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         events.put(SupportedListener.LOAN_DELINQUENT_90_PLUS,
                    new LoanDelinquent90DaysOrMoreEvent(loan, LocalDate.now().minusDays(91)));
         events.put(SupportedListener.BALANCE_ON_TARGET,
-                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(200)));
+                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.BALANCE_UNDER_MINIMUM,
-                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(199)));
+                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(0)));
         events.put(SupportedListener.CRASHED,
                    new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
         events.put(SupportedListener.REMOTE_OPERATION_FAILED,

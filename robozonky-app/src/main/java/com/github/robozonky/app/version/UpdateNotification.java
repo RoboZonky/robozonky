@@ -62,12 +62,10 @@ class UpdateNotification implements Refreshable.RefreshListener<VersionIdentifie
      */
     private void updateVersion(final String newVersion, final AtomicReference<String> lastKnownVersion,
                                final Consumer<String> handler) {
-        synchronized (this) {
-            if (Objects.equals(lastKnownVersion.get(), newVersion)) { // nothing to do
-                return;
-            }
-            lastKnownVersion.set(newVersion);
+        if (Objects.equals(lastKnownVersion.get(), newVersion)) { // nothing to do
+            return;
         }
+        lastKnownVersion.set(newVersion);
         if (VersionComparator.isSmallerThan(currentVersion, newVersion)) {
             handler.accept(newVersion);
         }

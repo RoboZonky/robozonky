@@ -21,8 +21,8 @@ import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
-    private static final State.ClassSpecificState STATE = State.forClass(Counter.class);
     private final String id;
     private final int maxItems;
     private final TemporalAmount period;
@@ -47,16 +46,16 @@ final class Counter {
         this.id = id;
         this.maxItems = maxItems;
         this.period = period;
-        this.timestamps = new LinkedHashSet<>(Counter.load(id));
+        this.timestamps = new CopyOnWriteArraySet<>(Counter.load(id));
     }
 
     private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
         final Stream<String> result = timestamps.stream().map(OffsetDateTime::toString);
-        return Counter.STATE.newBatch().set(id, result).call();
+        return State.forClass(Counter.class).newBatch().set(id, result).call();
     }
 
     private static Collection<OffsetDateTime> load(final String id) {
-        return Counter.STATE.getValues(id)
+        return State.forClass(Counter.class).getValues(id)
                 .map(value -> value.stream()
                         .map(String::trim)
                         .map(OffsetDateTime::parse)
@@ -67,12 +66,12 @@ final class Counter {
     /**
      * @return True when the counter increase was properly persisted.
      */
-    public synchronized boolean increase() {
+    public boolean increase() {
         timestamps.add(OffsetDateTime.now());
         return Counter.store(id, timestamps);
     }
 
-    public synchronized boolean allow() {
+    public boolean allow() {
         final OffsetDateTime now = OffsetDateTime.now();
         final boolean removed = timestamps.removeIf(timestamp -> timestamp.plus(period).isBefore(now));
         if (removed) {

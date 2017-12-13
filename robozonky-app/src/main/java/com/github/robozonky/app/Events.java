@@ -17,11 +17,11 @@
 package com.github.robozonky.app;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Refreshable;
@@ -71,7 +71,7 @@ public enum Events {
         }
     }
 
-    final Map<Class<? extends Event>, Events.EventSpecific<? extends Event>> registries = new HashMap<>();
+    final ConcurrentMap<Class<? extends Event>, EventSpecific<? extends Event>> registries = new ConcurrentHashMap<>();
 
     /**
      * Retrieve all listeners registered for a given event type. During the first call of this method, it will use the
@@ -82,7 +82,7 @@ public enum Events {
      * @return Listeners available for the event type in question.
      */
     @SuppressWarnings("unchecked")
-    private synchronized <E extends Event> Events.EventSpecific<E> loadListeners(final Class<E> eventClass) {
+    private <E extends Event> Events.EventSpecific<E> loadListeners(final Class<E> eventClass) {
         return (Events.EventSpecific<E>) this.registries.computeIfAbsent(eventClass, key -> {
             Events.LOGGER.trace("Registering event listeners for {}.", key);
             final Events.EventSpecific<E> eventSpecific = new Events.EventSpecific<>();

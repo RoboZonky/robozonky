@@ -28,12 +28,14 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
+import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
@@ -67,9 +69,11 @@ public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final Marketplace m = Mockito.mock(Marketplace.class);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
+        final PortfolioUpdater p = Mockito.mock(PortfolioUpdater.class);
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, true, m, "",
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
+            Mockito.verify(p).registerDependant(ArgumentMatchers.isA(Selling.class));
             final Future<ReturnCode> f = e.submit(d::get);
             while (DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get() == null) {
                 // do nothing while the parallel task is initializing

@@ -40,18 +40,21 @@ public class BalanceTrackerTest {
 
     @Test
     public void lifecycle() {
-        final State.ClassSpecificState state = State.forClass(BalanceTracker.class);
-        Assume.assumeFalse(state.getValue(BalanceTracker.BALANCE_KEY).isPresent());
+        System.out.println("A");
+        Assume.assumeFalse(State.forClass(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY).isPresent());
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
         // store new value
+        System.out.println("B");
         final int newBalance = 200;
         BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
         // overwrite value
+        System.out.println("C");
         final int newerBalance = 100;
         BalanceTracker.INSTANCE.setLastKnownBalance(newerBalance);
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newerBalance);
-        Assertions.assertThat(state.getValue(BalanceTracker.BALANCE_KEY)).isPresent();
+        Assertions.assertThat(State.forClass(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY)).isPresent();
+        System.out.println("D");
         // reset value
         Assertions.assertThat(BalanceTracker.INSTANCE.reset()).isTrue();
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();

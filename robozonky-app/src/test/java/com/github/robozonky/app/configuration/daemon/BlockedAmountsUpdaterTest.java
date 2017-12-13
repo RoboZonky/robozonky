@@ -19,8 +19,10 @@ package com.github.robozonky.app.configuration.daemon;
 import java.util.Optional;
 
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class BlockedAmountsUpdaterTest {
@@ -30,4 +32,22 @@ public class BlockedAmountsUpdaterTest {
         final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(Mockito.mock(Authenticated.class), Optional::empty);
         Assertions.assertThat(bau.getDependant()).isInstanceOf(BlockedAmounts.class);
     }
+
+    @Test
+    public void noDependant() {
+        final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(Mockito.mock(Authenticated.class), Optional::empty,
+                                                                    null);
+        bau.run(); // quietly ignored
+    }
+
+    @Test
+    public void customDependant() {
+        final Portfolio p = Mockito.mock(Portfolio.class);
+        final PortfolioDependant d = Mockito.mock(PortfolioDependant.class);
+        final Authenticated auth = Mockito.mock(Authenticated.class);
+        final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(auth, () -> Optional.of(p), d);
+        bau.run();
+        Mockito.verify(d).accept(ArgumentMatchers.eq(p), ArgumentMatchers.eq(auth));
+    }
 }
+

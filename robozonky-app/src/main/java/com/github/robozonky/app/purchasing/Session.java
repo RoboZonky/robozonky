@@ -22,9 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
@@ -54,10 +52,9 @@ import org.slf4j.LoggerFactory;
  * Instances of this class are supposed to be short-lived, as the marketplace and Zonky account balance can change
  * externally at any time. Essentially, one remote marketplace check should correspond to one instance of this class.
  */
-class Session implements AutoCloseable {
+final class Session {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
-    private static final AtomicReference<Session> INSTANCE = new AtomicReference<>(null);
     private final List<ParticipationDescriptor> stillAvailable;
     private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>();
     private final Zonky zonky;
@@ -65,24 +62,13 @@ class Session implements AutoCloseable {
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
-    private Session(final Portfolio portfolio, final Set<ParticipationDescriptor> marketplace, final Zonky zonky,
-                    final boolean dryRun) {
+    Session(final Portfolio portfolio, final Set<ParticipationDescriptor> marketplace, final Zonky zonky,
+            final boolean dryRun) {
         this.zonky = zonky;
         this.isDryRun = dryRun;
         this.stillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview(zonky, dryRun);
-    }
-
-    private synchronized static Session create(final Portfolio portfolio, final Zonky api,
-                                               final Collection<ParticipationDescriptor> marketplace,
-                                               final boolean dryRun) {
-        if (Session.INSTANCE.get() != null) {
-            throw new IllegalStateException("Purchasing session already exists.");
-        }
-        final Session s = new Session(portfolio, new LinkedHashSet<>(marketplace), api, dryRun);
-        Session.INSTANCE.set(s);
-        return s;
     }
 
     private void purchase(final PurchaseStrategy strategy) {
@@ -94,34 +80,26 @@ class Session implements AutoCloseable {
         } while (invested);
     }
 
-    static Collection<Investment> purchase(final Portfolio portfolio, final Zonky api,
-                                           final Collection<ParticipationDescriptor> items,
-                                           final PurchaseStrategy strategy, final boolean dryRun) {
-        try (final Session session = Session.create(portfolio, api, items, dryRun)) {
-            final Collection<ParticipationDescriptor> c = session.getAvailable();
-            if (c.isEmpty()) {
-                return Collections.emptyList();
-            }
-            Events.fire(new PurchasingStartedEvent(c, session.getPortfolioOverview()));
-            session.purchase(strategy);
-            final Collection<Investment> result = session.getResult();
-            Events.fire(new PurchasingCompletedEvent(result, session.getPortfolioOverview()));
-            return Collections.unmodifiableCollection(result);
+    public static Collection<Investment> purchase(final Portfolio portfolio, final Zonky api,
+                                                  final Collection<ParticipationDescriptor> items,
+                                                  final PurchaseStrategy strategy, final boolean dryRun) {
+        final Session session = new Session(portfolio, new LinkedHashSet<>(items), api, dryRun);
+        final Collection<ParticipationDescriptor> c = session.getAvailable();
+        if (c.isEmpty()) {
+            return Collections.emptyList();
         }
-    }
-
-    private synchronized void ensureOpen() {
-        final Session s = Session.INSTANCE.get();
-        if (!Objects.equals(s, this)) {
-            throw new IllegalStateException("Session already closed.");
-        }
+        Events.fire(new PurchasingStartedEvent(c, session.getPortfolioOverview()));
+        session.purchase(strategy);
+        final Collection<Investment> result = session.getResult();
+        Events.fire(new PurchasingCompletedEvent(result, session.getPortfolioOverview()));
+        return Collections.unmodifiableCollection(result);
     }
 
     /**
      * Get information about the portfolio, which is up to date relative to the current point in the session.
      * @return Portfolio.
      */
-    public synchronized PortfolioOverview getPortfolioOverview() {
+    public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
     }
 
@@ -130,7 +108,7 @@ class Session implements AutoCloseable {
      * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
-    public synchronized Collection<ParticipationDescriptor> getAvailable() {
+    public Collection<ParticipationDescriptor> getAvailable() {
         return Collections.unmodifiableList(new ArrayList<>(stillAvailable));
     }
 
@@ -138,7 +116,7 @@ class Session implements AutoCloseable {
      * Get investments made during this session.
      * @return Investments made so far during this session. Unmodifiable.
      */
-    public synchronized List<Investment> getResult() {
+    public List<Investment> getResult() {
         return Collections.unmodifiableList(new ArrayList<>(investmentsMadeNow));
     }
 
@@ -152,8 +130,7 @@ class Session implements AutoCloseable {
         }
     }
 
-    public synchronized boolean purchase(final RecommendedParticipation recommendation) {
-        ensureOpen();
+    public boolean purchase(final RecommendedParticipation recommendation) {
         if (portfolioOverview.getCzkAvailable() < recommendation.amount().intValue()) {
             // should not be allowed by the calling code
             return false;
@@ -169,7 +146,7 @@ class Session implements AutoCloseable {
         return purchased;
     }
 
-    private synchronized void markSuccessfulPurchase(final Investment i) {
+    private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
         final int id = i.getLoanId();
         stillAvailable.removeIf(l -> l.item().getLoanId() == id);
@@ -179,8 +156,4 @@ class Session implements AutoCloseable {
         portfolioOverview = portfolio.calculateOverview(newBalance);
     }
 
-    @Override
-    public synchronized void close() {
-        Session.INSTANCE.set(null); // the session can no longer be used
-    }
 }

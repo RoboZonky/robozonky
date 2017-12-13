@@ -37,13 +37,9 @@ abstract class BaseEntity {
     @XmlTransient
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private synchronized boolean hasBeenCalledBefore(final String key) {
+    private boolean hasBeenCalledBefore(final String key) {
         final String id = this.getClass().getCanonicalName() + ":" + key;
-        if (CHANGES_ALREADY_NOTIFIED.contains(id)) {
-            return true;
-        }
-        CHANGES_ALREADY_NOTIFIED.add(id);
-        return false;
+        return !CHANGES_ALREADY_NOTIFIED.add(id);
     }
 
     @JsonAnyGetter
