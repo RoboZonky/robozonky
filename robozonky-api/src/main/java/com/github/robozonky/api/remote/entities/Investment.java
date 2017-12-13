@@ -27,7 +27,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 public class Investment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
-    private boolean smpRelated, onSmp, canBeOffered;
+    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal;
     private int legalDpd, loanTermInMonth, currentTerm, remainingMonths;
     private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate, nextPaymentDate, activeTo;
@@ -118,6 +118,11 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public boolean isCanBeOffered() {
         return canBeOffered;
+    }
+
+    @XmlElement
+    public boolean isInWithdrawal() {
+        return inWithdrawal;
     }
 
     @XmlElement
