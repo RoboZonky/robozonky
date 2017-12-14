@@ -105,7 +105,9 @@ public class State {
 
     private boolean store() {
         try {
-            stateFile.store();
+            synchronized (State.class) { // one write at a time
+                stateFile.store();
+            }
             return true;
         } catch (final IOException ex) {
             LOGGER.warn("Failed storing state.", ex);
