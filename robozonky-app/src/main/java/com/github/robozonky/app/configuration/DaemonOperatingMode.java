@@ -16,9 +16,6 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -44,19 +41,6 @@ class DaemonOperatingMode extends OperatingMode {
 
     @ParametersDelegate
     StrategyCommandLineFragment strategy = new StrategyCommandLineFragment();
-
-    private static LocalDateTime getNextFourAM(final LocalDateTime now) {
-        final LocalDateTime fourAM = LocalTime.of(4, 0).atDate(now.toLocalDate());
-        if (fourAM.isAfter(now)) {
-            return fourAM;
-        }
-        return fourAM.plusDays(1);
-    }
-
-    private static Duration timeUntil4am(final LocalDateTime now) {
-        final LocalDateTime nextFourAm = getNextFourAM(now);
-        return Duration.between(now, nextFourAm);
-    }
 
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
@@ -91,10 +75,6 @@ class DaemonOperatingMode extends OperatingMode {
                         LOGGER.error("Failed updating portfolio.", ex);
                         return Optional.<InvestmentMode>empty();
                     }
-                    // ... and then run the update every 12 hours, starting at 4 a.m.
-                    scheduler.submit(updater, Duration.ofHours(12), timeUntil4am(LocalDateTime.now()));
-                    // also run blocked amounts update every now and then to detect changes made outside of the robot
-                    scheduler.submit(bau, Duration.ofHours(1));
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }

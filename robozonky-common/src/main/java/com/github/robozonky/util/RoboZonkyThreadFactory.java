@@ -35,6 +35,9 @@ public class RoboZonkyThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(final Runnable runnable) {
         final String name = threadGroup.getName() + "-" + nextThreadNumber.getAndIncrement();
-        return new Thread(threadGroup, runnable, name);
+        final Thread thread = new Thread(threadGroup, runnable, name);
+        thread.setPriority(threadGroup.getMaxPriority()); // use the max priority allowed by the group
+        thread.setDaemon(threadGroup.isDaemon());
+        return thread;
     }
 }

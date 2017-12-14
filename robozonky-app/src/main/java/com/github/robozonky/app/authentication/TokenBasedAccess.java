@@ -19,6 +19,7 @@ package com.github.robozonky.app.authentication;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import javax.ws.rs.NotAuthorizedException;
@@ -37,7 +38,7 @@ class TokenBasedAccess implements Authenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
     private static final TemporalAmount EMERGENCY_REFRESH_INTERVAL = Duration.ofSeconds(5);
-    private final ReentrantLock exclusiveRefresh = new ReentrantLock(true);
+    private final Lock exclusiveRefresh = new ReentrantLock(true);
     private final Refreshable<ZonkyApiToken> refreshableToken;
     private final SecretProvider secrets;
     private final ApiProvider apis;
@@ -85,8 +86,9 @@ class TokenBasedAccess implements Authenticated {
     public <T> T call(final Function<Zonky, T> operation, final int attemptNo) {
         LOGGER.trace("Executing {}, attempt #{}.", operation, attemptNo);
         try {
-            final ZonkyApiToken token = getFreshToken();
-            return refreshableToken.pauseFor(r -> apis.authenticated(token, operation));
+            final T result = apis.authenticated(getFreshToken(), operation);
+            LOGGER.trace("Done with {}, attempt #{}.", operation, attemptNo);
+            return result;
         } catch (final NotAuthorizedException ex) {
             if (attemptNo >= 3) {
                 throw new IllegalStateException("There was a severe authorization problem.", ex);
@@ -94,8 +96,6 @@ class TokenBasedAccess implements Authenticated {
                 LOGGER.debug("Request failed due to expired token, will retry #" + attemptNo);
                 return call(operation, attemptNo + 1);
             }
-        } finally {
-            LOGGER.trace("Done with {}, attempt #{}.", operation, attemptNo);
         }
     }
 

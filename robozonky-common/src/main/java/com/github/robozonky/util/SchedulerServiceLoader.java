@@ -29,8 +29,15 @@ import java.util.concurrent.ThreadFactory;
  */
 final class SchedulerServiceLoader {
 
+    private static ThreadGroup newThreadGroup(final String name) {
+        final ThreadGroup threadGroup = new ThreadGroup(name);
+        threadGroup.setMaxPriority(Thread.NORM_PRIORITY - 1); // these threads are supposed to be less important
+        threadGroup.setDaemon(true); // all of these threads are daemons (won't block shutdown)
+        return threadGroup;
+    }
+
     private static final ServiceLoader<SchedulerService> LOADER = ServiceLoader.load(SchedulerService.class);
-    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(new ThreadGroup("rzBackground"));
+    private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzBackground"));
 
     private static final SchedulerService REAL_SCHEDULER =
             parallelism -> Executors.newScheduledThreadPool(parallelism, THREAD_FACTORY);
