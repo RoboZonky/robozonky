@@ -54,8 +54,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     public void empty() {
         final Zonky z = mockZonky();
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.emptyList(), null, true);
         Assertions.assertThat(i).isEmpty();
     }
@@ -74,8 +73,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         });
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Zonky z = mockZonky();
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd), s, true);
         Assertions.assertThat(i).isEmpty();
         Assertions.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
@@ -101,9 +99,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         });
         final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = Mockito.spy(Portfolio.create(zonky)
-                                                        .orElseThrow(
-                                                                () -> new AssertionError("Should have been present,")));
+        final Portfolio portfolio = Mockito.spy(Portfolio.create(zonky));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd), s, true);
         Assertions.assertThat(i).hasSize(1);
@@ -128,9 +124,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         });
         final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = Mockito.spy(Portfolio.create(zonky)
-                                                        .orElseThrow(
-                                                                () -> new AssertionError("Should have been present,")));
+        final Portfolio portfolio = Mockito.spy(Portfolio.create(zonky));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd), s, false);
         Assertions.assertThat(i).hasSize(1);

@@ -75,8 +75,7 @@ public class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Participation mock = Mockito.mock(Participation.class);
         Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final Purchasing exec = new Purchasing(NONE_ACCEPTING, zonky, Duration.ofMinutes(60), true);
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio portfolio = Portfolio.create(zonky);
         Assertions.assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).hasSize(2);
@@ -91,8 +90,7 @@ public class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = mockApi();
         final Purchasing exec =
                 new Purchasing(ALL_ACCEPTING, zonky, Duration.ofMinutes(60), true);
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio portfolio = Portfolio.create(zonky);
         Assertions.assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
         Assertions.assertThat(e).isEmpty();

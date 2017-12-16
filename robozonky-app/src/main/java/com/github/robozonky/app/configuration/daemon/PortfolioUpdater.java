@@ -18,9 +18,11 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -55,19 +57,19 @@ public class PortfolioUpdater implements Runnable,
         LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
         updating.set(true);
         try {
-            final Portfolio folio = portfolio.updateAndGet(p -> authenticated.call(Portfolio::create).orElse(null));
-            if (folio == null) {
-                return;
-            }
-            // execute every dependant with its own authentication, to prevent token timeouts
-            dependants.forEach(d -> {
-                LOGGER.trace("Running dependant: {}.", d);
-                try {
-                    d.accept(folio, authenticated);
-                } catch (final Throwable t) {
-                    new DaemonRuntimeExceptionHandler().handle(t);
-                }
-            });
+            final Portfolio result = authenticated.call(Portfolio::create);
+            final CompletableFuture<Portfolio> combined = dependants.stream()
+                    .map(d -> (Function<Portfolio, Portfolio>) folio -> {
+                        d.accept(folio, authenticated);
+                        return folio;
+                    })
+                    .reduce(CompletableFuture.completedFuture(result),
+                            CompletableFuture::thenApply,
+                            (s1, s2) -> s1.thenCombine(s2, (p1, p2) -> p2));
+            portfolio.set(combined.get());
+        } catch (final Throwable t) {
+            portfolio.set(null);
+            new DaemonRuntimeExceptionHandler().handle(t);
         } finally {
             updating.set(false);
         }

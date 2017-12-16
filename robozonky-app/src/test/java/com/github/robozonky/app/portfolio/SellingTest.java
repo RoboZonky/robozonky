@@ -76,8 +76,7 @@ public class SellingTest extends AbstractZonkyLeveragingTest {
     @Test
     public void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = mockApi();
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio portfolio = Portfolio.create(zonky);
         new Selling(ALL_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
@@ -92,8 +91,7 @@ public class SellingTest extends AbstractZonkyLeveragingTest {
     public void noSaleDueToStrategyForbidding() {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio portfolio = Portfolio.create(zonky);
         new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(2);
@@ -107,8 +105,7 @@ public class SellingTest extends AbstractZonkyLeveragingTest {
     private void saleMade(final boolean isDryRun) {
         final Investment i = mock();
         final Zonky zonky = mockApi(i);
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio portfolio = Portfolio.create(zonky);
         new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         Assertions.assertThat(e).hasSize(5);

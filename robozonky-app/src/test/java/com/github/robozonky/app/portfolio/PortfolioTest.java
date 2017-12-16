@@ -40,8 +40,7 @@ public class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Loan loan = new Loan(loanId, 200);
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(loan);
-        final Portfolio instance = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio instance = Portfolio.create(z);
         Assertions.assertThat(instance.getLoan(loanId)).isEmpty();
         // load into cache
         Assertions.assertThat(instance.getLoan(z, loanId)).isSameAs(loan);
@@ -81,8 +80,7 @@ public class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Investment i4 = mockSold(); // ignored because sold
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4));
-        final Portfolio instance = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio instance = Portfolio.create(z);
         final PaymentStatuses p = PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE);
         Assertions.assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
     }
@@ -96,8 +94,7 @@ public class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Investment i5 = mockSold(); // ignored because sold
         final Zonky z = Mockito.mock(Zonky.class);
         Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4, i5));
-        final Portfolio instance = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present."));
+        final Portfolio instance = Portfolio.create(z);
         Assertions.assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
     }
 

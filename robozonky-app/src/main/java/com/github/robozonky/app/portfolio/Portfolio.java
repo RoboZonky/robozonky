@@ -67,16 +67,11 @@ public class Portfolio {
      * @param zonky The API to be used to retrieve the data from Zonky.
      * @return Empty in case there was a remote error.
      */
-    public static Optional<Portfolio> create(final Zonky zonky) {
-        try {
-            final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
-            final Portfolio p = new Portfolio(online);
-            LOGGER.debug("Loaded {} investments from Zonky.", online.size());
-            return Optional.of(p);
-        } catch (final Exception ex) {
-            LOGGER.warn("Failed loading Zonky portfolio.", ex);
-            return Optional.empty();
-        }
+    public static Portfolio create(final Zonky zonky) {
+        final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
+        final Portfolio p = new Portfolio(online);
+        LOGGER.debug("Loaded {} investments from Zonky.", online.size());
+        return p;
     }
 
     private static <T> Stream<T> getStream(final Collection<T> source, final Function<Stream<T>, Stream<T>> modifier) {

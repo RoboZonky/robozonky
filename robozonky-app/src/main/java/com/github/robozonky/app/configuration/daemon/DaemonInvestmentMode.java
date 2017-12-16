@@ -112,12 +112,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
             LOGGER.trace("Scheduling {} every {} ms, starting in {} ms.", task, refreshInterval, initialDelay);
             executor.scheduleWithFixedDelay(task, initialDelay, refreshInterval, TimeUnit.MILLISECONDS);
         });
-        // run portfolio update every 12 hours, starting at 4 a.m.
+        // run portfolio update twice a day; start @ 4 a.m., add random time so that not all robots hit Zonky at once
         final long secondsUntil4am = timeUntil4am(LocalDateTime.now()).getSeconds();
-        final long secondIn12hours = Duration.ofHours(12).getSeconds();
-        LOGGER.trace("Scheduling portfolio update every {} seconds, starting in {} seconds.", secondIn12hours,
+        final long secondsToStartIn = secondsUntil4am + (int) (Math.random() * 1000);
+        final long secondsIn12hours = Duration.ofHours(12).getSeconds();
+        LOGGER.trace("Scheduling portfolio update every {} seconds, starting in {} seconds.", secondsIn12hours,
                      secondsUntil4am);
-        executor.scheduleAtFixedRate(portfolioUpdater, secondsUntil4am, secondIn12hours, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(portfolioUpdater, secondsToStartIn, secondsIn12hours, TimeUnit.SECONDS);
         // also run blocked amounts update every now and then to detect changes made outside of the robot
         final long oneHourInSeconds = Duration.ofHours(1).getSeconds();
         LOGGER.trace("Scheduling blocked amounts update every {} seconds, starting in {} seconds.", oneHourInSeconds,

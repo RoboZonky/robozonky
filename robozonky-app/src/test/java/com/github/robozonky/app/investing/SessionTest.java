@@ -63,8 +63,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(zonky);
         final Session it = new Session(portfolio, new LinkedHashSet<>(lds), new Investor.Builder(), zonky);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(it.getAvailable())
@@ -87,8 +86,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId2))).thenReturn(ld2.item());
         // prepare portfolio that has the other loan as pending
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(zonky);
         portfolio.newBlockedAmount(zonky, new BlockedAmount(loanId2, BigDecimal.valueOf(200),
                                                             TransactionCategory.SMP_BUY));
         // test that the loans are not available
@@ -117,9 +115,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = ld.item().getId();
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.item());
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
-        final Portfolio portfolio = Mockito.spy(Portfolio.create(z)
-                                                        .orElseThrow(
-                                                                () -> new AssertionError("Should have been present,")));
+        final Portfolio portfolio = Mockito.spy(Portfolio.create(z));
         final Collection<Investment> i = Session.invest(portfolio, new Investor.Builder(), z, lds,
                                                         mockStrategy(loanId, amount));
         // check that one investment was made
@@ -141,8 +137,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
     public void underBalance() {
         // setup APIs
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         // run test
         final Session it = new Session(portfolio, Collections.emptySet(), new Investor.Builder(), z);
         final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
@@ -159,8 +154,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
         final RecommendedLoan recommendation =
                 AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Session t = new Session(portfolio, Collections.singleton(recommendation.descriptor()),
                                       new Investor.Builder(), z);
         final boolean result = t.invest(recommendation);
@@ -179,8 +173,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doThrow(thrown).when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Session t = new Session(portfolio, Collections.emptySet(), b, z);
         Assertions.assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
     }
@@ -195,8 +188,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Session t = new Session(portfolio, Collections.emptySet(), b, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
@@ -221,8 +213,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
@@ -247,8 +238,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
@@ -274,8 +264,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(Optional.empty()).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
@@ -302,8 +291,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Investor.Builder b = Mockito.spy(new Investor.Builder());
         Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Session t = new Session(portfolio, Collections.emptySet(), b, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isTrue();

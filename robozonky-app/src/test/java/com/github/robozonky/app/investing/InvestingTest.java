@@ -61,8 +61,7 @@ public class InvestingTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         Assertions.assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
@@ -72,8 +71,7 @@ public class InvestingTest extends AbstractZonkyLeveragingTest {
     @Test
     public void noItems() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
-        final Portfolio portfolio = Portfolio.create(z)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(z);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
@@ -91,8 +89,7 @@ public class InvestingTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = new LoanDescriptor(mock);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky zonky = mockApi();
-        final Portfolio portfolio = Portfolio.create(zonky)
-                .orElseThrow(() -> new AssertionError("Should have been present,"));
+        final Portfolio portfolio = Portfolio.create(zonky);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(mock);
         final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
