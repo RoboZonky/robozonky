@@ -38,7 +38,6 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -71,10 +70,10 @@ final class Session {
         this.portfolioOverview = portfolio.calculateOverview(zonky, dryRun);
     }
 
-    private void purchase(final PurchaseStrategy strategy) {
+    private void purchase(final RestrictedPurchaseStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.recommend(getAvailable(), getPortfolioOverview())
+            invested = strategy.apply(getAvailable(), getPortfolioOverview())
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -82,7 +81,7 @@ final class Session {
 
     public static Collection<Investment> purchase(final Portfolio portfolio, final Zonky api,
                                                   final Collection<ParticipationDescriptor> items,
-                                                  final PurchaseStrategy strategy, final boolean dryRun) {
+                                                  final RestrictedPurchaseStrategy strategy, final boolean dryRun) {
         final Session session = new Session(portfolio, new LinkedHashSet<>(items), api, dryRun);
         final Collection<ParticipationDescriptor> c = session.getAvailable();
         if (c.isEmpty()) {

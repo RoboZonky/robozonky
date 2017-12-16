@@ -31,7 +31,14 @@ public final class Defaults {
     public static final Locale LOCALE = Locale.forLanguageTag("cs_CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;
     public static final ZoneId ZONE_ID = ZoneId.of("Europe/Prague");
-    public static final int MAXIMUM_INVESTMENT_IN_CZK = 5000;
+    /**
+     * Small investors can only invest this amount into a single loan.
+     */
+    public static final int MINIMAL_MAXIMUM_INVESTMENT_IN_CZK = 5_000;
+    /**
+     * Biggest investors can invest this amount into a single loan.
+     */
+    public static final int MAXIMUM_INVESTMENT_IN_CZK = 20_000;
     public static final int MINIMUM_INVESTMENT_IN_CZK = 200;
     public static final int MINIMUM_INVESTMENT_INCREMENT_IN_CZK = 200;
     /**

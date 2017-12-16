@@ -48,6 +48,7 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
-        return auth.call(zonky -> Session.invest(portfolio, investor, zonky, marketplace, strategy));
+        final RestrictedInvestmentStrategy s = new RestrictedInvestmentStrategy(strategy, auth.getRestrictions());
+        return auth.call(zonky -> Session.invest(portfolio, investor, zonky, marketplace, s));
     }
 }

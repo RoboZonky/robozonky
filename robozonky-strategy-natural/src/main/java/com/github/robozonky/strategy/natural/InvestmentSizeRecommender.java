@@ -31,9 +31,11 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentSizeRecommender.class);
 
     private final ParsedStrategy strategy;
+    private final int maximumInvestmentAmount;
 
-    public InvestmentSizeRecommender(final ParsedStrategy strategy) {
+    public InvestmentSizeRecommender(final ParsedStrategy strategy, final int maximumInvestmentAmount) {
         this.strategy = strategy;
+        this.maximumInvestmentAmount = maximumInvestmentAmount;
     }
 
     private static int roundToNearestIncrement(final int number) {
@@ -51,12 +53,16 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
                 .intValue();
     }
 
-    private static int[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan) {
+    private int[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan) {
         final Rating rating = loan.getRating();
         final int absoluteMinimum = Math.max(strategy.getMinimumInvestmentSizeInCzk(rating),
                                              Defaults.MINIMUM_INVESTMENT_IN_CZK);
         final int minimumRecommendation = roundToNearestIncrement(absoluteMinimum);
-        final int maximumRecommendation = roundToNearestIncrement(strategy.getMaximumInvestmentSizeInCzk(rating));
+        final int maximumUserRecommendation = roundToNearestIncrement(strategy.getMaximumInvestmentSizeInCzk(rating));
+        if (maximumUserRecommendation > maximumInvestmentAmount) {
+            LOGGER.info("Maximum investment amount reduced to {} by Zonky.", maximumInvestmentAmount);
+        }
+        final int maximumRecommendation = Math.min(maximumUserRecommendation, maximumInvestmentAmount);
         final int loanId = loan.getId();
         LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}> CZK.", loanId,
                      minimumRecommendation, maximumRecommendation);

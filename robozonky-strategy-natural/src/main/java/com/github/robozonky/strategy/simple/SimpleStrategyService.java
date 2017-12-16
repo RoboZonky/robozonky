@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -201,8 +202,8 @@ public class SimpleStrategyService implements StrategyService {
 
         @Override
         public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> availableLoans,
-                                                 final PortfolioOverview portfolio) {
-            return child.recommend(availableLoans, portfolio);
+                                                 final PortfolioOverview portfolio, final Restrictions restrictions) {
+            return child.recommend(availableLoans, portfolio, restrictions);
         }
     }
 }

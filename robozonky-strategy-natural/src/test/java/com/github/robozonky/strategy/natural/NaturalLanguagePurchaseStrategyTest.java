@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -62,7 +63,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance() - 1);
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -78,7 +79,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
         Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -98,7 +99,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
         Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -113,7 +114,7 @@ public class NaturalLanguagePurchaseStrategyTest {
         final Participation l = mock();
         Mockito.doReturn(Rating.A).when(l).getRating();
         final Stream<RecommendedParticipation> result =
-                s.recommend(Collections.singletonList(mockDescriptor(l)), portfolio);
+                s.recommend(Collections.singletonList(mockDescriptor(l)), portfolio, new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -134,7 +135,8 @@ public class NaturalLanguagePurchaseStrategyTest {
         Mockito.doReturn(Rating.A).when(p2).getRating();
         final ParticipationDescriptor pd = mockDescriptor(p2);
         final List<RecommendedParticipation> result =
-                s.recommend(Arrays.asList(mockDescriptor(p), pd), portfolio).collect(Collectors.toList());
+                s.recommend(Arrays.asList(mockDescriptor(p), pd), portfolio, new Restrictions())
+                        .collect(Collectors.toList());
         Assertions.assertThat(result).hasSize(1);
         final RecommendedParticipation r = result.get(0);
         SoftAssertions.assertSoftly(softly -> {

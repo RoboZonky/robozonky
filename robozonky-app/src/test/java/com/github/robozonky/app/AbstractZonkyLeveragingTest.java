@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -82,6 +83,7 @@ public class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
         final Authenticated auth = Mockito.mock(Authenticated.class);
         Mockito.when(auth.getSecretProvider())
                 .thenReturn(SecretProvider.fallback("someone", "password".toCharArray()));
+        Mockito.when(auth.getRestrictions()).thenReturn(new Restrictions());
         Mockito.doAnswer(invocation -> {
             final Function<Zonky, Object> operation = invocation.getArgument(0);
             return operation.apply(zonky);

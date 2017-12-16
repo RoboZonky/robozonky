@@ -43,8 +43,8 @@ import org.mockito.Mockito;
 
 public class InvestingTest extends AbstractZonkyLeveragingTest {
 
-    private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
-            ALL_ACCEPTING_STRATEGY = (loans, folio) -> loans.stream().map(d -> d.recommend(200).get());
+    private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (a, p, r) -> Stream.empty(),
+            ALL_ACCEPTING_STRATEGY = (a, p, r) -> a.stream().map(d -> d.recommend(200).get());
     private static final Supplier<Optional<InvestmentStrategy>> NONE_ACCEPTING =
             () -> Optional.of(NONE_ACCEPTING_STRATEGY),
             ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY);

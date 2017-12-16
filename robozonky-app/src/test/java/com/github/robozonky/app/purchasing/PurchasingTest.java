@@ -42,8 +42,8 @@ import org.mockito.Mockito;
 
 public class PurchasingTest extends AbstractZonkyLeveragingTest {
 
-    private static final PurchaseStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio) -> Stream.empty(),
-            ALL_ACCEPTING_STRATEGY = (available, portfolio) -> available.stream().map(d -> d.recommend().get());
+    private static final PurchaseStrategy NONE_ACCEPTING_STRATEGY = (a, p, r) -> Stream.empty(),
+            ALL_ACCEPTING_STRATEGY = (a, p, r) -> a.stream().map(d -> d.recommend().get());
     private static final Supplier<Optional<PurchaseStrategy>> ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY),
             NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
@@ -74,7 +74,7 @@ public class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = mockApi();
         final Participation mock = Mockito.mock(Participation.class);
         Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
-        final Purchasing exec = new Purchasing(NONE_ACCEPTING, zonky, Duration.ofMinutes(60), true);
+        final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockAuthentication(zonky), Duration.ofMinutes(60), true);
         final Portfolio portfolio = Portfolio.create(zonky);
         Assertions.assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
@@ -89,7 +89,7 @@ public class PurchasingTest extends AbstractZonkyLeveragingTest {
     public void noItems() {
         final Zonky zonky = mockApi();
         final Purchasing exec =
-                new Purchasing(ALL_ACCEPTING, zonky, Duration.ofMinutes(60), true);
+                new Purchasing(ALL_ACCEPTING, mockAuthentication(zonky), Duration.ofMinutes(60), true);
         final Portfolio portfolio = Portfolio.create(zonky);
         Assertions.assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();

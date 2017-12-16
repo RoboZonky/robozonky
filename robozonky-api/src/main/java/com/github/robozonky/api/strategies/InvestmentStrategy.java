@@ -19,6 +19,8 @@ package com.github.robozonky.api.strategies;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
+
 /**
  * Determines which loans will be invested into, and how much. What the strategy does or does not allow depends on the
  * {@link StrategyService} implementation.
@@ -31,8 +33,10 @@ public interface InvestmentStrategy {
      * the resulting situation.
      * @param available Loans to be evaluated for acceptability.
      * @param portfolio Aggregation of information as to the user's current portfolio.
+     * @param restrictions Restrictions imposed by Zonky on the current user.
      * @return Acceptable loans, in the order of their decreasing priority, mapped to the recommended investment
      * amounts.
      */
-    Stream<RecommendedLoan> recommend(Collection<LoanDescriptor> available, PortfolioOverview portfolio);
+    Stream<RecommendedLoan> recommend(Collection<LoanDescriptor> available, PortfolioOverview portfolio,
+                                      Restrictions restrictions);
 }

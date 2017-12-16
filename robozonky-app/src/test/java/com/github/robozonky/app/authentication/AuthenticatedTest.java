@@ -27,6 +27,7 @@ import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
@@ -37,7 +38,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class AuthenticatedTest {
+public class AuthenticatedTest extends AbstractZonkyLeveragingTest {
 
     private static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
         final ApiProvider api = Mockito.mock(ApiProvider.class);
@@ -56,17 +57,7 @@ public class AuthenticatedTest {
     @Test
     public void defaultMethod() {
         final Zonky z = Mockito.mock(Zonky.class);
-        final Authenticated a = new Authenticated() {
-            @Override
-            public <T> T call(final Function<Zonky, T> operation) {
-                return operation.apply(z);
-            }
-
-            @Override
-            public SecretProvider getSecretProvider() {
-                return null;
-            }
-        };
+        final Authenticated a = mockAuthentication(z);
         final Consumer<Zonky> c = zonky -> z.logout();
         a.run(c);
         Mockito.verify(z).logout();

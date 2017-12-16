@@ -43,7 +43,7 @@ public class InvestmentSizeRecommenderTest {
     @Test
     public void withSpecificRating() {
         final ParsedStrategy s = getStrategy();
-        final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
+        final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s, Defaults.MAXIMUM_INVESTMENT_IN_CZK);
         // with unlimited balance, make maximum possible recommendation
         final int actualInvestment = r.apply(LOAN, Integer.MAX_VALUE);
         // at most 1 percent of 50000, rounded down to nearest increment of 200
@@ -65,7 +65,7 @@ public class InvestmentSizeRecommenderTest {
         final Loan l = Mockito.spy(LOAN);
         Mockito.doReturn(Rating.A).when(l).getRating();
         Mockito.doReturn(100000.0).when(l).getAmount();
-        final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
+        final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s, Defaults.MAXIMUM_INVESTMENT_IN_CZK);
         // with unlimited balance, make maximum possible recommendation
         final int actualInvestment = r.apply(l, Integer.MAX_VALUE);
         Assertions.assertThat(actualInvestment).isEqualTo(MAXIMUM_INVESTMENT);
@@ -80,7 +80,7 @@ public class InvestmentSizeRecommenderTest {
     public void nothingMoreToInvest() {
         final ParsedStrategy s = getStrategy();
         final Loan l = new Loan(1, Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
-        final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
+        final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s, Defaults.MAXIMUM_INVESTMENT_IN_CZK);
         // with unlimited balance, make maximum possible recommendation
         final int actualInvestment = r.apply(l, Integer.MAX_VALUE);
         Assertions.assertThat(actualInvestment).isEqualTo(0);

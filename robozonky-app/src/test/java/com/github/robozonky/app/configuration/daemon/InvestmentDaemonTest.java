@@ -22,19 +22,21 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class InvestmentDaemonTest {
+public class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void standard() {
-        final Authenticated a = Mockito.mock(Authenticated.class);
+        final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
         final Marketplace m = Mockito.mock(Marketplace.class);
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, s,

@@ -34,7 +34,7 @@ import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class TokenBasedAccess implements Authenticated {
+class TokenBasedAccess extends AbstractAuthenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
     private static final TemporalAmount EMERGENCY_REFRESH_INTERVAL = Duration.ofSeconds(5);

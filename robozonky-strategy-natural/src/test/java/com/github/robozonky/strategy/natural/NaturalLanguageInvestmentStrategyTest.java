@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -47,7 +48,8 @@ public class NaturalLanguageInvestmentStrategyTest {
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance() - 1);
         final Stream<RecommendedLoan> result =
-                s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio);
+                s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio,
+                            new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -63,7 +65,8 @@ public class NaturalLanguageInvestmentStrategyTest {
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
         Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
         final Stream<RecommendedLoan> result =
-                s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio);
+                s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio,
+                            new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -82,7 +85,8 @@ public class NaturalLanguageInvestmentStrategyTest {
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
         Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         final Stream<RecommendedLoan> result =
-                s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio);
+                s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio,
+                            new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -97,7 +101,8 @@ public class NaturalLanguageInvestmentStrategyTest {
         final Loan l = Mockito.spy(new Loan(1, 2));
         Mockito.doReturn(Rating.A).when(l).getRating();
         final Stream<RecommendedLoan> result =
-                s.recommend(Collections.singletonList(new LoanDescriptor(l)), portfolio);
+                s.recommend(Collections.singletonList(new LoanDescriptor(l)), portfolio,
+                            new Restrictions());
         Assertions.assertThat(result).isEmpty();
     }
 
@@ -115,7 +120,8 @@ public class NaturalLanguageInvestmentStrategyTest {
         Mockito.doReturn(Rating.A).when(l2).getRating();
         final LoanDescriptor ld = new LoanDescriptor(l);
         final List<RecommendedLoan> result =
-                s.recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio).collect(Collectors.toList());
+                s.recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio, new Restrictions())
+                        .collect(Collectors.toList());
         Assertions.assertThat(result).hasSize(1);
         final RecommendedLoan r = result.get(0);
         SoftAssertions.assertSoftly(softly -> {

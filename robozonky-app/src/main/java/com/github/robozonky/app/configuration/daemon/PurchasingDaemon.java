@@ -19,22 +19,38 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.purchasing.Purchasing;
 
 class PurchasingDaemon extends DaemonOperation {
 
+    private final BiConsumer<Portfolio, Authenticated> investor;
+
     public PurchasingDaemon(final Authenticated auth, final Supplier<Optional<PurchaseStrategy>> strategy,
                             final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
                             final Duration refreshPeriod, final boolean isDryRun) {
-        super(auth, portfolio, (folio, api) -> api.run(zonky -> {
-            final Collection<Participation> p = zonky.getAvailableParticipations().collect(Collectors.toList());
-            new Purchasing(strategy, zonky, maximumSleepPeriod, isDryRun).apply(folio, p);
-        }), refreshPeriod);
+        super(auth, portfolio, refreshPeriod);
+        this.investor = (folio, api) -> {
+            final Collection<Participation> p =
+                    api.call(zonky -> zonky.getAvailableParticipations().collect(Collectors.toList()));
+            new Purchasing(strategy, api, maximumSleepPeriod, isDryRun).apply(folio, p);
+        };
+    }
+
+    @Override
+    protected boolean isEnabled(final Authenticated authenticated) {
+        return !authenticated.getRestrictions().isCannotAccessSmp();
+    }
+
+    @Override
+    protected BiConsumer<Portfolio, Authenticated> getInvestor() {
+        return investor;
     }
 }

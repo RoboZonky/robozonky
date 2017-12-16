@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
 import com.github.robozonky.common.remote.Zonky;
@@ -37,13 +38,13 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
-    private final Zonky zonky;
+    private final Authenticated auth;
     private final boolean dryRun;
 
-    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Zonky zonky,
+    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Authenticated auth,
                       final TemporalAmount maximumSleepPeriod, final boolean dryRun) {
         super((l) -> new Activity(l, maximumSleepPeriod), strategy);
-        this.zonky = zonky;
+        this.auth = auth;
         this.dryRun = dryRun;
     }
 
@@ -60,17 +61,20 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
-        final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .map(p -> toDescriptor(portfolio, p, zonky))
-                .filter(d -> { // never re-purchase what was once sold
-                    final Loan l = d.related();
-                    final boolean wasSoldBefore = portfolio.wasOnceSold(l);
-                    if (wasSoldBefore) {
-                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", l.getId());
-                    }
-                    return !wasSoldBefore;
-                })
-                .collect(Collectors.toList());
-        return Session.purchase(portfolio, zonky, participations, strategy, dryRun);
+        return auth.call(zonky -> {
+            final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
+                    .map(p -> toDescriptor(portfolio, p, zonky))
+                    .filter(d -> { // never re-purchase what was once sold
+                        final Loan l = d.related();
+                        final boolean wasSoldBefore = portfolio.wasOnceSold(l);
+                        if (wasSoldBefore) {
+                            LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", l.getId());
+                        }
+                        return !wasSoldBefore;
+                    })
+                    .collect(Collectors.toList());
+            final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
+            return Session.purchase(portfolio, zonky, participations, s, dryRun);
+        });
     }
 }

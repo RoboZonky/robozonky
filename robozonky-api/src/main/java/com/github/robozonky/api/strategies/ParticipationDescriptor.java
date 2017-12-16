@@ -54,11 +54,12 @@ public final class ParticipationDescriptor
 
     @Override
     public Optional<RecommendedParticipation> recommend(final BigDecimal amount) {
-        if (Objects.equals(amount, participation.getRemainingPrincipal())) {
-            return Optional.of(new RecommendedParticipation(this));
-        } else {
+        if (participation.isWillExceedLoanInvestmentLimit()) {
+            return Optional.empty();
+        } else if (!Objects.equals(amount, participation.getRemainingPrincipal())) {
             return Optional.empty();
         }
+        return Optional.of(new RecommendedParticipation(this));
     }
 
     @Override

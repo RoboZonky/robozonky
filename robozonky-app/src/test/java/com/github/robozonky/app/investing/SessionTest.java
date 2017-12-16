@@ -37,6 +37,7 @@ import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -99,10 +100,11 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         });
     }
 
-    private InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
-        return (l, p) -> l.stream()
+    private RestrictedInvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
+        final InvestmentStrategy s = (l, p, r) -> l.stream()
                 .filter(i -> i.item().getId() == loanToRecommend)
                 .flatMap(i -> i.recommend(BigDecimal.valueOf(recommend)).map(Stream::of).orElse(Stream.empty()));
+        return new RestrictedInvestmentStrategy(s, new Restrictions());
     }
 
     @Test
@@ -310,5 +312,4 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Assertions.assertThat(e.getFinalBalance())
                 .isEqualTo(oldBalance - amountToInvest);
     }
-
 }

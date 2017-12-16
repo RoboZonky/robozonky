@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -38,11 +39,9 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageInvestmentStrategy.class);
     private static final PrimaryMarketplaceComparator COMPARATOR = new PrimaryMarketplaceComparator();
     private final ParsedStrategy strategy;
-    private final InvestmentSizeRecommender recommender;
 
     public NaturalLanguageInvestmentStrategy(final ParsedStrategy p) {
         this.strategy = p;
-        this.recommender = new InvestmentSizeRecommender(p);
     }
 
     private static Map<Rating, Collection<LoanDescriptor>> sortLoansByRating(final Stream<LoanDescriptor> loans) {
@@ -54,8 +53,8 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans,
-                                             final PortfolioOverview portfolio) {
+    public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans, final PortfolioOverview portfolio,
+                                             final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
             return Stream.empty();
@@ -68,6 +67,8 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 .collect(Collectors.toMap(Function.identity(), portfolio::getShareOnInvestment));
         // and now return recommendations in the order in which investment should be attempted
         final int balance = portfolio.getCzkAvailable();
+        final InvestmentSizeRecommender recommender =
+                new InvestmentSizeRecommender(strategy, restrictions.getMaximumInvestmentAmount());
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
                 .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))

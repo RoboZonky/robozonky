@@ -32,15 +32,17 @@ abstract class DaemonOperation implements Runnable {
     private final Duration refreshInterval;
     private final Authenticated api;
     private final PortfolioSupplier portfolio;
-    private final BiConsumer<Portfolio, Authenticated> investor;
 
     protected DaemonOperation(final Authenticated auth, final PortfolioSupplier portfolio,
-                              final BiConsumer<Portfolio, Authenticated> operation, final Duration refreshInterval) {
+                              final Duration refreshInterval) {
         this.api = auth;
-        this.investor = operation;
         this.portfolio = portfolio;
         this.refreshInterval = refreshInterval;
     }
+
+    protected abstract boolean isEnabled(final Authenticated authenticated);
+
+    protected abstract BiConsumer<Portfolio, Authenticated> getInvestor();
 
     public Duration getRefreshInterval() {
         return this.refreshInterval;
@@ -50,9 +52,13 @@ abstract class DaemonOperation implements Runnable {
     public void run() {
         try {
             LOGGER.trace("Starting.");
-            final Portfolio p =
-                    portfolio.get().orElseThrow(() -> new IllegalStateException("Portfolio not properly initialized."));
-            investor.accept(p, api);
+            if (isEnabled(api)) {
+                final Portfolio p = portfolio.get()
+                        .orElseThrow(() -> new IllegalStateException("Portfolio not properly initialized."));
+                getInvestor().accept(p, api);
+            } else {
+                LOGGER.info("Access to marketplace disabled by Zonky.");
+            }
             LOGGER.trace("Finished.");
         } catch (final Throwable t) {
             // we catch Throwable so that we can inform users even about errors

@@ -38,7 +38,6 @@ import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
-import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -92,7 +91,7 @@ final class Session {
 
     public static Collection<Investment> invest(final Portfolio portfolio, final Investor.Builder investor,
                                                 final Zonky api, final Collection<LoanDescriptor> loans,
-                                                final InvestmentStrategy strategy) {
+                                                final RestrictedInvestmentStrategy strategy) {
         final Session session = new Session(portfolio, new LinkedHashSet<>(loans), investor, api);
         final int balance = session.getPortfolioOverview().getCzkAvailable();
         Events.fire(new ExecutionStartedEvent(loans, session.getPortfolioOverview()));
@@ -104,10 +103,10 @@ final class Session {
         return Collections.unmodifiableCollection(result);
     }
 
-    private void invest(final InvestmentStrategy strategy) {
+    private void invest(final RestrictedInvestmentStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.recommend(getAvailable(), getPortfolioOverview())
+            invested = strategy.apply(getAvailable(), getPortfolioOverview())
                     .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);

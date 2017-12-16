@@ -25,7 +25,7 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class PasswordBasedAccess implements Authenticated {
+class PasswordBasedAccess extends AbstractAuthenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordBasedAccess.class);
 

@@ -34,7 +34,8 @@ public class InvestmentSize {
         this.minimumInvestmentInCzk = Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk);
         this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
         if (this.maximumInvestmentInCzk > Defaults.MAXIMUM_INVESTMENT_IN_CZK) {
-            throw new IllegalStateException("Maximum investment can not be more than 5000 CZK.");
+            throw new IllegalStateException("Maximum investment can not be more than "
+                                                    + Defaults.MAXIMUM_INVESTMENT_IN_CZK + " CZK.");
         }
     }
 

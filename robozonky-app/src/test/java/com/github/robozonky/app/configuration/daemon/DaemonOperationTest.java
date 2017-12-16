@@ -33,8 +33,21 @@ public class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     private static final class CustomOperation extends DaemonOperation {
 
+        private final BiConsumer<Portfolio, Authenticated> operation;
+
         public CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
-            super(auth, () -> Optional.of(Mockito.mock(Portfolio.class)), operation, Duration.ofSeconds(1));
+            super(auth, () -> Optional.of(Mockito.mock(Portfolio.class)), Duration.ofSeconds(1));
+            this.operation = operation;
+        }
+
+        @Override
+        protected boolean isEnabled(final Authenticated authenticated) {
+            return true;
+        }
+
+        @Override
+        protected BiConsumer<Portfolio, Authenticated> getInvestor() {
+            return operation;
         }
     }
 

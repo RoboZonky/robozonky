@@ -20,6 +20,7 @@ import java.time.temporal.TemporalAmount;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
@@ -77,6 +78,8 @@ public interface Authenticated {
             return null;
         });
     }
+
+    Restrictions getRestrictions();
 
     SecretProvider getSecretProvider();
 }

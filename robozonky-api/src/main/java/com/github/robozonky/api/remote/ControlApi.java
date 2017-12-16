@@ -25,6 +25,7 @@ import javax.ws.rs.Produces;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
@@ -38,10 +39,15 @@ public interface ControlApi {
     Logger LOGGER = LoggerFactory.getLogger(ControlApi.class);
 
     String ME = "/users/me";
+    String INVESTOR_ME = "/investors/me";
 
     @GET
     @Path(ControlApi.ME + "/logout")
     void logout();
+
+    @GET
+    @Path(ControlApi.INVESTOR_ME + "/restrictions")
+    Restrictions restrictions();
 
     @POST
     @Path("/marketplace/investment")

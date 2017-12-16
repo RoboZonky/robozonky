@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -100,7 +101,8 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
     @Override
     public Stream<RecommendedParticipation> recommend(final Collection<ParticipationDescriptor> available,
-                                                      final PortfolioOverview portfolio) {
+                                                      final PortfolioOverview portfolio,
+                                                      final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
             return Stream.empty();

@@ -186,8 +186,35 @@
                     "methodName": "<init>",
                     "elementKind": "constructor",
                     "justification": "This makes no practical difference; the class was abstract anyway."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method com.github.robozonky.api.remote.entities.Restrictions com.github.robozonky.api.remote.ControlApi::restrictions()",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "ControlApi",
+                    "methodName": "restrictions",
+                    "elementKind": "method",
+                    "justification": "Zonky introduces variable restrictions on what users can do."
+                  },
+                  {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview)",
+                    "new": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.remote.entities.Restrictions)",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "InvestmentStrategy",
+                    "methodName": "recommend",
+                    "elementKind": "method",
+                    "justification": "Zonky introduces variable restrictions on what users can do."
+                  },
+                  {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview)",
+                    "new": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.remote.entities.Restrictions)",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PurchaseStrategy",
+                    "methodName": "recommend",
+                    "elementKind": "method",
+                    "justification": "Zonky introduces variable restrictions on what users can do."
                   }
-
                 ]
               }
             }

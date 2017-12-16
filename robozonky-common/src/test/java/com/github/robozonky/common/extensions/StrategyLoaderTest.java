@@ -73,7 +73,7 @@ public class StrategyLoaderTest {
 
     @Test
     public void loading() {
-        final InvestmentStrategy is = (availableLoans, portfolio) -> Stream.empty();
+        final InvestmentStrategy is = (availableLoans, portfolio, restrictions) -> Stream.empty();
         final StrategyService iss = new StrategyService() {
             @Override
             public Optional<InvestmentStrategy> toInvest(final String strategy) {

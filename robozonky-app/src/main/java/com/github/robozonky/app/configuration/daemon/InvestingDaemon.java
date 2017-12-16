@@ -34,6 +34,26 @@ import com.github.robozonky.app.portfolio.Portfolio;
 
 class InvestingDaemon extends DaemonOperation {
 
+    private final BiConsumer<Portfolio, Authenticated> investor;
+
+    public InvestingDaemon(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
+                           final Supplier<Optional<InvestmentStrategy>> strategy,
+                           final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
+                           final Duration refreshPeriod) {
+        super(auth, portfolio, refreshPeriod);
+        this.investor = new InvestingDaemon.InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod);
+    }
+
+    @Override
+    protected boolean isEnabled(final Authenticated authenticated) {
+        return !authenticated.getRestrictions().isCannotInvest();
+    }
+
+    @Override
+    protected BiConsumer<Portfolio, Authenticated> getInvestor() {
+        return investor;
+    }
+
     private static final class InitializingInvestor implements BiConsumer<Portfolio, Authenticated> {
 
         private final AtomicBoolean registered = new AtomicBoolean(false);
@@ -60,13 +80,5 @@ class InvestingDaemon extends DaemonOperation {
         public void accept(final Portfolio portfolio, final Authenticated zonky) {
             core.accept(portfolio, zonky);
         }
-    }
-
-    public InvestingDaemon(final Authenticated auth, final Investor.Builder builder, final Marketplace marketplace,
-                           final Supplier<Optional<InvestmentStrategy>> strategy,
-                           final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
-                           final Duration refreshPeriod) {
-        super(auth, portfolio,
-              new InitializingInvestor(builder, marketplace, strategy, maximumSleepPeriod), refreshPeriod);
     }
 }

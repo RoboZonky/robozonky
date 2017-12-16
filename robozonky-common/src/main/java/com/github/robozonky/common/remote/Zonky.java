@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.internal.api.Settings;
@@ -168,6 +169,10 @@ public class Zonky implements AutoCloseable {
      */
     public Stream<Loan> getAvailableLoans(final Sort<Loan> ordering) {
         return Zonky.getStream(loanApi, ordering);
+    }
+
+    public Restrictions getRestrictions() {
+        return controlApi.execute(ControlApi::restrictions);
     }
 
     public void logout() {

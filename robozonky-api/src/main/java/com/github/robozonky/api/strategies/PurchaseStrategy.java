@@ -19,6 +19,8 @@ package com.github.robozonky.api.strategies;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
+
 /**
  * Determines which participation will be purchased, and for how much. What the strategy does or does not allow depends
  * on the {@link StrategyService} implementation.
@@ -31,9 +33,10 @@ public interface PurchaseStrategy {
      * resulting situation.
      * @param available Participations to be evaluated for acceptability.
      * @param portfolio Aggregation of information as to the user's current portfolio.
+     * @param restrictions Restrictions imposed by Zonky on the current user.
      * @return Acceptable participations, in the order of their decreasing priority, mapped to the recommended
      * purchase value.
      */
     Stream<RecommendedParticipation> recommend(Collection<ParticipationDescriptor> available,
-                                               PortfolioOverview portfolio);
+                                               PortfolioOverview portfolio, Restrictions restrictions);
 }
