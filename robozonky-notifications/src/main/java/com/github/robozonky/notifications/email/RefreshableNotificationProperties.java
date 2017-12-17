@@ -61,25 +61,25 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
 
     @Override
     protected Optional<String> getLatestSource() {
-        final String propValue =
+        final String source =
                 Settings.INSTANCE.get(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, (String) null);
-        if (propValue != null) { // attempt to read from the URL specified by the property
-            LOGGER.debug("Reading notification configuration from {}.", propValue);
+        if (source != null) { // attempt to read from the URL specified by the property
+            // will read user-provided config file and log a warning if missing, since the user actually requested it
+            LOGGER.debug("Reading notification configuration from '{}'.", source);
             try {
-                return Optional.of(RefreshableNotificationProperties.readUrl(new URL(propValue)));
-            } catch (final IOException ex) {
-                // fall back to the property file
-                LOGGER.debug("Failed reading configuration from {}.", propValue);
+                return Optional.of(RefreshableNotificationProperties.readUrl(new URL(source)));
+            } catch (final IOException ex) { // fall back to the property file
+                LOGGER.warn("Failed reading configuration from '{}' due to '{}'.", source, ex.getMessage());
             }
         }
+        // will read the default source file and silently ignore if missing, as this config is purely optional
         final File defaultConfigFile = RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION;
-        LOGGER.debug("Read config file {}.", defaultConfigFile.getAbsolutePath());
+        LOGGER.debug("Read config file '{}'.", defaultConfigFile.getAbsolutePath());
         try {
             final URL u = defaultConfigFile.toURI().toURL();
-            final String content = RefreshableNotificationProperties.readUrl(u);
-            return Optional.of(content);
+            return Optional.of(RefreshableNotificationProperties.readUrl(u));
         } catch (final IOException ex) {
-            LOGGER.debug("Failed reading configuration file {}.", defaultConfigFile);
+            LOGGER.debug("Failed reading configuration file '{}' due to '{}'.", defaultConfigFile, ex.getMessage());
             return Optional.empty();
         }
     }
