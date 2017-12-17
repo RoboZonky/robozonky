@@ -22,7 +22,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -65,10 +64,7 @@ public class RefreshableTest {
     public void immutable() {
         final Refreshable<Void> r = Refreshable.createImmutable();
         r.run();
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(r.get()).isEmpty();
-            softly.assertThat(r.isPaused()).isFalse();
-        });
+        Assertions.assertThat(r.get()).isEmpty();
     }
 
     @Test
@@ -148,23 +144,4 @@ public class RefreshableTest {
                 .valueUnset(RefreshableTest.transform(otherValue));
     }
 
-    @Test
-    public void refreshAfterUnpaused() {
-        final Refreshable<String> parent = new RefreshableString();
-        parent.run();
-        final Optional<String> before = parent.get();
-        parent.pauseFor((r) -> {
-            Assertions.assertThat(parent.isPaused()).isTrue();
-            parent.run(); // this will not be executed
-            final Optional<String> after = parent.get();
-            Assertions.assertThat(before).isEqualTo(after);
-            return null;
-        });
-        // pause is over, now the refresh should be run automatically
-        final Optional<String> after = parent.get();
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(parent.isPaused()).isFalse();
-            softly.assertThat(before).isNotEqualTo(after);
-        });
-    }
 }

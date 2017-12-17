@@ -22,10 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -40,8 +37,8 @@ import org.slf4j.LoggerFactory;
  * via {@link #get()}.
  * <p>
  * Only use this class if you need to periodically refresh a given remote resource and have the latest version of the
- * resource available as a variable. Using this class for any other background checks will bring needless complexity
- * that could be avoided by just scheduling a {@link Runnable} through {@link ScheduledExecutorService}.
+ * resource available. If you're trying to do anything with this class other than simple unconditional reads using the
+ * {@link #get()} method, you are most likely abusing this class and will eventually pay the price.
  * @param <T> Type of the resource.
  */
 public abstract class Refreshable<T> implements Runnable,
@@ -51,9 +48,6 @@ public abstract class Refreshable<T> implements Runnable,
     private final String id;
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
-    private final AtomicInteger requestsToPause = new AtomicInteger(0);
-    private final AtomicBoolean refreshRequestedWhilePaused = new AtomicBoolean(false);
-    private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
     private final Collection<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
     protected Refreshable(final Refreshable.RefreshListener<T>... listeners) {
@@ -151,32 +145,6 @@ public abstract class Refreshable<T> implements Runnable,
         return true;
     }
 
-    /**
-     * Will stop refreshing until the operation in question finishes. If multiple pause requests are active at the same
-     * time, both must finished before the refresh is started again.
-     * @param operation Operation to execute while the refreshable is paused.
-     * @return Result of the operation.
-     */
-    public <X> X pauseFor(final Function<Refreshable<T>, X> operation) {
-        requestsToPause.incrementAndGet();
-        try {
-            LOGGER.trace("Pausing: {}.", this);
-            return operation.apply(this);
-        } finally {
-            LOGGER.trace("Releasing: {}.", this);
-            if (requestsToPause.decrementAndGet() == 0) {
-                if (refreshRequestedWhilePaused.getAndSet(false)) {
-                    LOGGER.trace("Executing in lieu: {}.", this);
-                    run();
-                }
-            }
-        }
-    }
-
-    public boolean isPaused() {
-        return requestsToPause.get() > 0;
-    }
-
     private void storeResult(final T result) {
         final T previous = cachedResult.getAndSet(result);
         if (Objects.equals(previous, result)) {
@@ -226,21 +194,12 @@ public abstract class Refreshable<T> implements Runnable,
      */
     @Override
     public void run() {
-        if (requestsToPause.get() > 0) {
-            refreshRequestedWhilePaused.set(true);
-            LOGGER.trace("Paused, not refreshing: {}.", this);
-        } else if (refreshInProgress.getAndSet(true)) {
-            LOGGER.trace("Not refreshing due to refresh already in progress: {}", this);
-        } else {
-            try {
-                LOGGER.trace("Starting {}.", this);
-                runLocked();
-            } catch (final Exception ex) {
-                LOGGER.warn("Refresh failed: {}.", this, ex);
-            } finally {
-                this.refreshInProgress.set(false);
-                LOGGER.trace("Finished {}.", this);
-            }
+        try {
+            LOGGER.trace("Starting {}.", this);
+            runLocked();
+            LOGGER.trace("Finished {}.", this);
+        } catch (final Exception ex) {
+            LOGGER.debug("Refresh failed: {}.", this, ex);
         }
     }
 
@@ -251,8 +210,7 @@ public abstract class Refreshable<T> implements Runnable,
 
     /**
      * Listener for changes to the original resource. Use {@link #registerListener(Refreshable.RefreshListener)} to
-     * enable.
-     * Implementations of methods in this interface must not throw exceptions.
+     * enable. Implementations of methods in this interface must not throw exceptions.
      * @param <T> Target {@link Refreshable}'s generic type.
      */
     public interface RefreshListener<T> {
