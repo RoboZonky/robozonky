@@ -127,45 +127,13 @@
                     "methodName": "statistics",
                     "elementKind": "method",
                     "justification": "Zonky moved this API and we don't need it anymore."
-                  },
-                  {
+                  }, {
                     "code": "java.class.removed",
                     "old": "class com.github.robozonky.api.remote.entities.Statistics",
                     "package": "com.github.robozonky.api.remote.entities",
                     "classSimpleName": "Statistics",
                     "elementKind": "class",
                     "justification": "Zonky moved this API and we don't need it anymore."
-                  },{
-                    "code": "java.method.parameterTypeChanged",
-                    "old": "parameter java.util.Optional<T> com.github.robozonky.api.Refreshable<T>::getLatest(===java.time.temporal.TemporalAmount===)",
-                    "new": "parameter java.util.Optional<T> com.github.robozonky.api.Refreshable<T>::getLatest(===java.time.Duration===)",
-                    "oldType": "java.time.temporal.TemporalAmount",
-                    "newType": "java.time.Duration",
-                    "package": "com.github.robozonky.api",
-                    "classSimpleName": "Refreshable",
-                    "methodName": "getLatest",
-                    "parameterIndex": "0",
-                    "elementKind": "parameter",
-                    "justification": "Use of TemporalAmount discouraged by the JDK."
-                  }, {
-                    "code": "java.method.removed",
-                    "old": "method T com.github.robozonky.api.Refreshable<T>::getLatestBlocking()",
-                    "package": "com.github.robozonky.api",
-                    "classSimpleName": "Refreshable",
-                    "methodName": "getLatestBlocking",
-                    "elementKind": "method",
-                    "justification": "No longer used anywhere in the code."
-                  }, {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method java.util.function.Supplier<java.util.Optional<java.lang.String>> com.github.robozonky.api.Refreshable<T>::getLatestSource()",
-                    "new": "method java.util.Optional<java.lang.String> com.github.robozonky.api.Refreshable<T>::getLatestSource()",
-                    "oldType": "java.util.function.Supplier<java.util.Optional<java.lang.String>>",
-                    "newType": "java.util.Optional<java.lang.String>",
-                    "package": "com.github.robozonky.api",
-                    "classSimpleName": "Refreshable",
-                    "methodName": "getLatestSource",
-                    "elementKind": "method",
-                    "justification": "Simplification of a Refreshable threading model."
                   }, {
                     "code": "java.method.numberOfParametersChanged",
                     "old": "method void com.github.robozonky.api.notifications.Event::<init>()",
@@ -194,8 +162,7 @@
                     "methodName": "restrictions",
                     "elementKind": "method",
                     "justification": "Zonky introduces variable restrictions on what users can do."
-                  },
-                  {
+                  }, {
                     "code": "java.method.numberOfParametersChanged",
                     "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview)",
                     "new": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.remote.entities.Restrictions)",
@@ -204,8 +171,7 @@
                     "methodName": "recommend",
                     "elementKind": "method",
                     "justification": "Zonky introduces variable restrictions on what users can do."
-                  },
-                  {
+                  }, {
                     "code": "java.method.numberOfParametersChanged",
                     "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview)",
                     "new": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.remote.entities.Restrictions)",
@@ -214,6 +180,24 @@
                     "methodName": "recommend",
                     "elementKind": "method",
                     "justification": "Zonky introduces variable restrictions on what users can do."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.robozonky.api.Refreshable<T extends java.lang.Object>",
+                    "package": "com.github.robozonky.api",
+                    "classSimpleName": "Refreshable",
+                    "elementKind": "class",
+                    "justification": "Uses of Refreshable replaced throughout the API."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method <T extends com.github.robozonky.api.notifications.Event> com.github.robozonky.api.Refreshable<com.github.robozonky.api.notifications.EventListener<T>> com.github.robozonky.api.notifications.ListenerService::findListener(java.lang.Class<T>)",
+                    "new": "method <T extends com.github.robozonky.api.notifications.Event> com.github.robozonky.api.notifications.EventListenerSupplier<T> com.github.robozonky.api.notifications.ListenerService::findListener(java.lang.Class<T>)",
+                    "oldType": "com.github.robozonky.api.Refreshable<com.github.robozonky.api.notifications.EventListener<T extends com.github.robozonky.api.notifications.Event>>",
+                    "newType": "com.github.robozonky.api.notifications.EventListenerSupplier<T extends com.github.robozonky.api.notifications.Event>",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "ListenerService",
+                    "methodName": "findListener",
+                    "elementKind": "method",
+                    "justification": "Uses of Refreshable replaced throughout the API."
                   }
                 ]
               }

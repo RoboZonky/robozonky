@@ -203,7 +203,6 @@ public class RoboZonkyInstallerListenerTest {
         // prepare
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
         Mockito.when(localData.getVariable(Variables.IS_DRY_RUN.getKey())).thenReturn("true");
-        Mockito.when(localData.getVariable(Variables.IS_USING_OAUTH_TOKEN.getKey())).thenReturn("true");
         Mockito.when(localData.getVariable(Variables.IS_ZONKOID_ENABLED.getKey())).thenReturn("true");
         Mockito.when(localData.getVariable(Variables.ZONKOID_TOKEN.getKey())).thenReturn("123456");
         RoboZonkyInstallerListener.setInstallData(localData);
@@ -213,7 +212,6 @@ public class RoboZonkyInstallerListenerTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(clp.getOptions())
                     .containsKey("-d")
-                    .containsKey("-r")
                     .containsKey("-x");
             softly.assertThat(clp.getOptions().get("-p"))
                     .containsOnly(String.valueOf(RoboZonkyInstallerListener.KEYSTORE_PASSWORD));

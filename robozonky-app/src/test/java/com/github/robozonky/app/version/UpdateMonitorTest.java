@@ -68,7 +68,7 @@ public class UpdateMonitorTest {
                                                                   "</metadata>"));
         final UpdateMonitor v = new UpdateMonitor(serverUrl);
         v.run();
-        Assertions.assertThat(v.getLatest()).isPresent();
+        Assertions.assertThat(v.get()).isPresent();
     }
 
     @Test
@@ -76,7 +76,7 @@ public class UpdateMonitorTest {
         server.when(HttpRequest.request()).respond(HttpResponse.notFoundResponse());
         final UpdateMonitor v = new UpdateMonitor(serverUrl, "com.github.robozonky", "robozonky-nonexistent");
         v.run();
-        Assertions.assertThat(v.getLatest()).isEmpty();
+        Assertions.assertThat(v.get()).isEmpty();
     }
 
     @Test

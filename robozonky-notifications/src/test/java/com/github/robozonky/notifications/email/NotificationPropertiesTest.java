@@ -21,7 +21,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Properties;
 
-import com.github.robozonky.api.Refreshable;
+import com.github.robozonky.util.Refreshable;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
@@ -40,7 +40,7 @@ public class NotificationPropertiesTest {
     private static Optional<NotificationProperties> getProperties() {
         final Refreshable<NotificationProperties> r = new RefreshableNotificationProperties();
         r.run();
-        return r.getLatest();
+        return r.get();
     }
 
     @Rule

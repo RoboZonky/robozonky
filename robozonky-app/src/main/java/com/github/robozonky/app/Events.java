@@ -17,16 +17,16 @@
 package com.github.robozonky.app;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
@@ -52,13 +52,13 @@ public enum Events {
 
     private static class EventSpecific<E extends Event> {
 
-        private final Set<Refreshable<EventListener<E>>> listeners = new LinkedHashSet<>();
+        private final Collection<EventListenerSupplier<E>> listeners = new LinkedHashSet<>(0);
 
-        public void addListener(final Refreshable<EventListener<E>> eventListener) {
+        public void addListener(final EventListenerSupplier<E> eventListener) {
             listeners.add(eventListener);
         }
 
-        public Stream<Refreshable<EventListener<E>>> getListeners() {
+        public Stream<EventListenerSupplier<E>> getListeners() {
             return this.listeners.stream();
         }
     }
@@ -100,7 +100,7 @@ public enum Events {
      */
     @SuppressWarnings("unchecked")
     <E extends Event> Events.EventSpecific<E> loadListeners(final Class<E> eventClass,
-                                                            final Refreshable<EventListener<E>> listener) {
+                                                            final EventListenerSupplier<E> listener) {
         final Events.EventSpecific<E> eventSpecific = loadListeners(eventClass);
         if (listener != null) {
             eventSpecific.addListener(listener);
@@ -111,7 +111,7 @@ public enum Events {
     @SuppressWarnings("unchecked")
     <E extends Event> Stream<EventListener<E>> getListeners(final Class<E> eventClass) {
         return this.loadListeners(eventClass).getListeners()
-                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()));
+                .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()));
     }
 
     public static void initialize(final SessionInfo info) {

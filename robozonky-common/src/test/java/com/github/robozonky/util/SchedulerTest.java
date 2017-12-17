@@ -16,7 +16,6 @@
 
 package com.github.robozonky.util;
 
-import com.github.robozonky.api.Refreshable;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

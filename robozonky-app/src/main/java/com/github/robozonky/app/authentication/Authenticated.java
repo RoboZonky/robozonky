@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.authentication;
 
-import java.time.temporal.TemporalAmount;
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -35,12 +35,11 @@ public interface Authenticated {
      * @param refreshAfter Access token will be refreshed after expiration minus this.
      * @return This.
      */
-    static Authenticated tokenBased(final SecretProvider data, final TemporalAmount refreshAfter) {
+    static Authenticated tokenBased(final SecretProvider data, final Duration refreshAfter) {
         return Authenticated.tokenBased(new ApiProvider(), data, refreshAfter);
     }
 
-    static Authenticated tokenBased(final ApiProvider apis, final SecretProvider data,
-                                    final TemporalAmount refreshAfter) {
+    static Authenticated tokenBased(final ApiProvider apis, final SecretProvider data, final Duration refreshAfter) {
         return new TokenBasedAccess(apis, data, refreshAfter);
     }
 

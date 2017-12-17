@@ -16,18 +16,10 @@
 
 package com.github.robozonky.common.secrets;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import com.github.robozonky.internal.api.State;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Plain-text secret storage. Should only be used as fallback in case the JDK does not support KeyStores. This is
@@ -35,13 +27,9 @@ import org.slf4j.LoggerFactory;
  */
 final class FallbackSecretProvider implements SecretProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FallbackSecretProvider.class);
-    private static final State.ClassSpecificState STATE = State.forClass(FallbackSecretProvider.class);
-    private static final String TOKEN_STATE_ID = "token";
-
     private final String username;
     private final char[] password;
-    private final Map<String, char[]> secrets = new HashMap<>();
+    private final Map<String, char[]> secrets = new HashMap<>(0);
 
     public FallbackSecretProvider(final String username, final char... password) {
         this.username = username;
@@ -59,26 +47,6 @@ final class FallbackSecretProvider implements SecretProvider {
     }
 
     @Override
-    public Optional<Reader> getToken() {
-        return FallbackSecretProvider.STATE.getValue(FallbackSecretProvider.TOKEN_STATE_ID).map(
-                o -> (Reader) new StringReader(o));
-    }
-
-    @Override
-    public boolean setToken(final Reader token) {
-        try (final BufferedReader r = new BufferedReader(token)) {
-            FallbackSecretProvider.STATE
-                    .newBatch()
-                    .set(FallbackSecretProvider.TOKEN_STATE_ID, r.readLine())
-                    .call();
-            return true;
-        } catch (final IOException ex) {
-            FallbackSecretProvider.LOGGER.warn("Failed setting token.", ex);
-            return false;
-        }
-    }
-
-    @Override
     public Optional<char[]> getSecret(final String secretId) {
         return Optional.ofNullable(this.secrets.get(secretId));
     }
@@ -87,13 +55,6 @@ final class FallbackSecretProvider implements SecretProvider {
     public boolean setSecret(final String secretId, final char... secret) {
         this.secrets.put(secretId, secret);
         return true;
-    }
-
-    @Override
-    public boolean deleteToken() {
-        return FallbackSecretProvider.STATE
-                .newBatch(true)
-                .call();
     }
 
     @Override

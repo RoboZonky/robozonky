@@ -16,8 +16,10 @@
 
 package com.github.robozonky.app;
 
-import com.github.robozonky.api.Refreshable;
+import java.util.Optional;
+
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -29,8 +31,7 @@ public class EventsTest extends AbstractEventLeveragingTest {
     @Test
     public void firingAndFailing() {
         final EventListener<RoboZonkyStartingEvent> listener = Mockito.mock(EventListener.class);
-        final Refreshable<EventListener<RoboZonkyStartingEvent>> r = Refreshable.createImmutable(listener);
-        r.run();
+        final EventListenerSupplier<RoboZonkyStartingEvent> r = () -> Optional.of(listener);
         Mockito.doThrow(RuntimeException.class).when(listener).handle(ArgumentMatchers.any(), ArgumentMatchers.any());
         Events.INSTANCE.loadListeners(RoboZonkyStartingEvent.class, r);
         final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();

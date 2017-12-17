@@ -18,13 +18,13 @@ package com.github.robozonky.common.extensions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.util.Scheduler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
@@ -38,27 +38,27 @@ public class ListenerServiceLoaderTest {
         final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
         final EventListener<RoboZonkyStartingEvent> l = Mockito.mock(EventListener.class);
         final ListenerService s1 = Mockito.mock(ListenerService.class);
-        final Refreshable<EventListener<RoboZonkyStartingEvent>> returned = Refreshable.createImmutable(l);
-        returned.run();
+        final EventListenerSupplier<RoboZonkyStartingEvent> returned = () -> Optional.of(l);
         Mockito.doReturn(returned).when(s1).findListener(ArgumentMatchers.eq(e.getClass()));
         final ListenerService s2 = Mockito.mock(ListenerService.class);
-        Mockito.doReturn(Refreshable.createImmutable()).when(s2).findListener(ArgumentMatchers.eq(e.getClass()));
+        Mockito.doReturn((EventListenerSupplier<RoboZonkyStartingEvent>) Optional::empty)
+                .when(s2).findListener(ArgumentMatchers.eq(e.getClass()));
         final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2).iterator();
-        final List<Refreshable<EventListener<RoboZonkyStartingEvent>>> r =
-                ListenerServiceLoader.load(RoboZonkyStartingEvent.class, s, new Scheduler());
+        final List<EventListenerSupplier<RoboZonkyStartingEvent>> r =
+                ListenerServiceLoader.load(RoboZonkyStartingEvent.class, s);
         Assertions.assertThat(r).hasSize(2);
         Assertions.assertThat(r)
                 .first()
-                .has(new Condition<>(result -> result.getLatest().isPresent() && result.getLatest().get() == l,
+                .has(new Condition<>(result -> result.get().isPresent() && result.get().get() == l,
                                      "Exists"));
         Assertions.assertThat(r)
                 .last()
-                .has(new Condition<>(result -> !result.getLatest().isPresent(), "Does not exist"));
+                .has(new Condition<>(result -> !result.get().isPresent(), "Does not exist"));
     }
 
     @Test
     public void empty() {
-        final List<Refreshable<EventListener<RoboZonkyTestingEvent>>> r =
+        final List<EventListenerSupplier<RoboZonkyTestingEvent>> r =
                 ListenerServiceLoader.load(RoboZonkyTestingEvent.class);
         Assertions.assertThat(r).isEmpty(); // no providers registered by default
     }

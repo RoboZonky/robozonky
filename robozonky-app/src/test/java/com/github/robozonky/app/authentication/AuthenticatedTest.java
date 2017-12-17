@@ -17,7 +17,6 @@
 package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
-import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -125,7 +124,6 @@ public class AuthenticatedTest extends AbstractZonkyLeveragingTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result).isSameAs(expectedResult);
             softly.assertThat(a.getSecretProvider()).isSameAs(sp);
-            softly.assertThat(a.getRefreshableToken().isPaused()).isFalse();
         });
         Mockito.verify(oauth).login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password));
         Mockito.verify(oauth, Mockito.never()).refresh(ArgumentMatchers.any());
@@ -146,7 +144,7 @@ public class AuthenticatedTest extends AbstractZonkyLeveragingTest {
         Mockito.when(oauth.refresh(ArgumentMatchers.eq(token))).thenReturn(newToken);
         final Zonky z = Mockito.mock(Zonky.class);
         final ApiProvider api = mockApiProvider(oauth, z);
-        final TemporalAmount never = Duration.ofDays(1000); // let's not auto-refresh during the test
+        final Duration never = Duration.ofDays(1000); // let's not auto-refresh during the test
         final TokenBasedAccess a = (TokenBasedAccess) Authenticated.tokenBased(api, sp, never);
         // call SUT
         final Consumer<Zonky> f = Mockito.mock(Consumer.class);

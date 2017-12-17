@@ -23,8 +23,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.Refreshable;
 import org.apache.commons.io.IOUtils;
 
 class RefreshableStrategy extends Refreshable<String> {

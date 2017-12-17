@@ -23,9 +23,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
@@ -204,9 +204,8 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     public <T extends Event> void handleEvent(final T event) {
         final JmxListenerService service = new JmxListenerService();
-        final Refreshable<EventListener<T>> r = service.findListener((Class<T>) event.getClass());
-        r.run();
-        final EventListener<T> listener = r.getLatest().get();
+        final EventListenerSupplier<T> r = service.findListener((Class<T>) event.getClass());
+        final EventListener<T> listener = r.get().get();
         listener.handle(event, new SessionInfo(USERNAME));
     }
 
@@ -220,9 +219,8 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     @Test
     public void setInvalid() {
         final JmxListenerService service = new JmxListenerService();
-        final Refreshable<EventListener<RoboZonkyEndingEvent>> r = service.findListener(RoboZonkyEndingEvent.class);
+        final EventListenerSupplier<RoboZonkyEndingEvent> r = service.findListener(RoboZonkyEndingEvent.class);
         Assertions.assertThat(r).isNull();
-        ;
     }
 
     @After

@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.api.notifications;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-public class LocalhostAddressTest {
+@FunctionalInterface
+public interface EventListenerSupplier<T extends Event> extends Supplier<Optional<EventListener<T>>> {
 
-    @Test
-    public void isSubmitted() {
-        Assertions.assertThat(Scheduler.inBackground().isSubmitted(LocalhostAddress.INSTANCE)).isTrue();
-    }
-
-    @Test
-    public void hasValue() {
-        final LocalhostAddress address = new LocalhostAddress();
-        address.run();
-        Assertions.assertThat(address.get()).isPresent();
-    }
 }

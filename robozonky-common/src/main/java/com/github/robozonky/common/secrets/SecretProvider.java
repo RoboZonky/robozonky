@@ -16,7 +16,6 @@
 
 package com.github.robozonky.common.secrets;
 
-import java.io.Reader;
 import java.security.KeyStore;
 import java.util.Optional;
 
@@ -75,20 +74,6 @@ public interface SecretProvider {
     String getUsername();
 
     /**
-     * Retrieve serialization of Zonky's OAuth token.
-     * @return Present if {@link #setToken(Reader)} previously called, unless {@link #deleteToken()} was called after
-     * that.
-     */
-    Optional<Reader> getToken();
-
-    /**
-     * Store serialization of Zonky's OAuth token.
-     * @param token The serialization of the token to be stored.
-     * @return True if successful.
-     */
-    boolean setToken(final Reader token);
-
-    /**
      * Retrieve a secret stored through {@link #setSecret(String, char[])}.
      * @param secretId ID of the secret to retrieve.
      * @return The secret, if found.
@@ -102,12 +87,6 @@ public interface SecretProvider {
      * @return True if successful.
      */
     boolean setSecret(final String secretId, final char... secret);
-
-    /**
-     * Delete the stored token, if any.
-     * @return True if no token stored anymore.
-     */
-    boolean deleteToken();
 
     /**
      * Whether or not this provider will store all data in such a way that it survives JVM restart.

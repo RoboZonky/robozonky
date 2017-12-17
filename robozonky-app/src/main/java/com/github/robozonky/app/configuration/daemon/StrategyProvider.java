@@ -20,11 +20,11 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.extensions.StrategyLoader;
+import com.github.robozonky.util.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

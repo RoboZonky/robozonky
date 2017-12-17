@@ -18,6 +18,7 @@ package com.github.robozonky.app.authentication;
 
 import java.util.function.Function;
 
+import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
@@ -25,6 +26,10 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This exists mostly for purposes of testing. The core app should use {@link TokenBasedAccess} to alleviate pressure
+ * on the {@link ZonkyOAuthApi} endpoint.
+ */
 class PasswordBasedAccess extends AbstractAuthenticated {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordBasedAccess.class);

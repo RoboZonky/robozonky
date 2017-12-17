@@ -45,9 +45,6 @@
     <field type="check" variable="isEmailEnabled">
       <spec txt="Notifikovat e-mailem." set="true"/>
     </field>
-    <field type="check" variable="isUsingToken">
-      <spec txt="Neodhlašovat ze Zonky." set="false"/>
-    </field>
     <field type="check" variable="isJmxEnabled">
       <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
     </field>

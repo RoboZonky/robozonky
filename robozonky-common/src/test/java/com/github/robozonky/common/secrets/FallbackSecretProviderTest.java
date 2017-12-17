@@ -17,12 +17,9 @@
 package com.github.robozonky.common.secrets;
 
 import java.io.File;
-import java.io.StringReader;
-import java.util.UUID;
 
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Test;
 
@@ -50,21 +47,5 @@ public class FallbackSecretProviderTest {
         Assertions.assertThat(p.setSecret(key, value.toCharArray())).isTrue();
         Assertions.assertThat(p.getSecret(key)).contains(value.toCharArray());
         Assertions.assertThat(p.isPersistent()).isFalse();
-    }
-
-    @Test
-    public void tokenManipulation() {
-        final SecretProvider p = SecretProvider.fallback(FallbackSecretProviderTest.USR,
-                                                         FallbackSecretProviderTest.PWD.toCharArray());
-        final String token = UUID.randomUUID().toString();
-        // create token
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(p.setToken(new StringReader(token))).isTrue();
-        softly.assertThat(p.getToken()).isPresent();
-        softly.assertAll();
-        // delete created token
-        softly = new SoftAssertions();
-        softly.assertThat(p.deleteToken()).isTrue();
-        softly.assertAll();
     }
 }

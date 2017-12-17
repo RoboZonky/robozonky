@@ -27,14 +27,19 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.util.Refreshable;
+import com.github.robozonky.util.Scheduler;
 
 public class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
 
     public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
+
+    RefreshableNotificationProperties() {
+        Scheduler.inBackground().submit(this, Settings.INSTANCE.getRemoteResourceRefreshInterval());
+    }
 
     private static String readUrl(final URL url) throws IOException {
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), Defaults.CHARSET))) {

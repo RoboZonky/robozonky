@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api;
+package com.github.robozonky.util;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class RefreshableTest {
         final Refreshable<Void> r = Refreshable.createImmutable();
         r.run();
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(r.getLatest()).isEmpty();
+            softly.assertThat(r.get()).isEmpty();
             softly.assertThat(r.isPaused()).isFalse();
         });
     }
@@ -76,11 +76,11 @@ public class RefreshableTest {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
         r.run();
-        Assertions.assertThat(r.getLatest()).isPresent().contains(RefreshableTest.transform(initial));
-        final String original = r.getLatest().get();
+        Assertions.assertThat(r.get()).isPresent().contains(RefreshableTest.transform(initial));
+        final String original = r.get().get();
         r.run();
-        Assertions.assertThat(r.getLatest()).isPresent().contains(original);
-        Assertions.assertThat(r.getLatest().get()).isSameAs(original);
+        Assertions.assertThat(r.get()).isPresent().contains(original);
+        Assertions.assertThat(r.get().get()).isSameAs(original);
     }
 
     @Test
@@ -88,30 +88,28 @@ public class RefreshableTest {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
         r.run();
-        Assertions.assertThat(r.getLatest()).isPresent().contains(RefreshableTest.transform(initial));
+        Assertions.assertThat(r.get()).isPresent().contains(RefreshableTest.transform(initial));
         r.setLatestSource(null); // make sure latest will get reset
         r.run();
-        Assertions.assertThat(r.getLatest()).isEmpty();
-    }
-
-    @Test(timeout = 5000)
-    public void waitsForInitial() {
-        final String initial = "initial";
-        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
-        RefreshableTest.EXECUTOR.schedule(r, 1, TimeUnit.SECONDS); // execute only after the assertion is called
-        RefreshableTest.LOGGER.info("Blocking until value is found.");
-        Assertions.assertThat(r.getLatest()).isNotEmpty();
+        Assertions.assertThat(r.get()).isEmpty();
     }
 
     @Test
     public void registersListeners() {
-        final Refreshable<Void> r = Refreshable.createImmutable();
-        final Refreshable.RefreshListener<Void> l = Mockito.mock(Refreshable.RefreshListener.class);
+        final String s = UUID.randomUUID().toString();
+        final Refreshable<String> r = Refreshable.createImmutable(s);
+        r.run();
+        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
         Assertions.assertThat(r.registerListener(l)).isTrue();
+        Mockito.verify(l).valueSet(ArgumentMatchers.eq(s));
         Assertions.assertThat(r.registerListener(l)).isFalse(); // repeat registration
+        Mockito.verify(l, Mockito.times(1)).valueSet(ArgumentMatchers.eq(s));
         Assertions.assertThat(r.unregisterListener(l)).isTrue();
+        Mockito.verify(l).valueUnset(ArgumentMatchers.eq(s));
         Assertions.assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
+        Mockito.verify(l, Mockito.times(1)).valueUnset(ArgumentMatchers.eq(s));
         Assertions.assertThat(r.registerListener(l)).isTrue(); // re-registration
+        Mockito.verify(l, Mockito.times(2)).valueSet(ArgumentMatchers.eq(s));
     }
 
     private static class RefreshableString extends Refreshable<String> {
@@ -128,29 +126,6 @@ public class RefreshableTest {
         protected Optional<String> transform(final String source) {
             return Optional.of(source);
         }
-    }
-
-    @Test(timeout = 5000)
-    public void waitsForValue() {
-        final String initial = "initial";
-        final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
-        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
-        r.registerListener(l);
-        // wait for new value
-        RefreshableTest.LOGGER.info("Scheduling.");
-        RefreshableTest.EXECUTOR.schedule(() -> {
-            RefreshableTest.LOGGER.info("Executing.");
-            r.setLatestSource(initial);
-            r.run();
-            RefreshableTest.LOGGER.info("Executed.");
-        }, 1, TimeUnit.SECONDS); // execute only after the assertion is called
-        RefreshableTest.LOGGER.info("Blocking until value is found.");
-        Assertions.assertThat(r.getLatest()).isNotEmpty();
-        // and now change the value
-        final String otherValue = "other";
-        r.setLatestSource(otherValue);
-        r.run();
-        Assertions.assertThat(r.getLatest()).contains(RefreshableTest.transform(otherValue));
     }
 
     @Test
@@ -177,16 +152,16 @@ public class RefreshableTest {
     public void refreshAfterUnpaused() {
         final Refreshable<String> parent = new RefreshableString();
         parent.run();
-        final Optional<String> before = parent.getLatest();
+        final Optional<String> before = parent.get();
         parent.pauseFor((r) -> {
             Assertions.assertThat(parent.isPaused()).isTrue();
             parent.run(); // this will not be executed
-            final Optional<String> after = parent.getLatest();
+            final Optional<String> after = parent.get();
             Assertions.assertThat(before).isEqualTo(after);
             return null;
         });
         // pause is over, now the refresh should be run automatically
-        final Optional<String> after = parent.getLatest();
+        final Optional<String> after = parent.get();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(parent.isPaused()).isFalse();
             softly.assertThat(before).isNotEqualTo(after);

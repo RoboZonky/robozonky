@@ -17,10 +17,11 @@
 package com.github.robozonky.app.management;
 
 import java.util.Objects;
+import java.util.Optional;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
@@ -79,11 +80,11 @@ public class JmxListenerService implements ListenerService {
     }
 
     @Override
-    public <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType) {
+    public <T extends Event> EventListenerSupplier<T> findListener(final Class<T> eventType) {
         final EventListener<T> listener = JmxListenerService.newListener(eventType);
         if (listener == null) {
             return null;
         }
-        return Refreshable.createImmutable(listener);
+        return () -> Optional.of(listener);
     }
 }

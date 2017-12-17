@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.time.Duration;
-import java.time.temporal.TemporalAmount;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -164,23 +163,23 @@ public enum Settings {
         return get(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING);
     }
 
-    public TemporalAmount getTokenRefreshBeforeExpiration() {
+    public Duration getTokenRefreshPeriod() {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_TOKEN_REFRESH, 60));
     }
 
-    public TemporalAmount getRemoteResourceRefreshInterval() {
+    public Duration getRemoteResourceRefreshInterval() {
         return Duration.ofMinutes(get(Settings.Key.DEFAULTS_RESOURCE_REFRESH, 5));
     }
 
-    public TemporalAmount getSocketTimeout() {
+    public Duration getSocketTimeout() {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_SOCKET_TIMEOUT, 60));
     }
 
-    public TemporalAmount getConnectionTimeout() {
+    public Duration getConnectionTimeout() {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CONNECTION_TIMEOUT, 60));
     }
 
-    public TemporalAmount getCaptchaDelay(final Rating r) {
+    public Duration getCaptchaDelay(final Rating r) {
         return get(getRatingKey(r), (delay) -> Duration.ofSeconds(Integer.parseInt(delay)), getCaptchaDelay());
     }
 
@@ -190,7 +189,7 @@ public enum Settings {
      * activity detection - depend on it.
      * @return Duration of CAPTCHA protection for a standard loan.
      */
-    public TemporalAmount getCaptchaDelay() {
+    public Duration getCaptchaDelay() {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 0));
     }
 

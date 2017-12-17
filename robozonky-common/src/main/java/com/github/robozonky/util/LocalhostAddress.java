@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
 
@@ -32,7 +31,7 @@ public class LocalhostAddress extends Refreshable<String> {
     public static final Refreshable<String> INSTANCE = new LocalhostAddress();
     private static final String CHECKIP_URL = "http://checkip.amazonaws.com";
 
-    private LocalhostAddress() { // don't allow externally managed instances
+    LocalhostAddress() { // don't allow externally managed instances
         Scheduler.inBackground().submit(this);
     }
 

@@ -17,10 +17,11 @@
 package com.github.robozonky.common.extensions;
 
 import java.util.Collections;
+import java.util.Optional;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -91,13 +92,6 @@ public class CheckerTest {
     }
 
     @Test
-    public void notificationsEmptyWhenRefreshed() {
-        final Refreshable<EventListener<RoboZonkyTestingEvent>> r = Refreshable.createImmutable(null);
-        r.run();
-        Assertions.assertThat(Checker.notifications("", Collections.singletonList(r))).isFalse();
-    }
-
-    @Test
     public void notificationsEmptyByDefault() {
         Assertions.assertThat(Checker.notifications("")).isFalse();
     }
@@ -105,8 +99,7 @@ public class CheckerTest {
     @Test
     public void notificationsProper() {
         final EventListener<RoboZonkyTestingEvent> l = Mockito.mock(EventListener.class);
-        final Refreshable<EventListener<RoboZonkyTestingEvent>> r = Refreshable.createImmutable(l);
-        r.run();
+        final EventListenerSupplier<RoboZonkyTestingEvent> r = () -> Optional.of(l);
         Assertions.assertThat(Checker.notifications("", Collections.singletonList(r))).isTrue();
         Mockito.verify(l).handle(ArgumentMatchers.any(RoboZonkyTestingEvent.class), ArgumentMatchers.any());
     }

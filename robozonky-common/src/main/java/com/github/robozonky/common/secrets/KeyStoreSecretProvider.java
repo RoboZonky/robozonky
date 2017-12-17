@@ -16,13 +16,9 @@
 
 package com.github.robozonky.common.secrets;
 
-import java.io.CharArrayReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +30,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreSecretProvider.class);
     private static final String ALIAS_PASSWORD = "pwd";
     private static final String ALIAS_USERNAME = "usr";
-    private static final String ALIAS_TOKEN = "tkn";
-    private static final String ALIAS_TOKEN_DATE = "tknd";
 
     private static String getSecretIdentifier(final String secretId) {
         return "sct-" + secretId;
@@ -48,20 +42,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
             throw new IllegalArgumentException("KeyStoreHandler must be provided.");
         }
         this.ksh = ksh;
-    }
-
-    /**
-     * Set a key in the key store.
-     * @param alias Alias to store the key under.
-     * @param valueStream Will be converted to a {@link String} and stored.
-     * @return True if success.
-     */
-    private boolean set(final String alias, final Reader valueStream) {
-        try {
-            return this.set(alias, IOUtils.toString(valueStream));
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed storing key " + alias, ex);
-        }
     }
 
     /**
@@ -112,20 +92,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
     }
 
     @Override
-    public Optional<Reader> getToken() {
-        final Optional<char[]> stored = this.ksh.get(KeyStoreSecretProvider.ALIAS_TOKEN);
-        return stored.map(CharArrayReader::new);
-    }
-
-    @Override
-    public boolean setToken(final Reader token) {
-        final boolean firstSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN, token);
-        final boolean secondSuccessful = this.set(KeyStoreSecretProvider.ALIAS_TOKEN_DATE,
-                                                  OffsetDateTime.now().toString());
-        return firstSuccessful && secondSuccessful;
-    }
-
-    @Override
     public Optional<char[]> getSecret(final String secretId) {
         return this.ksh.get(KeyStoreSecretProvider.getSecretIdentifier(secretId));
     }
@@ -133,19 +99,6 @@ final class KeyStoreSecretProvider implements SecretProvider {
     @Override
     public boolean setSecret(final String secretId, final char... secret) {
         return this.set(KeyStoreSecretProvider.getSecretIdentifier(secretId), secret);
-    }
-
-    @Override
-    public boolean deleteToken() {
-        boolean result = this.ksh.delete(KeyStoreSecretProvider.ALIAS_TOKEN);
-        result = this.ksh.delete(KeyStoreSecretProvider.ALIAS_TOKEN_DATE) && result;
-        try {
-            this.ksh.save();
-            return result;
-        } catch (final IOException ex) {
-            KeyStoreSecretProvider.LOGGER.warn("Failed saving keystore.", ex);
-            return false;
-        }
     }
 
     @Override

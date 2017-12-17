@@ -16,7 +16,6 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,8 +59,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         email.setStartTLSRequired(properties.isStartTlsRequired());
         email.setSSLOnConnect(properties.isSslOnConnectRequired());
         email.setAuthentication(properties.getSmtpUsername(), properties.getSmtpPassword());
-        final String localhostAddress =
-                LocalhostAddress.INSTANCE.getLatest(Duration.ofSeconds(1)).orElse("unknown host");
+        final String localhostAddress = LocalhostAddress.INSTANCE.get().orElse("unknown host");
         email.setFrom(properties.getSender(), "RoboZonky @ " + localhostAddress);
         email.addTo(properties.getRecipient());
         return email;

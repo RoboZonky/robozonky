@@ -20,11 +20,11 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

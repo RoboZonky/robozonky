@@ -38,8 +38,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.Refreshable;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -18,12 +18,9 @@ package com.github.robozonky.common.secrets;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.security.KeyStoreException;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -74,12 +71,6 @@ public class KeyStoreSecretProviderTest {
     }
 
     @Test
-    public void tokenNotSet() {
-        final KeyStoreSecretProvider p = KeyStoreSecretProviderTest.newMockProvider();
-        Assertions.assertThat(p.getToken()).isEmpty();
-    }
-
-    @Test
     public void setUsernameAndPassword() {
         final KeyStoreSecretProvider p =
                 KeyStoreSecretProviderTest.newProvider(KeyStoreSecretProviderTest.USR, KeyStoreSecretProviderTest.PWD);
@@ -98,57 +89,6 @@ public class KeyStoreSecretProviderTest {
         Assertions.assertThat(p.setSecret(key, value.toCharArray())).isTrue();
         Assertions.assertThat(p.getSecret(key)).contains(value.toCharArray());
         Assertions.assertThat(p.isPersistent()).isTrue();
-    }
-
-    @Test
-    public void tokenManipulation() throws IOException {
-        final KeyStoreSecretProvider p = KeyStoreSecretProviderTest.newProvider();
-        final String toStore = "something";
-        // store token
-        final OffsetDateTime beforeStoring = OffsetDateTime.now();
-        try {
-            // makes sure the following code is always executed on a later timestamp than the previous code
-            Thread.sleep(1);
-        } catch (final InterruptedException ex) {
-            // do nothing
-        }
-        Assertions.assertThat(p.setToken(new StringReader(toStore))).isTrue();
-        Assertions.assertThat(p.getToken()).isPresent();
-        final String stored = IOUtils.toString(p.getToken().get());
-        Assertions.assertThat(stored).isEqualTo(toStore);
-        // clear token
-        p.deleteToken();
-        Assertions.assertThat(p.getToken()).isEmpty();
-    }
-
-    @Test
-    public void tokenDeleteFailed() throws IOException {
-        final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
-        Mockito.doThrow(IOException.class).when(ksh).save();
-        final KeyStoreSecretProvider p = new KeyStoreSecretProvider(ksh);
-        Assertions.assertThat(p.deleteToken()).isFalse();
-        Mockito.verify(ksh, Mockito.times(1)).save();
-        Mockito.verify(ksh, Mockito.times(2)).delete(Mockito.any());
-    }
-
-    @Test
-    public void tokenDeleteSucceeded() throws IOException {
-        final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
-        Mockito.doReturn(true).when(ksh).delete(Mockito.any());
-        final KeyStoreSecretProvider p = new KeyStoreSecretProvider(ksh);
-        Assertions.assertThat(p.deleteToken()).isTrue();
-        Mockito.verify(ksh, Mockito.times(1)).save();
-        Mockito.verify(ksh, Mockito.times(2)).delete(Mockito.any());
-    }
-
-    @Test
-    public void tokenSaveFailed() throws IOException {
-        final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
-        Mockito.doThrow(IOException.class).when(ksh).save();
-        final KeyStoreSecretProvider p = new KeyStoreSecretProvider(ksh);
-        Assertions.assertThat(p.setToken(new StringReader("something"))).isFalse();
-        Mockito.verify(ksh, Mockito.atLeast(1)).save();
-        Mockito.verify(ksh, Mockito.times(2)).set(Mockito.any(), Mockito.any(char[].class));
     }
 
     @Test

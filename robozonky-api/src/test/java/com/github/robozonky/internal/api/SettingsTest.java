@@ -69,7 +69,7 @@ public class SettingsTest {
             softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
                     .isEqualTo("");
             softly.assertThat(Settings.INSTANCE.isDebugEventStorageEnabled()).isFalse();
-            softly.assertThat(Settings.INSTANCE.getTokenRefreshBeforeExpiration())
+            softly.assertThat(Settings.INSTANCE.getTokenRefreshPeriod())
                     .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
                     .matches(new SettingsTest.TemporalPredicate(5 * 60));
@@ -102,7 +102,7 @@ public class SettingsTest {
                     .isEqualTo("");
             softly.assertThat(Settings.INSTANCE.isDebugEventStorageEnabled()).isFalse();
             softly.assertThat(Settings.INSTANCE.isDebugHttpResponseLoggingEnabled()).isFalse();
-            softly.assertThat(Settings.INSTANCE.getTokenRefreshBeforeExpiration())
+            softly.assertThat(Settings.INSTANCE.getTokenRefreshPeriod())
                     .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getRemoteResourceRefreshInterval())
                     .matches(new SettingsTest.TemporalPredicate(1000 * 60));

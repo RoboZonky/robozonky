@@ -187,9 +187,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         if (Boolean.valueOf(Variables.IS_DRY_RUN.getValue(DATA))) {
             cli.setOption("-d");
         }
-        if (Boolean.valueOf(Variables.IS_USING_OAUTH_TOKEN.getValue(DATA))) {
-            cli.setOption("-r");
-        }
         final boolean isZonkoidEnabled = Boolean.valueOf(Variables.IS_ZONKOID_ENABLED.getValue(DATA));
         if (secrets.isPersistent() && KEYSTORE_FILE.canRead()) {
             cli.setOption("-g", KEYSTORE_FILE.getAbsolutePath());

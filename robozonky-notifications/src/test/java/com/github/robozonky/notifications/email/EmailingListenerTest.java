@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.mail.internet.MimeMessage;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
@@ -67,6 +67,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+import com.github.robozonky.util.Refreshable;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -95,7 +96,6 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
     public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
             RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
             NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
-    private final EmailListenerService service = new EmailListenerService();
     @Parameterized.Parameter(1)
     public AbstractEmailingListener<Event> listener;
     // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
@@ -136,7 +136,7 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
                            NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
         final Refreshable<NotificationProperties> r = new RefreshableNotificationProperties();
         r.run();
-        final Optional<NotificationProperties> p = r.getLatest();
+        final Optional<NotificationProperties> p = r.get();
         System.clearProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
         return p.get();
     }
@@ -246,15 +246,11 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 
-    private <T extends Event> Refreshable<EventListener<T>> getListener(final Class<T> eventType) {
-        final Refreshable<EventListener<T>> refreshable = service.findListener(eventType);
-        refreshable.run();
-        return refreshable;
-    }
-
     @Test
     public void reportingEnabledHaveListeners() {
-        Assertions.assertThat(getListener(this.event.getClass()).getLatest()).isPresent();
+        final EmailListenerService service = new EmailListenerService();
+        final EventListenerSupplier<?> supplier = service.findListener(this.event.getClass());
+        Assertions.assertThat(supplier.get()).isPresent();
     }
 
     @Test

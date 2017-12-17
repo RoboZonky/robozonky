@@ -18,11 +18,10 @@ package com.github.robozonky.api.notifications;
 
 import java.util.ServiceLoader;
 
-import com.github.robozonky.api.Refreshable;
-
 /**
  * Use Java's {@link ServiceLoader} to load {@link EventListener}s
  */
+@FunctionalInterface
 public interface ListenerService {
 
     /**
@@ -33,5 +32,5 @@ public interface ListenerService {
      * @param <T> Class describing the event.
      * @return A listener, if any, to register with RoboZonky. Null means event type is not supported at all.
      */
-    <T extends Event> Refreshable<EventListener<T>> findListener(final Class<T> eventType);
+    <T extends Event> EventListenerSupplier<T> findListener(final Class<T> eventType);
 }

@@ -24,10 +24,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Refreshable;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -81,9 +81,9 @@ public class Checker {
     }
 
     public static boolean notifications(final String username,
-                                        final List<Refreshable<EventListener<RoboZonkyTestingEvent>>> refreshables) {
+                                        final List<EventListenerSupplier<RoboZonkyTestingEvent>> refreshables) {
         final Collection<EventListener<RoboZonkyTestingEvent>> listeners = refreshables.stream()
-                .flatMap(r -> r.getLatest().map(Stream::of).orElse(Stream.empty()))
+                .flatMap(r -> r.get().map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
         if (listeners.size() > 0) {
             final SessionInfo sessionInfo = new SessionInfo(username);

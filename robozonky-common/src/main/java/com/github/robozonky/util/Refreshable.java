@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api;
+package com.github.robozonky.util;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,35 +34,43 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents a resource that can be periodically checked for new results.
  * <p>
- * The aim of this class is to be scheduled using a {@link ScheduledExecutorService}, while another thread is calling
- * {@link #getLatest()} to retrieve the latest version of the resource.
+ * The aim of this class is to be scheduled using a {@link ScheduledExecutorService}, while another thread is reading
+ * the latest result. Preferred use is through {@link Refreshable.RefreshListener} as registered via
+ * {@link Refreshable#Refreshable(Refreshable.RefreshListener[])}. Alternatively, the latest result is also available
+ * via {@link #get()}.
  * <p>
  * Only use this class if you need to periodically refresh a given remote resource and have the latest version of the
  * resource available as a variable. Using this class for any other background checks will bring needless complexity
  * that could be avoided by just scheduling a {@link Runnable} through {@link ScheduledExecutorService}.
  * @param <T> Type of the resource.
  */
-public abstract class Refreshable<T> implements Runnable {
+public abstract class Refreshable<T> implements Runnable,
+                                                Supplier<Optional<T>> {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final String id;
     private final AtomicReference<String> latestKnownSource = new AtomicReference<>();
     private final AtomicReference<T> cachedResult = new AtomicReference<>();
     private final AtomicInteger requestsToPause = new AtomicInteger(0);
     private final AtomicBoolean refreshRequestedWhilePaused = new AtomicBoolean(false);
     private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
-    /**
-     * Will be used to prevent {@link #getLatest()} from returning before {@link #run()} fetched a value once.
-     */
-    private final CountDownLatch completionAssurance = new CountDownLatch(1);
     private final Collection<Refreshable.RefreshListener<T>> listeners = new CopyOnWriteArraySet<>();
 
-    public Refreshable() {
-        this.registerListener(new UpdateNotification()); // log changes to resource
+    protected Refreshable(final Refreshable.RefreshListener<T>... listeners) {
+        this(UUID.randomUUID().toString(), listeners);
+    }
+
+    protected Refreshable(final String id, final Refreshable.RefreshListener<T>... listeners) {
+        this.id = id;
+        this.registerListener(new UpdateNotification());
+        for (final Refreshable.RefreshListener<T> l : listeners) {
+            this.registerListener(l);
+        }
     }
 
     /**
      * Create an instance of this class that will always return empty resource.
-     * @return The returned instance's {@link #getLatest()} will always return {@link Optional#empty()}.
+     * @return The returned instance's {@link #get()} will always return {@link Optional#empty()}.
      */
     public static Refreshable<Void> createImmutable() {
         return Refreshable.createImmutable(null);
@@ -73,10 +80,10 @@ public abstract class Refreshable<T> implements Runnable {
      * Create an instance of this class that will never refresh the given resource.
      * @param toReturn Instance will always return this object.
      * @param <I> Type of object to return.
-     * @return The returned instance will never change it's {@link #getLatest()}.
+     * @return The returned instance will never change it's {@link #get()}.
      */
     public static <I> Refreshable<I> createImmutable(final I toReturn) {
-        return new Refreshable<I>() {
+        return new Refreshable<I>(toReturn == null ? "null" : toReturn.toString()) {
 
             @Override
             protected Optional<String> getLatestSource() {
@@ -87,21 +94,15 @@ public abstract class Refreshable<T> implements Runnable {
             protected Optional<I> transform(final String source) {
                 return Optional.ofNullable(toReturn);
             }
-
-            @Override
-            public String toString() {
-                return "ImmutableRefreshable{toReturn=" + toReturn + "}";
-            }
         };
     }
 
     /**
      * Result of this method will be used to fetch the latest resource state. While {@link #run()} is being
      * executed, if the result of the call no longer {@link #equals(Object)} its value from previous call,
-     * {@link #transform(String)} will be called, resulting in {@link #getLatest()} changing its return value.
-     *
+     * {@link #transform(String)} will be called, resulting in {@link #get()} changing its return value.
      * @return Method to retrieve identifier for the content. If empty, {@link #transform(String)} will not be called
-     * and {@link #getLatest()} will become empty.
+     * and {@link #get()} will become empty.
      */
     protected abstract Optional<String> getLatestSource();
 
@@ -114,43 +115,26 @@ public abstract class Refreshable<T> implements Runnable {
     protected abstract Optional<T> transform(final String source);
 
     /**
-     * Will block until {@link #run()} has finished at least once or until time runs out.
-     * @param waitFor How long to wait for.
-     * @return Empty if the source could not be parsed, if wait timed out or if the wait operation was interrupted.
+     * Latest version of the resource.
+     * @return Empty if the source could not be parsed.
      */
-    public Optional<T> getLatest(final Duration waitFor) {
-        try {
-            final long millisToWaitFor = waitFor.toMillis();
-            LOGGER.trace("Waiting for up to {} millis: {}.", millisToWaitFor, this);
-            if (completionAssurance.await(millisToWaitFor, TimeUnit.MILLISECONDS)) {
-                return Optional.ofNullable(cachedResult.get());
-            } else {
-                LOGGER.debug("Acquire failed: {}.", this);
-                return Optional.empty();
-            }
-        } catch (final InterruptedException ex) {
-            LOGGER.debug("Wait interrupted: {} (Reason: {}).", this, ex.getMessage());
-            return Optional.empty();
-        } finally {
-            LOGGER.trace("Wait over: {}.", this);
-        }
+    @Override
+    public Optional<T> get() {
+        return Optional.ofNullable(cachedResult.get());
     }
 
     /**
-     * Latest version of the resource. Will block until {@link #run()} has finished at least once.
-     * @return Empty if the source could not be parsed or if the wait operation was interrupted.
-     */
-    public Optional<T> getLatest() {
-        return getLatest(Duration.ofMillis(Long.MAX_VALUE));
-    }
-
-    /**
-     * Register an object to listen for changes to {@link #getLatest()}.
+     * Register an object to listen for changes to {@link #get()}.
      * @param listener Listener to register.
      * @return False if already registered.
      */
     public boolean registerListener(final Refreshable.RefreshListener<T> listener) {
-        return this.listeners.add(listener);
+        final boolean added = this.listeners.add(listener);
+        if (!added) {
+            return false;
+        }
+        get().ifPresent(listener::valueSet);
+        return true;
     }
 
     /**
@@ -159,7 +143,12 @@ public abstract class Refreshable<T> implements Runnable {
      * @return False if not registered before.
      */
     public boolean unregisterListener(final Refreshable.RefreshListener<T> listener) {
-        return this.listeners.remove(listener);
+        final boolean removed = this.listeners.remove(listener);
+        if (!removed) {
+            return false;
+        }
+        get().ifPresent(listener::valueUnset);
+        return true;
     }
 
     /**
@@ -232,7 +221,7 @@ public abstract class Refreshable<T> implements Runnable {
     }
 
     /**
-     * Update the value of {@link #getLatest()}, based on whether {@link #getLatestSource()} indicates there were any
+     * Update the value of {@link #get()}, based on whether {@link #getLatestSource()} indicates there were any
      * changes in the resource.
      */
     @Override
@@ -242,16 +231,22 @@ public abstract class Refreshable<T> implements Runnable {
             LOGGER.trace("Paused, not refreshing: {}.", this);
         } else if (refreshInProgress.getAndSet(true)) {
             LOGGER.trace("Not refreshing due to refresh already in progress: {}", this);
-        } else try {
-            LOGGER.trace("Starting {}.", this);
-            runLocked();
-        } catch (final Exception ex) {
-            LOGGER.warn("Refresh failed: {}.", this, ex);
-        } finally {
-            completionAssurance.countDown();
-            this.refreshInProgress.set(false);
-            LOGGER.trace("Finished {}.", this);
+        } else {
+            try {
+                LOGGER.trace("Starting {}.", this);
+                runLocked();
+            } catch (final Exception ex) {
+                LOGGER.warn("Refresh failed: {}.", this, ex);
+            } finally {
+                this.refreshInProgress.set(false);
+                LOGGER.trace("Finished {}.", this);
+            }
         }
+    }
+
+    @Override
+    public final String toString() {
+        return this.getClass().getSimpleName() + "{id='" + id + "'}";
     }
 
     /**
