@@ -37,7 +37,7 @@ public class Scheduler {
      * will have finished on the executor and if some of them are long-running, this will hurt robot's startup
      * time.
      */
-    private static final Scheduler BACKGROUND_SCHEDULER = new Scheduler(2);
+    private static final Scheduler BACKGROUND_SCHEDULER = new Scheduler();
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final TemporalAmount REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
     private final Supplier<ScheduledExecutorService> executorProvider;
