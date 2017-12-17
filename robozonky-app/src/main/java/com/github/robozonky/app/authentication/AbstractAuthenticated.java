@@ -28,13 +28,12 @@ abstract class AbstractAuthenticated implements Authenticated {
     private Restrictions restrictions = null;
 
     @Override
-    public Restrictions getRestrictions() {
-        final boolean needsUpdate = lastRestrictionsUpdate.plus(Duration.ofMinutes(5)).isBefore(Instant.now());
+    public synchronized Restrictions getRestrictions() {
+        final Instant now = Instant.now();
+        final boolean needsUpdate = lastRestrictionsUpdate.plus(Duration.ofMinutes(5)).isBefore(now);
         if (needsUpdate) {
-            synchronized (this) {
-                restrictions = call(Zonky::getRestrictions);
-                lastRestrictionsUpdate = Instant.now();
-            }
+            restrictions = call(Zonky::getRestrictions);
+            lastRestrictionsUpdate = now;
         }
         return restrictions;
     }

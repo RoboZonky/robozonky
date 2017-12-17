@@ -154,7 +154,10 @@ public class Portfolio {
      * @return
      */
     public Stream<Investment> getActiveForSecondaryMarketplace() {
-        return getActive().filter(Investment::isCanBeOffered).filter(i -> !i.isOnSmp());
+        return getActive()
+                .filter(Investment::isCanBeOffered)
+                .filter(i -> !i.isInWithdrawal())
+                .filter(i -> !i.isOnSmp());
     }
 
     public Stream<Investment> getActive() {

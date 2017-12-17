@@ -27,11 +27,19 @@ public class Restrictions extends BaseEntity {
     private boolean cannotInvest = false, cannotAccessSmp = false;
     private int maximumInvestmentAmount = Defaults.MINIMAL_MAXIMUM_INVESTMENT_IN_CZK;
 
+    /**
+     * Date of Zonky receiving the investor-initiated contract termination.
+     * @return
+     */
     @XmlElement
     public OffsetDateTime getRequestDate() {
         return requestDate;
     }
 
+    /**
+     * Date of investor's contract termination. Will be later than {@link #getRequestDate()}.
+     * @return
+     */
     @XmlElement
     public OffsetDateTime getWithdrawalDate() {
         return withdrawalDate;
@@ -47,6 +55,10 @@ public class Restrictions extends BaseEntity {
         return cannotAccessSmp;
     }
 
+    /**
+     * Biggest amount that a user is allowed to invest into a single loan.
+     * @return
+     */
     @XmlElement
     public int getMaximumInvestmentAmount() {
         return maximumInvestmentAmount;

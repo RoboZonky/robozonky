@@ -120,6 +120,10 @@ public class Investment extends BaseInvestment {
         return canBeOffered;
     }
 
+    /**
+     * The client terminated the loan contract. The investment can therefore not be sold on secondary marketplace.
+     * @return
+     */
     @XmlElement
     public boolean isInWithdrawal() {
         return inWithdrawal;
