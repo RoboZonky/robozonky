@@ -26,6 +26,6 @@ import com.github.robozonky.app.portfolio.Portfolio;
  * therefore there is no instance to supply.
  */
 @FunctionalInterface
-public interface PortfolioSupplier extends Supplier<Optional<Portfolio>> {
+interface PortfolioSupplier extends Supplier<Optional<Portfolio>> {
 
 }

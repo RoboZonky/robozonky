@@ -37,7 +37,6 @@ import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.PortfolioDependant;
-import com.github.robozonky.app.configuration.daemon.PortfolioSupplier;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +45,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Historical record of which {@link Investment}s have been delinquent and when. Instances of this class (obtained via
- * {@link #Delinquents()} update shared state (implemented via {@link State}) which can then be retrieved through static
- * methods, such as {@link #getDelinquents()} and {@link #getLastUpdateTimestamp()}.
+ * {@link #Delinquents()} update shared state (implemented via {@link State}) which can then be
+ * retrieved through static methods, such as {@link #getDelinquents()} and {@link #getLastUpdateTimestamp()}.
  */
 public class Delinquents implements PortfolioDependant {
 
@@ -59,21 +58,13 @@ public class Delinquents implements PortfolioDependant {
     private final LoanProvider loanProvider;
 
     /**
-     * Creates an instance of this class which will use {@link ZonkyLoanProvider} to retrieve {@link Loan}s.
+     * Creates an instance of this class which will use {@link PortfolioLoanProvider} to retrieve {@link Loan}s.
      */
     public Delinquents() {
-        this(new ZonkyLoanProvider());
+        this(null);
     }
 
-    /**
-     * Creates an instance of this class which will use {@link PortfolioLoanProvider} to retrieve {@link Loan}s.
-     * @param portfolioSupplier Will be used to retrieve the portfolio when needed.
-     */
-    public Delinquents(final PortfolioSupplier portfolioSupplier) {
-        this(new PortfolioLoanProvider(portfolioSupplier));
-    }
-
-    private Delinquents(final LoanProvider loanProvider) {
+    Delinquents(final LoanProvider loanProvider) {
         this.loanProvider = loanProvider;
     }
 
@@ -142,8 +133,25 @@ public class Delinquents implements PortfolioDependant {
                 }).collect(Collectors.toSet());
     }
 
-    void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent) {
-        update(auth, presentlyDelinquent, Collections.emptyList());
+    private static Collection<Delinquency> store(final Stream<Delinquent> newDelinquents,
+                                                 final Stream<Delinquent> stillDelinquent) {
+        LOGGER.trace("Starting delinquency update.");
+        final State.ClassSpecificState state = getState();
+        final State.Batch stateUpdate = state.newBatch(true);
+        // update state of delinquents
+        final Collection<Delinquency> allPresent = Stream.concat(stillDelinquent, newDelinquents)
+                .peek(d -> stateUpdate.set(String.valueOf(d.getLoanId()), toString(d)))
+                .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
+                .collect(Collectors.toSet());
+        stateUpdate.set(LAST_UPDATE_PROPERTY_NAME, OffsetDateTime.now().toString());
+        stateUpdate.call(); // persist state updates
+        LOGGER.trace("Delinquency update finished.");
+        return allPresent;
+    }
+
+    void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent,
+                final LoanProvider loanProvider) {
+        update(auth, presentlyDelinquent, Collections.emptyList(), loanProvider);
     }
 
     /**
@@ -153,9 +161,10 @@ public class Delinquents implements PortfolioDependant {
      * @param presentlyDelinquent Loans that currently have overdue instalments. This corresponds to
      * {@link PaymentStatus#getDelinquent()}
      * @param noLongerActive Loans that are no longer relevant. This corresponds to {@link PaymentStatus#getDone()}.
+     * @param loanProvider Used to retrieve {@link Loan} instances from Zonky.
      */
-    void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent,
-                final Collection<Investment> noLongerActive) {
+    static void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent,
+                       final Collection<Investment> noLongerActive, final LoanProvider loanProvider) {
         LOGGER.debug("Updating delinquent loans.");
         final LocalDate now = LocalDate.now();
         final Collection<Delinquent> knownDelinquents = getDelinquents();
@@ -179,25 +188,10 @@ public class Delinquents implements PortfolioDependant {
         final Stream<Delinquent> newDelinquents = presentlyDelinquent.stream()
                 .filter(i -> knownDelinquents.stream().noneMatch(d -> related(d, i)))
                 .map(i -> new Delinquent(i.getLoanId(), i.getNextPaymentDate().toLocalDate()));
-        store(auth, newDelinquents, stillDelinquent);
-        LOGGER.trace("Done.");
-    }
-
-    private void store(final Authenticated auth, final Stream<Delinquent> newDelinquents,
-                       final Stream<Delinquent> stillDelinquent) {
-        LOGGER.trace("Starting delinquency update.");
-        final State.ClassSpecificState state = State.forClass(this.getClass());
-        final State.Batch stateUpdate = state.newBatch(true);
-        // update state of delinquents
-        final Collection<Delinquency> allPresent = Stream.concat(stillDelinquent, newDelinquents)
-                .peek(d -> stateUpdate.set(String.valueOf(d.getLoanId()), toString(d)))
-                .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
-                .collect(Collectors.toSet());
-        stateUpdate.set(LAST_UPDATE_PROPERTY_NAME, OffsetDateTime.now().toString());
-        stateUpdate.call(); // persist state updates
-        LOGGER.trace("Delinquency update finished.");
+        final Collection<Delinquency> presentDelinquents = store(newDelinquents, stillDelinquent);
         // and notify of new delinquencies over all known thresholds
-        Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(allPresent, auth, loanProvider));
+        Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(presentDelinquents, auth, loanProvider));
+        LOGGER.trace("Done.");
     }
 
     /**
@@ -211,7 +205,8 @@ public class Delinquents implements PortfolioDependant {
      */
     @Override
     public void accept(final Portfolio portfolio, final Authenticated auth) {
+        final LoanProvider p = loanProvider == null ? new PortfolioLoanProvider(portfolio) : loanProvider;
         update(auth, getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
-               getWithPaymentStatus(portfolio, PaymentStatus.getDone()));
+               getWithPaymentStatus(portfolio, PaymentStatus.getDone()), p);
     }
 }

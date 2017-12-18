@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -118,7 +119,7 @@ enum DelinquencyCategory {
         final Collection<Delinquency> activeAndPresent = delinquencies.stream()
                 .filter(d -> !d.getFixedOn().isPresent())
                 .collect(Collectors.toSet());
-        final State.ClassSpecificState state = State.forClass(this.getClass());
+        final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
         final Collection<Integer> activeHistorical = state.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
@@ -130,20 +131,15 @@ enum DelinquencyCategory {
                 .filter(d -> activeHistorical.stream().noneMatch(i -> d.getParent().getLoanId() == i))
                 .peek(d -> {
                     final Loan l = auth.call(zonky -> loanProvider.apply(d.getParent().getLoanId(), zonky));
-                    final Event e = auth.call(zonky -> getEvent(d, l, thresholdInDays));
+                    final Event e = getEvent(d, l, thresholdInDays);
                     Events.fire(e);
                 })
                 .map(d -> d.getParent().getLoanId());
         final Collection<Integer> result = Stream.concat(activeHistorical.stream(), newFound)
-                .sorted()
-                .collect(Collectors.toSet());
+                .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
         state.newBatch().set(fieldName, toIdString(result.stream())).call();
         LOGGER.trace("Update over.");
         return result;
-    }
-
-    public Collection<Integer> update(final Collection<Delinquency> delinquencies, final Authenticated auth) {
-        return update(delinquencies, auth, (loanId, zonky) -> zonky.getLoan(loanId));
     }
 
 }

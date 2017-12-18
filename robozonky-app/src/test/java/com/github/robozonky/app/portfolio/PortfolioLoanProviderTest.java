@@ -16,10 +16,7 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.Optional;
-
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.app.configuration.daemon.PortfolioSupplier;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -29,22 +26,11 @@ import org.mockito.Mockito;
 public class PortfolioLoanProviderTest {
 
     @Test
-    public void noPortfolio() {
-        final PortfolioSupplier portfolioProvider = Optional::empty;
-        final Zonky zonky = Mockito.mock(Zonky.class);
-        final Loan l = new Loan(1, 200);
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        final LoanProvider p = new PortfolioLoanProvider(portfolioProvider);
-        Assertions.assertThat(p.apply(l.getId(), zonky)).isSameAs(l);
-    }
-
-    @Test
     public void proper() {
-        final PortfolioSupplier portfolioProvider = () -> Optional.of(new Portfolio());
         final Zonky zonky = Mockito.mock(Zonky.class);
         final Loan l = new Loan(1, 200);
         Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        final LoanProvider p = new PortfolioLoanProvider(portfolioProvider);
+        final LoanProvider p = new PortfolioLoanProvider(new Portfolio());
         Assertions.assertThat(p.apply(l.getId(), zonky)).isSameAs(l);
     }
 }

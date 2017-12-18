@@ -17,24 +17,21 @@
 package com.github.robozonky.app.portfolio;
 
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.app.configuration.daemon.PortfolioSupplier;
 import com.github.robozonky.common.remote.Zonky;
 
 /**
- * Will retrieve {@link Loan}s from {@link Portfolio#getLoan(Zonky, int)}, falling back to {@link ZonkyLoanProvider}.
+ * Will retrieve {@link Loan}s from {@link Portfolio#getLoan(Zonky, int)}.
  */
 class PortfolioLoanProvider implements LoanProvider {
 
-    private final PortfolioSupplier portfolio;
+    private final Portfolio portfolio;
 
-    public PortfolioLoanProvider(final PortfolioSupplier portfolio) {
+    public PortfolioLoanProvider(final Portfolio portfolio) {
         this.portfolio = portfolio;
     }
 
     @Override
     public Loan apply(final Integer loanId, final Zonky zonky) {
-        return portfolio.get()
-                .map(portfolio -> portfolio.getLoan(zonky, loanId))
-                .orElse(new ZonkyLoanProvider().apply(loanId, zonky));
+        return portfolio.getLoan(zonky, loanId);
     }
 }
