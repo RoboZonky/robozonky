@@ -64,21 +64,23 @@ public class State {
         return new State.ClassSpecificState(clz);
     }
 
-    private Ini getStateFile() {
+    private static Ini getStateFile() {
         try {
             final File stateLocation = Settings.INSTANCE.getStateFile();
-            if (!stateLocation.exists()) {
-                LOGGER.debug("Creating state: {}.", stateLocation);
-                stateLocation.createNewFile();
+            synchronized (State.class) { // only create the file once
+                if (!stateLocation.exists()) {
+                    LOGGER.trace("Creating state: '{}'.", stateLocation);
+                    stateLocation.createNewFile();
+                }
             }
-            LOGGER.debug("Reading state: {}.", stateLocation);
+            LOGGER.trace("Reading state: '{}'.", stateLocation);
             return new Ini(stateLocation);
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed initializing state.", ex);
         }
     }
 
-    boolean containskey(final String section, final String key) {
+    private boolean containskey(final String section, final String key) {
         final boolean hasSection = stateFile.keySet().contains(section);
         return hasSection && stateFile.get(section).containsKey(key);
     }
@@ -106,6 +108,7 @@ public class State {
     private boolean store() {
         try {
             synchronized (State.class) { // one write at a time
+                LOGGER.trace("Storing state: '{}'.", stateFile.getFile().getAbsolutePath());
                 stateFile.store();
             }
             return true;
