@@ -99,6 +99,10 @@ enum DelinquencyCategory {
         return "notified" + dayThreshold + "plus";
     }
 
+    private static boolean isLoanRelated(final Delinquency d, final int loanId) {
+        return d.getParent().getLoanId() == loanId;
+    }
+
     /**
      * @return Number of days at minimum for a delinquency to belong to this category.
      */
@@ -108,38 +112,35 @@ enum DelinquencyCategory {
 
     /**
      * Update internal state trackers and send events if necessary.
-     * @param delinquencies Active delinquencies - ie. payments that are, right now, overdue.
+     * @param active Active delinquencies - ie. payments that are, right now, overdue.
      * @param auth Authenticated API to be used for retrieving loan data.
      * @param loanProvider Used to retrieve loans either from the Zonky API or from some cache.
      * @return IDs of loans that are being tracked in this category.
      */
-    public Collection<Integer> update(final Collection<Delinquency> delinquencies, final Authenticated auth,
+    public Collection<Integer> update(final Collection<Delinquency> active, final Authenticated auth,
                                       final BiFunction<Integer, Zonky, Loan> loanProvider) {
         LOGGER.trace("Updating {}.", this);
-        final Collection<Delinquency> activeAndPresent = delinquencies.stream()
-                .filter(d -> !d.getFixedOn().isPresent())
-                .collect(Collectors.toSet());
         final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
-        final Collection<Integer> activeHistorical = state.getValues(fieldName)
+        final Collection<Integer> keepThese = state.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
                 .orElse(Stream.empty())
-                .filter(id -> activeAndPresent.stream().anyMatch(d -> d.getParent().getLoanId() == id))
+                .filter(id -> active.stream().anyMatch(d -> isLoanRelated(d, id)))
                 .collect(Collectors.toSet());
-        final Stream<Integer> newFound = activeAndPresent.stream()
+        final Stream<Integer> addThese = active.stream()
                 .filter(d -> isOverThreshold(d, thresholdInDays))
-                .filter(d -> activeHistorical.stream().noneMatch(i -> d.getParent().getLoanId() == i))
+                .filter(d -> keepThese.stream().noneMatch(id -> isLoanRelated(d, id)))
                 .peek(d -> {
                     final Loan l = auth.call(zonky -> loanProvider.apply(d.getParent().getLoanId(), zonky));
                     final Event e = getEvent(d, l, thresholdInDays);
                     Events.fire(e);
                 })
                 .map(d -> d.getParent().getLoanId());
-        final Collection<Integer> result = Stream.concat(activeHistorical.stream(), newFound)
+        final Collection<Integer> storeThese = Stream.concat(keepThese.stream(), addThese)
                 .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
-        state.newBatch().set(fieldName, toIdString(result.stream())).call();
-        LOGGER.trace("Update over.");
-        return result;
+        state.newBatch().set(fieldName, toIdString(storeThese.stream())).call();
+        LOGGER.trace("Update over, stored {}.", storeThese);
+        return storeThese;
     }
 
 }

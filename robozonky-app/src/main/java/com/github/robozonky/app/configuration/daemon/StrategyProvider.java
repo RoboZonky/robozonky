@@ -25,16 +25,29 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.common.extensions.StrategyLoader;
 import com.github.robozonky.util.Refreshable;
+import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class StrategyProvider implements Refreshable.RefreshListener<String> {
+public class StrategyProvider implements Refreshable.RefreshListener<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrategyProvider.class);
 
     private final AtomicReference<InvestmentStrategy> toInvest = new AtomicReference<>();
     private final AtomicReference<SellStrategy> toSell = new AtomicReference<>();
     private final AtomicReference<PurchaseStrategy> toPurchase = new AtomicReference<>();
+
+    public static StrategyProvider createFor(final String strategyLocation) {
+        final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
+        final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
+        strategy.registerListener(sp);
+        Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
+        return sp;
+    }
+
+    StrategyProvider() {
+        // no external instances
+    }
 
     @Override
     public void valueSet(final String newValue) {

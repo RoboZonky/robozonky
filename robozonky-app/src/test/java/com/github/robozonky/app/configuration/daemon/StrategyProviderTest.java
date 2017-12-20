@@ -16,8 +16,12 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 
+import com.github.robozonky.internal.api.Defaults;
+import com.google.common.io.Files;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
@@ -58,4 +62,43 @@ public class StrategyProviderTest {
             softly.assertThat(r.getToPurchase()).isEmpty();
         });
     }
+
+    private static File newStrategyFile() throws IOException {
+        final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
+        Files.write(MINIMAL_STRATEGY, strategy, Defaults.CHARSET);
+        return strategy;
+    }
+
+    @Test
+    public void loadStrategyAsFile() throws IOException {
+        final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isPresent();
+            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToPurchase()).isPresent();
+        });
+    }
+
+    @Test
+    public void loadWrongStrategyAsFile() throws IOException {
+        final File tmp = File.createTempFile("robozonky-", ".cfg");
+        final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isEmpty();
+            softly.assertThat(r.getToSell()).isEmpty();
+            softly.assertThat(r.getToPurchase()).isEmpty();
+        });
+    }
+
+    @Test
+    public void loadStrategyAsUrl() throws IOException {
+        final String url = newStrategyFile().toURI().toURL().toString();
+        final StrategyProvider r = StrategyProvider.createFor(url);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.getToInvest()).isPresent();
+            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToPurchase()).isPresent();
+        });
+    }
+
 }

@@ -44,7 +44,7 @@ final class SecretProviderFactory {
                 SecretProviderFactory.LOGGER.error("Failed opening guarded storage.", ex);
                 return Optional.<SecretProvider>empty();
             }
-        }).orElseGet(() -> Optional.of(SecretProvider.fallback(cli.getUsername().get(), cli.getPassword())));
+        }).orElseGet(() -> Optional.of(SecretProvider.fallback(cli.getUsername().get(), password)));
     }
 
 }

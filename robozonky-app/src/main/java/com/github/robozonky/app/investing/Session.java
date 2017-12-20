@@ -60,14 +60,16 @@ final class Session {
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final List<LoanDescriptor> loansStillAvailable;
     private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>(0);
+    private final Zonky zonky;
     private final Investor investor;
     private final SessionState state;
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
-    Session(final Portfolio portfolio, final Set<LoanDescriptor> marketplace, final Investor.Builder proxy,
+    Session(final Portfolio portfolio, final Set<LoanDescriptor> marketplace, final Investor investor,
             final Zonky zonky) {
-        this.investor = proxy.build(zonky);
+        this.zonky = zonky;
+        this.investor = investor;
         this.state = new SessionState(marketplace);
         this.loansStillAvailable = marketplace.stream()
                 .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> isSameLoan(l, l2)))
@@ -89,8 +91,8 @@ final class Session {
         return l.item().getId() == loanId;
     }
 
-    public static Collection<Investment> invest(final Portfolio portfolio, final Investor.Builder investor,
-                                                final Zonky api, final Collection<LoanDescriptor> loans,
+    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor, final Zonky api,
+                                                final Collection<LoanDescriptor> loans,
                                                 final RestrictedInvestmentStrategy strategy) {
         final Session session = new Session(portfolio, new LinkedHashSet<>(loans), investor, api);
         final int balance = session.getPortfolioOverview().getCzkAvailable();
@@ -196,7 +198,7 @@ final class Session {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> isSameLoan(l, i));
         final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getAmount(), TransactionCategory.INVESTMENT);
-        portfolio.newBlockedAmount(investor.getZonky(), b);
+        portfolio.newBlockedAmount(zonky, b);
         final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(i.getAmount());
         portfolioOverview = portfolio.calculateOverview(newBalance);
     }

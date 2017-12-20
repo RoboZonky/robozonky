@@ -26,6 +26,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,41 +81,24 @@ import org.mockito.Mockito;
 @RunWith(Parameterized.class)
 public class InvestorTest extends AbstractZonkyLeveragingTest {
 
-    private enum ProxyType {
+    private static final double LOAN_AMOUNT = 2000.0;
+    private static final int CONFIRMED_AMOUNT = (int) (InvestorTest.LOAN_AMOUNT / 2);
+    @Parameterized.Parameter
+    public InvestorTest.ProxyType proxyType;
+    @Parameterized.Parameter(1)
+    public InvestorTest.Captcha captcha;
+    @Parameterized.Parameter(2)
+    public InvestorTest.Remote confirmation;
+    @Parameterized.Parameter(3)
+    public InvestorTest.RemoteResponse confirmationResponse;
+    @Parameterized.Parameter(4)
+    public ZonkyResponseType responseType;
+    private Zonky api = Mockito.mock(Zonky.class);
 
-        DRY,
-        SIMPLE,
-        CONFIRMING
-
-    }
-
-    private enum Captcha {
-
-        PROTECTED,
-        UNPROTECTED
-    }
-
-    private enum Remote {
-
-        CONFIRMED,
-        UNCONFIRMED
-    }
-
-    private enum RemoteResponse {
-
-        ACK,
-        NAK
-    }
 
     @Parameterized.Parameters(name = "{0}+{1}+{2}({3})={4}")
     public static Collection<Object[]> generatePossibilities() {
         final Collection<Object[]> result = new ArrayList<>();
-        // dry proxy
-        for (final InvestorTest.Captcha c1 : InvestorTest.Captcha.values()) {
-            for (final InvestorTest.Remote c2 : InvestorTest.Remote.values()) {
-                result.add(new Object[]{InvestorTest.ProxyType.DRY, c1, c2, null, ZonkyResponseType.INVESTED});
-            }
-        }
         // simple proxy
         result.add(new Object[]{InvestorTest.ProxyType.SIMPLE, InvestorTest.Captcha.PROTECTED,
                 InvestorTest.Remote.CONFIRMED, null, null});
@@ -145,9 +129,6 @@ public class InvestorTest extends AbstractZonkyLeveragingTest {
         return Collections.unmodifiableCollection(result);
     }
 
-    private static final double LOAN_AMOUNT = 2000.0;
-    private static final int CONFIRMED_AMOUNT = (int) (InvestorTest.LOAN_AMOUNT / 2);
-
     private static LoanDescriptor mockLoanDescriptor(final boolean protectByCaptcha) {
         if (protectByCaptcha) {
             return mockLoanDescriptor();
@@ -155,17 +136,6 @@ public class InvestorTest extends AbstractZonkyLeveragingTest {
             return mockLoanDescriptorWithoutCaptcha();
         }
     }
-
-    @Parameterized.Parameter
-    public InvestorTest.ProxyType proxyType;
-    @Parameterized.Parameter(1)
-    public InvestorTest.Captcha captcha;
-    @Parameterized.Parameter(2)
-    public InvestorTest.Remote confirmation;
-    @Parameterized.Parameter(3)
-    public InvestorTest.RemoteResponse confirmationResponse;
-    @Parameterized.Parameter(4)
-    public ZonkyResponseType responseType;
 
     private RecommendedLoan getRecommendation() {
         final LoanDescriptor ld =
@@ -175,10 +145,7 @@ public class InvestorTest extends AbstractZonkyLeveragingTest {
     }
 
     private Investor getZonkyProxy() {
-        final Zonky api = Mockito.mock(Zonky.class);
         switch (proxyType) {
-            case DRY:
-                return new Investor.Builder().asDryRun().build(api);
             case SIMPLE:
                 return new Investor.Builder().build(api);
             case CONFIRMING:
@@ -202,6 +169,10 @@ public class InvestorTest extends AbstractZonkyLeveragingTest {
         }
     }
 
+    private boolean isSupposedToHaveSentInvestCommand() {
+        return (responseType == ZonkyResponseType.INVESTED);
+    }
+
     private void test(final boolean seenBefore) {
         final RecommendedLoan r = this.getRecommendation();
         final Investor p = this.getZonkyProxy();
@@ -210,24 +181,31 @@ public class InvestorTest extends AbstractZonkyLeveragingTest {
             result = p.invest(r, seenBefore);
         } catch (final Exception ex) {
             if (responseType != null) {
-                Assertions.fail("Thrown an exception when it shouldn't have.");
+                Assertions.fail("Thrown an exception when it shouldn't have.", ex);
             }
             return;
         }
-        if (this.proxyType == InvestorTest.ProxyType.CONFIRMING) {
-            Assertions.assertThat(p.getConfirmationProviderId()).isPresent();
+        SoftAssertions.assertSoftly(softly -> {
+            if (this.proxyType == InvestorTest.ProxyType.CONFIRMING) {
+                softly.assertThat(p.getConfirmationProviderId()).isPresent();
+            } else {
+                softly.assertThat(p.getConfirmationProviderId()).isEmpty();
+            }
+            if (responseType == ZonkyResponseType.DELEGATED && seenBefore) {
+                softly.assertThat(result.getType()).isEqualTo(ZonkyResponseType.SEEN_BEFORE);
+            } else {
+                softly.assertThat(result.getType()).isEqualTo(responseType);
+            }
+            if (result.getType() == ZonkyResponseType.INVESTED) {
+                softly.assertThat(result.getConfirmedAmount()).hasValue(InvestorTest.CONFIRMED_AMOUNT);
+            } else {
+                softly.assertThat(result.getConfirmedAmount()).isEmpty();
+            }
+        });
+        if (isSupposedToHaveSentInvestCommand()) {
+            Mockito.verify(api).invest(ArgumentMatchers.any());
         } else {
-            Assertions.assertThat(p.getConfirmationProviderId()).isEmpty();
-        }
-        if (responseType == ZonkyResponseType.DELEGATED && seenBefore) {
-            Assertions.assertThat(result.getType()).isEqualTo(ZonkyResponseType.SEEN_BEFORE);
-        } else {
-            Assertions.assertThat(result.getType()).isEqualTo(responseType);
-        }
-        if (result.getType() == ZonkyResponseType.INVESTED) {
-            Assertions.assertThat(result.getConfirmedAmount()).hasValue(InvestorTest.CONFIRMED_AMOUNT);
-        } else {
-            Assertions.assertThat(result.getConfirmedAmount()).isEmpty();
+            Mockito.verify(api, Mockito.never()).invest(ArgumentMatchers.any());
         }
     }
 
@@ -245,5 +223,30 @@ public class InvestorTest extends AbstractZonkyLeveragingTest {
     public void testBeforeSeen() {
         Assume.assumeTrue(this.isValidForLoansSeenBefore());
         test(true);
+    }
+
+    private enum ProxyType {
+
+        SIMPLE,
+        CONFIRMING
+
+    }
+
+    private enum Captcha {
+
+        PROTECTED,
+        UNPROTECTED
+    }
+
+    private enum Remote {
+
+        CONFIRMED,
+        UNCONFIRMED
+    }
+
+    private enum RemoteResponse {
+
+        ACK,
+        NAK
     }
 }

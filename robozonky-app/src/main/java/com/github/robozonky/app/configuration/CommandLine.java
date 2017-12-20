@@ -103,9 +103,8 @@ public class CommandLine {
     }
 
     private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
-        return SecretProviderFactory.getSecretProvider(this.authenticationFragment)
-                .flatMap(secrets -> Optional.ofNullable(mode)
-                        .flatMap(i -> i.configure(this, authenticationFragment.createAuthenticated(secrets))));
+        return SecretProviderFactory.getSecretProvider(authenticationFragment)
+                .flatMap(secrets -> mode.configure(this, authenticationFragment.createAuthenticated(secrets)));
     }
 
     TweaksCommandLineFragment getTweaksFragment() {

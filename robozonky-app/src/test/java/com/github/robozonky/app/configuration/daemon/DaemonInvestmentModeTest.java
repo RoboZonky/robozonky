@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,25 +26,12 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.internal.api.Defaults;
-import com.google.common.io.Files;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
-
-    private static final String MINIMAL_STRATEGY = "Robot má udržovat konzervativní portfolio.";
-
-    private static File newStrategyFile() throws IOException {
-        final File strategy = File.createTempFile("robozonky-strategy", ".cfg");
-        Files.write(MINIMAL_STRATEGY, strategy, Defaults.CHARSET);
-        return strategy;
-    }
 
     @Test
     public void constructor() throws Exception {
@@ -55,7 +40,9 @@ public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Investor.Builder b = new Investor.Builder().asDryRun();
         // setup marketplace
         final Marketplace m = Mockito.mock(Marketplace.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m,
+                                                                     Mockito.mock(StrategyProvider.class),
+                                                                     Mockito.mock(Runnable.class),
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
             Assertions.assertThat(d.isFaultTolerant()).isTrue();
@@ -70,10 +57,11 @@ public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Marketplace m = Mockito.mock(Marketplace.class);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final PortfolioUpdater p = Mockito.mock(PortfolioUpdater.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, true, m, "",
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, true, m,
+                                                                     Mockito.mock(StrategyProvider.class),
+                                                                     Mockito.mock(Runnable.class),
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
-            Mockito.verify(p).registerDependant(ArgumentMatchers.isA(Selling.class));
             final Future<ReturnCode> f = e.submit(d::get);
             while (DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get() == null) {
                 // do nothing while the parallel task is initializing
@@ -93,7 +81,9 @@ public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final Marketplace m = Mockito.mock(Marketplace.class);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m, "",
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, new PortfolioUpdater(a), b, true, m,
+                                                                     Mockito.mock(StrategyProvider.class),
+                                                                     Mockito.mock(Runnable.class),
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
             final Future<ReturnCode> f = e.submit(d::get);
@@ -107,37 +97,5 @@ public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         }
         Mockito.verify(m).close();
     }
-    @Test
-    public void loadStrategyAsFile() throws IOException {
-        final StrategyProvider r = DaemonInvestmentMode.initStrategy(newStrategyFile().getAbsolutePath());
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
-            softly.assertThat(r.getToPurchase()).isPresent();
-        });
-    }
-
-    @Test
-    public void loadWrongStrategyAsFile() throws IOException {
-        final File tmp = File.createTempFile("robozonky-", ".cfg");
-        final StrategyProvider r = DaemonInvestmentMode.initStrategy(tmp.getAbsolutePath());
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isEmpty();
-            softly.assertThat(r.getToSell()).isEmpty();
-            softly.assertThat(r.getToPurchase()).isEmpty();
-        });
-    }
-
-    @Test
-    public void loadStrategyAsUrl() throws IOException {
-        final String url = newStrategyFile().toURI().toURL().toString();
-        final StrategyProvider r = DaemonInvestmentMode.initStrategy(url);
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
-            softly.assertThat(r.getToPurchase()).isPresent();
-        });
-    }
-
 
 }

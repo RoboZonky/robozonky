@@ -24,8 +24,8 @@ public class BlockedAmountsUpdater implements Runnable {
     private final PortfolioSupplier portfolio;
     private final PortfolioDependant instance;
 
-    public BlockedAmountsUpdater(final Authenticated authenticated, final PortfolioSupplier portfolio,
-                                 final PortfolioDependant blockedAmounts) {
+    BlockedAmountsUpdater(final Authenticated authenticated, final PortfolioSupplier portfolio,
+                          final PortfolioDependant blockedAmounts) {
         this.authenticated = authenticated;
         this.portfolio = portfolio;
         this.instance = blockedAmounts;

@@ -19,6 +19,7 @@ package com.github.robozonky.app.investing;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
@@ -31,25 +32,22 @@ import org.slf4j.LoggerFactory;
 public class Investor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Investor.class);
-    private final String username;
-    private final Zonky zonky;
-    private final boolean isDryRun;
+    private static final InvestOperation DRY_RUN = recommendedLoan -> {
+        Investor.LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", recommendedLoan);
+        return new ZonkyResponse(recommendedLoan.amount().intValue());
+    };
+    private final InvestOperation investOperation;
     private final RequestId requestId;
     private final ConfirmationProvider provider;
 
-    private Investor(final RequestId requestId, final ConfirmationProvider provider, final Zonky zonky,
-                     final boolean isDryRun) {
-        this.username = requestId.getUserId();
-        this.zonky = zonky;
-        this.isDryRun = isDryRun;
+    private Investor(final RequestId requestId, final ConfirmationProvider provider, final InvestOperation operation) {
+        this.investOperation = operation;
         this.provider = provider;
         this.requestId = requestId;
     }
 
-    private Investor(final String username, final Zonky zonky, final boolean isDryRun) {
-        this.username = username;
-        this.zonky = zonky;
-        this.isDryRun = isDryRun;
+    private Investor(final InvestOperation operation) {
+        this.investOperation = operation;
         this.provider = null;
         this.requestId = null;
     }
@@ -59,32 +57,17 @@ public class Investor {
         return new Investment(r.descriptor().item(), amount);
     }
 
-    public Zonky getZonky() {
-        return zonky;
-    }
-
-    public boolean isDryRun() {
-        return isDryRun;
-    }
-
-    public String getUsername() {
-        return this.username;
-    }
-
     public Optional<String> getConfirmationProviderId() {
         return (this.provider == null) ? Optional.empty() : Optional.of(this.provider.getId());
     }
 
     public ZonkyResponse invest(final RecommendedLoan r, final boolean alreadySeenBefore) {
-        if (this.isDryRun) {
-            Investor.LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", r);
-            return new ZonkyResponse(r.amount().intValue());
-        } else if (alreadySeenBefore) {
+        final boolean confirmationRequired = r.isConfirmationRequired();
+        if (alreadySeenBefore) {
             Investor.LOGGER.debug("Loan seen before.");
             final boolean protectedByCaptcha = r.descriptor().getLoanCaptchaProtectionEndDateTime()
                     .map(date -> OffsetDateTime.now().isBefore(date))
                     .orElse(false);
-            final boolean confirmationRequired = r.isConfirmationRequired();
             if (!protectedByCaptcha && !confirmationRequired) {
                 /*
                  * investment is no longer protected by CAPTCHA and no confirmation is required. therefore we invest.
@@ -98,25 +81,19 @@ public class Investor {
                  */
                 return new ZonkyResponse(ZonkyResponseType.SEEN_BEFORE);
             }
-        } else {
-            if (r.isConfirmationRequired()) {
-                if (this.provider == null) {
-                    throw new IllegalStateException("Confirmation required but no confirmation provider specified.");
-                } else {
-                    return this.delegateOrReject(r);
-                }
+        } else if (confirmationRequired) {
+            if (this.provider == null) {
+                throw new IllegalStateException("Confirmation required but no confirmation provider specified.");
             } else {
-                return this.investOrDelegateOnCaptcha(r);
+                return this.delegateOrReject(r);
             }
+        } else {
+            return this.investOrDelegateOnCaptcha(r);
         }
     }
 
     private ZonkyResponse investLocallyFailingOnCaptcha(final RecommendedLoan r) {
-        Investor.LOGGER.debug("Executing investment: {}.", r);
-        final Investment i = Investor.convertToInvestment(r);
-        this.zonky.invest(i);
-        Investor.LOGGER.debug("Investment succeeded.");
-        return new ZonkyResponse(i.getAmount().intValue());
+        return investOperation.apply(r);
     }
 
     private ZonkyResponse investOrDelegateOnCaptcha(final RecommendedLoan r) {
@@ -134,6 +111,10 @@ public class Investor {
         return new ZonkyResponse(ZonkyResponseType.REJECTED);
     }
 
+    public boolean isDryRun() {
+        return investOperation == DRY_RUN;
+    }
+
     private ZonkyResponse delegateOrReject(final RecommendedLoan r) {
         Investor.LOGGER.debug("Asking to confirm investment: {}.", r);
         final boolean delegationSucceeded = this.provider.requestConfirmation(this.requestId,
@@ -146,6 +127,11 @@ public class Investor {
             Investor.LOGGER.debug("Investment not confirmed delegated, not investing: {}.", r);
             return new ZonkyResponse(ZonkyResponseType.REJECTED);
         }
+    }
+
+    @FunctionalInterface
+    private interface InvestOperation extends Function<RecommendedLoan, ZonkyResponse> {
+
     }
 
     public static class Builder {
@@ -174,10 +160,6 @@ public class Investor {
             return this;
         }
 
-        public String getUsername() {
-            return username;
-        }
-
         public Investor.Builder asDryRun() {
             this.isDryRun = true;
             return this;
@@ -188,9 +170,16 @@ public class Investor {
         }
 
         public Investor build(final Zonky zonky) {
+            final InvestOperation o = isDryRun ? DRY_RUN : recommendedLoan -> {
+                Investor.LOGGER.debug("Executing investment: {}.", recommendedLoan);
+                final Investment i = Investor.convertToInvestment(recommendedLoan);
+                zonky.invest(i);
+                Investor.LOGGER.debug("Investment succeeded.");
+                return new ZonkyResponse(i.getAmount().intValue());
+            };
             return this.getConfirmationRequestUsed()
-                    .map(r -> new Investor(r, provider, zonky, isDryRun))
-                    .orElse(new Investor(username, zonky, isDryRun));
+                    .map(r -> new Investor(r, provider, o))
+                    .orElse(new Investor(o));
         }
     }
 }

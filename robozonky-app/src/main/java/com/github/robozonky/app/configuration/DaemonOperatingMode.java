@@ -26,8 +26,10 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.BlockedAmountsUpdater;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.configuration.daemon.PortfolioUpdater;
+import com.github.robozonky.app.configuration.daemon.StrategyProvider;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Delinquents;
+import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.common.extensions.MarketplaceLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
@@ -55,9 +57,12 @@ class DaemonOperatingMode extends OperatingMode {
                     // run update of blocked amounts automatically with every portfolio update
                     updater.registerDependant(bau.getDependant());
                     // update delinquents automatically with every portfolio update
-                    updater.registerDependant(new Delinquents());
+                    updater.registerDependant((p, a) -> Delinquents.update(a, p));
+                    final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
+                    // attempt to sell participations after every portfolio update
+                    updater.registerDependant(new Selling(sp::getToSell, builder.isDryRun()));
                     final InvestmentMode m = new DaemonInvestmentMode(auth, updater, builder, isFaultTolerant,
-                                                                      marketplaceImpl, strategy.getStrategyLocation(),
+                                                                      marketplaceImpl, sp, bau,
                                                                       marketplace.getMaximumSleepDuration(),
                                                                       marketplace.getPrimaryMarketplaceCheckDelay(),
                                                                       marketplace.getSecondaryMarketplaceCheckDelay());

@@ -34,9 +34,7 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
-import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,23 +47,21 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final Marketplace marketplace;
     private final List<DaemonOperation> daemons;
     private final PortfolioUpdater portfolioUpdater;
-    private final BlockedAmountsUpdater blockedAmountsUpdater;
+    private final Runnable blockedAmountsUpdater;
     public DaemonInvestmentMode(final Authenticated auth, final PortfolioUpdater p, final Investor.Builder builder,
                                 final boolean isFaultTolerant, final Marketplace marketplace,
-                                final String strategyLocation, final Duration maximumSleepPeriod,
+                                final StrategyProvider strategyProvider, final Runnable blockedAmountsUpdater,
+                                final Duration maximumSleepPeriod,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.faultTolerant = isFaultTolerant;
         this.marketplace = marketplace;
-        final boolean dryRun = builder.isDryRun();
-        final StrategyProvider sp = initStrategy(strategyLocation);
         this.portfolioUpdater = p;
-        this.blockedAmountsUpdater = new BlockedAmountsUpdater(auth, portfolioUpdater);
-        p.registerDependant(new Selling(sp::getToSell, dryRun)); // run sell strategy with every portfolio update
-        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, sp::getToInvest, p,
+        this.blockedAmountsUpdater = blockedAmountsUpdater;
+        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, strategyProvider::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
-                                     new PurchasingDaemon(auth, sp::getToPurchase, p, maximumSleepPeriod,
-                                                          secondaryMarketplaceCheckPeriod, dryRun));
+                                     new PurchasingDaemon(auth, strategyProvider::getToPurchase, p, maximumSleepPeriod,
+                                                          secondaryMarketplaceCheckPeriod, builder.isDryRun()));
     }
 
     private static ThreadGroup newThreadGroup(final String name) {
@@ -73,14 +69,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
         threadGroup.setMaxPriority(Thread.NORM_PRIORITY + 1); // these threads should be a bit more important
         threadGroup.setDaemon(true); // no thread from this group shall block shutdown
         return threadGroup;
-    }
-
-    static StrategyProvider initStrategy(final String strategyLocation) {
-        final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
-        final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
-        strategy.registerListener(sp);
-        Scheduler.inBackground().submit(strategy); // start strategy refresh after the listener was registered
-        return sp;
     }
 
     private static LocalDateTime getNextFourAM(final LocalDateTime now) {

@@ -65,7 +65,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         final Portfolio portfolio = Portfolio.create(zonky);
-        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), new Investor.Builder(), zonky);
+        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(zonky), zonky);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(it.getAvailable())
                     .isNotSameAs(lds)
@@ -91,7 +91,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         portfolio.newBlockedAmount(zonky, new BlockedAmount(loanId2, BigDecimal.valueOf(200),
                                                             TransactionCategory.SMP_BUY));
         // test that the loans are not available
-        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), new Investor.Builder(), zonky);
+        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(zonky), zonky);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(it.getAvailable())
                     .hasSize(1)
@@ -107,6 +107,10 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         return new RestrictedInvestmentStrategy(s, new Restrictions());
     }
 
+    private Investor getInvestor(final Zonky zonky) {
+        return new Investor.Builder().build(zonky);
+    }
+
     @Test
     public void makeInvestment() {
         // setup APIs
@@ -118,7 +122,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.when(z.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(ld.item());
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         final Portfolio portfolio = Mockito.spy(Portfolio.create(z));
-        final Collection<Investment> i = Session.invest(portfolio, new Investor.Builder(), z, lds,
+        final Collection<Investment> i = Session.invest(portfolio, getInvestor(z), z, lds,
                                                         mockStrategy(loanId, amount));
         // check that one investment was made
         Assertions.assertThat(i).hasSize(1);
@@ -141,7 +145,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
         final Portfolio portfolio = Portfolio.create(z);
         // run test
-        final Session it = new Session(portfolio, Collections.emptySet(), new Investor.Builder(), z);
+        final Session it = new Session(portfolio, Collections.emptySet(), getInvestor(z), z);
         final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
                 .recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
         final boolean result = it.invest(recommendation.get());
@@ -157,8 +161,7 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final RecommendedLoan recommendation =
                 AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
         final Portfolio portfolio = Portfolio.create(z);
-        final Session t = new Session(portfolio, Collections.singleton(recommendation.descriptor()),
-                                      new Investor.Builder(), z);
+        final Session t = new Session(portfolio, Collections.singleton(recommendation.descriptor()), getInvestor(z), z);
         final boolean result = t.invest(recommendation);
         // verify result
         Assertions.assertThat(result).isFalse();
@@ -173,10 +176,8 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = Mockito.mock(Investor.class);
         Mockito.doThrow(thrown).when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
-        final Investor.Builder b = Mockito.spy(new Investor.Builder());
-        Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z);
-        final Session t = new Session(portfolio, Collections.emptySet(), b, z);
+        final Session t = new Session(portfolio, Collections.emptySet(), p, z);
         Assertions.assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
     }
 
@@ -188,10 +189,8 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        final Investor.Builder b = Mockito.spy(new Investor.Builder());
-        Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z);
-        final Session t = new Session(portfolio, Collections.emptySet(), b, z);
+        final Session t = new Session(portfolio, Collections.emptySet(), p, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
         // validate event
@@ -212,11 +211,9 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        final Investor.Builder b = Mockito.spy(new Investor.Builder());
-        Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         final Portfolio portfolio = Portfolio.create(z);
-        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
+        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
         // validate event
@@ -238,10 +235,8 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        final Investor.Builder b = Mockito.spy(new Investor.Builder());
-        Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z);
-        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
+        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
         // validate event
@@ -264,10 +259,8 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         Mockito.doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.empty()).when(p).getConfirmationProviderId();
-        final Investor.Builder b = Mockito.spy(new Investor.Builder());
-        Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z);
-        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), b, z);
+        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isFalse();
         // validate event
@@ -287,14 +280,11 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(oldBalance);
         Mockito.when(z.getLoan(ArgumentMatchers.eq(r.descriptor().item().getId()))).thenReturn(r.descriptor().item());
         final Investor p = Mockito.mock(Investor.class);
-        Mockito.doReturn(z).when(p).getZonky();
         Mockito.doReturn(new ZonkyResponse(amountToInvest))
                 .when(p).invest(ArgumentMatchers.eq(r), ArgumentMatchers.anyBoolean());
         Mockito.doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        final Investor.Builder b = Mockito.spy(new Investor.Builder());
-        Mockito.doReturn(p).when(b).build(ArgumentMatchers.eq(z));
         final Portfolio portfolio = Portfolio.create(z);
-        final Session t = new Session(portfolio, Collections.emptySet(), b, z);
+        final Session t = new Session(portfolio, Collections.emptySet(), p, z);
         final boolean result = t.invest(r);
         Assertions.assertThat(result).isTrue();
         final List<Investment> investments = t.getResult();
