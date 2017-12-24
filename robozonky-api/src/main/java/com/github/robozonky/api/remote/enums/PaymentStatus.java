@@ -28,7 +28,8 @@ public enum PaymentStatus {
     PAID_OFF,
     CANCELED,
     WRITTEN_OFF,
-    PAID;
+    PAID,
+    IN_WITHDRAWAL;
 
     /**
      * @return Values of this enum that correspond to investments where there are overdue instalments.
@@ -42,7 +43,7 @@ public enum PaymentStatus {
      */
     public static PaymentStatuses getDone() {
         return PaymentStatuses.of(PaymentStatus.CANCELED, PaymentStatus.PAID_OFF, PaymentStatus.WRITTEN_OFF,
-                                  PaymentStatus.PAID);
+                                  PaymentStatus.PAID, PaymentStatus.IN_WITHDRAWAL);
     }
 
     /**
