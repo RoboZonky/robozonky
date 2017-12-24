@@ -52,7 +52,7 @@ public class MarketplaceLoaderTest {
     public void loading() {
         final Marketplace m = new Marketplace() {
             @Override
-            public boolean registerListener(Consumer<Collection<Loan>> listener) {
+            public boolean registerListener(final Consumer<Collection<Loan>> listener) {
                 return false;
             }
 

@@ -37,6 +37,7 @@ import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.PortfolioDependant;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,9 +67,8 @@ public class Selling implements PortfolioDependant {
         return auth.call(zonky -> portfolio.calculateOverview(zonky, isDryRun));
     }
 
-    private InvestmentDescriptor getDescriptor(final Portfolio portfolio, final Investment i,
-                                               final Authenticated auth) {
-        return auth.call(zonky -> new InvestmentDescriptor(i, portfolio.getLoan(zonky, i.getLoanId())));
+    private InvestmentDescriptor getDescriptor(final Investment i, final Authenticated auth) {
+        return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky)));
     }
 
     private Optional<Investment> processInvestment(final Zonky zonky, final RecommendedInvestment r) {
@@ -94,7 +94,7 @@ public class Selling implements PortfolioDependant {
     private void sell(final Portfolio portfolio, final SellStrategy strategy, final Authenticated auth) {
         final PortfolioOverview overview = newPortfolioOverview(portfolio, isDryRun, auth);
         final Set<InvestmentDescriptor> eligible = portfolio.getActiveForSecondaryMarketplace().parallel()
-                .map(i -> getDescriptor(portfolio, i, auth))
+                .map(i -> getDescriptor(i, auth))
                 .collect(Collectors.toSet());
         Events.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)

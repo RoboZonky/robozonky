@@ -35,7 +35,7 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.internal.api.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,11 +114,9 @@ enum DelinquencyCategory {
      * Update internal state trackers and send events if necessary.
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
      * @param auth Authenticated API to be used for retrieving loan data.
-     * @param loanProvider Used to retrieve loans either from the Zonky API or from some cache.
      * @return IDs of loans that are being tracked in this category.
      */
-    public Collection<Integer> update(final Collection<Delinquency> active, final Authenticated auth,
-                                      final BiFunction<Integer, Zonky, Loan> loanProvider) {
+    public Collection<Integer> update(final Collection<Delinquency> active, final Authenticated auth) {
         LOGGER.trace("Updating {}.", this);
         final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
@@ -131,7 +129,7 @@ enum DelinquencyCategory {
                 .filter(d -> isOverThreshold(d, thresholdInDays))
                 .filter(d -> keepThese.stream().noneMatch(id -> isLoanRelated(d, id)))
                 .peek(d -> {
-                    final Loan l = auth.call(zonky -> loanProvider.apply(d.getParent().getLoanId(), zonky));
+                    final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(d.getParent().getLoanId(), zonky));
                     final Event e = getEvent(d, l, thresholdInDays);
                     Events.fire(e);
                 })

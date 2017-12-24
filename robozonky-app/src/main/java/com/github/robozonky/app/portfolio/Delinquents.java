@@ -33,6 +33,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
@@ -129,7 +130,7 @@ public class Delinquents {
     }
 
     static void update(final Authenticated auth, final Collection<Investment> presentlyDelinquent,
-                       final Collection<Investment> noLongerActive, final LoanProvider loanProvider) {
+                       final Collection<Investment> noLongerActive) {
         LOGGER.debug("Updating delinquent loans.");
         final LocalDate now = LocalDate.now();
         final Collection<Delinquent> knownDelinquents = getDelinquents();
@@ -141,7 +142,7 @@ public class Delinquents {
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
                 .map(Delinquency::getParent)
                 .forEach(d -> {  // notify
-                    final Loan loan = auth.call(z -> loanProvider.apply(d.getLoanId(), z));
+                    final Loan loan = auth.call(z -> LoanCache.INSTANCE.getLoan(d.getLoanId(), z));
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
                         Events.fire(new LoanDefaultedEvent(loan, since));
@@ -160,7 +161,7 @@ public class Delinquents {
         final Stream<Delinquent> all = Stream.concat(delinquentInThePast, nowDelinquent).distinct();
         final Collection<Delinquency> result = persistAndReturnActiveDelinquents(all);
         // notify of new delinquencies over all known thresholds
-        Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(result, auth, loanProvider));
+        Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(result, auth));
         LOGGER.trace("Done.");
     }
 
@@ -177,6 +178,6 @@ public class Delinquents {
      */
     public static void update(final Authenticated auth, final Portfolio portfolio) {
         update(auth, getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
-               getWithPaymentStatus(portfolio, PaymentStatus.getDone()), new PortfolioLoanProvider(portfolio));
+               getWithPaymentStatus(portfolio, PaymentStatus.getDone()));
     }
 }

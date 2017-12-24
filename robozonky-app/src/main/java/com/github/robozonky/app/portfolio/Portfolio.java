@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -39,6 +38,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.util.ApiUtil;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
@@ -87,7 +87,7 @@ public class Portfolio {
     }
 
     private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
-        final Loan l = getLoan(zonky, blockedAmount.getLoanId());
+        final Loan l = LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky);
         return new Investment(l, blockedAmount.getAmount().intValue());
     }
 
@@ -188,29 +188,5 @@ public class Portfolio {
     public PortfolioOverview calculateOverview(final Zonky zonky, final boolean isDryRun) {
         final BigDecimal balance = isDryRun ? ApiUtil.getDryRunBalance(zonky) : ApiUtil.getLiveBalance(zonky);
         return calculateOverview(balance);
-    }
-
-    /**
-     * Retrieve a full Loan instance from local cache, falling back to the server if not already present.
-     * @param zonky API to use to retrieve the data.
-     * @param loanId ID of the loan to retrieve.
-     * @return Copy of the loan data at time of retrieval.
-     */
-    public Loan getLoan(final Zonky zonky, final int loanId) {
-        return loanCache.compute(loanId, (key, value) -> {
-            if (value != null) {
-                return value;
-            }
-            return zonky.getLoan(loanId);
-        });
-    }
-
-    /**
-     * Retrieve a full Loan instance from local cache.
-     * @param loanId ID of the loan to retrieve.
-     * @return Empty if loan not present in local cache.
-     */
-    public Optional<Loan> getLoan(final int loanId) {
-        return Optional.ofNullable(loanCache.get(loanId));
     }
 }
