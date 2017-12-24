@@ -17,15 +17,11 @@
 package com.github.robozonky.app.configuration;
 
 import java.io.File;
-import java.time.Duration;
 import java.util.Optional;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +42,6 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
             description = "Path to secure file that contains username, password etc.")
     private File keystore = null;
 
-    @Deprecated
-    @Parameter(names = {"-r", "--refresh"}, hidden = true)
-    private boolean refreshTokenEnabled = false;
-
     public AuthenticationCommandLineFragment() {
         // do nothing
     }
@@ -61,7 +53,6 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
     AuthenticationCommandLineFragment(final String username, final File keystore, final boolean refreshTokenEnabled) {
         this.username = username;
         this.keystore = keystore;
-        this.refreshTokenEnabled = refreshTokenEnabled;
     }
 
     public Optional<String> getUsername() {
@@ -74,16 +65,6 @@ class AuthenticationCommandLineFragment extends AbstractCommandLineFragment {
 
     public Optional<File> getKeystore() {
         return Optional.ofNullable(keystore);
-    }
-
-    public Authenticated createAuthenticated(final SecretProvider secrets) {
-        if (refreshTokenEnabled) {
-            LOGGER.info("Persistent authentication is now enabled by default and can not be disabled."
-                                + " '-r' command-line option will be removed in the next RoboZonky major version. " +
-                                "Kindly stop using it.");
-        }
-        final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
-        return Authenticated.tokenBased(secrets, duration);
     }
 
     private Optional<ParameterException> actuallyValidate() {

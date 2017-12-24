@@ -19,7 +19,6 @@ package com.github.robozonky.app.configuration;
 import java.io.File;
 
 import com.beust.jcommander.ParameterException;
-import com.github.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -70,12 +69,4 @@ public class AuthenticationCommandLineFragmentTest {
         fragment.validate(null);
     }
 
-    @Test
-    public void refreshEnabled() {
-        final File keystore = new File("");
-        final AuthenticationCommandLineFragment fragment =
-                new AuthenticationCommandLineFragment("username", keystore, true);
-        Assertions.assertThat(fragment.createAuthenticated(SecretProvider.fallback("username", new char[0])))
-                .isNotNull();
-    }
 }
