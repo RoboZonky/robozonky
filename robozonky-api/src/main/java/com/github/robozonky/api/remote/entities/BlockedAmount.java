@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 
 public class BlockedAmount extends BaseEntity implements Comparable<BlockedAmount> {
 
-    private BigDecimal amount;
+    private BigDecimal amount, discount;
     private int loanId;
     private TransactionCategory category;
     private String loanName;
@@ -54,6 +54,11 @@ public class BlockedAmount extends BaseEntity implements Comparable<BlockedAmoun
     @XmlElement
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    @XmlElement
+    public BigDecimal getDiscount() {
+        return discount;
     }
 
     @XmlElement
