@@ -17,30 +17,26 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-/**
- * Individual condition that may then be aggregated within {@link MarketplaceFilter}.
- */
-public interface MarketplaceFilterCondition extends Predicate<Wrapper> {
+enum AlwaysAcceptingCondition implements MarketplaceFilterCondition {
 
-    static MarketplaceFilterCondition alwaysAccepting() {
-        return AlwaysAcceptingCondition.INSTANCE;
+    // cheap thread-safe sigleton
+    INSTANCE;
+
+    @Override
+    public Optional<String> getDescription() {
+        return Optional.empty();
     }
 
-    static MarketplaceFilterCondition neverAccepting() {
+    @Override
+    public boolean test(final Wrapper item) {
+        return true;
+    }
+
+    @Override
+    public MarketplaceFilterCondition negate() {
         return NeverAceptingCondition.INSTANCE;
     }
-
-    /**
-     * Describe the condition using eg. range boundaries.
-     * @return If present, is a whole sentence. (Starting with capital letter, ending with a full stop.)
-     */
-    Optional<String> getDescription();
-
-    boolean test(final Wrapper item);
-
-    MarketplaceFilterCondition negate();
 }

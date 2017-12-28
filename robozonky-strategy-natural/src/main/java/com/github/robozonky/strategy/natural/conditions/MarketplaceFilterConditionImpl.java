@@ -16,6 +16,8 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +27,22 @@ abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondit
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Override
+    public Optional<String> getDescription() {
+        return Optional.empty();
+    }
+
+    @Override
     public String toString() {
         final String description = getDescription().orElse("N/A.");
         return this.getClass().getSimpleName() + " (" + description + ")";
+    }
+
+    @Override
+    public MarketplaceFilterCondition negate() {
+        if (this instanceof NegatingCondition) {
+            return ((NegatingCondition) this).getToNegate();
+        } else {
+            return new NegatingCondition(this);
+        }
     }
 }

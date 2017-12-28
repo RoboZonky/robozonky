@@ -8,13 +8,24 @@ import Tokens;
 }
 
 defaultExpression returns [DefaultValues result]:
- r=portfolioExpression
- { $result = new DefaultValues($r.result); }
+ r=portfolioExpression { $result = new DefaultValues($r.result); }
+ (e=exitDateExpression { $result.setExitProperties($e.result); })?
  (p=targetPortfolioSizeExpression { $result.setTargetPortfolioSize($p.result); })?
  (d=defaultInvestmentSizeExpression { $result.setInvestmentSize($d.result); })?
  (s=defaultInvestmentShareExpression { $result.setInvestmentShare($s.result); })?
  (b=targetBalanceExpression { $result.setMinimumBalance($b.result); })?
  (c=confirmationExpression { $result.setConfirmationCondition($c.result); })?
+;
+
+exitDateExpression returns [ExitProperties result]:
+    'Opustit Zonky k ' termination=dateExpr (
+        ( { $result = new ExitProperties($termination.result); } )
+        | (
+            OR_COMMA 'výprodej zahájit ' selloff=dateExpr {
+                $result = new ExitProperties($termination.result, $selloff.result);
+            }
+        )
+    ) DOT
 ;
 
 defaultInvestmentSizeExpression returns [InvestmentSize result] :
@@ -28,16 +39,6 @@ defaultInvestmentShareExpression returns [DefaultInvestmentShare result] :
         maximumInvestmentInCzk=intExpr
         { $result = new DefaultInvestmentShare($maximumInvestmentInCzk.result); }
     ' % výše úvěru' DOT
-;
-
-targetPortfolioSizeExpression returns [int result] :
-    'Cílová zůstatková částka je ' maximumInvestmentInCzk=intExpr KC DOT
-    {$result = $maximumInvestmentInCzk.result;}
-;
-
-targetBalanceExpression returns [int result] :
-    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=intExpr KC DOT
-    {$result = $balance.result;}
 ;
 
 confirmationExpression returns [MarketplaceFilterCondition result] :

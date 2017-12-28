@@ -27,16 +27,8 @@ import org.mockito.Mockito;
 
 public class MarketplaceFilterTest {
 
-    private static final Supplier<MarketplaceFilterCondition> MATCHING = () -> new MarketplaceFilterCondition() {
-
-        @Override
-        public boolean test(final Wrapper loan) {
-            return true;
-        }
-    };
-    private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = () -> new MarketplaceFilterCondition() {
-        // this is the default
-    };
+    private static final Supplier<MarketplaceFilterCondition> MATCHING = MarketplaceFilterCondition::alwaysAccepting;
+    private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = MarketplaceFilterCondition::neverAccepting;
 
     @Test
     public void noConditions() {
@@ -47,14 +39,14 @@ public class MarketplaceFilterTest {
     @Test
     public void oneMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.ignoreWhen(Collections.singletonList(MATCHING.get()));
+        f.when(Collections.singletonList(MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Wrapper.class))).isTrue();
     }
 
     @Test
     public void notAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.ignoreWhen(Arrays.asList(MATCHING.get(), NOT_MATCHING.get(), MATCHING.get()));
+        f.when(Arrays.asList(MATCHING.get(), NOT_MATCHING.get(), MATCHING.get()));
         Assertions.assertThat(f.test(Mockito.mock(Wrapper.class))).isFalse();
     }
 

@@ -17,12 +17,14 @@
 package com.github.robozonky.strategy.natural;
 
 import java.util.Collections;
+import java.util.function.BiFunction;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class InvestmentSizeRecommenderTest {
@@ -36,8 +38,8 @@ public class InvestmentSizeRecommenderTest {
         final DefaultValues defaults = new DefaultValues(DefaultPortfolio.EMPTY);
         defaults.setInvestmentShare(new DefaultInvestmentShare(MAXIMUM_SHARE));
         final InvestmentSize target = new InvestmentSize(MAXIMUM_INVESTMENT);
-        return new ParsedStrategy(defaults, Collections.emptyList(), Collections.singletonMap(LOAN.getRating(), target),
-                                  Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+        return new ParsedStrategy(defaults, Collections.emptyList(),
+                                  Collections.singletonMap(LOAN.getRating(), target));
     }
 
     @Test
@@ -86,4 +88,44 @@ public class InvestmentSizeRecommenderTest {
         Assertions.assertThat(actualInvestment).isEqualTo(0);
     }
 
+    @Test
+    public void minimumOverBalance() {
+        final Loan l = new Loan(1, 100_000);
+        final ParsedStrategy s = Mockito.mock(ParsedStrategy.class);
+        final int minimumInvestment = 1000;
+        Mockito.when(s.getMinimumInvestmentSizeInCzk(ArgumentMatchers.eq(l.getRating()))).thenReturn(minimumInvestment);
+        Mockito.when(s.getMaximumInvestmentSizeInCzk(ArgumentMatchers.eq(l.getRating())))
+                .thenReturn(minimumInvestment * 2);
+        Mockito.when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
+        final BiFunction<Loan, Integer, Integer> r = new InvestmentSizeRecommender(s, minimumInvestment * 10);
+        Assertions.assertThat(r.apply(l, minimumInvestment - 1)).isEqualTo(0);
+    }
+
+    @Test
+    public void minimumOverRemaining() {
+        final int minimumInvestment = 1000;
+        final Loan l = new Loan(1, minimumInvestment - 1);
+        final ParsedStrategy s = Mockito.mock(ParsedStrategy.class);
+        Mockito.when(s.getMinimumInvestmentSizeInCzk(ArgumentMatchers.eq(l.getRating()))).thenReturn(minimumInvestment);
+        Mockito.when(s.getMaximumInvestmentSizeInCzk(ArgumentMatchers.eq(l.getRating())))
+                .thenReturn(minimumInvestment * 2);
+        Mockito.when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
+        final BiFunction<Loan, Integer, Integer> r = new InvestmentSizeRecommender(s, minimumInvestment * 10);
+        Assertions.assertThat(r.apply(l, minimumInvestment * 2)).isEqualTo(0);
+    }
+
+    @Test
+    public void recommendationRoundedUnderMinimum() {
+        final int minimumInvestment = 1000;
+        final Loan l = new Loan(1, minimumInvestment - 1);
+        final ParsedStrategy s = Mockito.mock(ParsedStrategy.class);
+        // next line will cause the recommendation to be rounded to 800, which will be below the minimum investment
+        Mockito.when(s.getMinimumInvestmentSizeInCzk(ArgumentMatchers.eq(l.getRating()))).thenReturn(
+                minimumInvestment - 1);
+        Mockito.when(s.getMaximumInvestmentSizeInCzk(ArgumentMatchers.eq(l.getRating())))
+                .thenReturn(minimumInvestment);
+        Mockito.when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
+        final BiFunction<Loan, Integer, Integer> r = new InvestmentSizeRecommender(s, minimumInvestment * 10);
+        Assertions.assertThat(r.apply(l, minimumInvestment * 2)).isEqualTo(0);
+    }
 }

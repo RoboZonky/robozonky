@@ -71,9 +71,7 @@ public class NaturalLanguagePurchaseStrategyTest {
     public void unacceptablePortfolioDueToOverInvestment() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
-        final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
-                                                    Collections.emptyList(), Collections.emptyList(),
-                                                    Collections.emptyList());
+        final ParsedStrategy p = new ParsedStrategy(v);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
@@ -85,15 +83,10 @@ public class NaturalLanguagePurchaseStrategyTest {
 
     @Test
     public void noLoansApplicable() {
-        final MarketplaceFilter filter = new MarketplaceFilter();
-        filter.ignoreWhen(Collections.singleton(new MarketplaceFilterCondition() {
-            @Override
-            public boolean test(final Wrapper loan) {
-                return true;
-            }
-        }));
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptyList(),
-                                                    Collections.singleton(filter));
+        final MarketplaceFilter filter = MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting());
+        final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
+        final FilterSupplier w = new FilterSupplier(v, Collections.emptySet(), Collections.singleton(filter));
+        final ParsedStrategy p = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), w);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());

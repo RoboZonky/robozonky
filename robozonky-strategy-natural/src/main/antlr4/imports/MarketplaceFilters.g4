@@ -37,25 +37,25 @@ sellFilterExpression returns [Collection<MarketplaceFilter> result]:
 
 jointMarketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
-    'Ignorovat vše, kde: ' r=jointMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
+    'Ignorovat vše, kde: ' r=jointMarketplaceFilterConditions { $result.when($r.result); }
     ('(Ale ne když: ' s=jointMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
 primaryMarketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
-    'Ignorovat úvěr, kde: ' r=primaryMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
+    'Ignorovat úvěr, kde: ' r=primaryMarketplaceFilterConditions { $result.when($r.result); }
     ('(Ale ne když: ' s=primaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
 secondaryMarketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
-    'Ignorovat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
+    'Ignorovat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.when($r.result); }
     ('(Ale ne když: ' s=secondaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 
 sellMarketplaceFilter returns [MarketplaceFilter result]:
     { $result = new MarketplaceFilter(); }
-    'Prodat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.ignoreWhen($r.result); }
+    'Prodat participaci, kde: ' r=secondaryMarketplaceFilterConditions { $result.when($r.result); }
     ('(Ale ne když: ' s=secondaryMarketplaceFilterConditions { $result.butNotWhen($s.result); } ')')?
 ;
 

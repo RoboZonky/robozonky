@@ -16,6 +16,9 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
@@ -26,9 +29,8 @@ public class DefaultValues {
     private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
     private InvestmentSize investmentSize = new InvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
-    private MarketplaceFilterCondition confirmationCondition = new MarketplaceFilterCondition() {
-        // by default, do not confirm anything ever
-    };
+    private ExitProperties exitProperties;
+    private MarketplaceFilterCondition confirmationCondition = MarketplaceFilterCondition.neverAccepting();
 
     public DefaultValues(final DefaultPortfolio portfolio) {
         this.portfolio = portfolio;
@@ -48,6 +50,26 @@ public class DefaultValues {
                                                        + Defaults.MINIMUM_INVESTMENT_IN_CZK + "CZK.");
         }
         this.minimumBalance = minimumBalance;
+    }
+
+    public void setExitProperties(final ExitProperties properties) {
+        this.exitProperties = properties;
+    }
+
+    public boolean isSelloffStarted() {
+        if (exitProperties == null) {
+            return false;
+        } else {
+            return exitProperties.getSelloffStart().isBefore(LocalDate.now());
+        }
+    }
+
+    public long getMonthsBeforeExit() {
+        if (exitProperties == null) {
+            return -1;
+        } else {
+            return Math.max(0, Period.between(LocalDate.now(), exitProperties.getAccountTermination()).toTotalMonths());
+        }
     }
 
     public int getTargetPortfolioSize() {
@@ -99,6 +121,7 @@ public class DefaultValues {
                 ", minimumBalance=" + minimumBalance +
                 ", investmentSize=" + investmentSize +
                 ", investmentShare=" + investmentShare +
+                ", exitProperties=" + exitProperties +
                 ", confirmationCondition=" + confirmationCondition +
                 '}';
     }

@@ -71,7 +71,8 @@ complexExpression returns [ParsedStrategy result]
     )?
 
     {
-        $result = new ParsedStrategy($d.result, portfolioStructures, investmentSizes, primaryFilters, secondaryFilters,
-                                     sellFilters);
+        final DefaultValues v = $d.result;
+        $result = new ParsedStrategy(v, portfolioStructures, investmentSizes,
+                                     new FilterSupplier(v, primaryFilters, secondaryFilters, sellFilters));
     }
 ;

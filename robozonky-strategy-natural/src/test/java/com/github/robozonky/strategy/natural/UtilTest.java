@@ -76,7 +76,6 @@ public class UtilTest {
         final int targetShareA = 1;
         final int targetShareB = targetShareA * 5;
         final int targetShareC = targetShareB * 5;
-
         final ParsedStrategy parsedStrategy = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
                                                                  Arrays.asList(
                                                                          new PortfolioShare(Rating.A, targetShareA,
@@ -85,8 +84,7 @@ public class UtilTest {
                                                                                             targetShareB),
                                                                          new PortfolioShare(Rating.C, targetShareC,
                                                                                             targetShareC)),
-                                                                 Collections.emptyMap(), Collections.emptyList(),
-                                                                 Collections.emptyList(), Collections.emptyList());
+                                                                 Collections.emptyMap());
         // all ratings have zero share; C > B > A
         PortfolioOverview portfolio = prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio.getSharesOnInvestment()), Rating.C, Rating.B,

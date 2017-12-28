@@ -35,16 +35,22 @@ import com.github.robozonky.strategy.natural.Wrapper;
  * <li>TRUE IF CONDITIONS1 TRUE BUT NOT WHEN CONDITIONS2 TRUE.</li>
  * <li>CONDITIONS1 is TRUE when all conditions evaluate to true.</li>
  * <li>CONDITIONS2 is TRUE when either empty or at least one condition evalutes to false.</li>
- * <li>CONDITIONS1 supplied by {@link #ignoreWhen(Collection)}, CONDITIONS2 by {@link #butNotWhen(Collection)}.</li>
+ * <li>CONDITIONS1 supplied by {@link #when(Collection)}, CONDITIONS2 by {@link #butNotWhen(Collection)}.</li>
  * </ul>
  * <p>
  * Result of the evaluation obtained via {@link #test(Wrapper)}.
  */
 public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
 
+    public static MarketplaceFilter of(final MarketplaceFilterCondition c) {
+        final MarketplaceFilter f = new MarketplaceFilter();
+        f.when(Collections.singleton(c));
+        return f;
+    }
+
     private static AtomicInteger COUNTER = new AtomicInteger(0);
     private final int id = COUNTER.incrementAndGet();
-    private Collection<MarketplaceFilterCondition> ignoreWhen = Collections.emptySet(),
+    private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
             butNotWhen = Collections.emptySet();
 
     private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
@@ -57,12 +63,12 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * {@link #test(Wrapper)} will only return true if all of the conditions supplied here return true.
      * @param conditions All must return true for filter to return true.
      */
-    public void ignoreWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        ignoreWhen = new LinkedHashSet<>(conditions);
+    public void when(final Collection<? extends MarketplaceFilterCondition> conditions) {
+        when = new LinkedHashSet<>(conditions);
     }
 
     /**
-     * {@link #test(Wrapper)} will only return true if {@link #ignoreWhen(Collection)} and none of the conditions
+     * {@link #test(Wrapper)} will only return true if {@link #when(Collection)} and none of the conditions
      * supplied here return true.
      * @param conditions All must return false for filter to return true.
      */
@@ -72,17 +78,17 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("#" + id + ": [" + toString(ignoreWhen) + "] but not [" + toString(butNotWhen) + "].");
+        return Optional.of("#" + id + ": [" + toString(when) + "] but not [" + toString(butNotWhen) + "].");
     }
 
     /**
      * Whether or not the item matches the complex condition.
      * @param item Item in question.
-     * @return True when all {@link #ignoreWhen} true AND 1+ {@link #butNotWhen} false.
+     * @return True when all {@link #when} true AND 1+ {@link #butNotWhen} false.
      */
     @Override
     public boolean test(final Wrapper item) {
         final Predicate<MarketplaceFilterCondition> f = c -> c.test(item);
-        return ignoreWhen.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
+        return when.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
     }
 }

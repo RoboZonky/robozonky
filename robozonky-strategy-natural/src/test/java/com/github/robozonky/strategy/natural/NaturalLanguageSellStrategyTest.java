@@ -48,15 +48,8 @@ public class NaturalLanguageSellStrategyTest {
 
     @Test
     public void noLoansApplicable() {
-        final MarketplaceFilter filter = new MarketplaceFilter();
-        filter.ignoreWhen(Collections.singleton(new MarketplaceFilterCondition() {
-            @Override
-            public boolean test(final Wrapper loan) {
-                return true;
-            }
-        }));
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptyList(),
-                                                    Collections.singleton(filter));
+        final MarketplaceFilter filter = MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting());
+        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());

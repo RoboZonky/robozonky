@@ -4,6 +4,7 @@ grammar Tokens;
     import java.lang.String;
     import java.math.BigDecimal;
     import java.math.BigInteger;
+    import java.time.LocalDate;
     import java.util.Collection;
     import java.util.LinkedHashSet;
     import com.github.robozonky.api.remote.enums.*;
@@ -19,6 +20,16 @@ portfolioExpression returns [DefaultPortfolio result] :
         | ( 'progresivní' { $result = DefaultPortfolio.PROGRESSIVE; } )
         | ( 'prázdné' { $result = DefaultPortfolio.EMPTY; } )
     ) ' portfolio' DOT
+;
+
+targetPortfolioSizeExpression returns [int result] :
+    'Cílová zůstatková částka je ' maximumInvestmentInCzk=intExpr KC DOT
+    {$result = $maximumInvestmentInCzk.result;}
+;
+
+targetBalanceExpression returns [int result] :
+    'Investovat pouze pokud disponibilní zůstatek přesáhne ' balance=intExpr KC DOT
+    {$result = $balance.result;}
 ;
 
 ratingCondition returns [MarketplaceFilterCondition result]:
@@ -76,6 +87,16 @@ incomeExpression returns [MainIncomeType result] :
 purposeExpression returns [Purpose result] :
     r=(PURPOSE | OTHER) {
         $result = Purpose.findByCode($r.getText());
+    }
+;
+
+dateExpr returns [LocalDate result] :
+    d=intExpr DOT m=intExpr DOT y=intExpr
+    {
+        $result = LocalDate.now()
+            .withDayOfMonth($d.result)
+            .withMonth($m.result)
+            .withYear($y.result);
     }
 ;
 

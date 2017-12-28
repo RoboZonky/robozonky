@@ -22,20 +22,20 @@ public class LoanTermCondition extends AbstractRangeCondition {
 
     private static final int MIN_TERM = 0, MAX_TERM = 84;
 
-    private static void assertIsInRange(final int months) {
+    private static void assertIsInRange(final long months) {
         if ((months < LoanTermCondition.MIN_TERM) || (months > LoanTermCondition.MAX_TERM)) {
             throw new IllegalArgumentException("Loan term must be in range of <" + LoanTermCondition.MIN_TERM + "; "
                                                        + LoanTermCondition.MAX_TERM + ">, but was " + months);
         }
     }
 
-    public LoanTermCondition(final int fromInclusive, final int toInclusive) {
+    public LoanTermCondition(final long fromInclusive, final long toInclusive) {
         super(Wrapper::getRemainingTermInMonths, fromInclusive, toInclusive);
         LoanTermCondition.assertIsInRange(fromInclusive);
         LoanTermCondition.assertIsInRange(toInclusive);
     }
 
-    public LoanTermCondition(final int fromInclusive) {
+    public LoanTermCondition(final long fromInclusive) {
         this(fromInclusive, LoanTermCondition.MAX_TERM);
     }
 }

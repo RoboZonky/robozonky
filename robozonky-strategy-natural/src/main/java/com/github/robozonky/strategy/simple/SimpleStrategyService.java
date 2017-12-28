@@ -38,6 +38,7 @@ import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.strategy.natural.DefaultInvestmentShare;
 import com.github.robozonky.strategy.natural.DefaultPortfolio;
 import com.github.robozonky.strategy.natural.DefaultValues;
+import com.github.robozonky.strategy.natural.FilterSupplier;
 import com.github.robozonky.strategy.natural.InvestmentSize;
 import com.github.robozonky.strategy.natural.NaturalLanguageInvestmentStrategy;
 import com.github.robozonky.strategy.natural.ParsedStrategy;
@@ -85,7 +86,7 @@ public class SimpleStrategyService implements StrategyService {
         final LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
         c.add(Collections.singleton(r));
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.ignoreWhen(Arrays.asList(c, condition));
+        f.when(Arrays.asList(c, condition));
         return f;
     }
 
@@ -162,8 +163,7 @@ public class SimpleStrategyService implements StrategyService {
                 .flatMap(s -> s.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toList());
         // and create the strategy
-        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, filters, Collections.emptyList(),
-                                                    Collections.emptyList());
+        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, new FilterSupplier(d, filters));
         LOGGER.debug("Converted strategy: {}.", p);
         final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);
         return new SimpleStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);
