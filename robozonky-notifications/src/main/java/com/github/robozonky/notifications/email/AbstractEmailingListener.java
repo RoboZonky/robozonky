@@ -73,8 +73,12 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return this.finishers.size();
     }
 
+    boolean allowGlobal() {
+        return properties.overrideGlobalGag() || properties.getGlobalCounter().allow();
+    }
+
     boolean shouldSendEmail(final T event) {
-        return this.properties.getGlobalCounter().allow() && this.emailsOfThisType.allow();
+        return allowGlobal() && this.emailsOfThisType.allow();
     }
 
     abstract String getSubject(final T event);

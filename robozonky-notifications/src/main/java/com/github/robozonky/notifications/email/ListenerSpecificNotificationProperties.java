@@ -28,6 +28,10 @@ class ListenerSpecificNotificationProperties extends NotificationProperties {
         this.listener = listener;
     }
 
+    public boolean overrideGlobalGag() {
+        return listener.overrideGlobalGag();
+    }
+
     public int getListenerSpecificHourlyEmailLimit() {
         return this.getListenerSpecificIntProperty(NotificationProperties.HOURLY_LIMIT).orElse(Integer.MAX_VALUE);
     }

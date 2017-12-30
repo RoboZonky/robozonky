@@ -238,6 +238,11 @@ enum SupportedListener {
         }
 
         @Override
+        public boolean overrideGlobalGag() {
+            return true;
+        }
+
+        @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyCrashedEventListener(properties);
         }
@@ -271,6 +276,11 @@ enum SupportedListener {
         }
 
         @Override
+        public boolean overrideGlobalGag() {
+            return true;
+        }
+
+        @Override
         protected EventListener<? extends Event> newListener(final ListenerSpecificNotificationProperties properties) {
             return new RoboZonkyInitializedEventListener(properties);
         }
@@ -279,6 +289,11 @@ enum SupportedListener {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyEndingEvent.class;
+        }
+
+        @Override
+        public boolean overrideGlobalGag() {
+            return true;
         }
 
         @Override
@@ -301,6 +316,11 @@ enum SupportedListener {
         @Override
         public Class<? extends Event> getEventType() {
             return RoboZonkyUpdateDetectedEvent.class;
+        }
+
+        @Override
+        public boolean overrideGlobalGag() {
+            return true;
         }
 
         @Override
@@ -339,6 +359,16 @@ enum SupportedListener {
      * @return Event type.
      */
     abstract Class<? extends Event> getEventType();
+
+    /**
+     * Whether or not the listener will ignore global anti-spam settings. The reason for this is that some very
+     * important notifications can be ignored due to some other notification already exceeding the global e-mail
+     * allowance. This should only be allowed for the most important notifications.
+     * @return True if global anti-spam settings will be ignored for this notification.
+     */
+    public boolean overrideGlobalGag() {
+        return false;
+    }
 
     public EventListener<? extends Event> getListener(final NotificationProperties properties) {
         return this.newListener(new ListenerSpecificNotificationProperties(this, properties));
