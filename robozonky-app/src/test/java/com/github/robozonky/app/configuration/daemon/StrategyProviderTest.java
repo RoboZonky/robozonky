@@ -35,7 +35,7 @@ public class StrategyProviderTest {
         r.valueSet(MINIMAL_STRATEGY); // store correct strategy
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
         });
         r.valueChanged(MINIMAL_STRATEGY, UUID.randomUUID().toString()); // store invalid strategy
@@ -52,7 +52,7 @@ public class StrategyProviderTest {
         r.valueSet(MINIMAL_STRATEGY); // store correct strategy
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
         });
         r.valueUnset(MINIMAL_STRATEGY);
@@ -74,7 +74,7 @@ public class StrategyProviderTest {
         final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
         });
     }
@@ -96,7 +96,7 @@ public class StrategyProviderTest {
         final StrategyProvider r = StrategyProvider.createFor(url);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
-            softly.assertThat(r.getToSell()).isPresent();
+            softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
         });
     }
