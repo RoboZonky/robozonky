@@ -96,7 +96,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
         try {
             final ParsedStrategy s = parseOrCached(strategy);
             if (isSupported(s)) {
-                return Optional.of(constructor.apply(s));
+                return Optional.ofNullable(constructor.apply(s));
             }
             LOGGER.warn("Strategy only supports RoboZonky {} or later. Please upgrade.", s.getMinimumVersion().get());
         } catch (final Exception ex) {
@@ -113,7 +113,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     @Override
     public Optional<SellStrategy> toSell(final String strategy) {
-        return getStrategy(strategy, NaturalLanguageSellStrategy::new);
+        return getStrategy(strategy, (s) -> s.isSellingEnabled() ? new NaturalLanguageSellStrategy(s) : null);
     }
 
     @Override

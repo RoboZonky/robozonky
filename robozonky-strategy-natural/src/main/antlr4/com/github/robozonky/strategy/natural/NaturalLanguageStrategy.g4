@@ -7,6 +7,7 @@ import Defaults, InvestmentSize, PortfolioStructure, MarketplaceFilters;
     import java.math.BigInteger;
     import java.util.Collection;
     import java.util.Collections;
+    import org.slf4j.LoggerFactory;
     import com.github.robozonky.api.remote.enums.*;
     import com.github.robozonky.api.remote.entities.*;
     import com.github.robozonky.strategy.natural.*;
@@ -64,11 +65,25 @@ complexExpression returns [ParsedStrategy result]
         }
     )?
 
+    { boolean emptyIsOk = false; }
     (
-        DELIM 'Prodej participací'
-        s=sellFilterExpression
-        { sellFilters = $s.result; }
-    )?
+        (
+            DELIM 'Prodej participací'
+            s=sellFilterExpression {
+                sellFilters = $s.result;
+            }
+        ) | (
+            'Prodej participací zakázán.' {
+                sellFilters = Collections.emptySet();
+                emptyIsOk = true;
+            }
+        )
+    )? {
+        if (!emptyIsOk) {
+            LoggerFactory.getLogger(this.getClass())
+                .warn("Sell filters are missing without excuse. This is deprecated and will eventually break.");
+        }
+    }
 
     {
         final DefaultValues v = $d.result;

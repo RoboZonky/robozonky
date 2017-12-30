@@ -168,6 +168,10 @@ public class ParsedStrategy {
         });
     }
 
+    public boolean isSellingEnabled() {
+        return !filters.getSellFilters().isEmpty();
+    }
+
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
         return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());

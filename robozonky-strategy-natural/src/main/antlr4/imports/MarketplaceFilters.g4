@@ -29,7 +29,7 @@ marketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, Coll
 ;
 
 sellFilterExpression returns [Collection<MarketplaceFilter> result]:
-    { $result = new ArrayList<>(); }
+    { $result = new ArrayList<>(0); }
     (
         (j=sellMarketplaceFilter { $result.add($j.result); })
     )*
