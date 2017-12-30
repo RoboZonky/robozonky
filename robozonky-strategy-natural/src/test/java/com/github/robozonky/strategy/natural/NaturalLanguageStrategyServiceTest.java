@@ -124,6 +124,17 @@ public class NaturalLanguageStrategyServiceTest {
         Assertions.assertThat(getStrategy(str)).isEmpty();
     }
 
+    @Test
+    public void enabled() throws IOException {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("enabled-filters");
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        if (strategyProvider == Type.SELLING) {
+            Assertions.assertThat(getStrategy(str)).isEmpty();
+        } else {
+            Assertions.assertThat(getStrategy(str)).isPresent();
+        }
+    }
+
     /**
      * This tests a real-life mistake. I forgot to end an expression with EOF - therefore the file was read to the
      * end without error, but whatever was written there was silently ignored. This resulted in an empty strategy,

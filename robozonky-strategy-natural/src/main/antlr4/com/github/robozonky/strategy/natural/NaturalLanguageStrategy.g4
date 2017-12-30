@@ -20,7 +20,7 @@ primaryExpression returns [ParsedStrategy result] :
     (
         ( s=portfolioExpression {
             final DefaultValues v = new DefaultValues($s.result);
-            // enable primary and secondary marketplaces, disable selling of participations
+            // enable primary and secondary marketplaces, disable selling
             final FilterSupplier f = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet());
             $result = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), f); })
         | ( c=complexExpression { $result = $c.result; })
@@ -82,6 +82,8 @@ complexExpression returns [ParsedStrategy result]
                 primaryFilters = null;
                 secondaryFilters = null;
             }
+        ) | (
+            'Investovat do všech půjček a participací.'
         )
     )
 
