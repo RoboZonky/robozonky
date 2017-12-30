@@ -108,7 +108,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     @Override
     public Optional<InvestmentStrategy> toInvest(final String strategy) {
-        return getStrategy(strategy, NaturalLanguageInvestmentStrategy::new);
+        return getStrategy(strategy, (s) -> s.isInvestingEnabled() ? new NaturalLanguageInvestmentStrategy(s) : null);
     }
 
     @Override
@@ -118,6 +118,6 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     @Override
     public Optional<PurchaseStrategy> toPurchase(final String strategy) {
-        return getStrategy(strategy, NaturalLanguagePurchaseStrategy::new);
+        return getStrategy(strategy, (s) -> s.isPurchasingEnabled() ? new NaturalLanguagePurchaseStrategy(s) : null);
     }
 }

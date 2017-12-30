@@ -37,32 +37,6 @@ import org.junit.runners.Parameterized;
 public class NaturalLanguageStrategyServiceTest {
 
     private static final StrategyService SERVICE = new NaturalLanguageStrategyService();
-
-    private enum Type {
-
-        INVESTING {
-            @Override
-            public Function<String, Optional<?>> getStrategy() {
-                return SERVICE::toInvest;
-            }
-        },
-        PURCHASING {
-            @Override
-            public Function<String, Optional<?>> getStrategy() {
-                return SERVICE::toPurchase;
-            }
-        },
-        SELLING {
-            @Override
-            public Function<String, Optional<?>> getStrategy() {
-                return SERVICE::toSell;
-            }
-        };
-
-        public abstract Function<String, Optional<?>> getStrategy();
-
-    }
-
     @Parameterized.Parameter
     public Type strategyProvider;
 
@@ -143,6 +117,13 @@ public class NaturalLanguageStrategyServiceTest {
         }
     }
 
+    @Test
+    public void disabled() throws IOException {
+        final InputStream s = NaturalLanguageStrategyServiceTest.class.getResourceAsStream("disabled-filters");
+        final String str = IOUtils.toString(s, Defaults.CHARSET);
+        Assertions.assertThat(getStrategy(str)).isEmpty();
+    }
+
     /**
      * This tests a real-life mistake. I forgot to end an expression with EOF - therefore the file was read to the
      * end without error, but whatever was written there was silently ignored. This resulted in an empty strategy,
@@ -182,6 +163,31 @@ public class NaturalLanguageStrategyServiceTest {
         } else {
             Assertions.assertThat(getStrategy(str)).isPresent();
         }
+    }
+
+    private enum Type {
+
+        INVESTING {
+            @Override
+            public Function<String, Optional<?>> getStrategy() {
+                return SERVICE::toInvest;
+            }
+        },
+        PURCHASING {
+            @Override
+            public Function<String, Optional<?>> getStrategy() {
+                return SERVICE::toPurchase;
+            }
+        },
+        SELLING {
+            @Override
+            public Function<String, Optional<?>> getStrategy() {
+                return SERVICE::toSell;
+            }
+        };
+
+        public abstract Function<String, Optional<?>> getStrategy();
+
     }
 }
 

@@ -113,7 +113,9 @@ public class NaturalLanguagePurchaseStrategyTest {
 
     @Test
     public void recommendationIsMade() {
-        final ParsedStrategy ps = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE);
+        final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
+        final ParsedStrategy ps = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
+                                                     new FilterSupplier(v, null, Collections.emptySet()));
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(ps);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(ps.getMinimumBalance());

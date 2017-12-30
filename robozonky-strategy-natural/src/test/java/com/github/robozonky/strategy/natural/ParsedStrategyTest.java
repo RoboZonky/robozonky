@@ -86,7 +86,10 @@ public class ParsedStrategyTest {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
         values.setExitProperties(new ExitProperties(LocalDate.now().plusMonths(6))); // exit active, no sell-off yet
-        final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList());
+        final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(), Collections.emptyMap(),
+                                                           new FilterSupplier(values, Collections.emptySet(),
+                                                                              Collections.emptySet(),
+                                                                              Collections.emptySet()));
         // no loan or participation should be bought; every investment should be sold
         final Loan loanUnder = new Loan(1, 1000);
         final Loan loanOver = Mockito.spy(new Loan(2, 1000));

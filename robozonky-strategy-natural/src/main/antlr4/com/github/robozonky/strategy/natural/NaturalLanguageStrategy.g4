@@ -18,7 +18,11 @@ primaryExpression returns [ParsedStrategy result] :
     v=minimumVersionExpression?
 
     (
-        ( s=portfolioExpression { $result = new ParsedStrategy($s.result); })
+        ( s=portfolioExpression {
+            final DefaultValues v = new DefaultValues($s.result);
+            // enable primary and secondary marketplaces, disable selling of participations
+            final FilterSupplier f = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet());
+            $result = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), f); })
         | ( c=complexExpression { $result = $c.result; })
     ) {
         // only set version when the optional expression was actually present
@@ -58,14 +62,30 @@ complexExpression returns [ParsedStrategy result]
     )?
 
     (
-        DELIM 'Filtrování tržiště'
-        m=marketplaceFilterExpression {
-            primaryFilters = $m.primary;
-            secondaryFilters = $m.secondary;
-        }
-    )?
+        (
+            { boolean marketplaceFiltersMissing = true; }
+            (
+                DELIM 'Filtrování tržiště'
+                m=marketplaceFilterExpression {
+                    primaryFilters = $m.primaryEnabled ? $m.primary : null;
+                    secondaryFilters = $m.secondaryEnabled ? $m.secondary : null;
+                    marketplaceFiltersMissing = false;
+                }
+            )? {
+                if (marketplaceFiltersMissing) {
+                    LoggerFactory.getLogger(this.getClass())
+                        .warn("Marketplace filters are missing without excuse. This is deprecated and will eventually break.");
+                }
+            }
+        ) | (
+            'Ignorovat primární i sekundární tržiště.' {
+                primaryFilters = null;
+                secondaryFilters = null;
+            }
+        )
+    )
 
-    { boolean emptyIsOk = false; }
+    { boolean emptySellFiltersIsOk = false; }
     (
         (
             DELIM 'Prodej participací'
@@ -75,11 +95,11 @@ complexExpression returns [ParsedStrategy result]
         ) | (
             'Prodej participací zakázán.' {
                 sellFilters = Collections.emptySet();
-                emptyIsOk = true;
+                emptySellFiltersIsOk = true;
             }
         )
     )? {
-        if (!emptyIsOk) {
+        if (!emptySellFiltersIsOk) {
             LoggerFactory.getLogger(this.getClass())
                 .warn("Sell filters are missing without excuse. This is deprecated and will eventually break.");
         }

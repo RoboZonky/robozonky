@@ -163,7 +163,8 @@ public class SimpleStrategyService implements StrategyService {
                 .flatMap(s -> s.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toList());
         // and create the strategy
-        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes, new FilterSupplier(d, filters));
+        final ParsedStrategy p = new ParsedStrategy(d, portfolio, investmentSizes,
+                                                    new FilterSupplier(d, filters));
         LOGGER.debug("Converted strategy: {}.", p);
         final InvestmentStrategy result = new NaturalLanguageInvestmentStrategy(p);
         return new SimpleStrategyService.ExclusivelyPrimaryMarketplaceInvestmentStrategy(result);

@@ -154,6 +154,9 @@ public class ParsedStrategy {
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
+        if (!isInvestingEnabled()) {
+            return Stream.empty();
+        }
         return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item());
             return matchesNoFilter(w, filters.getPrimaryMarketplaceFilters());
@@ -162,6 +165,9 @@ public class ParsedStrategy {
 
     public Stream<ParticipationDescriptor> getApplicableParticipations(
             final Collection<ParticipationDescriptor> items) {
+        if (!isPurchasingEnabled()) {
+            return Stream.empty();
+        }
         return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
             return matchesNoFilter(w, filters.getSecondaryMarketplaceFilters());
@@ -170,6 +176,14 @@ public class ParsedStrategy {
 
     public boolean isSellingEnabled() {
         return !filters.getSellFilters().isEmpty();
+    }
+
+    public boolean isPurchasingEnabled() {
+        return filters.isSecondaryMarketplaceEnabled();
+    }
+
+    public boolean isInvestingEnabled() {
+        return filters.isPrimaryMarketplaceEnabled();
     }
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {

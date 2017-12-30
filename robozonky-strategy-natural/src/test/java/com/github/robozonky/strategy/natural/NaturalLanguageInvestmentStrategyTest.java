@@ -84,7 +84,7 @@ public class NaturalLanguageInvestmentStrategyTest {
 
     @Test
     public void nothingRecommendedDueToRatingOverinvested() {
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
+        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
@@ -100,7 +100,7 @@ public class NaturalLanguageInvestmentStrategyTest {
 
     @Test
     public void recommendationIsMade() {
-        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE);
+        final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
         Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());

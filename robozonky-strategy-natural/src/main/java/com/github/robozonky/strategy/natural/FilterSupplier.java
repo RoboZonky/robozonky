@@ -43,30 +43,39 @@ public class FilterSupplier {
     private final DefaultValues defaults;
     private final Supplier<Collection<MarketplaceFilter>> primarySupplier, secondarySupplier, sellSupplier;
     private final Lock lock = new ReentrantLock(true);
+    private final boolean primaryMarketplaceEnabled, secondaryMarketplaceEnabled;
     private volatile Collection<MarketplaceFilter> primaryMarketplaceFilters, secondaryMarketplaceFilters, sellFilters;
     private volatile long lastCheckedMonthsBeforeExit = -1;
     private volatile boolean wasCheckedOnce = false, lastCheckedSellOffStarted = false;
 
+    /**
+     * @param defaults Never null.
+     * @param primaryMarketplaceFilters If null, {@link #isPrimaryMarketplaceEnabled()} will return false.
+     * @param secondaryMarketplaceFilters If null, {@link #isSecondaryMarketplaceEnabled()} will return false.
+     * @param sellFilters Never null.
+     */
     public FilterSupplier(final DefaultValues defaults, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
                           final Collection<MarketplaceFilter> secondaryMarketplaceFilters,
                           final Collection<MarketplaceFilter> sellFilters) {
         this.defaults = defaults;
+        this.primaryMarketplaceEnabled = primaryMarketplaceFilters != null;
+        this.secondaryMarketplaceEnabled = secondaryMarketplaceFilters != null;
         this.primarySupplier = () -> primaryMarketplaceFilters;
         this.secondarySupplier = () -> secondaryMarketplaceFilters;
         this.sellSupplier = () -> sellFilters;
     }
 
-    public FilterSupplier(final DefaultValues defaults, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
-                          final Collection<MarketplaceFilter> secondaryMarketplaceFilters) {
+    FilterSupplier(final DefaultValues defaults, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
+                   final Collection<MarketplaceFilter> secondaryMarketplaceFilters) {
         this(defaults, primaryMarketplaceFilters, secondaryMarketplaceFilters, Collections.emptySet());
     }
 
     public FilterSupplier(final DefaultValues defaults, final Collection<MarketplaceFilter> primaryMarketplaceFilters) {
-        this(defaults, primaryMarketplaceFilters, Collections.emptySet());
+        this(defaults, primaryMarketplaceFilters, null);
     }
 
-    public FilterSupplier(final DefaultValues defaults) {
-        this(defaults, Collections.emptySet());
+    FilterSupplier(final DefaultValues defaults) {
+        this(defaults, null);
     }
 
     private static Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> unlessSelloff,
@@ -90,14 +99,30 @@ public class FilterSupplier {
         return Collections.unmodifiableCollection(result);
     }
 
+    public boolean isPrimaryMarketplaceEnabled() {
+        return primaryMarketplaceEnabled;
+    }
+
+    public boolean isSecondaryMarketplaceEnabled() {
+        return secondaryMarketplaceEnabled;
+    }
+
     private Collection<MarketplaceFilter> refreshPrimaryMarketplaceFilters() {
-        return getFilters(() -> supplyFilters(primarySupplier.get(), defaults.getMonthsBeforeExit()),
-                          defaults.isSelloffStarted());
+        if (isPrimaryMarketplaceEnabled()) {
+            return getFilters(() -> supplyFilters(primarySupplier.get(), defaults.getMonthsBeforeExit()),
+                              defaults.isSelloffStarted());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private Collection<MarketplaceFilter> refreshSecondaryMarketplaceFilters() {
-        return getFilters(() -> supplyFilters(secondarySupplier.get(), defaults.getMonthsBeforeExit()),
-                          defaults.isSelloffStarted());
+        if (isSecondaryMarketplaceEnabled()) {
+            return getFilters(() -> supplyFilters(secondarySupplier.get(), defaults.getMonthsBeforeExit()),
+                              defaults.isSelloffStarted());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private Collection<MarketplaceFilter> refreshSellFilters() {

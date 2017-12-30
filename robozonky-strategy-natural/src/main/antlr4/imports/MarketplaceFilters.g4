@@ -11,7 +11,38 @@ import CommonFilters, Tokens;
     import com.github.robozonky.strategy.natural.conditions.*;
 }
 
-marketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, Collection<MarketplaceFilter> secondary]
+marketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, Collection<MarketplaceFilter> secondary,
+                                        boolean primaryEnabled, boolean secondaryEnabled]
+    @init {
+        $primary = new ArrayList<>();
+        $secondary = new ArrayList<>();
+        $primaryEnabled = true;
+        $secondaryEnabled = true;
+    } :
+    (
+        n=noFiltersGivenExpression {
+            $primaryEnabled = $n.primaryEnabled;
+            $secondaryEnabled = $n.secondaryEnabled;
+        }
+    ) | (
+        p=onlyPrimaryFilterExpression {
+            $primary = $p.primary;
+            $secondaryEnabled = $p.secondaryEnabled;
+        }
+    ) | (
+        s=onlySecondaryFilterExpression {
+            $primaryEnabled = $s.primaryEnabled;
+            $secondary = $s.secondary;
+        }
+    ) | (
+        o=oldMarketplaceFilterExpression {
+            $primary = $o.primary;
+            $secondary = $o.secondary;
+        }
+    )
+;
+
+oldMarketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, Collection<MarketplaceFilter> secondary]
     @init {
         $primary = new ArrayList<>();
         $secondary = new ArrayList<>();
@@ -25,8 +56,71 @@ marketplaceFilterExpression returns [Collection<MarketplaceFilter> primary, Coll
         }) | (s=secondaryMarketplaceFilter {
             $secondary.add($s.result);
         })
-    )*
+    )* {
+        if ($primary.isEmpty()) {
+            LoggerFactory.getLogger(this.getClass())
+                .warn("Primary marketplace filters missing without excuse. This is deprecated and will eventually break.");
+        }
+        if ($secondary.isEmpty()) {
+            LoggerFactory.getLogger(this.getClass())
+                .warn("Secondary marketplace filters missing without excuse. This is deprecated and will eventually break.");
+        }
+   }
 ;
+
+noFiltersGivenExpression returns [boolean primaryEnabled, boolean secondaryEnabled]:
+    p=primaryEnablementExpression {
+        $primaryEnabled = $p.enabled;
+    }
+    s=secondaryEnablementExpression {
+        $secondaryEnabled = $s.enabled;
+    }
+;
+
+primaryEnablementExpression returns [boolean enabled]:
+    (
+        'Ignorovat všechny půjčky.' { $enabled = false; }
+    ) | (
+        'Investovat do všech půjček.' { $enabled = true; }
+    )
+;
+
+secondaryEnablementExpression returns [boolean enabled]:
+    (
+        'Ignorovat všechny participace.' { $enabled = false; }
+    ) | (
+        'Investovat do všech participací.' { $enabled = true; }
+    )
+;
+
+onlySecondaryFilterExpression returns [Collection<MarketplaceFilter> secondary, boolean primaryEnabled]
+    @init {
+        $secondary = new ArrayList<>(0);
+    } :
+    p=primaryEnablementExpression {
+        $primaryEnabled = $p.enabled;
+    }
+    (
+        s=secondaryMarketplaceFilter {
+            $secondary.add($s.result);
+        }
+    )+
+;
+
+onlyPrimaryFilterExpression returns [Collection<MarketplaceFilter> primary, boolean secondaryEnabled]
+    @init {
+        $primary = new ArrayList<>(0);
+    } :
+    (
+        p=primaryMarketplaceFilter {
+            $primary.add($p.result);
+        }
+    )+
+    s=secondaryEnablementExpression {
+        $secondaryEnabled = $s.enabled;
+    }
+;
+
 
 sellFilterExpression returns [Collection<MarketplaceFilter> result]:
     { $result = new ArrayList<>(0); }
