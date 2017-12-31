@@ -16,8 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.io.IOException;
-
 import org.antlr.v4.runtime.CharStreams;
 
 /**
@@ -25,7 +23,7 @@ import org.antlr.v4.runtime.CharStreams;
  */
 public class GeneratedStrategyVerifier {
 
-    public static ParsedStrategy parseWithAntlr(final String strategy) throws IOException {
+    public static ParsedStrategy parseWithAntlr(final String strategy) {
         return NaturalLanguageStrategyService.parseWithAntlr(CharStreams.fromString(strategy));
     }
 }

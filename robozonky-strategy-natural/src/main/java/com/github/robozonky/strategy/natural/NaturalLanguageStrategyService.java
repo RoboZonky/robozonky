@@ -63,6 +63,11 @@ public class NaturalLanguageStrategyService implements StrategyService {
         return Optional.ofNullable(CACHE.get().get(strategy));
     }
 
+    private static <T extends Recognizer<?, ?>> T preventSysOut(final T instance) {
+        instance.removeErrorListeners();
+        return instance;
+    }
+
     private synchronized static ParsedStrategy parseOrCached(final String strategy) {
         return getCached(strategy).orElseGet(() -> {
             LOGGER.trace("Parsing started.");
@@ -74,19 +79,15 @@ public class NaturalLanguageStrategyService implements StrategyService {
     }
 
     static ParsedStrategy parseWithAntlr(final CharStream s) {
-        final NaturalLanguageStrategyLexer l = new NaturalLanguageStrategyLexer(s);
-        l.removeErrorListeners(); // prevent any sysout
-        final NaturalLanguageStrategyParser p = new NaturalLanguageStrategyParser(new CommonTokenStream(l));
-        p.removeErrorListeners(); // prevent any sysout
+        final NaturalLanguageStrategyLexer l = preventSysOut(new NaturalLanguageStrategyLexer(s));
+        final NaturalLanguageStrategyParser p =
+                preventSysOut(new NaturalLanguageStrategyParser(new CommonTokenStream(l)));
         p.addErrorListener(NaturalLanguageStrategyService.ERROR_LISTENER);
         return p.primaryExpression().result;
     }
 
     private static boolean isSupported(final ParsedStrategy s) {
         final String currentVersion = Defaults.ROBOZONKY_VERSION;
-        if (currentVersion == null) { // means latest snapshot; see javadoc for Defaults.ROBOZONKY_VERSION
-            return true;
-        }
         return s.getMinimumVersion()
                 .map(minimum -> new RoboZonkyVersion(currentVersion).compareTo(minimum) >= 0)
                 .orElse(true);

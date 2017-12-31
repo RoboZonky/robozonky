@@ -40,6 +40,9 @@ class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
     }
 
     private static int[] digits(final String version) {
+        if (version == null) { // this means we're on a SNAPSHOT, which is assumed to be the latest version
+            return new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
+        }
         final String regular = version.replace(SNAPSHOT_ID, "");
         return Arrays.stream(regular.split("\\Q.\\E"))
                 .mapToInt(Integer::parseInt)

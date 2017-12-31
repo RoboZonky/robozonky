@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
@@ -31,6 +32,12 @@ public class RoboZonkyVersionTest {
             softly.assertThat(current).isLessThan(new RoboZonkyVersion("4.2.0"));
             softly.assertThat(current).isLessThan(new RoboZonkyVersion("5.4.3"));
         });
+    }
+
+    @Test
+    public void snapshot() {
+        final RoboZonkyVersion current = new RoboZonkyVersion((String) null);
+        Assertions.assertThat(current).isGreaterThan(new RoboZonkyVersion("999.999.999"));
     }
 
     @Test
