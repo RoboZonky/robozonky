@@ -54,11 +54,11 @@ public class Loan extends BaseEntity {
     }
 
     private boolean topped, covered, published, questionsAllowed;
-    private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount;
+    private int id, termInMonths = 1, investmentsCount, questionsCount, userId, activeLoansCount;
     private double amount, remainingInvestment;
     private String name, nickName, story, url;
-    private BigDecimal interestRate = BigDecimal.ZERO;
-    private OffsetDateTime datePublished, deadline = OffsetDateTime.MAX;
+    private BigDecimal interestRate = new BigDecimal("0.1999");
+    private OffsetDateTime datePublished = OffsetDateTime.now(), deadline = datePublished.plusDays(2);
     private Rating rating = Rating.D;
     private Collection<Photo> photos = Collections.emptyList();
     private BigDecimal investmentRate = BigDecimal.ZERO;

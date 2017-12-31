@@ -39,7 +39,7 @@ public class PortfolioOverview {
     private final Map<Rating, Integer> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> sharesOnInvestment;
 
-    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
+    public PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
         this.czkAvailable = czkAvailable.intValue();
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
         this.czkInvestedPerRating = czkInvestedPerRating;

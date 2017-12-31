@@ -299,7 +299,6 @@ public class SessionTest extends AbstractZonkyLeveragingTest {
         });
         // validate event contents
         final InvestmentMadeEvent e = (InvestmentMadeEvent) newEvents.get(1);
-        Assertions.assertThat(e.getFinalBalance())
-                .isEqualTo(oldBalance - amountToInvest);
+        Assertions.assertThat(e.getPortfolioOverview().getCzkAvailable()).isEqualTo(oldBalance - amountToInvest);
     }
 }

@@ -16,15 +16,17 @@
 
 package com.github.robozonky.notifications.email;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.util.FinancialCalculator;
 
 class InvestmentMadeEventListener extends AbstractBalanceRegisteringEmailingListener<InvestmentMadeEvent> {
 
     public InvestmentMadeEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(InvestmentMadeEvent::getFinalBalance, properties);
+        super((i) -> i.getPortfolioOverview().getCzkAvailable(), properties);
     }
 
     @Override
@@ -42,6 +44,10 @@ class InvestmentMadeEventListener extends AbstractBalanceRegisteringEmailingList
     protected Map<String, Object> getData(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = Util.getLoanData(i);
+        result.put("yield", FinancialCalculator.expectedInterest(i));
+        final BigDecimal interestRate =
+                FinancialCalculator.expectedInterestRateAfterFees(i, event.getPortfolioOverview());
+        result.put("relativeYield", interestRate);
         result.put("isDryRun", event.isDryRun());
         result.put("newBalance", getNewBalance(event));
         return result;

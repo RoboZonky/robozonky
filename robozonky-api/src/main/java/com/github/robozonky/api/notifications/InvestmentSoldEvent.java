@@ -17,6 +17,7 @@
 package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately after secondary market purchase was detected by the robot.
@@ -24,11 +25,11 @@ import com.github.robozonky.api.remote.entities.Investment;
 public final class InvestmentSoldEvent extends Event {
 
     private final Investment investment;
-    private final int finalBalance;
+    private final PortfolioOverview portfolioOverview;
 
-    public InvestmentSoldEvent(final Investment investment, final int finalBalance) {
+    public InvestmentSoldEvent(final Investment investment, final PortfolioOverview portfolioOverview) {
         this.investment = investment;
-        this.finalBalance = finalBalance;
+        this.portfolioOverview = portfolioOverview;
     }
 
     /**
@@ -39,9 +40,10 @@ public final class InvestmentSoldEvent extends Event {
     }
 
     /**
-     * @return The new account balance
+     *
+     * @return Overview of the portfolio after the investment was sold.
      */
-    public int getFinalBalance() {
-        return this.finalBalance;
+    public PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 }

@@ -119,6 +119,83 @@
                   }
                 },
                 "ignore": [
+                  {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "parameter void com.github.robozonky.api.notifications.InvestmentMadeEvent::<init>(com.github.robozonky.api.remote.entities.Investment, ===int===, boolean)",
+                    "new": "parameter void com.github.robozonky.api.notifications.InvestmentMadeEvent::<init>(com.github.robozonky.api.remote.entities.Investment, ===com.github.robozonky.api.strategies.PortfolioOverview===, boolean)",
+                    "oldType": "int",
+                    "newType": "com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "InvestmentMadeEvent",
+                    "methodName": "<init>",
+                    "parameterIndex": "1",
+                    "elementKind": "parameter",
+                    "justification": "Final balance replaced by portfolio overview."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method int com.github.robozonky.api.notifications.InvestmentMadeEvent::getFinalBalance()",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "InvestmentMadeEvent",
+                    "methodName": "getFinalBalance",
+                    "elementKind": "method",
+                    "justification": "Final balance replaced by portfolio overview."
+                  }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "parameter void com.github.robozonky.api.notifications.InvestmentPurchasedEvent::<init>(com.github.robozonky.api.remote.entities.Investment, ===int===, boolean)",
+                    "new": "parameter void com.github.robozonky.api.notifications.InvestmentPurchasedEvent::<init>(com.github.robozonky.api.remote.entities.Investment, ===com.github.robozonky.api.strategies.PortfolioOverview===, boolean)",
+                    "oldType": "int",
+                    "newType": "com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "InvestmentPurchasedEvent",
+                    "methodName": "<init>",
+                    "parameterIndex": "1",
+                    "elementKind": "parameter",
+                    "justification": "Final balance replaced by portfolio overview."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method int com.github.robozonky.api.notifications.InvestmentPurchasedEvent::getFinalBalance()",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "InvestmentPurchasedEvent",
+                    "methodName": "getFinalBalance",
+                    "elementKind": "method",
+                    "justification": "Final balance replaced by portfolio overview."
+                  }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "parameter void com.github.robozonky.api.notifications.InvestmentSoldEvent::<init>(com.github.robozonky.api.remote.entities.Investment, ===int===)",
+                    "new": "parameter void com.github.robozonky.api.notifications.InvestmentSoldEvent::<init>(com.github.robozonky.api.remote.entities.Investment, ===com.github.robozonky.api.strategies.PortfolioOverview===)",
+                    "oldType": "int",
+                    "newType": "com.github.robozonky.api.strategies.PortfolioOverview",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "InvestmentSoldEvent",
+                    "methodName": "<init>",
+                    "parameterIndex": "1",
+                    "elementKind": "parameter",
+                    "justification": "Final balance replaced by portfolio overview."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method int com.github.robozonky.api.notifications.InvestmentSoldEvent::getFinalBalance()",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "InvestmentSoldEvent",
+                    "methodName": "getFinalBalance",
+                    "elementKind": "method",
+                    "justification": "Final balance replaced by portfolio overview."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.remote.enums.Rating::getInterestRateWithoutFees(java.time.OffsetDateTime)",
+                    "package": "com.github.robozonky.api.remote.enums",
+                    "classSimpleName": "Rating",
+                    "methodName": "getInterestRateWithoutFees",
+                    "elementKind": "method",
+                    "justification": "Unused code."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.math.BigDecimal com.github.robozonky.api.remote.enums.Rating::getRelativeSaleFee()",
+                    "package": "com.github.robozonky.api.remote.enums",
+                    "classSimpleName": "Rating",
+                    "methodName": "getRelativeSaleFee",
+                    "elementKind": "method",
+                    "justification": "Unused code."
+                  }
                 ]
               }
             }

@@ -185,7 +185,7 @@ final class Session {
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
                 final Investment i = new Investment(recommendation.descriptor().item(), confirmedAmount);
                 markSuccessfulInvestment(i);
-                Events.fire(new InvestmentMadeEvent(i, portfolioOverview.getCzkAvailable(), investor.isDryRun()));
+                Events.fire(new InvestmentMadeEvent(i, portfolioOverview, investor.isDryRun()));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA
                 return false;

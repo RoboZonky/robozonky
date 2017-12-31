@@ -28,11 +28,13 @@ public class Investment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
     private boolean smpRelated, onSmp, canBeOffered, inWithdrawal;
-    private int legalDpd, loanTermInMonth, currentTerm, remainingMonths;
+    private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
     private String loanName, nickname, firstName, surname;
-    private OffsetDateTime investmentDate, nextPaymentDate, activeTo;
-    private BigDecimal interestRate, paid, toPay, amountDue, paidInterest, dueInterest, paidPrincipal, duePrincipal,
-            expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor, smpFee, paidPenalty;
+    private OffsetDateTime investmentDate = OffsetDateTime.now(), nextPaymentDate = investmentDate.plusMonths(1),
+            activeTo = investmentDate.plusMonths(loanTermInMonth);
+    private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
+            duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
+            smpFee = new BigDecimal("0.015"), paidPenalty = BigDecimal.ZERO;
     private Rating rating;
 
     Investment() {

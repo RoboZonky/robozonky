@@ -17,6 +17,7 @@
 package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately after an investment was submitted to the API.
@@ -24,12 +25,13 @@ import com.github.robozonky.api.remote.entities.Investment;
 public final class InvestmentMadeEvent extends Event {
 
     private final Investment investment;
-    private final int finalBalance;
+    private final PortfolioOverview portfolioOverview;
     private final boolean dryRun;
 
-    public InvestmentMadeEvent(final Investment investment, final int finalBalance, final boolean isDryRun) {
+    public InvestmentMadeEvent(final Investment investment, final PortfolioOverview portfolioOverview,
+                               final boolean isDryRun) {
         this.investment = investment;
-        this.finalBalance = finalBalance;
+        this.portfolioOverview = portfolioOverview;
         this.dryRun = isDryRun;
     }
 
@@ -41,10 +43,11 @@ public final class InvestmentMadeEvent extends Event {
     }
 
     /**
-     * @return The new account balance
+     *
+     * @return Status of the portfolio after the investment was made.
      */
-    public int getFinalBalance() {
-        return this.finalBalance;
+    public PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 
     /**

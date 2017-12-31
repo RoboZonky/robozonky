@@ -140,7 +140,7 @@ final class Session {
         if (purchased) {
             final Investment i = new Investment(recommendation.descriptor());
             markSuccessfulPurchase(i);
-            Events.fire(new InvestmentPurchasedEvent(i, portfolioOverview.getCzkAvailable(), isDryRun));
+            Events.fire(new InvestmentPurchasedEvent(i, portfolioOverview, isDryRun));
         }
         return purchased;
     }

@@ -16,46 +16,28 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
 
 public enum Rating implements BaseEnum {
 
     // it is imperative for proper functioning of strategy algorithms that ratings here be ordered best to worst
-    AAAAA("A**", new BigDecimal("0.0299"), new BigDecimal("0.0379")),
-    AAAA("A*", new BigDecimal("0.0399"), new BigDecimal("0.0449")),
-    AAA("A++", new BigDecimal("0.0499")),
-    AA("A+", new BigDecimal("0.0749"), new BigDecimal("0.0599")),
-    A("A", new BigDecimal("0.0999"), new BigDecimal("0.0799")),
-    B("B", new BigDecimal("0.1249"), new BigDecimal("0.0999")),
-    C("C", new BigDecimal("0.1449"), new BigDecimal("0.1149")),
-    D("D", new BigDecimal("0.1899"), new BigDecimal("0.1499"));
+    AAAAA("A**"),
+    AAAA("A*"),
+    AAA("A++"),
+    AA("A+"),
+    A("A"),
+    B("B"),
+    C("C"),
+    D("D");
 
-    private static final BigDecimal SALE_FEE = new BigDecimal("0.015");
-    private static final OffsetDateTime MIDNIGHT_2017_09_01 =
-            getThreshold(LocalDate.of(2017, Month.SEPTEMBER, 01), Defaults.ZONE_ID);
     private final String code;
-    private final BigDecimal oldInterestRate, newInterestRate;
 
-    Rating(final String code, final BigDecimal expectedYieldPre20170901, final BigDecimal expectedYield) {
+    Rating(final String code) {
         this.code = code;
-        this.oldInterestRate = expectedYieldPre20170901;
-        this.newInterestRate = expectedYield;
-    }
-
-    Rating(final String code, final BigDecimal expectedYield) {
-        this(code, expectedYield, expectedYield);
     }
 
     public static Rating findByCode(final String code) {
@@ -63,11 +45,6 @@ public enum Rating implements BaseEnum {
                 .filter(r -> Objects.equals(r.code, code))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
-    }
-
-    private static OffsetDateTime getThreshold(final LocalDate date, final ZoneId zoneId) {
-        final LocalDateTime sep1stMidnight = LocalDateTime.of(date, LocalTime.MIDNIGHT);
-        return sep1stMidnight.atZone(zoneId).toOffsetDateTime();
     }
 
     public TemporalAmount getCaptchaDelay() {
@@ -79,15 +56,4 @@ public enum Rating implements BaseEnum {
         return code;
     }
 
-    public BigDecimal getInterestRateWithoutFees(final OffsetDateTime investmentDate) {
-        if (investmentDate.isAfter(MIDNIGHT_2017_09_01)) {
-            return newInterestRate;
-        } else {
-            return oldInterestRate;
-        }
-    }
-
-    public BigDecimal getRelativeSaleFee() {
-        return SALE_FEE;
-    }
 }

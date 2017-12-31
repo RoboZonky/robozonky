@@ -118,12 +118,6 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         }
     }
 
-    @Before
-    @After
-    public void resetEmailing() throws Exception {
-        EMAIL.purgeEmailFromAllMailboxes();
-    }
-
     private static ServerSetup getServerSetup() {
         final ServerSetup setup = ServerSetupTest.SMTP;
         setup.setServerStartupTimeout(5000);
@@ -157,11 +151,9 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getListeners() {
         // prepare data
-        final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getId()).thenReturn(66666);
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
+        final Loan loan = Mockito.spy(new Loan(66666, 100000));
+        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now().minusMonths(2));
         Mockito.when(loan.getRemainingInvestment()).thenReturn(2000.0);
-        Mockito.when(loan.getAmount()).thenReturn(100000.0);
         Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
         Mockito.when(loan.getTermInMonths()).thenReturn(25);
         Mockito.when(loan.getUrl()).thenReturn("http://www.robozonky.cz/");
@@ -173,8 +165,9 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
         events.put(SupportedListener.INVESTMENT_DELEGATED,
                    new InvestmentDelegatedEvent(recommendation, 200, "random"));
-        events.put(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, 200, true));
-        events.put(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, 200));
+        events.put(SupportedListener.INVESTMENT_MADE,
+                   new InvestmentMadeEvent(i, mockPortfolio(Integer.MAX_VALUE), true));
+        events.put(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
         events.put(SupportedListener.INVESTMENT_REJECTED,
                    new InvestmentRejectedEvent(recommendation, 200, "random"));
@@ -207,12 +200,19 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         events.put(SupportedListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3"));
         events.put(SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
                    new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
-        events.put(SupportedListener.INVESTMENT_PURCHASED, new InvestmentPurchasedEvent(i, 200, true));
+        events.put(SupportedListener.INVESTMENT_PURCHASED,
+                   new InvestmentPurchasedEvent(i, mockPortfolio(Integer.MAX_VALUE), true));
         events.put(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, true));
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[]{s, getListener(s, properties), events.get(s)})
                 .collect(Collectors.toList());
+    }
+
+    @Before
+    @After
+    public void resetEmailing() throws Exception {
+        EMAIL.purgeEmailFromAllMailboxes();
     }
 
     @After

@@ -130,8 +130,8 @@ public class Portfolio {
                 getActive()
                         .filter(equalsBlockedAmount)
                         .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
-                            final int balance = zonky.getWallet().getAvailableBalance().intValue();
-                            Events.fire(new InvestmentSoldEvent(i, balance));
+                            final PortfolioOverview po = calculateOverview(zonky.getWallet().getAvailableBalance());
+                            Events.fire(new InvestmentSoldEvent(i, po));
                         })
                         .forEach(i -> {
                             i.setIsOnSmp(false);

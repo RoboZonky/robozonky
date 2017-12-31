@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.management;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
@@ -145,7 +147,8 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     private static Object[] getParametersForInvestmentMade() {
         final Loan l = new Loan(1, 1000);
-        final Event evt = new InvestmentMadeEvent(new Investment(l, 200), 1000, false);
+        final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.valueOf(1000), Collections.emptyList());
+        final Event evt = new InvestmentMadeEvent(new Investment(l, 200), po, false);
         final Consumer<SoftAssertions> before = (softly) -> {
             final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getSuccessfulInvestments()).isEmpty();
@@ -175,7 +178,9 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     private static Object[] getParametersForInvestmentPurchased() {
         final Investment l = new Investment(new Loan(1, 1000), 200);
-        final Event evt = new InvestmentPurchasedEvent(l, 2000, true);
+        final Event evt = new InvestmentPurchasedEvent(l, PortfolioOverview.calculate(BigDecimal.valueOf(2000),
+                                                                                      Collections.emptyList()),
+                                                       true);
         final Consumer<SoftAssertions> before = (softly) -> {
             final OperationsMBean mbean = OPERATIONS.get();
             softly.assertThat(mbean.getPurchasedInvestments()).isEmpty();
