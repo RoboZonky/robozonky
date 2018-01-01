@@ -54,7 +54,7 @@
     <surefire.version>2.20.1</surefire.version>
     <version.org.jboss.resteasy>3.1.4.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.25</version.org.slf4j>
-    <version.org.antlr>4.7</version.org.antlr>
+    <version.org.antlr>4.7.1</version.org.antlr>
   </properties>
   <dependencyManagement>
     <dependencies>
