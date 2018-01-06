@@ -7,7 +7,7 @@ pro demonstraci nastavení strategie a nejsou platné!
 
 RoboZonky pro Zonky účet ${data.session.userName} Vás tímto informuje o následující operaci:
 
-<#include "warning-interest.ftl">
+<#include embed>
 
 --
 Tuto zprávu dostáváte, protože je tak Váš robot nakonfigurován. Neodpovídejte na ni.
