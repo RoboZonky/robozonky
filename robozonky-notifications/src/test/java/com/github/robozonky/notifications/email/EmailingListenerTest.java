@@ -60,7 +60,10 @@ import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -153,6 +156,10 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         // prepare data
         final Loan loan = Mockito.spy(new Loan(66666, 100000));
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now().minusMonths(2));
+        Mockito.when(loan.getName()).thenReturn("Úvěr");
+        Mockito.when(loan.getRegion()).thenReturn(Region.JIHOCESKY);
+        Mockito.when(loan.getPurpose()).thenReturn(Purpose.AUTO_MOTO);
+        Mockito.when(loan.getMainIncomeType()).thenReturn(MainIncomeType.EMPLOYMENT);
         Mockito.when(loan.getRemainingInvestment()).thenReturn(2000.0);
         Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
         Mockito.when(loan.getTermInMonths()).thenReturn(25);
@@ -228,14 +235,21 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
     @Test
     public void testMailSent() throws Exception {
         final AbstractEmailingListener<Event> l = this.listener;
-        Assertions.assertThat(this.event).isInstanceOf(this.listenerType.getEventType());
         l.handle(this.event, new SessionInfo("someone@somewhere.net"));
-        Assertions.assertThat(l.getData(this.event)).isNotNull();
         Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(1);
         final MimeMessage m = EMAIL.getReceivedMessages()[0];
         Assertions.assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
         Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(l.getSubject(this.event));
         Assertions.assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
+    }
+
+    @Test
+    public void formal() {
+        Assertions.assertThat(this.event).isInstanceOf(this.listenerType.getEventType());
+        final AbstractEmailingListener<Event> l = this.listener;
+        Assertions.assertThat(l.getTemplateFileName())
+                .isNotNull()
+                .isNotEmpty();
     }
 
     @Test

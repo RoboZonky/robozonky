@@ -1,9 +1,12 @@
 Participace s následujícími parametry byla právě vystavena na sekundární trh:
 
-- Číslo půjčky:                ${data.loanId?c}
+- Půjčka:                      #${data.loanId?c} ${data.loanName?cap_first}
 - Rating:                      ${data.loanRating}
 - Zbývá splátek:               ${data.loanTermRemaining?c}
 - Hodnota participace:         ${data.investedAmount?string.currency}
 
-Informace o této půjčce jsou dostupné na následující adrese:
-${data.loanUrl}
+Dodatečné informace o půjčce:
+- Účel:                        ${data.loanPurpose.getCode()?cap_first}
+- Kraj:                        ${data.loanRegion.getCode()?cap_first}
+- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
+- Více na:                     ${data.loanUrl}

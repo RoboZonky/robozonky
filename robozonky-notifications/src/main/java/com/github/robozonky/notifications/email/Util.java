@@ -45,6 +45,10 @@ class Util {
             put("loanRating", loan.getRating().getCode());
             put("loanTerm", loan.getTermInMonths());
             put("loanUrl", Loan.getUrlSafe(loan));
+            put("loanRegion", loan.getRegion());
+            put("loanMainIncomeType", loan.getMainIncomeType());
+            put("loanPurpose", loan.getPurpose());
+            put("loanName", loan.getName());
         }};
     }
 

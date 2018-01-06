@@ -1,15 +1,17 @@
 Participace s následujícími parametry byla úspěšně prodána:
 
-- Číslo půjčky:                ${data.loanId?c}
+- Půjčka:                      #${data.loanId?c} ${data.loanName?cap_first}
 - Rating:                      ${data.loanRating}
 - Zbývá splátek:               ${data.loanTermRemaining?c}
 - Hodnota participace:         ${data.investedAmount?string.currency}
 - Dosažený výnos*:             ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
 
-Informace o této půjčce jsou dostupné na následující adrese:
-${data.loanUrl}
+Dodatečné informace o půjčce:
+- Účel:                        ${data.loanPurpose.getCode()?cap_first}
+- Kraj:                        ${data.loanRegion.getCode()?cap_first}
+- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
+- Více na:                     ${data.loanUrl}
 
 Nový zůstatek na Zonky účtu je ${data.newBalance?string.currency}.
 
-* Před zdaněním, odhad. Skutečná hodnota se může lišit v závislosti na momentální výši poplatků, zvolené metodě výpočtu
-  a celé řadě dalších faktorů. Směrodatné údaje poskytuje výhradně investorský dashboard Zonky.
+<#include "warning-interest.ftl">
