@@ -28,7 +28,7 @@ class InvestmentSkippedEventListener extends AbstractEmailingListener<Investment
 
     @Override
     String getSubject(final InvestmentSkippedEvent event) {
-        return "Půjčka č. " + event.getRecommendation().descriptor().item().getId() + " dočasně přeskočena";
+        return "Půjčka č. " + event.getLoan().getId() + " dočasně přeskočena";
     }
 
     @Override
@@ -38,6 +38,8 @@ class InvestmentSkippedEventListener extends AbstractEmailingListener<Investment
 
     @Override
     protected Map<String, Object> getData(final InvestmentSkippedEvent event) {
-        return Util.getLoanData(event.getRecommendation());
+        final Map<String, Object> result = Util.getLoanData(event.getLoan());
+        result.put("loanRecommendation", event.getRecommendation());
+        return result;
     }
 }

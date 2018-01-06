@@ -19,7 +19,6 @@ package com.github.robozonky.notifications.email;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 
 class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent> {
 
@@ -39,9 +38,6 @@ class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent
 
     @Override
     protected Map<String, Object> getData(final SaleOfferedEvent event) {
-        final Investment i = event.getInvestment();
-        final Map<String, Object> result = Util.getLoanData(i);
-        result.put("isDryRun", event.isDryRun());
-        return result;
+        return Util.getLoanData(event.getInvestment(), event.getLoan());
     }
 }

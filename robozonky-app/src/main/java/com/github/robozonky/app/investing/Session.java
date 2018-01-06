@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
+import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
@@ -156,11 +157,10 @@ final class Session {
         final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         Session.LOGGER.debug("Response for loan {}: {}.", loanId, response);
         final String providerId = investor.getConfirmationProviderId().orElse("-");
-        final int balance = portfolioOverview.getCzkAvailable();
         switch (response.getType()) {
             case REJECTED:
                 return investor.getConfirmationProviderId().map(c -> {
-                    Events.fire(new InvestmentRejectedEvent(recommendation, balance, providerId));
+                    Events.fire(new InvestmentRejectedEvent(recommendation, providerId));
                     // rejected through a confirmation provider => forget
                     discard(loan);
                     return false;
@@ -172,7 +172,8 @@ final class Session {
                     return false;
                 });
             case DELEGATED:
-                Events.fire(new InvestmentDelegatedEvent(recommendation, balance, providerId));
+                final Event e = new InvestmentDelegatedEvent(recommendation, providerId);
+                Events.fire(e);
                 if (recommendation.isConfirmationRequired()) {
                     // confirmation required, delegation successful => forget
                     discard(loan);
@@ -185,7 +186,7 @@ final class Session {
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
                 final Investment i = new Investment(recommendation.descriptor().item(), confirmedAmount);
                 markSuccessfulInvestment(i);
-                Events.fire(new InvestmentMadeEvent(i, portfolioOverview, investor.isDryRun()));
+                Events.fire(new InvestmentMadeEvent(i, loan.item(), portfolioOverview));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA
                 return false;

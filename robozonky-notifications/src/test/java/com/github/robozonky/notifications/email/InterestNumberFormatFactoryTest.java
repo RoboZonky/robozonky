@@ -21,14 +21,24 @@ import java.util.Locale;
 
 import com.github.robozonky.internal.api.Defaults;
 import freemarker.core.Environment;
+import freemarker.core.InvalidFormatParametersException;
 import freemarker.core.TemplateNumberFormat;
 import freemarker.core.TemplateValueFormatException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class InterestNumberFormatFactoryTest {
+
+    @BeforeClass
+    public static void checkJava9() { // turns out that CZ locale outputs on Java 8 are different
+        // TODO remove when Java 9 is the minimum platform
+        Assume.assumeTrue("Need Java 9 to run.", System.getProperty("java.version").startsWith("9"));
+    }
 
     @Test
     public void formattingCzech() throws TemplateValueFormatException, TemplateModelException {
@@ -69,4 +79,21 @@ public class InterestNumberFormatFactoryTest {
         final Object result = f.formatToPlainText(m);
         Assertions.assertThat(result).isEqualTo("0.01%");
     }
+
+    @Test
+    public void formal() throws TemplateValueFormatException {
+        final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
+                                                                                Environment.getCurrentEnvironment());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(f.isLocaleBound()).isTrue();
+            softly.assertThat(f.getDescription())
+                    .isNotNull()
+                    .isNotEmpty();
+            softly.assertThatThrownBy(() -> InterestNumberFormatFactory.INSTANCE.get("someparam", Locale.ENGLISH,
+                                                                                     Environment
+                                                                                             .getCurrentEnvironment()))
+                    .isInstanceOf(InvalidFormatParametersException.class);
+        });
+    }
+
 }

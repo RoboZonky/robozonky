@@ -22,34 +22,35 @@ import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 @RunWith(Parameterized.class)
 public class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
+    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER = (id) -> Mockito.mock(Investment.class);
+    @Parameterized.Parameter
+    public DelinquencyCategory category;
+    private TemporalAmount minimumMatchingDuration;
+
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> parameters() {
         return Stream.of(DelinquencyCategory.values()).map(c -> new Object[]{c}).collect(Collectors.toSet());
     }
-
-    @Parameterized.Parameter
-    public DelinquencyCategory category;
-    private TemporalAmount minimumMatchingDuration;
 
     @Before
     public void prepareTimelines() {
@@ -58,18 +59,17 @@ public class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void empty() {
-        Assertions.assertThat(category.update(Collections.emptyList(), null)).isEmpty();
+        Assertions.assertThat(category.update(Collections.emptyList(), null, null)).isEmpty();
     }
 
     @Test
     public void addAndRead() {
         final int loanId = 1;
-        final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(new Loan(loanId, 200));
+        final Function<Integer, Loan> f = (id) -> new Loan(loanId, 200);
         // store a delinquent loan
         final Delinquent d = new Delinquent(loanId);
         final Delinquency dy = d.addDelinquency(LocalDate.now().minus(minimumMatchingDuration));
-        Assertions.assertThat(category.update(Collections.singleton(dy), mockAuthentication(zonky)))
+        Assertions.assertThat(category.update(Collections.singleton(dy), INVESTMENT_SUPPLIER, f))
                 .containsExactly(loanId);
         final List<Event> events = this.getNewEvents();
         SoftAssertions.assertSoftly(softly -> {
@@ -77,11 +77,11 @@ public class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(events).first().isInstanceOf(LoanDelinquentEvent.class);
         });
         // attempt to store it again, making sure no event is fired
-        Assertions.assertThat(category.update(Collections.singleton(dy), mockAuthentication(zonky)))
+        Assertions.assertThat(category.update(Collections.singleton(dy), INVESTMENT_SUPPLIER, f))
                 .containsExactly(loanId);
         Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
         // now update with no delinquents, making sure nothing is returned
-        Assertions.assertThat(category.update(Collections.emptyList(), mockAuthentication(zonky))).isEmpty();
+        Assertions.assertThat(category.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f)).isEmpty();
         Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
     }
 }

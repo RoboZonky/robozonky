@@ -26,27 +26,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
 public class UtilTest {
 
-    private static PortfolioOverview prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
-                                                     final BigDecimal ratingC) {
+    private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
+                                                           final BigDecimal ratingC) {
         final Map<Rating, BigDecimal> map = new EnumMap<>(Rating.class);
         Arrays.stream(Rating.values()).forEach(r -> map.put(r, BigDecimal.ZERO));
         map.put(Rating.A, ratingA);
         map.put(Rating.B, ratingB);
         map.put(Rating.C, ratingC);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getSharesOnInvestment()).thenReturn(map);
-        map.forEach((key, value) ->
-                            Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.eq(key))).thenReturn(value));
-        return portfolio;
+        return map;
     }
 
     private static void assertOrder(final Stream<Rating> result, final Rating... ratingsOrderedDown) {
@@ -86,17 +79,16 @@ public class UtilTest {
                                                                                             targetShareC)),
                                                                  Collections.emptyMap());
         // all ratings have zero share; C > B > A
-        PortfolioOverview portfolio = prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio.getSharesOnInvestment()), Rating.C, Rating.B,
-                    Rating.A);
+        Map<Rating, BigDecimal> portfolio = prepareShareMap(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio), Rating.C, Rating.B, Rating.A);
 
         // A only; B, C overinvested
         portfolio = prepareShareMap(BigDecimal.ZERO, BigDecimal.valueOf(10), BigDecimal.valueOf(30));
-        assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio.getSharesOnInvestment()), Rating.A);
+        assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio), Rating.A);
 
         // B > C > A
         portfolio = prepareShareMap(BigDecimal.valueOf(0.0099), BigDecimal.ZERO, BigDecimal.valueOf(0.249));
-        assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio.getSharesOnInvestment()), Rating.B, Rating.C,
+        assertOrder(Util.rankRatingsByDemand(parsedStrategy, portfolio), Rating.B, Rating.C,
                     Rating.A);
     }
 }

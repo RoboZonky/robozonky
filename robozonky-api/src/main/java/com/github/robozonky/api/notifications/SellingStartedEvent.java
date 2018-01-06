@@ -26,25 +26,25 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
  * Fired immediately before existing investments are submitted to the selling algorithm.
  * Will eventually be followed by {@link SellingCompletedEvent}.
  */
-public final class SellingStartedEvent extends Event {
+public final class SellingStartedEvent extends Event implements Financial {
 
     private final Collection<InvestmentDescriptor> descriptors;
     private final PortfolioOverview portfolioOverview;
 
-    public SellingStartedEvent(final Collection<InvestmentDescriptor> descriptors,
-                               final PortfolioOverview portfolioOverview) {
+    public SellingStartedEvent(final Collection<InvestmentDescriptor> descriptors, final PortfolioOverview portfolio) {
         super("descriptors");
         this.descriptors = Collections.unmodifiableCollection(descriptors);
-        this.portfolioOverview = portfolioOverview;
+        this.portfolioOverview = portfolio;
     }
 
     /**
      * @return Participations on the secondary marketplace that are available for robotic investment.
      */
     public Collection<InvestmentDescriptor> getDescriptors() {
-        return this.descriptors;
+        return descriptors;
     }
 
+    @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
     }

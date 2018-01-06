@@ -18,7 +18,7 @@ package com.github.robozonky.notifications.email;
 
 import java.time.OffsetDateTime;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 
@@ -26,32 +26,32 @@ enum DelinquencyTracker {
 
     INSTANCE; // fast thread-safe singleton
 
-    private static String loanToId(final Loan loan) {
-        return String.valueOf(loan.getId());
+    private static String toId(final Investment investment) {
+        return String.valueOf(investment.getLoanId());
     }
 
-    public boolean setDelinquent(final Loan loan) {
-        if (this.isDelinquent(loan)) {
+    public boolean setDelinquent(final Investment investment) {
+        if (this.isDelinquent(investment)) {
             return false;
         }
         return State.forClass(DelinquencyTracker.class)
                 .newBatch()
-                .set(loanToId(loan), OffsetDateTime.now(Defaults.ZONE_ID).toString())
+                .set(toId(investment), OffsetDateTime.now(Defaults.ZONE_ID).toString())
                 .call();
     }
 
-    public boolean unsetDelinquent(final Loan loan) {
-        if (!this.isDelinquent(loan)) {
+    public boolean unsetDelinquent(final Investment investment) {
+        if (!this.isDelinquent(investment)) {
             return false;
         }
         return State.forClass(DelinquencyTracker.class)
                 .newBatch()
-                .unset(loanToId(loan))
+                .unset(toId(investment))
                 .call();
     }
 
-    public boolean isDelinquent(final Loan loan) {
-        return State.forClass(DelinquencyTracker.class).getValue(loanToId(loan)).isPresent();
+    public boolean isDelinquent(final Investment investment) {
+        return State.forClass(DelinquencyTracker.class).getValue(toId(investment)).isPresent();
     }
 
 }

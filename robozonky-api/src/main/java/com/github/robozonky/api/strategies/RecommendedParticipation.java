@@ -45,7 +45,7 @@ public final class RecommendedParticipation
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
         final RecommendedParticipation that = (RecommendedParticipation) o;

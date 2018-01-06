@@ -21,9 +21,19 @@ import com.github.robozonky.internal.api.Defaults;
 public class SessionInfo {
 
     private final String userName;
+    private final boolean isDryRun;
 
     public SessionInfo(final String userName) {
+        this(userName, true);
+    }
+
+    public SessionInfo(final String userName, final boolean isDryRun) {
         this.userName = userName;
+        this.isDryRun = isDryRun;
+    }
+
+    public boolean isDryRun() {
+        return isDryRun;
     }
 
     public String getUserName() {

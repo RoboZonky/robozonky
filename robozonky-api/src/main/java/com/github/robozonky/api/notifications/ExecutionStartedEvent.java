@@ -26,7 +26,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
  * Fired immediately before the loans are submitted to the investing algorithm. Will eventually be followed by
  * {@link ExecutionCompletedEvent}.
  */
-public final class ExecutionStartedEvent extends Event {
+public final class ExecutionStartedEvent extends Event implements Financial {
 
     private final Collection<LoanDescriptor> loanDescriptors;
     private final PortfolioOverview portfolioOverview;
@@ -37,6 +37,11 @@ public final class ExecutionStartedEvent extends Event {
         this.portfolioOverview = portfolio;
     }
 
+    @Override
+    public PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
+    }
+
     /**
      * @return Loans found on the marketplace that are available for robotic investment.
      */
@@ -44,7 +49,4 @@ public final class ExecutionStartedEvent extends Event {
         return this.loanDescriptors;
     }
 
-    public PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview;
-    }
 }

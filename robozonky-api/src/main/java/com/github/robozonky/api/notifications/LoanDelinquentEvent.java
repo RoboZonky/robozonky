@@ -24,24 +24,33 @@ import com.github.robozonky.api.remote.entities.Loan;
 /**
  * Fired immediately after an {@link Investment} is identified as delinquent.
  */
-public abstract class LoanDelinquentEvent extends Event {
+public abstract class LoanDelinquentEvent extends Event implements InvestmentBased {
 
+    private final Investment investment;
     private final Loan loan;
     private final LocalDate since;
     private final int thresholdInDays;
 
-    public LoanDelinquentEvent(final Loan loan, final LocalDate since, final int thresholdInDays) {
+    LoanDelinquentEvent(final Investment investment, final Loan loan, final LocalDate since,
+                        final int thresholdInDays) {
+        this.investment = investment;
         this.loan = loan;
         this.since = since;
         this.thresholdInDays = thresholdInDays;
     }
 
-    public int getThresholdInDays() {
-        return thresholdInDays;
+    @Override
+    public Investment getInvestment() {
+        return investment;
     }
 
+    @Override
     public Loan getLoan() {
         return loan;
+    }
+
+    public int getThresholdInDays() {
+        return thresholdInDays;
     }
 
     public LocalDate getDelinquentSince() {

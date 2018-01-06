@@ -12,5 +12,3 @@ Dodatečné informace o půjčce:
 - Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
 - Více na:                     ${data.loanUrl}
 
-Zůstatek na Zonky účtu je ${data.newBalance?string.currency}.
-

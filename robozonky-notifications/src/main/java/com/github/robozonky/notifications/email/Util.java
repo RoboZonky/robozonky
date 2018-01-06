@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
 
 class Util {
@@ -52,18 +51,26 @@ class Util {
         }};
     }
 
-    public static Map<String, Object> getLoanData(final RecommendedLoan l) {
-        final Loan loan = l.descriptor().item();
-        final Map<String, Object> result = getLoanData(loan);
-        result.put("loanRecommendation", l.amount());
-        return result;
-    }
-
-    public static Map<String, Object> getLoanData(final Investment i) {
-        final Map<String, Object> loanData = getLoanData(i.getLoan().orElseThrow(IllegalStateException::new));
+    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
+        final Map<String, Object> loanData = getLoanData(l);
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("investedAmount", i.getRemainingPrincipal());
         return loanData;
+    }
+
+    public static Map<String, Object> getDelinquentData(final Investment i, final LocalDate date) {
+        final int loanId = i.getLoanId();
+        return new HashMap<String, Object>() {{
+            put("loanRating", i.getRating());
+            put("loanName", i.getLoanName());
+            put("loanId", loanId);
+            put("totalAmount", i.getAmount());
+            put("remainingAmount", i.getRemainingPrincipal().add(i.getDuePrincipal()));
+            put("totalMonths", i.getLoanTermInMonth());
+            put("remainingMonths", i.getRemainingMonths());
+            put("since", Util.toDate(date));
+            put("loanUrl", Loan.guessUrl(loanId));
+        }};
     }
 
     public static String stackTraceToString(final Throwable t) {

@@ -16,6 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
+import java.math.BigDecimal;
+
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
@@ -23,18 +27,31 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
  * Fired immediately after {@link PurchaseStrategy} has recommended a particular loan.
  * {@link PurchaseRequestedEvent} may be fired next.
  */
-public final class PurchaseRecommendedEvent extends Event {
+public final class PurchaseRecommendedEvent extends Event implements ParticipationBased,
+                                                                     Recommending {
 
-    private final RecommendedParticipation recommendation;
+    private final Participation participation;
+    private final Loan loan;
+    private final BigDecimal recommendation;
 
     public PurchaseRecommendedEvent(final RecommendedParticipation recommendation) {
-        this.recommendation = recommendation;
+        this.participation = recommendation.descriptor().item();
+        this.loan = recommendation.descriptor().related();
+        this.recommendation = recommendation.amount();
     }
 
-    /**
-     * @return The recommendation to be submitted to the investing algorithm.
-     */
-    public RecommendedParticipation getRecommendation() {
-        return this.recommendation;
+    @Override
+    public Loan getLoan() {
+        return loan;
+    }
+
+    @Override
+    public Participation getParticipation() {
+        return participation;
+    }
+
+    @Override
+    public BigDecimal getRecommendation() {
+        return recommendation;
     }
 }

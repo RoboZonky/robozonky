@@ -25,24 +25,25 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 /**
  * Fired immediately after the investing algorithm is finished making investments.
  */
-public final class ExecutionCompletedEvent extends Event {
+public final class ExecutionCompletedEvent extends Event implements Financial {
 
-    private final Collection<Investment> investment;
+    private final Collection<Investment> investments;
     private final PortfolioOverview portfolioOverview;
 
     public ExecutionCompletedEvent(final Collection<Investment> investment, final PortfolioOverview portfolio) {
-        this.investment = Collections.unmodifiableCollection(investment);
+        this.investments = Collections.unmodifiableCollection(investment);
         this.portfolioOverview = portfolio;
+    }
+
+    @Override
+    public PortfolioOverview getPortfolioOverview() {
+        return portfolioOverview;
     }
 
     /**
      * @return The investments that were made.
      */
     public Collection<Investment> getInvestments() {
-        return this.investment;
-    }
-
-    public PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview;
+        return investments;
     }
 }

@@ -27,14 +27,13 @@ import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 
 class Operations implements OperationsMBean {
 
+    private final Map<Integer, BigDecimal> successfulInvestments = new LinkedHashMap<>(0),
+            delegatedInvestments = new LinkedHashMap<>(0), rejectedInvestments = new LinkedHashMap<>(0),
+            purchasedInvestments = new LinkedHashMap<>(0), offeredInvestments = new LinkedHashMap<>(0);
     private OffsetDateTime lastInvestmentRunTimestamp;
-    private final Map<Integer, BigDecimal> successfulInvestments = new LinkedHashMap<>(),
-            delegatedInvestments = new LinkedHashMap<>(), rejectedInvestments = new LinkedHashMap<>(),
-            purchasedInvestments = new LinkedHashMap<>(), offeredInvestments = new LinkedHashMap<>();
 
     @Override
     public Map<Integer, BigDecimal> getSuccessfulInvestments() {
@@ -72,14 +71,12 @@ class Operations implements OperationsMBean {
     }
 
     void handle(final InvestmentDelegatedEvent event) {
-        final RecommendedLoan r = event.getRecommendation();
-        this.delegatedInvestments.put(r.descriptor().item().getId(), r.amount());
+        this.delegatedInvestments.put(event.getLoan().getId(), event.getRecommendation());
         registerInvestmentRun(event);
     }
 
     void handle(final InvestmentRejectedEvent event) {
-        final RecommendedLoan r = event.getRecommendation();
-        this.rejectedInvestments.put(r.descriptor().item().getId(), r.amount());
+        this.rejectedInvestments.put(event.getLoan().getId(), event.getRecommendation());
         registerInvestmentRun(event);
     }
 

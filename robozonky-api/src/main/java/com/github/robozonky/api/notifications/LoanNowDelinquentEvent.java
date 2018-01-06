@@ -18,11 +18,12 @@ package com.github.robozonky.api.notifications;
 
 import java.time.LocalDate;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 
 public final class LoanNowDelinquentEvent extends LoanDelinquentEvent {
 
-    public LoanNowDelinquentEvent(final Loan loan, final LocalDate since) {
-        super(loan, since, 0);
+    public LoanNowDelinquentEvent(final Investment investment, final Loan loan, final LocalDate since) {
+        super(investment, loan, since, 0);
     }
 }

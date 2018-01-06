@@ -17,31 +17,29 @@
 package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 
 /**
  * Fired immediately after secondary market purchase was submitted to the API.
  */
-public final class SaleOfferedEvent extends Event {
+public final class SaleOfferedEvent extends Event implements InvestmentBased {
 
     private final Investment investment;
-    private final boolean dryRun;
+    private final Loan loan;
 
-    public SaleOfferedEvent(final Investment investment, final boolean isDryRun) {
+    public SaleOfferedEvent(final Investment investment, final Loan loan) {
         this.investment = investment;
-        this.dryRun = isDryRun;
+        this.loan = loan;
     }
 
-    /**
-     * @return The purchase that was made.
-     */
+    @Override
+    public Loan getLoan() {
+        return loan;
+    }
+
+    @Override
     public Investment getInvestment() {
-        return this.investment;
+        return investment;
     }
 
-    /**
-     * @return True if investment was only simulated.
-     */
-    public boolean isDryRun() {
-        return dryRun;
-    }
 }

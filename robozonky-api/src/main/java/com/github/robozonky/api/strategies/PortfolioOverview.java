@@ -21,6 +21,7 @@ import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,13 +40,14 @@ public class PortfolioOverview {
     private final Map<Rating, Integer> czkInvestedPerRating;
     private final Map<Rating, BigDecimal> sharesOnInvestment;
 
-    public PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
+    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
         this.czkAvailable = czkAvailable.intValue();
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
-        this.czkInvestedPerRating = czkInvestedPerRating;
         if (this.czkInvested == 0) {
+            this.czkInvestedPerRating = Collections.emptyMap();
             this.sharesOnInvestment = Collections.emptyMap();
         } else {
+            this.czkInvestedPerRating = new EnumMap<>(czkInvestedPerRating);
             this.sharesOnInvestment = Arrays.stream(Rating.values()).collect(Collectors.toMap(
                     Function.identity(),
                     r -> {
@@ -61,22 +63,27 @@ public class PortfolioOverview {
         return vals.stream().reduce(0, (a, b) -> a + b);
     }
 
+    @Deprecated
+    public static PortfolioOverview calculate(final BigDecimal balance, final Collection<Investment> investments) {
+        return calculate(balance, investments.stream());
+    }
+
     /**
      * Prepare an immutable portfolio overview, based on the provided information.
      * @param balance Current available balance in the wallet.
      * @param investments All active investments incl. blocked amounts.
      * @return Never null.
      */
-    public static PortfolioOverview calculate(final BigDecimal balance, final Collection<Investment> investments) {
-        // first figure out how much we have in outstanding loans
-        final Map<Rating, Integer> amounts = investments.stream()
+    public static PortfolioOverview calculate(final BigDecimal balance, final Stream<Investment> investments) {
+        // FIXME replace summing by reduction, to be able to use BigDecimal precision
+        final Map<Rating, Integer> amounts = investments
                 .collect(Collectors.groupingBy(Investment::getRating,
                                                Collectors.summingInt(i -> i.getRemainingPrincipal().intValue())));
-        return new PortfolioOverview(balance, amounts);
+        return calculate(balance, amounts);
     }
 
-    public static PortfolioOverview calculate(final BigDecimal balance, final Stream<Investment> investments) {
-        return calculate(balance, investments.collect(Collectors.toSet()));
+    public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts) {
+        return new PortfolioOverview(balance, amounts);
     }
 
     /**
@@ -111,13 +118,5 @@ public class PortfolioOverview {
      */
     public BigDecimal getShareOnInvestment(final Rating r) {
         return this.sharesOnInvestment.getOrDefault(r, BigDecimal.ZERO);
-    }
-
-    /**
-     * Retrieve {@link #getShareOnInvestment(Rating)} for all ratings.
-     * @return All ratings will be present.
-     */
-    public Map<Rating, BigDecimal> getSharesOnInvestment() {
-        return this.sharesOnInvestment;
     }
 }

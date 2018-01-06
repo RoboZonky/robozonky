@@ -81,9 +81,10 @@ public class Selling implements PortfolioDependant {
                 LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
                 zonky.sell(i);
                 i.setIsOnSmp(true); // send the investment to secondary marketplace; Portfolio class may use it later
+                // FIXME use the above also when doing dry run?
                 LOGGER.trace("Request over.");
             }
-            Events.fire(new SaleOfferedEvent(i, isDryRun)); // only executes on actual successful sale
+            Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
             return Optional.of(i);
         } catch (final Throwable t) { // prevent failure in one operation from trying other operations
             new DaemonRuntimeExceptionHandler().handle(t);

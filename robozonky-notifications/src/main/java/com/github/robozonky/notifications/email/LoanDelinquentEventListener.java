@@ -16,27 +16,25 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.Date;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.internal.api.Defaults;
 
 class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquentEvent> {
 
     public LoanDelinquentEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
-        registerFinisher(event -> DelinquencyTracker.INSTANCE.setDelinquent(event.getLoan()));
+        registerFinisher(event -> DelinquencyTracker.INSTANCE.setDelinquent(event.getInvestment()));
     }
 
     @Override
     String getSubject(final LoanDelinquentEvent event) {
         final int threshold = event.getThresholdInDays();
+        final int loanId = event.getInvestment().getLoanId();
         if (threshold == 0) {
-            return "Půjčka č. " + event.getLoan().getId() + " je nově v prodlení";
+            return "Půjčka č. " + loanId + " je nově v prodlení";
         } else {
-            return "Půjčka č. " + event.getLoan().getId() + " je " + threshold + " dní v prodlení";
+            return "Půjčka č. " + loanId + " je " + threshold + " dní v prodlení";
         }
     }
 
@@ -47,9 +45,6 @@ class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquen
 
     @Override
     protected Map<String, Object> getData(final LoanDelinquentEvent event) {
-        final Loan loan = event.getLoan();
-        final Map<String, Object> result = Util.getLoanData(loan);
-        result.put("since", Date.from(event.getDelinquentSince().atStartOfDay(Defaults.ZONE_ID).toInstant()));
-        return result;
+        return Util.getDelinquentData(event.getInvestment(), event.getDelinquentSince());
     }
 }

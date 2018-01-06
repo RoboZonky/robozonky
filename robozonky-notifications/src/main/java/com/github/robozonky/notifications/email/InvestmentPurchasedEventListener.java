@@ -42,12 +42,11 @@ class InvestmentPurchasedEventListener extends AbstractBalanceRegisteringEmailin
     @Override
     protected Map<String, Object> getData(final InvestmentPurchasedEvent event) {
         final Investment i = event.getInvestment();
-        final Map<String, Object> result = Util.getLoanData(i);
+        final Map<String, Object> result = Util.getLoanData(i, event.getLoan());
         result.put("yield", FinancialCalculator.expectedInterest(i));
         final BigDecimal interestRate =
                 FinancialCalculator.expectedInterestRateAfterFees(i, event.getPortfolioOverview());
         result.put("relativeYield", interestRate);
-        result.put("isDryRun", event.isDryRun());
         result.put("newBalance", getNewBalance(event));
         return result;
     }

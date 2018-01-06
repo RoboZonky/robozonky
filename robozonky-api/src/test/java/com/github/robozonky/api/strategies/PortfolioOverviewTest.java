@@ -17,8 +17,7 @@
 package com.github.robozonky.api.strategies;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -32,7 +31,7 @@ public class PortfolioOverviewTest {
     @Test
     public void emptyPortfolio() {
         final int balance = 5000;
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Collections.emptyList());
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Stream.empty());
         SoftAssertions.assertSoftly(softly -> {
             for (final Rating r : Rating.values()) {
                 softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
@@ -53,7 +52,7 @@ public class PortfolioOverviewTest {
         final int balance = 5000;
         final Investment i1 = new Investment(mockLoan(Rating.A), 400);
         final Investment i2 = new Investment(mockLoan(Rating.B), 600);
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Arrays.asList(i1, i2));
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Stream.of(i1, i2));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(o.getShareOnInvestment(Rating.A)).isEqualTo(new BigDecimal("0.4"));
             softly.assertThat(o.getShareOnInvestment(Rating.B)).isEqualTo(new BigDecimal("0.6"));

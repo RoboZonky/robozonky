@@ -16,21 +16,33 @@
 
 package com.github.robozonky.api.notifications;
 
+import java.math.BigDecimal;
+
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired when an event was skipped by the investment algorithm due to CAPTCHA, to be evaluated later after CAPTCHA
  * expires.
  */
-public final class InvestmentSkippedEvent extends Event {
+public final class InvestmentSkippedEvent extends Event implements LoanBased,
+                                                                   Recommending {
 
-    private final RecommendedLoan recommendation;
+    private final Loan loan;
+    private final BigDecimal recommendation;
 
     public InvestmentSkippedEvent(final RecommendedLoan recommendation) {
-        this.recommendation = recommendation;
+        this.loan = recommendation.descriptor().item();
+        this.recommendation = recommendation.amount();
     }
 
-    public RecommendedLoan getRecommendation() {
+    @Override
+    public BigDecimal getRecommendation() {
         return recommendation;
+    }
+
+    @Override
+    public Loan getLoan() {
+        return loan;
     }
 }

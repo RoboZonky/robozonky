@@ -25,23 +25,24 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 /**
  * Fired immediately after the investing algorithm is finished selling participations in the secondary marketplace.
  */
-public final class SellingCompletedEvent extends Event {
+public final class SellingCompletedEvent extends Event implements Financial {
 
-    private final Collection<Investment> investment;
+    private final Collection<Investment> investments;
     private final PortfolioOverview portfolioOverview;
 
-    public SellingCompletedEvent(final Collection<Investment> investment, final PortfolioOverview portfolioOverview) {
-        this.investment = Collections.unmodifiableCollection(investment);
-        this.portfolioOverview = portfolioOverview;
+    public SellingCompletedEvent(final Collection<Investment> investment, final PortfolioOverview portfolio) {
+        this.investments = Collections.unmodifiableCollection(investment);
+        this.portfolioOverview = portfolio;
     }
 
     /**
      * @return The investments that were made.
      */
     public Collection<Investment> getInvestments() {
-        return this.investment;
+        return investments;
     }
 
+    @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
     }

@@ -21,32 +21,31 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.Investment;
 
 abstract class AbstractLoanTerminatedEmailingListener<T extends Event> extends AbstractEmailingListener<T> {
 
-    private final Function<T, Loan> loanSupplier;
+    private final Function<T, Investment> investmentSupplier;
     private final Function<T, LocalDate> dateSupplier;
 
-    protected AbstractLoanTerminatedEmailingListener(final Function<T, Loan> loanSupplier,
+    protected AbstractLoanTerminatedEmailingListener(final Function<T, Investment> investmentSupplier,
                                                      final Function<T, LocalDate> dateSupplier,
                                                      final ListenerSpecificNotificationProperties properties) {
         super(properties);
-        this.loanSupplier = loanSupplier;
+        this.investmentSupplier = investmentSupplier;
         this.dateSupplier = dateSupplier;
-        registerFinisher(event -> DelinquencyTracker.INSTANCE.unsetDelinquent(loanSupplier.apply(event)));
+        registerFinisher(event -> DelinquencyTracker.INSTANCE.unsetDelinquent(investmentSupplier.apply(event)));
     }
 
     @Override
     boolean shouldSendEmail(final T event) {
-        return super.shouldSendEmail(event) && DelinquencyTracker.INSTANCE.isDelinquent(loanSupplier.apply(event));
+        return super.shouldSendEmail(event) &&
+                DelinquencyTracker.INSTANCE.isDelinquent(investmentSupplier.apply(event));
     }
 
     @Override
     protected Map<String, Object> getData(final T event) {
-        final Loan loan = loanSupplier.apply(event);
-        final Map<String, Object> result = Util.getLoanData(loan);
-        result.put("since", Util.toDate(dateSupplier.apply(event)));
-        return result;
+        final Investment i = investmentSupplier.apply(event);
+        return Util.getDelinquentData(i, dateSupplier.apply(event));
     }
 }

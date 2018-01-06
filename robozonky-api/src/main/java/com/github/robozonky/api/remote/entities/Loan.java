@@ -53,6 +53,10 @@ public class Loan extends BaseEntity {
         return providedUrl == null ? Loan.LOAN_URL_SUPPLIER.apply(l.getId()) : providedUrl;
     }
 
+    public static String guessUrl(final int loanId) {
+        return Loan.LOAN_URL_SUPPLIER.apply(loanId);
+    }
+
     private boolean topped, covered, published, questionsAllowed;
     private int id, termInMonths = 1, investmentsCount, questionsCount, userId, activeLoansCount;
     private double amount, remainingInvestment;

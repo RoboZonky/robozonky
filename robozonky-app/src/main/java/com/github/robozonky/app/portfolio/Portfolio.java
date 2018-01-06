@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -51,7 +50,6 @@ public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Collection<Investment> investments, investmentsPending = new ArrayList<>(0);
-    private final ConcurrentMap<Integer, Loan> loanCache = new ConcurrentHashMap<>(0);
 
     Portfolio() {
         this(Collections.emptyList());
@@ -104,6 +102,16 @@ public class Portfolio {
                 .anyMatch(i -> i.isOnSmp() || i.getStatus() == InvestmentStatus.SOLD);
     }
 
+    public Optional<Investment> lookup(final int loanId) {
+        return Stream.concat(investments.stream(), investmentsPending.stream())
+                .filter(i -> i.getLoanId() == loanId)
+                .findFirst();
+    }
+
+    public Investment lookupOrFail(final int loanId) {
+        return lookup(loanId).orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loanId));
+    }
+
     /**
      * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}. This can
      * happen in several ways:
@@ -131,7 +139,8 @@ public class Portfolio {
                         .filter(equalsBlockedAmount)
                         .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
                             final PortfolioOverview po = calculateOverview(zonky.getWallet().getAvailableBalance());
-                            Events.fire(new InvestmentSoldEvent(i, po));
+                            final Loan l = LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky);
+                            Events.fire(new InvestmentSoldEvent(i, l, po));
                         })
                         .forEach(i -> {
                             i.setIsOnSmp(false);

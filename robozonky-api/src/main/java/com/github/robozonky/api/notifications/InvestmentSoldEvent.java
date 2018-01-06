@@ -17,32 +17,36 @@
 package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately after secondary market purchase was detected by the robot.
  */
-public final class InvestmentSoldEvent extends Event {
+public final class InvestmentSoldEvent extends Event implements InvestmentBased,
+                                                                Financial {
 
     private final Investment investment;
+    private final Loan loan;
     private final PortfolioOverview portfolioOverview;
 
-    public InvestmentSoldEvent(final Investment investment, final PortfolioOverview portfolioOverview) {
+    public InvestmentSoldEvent(final Investment investment, final Loan loan, final PortfolioOverview portfolio) {
         this.investment = investment;
-        this.portfolioOverview = portfolioOverview;
+        this.loan = loan;
+        this.portfolioOverview = portfolio;
     }
 
-    /**
-     * @return The purchase that was made.
-     */
+    @Override
     public Investment getInvestment() {
-        return this.investment;
+        return investment;
     }
 
-    /**
-     *
-     * @return Overview of the portfolio after the investment was sold.
-     */
+    @Override
+    public Loan getLoan() {
+        return loan;
+    }
+
+    @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
     }

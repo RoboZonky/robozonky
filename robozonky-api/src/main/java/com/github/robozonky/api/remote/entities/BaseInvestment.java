@@ -85,6 +85,11 @@ abstract class BaseInvestment extends BaseEntity {
         return id;
     }
 
+    /**
+     * There should be no need to ever use this. Please don't.
+     * @return
+     */
+    @Deprecated
     @XmlTransient
     public Optional<Loan> getLoan() {
         return Optional.ofNullable(loan);

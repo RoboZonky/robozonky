@@ -59,7 +59,7 @@ public class FinancialCalculatorTest {
         final int amountPerRating = total / Rating.values().length;
         final Map<Rating, Integer> shares = Arrays.stream(Rating.values())
                 .collect(Collectors.toMap(Function.identity(), r -> amountPerRating));
-        return new PortfolioOverview(BigDecimal.valueOf(1000), shares);
+        return PortfolioOverview.calculate(BigDecimal.valueOf(1000), shares);
     }
 
     @Test

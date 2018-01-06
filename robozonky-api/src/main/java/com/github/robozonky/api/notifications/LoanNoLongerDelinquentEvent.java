@@ -24,21 +24,14 @@ import com.github.robozonky.api.remote.entities.Loan;
 /**
  * Fired immediately after an {@link Investment} is identified as no longer delinquent.
  */
-public final class LoanNoLongerDelinquentEvent extends Event {
+public final class LoanNoLongerDelinquentEvent extends Event implements InvestmentBased {
 
+    private final Investment investment;
     private final Loan loan;
     private final LocalDate delinquentSince;
 
-    /**
-     * Use {@link #LoanNoLongerDelinquentEvent(Loan, LocalDate)}. This only exists for backwards compatibility.
-     * @param loan
-     */
-    @Deprecated
-    public LoanNoLongerDelinquentEvent(final Loan loan) {
-        this(loan, LocalDate.now());
-    }
-
-    public LoanNoLongerDelinquentEvent(final Loan loan, final LocalDate delinquentSince) {
+    public LoanNoLongerDelinquentEvent(final Investment investment, final Loan loan, final LocalDate delinquentSince) {
+        this.investment = investment;
         this.loan = loan;
         this.delinquentSince = delinquentSince;
     }
@@ -47,7 +40,13 @@ public final class LoanNoLongerDelinquentEvent extends Event {
         return delinquentSince;
     }
 
+    @Override
     public Loan getLoan() {
         return loan;
+    }
+
+    @Override
+    public Investment getInvestment() {
+        return investment;
     }
 }

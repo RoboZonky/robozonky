@@ -171,27 +171,28 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         // create events for listeners
         final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
         events.put(SupportedListener.INVESTMENT_DELEGATED,
-                   new InvestmentDelegatedEvent(recommendation, 200, "random"));
+                   new InvestmentDelegatedEvent(recommendation, "random"));
         events.put(SupportedListener.INVESTMENT_MADE,
-                   new InvestmentMadeEvent(i, mockPortfolio(Integer.MAX_VALUE), true));
-        events.put(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, mockPortfolio(Integer.MAX_VALUE)));
+                   new InvestmentMadeEvent(i, loan, mockPortfolio(Integer.MAX_VALUE)));
+        events.put(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, loan,
+                                                                              mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
         events.put(SupportedListener.INVESTMENT_REJECTED,
-                   new InvestmentRejectedEvent(recommendation, 200, "random"));
+                   new InvestmentRejectedEvent(recommendation, "random"));
         events.put(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
-                   new LoanNoLongerDelinquentEvent(loan, LocalDate.now()));
+                   new LoanNoLongerDelinquentEvent(i, loan, LocalDate.now()));
         events.put(SupportedListener.LOAN_DEFAULTED,
-                   new LoanDefaultedEvent(loan, LocalDate.now()));
+                   new LoanDefaultedEvent(i, loan, LocalDate.now()));
         events.put(SupportedListener.LOAN_NOW_DELINQUENT,
-                   new LoanNowDelinquentEvent(loan, LocalDate.now()));
+                   new LoanNowDelinquentEvent(i, loan, LocalDate.now()));
         events.put(SupportedListener.LOAN_DELINQUENT_10_PLUS,
-                   new LoanDelinquent10DaysOrMoreEvent(loan, LocalDate.now().minusDays(11)));
+                   new LoanDelinquent10DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(11)));
         events.put(SupportedListener.LOAN_DELINQUENT_30_PLUS,
-                   new LoanDelinquent30DaysOrMoreEvent(loan, LocalDate.now().minusDays(31)));
+                   new LoanDelinquent30DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(31)));
         events.put(SupportedListener.LOAN_DELINQUENT_60_PLUS,
-                   new LoanDelinquent60DaysOrMoreEvent(loan, LocalDate.now().minusDays(61)));
+                   new LoanDelinquent60DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(61)));
         events.put(SupportedListener.LOAN_DELINQUENT_90_PLUS,
-                   new LoanDelinquent90DaysOrMoreEvent(loan, LocalDate.now().minusDays(91)));
+                   new LoanDelinquent90DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(91)));
         events.put(SupportedListener.BALANCE_ON_TARGET,
                    new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.BALANCE_UNDER_MINIMUM,
@@ -208,8 +209,8 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         events.put(SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
                    new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
         events.put(SupportedListener.INVESTMENT_PURCHASED,
-                   new InvestmentPurchasedEvent(i, mockPortfolio(Integer.MAX_VALUE), true));
-        events.put(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, true));
+                   new InvestmentPurchasedEvent(i, loan, mockPortfolio(Integer.MAX_VALUE)));
+        events.put(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, loan));
         // create the listeners
         return Stream.of(SupportedListener.values())
                 .map(s -> new Object[]{s, getListener(s, properties), events.get(s)})

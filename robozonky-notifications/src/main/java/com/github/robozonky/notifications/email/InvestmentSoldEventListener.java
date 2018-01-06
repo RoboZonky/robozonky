@@ -52,7 +52,7 @@ class InvestmentSoldEventListener extends AbstractBalanceRegisteringEmailingList
     @Override
     protected Map<String, Object> getData(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
-        final Map<String, Object> result = Util.getLoanData(i);
+        final Map<String, Object> result = Util.getLoanData(i, event.getLoan());
         result.put("yield",
                    FinancialCalculator.actualInterestAfterFees(event.getInvestment(), event.getPortfolioOverview(),
                                                                true));

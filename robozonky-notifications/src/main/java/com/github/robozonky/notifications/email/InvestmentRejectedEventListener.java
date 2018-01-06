@@ -28,8 +28,8 @@ class InvestmentRejectedEventListener extends AbstractEmailingListener<Investmen
 
     @Override
     String getSubject(final InvestmentRejectedEvent event) {
-        return "Investice zamítnuta - " + event.getRecommendation().amount().intValue() + ",- Kč, " +
-                "půjčka č. " + event.getRecommendation().descriptor().item().getId();
+        return "Investice zamítnuta - " + event.getRecommendation().intValue() + ",- Kč, " +
+                "půjčka č. " + event.getLoan().getId();
     }
 
     @Override
@@ -39,8 +39,8 @@ class InvestmentRejectedEventListener extends AbstractEmailingListener<Investmen
 
     @Override
     protected Map<String, Object> getData(final InvestmentRejectedEvent event) {
-        final Map<String, Object> result = Util.getLoanData(event.getRecommendation());
-        result.put("newBalance", event.getBalance());
+        final Map<String, Object> result = Util.getLoanData(event.getLoan());
+        result.put("loanRecommendation", event.getRecommendation());
         return result;
     }
 }

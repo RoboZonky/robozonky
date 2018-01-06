@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.time.LocalDate;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+/**
+ * Represents an event that may cause or has already caused the user's portfolio to change.
+ */
+public interface Financial {
 
-public final class LoanDelinquent90DaysOrMoreEvent extends LoanDelinquentEvent {
-
-    public LoanDelinquent90DaysOrMoreEvent(final Investment investment, final Loan loan, final LocalDate since) {
-        super(investment, loan, since, 90);
-    }
+    PortfolioOverview getPortfolioOverview();
 }

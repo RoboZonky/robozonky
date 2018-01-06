@@ -55,7 +55,7 @@ final class Session {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final List<ParticipationDescriptor> stillAvailable;
-    private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>();
+    private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>(0);
     private final Zonky zonky;
     private final boolean isDryRun;
     private final Portfolio portfolio;
@@ -73,7 +73,7 @@ final class Session {
     private void purchase(final RestrictedPurchaseStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.apply(getAvailable(), getPortfolioOverview())
+            invested = strategy.apply(getAvailable(), portfolioOverview)
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -140,7 +140,7 @@ final class Session {
         if (purchased) {
             final Investment i = new Investment(recommendation.descriptor());
             markSuccessfulPurchase(i);
-            Events.fire(new InvestmentPurchasedEvent(i, portfolioOverview, isDryRun));
+            Events.fire(new InvestmentPurchasedEvent(i, recommendation.descriptor().related(), portfolioOverview));
         }
         return purchased;
     }

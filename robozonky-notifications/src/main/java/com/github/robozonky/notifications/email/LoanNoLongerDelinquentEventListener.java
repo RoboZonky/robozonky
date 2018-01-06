@@ -21,12 +21,12 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 class LoanNoLongerDelinquentEventListener extends AbstractLoanTerminatedEmailingListener<LoanNoLongerDelinquentEvent> {
 
     public LoanNoLongerDelinquentEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(LoanNoLongerDelinquentEvent::getLoan, LoanNoLongerDelinquentEvent::getDelinquentSince, properties);
+        super(LoanNoLongerDelinquentEvent::getInvestment, LoanNoLongerDelinquentEvent::getDelinquentSince, properties);
     }
 
     @Override
     String getSubject(final LoanNoLongerDelinquentEvent event) {
-        return "Půjčka č. " + event.getLoan().getId() + " již není v prodlení";
+        return "Půjčka č. " + event.getInvestment().getLoanId() + " již není v prodlení";
     }
 
     @Override

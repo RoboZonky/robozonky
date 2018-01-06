@@ -16,31 +16,36 @@
 
 package com.github.robozonky.api.notifications;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired immediately after {@link ConfirmationProvider} rejected a given investment.
  */
-public final class InvestmentRejectedEvent extends Event {
+public final class InvestmentRejectedEvent extends Event implements LoanBased,
+                                                                    Recommending {
 
-    private final RecommendedLoan recommendation;
-    private final int balance;
+    private final Loan loan;
+    private final BigDecimal recommendation;
     private final String confirmationProviderId;
 
-    public InvestmentRejectedEvent(final RecommendedLoan recommendation, final int balance,
-                                   final String confirmationProviderId) {
-        this.recommendation = recommendation;
-        this.balance = balance;
+    public InvestmentRejectedEvent(final RecommendedLoan recommendation, final String confirmationProviderId) {
+        this.loan = recommendation.descriptor().item();
+        this.recommendation = recommendation.amount();
         this.confirmationProviderId = confirmationProviderId;
     }
 
-    public RecommendedLoan getRecommendation() {
-        return recommendation;
+    @Override
+    public Loan getLoan() {
+        return loan;
     }
 
-    public int getBalance() {
-        return balance;
+    @Override
+    public BigDecimal getRecommendation() {
+        return recommendation;
     }
 
     public String getConfirmationProviderId() {

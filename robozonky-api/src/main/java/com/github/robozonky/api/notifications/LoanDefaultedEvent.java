@@ -18,18 +18,27 @@ package com.github.robozonky.api.notifications;
 
 import java.time.LocalDate;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 
-public final class LoanDefaultedEvent extends Event {
+public final class LoanDefaultedEvent extends Event implements InvestmentBased {
 
+    private final Investment investment;
     private final Loan loan;
     private final LocalDate delinquentSince;
 
-    public LoanDefaultedEvent(final Loan loan, final LocalDate delinquentSince) {
+    public LoanDefaultedEvent(final Investment investment, final Loan loan, final LocalDate delinquentSince) {
+        this.investment = investment;
         this.loan = loan;
         this.delinquentSince = delinquentSince;
     }
 
+    @Override
+    public Investment getInvestment() {
+        return investment;
+    }
+
+    @Override
     public Loan getLoan() {
         return loan;
     }

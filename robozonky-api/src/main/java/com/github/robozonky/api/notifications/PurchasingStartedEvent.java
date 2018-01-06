@@ -26,25 +26,26 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
  * Fired immediately before the loans are submitted to the investing algorithm.
  * Will eventually be followed by {@link PurchasingCompletedEvent}.
  */
-public final class PurchasingStartedEvent extends Event {
+public final class PurchasingStartedEvent extends Event implements Financial {
 
     private final Collection<ParticipationDescriptor> descriptors;
     private final PortfolioOverview portfolioOverview;
 
     public PurchasingStartedEvent(final Collection<ParticipationDescriptor> descriptors,
-                                  final PortfolioOverview portfolioOverview) {
+                                  final PortfolioOverview portfolio) {
         super("descriptors");
         this.descriptors = Collections.unmodifiableCollection(descriptors);
-        this.portfolioOverview = portfolioOverview;
+        this.portfolioOverview = portfolio;
     }
 
     /**
      * @return Participations on the secondary marketplace that are available for robotic investment.
      */
     public Collection<ParticipationDescriptor> getDescriptors() {
-        return this.descriptors;
+        return descriptors;
     }
 
+    @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
     }

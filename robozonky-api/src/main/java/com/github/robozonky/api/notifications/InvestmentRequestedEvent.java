@@ -16,23 +16,33 @@
 
 package com.github.robozonky.api.notifications;
 
+import java.math.BigDecimal;
+
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
 /**
  * Fired immediately before {@link ControlApi#invest(Investment)} call is made or, in case of dry run,
  * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentMadeEvent}.
  */
-public final class InvestmentRequestedEvent extends Event {
+public final class InvestmentRequestedEvent extends Event implements LoanBased,
+                                                                     Recommending {
 
-    private final RecommendedLoan recommendation;
+    private final Loan loan;
+    private final BigDecimal recommendation;
 
     public InvestmentRequestedEvent(final RecommendedLoan recommendation) {
-        this.recommendation = recommendation;
+        this.loan = recommendation.descriptor().item();
+        this.recommendation = recommendation.amount();
     }
 
-    public RecommendedLoan getRecommendation() {
+    public Loan getLoan() {
+        return loan;
+    }
+
+    public BigDecimal getRecommendation() {
         return recommendation;
     }
 }

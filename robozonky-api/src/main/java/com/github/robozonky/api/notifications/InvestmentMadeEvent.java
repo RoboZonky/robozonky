@@ -17,43 +17,38 @@
 package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Fired immediately after an investment was submitted to the API.
  */
-public final class InvestmentMadeEvent extends Event {
+public final class InvestmentMadeEvent extends Event implements InvestmentBased,
+                                                                Financial {
 
     private final Investment investment;
+    private final Loan loan;
     private final PortfolioOverview portfolioOverview;
-    private final boolean dryRun;
 
-    public InvestmentMadeEvent(final Investment investment, final PortfolioOverview portfolioOverview,
-                               final boolean isDryRun) {
+    public InvestmentMadeEvent(final Investment investment, final Loan loan,
+                               final PortfolioOverview portfolioOverview) {
         this.investment = investment;
+        this.loan = loan;
         this.portfolioOverview = portfolioOverview;
-        this.dryRun = isDryRun;
     }
 
-    /**
-     * @return The investment that was made.
-     */
+    @Override
+    public Loan getLoan() {
+        return loan;
+    }
+
+    @Override
     public Investment getInvestment() {
         return this.investment;
     }
 
-    /**
-     *
-     * @return Status of the portfolio after the investment was made.
-     */
+    @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
-    }
-
-    /**
-     * @return True if investment was only simulated.
-     */
-    public boolean isDryRun() {
-        return dryRun;
     }
 }
