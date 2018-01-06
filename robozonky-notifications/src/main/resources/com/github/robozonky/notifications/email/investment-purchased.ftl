@@ -4,7 +4,7 @@ Na sekundárním trhu byla právě zakoupena následující participace:
 - Rating:                      ${data.loanRating}
 - Zbývá splátek:               ${data.loanTermRemaining?c}
 - Hodnota participace:         ${data.investedAmount?string.currency}
-- Dosažitelný výnos*:          ${data.yield?string.currency} (${data.relativeYield?string.percent} p. a.)
+- Dosažitelný výnos*:          ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
 
 Informace o této půjčce jsou dostupné na následující adrese:
 ${data.loanUrl}

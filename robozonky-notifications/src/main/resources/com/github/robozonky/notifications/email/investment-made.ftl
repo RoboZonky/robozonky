@@ -4,7 +4,7 @@ Půjčka s následujícími parametry byla úspěšně zainvestována:
 - Rating:                      ${data.loanRating}
 - Délka splácení:              ${data.loanTerm?c} měsíců
 - Investovaná částka:          ${data.investedAmount?string.currency}
-- Dosažitelný výnos*:          ${data.yield?string.currency} (${data.relativeYield?string.percent} p. a.)
+- Dosažitelný výnos*:          ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
 
 Informace o této půjčce jsou dostupné na následující adrese:
 ${data.loanUrl}

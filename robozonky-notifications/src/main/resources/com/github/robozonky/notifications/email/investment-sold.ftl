@@ -4,7 +4,7 @@ Participace s následujícími parametry byla úspěšně prodána:
 - Rating:                      ${data.loanRating}
 - Zbývá splátek:               ${data.loanTermRemaining?c}
 - Hodnota participace:         ${data.investedAmount?string.currency}
-- Dosažený výnos*:             ${data.yield?string.currency} (${data.relativeYield?string.percent} p. a.)
+- Dosažený výnos*:             ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
 
 Informace o této půjčce jsou dostupné na následující adrese:
 ${data.loanUrl}

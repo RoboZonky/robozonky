@@ -19,11 +19,13 @@ package com.github.robozonky.notifications.email;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
+import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -36,6 +38,9 @@ enum TemplateProcessor {
 
     static Configuration getFreemarkerConfiguration() {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
+        final Map<String, TemplateNumberFormatFactory> customNumberFormats =
+                Collections.singletonMap("interest", InterestNumberFormatFactory.INSTANCE);
+        cfg.setCustomNumberFormats(customNumberFormats);
         cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
         cfg.setLogTemplateExceptions(false);
         cfg.setDefaultEncoding(Defaults.CHARSET.displayName());

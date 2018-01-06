@@ -28,7 +28,7 @@ import javax.ws.rs.core.MediaType;
 public final class Defaults {
 
     public static final String MEDIA_TYPE = MediaType.APPLICATION_JSON + "; charset=UTF-8";
-    public static final Locale LOCALE = Locale.forLanguageTag("cs_CZ");
+    public static final Locale LOCALE = Locale.forLanguageTag("cs-CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;
     public static final ZoneId ZONE_ID = ZoneId.of("Europe/Prague");
     /**
