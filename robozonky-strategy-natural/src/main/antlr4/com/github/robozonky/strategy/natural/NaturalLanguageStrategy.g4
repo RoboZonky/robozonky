@@ -78,7 +78,7 @@ complexExpression returns [ParsedStrategy result]
                 }
             }
         ) | (
-            'Ignorovat primární i sekundární tržiště.' {
+            'Ignorovat všechny půjčky i participace.' {
                 primaryFilters = null;
                 secondaryFilters = null;
             }
