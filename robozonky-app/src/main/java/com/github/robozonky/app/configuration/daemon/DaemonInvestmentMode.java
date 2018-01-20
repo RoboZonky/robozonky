@@ -81,21 +81,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private void executeDaemons(final Scheduler executor) {
         // run portfolio update twice a day
-        final Duration twelveHours = Duration.ofHours(12);
-        LOGGER.trace("Scheduling portfolio update every {} seconds.", twelveHours.getSeconds());
-        executor.submit(portfolioUpdater, twelveHours);
+        executor.submit(portfolioUpdater, Duration.ofHours(12));
         // also run blocked amounts update every now and then to detect changes made outside of the robot
         final Duration oneHour = Duration.ofHours(1);
-        LOGGER.trace("Scheduling blocked amounts update every {} seconds, starting in {} seconds.",
-                     oneHour.getSeconds(), oneHour.getSeconds());
         executor.submit(blockedAmountsUpdater, oneHour, oneHour);
         // run investing and purchasing daemons
         IntStream.range(0, daemons.size()).boxed().forEach(daemonId -> {
             final DaemonOperation d = daemons.get(daemonId);
             final long initialDelay = daemonId * 250; // quarter second apart
             final Runnable task = new Skippable(d, portfolioUpdater::isUpdating);
-            LOGGER.trace("Scheduling {} every {} ms, starting in {} ms.", task, d.getRefreshInterval().toMillis(),
-                         initialDelay);
             executor.submit(task, d.getRefreshInterval(), Duration.ofMillis(initialDelay));
         });
     }
