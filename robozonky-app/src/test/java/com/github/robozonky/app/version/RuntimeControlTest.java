@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.util;
+package com.github.robozonky.app.version;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
+import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.util.Schedulers;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class SchedulerTest {
-
-    private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
+public class RuntimeControlTest {
 
     @Test
-    public void lifecycle() {
+    public void check() {
+        final ApiVersion v = new ApiVersion("master", UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                                            OffsetDateTime.now(), "1.0.0");
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
-            final ScheduledFuture<?> f = s.submit(REFRESHABLE);
-            Assertions.assertThat((Future) f).isNotNull();
-            Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
+            final RuntimeControl rc = new RuntimeControl();
+            rc.valueUnset(null);
+            Assertions.assertThat(s.isPaused()).isTrue();
+            rc.valueSet(v);
+            Assertions.assertThat(s.isPaused()).isFalse();
         }
     }
 }

@@ -20,19 +20,15 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class TokenBasedAccess extends AbstractAuthenticated {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenBasedAccess.class);
     private final Supplier<Optional<ZonkyApiToken>> tokenSupplier;
     private final SecretProvider secrets;
     private final ApiProvider apis;
@@ -50,23 +46,7 @@ class TokenBasedAccess extends AbstractAuthenticated {
 
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
-        return call(operation, 1);
-    }
-
-    public <T> T call(final Function<Zonky, T> operation, final int attemptNo) {
-        LOGGER.trace("Executing {}, attempt #{}.", operation, attemptNo);
-        try {
-            final T result = apis.authenticated(getToken(), operation);
-            LOGGER.trace("Done with {}, attempt #{}.", operation, attemptNo);
-            return result;
-        } catch (final NotAuthorizedException ex) {
-            if (attemptNo >= 3) {
-                throw new IllegalStateException("There was a severe authorization problem.", ex);
-            } else {
-                LOGGER.debug("Request failed due to expired token, will retry #" + attemptNo);
-                return call(operation, attemptNo + 1);
-            }
-        }
+        return apis.authenticated(getToken(), operation);
     }
 
     @Override

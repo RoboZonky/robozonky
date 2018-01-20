@@ -237,7 +237,7 @@ public abstract class Refreshable<T> implements Runnable,
          * @param newValue New value of the resource.
          */
         default void valueChanged(final T oldValue, final T newValue) {
-            // do nothing
+            valueSet(newValue);
         }
     }
 

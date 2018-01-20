@@ -19,6 +19,7 @@ package com.github.robozonky.app.configuration;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.beust.jcommander.JCommander;
@@ -59,22 +60,24 @@ public class CommandLine {
      * Takes command-line arguments and converts them into an application configuration, printing command line usage
      * information in case the arguments are somehow invalid.
      * @param args Command-line arguments, coming from the main() method.
+     * @param shutdownCall To pass to the daemon operations to allow them to shut down properly.
      * @return Present if the arguments resulted in a valid configuration, empty otherwise.
      */
-    public static Optional<InvestmentMode> parse(final String... args) {
+    public static Optional<InvestmentMode> parse(final Consumer<Throwable> shutdownCall, final String... args) {
         try {
-            return CommandLine.parseUnsafe(args);
+            return CommandLine.parseUnsafe(shutdownCall, args);
         } catch (final ParameterException ex) {
             CommandLine.LOGGER.debug("Command line parsing ended with parameter exception.", ex);
             return CommandLine.terminate(ex);
         }
     }
 
-    private static Optional<InvestmentMode> parseUnsafe(final String... args) throws ParameterException {
+    private static Optional<InvestmentMode> parseUnsafe(final Consumer<Throwable> shutdownCall,
+                                                        final String... args) throws ParameterException {
         final CommandLine cli = new CommandLine();
         final JCommander.Builder builder = new JCommander.Builder()
                 .programName(CommandLine.getScriptIdentifier())
-                .addCommand(new DaemonOperatingMode())
+                .addCommand(new DaemonOperatingMode(shutdownCall))
                 .addCommand(new TestOperatingMode())
                 .addObject(cli);
         final JCommander jc = builder.build();

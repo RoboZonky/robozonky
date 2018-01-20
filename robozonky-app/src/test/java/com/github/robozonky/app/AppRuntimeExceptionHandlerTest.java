@@ -34,19 +34,12 @@ public class AppRuntimeExceptionHandlerTest extends AbstractEventLeveragingTest 
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-    private final RuntimeExceptionHandler faultTolerant = new AppRuntimeExceptionHandler(true);
-    private final RuntimeExceptionHandler regular = new AppRuntimeExceptionHandler(false);
+    private final RuntimeExceptionHandler regular = new AppRuntimeExceptionHandler();
 
     @Test
     public void unexpectedException() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
         regular.handle(new IllegalStateException());
-    }
-
-    @Test
-    public void unexpectedExceptionFaultTolerant() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
-        faultTolerant.handle(new IllegalStateException());
     }
 
     @Test
@@ -56,21 +49,9 @@ public class AppRuntimeExceptionHandlerTest extends AbstractEventLeveragingTest 
     }
 
     @Test
-    public void unexpectedProcessingExceptionFaultTolerant() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_UNEXPECTED.getCode());
-        faultTolerant.handle(new ProcessingException(new IllegalStateException()));
-    }
-
-    @Test
     public void socketException() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
         regular.handle(new ProcessingException(new SocketException("Testing exception")));
-    }
-
-    @Test
-    public void socketExceptionFaultTolerant() {
-        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
-        faultTolerant.handle(new ProcessingException(new SocketException("Testing exception")));
     }
 
     @Test
@@ -80,21 +61,9 @@ public class AppRuntimeExceptionHandlerTest extends AbstractEventLeveragingTest 
     }
 
     @Test
-    public void unknownHostExceptionFaultTolerant() {
-        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
-        faultTolerant.handle(new ProcessingException(new UnknownHostException("Testing exception")));
-    }
-
-    @Test
     public void notAllowedException() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_DOWN.getCode());
         regular.handle(new NotAllowedException("Testing exception"));
-    }
-
-    @Test
-    public void notAllowedExceptionFaultTolerant() {
-        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
-        faultTolerant.handle(new NotAllowedException("Testing exception"));
     }
 
     @Test
@@ -104,20 +73,9 @@ public class AppRuntimeExceptionHandlerTest extends AbstractEventLeveragingTest 
     }
 
     @Test
-    public void serverErrorExceptionFaultToleratnt() {
-        exit.expectSystemExitWithStatus(ReturnCode.OK.getCode());
-        faultTolerant.handle(new ServerErrorException(500));
-    }
-
-    @Test
     public void webApplicationException() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_REMOTE.getCode());
         regular.handle(new WebApplicationException("Testing exception"));
     }
 
-    @Test
-    public void webApplicationExceptionFaultTolerant() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_REMOTE.getCode());
-        faultTolerant.handle(new WebApplicationException("Testing exception"));
-    }
 }

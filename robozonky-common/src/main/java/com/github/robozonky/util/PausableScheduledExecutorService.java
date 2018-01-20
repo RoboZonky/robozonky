@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app;
+package com.github.robozonky.util;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.concurrent.ScheduledExecutorService;
 
-import com.github.robozonky.app.management.MBean;
+public interface PausableScheduledExecutorService extends ScheduledExecutorService {
 
-public class Management implements ShutdownHook.Handler {
+    void pause();
 
-    @Override
-    public Optional<Consumer<ShutdownHook.Result>> get() {
-        MBean.loadAll();
-        return Optional.of((result) -> MBean.unloadAll());
-    }
+    void resume();
 }

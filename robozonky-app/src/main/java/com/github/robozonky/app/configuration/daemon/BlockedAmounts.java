@@ -18,8 +18,7 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -44,10 +43,10 @@ class BlockedAmounts implements PortfolioDependant {
         final Collection<BlockedAmount> presentBlockedAmounts =
                 auth.call(zonky -> zonky.getBlockedAmounts().collect(Collectors.toList()));
         final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
-        final SortedSet<BlockedAmount> difference = presentBlockedAmounts.stream()
+        final Set<BlockedAmount> difference = presentBlockedAmounts.stream()
                 .filter(ba -> !previousBlockedAmounts.contains(ba))
-                .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
-        auth.run(zonky -> difference.stream().forEach(ba -> portfolio.newBlockedAmount(zonky, ba)));
+                .collect(Collectors.toSet());
+        auth.run(zonky -> difference.forEach(ba -> portfolio.newBlockedAmount(zonky, ba)));
         LOGGER.trace("Finished.");
     }
 }

@@ -36,7 +36,7 @@ class Delinquency implements DelinquencyMBean {
     private final Supplier<Stream<Delinquent>> source;
 
     public Delinquency() {
-        this(() -> Delinquents.getDelinquents().stream());
+        this(Delinquents::getDelinquents);
     }
 
     // for testing purposes only

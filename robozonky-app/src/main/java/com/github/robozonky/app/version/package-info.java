@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration;
-
-import java.util.function.Function;
-
-import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.runtime.RuntimeHandler;
-
-public interface InvestmentMode extends Function<RuntimeHandler, ReturnCode>,
-                                        AutoCloseable {
-
-    @Override
-    default void close() throws Exception {
-        // no need to do anything
-    }
-}
+/**
+ * The goal of this package is to handle version updates. {@link com.github.robozonky.app.version.LivenessCheck} is
+ * used to check for Zonky API availability and version. {@link com.github.robozonky.app.version.UpdateMonitor} checks
+ * for new versions of RoboZonky itself.
+ */
+package com.github.robozonky.app.version;

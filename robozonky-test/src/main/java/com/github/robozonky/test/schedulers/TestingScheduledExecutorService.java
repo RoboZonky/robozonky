@@ -20,13 +20,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
+import com.github.robozonky.util.PausableScheduledExecutorService;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * The goal of this class is to bring background tasks from {@link Scheduler} to the foreground. This will help will
  * test stability and will allow to write assertions against operations performed with the scheduler.
  */
-class TestingScheduledExecutorService implements ScheduledExecutorService {
+class TestingScheduledExecutorService implements PausableScheduledExecutorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestingScheduledExecutorService.class);
 
@@ -85,7 +83,7 @@ class TestingScheduledExecutorService implements ScheduledExecutorService {
     }
 
     @Override
-    public boolean awaitTermination(final long l, final TimeUnit timeUnit) throws InterruptedException {
+    public boolean awaitTermination(final long l, final TimeUnit timeUnit) {
         throw new UnsupportedOperationException();
     }
 
@@ -125,39 +123,36 @@ class TestingScheduledExecutorService implements ScheduledExecutorService {
             }
 
             @Override
-            public Object get() throws InterruptedException, ExecutionException {
+            public Object get() {
                 return null;
             }
 
             @Override
-            public Object get(final long timeout,
-                              final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            public Object get(final long timeout, final TimeUnit unit) {
                 return null;
             }
         };
     }
 
     @Override
-    public <T> List<Future<T>> invokeAll(
-            final Collection<? extends Callable<T>> collection) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(final Collection<? extends Callable<T>> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public <T> List<Future<T>> invokeAll(final Collection<? extends Callable<T>> collection, final long l,
-                                         final TimeUnit timeUnit) throws InterruptedException {
+                                         final TimeUnit timeUnit) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public <T> T invokeAny(
-            final Collection<? extends Callable<T>> collection) throws InterruptedException, ExecutionException {
+            final Collection<? extends Callable<T>> collection) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T invokeAny(final Collection<? extends Callable<T>> collection, final long l,
-                           final TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException {
+    public <T> T invokeAny(final Collection<? extends Callable<T>> collection, final long l, final TimeUnit timeUnit) {
         throw new UnsupportedOperationException();
     }
 
@@ -168,5 +163,15 @@ class TestingScheduledExecutorService implements ScheduledExecutorService {
         } catch (final Exception ex) {
             LOGGER.warn("Task execution failed.", ex);
         }
+    }
+
+    @Override
+    public void pause() {
+        // FIXME implement
+    }
+
+    @Override
+    public void resume() {
+        // FIXME implement
     }
 }

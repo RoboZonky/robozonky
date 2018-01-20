@@ -20,12 +20,14 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
+import com.github.robozonky.app.management.Management;
+import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.version.LivenessCheck;
 import com.github.robozonky.app.version.UpdateMonitor;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
@@ -36,12 +38,16 @@ import org.slf4j.LoggerFactory;
  */
 public class App {
 
+    private static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
+    private static final RuntimeHandler RUNTIME = new RuntimeHandler();
 
     private static void exit(final ReturnCode returnCode) {
         App.LOGGER.trace("Exit requested with return code {}.", returnCode);
-        App.exit(new ShutdownHook.Result(returnCode, null));
+        final ShutdownHook.Result r = RUNTIME.getTerminationCause()
+                .map(t -> new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, t))
+                .orElse(new ShutdownHook.Result(returnCode, null));
+        App.exit(r);
     }
 
     /**
@@ -55,8 +61,12 @@ public class App {
     }
 
     static ReturnCode execute(final InvestmentMode mode) {
+        Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
+        App.SHUTDOWN_HOOKS.register(RUNTIME.getShutdownEnabler());
+        App.SHUTDOWN_HOOKS.register(new Management(RUNTIME));
+        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
         try {
-            return mode.get();
+            return mode.apply(RUNTIME);
         } finally {
             try {
                 mode.close();
@@ -66,17 +76,9 @@ public class App {
         }
     }
 
-    static ReturnCode execute(final InvestmentMode mode, final AtomicBoolean faultTolerant) {
-        App.SHUTDOWN_HOOKS.register(new ShutdownEnabler());
-        App.SHUTDOWN_HOOKS.register(new Management());
-        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
-        faultTolerant.set(mode.isFaultTolerant());
-        return App.execute(mode);
-    }
-
-    private static ReturnCode execute(final String[] args, final AtomicBoolean faultTolerant) {
-        return CommandLine.parse(args)
-                .map(mode -> App.execute(mode, faultTolerant))
+    private static ReturnCode execute(final String[] args) {
+        return CommandLine.parse(RUNTIME::resumeToFail, args)
+                .map(App::execute)
                 .orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
     }
 
@@ -87,15 +89,13 @@ public class App {
                          System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
                          System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
                          Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
-        App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.inBackground().shutdown()));
+        App.SHUTDOWN_HOOKS.register(LivenessCheck.setup());
+        App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.inBackground().close()));
         // check for new RoboZonky version every now and then
-        Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
-        // read the command line and call the runtime
-        final AtomicBoolean faultTolerant = new AtomicBoolean(false);
         try { // call core code
-            App.exit(App.execute(args, faultTolerant));
+            App.exit(App.execute(args));
         } catch (final Exception ex) {
-            new AppRuntimeExceptionHandler(faultTolerant.get()).handle(ex);
+            new AppRuntimeExceptionHandler().handle(ex);
         }
     }
 }

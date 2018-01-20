@@ -17,14 +17,15 @@
 package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -51,6 +52,46 @@ public class AuthenticatedTest extends AbstractZonkyLeveragingTest {
                     return f.apply(z);
                 });
         return api;
+    }
+
+    @Test
+    public void restrictions() {
+        final Zonky z = Mockito.mock(Zonky.class);
+        Mockito.when(z.getRestrictions()).thenAnswer(invocation -> Mockito.mock(Restrictions.class));
+        final AbstractAuthenticated a = new AbstractAuthenticated() {
+            @Override
+            public <T> T call(final Function<Zonky, T> operation) {
+                return operation.apply(z);
+            }
+
+            @Override
+            public SecretProvider getSecretProvider() {
+                return null;
+            }
+        };
+        final Restrictions r = a.getRestrictions(Instant.now().minus(Duration.ofMinutes(10))); // stale
+        Assertions.assertThat(r).isNotNull();
+        final Restrictions r2 = a.getRestrictions(); // should refresh
+        Assertions.assertThat(r2).isNotNull().isNotEqualTo(r);
+    }
+
+    @Test
+    public void run() {
+        final Zonky z = Mockito.mock(Zonky.class);
+        final AbstractAuthenticated a = new AbstractAuthenticated() {
+            @Override
+            public <T> T call(final Function<Zonky, T> operation) {
+                return operation.apply(z);
+            }
+
+            @Override
+            public SecretProvider getSecretProvider() {
+                return null;
+            }
+        };
+        final Consumer<Zonky> runnable = Mockito.mock(Consumer.class);
+        a.run(runnable);
+        Mockito.verify(runnable).accept(ArgumentMatchers.eq(z));
     }
 
     @Test
@@ -130,27 +171,4 @@ public class AuthenticatedTest extends AbstractZonkyLeveragingTest {
         Mockito.verify(z, Mockito.never()).logout();
     }
 
-    @Test
-    public void tokenReattempt() {
-        // prepare SUT
-        final SecretProvider sp = SecretProvider.fallback(UUID.randomUUID().toString(), new char[0]);
-        final String username = sp.getUsername();
-        final char[] password = sp.getPassword();
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 1);
-        final OAuth oauth = Mockito.mock(OAuth.class);
-        Mockito.when(oauth.login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password))).thenReturn(token);
-        final ZonkyApiToken newToken = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                                                         299);
-        Mockito.when(oauth.refresh(ArgumentMatchers.eq(token))).thenReturn(newToken);
-        final Zonky z = Mockito.mock(Zonky.class);
-        final ApiProvider api = mockApiProvider(oauth, z);
-        final Duration never = Duration.ofDays(1000); // let's not auto-refresh during the test
-        final TokenBasedAccess a = (TokenBasedAccess) Authenticated.tokenBased(api, sp, never);
-        // call SUT
-        final Consumer<Zonky> f = Mockito.mock(Consumer.class);
-        Mockito.doThrow(NotAuthorizedException.class).when(f).accept(z);
-        Assertions.assertThatThrownBy(() -> a.run(f)).isInstanceOf(IllegalStateException.class);
-        Mockito.verify(oauth).refresh(ArgumentMatchers.any());
-        Mockito.verify(f, Mockito.times(3)).accept(z); // three attempts to execute
-    }
 }

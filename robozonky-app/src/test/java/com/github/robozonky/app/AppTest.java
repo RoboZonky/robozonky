@@ -16,15 +16,10 @@
 
 package com.github.robozonky.app;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.configuration.InvestmentMode;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.mockito.Mockito;
 
 public class AppTest extends AbstractEventLeveragingTest {
 
@@ -41,19 +36,5 @@ public class AppTest extends AbstractEventLeveragingTest {
     public void wrongKeyStore() {
         exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
         App.main("-g", "some.random.file", "-p", "password", "single", "-l", "1", "-a", "1000");
-    }
-
-    @Test
-    public void modeProcessed() throws Exception {
-        final AtomicBoolean faultTolerant = new AtomicBoolean(false);
-        final InvestmentMode mode = Mockito.mock(InvestmentMode.class);
-        Mockito.when(mode.get()).thenReturn(ReturnCode.ERROR_SETUP);
-        Mockito.when(mode.isFaultTolerant()).thenReturn(!faultTolerant.get());
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(App.execute(mode, faultTolerant)).isEqualTo(ReturnCode.ERROR_SETUP);
-            softly.assertThat(faultTolerant.get()).isTrue();
-            softly.assertThat(App.SHUTDOWN_HOOKS.getRegisteredCount()).isGreaterThanOrEqualTo(3);
-        });
-        Mockito.verify(mode).close();
     }
 }

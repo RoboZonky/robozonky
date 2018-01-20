@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ApiProvider {
 
-    private static final String ZONKY_URL = "https://api.zonky.cz";
+    public static final String ZONKY_URL = "https://api.zonky.cz";
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private static <X> Function<X, Void> toFunction(final Consumer<X> f) {

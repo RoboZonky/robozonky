@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app;
+package com.github.robozonky.app.util;
 
 import java.util.Optional;
 
 import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.ShutdownHook;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;

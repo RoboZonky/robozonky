@@ -22,6 +22,7 @@ import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
+import com.github.robozonky.app.runtime.RuntimeHandler;
 import com.github.robozonky.common.extensions.Checker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +35,12 @@ class TestOperatingMode extends OperatingMode {
                                                          final Investor.Builder builder) {
         return Optional.of(new InvestmentMode() {
 
-            @Override
-            public boolean isFaultTolerant() {
-                return false;
-            }
-
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
             @Override
-            public ReturnCode get() {
-                LOGGER.info("Notification sent: {}.", auth.getSecretProvider().getUsername());
+            public ReturnCode apply(final RuntimeHandler runtimeHandler) {
+                final boolean sent = Checker.notifications(auth.getSecretProvider().getUsername());
+                LOGGER.info("Notification sent: {}.", sent);
                 return builder.getConfirmationUsed().map(c -> builder.getConfirmationRequestUsed()
                         .map(r -> {
                             LOGGER.info("Confirmation received: {}.",

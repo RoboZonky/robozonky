@@ -16,17 +16,20 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
+import java.time.Duration;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
+import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +39,20 @@ public class PortfolioUpdater implements Runnable,
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
     private final Authenticated authenticated;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
-    private final Set<PortfolioDependant> dependants = new CopyOnWriteArraySet<>();
-    private final AtomicBoolean updating = new AtomicBoolean(false);
+    private final Collection<PortfolioDependant> dependants = new CopyOnWriteArraySet<>();
+    private final AtomicBoolean updating = new AtomicBoolean(true);
+    private final Consumer<Throwable> shutdownCall;
+    private final Duration retryFor;
 
-    public PortfolioUpdater(final Authenticated authenticated) {
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated,
+                     final Duration retryFor) {
+        this.shutdownCall = shutdownCall;
         this.authenticated = authenticated;
+        this.retryFor = retryFor;
+    }
+
+    public PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated) {
+        this(shutdownCall, authenticated, Duration.ofHours(1));
     }
 
     public void registerDependant(final PortfolioDependant updater) {
@@ -52,28 +64,37 @@ public class PortfolioUpdater implements Runnable,
         return updating.get();
     }
 
+    private Portfolio runIt() {
+        final Portfolio result = authenticated.call(Portfolio::create);
+        final CompletableFuture<Portfolio> combined = dependants.stream()
+                .map(d -> (Function<Portfolio, Portfolio>) folio -> {
+                    d.accept(folio, authenticated);
+                    return folio;
+                })
+                .reduce(CompletableFuture.completedFuture(result),
+                        CompletableFuture::thenApply,
+                        (s1, s2) -> s1.thenCombine(s2, (p1, p2) -> p2));
+        try {
+            return combined.get();
+        } catch (final Throwable t) {
+            new DaemonRuntimeExceptionHandler().handle(t);
+            return null;
+        }
+    }
+
     @Override
     public void run() {
         LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
         updating.set(true);
-        try {
-            final Portfolio result = authenticated.call(Portfolio::create);
-            final CompletableFuture<Portfolio> combined = dependants.stream()
-                    .map(d -> (Function<Portfolio, Portfolio>) folio -> {
-                        d.accept(folio, authenticated);
-                        return folio;
-                    })
-                    .reduce(CompletableFuture.completedFuture(result),
-                            CompletableFuture::thenApply,
-                            (s1, s2) -> s1.thenCombine(s2, (p1, p2) -> p2));
-            portfolio.set(combined.get());
-        } catch (final Throwable t) {
-            portfolio.set(null);
-            new DaemonRuntimeExceptionHandler().handle(t);
-        } finally {
+        final Backoff<Portfolio> backoff = Backoff.exponential(this::runIt, Duration.ofSeconds(1), retryFor);
+        final Optional<Portfolio> p = backoff.get();
+        if (p.isPresent()) {
+            portfolio.set(p.get());
             updating.set(false);
+            LOGGER.info("RoboZonky resumed.");
+        } else {
+            shutdownCall.accept(new IllegalStateException("Portfolio initialization failed."));
         }
-        LOGGER.info("RoboZonky resumed.");
     }
 
     @Override

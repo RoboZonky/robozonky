@@ -17,76 +17,112 @@
 package com.github.robozonky.util;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Scheduler {
+public class Scheduler implements AutoCloseable {
 
     /*
      * Pool size > 1 speeds up RoboZonky startup. Strategy loading will block until all other preceding tasks
      * will have finished on the executor and if some of them are long-running, this will hurt robot's startup
      * time.
      */
-    private static final Scheduler BACKGROUND_SCHEDULER = new Scheduler();
+    private static final Scheduler BACKGROUND_SCHEDULER =
+            Schedulers.INSTANCE.create(1, new RoboZonkyThreadFactory(newThreadGroup("rzBackground")));
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    private static final TemporalAmount REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
-    private final Supplier<ScheduledExecutorService> executorProvider;
-    private final Set<Runnable> submitted = new LinkedHashSet<>(0);
-    private ScheduledExecutorService executor;
+    private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
+    private final Collection<Runnable> submitted = new LinkedHashSet<>(0);
+    private final AtomicInteger pauseRequests = new AtomicInteger(0);
+    private PausableScheduledExecutorService executor;
 
-    public Scheduler() {
-        this(1);
+    Scheduler(final int poolSize, final ThreadFactory threadFactory) {
+        this.executor = SchedulerServiceLoader.load().newScheduledExecutorService(poolSize, threadFactory);
     }
 
-    public Scheduler(final int poolSize) {
-        this.executorProvider = () -> SchedulerServiceLoader.load().newScheduledExecutorService(poolSize);
-        this.executor = executorProvider.get();
+    private static ThreadGroup newThreadGroup(final String name) {
+        final ThreadGroup threadGroup = new ThreadGroup(name);
+        threadGroup.setMaxPriority(Thread.NORM_PRIORITY - 1); // these threads are supposed to be less important
+        threadGroup.setDaemon(true); // all of these threads are daemons (won't block shutdown)
+        return threadGroup;
     }
 
     public static Scheduler inBackground() {
         return BACKGROUND_SCHEDULER;
     }
 
-    public void submit(final Runnable toSchedule) {
-        this.submit(toSchedule, Scheduler.REFRESH);
+    public ScheduledFuture<?> submit(final Runnable toSchedule) {
+        return this.submit(toSchedule, Scheduler.REFRESH);
     }
 
-    public Future<?> run(final Runnable toRun) {
-        Scheduler.LOGGER.debug("Scheduling {} immediately.", toRun);
-        return executor.submit(toRun);
+    public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween) {
+        return submit(toSchedule, delayInBetween, Duration.ZERO);
     }
 
-    public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween) {
-        submit(toSchedule, delayInBetween, Duration.ZERO);
-    }
-
-    public void submit(final Runnable toSchedule, final TemporalAmount delayInBetween,
-                       final TemporalAmount firstDelay) {
-        final long firstDelayInSeconds = firstDelay.get(ChronoUnit.SECONDS);
-        final long delayInSeconds = delayInBetween.get(ChronoUnit.SECONDS);
-        Scheduler.LOGGER.debug("Scheduling {} every {} seconds, starting in {} seconds.", toSchedule, delayInSeconds,
-                               firstDelayInSeconds);
-        executor.scheduleWithFixedDelay(toSchedule, firstDelayInSeconds, delayInSeconds, TimeUnit.SECONDS);
+    public ScheduledFuture<?> submit(final Runnable toSchedule, final Duration delayInBetween,
+                                     final Duration firstDelay) {
+        Scheduler.LOGGER.debug("Scheduling {} every {} ms, starting in {} ms.", toSchedule, delayInBetween.toMillis(),
+                               firstDelay.toMillis());
+        /*
+         * it is imperative that tasks be scheduled with fixed delay. if scheduled at fixed rate instead, pausing the
+         * executor would result in tasks queuing up. and since we use this class to schedule tasks as frequently as
+         * every second, such behavior is not acceptable.
+         */
+        final ScheduledFuture<?> f = executor.scheduleWithFixedDelay(toSchedule, firstDelay.toNanos(),
+                                                                     delayInBetween.toNanos(), TimeUnit.NANOSECONDS);
         this.submitted.add(toSchedule);
+        return f;
     }
 
     public boolean isSubmitted(final Runnable refreshable) {
         return submitted.contains(refreshable);
     }
 
-    public void shutdown() {
-        Scheduler.LOGGER.debug("Shutting down.");
-        executor.shutdownNow();
+    /**
+     * Pause the scheduler, queuing all scheduled executions until {@link #resume()} is called. Calling this method
+     * several times in a row will require equal amount of calls to {@link #resume()} to resume the scheduler later.
+     */
+    void pause() {
+        synchronized (this) {
+            final int requests = pauseRequests.incrementAndGet();
+            if (requests == 1) {
+                executor.pause();
+            }
+        }
+        LOGGER.trace("Incrementing pause counter for {}.", this);
     }
 
+    public boolean isPaused() {
+        return pauseRequests.get() > 0;
+    }
+
+    /**
+     * Decrements the counter of times that {@link #pause()} was called. If counter reaches zero, scheduler is resumed
+     * and all queued tasks are executed.
+     */
+    void resume() {
+        LOGGER.trace("Decrementing pause counter for {}.", this);
+        synchronized (this) {
+            final int requests = pauseRequests.decrementAndGet();
+            if (requests == 0) {
+                executor.resume();
+            } else if (requests < 0) {
+                pauseRequests.set(0);
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        Scheduler.LOGGER.trace("Shutting down {}.", this);
+        executor.shutdownNow();
+        Schedulers.INSTANCE.destroy(this);
+    }
 }

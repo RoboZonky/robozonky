@@ -31,17 +31,17 @@ final class AppRuntimeExceptionHandler extends RuntimeExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppRuntimeExceptionHandler.class);
 
-    private static void handleException(final Throwable ex, final boolean faultTolerant) {
+    private static void handleException(final Throwable ex) {
         final Throwable cause = ex.getCause();
         if (ex instanceof NotAllowedException || ex instanceof ServerErrorException ||
                 cause instanceof SocketException || cause instanceof UnknownHostException) {
-            AppRuntimeExceptionHandler.handleZonkyMaintenanceError(ex, faultTolerant);
+            AppRuntimeExceptionHandler.handleZonkyMaintenanceError(ex);
         } else {
             AppRuntimeExceptionHandler.handleUnexpectedException(ex);
         }
     }
 
-    private static void handleException(final Throwable ex) {
+    private static void handleStandardException(final Throwable ex) {
         AppRuntimeExceptionHandler.LOGGER.error("Application encountered remote API error.", ex);
         App.exit(new ShutdownHook.Result(ReturnCode.ERROR_REMOTE, ex));
     }
@@ -51,32 +51,20 @@ final class AppRuntimeExceptionHandler extends RuntimeExceptionHandler {
         App.exit(new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, ex));
     }
 
-    private static void handleZonkyMaintenanceError(final Throwable ex, final boolean faultTolerant) {
-        AppRuntimeExceptionHandler.LOGGER.warn(
-                "Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
-        if (faultTolerant) {
-            AppRuntimeExceptionHandler.LOGGER.info(
-                    "RoboZonky is in fault-tolerant mode. The above will not be reported as error.");
-            App.exit(new ShutdownHook.Result(ReturnCode.OK, ex));
-        } else {
-            App.exit(new ShutdownHook.Result(ReturnCode.ERROR_DOWN, ex));
-        }
-    }
-
-    private final boolean faultTolerant;
-
-    public AppRuntimeExceptionHandler(final boolean faultTolerant) {
-        this.faultTolerant = faultTolerant;
+    private static void handleZonkyMaintenanceError(final Throwable ex) {
+        AppRuntimeExceptionHandler.LOGGER
+                .warn("Application not allowed to access remote API, Zonky likely down for maintenance.", ex);
+        App.exit(new ShutdownHook.Result(ReturnCode.ERROR_DOWN, ex));
     }
 
     @Override
     protected Consumer<Throwable> getCommunicationFailureHandler() {
-        return (in) -> AppRuntimeExceptionHandler.handleException(in, faultTolerant);
+        return AppRuntimeExceptionHandler::handleException;
     }
 
     @Override
     protected Consumer<Throwable> getRemoteFailureHandler() {
-        return AppRuntimeExceptionHandler::handleException;
+        return AppRuntimeExceptionHandler::handleStandardException;
     }
 
     @Override

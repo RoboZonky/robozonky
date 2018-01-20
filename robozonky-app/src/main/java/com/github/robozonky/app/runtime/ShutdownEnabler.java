@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app;
+package com.github.robozonky.app.runtime;
 
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
+import com.github.robozonky.app.ShutdownHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Makes sure that when Ctrl+C is pressed in daemon-mode, the app cleanly shuts down.
  */
-public class ShutdownEnabler implements ShutdownHook.Handler {
+class ShutdownEnabler implements ShutdownHook.Handler {
 
-    public static final AtomicReference<CountDownLatch> DAEMON_ALLOWED_TO_TERMINATE =
-            new AtomicReference<>(new CountDownLatch(1));
     private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownEnabler.class);
+    private final Semaphore daemonAllowedToTerminate = new Semaphore(1);
+
+    public ShutdownEnabler() {
+        daemonAllowedToTerminate.acquireUninterruptibly();
+    }
+
+    public void waitUntilTriggered() {
+        LOGGER.debug("Waiting for shutdown on {}.", daemonAllowedToTerminate);
+        daemonAllowedToTerminate.acquireUninterruptibly();
+    }
 
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
@@ -40,10 +48,8 @@ public class ShutdownEnabler implements ShutdownHook.Handler {
              * when the code gets here during shutdown, control is handed over to the daemon, which is already
              * waiting to acquire; application will relinquish control and the JVM will shut down.
              */
-            final CountDownLatch daemonAllowedToTerminate =
-                    ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.getAndUpdate(l -> new CountDownLatch(1));
             ShutdownEnabler.LOGGER.debug("Running with {}.", daemonAllowedToTerminate);
-            daemonAllowedToTerminate.countDown();
+            daemonAllowedToTerminate.release();
         }));
     }
 }

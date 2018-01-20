@@ -17,8 +17,7 @@
 package com.github.robozonky.app.configuration;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
@@ -33,7 +32,6 @@ import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.common.extensions.MarketplaceLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
-import com.github.robozonky.util.Scheduler;
 
 @Parameters(commandNames = "daemon", commandDescription = "Constantly checks marketplaces, invests based on strategy.")
 class DaemonOperatingMode extends OperatingMode {
@@ -44,15 +42,26 @@ class DaemonOperatingMode extends OperatingMode {
     @ParametersDelegate
     StrategyCommandLineFragment strategy = new StrategyCommandLineFragment();
 
+    private final Consumer<Throwable> shutdownCall;
+
+    public DaemonOperatingMode(final Consumer<Throwable> shutdownCall) {
+        this.shutdownCall = shutdownCall;
+    }
+
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
         final boolean isFaultTolerant = cli.getTweaksFragment().isFaultTolerant();
+        if (isFaultTolerant) {
+            LOGGER.info("RoboZonky is now fault tolerant by default and cannot be configured otherwise."
+                                + " '-t' command-line option will be removed in the next RoboZonky major version. " +
+                                "Kindly stop using it.");
+        }
         final SecretProvider secretProvider = auth.getSecretProvider();
         final Credentials cred = new Credentials(marketplace.getMarketplaceCredentials(), secretProvider);
         return MarketplaceLoader.load(cred)
                 .map(marketplaceImpl -> {
-                    final PortfolioUpdater updater = new PortfolioUpdater(auth);
+                    final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth);
                     final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(auth, updater);
                     // run update of blocked amounts automatically with every portfolio update
                     updater.registerDependant(bau.getDependant());
@@ -61,25 +70,10 @@ class DaemonOperatingMode extends OperatingMode {
                     final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
                     // attempt to sell participations after every portfolio update
                     updater.registerDependant(new Selling(sp::getToSell, builder.isDryRun()));
-                    final InvestmentMode m = new DaemonInvestmentMode(auth, updater, builder, isFaultTolerant,
-                                                                      marketplaceImpl, sp, bau,
+                    final InvestmentMode m = new DaemonInvestmentMode(auth, updater, builder, marketplaceImpl, sp, bau,
                                                                       marketplace.getMaximumSleepDuration(),
                                                                       marketplace.getPrimaryMarketplaceCheckDelay(),
                                                                       marketplace.getSecondaryMarketplaceCheckDelay());
-                    // only schedule internal data updates after daemon had a chance to initialize...
-                    final Scheduler scheduler = Scheduler.inBackground();
-                    final Future<?> f = scheduler.run(updater);
-                    try {
-                        /*
-                         * wait for the update to finish; has to be done in this roundabout way, so that integration
-                         * tests can substitute this operation, which would otherwise call a live Zonky API, by a no-op
-                         * via the pluggable scheduler mechanism.
-                         */
-                        f.get();
-                    } catch (final ExecutionException | InterruptedException ex) {
-                        LOGGER.error("Failed updating portfolio.", ex);
-                        return Optional.<InvestmentMode>empty();
-                    }
                     return Optional.of(m);
                 }).orElse(Optional.empty());
     }

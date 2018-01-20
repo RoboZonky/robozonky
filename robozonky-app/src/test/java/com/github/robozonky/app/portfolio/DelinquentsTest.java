@@ -86,11 +86,13 @@ public class DelinquentsTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(5);
         });
-        Assertions.assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
-        Assertions.assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanDelinquent10DaysOrMoreEvent.class);
-        Assertions.assertThat(this.getNewEvents().get(2)).isInstanceOf(LoanDelinquent30DaysOrMoreEvent.class);
-        Assertions.assertThat(this.getNewEvents().get(3)).isInstanceOf(LoanDelinquent60DaysOrMoreEvent.class);
-        Assertions.assertThat(this.getNewEvents().get(4)).isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
+            softly.assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanDelinquent10DaysOrMoreEvent.class);
+            softly.assertThat(this.getNewEvents().get(2)).isInstanceOf(LoanDelinquent30DaysOrMoreEvent.class);
+            softly.assertThat(this.getNewEvents().get(3)).isInstanceOf(LoanDelinquent60DaysOrMoreEvent.class);
+            softly.assertThat(this.getNewEvents().get(4)).isInstanceOf(LoanDelinquent90DaysOrMoreEvent.class);
+        });
     }
 
     @Test
@@ -119,5 +121,10 @@ public class DelinquentsTest extends AbstractZonkyLeveragingTest {
         // the investment is defaulted
         Delinquents.update(Collections.emptyList(), Collections.singletonList(i), INVESTMENT_SUPPLIER, f);
         Assertions.assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
+    }
+
+    @Test
+    public void defaultUpdateTime() {
+        Assertions.assertThat(Delinquents.getLastUpdateTimestamp()).isBefore(OffsetDateTime.now());
     }
 }

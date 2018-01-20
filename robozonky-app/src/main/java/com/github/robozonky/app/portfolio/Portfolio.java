@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,6 +83,18 @@ public class Portfolio {
         return getStream(source, Function.identity());
     }
 
+    private static boolean isLoanRelated(final Investment i, final int loanId) {
+        return i.getLoanId() == loanId;
+    }
+
+    private static boolean isLoanRelated(final Investment i, final Loan loan) {
+        return isLoanRelated(i, loan.getId());
+    }
+
+    private static boolean isLoanRelated(final Investment i, final BlockedAmount blockedAmount) {
+        return isLoanRelated(i, blockedAmount.getLoanId());
+    }
+
     private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
         final Loan l = LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky);
         return new Investment(l, blockedAmount.getAmount().intValue());
@@ -98,13 +109,13 @@ public class Portfolio {
     public boolean wasOnceSold(final Loan loan) {
         // first find the loan in question, then check if it's being sold or was already sold
         return getStream(investments)
-                .filter(i -> i.getLoanId() == loan.getId())
+                .filter(i -> isLoanRelated(i, loan))
                 .anyMatch(i -> i.isOnSmp() || i.getStatus() == InvestmentStatus.SOLD);
     }
 
     public Optional<Investment> lookup(final int loanId) {
         return Stream.concat(investments.stream(), investmentsPending.stream())
-                .filter(i -> i.getLoanId() == loanId)
+                .filter(i -> isLoanRelated(i, loanId))
                 .findFirst();
     }
 
@@ -124,19 +135,18 @@ public class Portfolio {
      * @param blockedAmount Blocked amount to register.
      */
     public void newBlockedAmount(final Zonky zonky, final BlockedAmount blockedAmount) {
-        final Predicate<Investment> equalsBlockedAmount = i -> i.getLoanId() == blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
                 final Investment newcomer = toInvestment(zonky, blockedAmount);
-                if (investmentsPending.stream().noneMatch(equalsBlockedAmount)) {
+                if (investmentsPending.stream().noneMatch(i -> isLoanRelated(i, blockedAmount))) {
                     investmentsPending.add(newcomer);
                 }
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
                 // before daily update is run, the newly sold participation will show as active
                 getActive()
-                        .filter(equalsBlockedAmount)
+                        .filter(i -> isLoanRelated(i, blockedAmount))
                         .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
                             final PortfolioOverview po = calculateOverview(zonky.getWallet().getAvailableBalance());
                             final Loan l = LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky);

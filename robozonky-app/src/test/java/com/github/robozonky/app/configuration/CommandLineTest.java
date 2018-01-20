@@ -49,7 +49,8 @@ public class CommandLineTest {
 
     @Test
     public void helpCli() {
-        final Optional<InvestmentMode> cfg = CommandLine.parse("-h");
+        final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
+        }, "-h");
         Assertions.assertThat(cfg).isEmpty();
         Assertions.assertThat(systemOutRule.getLog()).contains(CommandLine.getScriptIdentifier());
     }
@@ -57,8 +58,9 @@ public class CommandLineTest {
     @Test
     public void invalidFragmentCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-g", "somewhere",
-                                                               "-p", "password", "single", "-s", "somewhere");
+        final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
+                                                               }, "-u", "someone", "-g", "somewhere", "-p",
+                                                               "password", "single", "-s", "somewhere");
         Assertions.assertThat(cfg).isEmpty();
         Assertions.assertThat(systemOutRule.getLog()).contains(CommandLine.getScriptIdentifier());
     }
@@ -66,7 +68,8 @@ public class CommandLineTest {
     @Test
     public void validDaemonCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLine.parse("-u", "someone", "-p", "password",
+        final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
+                                                               }, "-u", "someone", "-p", "password",
                                                                "daemon", "-s", "somewhere");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
     }

@@ -105,7 +105,7 @@ public class Delinquents {
     /**
      * @return Active loans that are now, or at some point have been, tracked as delinquent.
      */
-    public static Collection<Delinquent> getDelinquents() {
+    public static Stream<Delinquent> getDelinquents() {
         final State.ClassSpecificState state = getState();
         return state.getKeys().stream()
                 .filter(StringUtils::isNumeric) // skip any non-loan metadata
@@ -114,7 +114,7 @@ public class Delinquents {
                     final List<String> rawDelinquencies =
                             state.getValues(key).orElseThrow(() -> new IllegalStateException("Impossible."));
                     return add(loanId, rawDelinquencies);
-                }).collect(Collectors.toSet());
+                });
     }
 
     private static Collection<Delinquency> persistAndReturnActiveDelinquents(final Stream<Delinquent> delinquents) {
@@ -130,20 +130,19 @@ public class Delinquents {
         return allPresent;
     }
 
-    static void update(final Collection<Investment> presentlyDelinquent, final Collection<Investment> noLongerActive,
-                       final Function<Integer, Investment> investmentSupplier,
-                       final Function<Integer, Loan> loanSupplier) {
-        LOGGER.debug("Updating delinquent loans.");
+    private static Collection<Delinquent> getKnownDelinquents(final Collection<Investment> presentlyDelinquent,
+                                                              final Collection<Investment> noLongerActive,
+                                                              final Function<Integer, Investment> investmentSupplier,
+                                                              final Function<Integer, Loan> loanSupplier) {
         final LocalDate now = LocalDate.now();
-        final Collection<Delinquent> knownDelinquents = getDelinquents();
         // find out loans that are no longer delinquent, either through payment or through default
-        knownDelinquents.stream()
+        return getDelinquents().parallel()
                 .filter(Delinquent::hasActiveDelinquency) // last known state was delinquent
                 .filter(d -> presentlyDelinquent.stream().noneMatch(i -> related(d, i))) // no longer is delinquent
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
                 .map(Delinquency::getParent)
-                .forEach(d -> {  // notify
+                .peek(d -> {  // notify
                     final int loanId = d.getLoanId();
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     final Loan l = loanSupplier.apply(loanId);
@@ -153,7 +152,15 @@ public class Delinquents {
                     } else {
                         Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since));
                     }
-                });
+                }).collect(Collectors.toList());
+    }
+
+    static void update(final Collection<Investment> presentlyDelinquent, final Collection<Investment> noLongerActive,
+                       final Function<Integer, Investment> investmentSupplier,
+                       final Function<Integer, Loan> loanSupplier) {
+        LOGGER.debug("Updating delinquent loans.");
+        final Collection<Delinquent> knownDelinquents = getKnownDelinquents(presentlyDelinquent, noLongerActive,
+                                                                            investmentSupplier, loanSupplier);
         // assemble delinquencies past and present
         final Stream<Delinquent> delinquentInThePast = knownDelinquents.stream()
                 .filter(d -> noLongerActive.stream().noneMatch(i -> related(d, i)));

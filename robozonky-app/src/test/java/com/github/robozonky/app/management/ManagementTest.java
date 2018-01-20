@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app;
+package com.github.robozonky.app.management;
 
 import java.lang.management.ManagementFactory;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.management.IntrospectionException;
 import javax.management.MBeanServer;
-import javax.management.ReflectionException;
 
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.management.MBean;
+import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.app.runtime.RuntimeHandler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -34,9 +33,9 @@ public class ManagementTest {
     private static final MBeanServer SERVER = ManagementFactory.getPlatformMBeanServer();
 
     @Test
-    public void registerAndUnregister() throws IntrospectionException, ReflectionException {
+    public void registerAndUnregister() {
         final int beanCountBeforeRegister = ManagementTest.SERVER.getMBeanCount();
-        final Management m = new Management();
+        final Management m = new Management(new RuntimeHandler());
         final Optional<Consumer<ShutdownHook.Result>> hook = m.get(); // register the mbeans
         final int beanCountAfterRegister = ManagementTest.SERVER.getMBeanCount();
         SoftAssertions.assertSoftly(softly -> {

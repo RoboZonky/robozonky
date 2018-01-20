@@ -481,7 +481,25 @@
                         "methodName": "getRelativeSaleFee",
                         "elementKind": "method",
                         "justification": "Unused code."
+                      }, {
+                        "code": "java.method.removed",
+                        "old": "method int com.github.robozonky.api.remote.entities.BlockedAmount::compareTo(com.github.robozonky.api.remote.entities.BlockedAmount)",
+                        "package": "com.github.robozonky.api.remote.entities",
+                        "classSimpleName": "BlockedAmount",
+                        "methodName": "compareTo",
+                        "elementKind": "method",
+                        "justification": "BlockedAmount is no longer Comparable."
+                      }, {
+                        "code": "java.class.noLongerImplementsInterface",
+                        "old": "class com.github.robozonky.api.remote.entities.BlockedAmount",
+                        "new": "class com.github.robozonky.api.remote.entities.BlockedAmount",
+                        "interface": "java.lang.Comparable<com.github.robozonky.api.remote.entities.BlockedAmount>",
+                        "package": "com.github.robozonky.api.remote.entities",
+                        "classSimpleName": "BlockedAmount",
+                        "elementKind": "class",
+                        "justification": "BlockedAmount is no longer Comparable."
                       }
+
                     ]
                   }
                 }

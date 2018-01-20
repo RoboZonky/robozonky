@@ -36,7 +36,6 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.PortfolioDependant;
-import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
@@ -72,24 +71,19 @@ public class Selling implements PortfolioDependant {
     }
 
     private Optional<Investment> processInvestment(final Zonky zonky, final RecommendedInvestment r) {
-        try {
-            Events.fire(new SaleRequestedEvent(r));
-            final Investment i = r.descriptor().item();
-            if (isDryRun) {
-                LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
-            } else {
-                LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
-                zonky.sell(i);
-                i.setIsOnSmp(true); // send the investment to secondary marketplace; Portfolio class may use it later
-                // FIXME use the above also when doing dry run?
-                LOGGER.trace("Request over.");
-            }
-            Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
-            return Optional.of(i);
-        } catch (final Throwable t) { // prevent failure in one operation from trying other operations
-            new DaemonRuntimeExceptionHandler().handle(t);
-            return Optional.empty();
+        Events.fire(new SaleRequestedEvent(r));
+        final Investment i = r.descriptor().item();
+        if (isDryRun) {
+            LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
+        } else {
+            LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
+            zonky.sell(i);
+            i.setIsOnSmp(true); // send the investment to secondary marketplace; Portfolio class may use it later
+            // FIXME use the above also when doing dry run?
+            LOGGER.trace("Request over.");
         }
+        Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
+        return Optional.of(i);
     }
 
     private void sell(final Portfolio portfolio, final SellStrategy strategy, final Authenticated auth) {

@@ -18,13 +18,12 @@ package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Comparator;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 
-public class BlockedAmount extends BaseEntity implements Comparable<BlockedAmount> {
+public class BlockedAmount extends BaseEntity {
 
     private BigDecimal amount, discount;
     private int loanId;
@@ -93,7 +92,7 @@ public class BlockedAmount extends BaseEntity implements Comparable<BlockedAmoun
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
         final BlockedAmount that = (BlockedAmount) o;
@@ -107,11 +106,4 @@ public class BlockedAmount extends BaseEntity implements Comparable<BlockedAmoun
         return Objects.hash(amount, loanId, category);
     }
 
-    @Override
-    public int compareTo(final BlockedAmount blockedAmount) {
-        return Comparator.comparing(BlockedAmount::getDateStart)
-                .thenComparing(BlockedAmount::getLoanId)
-                .thenComparing(BlockedAmount::getAmount)
-                .compare(this, blockedAmount);
-    }
 }

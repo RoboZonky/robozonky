@@ -65,7 +65,9 @@ class ZonkyApiTokenSupplier implements Supplier<Optional<ZonkyApiToken>> {
     }
 
     private ZonkyApiToken refreshTokenIfNecessary(final ZonkyApiToken token) {
-        if (token.willExpireIn(refresh)) {
+        if (token.willExpireIn(Duration.ZERO)) {
+            return getFreshToken();
+        } else if (token.willExpireIn(refresh)) {
             return refreshToken(token);
         } else {
             LOGGER.trace("Reusing token.");

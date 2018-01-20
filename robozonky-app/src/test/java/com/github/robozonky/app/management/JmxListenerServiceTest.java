@@ -20,10 +20,11 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -44,22 +45,23 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.app.ShutdownHook;
+import com.github.robozonky.app.runtime.RuntimeHandler;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
 
 @RunWith(Parameterized.class)
 public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     private static final String USERNAME = "someone@somewhere.cz";
-    private static final Supplier<OperationsMBean> OPERATIONS = () -> (Operations) MBean.OPERATIONS.getImplementation();
-    private static final Supplier<RuntimeMBean> RUNTIME = () -> (Runtime) MBean.RUNTIME.getImplementation();
-    private static final Supplier<PortfolioMBean> PORTFOLIO = () -> (Portfolio) MBean.PORTFOLIO.getImplementation();
+    private static Optional<Consumer<ShutdownHook.Result>> MGMT;
     /**
      * This exists so that parameterized tests can have a nicely readable ID. Don't put anything more complicated
      * there, as PIT mutation testing will silently ignore the test if the name of the test is weird.
@@ -73,15 +75,30 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     @Parameterized.Parameter(3)
     public Consumer<SoftAssertions> assertionsAfter;
 
+    private static Runtime getRuntimeMBean() {
+        return (Runtime) JmxListenerService.getMBean(MBean.RUNTIME)
+                .orElseThrow(() -> new IllegalStateException("Not found"));
+    }
+
+    private static Operations getOperationsMBean() {
+        return (Operations) JmxListenerService.getMBean(MBean.OPERATIONS)
+                .orElseThrow(() -> new IllegalStateException("Not found"));
+    }
+
+    private static Portfolio getPortfolioMBean() {
+        return (Portfolio) JmxListenerService.getMBean(MBean.PORTFOLIO)
+                .orElseThrow(() -> new IllegalStateException("Not found"));
+    }
+
     private static Object[] getParametersForExecutionCompleted() {
         final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
         final Consumer<SoftAssertions> before = (softly) -> {
-            softly.assertThat(RUNTIME.get().getZonkyUsername()).isEqualTo("");
+            softly.assertThat(getRuntimeMBean().getZonkyUsername()).isEqualTo("");
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(RUNTIME.get().getZonkyUsername()).isEqualTo(USERNAME);
-            softly.assertThat(RUNTIME.get().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
-            softly.assertThat(PORTFOLIO.get().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+            softly.assertThat(getRuntimeMBean().getZonkyUsername()).isEqualTo(USERNAME);
+            softly.assertThat(getRuntimeMBean().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+            softly.assertThat(getPortfolioMBean().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
@@ -90,7 +107,7 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final Consumer<SoftAssertions> before = (softly) -> {
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            softly.assertThat(PORTFOLIO.get().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
+            softly.assertThat(getPortfolioMBean().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
         return new Object[]{evt.getClass(), evt, before, after};
     }
@@ -117,11 +134,11 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentDelegatedEvent(r, "");
         final Consumer<SoftAssertions> before = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getDelegatedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getDelegatedInvestments()).containsOnlyKeys(l.getId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
@@ -134,11 +151,11 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentRejectedEvent(r, "");
         final Consumer<SoftAssertions> before = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getRejectedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getRejectedInvestments()).containsOnlyKeys(l.getId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
@@ -150,11 +167,11 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.valueOf(1000), Stream.empty());
         final Event evt = new InvestmentMadeEvent(new Investment(l, 200), l, po);
         final Consumer<SoftAssertions> before = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getSuccessfulInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getSuccessfulInvestments()).containsOnlyKeys(l.getId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
@@ -166,11 +183,11 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final Investment i = new Investment(l, 200);
         final Event evt = new SaleOfferedEvent(i, l);
         final Consumer<SoftAssertions> before = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getOfferedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getOfferedInvestments()).containsOnlyKeys(i.getLoanId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
@@ -183,11 +200,11 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final Event evt = new InvestmentPurchasedEvent(i, l, PortfolioOverview.calculate(BigDecimal.valueOf(2000),
                                                                                          Stream.empty()));
         final Consumer<SoftAssertions> before = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getPurchasedInvestments()).isEmpty();
         };
         final Consumer<SoftAssertions> after = (softly) -> {
-            final OperationsMBean mbean = OPERATIONS.get();
+            final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getPurchasedInvestments()).containsOnlyKeys(i.getLoanId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
@@ -208,7 +225,17 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
                              JmxListenerServiceTest.getParametersForInvestmentPurchased());
     }
 
-    public <T extends Event> void handleEvent(final T event) {
+    @BeforeClass
+    public static void loadAll() {
+        MGMT = new Management(Mockito.mock(RuntimeHandler.class)).get();
+    }
+
+    @AfterClass
+    public static void unloadAll() {
+        MGMT.ifPresent(rc -> rc.accept(new ShutdownHook.Result(ReturnCode.OK, null)));
+    }
+
+    private <T extends Event> void handleEvent(final T event) {
         final JmxListenerService service = new JmxListenerService();
         final EventListenerSupplier<T> r = service.findListener((Class<T>) event.getClass());
         final EventListener<T> listener = r.get().get();
@@ -227,11 +254,5 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final JmxListenerService service = new JmxListenerService();
         final EventListenerSupplier<RoboZonkyEndingEvent> r = service.findListener(RoboZonkyEndingEvent.class);
         Assertions.assertThat(r).isNull();
-    }
-
-    @After
-    @Before
-    public void reset() {
-        Stream.of(MBean.values()).forEach(MBean::reset);
     }
 }

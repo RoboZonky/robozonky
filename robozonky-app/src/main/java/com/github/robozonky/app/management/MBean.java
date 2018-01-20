@@ -16,87 +16,61 @@
 
 package com.github.robozonky.app.management;
 
-import java.lang.management.ManagementFactory;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
+import com.github.robozonky.app.runtime.RuntimeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public enum MBean {
+enum MBean {
 
-    RUNTIME(Runtime::new),
-    OPERATIONS(Operations::new),
-    DELINQUENCY(Delinquency::new),
-    PORTFOLIO(Portfolio::new);
+    RUNTIME(Runtime.class) {
+        @Override
+        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
+            return new Runtime(runtimeHandler);
+        }
+    },
+    OPERATIONS(Operations.class) {
+        @Override
+        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
+            return new Operations();
+        }
+    },
+    DELINQUENCY(Delinquency.class) {
+        @Override
+        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
+            return new Delinquency();
+        }
+    },
+    PORTFOLIO(Portfolio.class) {
+        @Override
+        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
+            return new Portfolio();
+        }
+    };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MBean.class);
+    private final ObjectName objectName;
 
-    public static void loadAll() {
-        MBean.LOGGER.debug("Registering MBeans.");
-        final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        Stream.of(MBean.values())
-                .map(MBean::getImplementation)
-                .forEach(i -> {
-                    try {
-                        final ObjectName name = MBean.assembleObjectName(i);
-                        server.registerMBean(i, name);
-                        MBean.LOGGER.debug("Registered MBean '{}'.", name);
-                    } catch (final NotCompliantMBeanException | InstanceAlreadyExistsException |
-                            MBeanRegistrationException ex) {
-                        MBean.LOGGER.warn("Failed loading MBean.", ex);
-                    }
-                });
-        MBean.LOGGER.debug("MBeans registered.");
+    MBean(final Class<? extends BaseMBean> implClass) {
+        this.objectName = MBean.assembleObjectName(implClass);
     }
 
-    public static void unloadAll() {
-        MBean.LOGGER.debug("Unregistering MBeans.");
-        final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        Stream.of(MBean.values())
-                .map(MBean::getImplementation)
-                .map(MBean::assembleObjectName)
-                .forEach(name -> {
-                    try {
-                        server.unregisterMBean(name);
-                        MBean.LOGGER.debug("Unregistered MBean '{}'.", name);
-                    } catch (final InstanceNotFoundException | MBeanRegistrationException ex) {
-                        MBean.LOGGER.info("Failed unloading MBean.", ex);
-                    }
-                });
-        MBean.LOGGER.debug("MBeans unregistered.");
-    }
-
-    static ObjectName assembleObjectName(final BaseMBean implementation) {
+    static ObjectName assembleObjectName(final Class<? extends BaseMBean> implementation) {
         try {
-            final String className = implementation.getClass().getSimpleName();
+            final String className = implementation.getSimpleName();
             return new ObjectName("com.github.robozonky:type=" + className);
         } catch (final MalformedObjectNameException ex) {
-            MBean.LOGGER.warn("MBean '{}' will be ignored.", implementation.getClass(), ex);
+            MBean.LOGGER.warn("MBean '{}' will be ignored.", implementation, ex);
             return null;
         }
     }
 
-    private final Supplier<BaseMBean> supplier;
-    private BaseMBean implementation;
-
-    MBean(final Supplier<BaseMBean> supplier) {
-        this.supplier = supplier;
-        this.reset();
+    public ObjectName getObjectName() {
+        return objectName;
     }
 
-    public BaseMBean getImplementation() {
-        return implementation;
-    }
+    abstract BaseMBean newImplementation(final RuntimeHandler runtimeHandler);
 
-    void reset() {
-        implementation = supplier.get();
-    }
 }

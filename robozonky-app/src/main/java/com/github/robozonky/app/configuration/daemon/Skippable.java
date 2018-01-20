@@ -35,12 +35,11 @@ final class Skippable implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.trace("Checking whether to run the update.");
         if (shouldBeSkipped.get()) {
-            LOGGER.trace("Not running the update.");
+            LOGGER.trace("Not running {}.", toRun);
             return;
         }
-        LOGGER.trace("Running the update.");
+        LOGGER.trace("Running {}.", toRun);
         toRun.run();
         LOGGER.trace("Update finished.");
     }

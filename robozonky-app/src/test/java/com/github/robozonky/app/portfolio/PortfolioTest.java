@@ -16,18 +16,28 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.InvestmentSoldEvent;
+import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
+import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class PortfolioTest extends AbstractZonkyLeveragingTest {
@@ -96,5 +106,36 @@ public class PortfolioTest extends AbstractZonkyLeveragingTest {
         System.setProperty(Settings.Key.DEFAULTS_DRY_RUN_BALANCE.getName(), String.valueOf(balance));
         Assertions.assertThat(instance.calculateOverview(zonky, true).getCzkAvailable())
                 .isEqualTo(balance);
+    }
+
+    @Test
+    public void newSale() {
+        final Loan l = new Loan(1, 1000);
+        final Investment i = new Investment(l, 200);
+        final BlockedAmount ba = new BlockedAmount(l.getId(), BigDecimal.valueOf(l.getAmount()),
+                                                   TransactionCategory.SMP_SALE_FEE);
+        final Zonky zonky = harmlessZonky(10_000);
+        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
+        final Portfolio portfolio = new Portfolio(Collections.singletonList(i));
+        Assertions.assertThat(portfolio.wasOnceSold(l)).isFalse();
+        i.setIsOnSmp(true);
+        Assertions.assertThat(portfolio.wasOnceSold(l)).isTrue();
+        portfolio.newBlockedAmount(zonky, ba);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(i.isOnSmp()).isFalse();
+            softly.assertThat(i.getStatus()).isEqualTo(InvestmentStatus.SOLD);
+        });
+        final List<Event> events = this.getNewEvents();
+        Assertions.assertThat(events).first().isInstanceOf(InvestmentSoldEvent.class);
+        // doing the same thing again shouldn't do anything
+        this.readPreexistingEvents();
+        portfolio.newBlockedAmount(zonky, ba);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(i.isOnSmp()).isFalse();
+            softly.assertThat(i.getStatus()).isEqualTo(InvestmentStatus.SOLD);
+            softly.assertThat(portfolio.wasOnceSold(l)).isTrue();
+        });
+        final List<Event> newEvents = this.getNewEvents();
+        Assertions.assertThat(newEvents).isEmpty();
     }
 }

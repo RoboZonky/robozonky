@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.util;
 
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import java.util.concurrent.ScheduledExecutorService;
+
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class RuntimeTest {
+public class SchedulerServiceTest {
 
     @Test
-    public void shutdown() {
-        final RuntimeHandler h = Mockito.mock(RuntimeHandler.class);
-        final Runtime r = new Runtime(h);
-        r.stopDaemon();
-        Mockito.verify(h).resumeToShutdown();
+    public void defaults() {
+        final PausableScheduledExecutorService expected = Mockito.mock(PausableScheduledExecutorService.class);
+        final SchedulerService s = (parallelism, threadFactory) -> expected;
+        final ScheduledExecutorService ses = s.newScheduledExecutorService(1);
+        Assertions.assertThat(ses).isSameAs(expected);
     }
 }

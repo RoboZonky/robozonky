@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration.daemon;
+package com.github.robozonky.app.runtime;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import com.github.robozonky.app.ShutdownEnabler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,23 +23,22 @@ class DaemonShutdownHook extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonShutdownHook.class);
 
-    private final CountDownLatch blockUntilZero;
+    private final ShutdownEnabler shutdownEnabler;
+    private final RuntimeHandler runtimeHandler;
 
-    public DaemonShutdownHook(final CountDownLatch blockUntilZero) {
-        this.blockUntilZero = blockUntilZero;
+    public DaemonShutdownHook(final RuntimeHandler handler, final ShutdownEnabler shutdownEnabler) {
+        this.shutdownEnabler = shutdownEnabler;
+        this.runtimeHandler = handler;
     }
 
+    @Override
     public void run() {
-        LOGGER.debug("Shutdown requested through {}.", blockUntilZero);
+        LOGGER.debug("Shutdown requested through {}.", runtimeHandler);
         // will release the main thread and thus terminate the daemon
-        final CountDownLatch shutdownEnabler = ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get();
-        blockUntilZero.countDown();
+        runtimeHandler.resumeToShutdown();
         // only allow to shut down after the daemon has been closed by the app
         try {
-            LOGGER.debug("Waiting for shutdown on {}.", shutdownEnabler);
-            shutdownEnabler.await(1, TimeUnit.MINUTES);
-        } catch (final InterruptedException ex) { // don't block shutdown indefinitely
-            LOGGER.warn("Timed out waiting for daemon to terminate cleanly.");
+            shutdownEnabler.waitUntilTriggered();
         } finally {
             LOGGER.debug("Shutdown allowed.");
         }

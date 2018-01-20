@@ -17,36 +17,25 @@
 package com.github.robozonky.app.management;
 
 import java.time.OffsetDateTime;
-import java.util.concurrent.CountDownLatch;
 
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.app.ShutdownEnabler;
-import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
+import com.github.robozonky.app.runtime.RuntimeHandler;
 import com.github.robozonky.internal.api.Defaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class Runtime implements RuntimeMBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Runtime.class);
-
+    private final RuntimeHandler runtimeHandler;
     private String zonkyUsername = "";
     private OffsetDateTime lastUpdatedDateTime;
 
-    private static void countDown(final CountDownLatch latch) {
-        Runtime.LOGGER.debug("Counting down {}.", latch);
-        latch.countDown();
+    public Runtime(final RuntimeHandler runtimeHandler) {
+        this.runtimeHandler = runtimeHandler;
     }
 
     @Override
     public void stopDaemon() {
-        Runtime.countDown(DaemonInvestmentMode.BLOCK_UNTIL_ZERO.get()); // signal daemon to end
-        /*
-         * Graceful shutdown will be assured due to the daemon shutdown hook only being called on normal application
-         * shutdown. Therefore we can signal graceful shutdown right away.
-         */
-        Runtime.countDown(ShutdownEnabler.DAEMON_ALLOWED_TO_TERMINATE.get());
+        runtimeHandler.resumeToShutdown();
     }
 
     @Override
