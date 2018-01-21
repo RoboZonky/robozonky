@@ -28,10 +28,12 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
@@ -133,7 +135,8 @@ public class Delinquents {
     private static Collection<Delinquent> getKnownDelinquents(final Collection<Investment> presentlyDelinquent,
                                                               final Collection<Investment> noLongerActive,
                                                               final Function<Integer, Investment> investmentSupplier,
-                                                              final Function<Integer, Loan> loanSupplier) {
+                                                              final Function<Integer, Loan> loanSupplier,
+                                                              final PortfolioOverview portfolioOverview) {
         final LocalDate now = LocalDate.now();
         // find out loans that are no longer delinquent, either through payment or through default
         return getDelinquents().parallel()
@@ -148,7 +151,17 @@ public class Delinquents {
                     final Loan l = loanSupplier.apply(loanId);
                     final Investment inv = investmentSupplier.apply(loanId);
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
-                        Events.fire(new LoanDefaultedEvent(inv, l, since));
+                        final PaymentStatus s = inv.getPaymentStatus();
+                        switch (s) {
+                            case PAID_OFF:
+                                Events.fire(new LoanDefaultedEvent(inv, l, since));
+                                break;
+                            case PAID:
+                                Events.fire(new LoanRepaidEvent(inv, l, portfolioOverview));
+                                break;
+                            default:
+                                LOGGER.warn("Unsupported payment status '{}' for loan #{}.", s, l.getId());
+                        }
                     } else {
                         Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since));
                     }
@@ -157,10 +170,11 @@ public class Delinquents {
 
     static void update(final Collection<Investment> presentlyDelinquent, final Collection<Investment> noLongerActive,
                        final Function<Integer, Investment> investmentSupplier,
-                       final Function<Integer, Loan> loanSupplier) {
+                       final Function<Integer, Loan> loanSupplier, final PortfolioOverview portfolioOverview) {
         LOGGER.debug("Updating delinquent loans.");
         final Collection<Delinquent> knownDelinquents = getKnownDelinquents(presentlyDelinquent, noLongerActive,
-                                                                            investmentSupplier, loanSupplier);
+                                                                            investmentSupplier, loanSupplier,
+                                                                            portfolioOverview);
         // assemble delinquencies past and present
         final Stream<Delinquent> delinquentInThePast = knownDelinquents.stream()
                 .filter(d -> noLongerActive.stream().noneMatch(i -> related(d, i)));
@@ -186,10 +200,14 @@ public class Delinquents {
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
      * @param auth The API that will be used to retrieve the loan instances.
      * @param portfolio Holds information about investments.
+     * @param isDryRun Whether or not to run in a dry run mode.
      */
-    public static void update(final Authenticated auth, final Portfolio portfolio) {
+    public static void update(final Authenticated auth, final Portfolio portfolio, final boolean isDryRun) {
+        final PortfolioOverview portfolioOverview = auth.call(zonky -> portfolio.calculateOverview(zonky, isDryRun));
         update(getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
-               getWithPaymentStatus(portfolio, PaymentStatus.getDone()), portfolio::lookupOrFail,
-               id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)));
+               getWithPaymentStatus(portfolio, PaymentStatus.getDone()),
+               portfolio::lookupOrFail,
+               id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)),
+               portfolioOverview);
     }
 }

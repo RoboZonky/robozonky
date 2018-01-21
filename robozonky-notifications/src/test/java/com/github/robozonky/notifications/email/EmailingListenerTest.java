@@ -48,6 +48,7 @@ import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -170,21 +171,17 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         final NotificationProperties properties = EmailingListenerTest.getNotificationProperties();
         // create events for listeners
         final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
-        events.put(SupportedListener.INVESTMENT_DELEGATED,
-                   new InvestmentDelegatedEvent(recommendation, "random"));
+        events.put(SupportedListener.INVESTMENT_DELEGATED, new InvestmentDelegatedEvent(recommendation, "random"));
         events.put(SupportedListener.INVESTMENT_MADE,
                    new InvestmentMadeEvent(i, loan, mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, loan,
                                                                               mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
-        events.put(SupportedListener.INVESTMENT_REJECTED,
-                   new InvestmentRejectedEvent(recommendation, "random"));
+        events.put(SupportedListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, "random"));
         events.put(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
                    new LoanNoLongerDelinquentEvent(i, loan, LocalDate.now()));
-        events.put(SupportedListener.LOAN_DEFAULTED,
-                   new LoanDefaultedEvent(i, loan, LocalDate.now()));
-        events.put(SupportedListener.LOAN_NOW_DELINQUENT,
-                   new LoanNowDelinquentEvent(i, loan, LocalDate.now()));
+        events.put(SupportedListener.LOAN_DEFAULTED, new LoanDefaultedEvent(i, loan, LocalDate.now()));
+        events.put(SupportedListener.LOAN_NOW_DELINQUENT, new LoanNowDelinquentEvent(i, loan, LocalDate.now()));
         events.put(SupportedListener.LOAN_DELINQUENT_10_PLUS,
                    new LoanDelinquent10DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(11)));
         events.put(SupportedListener.LOAN_DELINQUENT_30_PLUS,
@@ -193,14 +190,14 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
                    new LoanDelinquent60DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(61)));
         events.put(SupportedListener.LOAN_DELINQUENT_90_PLUS,
                    new LoanDelinquent90DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(91)));
+        events.put(SupportedListener.LOAN_REPAID, new LoanRepaidEvent(i, loan, mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.BALANCE_ON_TARGET,
                    new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(Integer.MAX_VALUE)));
         events.put(SupportedListener.BALANCE_UNDER_MINIMUM,
                    new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(0)));
         events.put(SupportedListener.CRASHED,
                    new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
-        events.put(SupportedListener.REMOTE_OPERATION_FAILED,
-                   new RemoteOperationFailedEvent(new RuntimeException()));
+        events.put(SupportedListener.REMOTE_OPERATION_FAILED, new RemoteOperationFailedEvent(new RuntimeException()));
         events.put(SupportedListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException()));
         events.put(SupportedListener.INITIALIZED, new RoboZonkyInitializedEvent());
         events.put(SupportedListener.ENDING, new RoboZonkyEndingEvent());

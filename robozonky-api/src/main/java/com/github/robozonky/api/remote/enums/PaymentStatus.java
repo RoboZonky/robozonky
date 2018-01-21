@@ -25,9 +25,12 @@ public enum PaymentStatus {
     DUE,
     COVERED,
     NOT_COVERED,
+    // "zesplatněná"
     PAID_OFF,
     CANCELED,
+    // "ztraceno"
     WRITTEN_OFF,
+    // "splacená"
     PAID,
     IN_WITHDRAWAL;
 

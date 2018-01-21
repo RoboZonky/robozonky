@@ -134,13 +134,22 @@ public class FinancialCalculator {
                                                          final PortfolioOverview portfolioOverview,
                                                          final long totalTerms, final boolean includeSmpSaleFee) {
         final BigDecimal actualIncome = actualInterestAfterFees(investment, portfolioOverview, includeSmpSaleFee);
-        return actualInterestRate(investment.getAmount(), actualIncome, totalTerms);
+        return actualInterestRate(amountLoaned(investment), actualIncome, totalTerms);
+    }
+
+    private static BigDecimal amountLoaned(final Investment i) {
+        final BigDecimal purchasePrice = i.getPurchasePrice();
+        if (purchasePrice != null && purchasePrice.compareTo(BigDecimal.ZERO) > 0) { // bought on secondary marketplace
+            return purchasePrice;
+        } else { // bought on primary marketplace
+            return i.getAmount();
+        }
     }
 
     public static BigDecimal actualInterestAfterFees(final Investment investment,
                                                      final PortfolioOverview portfolioOverview,
                                                      final boolean includeSmpSaleFee) {
-        final int termsInZonky = investment.getLoanTermInMonth() - investment.getRemainingMonths();
+        final int termsInZonky = investment.getLoanTermInMonth() - investment.getCurrentTerm();
         final BigDecimal fee = feePaid(investment, portfolioOverview, termsInZonky);
         final BigDecimal actualFee = includeSmpSaleFee ? plus(fee, investment.getSmpFee()) : fee;
         final BigDecimal interest = plus(investment.getPaidInterest(), investment.getPaidPenalty());
@@ -170,6 +179,6 @@ public class FinancialCalculator {
                                                            final PortfolioOverview portfolioOverview) {
         final int terms = investment.getRemainingMonths();
         final BigDecimal expectedInterest = expectedInterestAfterFees(investment, portfolioOverview);
-        return actualInterestRate(investment.getAmount(), expectedInterest, terms);
+        return actualInterestRate(amountLoaned(investment), expectedInterest, terms);
     }
 }

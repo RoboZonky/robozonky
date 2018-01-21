@@ -28,6 +28,7 @@ import com.github.robozonky.app.configuration.daemon.PortfolioUpdater;
 import com.github.robozonky.app.configuration.daemon.StrategyProvider;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Delinquents;
+import com.github.robozonky.app.portfolio.Repayments;
 import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.common.extensions.MarketplaceLoader;
 import com.github.robozonky.common.secrets.Credentials;
@@ -36,13 +37,11 @@ import com.github.robozonky.common.secrets.SecretProvider;
 @Parameters(commandNames = "daemon", commandDescription = "Constantly checks marketplaces, invests based on strategy.")
 class DaemonOperatingMode extends OperatingMode {
 
+    private final Consumer<Throwable> shutdownCall;
     @ParametersDelegate
     MarketplaceCommandLineFragment marketplace = new MarketplaceCommandLineFragment();
-
     @ParametersDelegate
     StrategyCommandLineFragment strategy = new StrategyCommandLineFragment();
-
-    private final Consumer<Throwable> shutdownCall;
 
     public DaemonOperatingMode(final Consumer<Throwable> shutdownCall) {
         this.shutdownCall = shutdownCall;
@@ -65,11 +64,14 @@ class DaemonOperatingMode extends OperatingMode {
                     final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(auth, updater);
                     // run update of blocked amounts automatically with every portfolio update
                     updater.registerDependant(bau.getDependant());
+                    // update loans repaid with every portfolio update
+                    final boolean isDryRun = builder.isDryRun();
+                    updater.registerDependant(new Repayments(isDryRun));
                     // update delinquents automatically with every portfolio update
-                    updater.registerDependant((p, a) -> Delinquents.update(a, p));
+                    updater.registerDependant((p, a) -> Delinquents.update(a, p, isDryRun));
                     final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
                     // attempt to sell participations after every portfolio update
-                    updater.registerDependant(new Selling(sp::getToSell, builder.isDryRun()));
+                    updater.registerDependant(new Selling(sp::getToSell, isDryRun));
                     final InvestmentMode m = new DaemonInvestmentMode(auth, updater, builder, marketplaceImpl, sp, bau,
                                                                       marketplace.getMaximumSleepDuration(),
                                                                       marketplace.getPrimaryMarketplaceCheckDelay(),

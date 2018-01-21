@@ -97,11 +97,20 @@ public class Investment extends BaseInvestment {
         return legalDpd;
     }
 
+    /**
+     * The original term.
+     * @return
+     */
     @XmlElement
     public int getLoanTermInMonth() {
         return loanTermInMonth;
     }
 
+    /**
+     * How many monthly payments were remaining to be made from {@link #getLoanTermInMonth()}.
+     * May be less than {@link #getRemainingMonths()} in case of early payments.
+     * @return
+     */
     @XmlElement
     public int getCurrentTerm() {
         return currentTerm;
@@ -131,6 +140,10 @@ public class Investment extends BaseInvestment {
         return inWithdrawal;
     }
 
+    /**
+     * How many monthly payments are now remaining. Also see {@link #getCurrentTerm()}.
+     * @return
+     */
     @XmlElement
     public int getRemainingMonths() {
         return remainingMonths;

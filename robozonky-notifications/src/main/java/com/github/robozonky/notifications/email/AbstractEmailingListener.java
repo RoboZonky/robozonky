@@ -89,7 +89,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return Collections.emptyMap();
     }
 
-    Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
+    final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
         return Collections.unmodifiableMap(new HashMap<String, Object>(this.getData(event)) {{
             put("session", new HashMap<String, Object>() {{
                 put("userName", Util.obfuscateEmailAddress(sessionInfo.getUserName()));

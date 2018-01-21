@@ -94,13 +94,24 @@ public class FinancialCalculatorTest {
         final Investment i = Mockito.spy(new Investment(l, 1000));
         Mockito.when(i.getPaidInterest()).thenReturn(BigDecimal.valueOf(500));
         Mockito.when(i.getPaidPenalty()).thenReturn(BigDecimal.ONE);
-        Mockito.when(i.getRemainingMonths()).thenReturn(10);
+        Mockito.when(i.getCurrentTerm()).thenReturn(10);
+        Mockito.when(i.getSmpFee()).thenReturn(BigDecimal.ONE);
+        final BigDecimal wrong = FinancialCalculator.actualInterestRateAfterFees(i,
+                                                                                 getPortfolioOverview(threshold - 1),
+                                                                                 10);
+        Mockito.when(i.getPurchasePrice()).thenReturn(BigDecimal.valueOf(1200)); // override the amount
         final BigDecimal before = FinancialCalculator.actualInterestRateAfterFees(i,
                                                                                   getPortfolioOverview(threshold - 1),
                                                                                   10);
+        Assertions.assertThat(wrong).isGreaterThan(before);
         final BigDecimal after = FinancialCalculator.actualInterestRateAfterFees(i, getPortfolioOverview(threshold),
                                                                                  10);
         Assertions.assertThat(after).isGreaterThan(before);
+        final BigDecimal afterSmpFee = FinancialCalculator.actualInterestRateAfterFees(i,
+                                                                                       getPortfolioOverview(threshold),
+                                                                                       10,
+                                                                                       true);
+        Assertions.assertThat(after).isGreaterThan(afterSmpFee);
     }
 
     @Test
@@ -111,9 +122,14 @@ public class FinancialCalculatorTest {
         final Investment i = Mockito.spy(new Investment(l, 1000));
         Mockito.when(i.getPaidInterest()).thenReturn(BigDecimal.valueOf(500));
         Mockito.when(i.getPaidPenalty()).thenReturn(BigDecimal.ONE);
-        Mockito.when(i.getRemainingMonths()).thenReturn(50);
+        Mockito.when(i.getCurrentTerm()).thenReturn(50);
+        Mockito.when(i.getSmpFee()).thenReturn(BigDecimal.ONE);
         final BigDecimal before = FinancialCalculator.actualInterestAfterFees(i, getPortfolioOverview(threshold - 1));
         final BigDecimal after = FinancialCalculator.actualInterestAfterFees(i, getPortfolioOverview(threshold));
         Assertions.assertThat(after).isGreaterThan(before);
+        final BigDecimal afterSmpFee = FinancialCalculator.actualInterestAfterFees(i,
+                                                                                   getPortfolioOverview(threshold),
+                                                                                   true);
+        Assertions.assertThat(after).isGreaterThan(afterSmpFee);
     }
 }

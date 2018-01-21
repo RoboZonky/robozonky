@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration.daemon;
+package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

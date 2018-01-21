@@ -19,7 +19,9 @@ package com.github.robozonky.app.configuration.daemon;
 import java.util.Optional;
 
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.BlockedAmounts;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioDependant;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
@@ -68,7 +69,9 @@ public class PortfolioUpdater implements Runnable,
         final Portfolio result = authenticated.call(Portfolio::create);
         final CompletableFuture<Portfolio> combined = dependants.stream()
                 .map(d -> (Function<Portfolio, Portfolio>) folio -> {
+                    LOGGER.trace("Running {}.", d);
                     d.accept(folio, authenticated);
+                    LOGGER.trace("Finished {}.", d);
                     return folio;
                 })
                 .reduce(CompletableFuture.completedFuture(result),

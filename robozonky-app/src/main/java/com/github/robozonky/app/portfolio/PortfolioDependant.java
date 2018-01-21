@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.configuration.daemon;
+package com.github.robozonky.app.portfolio;
 
 import java.util.function.BiConsumer;
 
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.portfolio.Portfolio;
 
 /**
  * Represents code to be executed after a successful portfolio update, administered from within this package.

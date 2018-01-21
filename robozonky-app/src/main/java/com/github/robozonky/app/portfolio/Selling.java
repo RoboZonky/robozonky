@@ -35,7 +35,6 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.configuration.daemon.PortfolioDependant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
