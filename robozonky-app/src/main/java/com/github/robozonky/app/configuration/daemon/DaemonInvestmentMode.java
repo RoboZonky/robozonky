@@ -17,8 +17,6 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -64,19 +62,6 @@ public class DaemonInvestmentMode implements InvestmentMode {
         threadGroup.setMaxPriority(Thread.NORM_PRIORITY + 1); // these threads should be a bit more important
         threadGroup.setDaemon(true); // no thread from this group shall block shutdown
         return threadGroup;
-    }
-
-    private static LocalDateTime getNextFourAM(final LocalDateTime now) {
-        final LocalDateTime fourAM = LocalTime.of(4, 0).atDate(now.toLocalDate());
-        if (fourAM.isAfter(now)) {
-            return fourAM;
-        }
-        return fourAM.plusDays(1);
-    }
-
-    private static Duration timeUntil4am(final LocalDateTime now) {
-        final LocalDateTime nextFourAm = getNextFourAM(now);
-        return Duration.between(now, nextFourAm);
     }
 
     private void executeDaemons(final Scheduler executor) {

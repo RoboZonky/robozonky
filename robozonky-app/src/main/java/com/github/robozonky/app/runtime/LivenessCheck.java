@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.Refreshable;
+import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Schedulers;
 import org.apache.commons.io.IOUtils;
 
@@ -41,6 +43,7 @@ import org.apache.commons.io.IOUtils;
 class LivenessCheck extends Refreshable<ApiVersion> {
 
     private static final String URL = ApiProvider.ZONKY_URL + "/version";
+
     private final String url;
 
     private LivenessCheck() {
@@ -51,13 +54,19 @@ class LivenessCheck extends Refreshable<ApiVersion> {
         this.url = url;
     }
 
+    private static ThreadFactory getThreadFactory() {
+        final ThreadGroup tg = new ThreadGroup("rzLiveness");
+        tg.setDaemon(true);
+        return new RoboZonkyThreadFactory(tg);
+    }
+
     public static ShutdownHook.Handler setup(final MainControl livenessTrigger) {
         final Refreshable<ApiVersion> liveness = new LivenessCheck();
         final Refreshable.RefreshListener<ApiVersion> listener = new SchedulerControl();
         liveness.registerListener(listener);
         liveness.registerListener(livenessTrigger);
         // independent of the other schedulers; it controls whether or not the others are even allowed to run
-        final ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
+        final ScheduledExecutorService e = Executors.newScheduledThreadPool(1, getThreadFactory());
         e.scheduleWithFixedDelay(liveness, 0, Duration.ofSeconds(5).toMillis(), TimeUnit.MILLISECONDS);
         return () -> Optional.of(returnCode -> e.shutdownNow());
     }

@@ -19,6 +19,7 @@ package com.github.robozonky.app;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Locale;
+import java.util.Optional;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
@@ -91,9 +92,9 @@ public class App {
         App.LOGGER.debug("Running {} {} v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vm.vendor"),
                          System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
                          System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
-                         java.lang.Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
-                         Charset.defaultCharset());
+                         Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
         ensureLiveness();
+        App.SHUTDOWN_HOOKS.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
         Events.fire(new RoboZonkyStartingEvent());
         // check for new RoboZonky version every now and then
         try { // call core code

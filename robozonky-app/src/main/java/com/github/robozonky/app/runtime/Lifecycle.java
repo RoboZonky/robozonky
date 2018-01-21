@@ -23,10 +23,11 @@ import java.util.concurrent.CountDownLatch;
 
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.util.LocalhostAddress;
-import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+;
 
 /**
  * This class controls the internals of the application. It provides ways of blocking certain robot operations until
@@ -89,7 +90,7 @@ public class Lifecycle {
      * @return
      */
     public Collection<ShutdownHook.Handler> getShutdownHooks() {
-        return Arrays.asList(() -> Optional.of((r) -> Scheduler.inBackground().close()), cleanup, shutdownEnabler);
+        return Arrays.asList(cleanup, shutdownEnabler);
     }
 
     /**

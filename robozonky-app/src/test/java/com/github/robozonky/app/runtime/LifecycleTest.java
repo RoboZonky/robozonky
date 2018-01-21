@@ -52,7 +52,7 @@ public class LifecycleTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(h.getTerminationCause()).isEmpty();
             softly.assertThat(h.getShutdownHooks())
-                    .hasSize(3)
+                    .hasSize(2)
                     .hasOnlyElementsOfType(ShutdownHook.Handler.class);
         });
     }
