@@ -228,7 +228,7 @@
       <dependency>
         <groupId>org.junit.vintage</groupId>
         <artifactId>junit-vintage-engine</artifactId>
-        <version>4.12.2</version>
+        <version>4.12.3</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
