@@ -1,11 +1,10 @@
 version: '{build}'
 environment:
   matrix:
-    - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+    - JAVA_HOME: C:\Program Files\Java\jdk9
 branches:
   except:
     - gh-pages
-os: Windows Server 2012
 install:
   - cmd: SET PATH=%JAVA_HOME%\bin;%PATH%
   - cmd: SET MAVEN_OPTS=-Xmx4g
