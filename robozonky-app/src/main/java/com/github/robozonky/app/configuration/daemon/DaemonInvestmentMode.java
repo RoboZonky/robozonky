@@ -29,7 +29,7 @@ import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
@@ -95,12 +95,12 @@ public class DaemonInvestmentMode implements InvestmentMode {
     }
 
     @Override
-    public ReturnCode apply(final RuntimeHandler runtimeHandler) {
+    public ReturnCode apply(final Lifecycle lifecycle) {
         try (final Scheduler executor = Schedulers.INSTANCE.create(2, THREAD_FACTORY)) {
             // schedule the tasks
             executeDaemons(executor);
             // block until request to stop the app is received
-            runtimeHandler.suspend();
+            lifecycle.suspend();
             LOGGER.trace("Request to stop received.");
             // signal the end of standard operation
             return ReturnCode.OK;

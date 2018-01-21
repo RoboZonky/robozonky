@@ -145,17 +145,10 @@ public class UpdateMonitor extends Refreshable<VersionIdentifier> {
     }
 
     @Override
-    protected Optional<String> getLatestSource() {
+    protected String getLatestSource() throws Exception {
         try (final InputStream s = UpdateMonitor.getMavenCentralData(this.groupId, this.artifactId,
                                                                      this.mavenCentralHostname)) {
-            return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
-        } catch (final Throwable ex) {
-            /*
-             * Java 9 on Travis occasionally and unpredictably throws "j.l.NCDFE: Could not initialize class
-             * sun.security.ssl.SSLContextImpl$DefaultSSLContext" when communicating over HTTPS
-             */
-            UpdateMonitor.LOGGER.debug("Failed reading source.", ex);
-            return Optional.empty();
+            return IOUtils.toString(s, Defaults.CHARSET);
         }
     }
 

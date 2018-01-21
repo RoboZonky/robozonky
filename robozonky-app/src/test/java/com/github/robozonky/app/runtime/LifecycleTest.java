@@ -20,11 +20,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.github.robozonky.app.ShutdownHook;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Test;
 
-public class RuntimeHandlerTest {
+public class LifecycleTest {
 
     private final ExecutorService e = Executors.newFixedThreadPool(1);
 
@@ -37,7 +38,7 @@ public class RuntimeHandlerTest {
     public void failing() {
         final Throwable t = new IllegalStateException("Testing exception.");
         final CountDownLatch c = new CountDownLatch(1);
-        final RuntimeHandler h = new RuntimeHandler(c);
+        final Lifecycle h = new Lifecycle(c);
         h.resumeToFail(t);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(h.getTerminationCause()).contains(t);
@@ -47,10 +48,12 @@ public class RuntimeHandlerTest {
 
     @Test
     public void create() {
-        final RuntimeHandler h = new RuntimeHandler();
+        final Lifecycle h = new Lifecycle();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(h.getTerminationCause()).isEmpty();
-            softly.assertThat(h.getShutdownEnabler()).isNotNull();
+            softly.assertThat(h.getShutdownHooks())
+                    .hasSize(3)
+                    .hasOnlyElementsOfType(ShutdownHook.Handler.class);
         });
     }
 }

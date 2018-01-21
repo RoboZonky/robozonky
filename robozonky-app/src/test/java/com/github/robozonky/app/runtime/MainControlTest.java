@@ -22,27 +22,34 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.ShutdownHook;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-public class ShutdownEnablerTest {
+public class MainControlTest {
 
     @Test(timeout = 5000)
-    public void standard() throws ExecutionException, InterruptedException {
-        final ShutdownEnabler se = new ShutdownEnabler();
+    public void operation() throws InterruptedException, ExecutionException {
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        final Future<?> f = e.submit(se::waitUntilTriggered);
+        final MainControl mainControl = new MainControl();
+        final AtomicBoolean started = new AtomicBoolean(false);
+        final Future<?> f = e.submit(() -> {
+            started.set(true);
+            try {
+                mainControl.waitUntilTriggered();
+            } catch (final InterruptedException e1) {
+                throw new IllegalStateException(e1);
+            }
+        });
+        while (!started.get()) {
+            Thread.sleep(1);
+        }
+        mainControl.valueUnset(null);
         Assertions.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
-                .isInstanceOf(TimeoutException.class); // the thread is blocked
-        final Consumer<ShutdownHook.Result> c = se.get()
-                .orElseThrow(() -> new IllegalStateException("Should have returned."));
-        c.accept(new ShutdownHook.Result(ReturnCode.OK, null)); // this unblocks the thread
-        f.get(); // this should return
-        Assertions.assertThat(f).isDone();
-        e.shutdownNow();
+                .isInstanceOf(TimeoutException.class);  // nothing will happen
+        mainControl.valueSet(Mockito.mock(ApiVersion.class));
+        f.get(); // make sure task finished
     }
 }

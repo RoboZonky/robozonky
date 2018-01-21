@@ -17,7 +17,6 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,12 +51,9 @@ class RefreshableStrategy extends Refreshable<String> {
     }
 
     @Override
-    protected Optional<String> getLatestSource() {
+    protected String getLatestSource() throws Exception {
         try (final InputStream s = url.openStream()) {
-            return Optional.of(IOUtils.toString(s, Defaults.CHARSET));
-        } catch (final IOException ex) {
-            LOGGER.warn("Failed reading strategy.", ex);
-            return Optional.empty();
+            return IOUtils.toString(s, Defaults.CHARSET);
         }
     }
 

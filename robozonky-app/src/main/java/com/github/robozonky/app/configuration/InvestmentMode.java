@@ -19,9 +19,9 @@ package com.github.robozonky.app.configuration;
 import java.util.function.Function;
 
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.runtime.Lifecycle;
 
-public interface InvestmentMode extends Function<RuntimeHandler, ReturnCode>,
+public interface InvestmentMode extends Function<Lifecycle, ReturnCode>,
                                         AutoCloseable {
 
     @Override

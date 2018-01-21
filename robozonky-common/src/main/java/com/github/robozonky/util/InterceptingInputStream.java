@@ -30,7 +30,7 @@ public class InterceptingInputStream extends InputStream {
     private final String intercepted;
 
     public InterceptingInputStream(final InputStream source) throws IOException {
-        this.source = source.markSupported() ? source : new BufferedInputStream(source);
+        this.source = new BufferedInputStream(source); // to ensure mark() is supported
         this.source.mark(MAX_ENTITY_SIZE + 1);
         final byte[] entity = new byte[MAX_ENTITY_SIZE + 1];
         final int entitySize = this.source.read(entity);

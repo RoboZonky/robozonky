@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.app.runtime;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -24,14 +24,14 @@ import com.github.robozonky.util.Schedulers;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class RuntimeControlTest {
+public class SchedulerControlTest {
 
     @Test
     public void check() {
         final ApiVersion v = new ApiVersion("master", UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                                             OffsetDateTime.now(), "1.0.0");
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            final RuntimeControl rc = new RuntimeControl();
+            final SchedulerControl rc = new SchedulerControl();
             rc.valueUnset(null);
             Assertions.assertThat(s.isPaused()).isTrue();
             rc.valueSet(v);

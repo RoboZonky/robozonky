@@ -24,18 +24,18 @@ class DaemonShutdownHook extends Thread {
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonShutdownHook.class);
 
     private final ShutdownEnabler shutdownEnabler;
-    private final RuntimeHandler runtimeHandler;
+    private final Lifecycle lifecycle;
 
-    public DaemonShutdownHook(final RuntimeHandler handler, final ShutdownEnabler shutdownEnabler) {
+    public DaemonShutdownHook(final Lifecycle handler, final ShutdownEnabler shutdownEnabler) {
         this.shutdownEnabler = shutdownEnabler;
-        this.runtimeHandler = handler;
+        this.lifecycle = handler;
     }
 
     @Override
     public void run() {
-        LOGGER.debug("Shutdown requested through {}.", runtimeHandler);
+        LOGGER.debug("Shutdown requested through {}.", lifecycle);
         // will release the main thread and thus terminate the daemon
-        runtimeHandler.resumeToShutdown();
+        lifecycle.resumeToShutdown();
         // only allow to shut down after the daemon has been closed by the app
         try {
             shutdownEnabler.waitUntilTriggered();

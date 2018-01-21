@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.app.runtime;
 
 import java.util.UUID;
 
@@ -52,6 +52,11 @@ public class LivenessCheckTest {
         server.stop();
     }
 
+    @After
+    public void resumeSchedulers() {
+        Schedulers.INSTANCE.resume(); // reset
+    }
+
     @Test
     public void check() {
         server
@@ -63,7 +68,7 @@ public class LivenessCheckTest {
         l.run();
         Assertions.assertThat(l.get()).isPresent();
         Assertions.assertThat(l.get().get().getBuildVersion()).isEqualTo("0.77.0");
-        Schedulers.INSTANCE.pause(); // reset
+        Schedulers.INSTANCE.resume(); // reset
     }
 
     @Test
@@ -75,7 +80,17 @@ public class LivenessCheckTest {
         final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
         Assertions.assertThat(l.get()).isEmpty();
-        Schedulers.INSTANCE.resume(); // reset
+    }
+
+    @Test
+    public void wrongUrl() {
+        server
+                .when(request())
+                .respond(response()
+                                 .withStatusCode(500));
+        final LivenessCheck l = new LivenessCheck(serverUrl); // no protocol
+        l.run();
+        Assertions.assertThat(l.get()).isEmpty();
     }
 
     @Test

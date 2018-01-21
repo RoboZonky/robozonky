@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.app.runtime;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
@@ -36,24 +35,12 @@ import org.apache.commons.io.IOUtils;
 
 /**
  * Periodically queries remote Zonky API, checking whether it's accessible. Based on that, it will trigger
- * {@link RuntimeControl} to call either {@link Schedulers#pause()} or {@link Schedulers#resume()}, therefore
+ * {@link SchedulerControl} to call either {@link Schedulers#pause()} or {@link Schedulers#resume()}, therefore
  * controlling the entire daemon runtime.
  */
-public class LivenessCheck extends Refreshable<ApiVersion> {
-
-    public static ShutdownHook.Handler setup() {
-        Schedulers.INSTANCE.pause(); // don't run anything until Zonky is up and running
-        final Refreshable<ApiVersion> liveness = new LivenessCheck();
-        final Refreshable.RefreshListener<ApiVersion> listener = new RuntimeControl();
-        liveness.registerListener(listener);
-        // independent of the other schedulers; it controls whether or not the others are even allowed to run
-        final ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
-        e.scheduleWithFixedDelay(liveness, 0, Duration.ofSeconds(5).toMillis(), TimeUnit.MILLISECONDS);
-        return () -> Optional.of(returnCode -> e.shutdownNow());
-    }
+class LivenessCheck extends Refreshable<ApiVersion> {
 
     private static final String URL = ApiProvider.ZONKY_URL + "/version";
-
     private final String url;
 
     private LivenessCheck() {
@@ -64,18 +51,22 @@ public class LivenessCheck extends Refreshable<ApiVersion> {
         this.url = url;
     }
 
+    public static ShutdownHook.Handler setup(final MainControl livenessTrigger) {
+        final Refreshable<ApiVersion> liveness = new LivenessCheck();
+        final Refreshable.RefreshListener<ApiVersion> listener = new SchedulerControl();
+        liveness.registerListener(listener);
+        liveness.registerListener(livenessTrigger);
+        // independent of the other schedulers; it controls whether or not the others are even allowed to run
+        final ScheduledExecutorService e = Executors.newScheduledThreadPool(1);
+        e.scheduleWithFixedDelay(liveness, 0, Duration.ofSeconds(5).toMillis(), TimeUnit.MILLISECONDS);
+        return () -> Optional.of(returnCode -> e.shutdownNow());
+    }
+
     @Override
-    protected Optional<String> getLatestSource() {
+    protected String getLatestSource() throws Exception {
         try (final InputStream s = new URL(url).openStream()) {
-            final String json = IOUtils.readLines(s, Defaults.CHARSET).stream()
-                    .collect(Collectors.joining(System.lineSeparator()));
-            return Optional.of(json);
-        } catch (final MalformedURLException ex) {
-            LOGGER.trace("Wrong Zonky URL.", ex);
-        } catch (final IOException ex) {
-            LOGGER.trace("Failed communicating with Zonky, likely down or cannot be reached.", ex);
+            return IOUtils.readLines(s, Defaults.CHARSET).stream().collect(Collectors.joining(System.lineSeparator()));
         }
-        return Optional.empty();
     }
 
     @Override

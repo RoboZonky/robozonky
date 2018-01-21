@@ -46,6 +46,7 @@ public class JmxListenerService implements ListenerService {
     private static Map<MBean, Object> IMPLEMENTATIONS = Collections.emptyMap();
 
     public static void setInstances(final Map<MBean, Object> implementations) {
+        LOGGER.trace("Setting MBeans: {}.", implementations);
         IMPLEMENTATIONS = Collections.unmodifiableMap(implementations);
     }
 

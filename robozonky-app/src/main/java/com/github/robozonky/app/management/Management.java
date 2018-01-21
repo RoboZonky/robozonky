@@ -30,26 +30,26 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.runtime.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Management implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Management.class);
-    private final RuntimeHandler runtimeHandler;
+    private final Lifecycle lifecycle;
 
-    public Management(final RuntimeHandler runtimeHandler) {
-        this.runtimeHandler = runtimeHandler;
+    public Management(final Lifecycle lifecycle) {
+        this.lifecycle = lifecycle;
     }
 
-    private static Map<MBean, Object> loadAll(final RuntimeHandler runtimeHandler) {
+    private static Map<MBean, Object> loadAll(final Lifecycle lifecycle) {
         LOGGER.debug("Registering MBeans.");
         final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         final Map<MBean, Object> instances = new EnumMap<>(MBean.class);
         for (final MBean mbean : MBean.values()) {
             try {
-                final Object impl = mbean.newImplementation(runtimeHandler);
+                final Object impl = mbean.newImplementation(lifecycle);
                 server.registerMBean(impl, mbean.getObjectName());
                 LOGGER.debug("Registered MBean '{}'.", mbean.getObjectName());
                 instances.put(mbean, impl);
@@ -80,10 +80,10 @@ public class Management implements ShutdownHook.Handler {
 
     @Override
     public Optional<Consumer<ShutdownHook.Result>> get() {
-        JmxListenerService.setInstances(Management.loadAll(runtimeHandler));
+        JmxListenerService.setInstances(Management.loadAll(lifecycle));
         return Optional.of((result) -> {
-            JmxListenerService.setInstances(Collections.emptyMap());
             Management.unloadAll();
+            JmxListenerService.setInstances(Collections.emptyMap());
         });
     }
 }

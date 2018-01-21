@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.app.runtime;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;

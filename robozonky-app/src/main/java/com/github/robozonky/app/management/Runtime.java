@@ -20,22 +20,22 @@ import java.time.OffsetDateTime;
 
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.api.Defaults;
 
 class Runtime implements RuntimeMBean {
 
-    private final RuntimeHandler runtimeHandler;
+    private final Lifecycle lifecycle;
     private String zonkyUsername = "";
     private OffsetDateTime lastUpdatedDateTime;
 
-    public Runtime(final RuntimeHandler runtimeHandler) {
-        this.runtimeHandler = runtimeHandler;
+    public Runtime(final Lifecycle lifecycle) {
+        this.lifecycle = lifecycle;
     }
 
     @Override
     public void stopDaemon() {
-        runtimeHandler.resumeToShutdown();
+        lifecycle.resumeToShutdown();
     }
 
     @Override

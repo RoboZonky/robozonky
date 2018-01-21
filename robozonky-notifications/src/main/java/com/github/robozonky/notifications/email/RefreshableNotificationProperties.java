@@ -60,14 +60,14 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
     }
 
     @Override
-    protected Optional<String> getLatestSource() {
+    protected String getLatestSource() throws Exception {
         final String source =
                 Settings.INSTANCE.get(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, (String) null);
         if (source != null) { // attempt to read from the URL specified by the property
             // will read user-provided config file and log a warning if missing, since the user actually requested it
             LOGGER.debug("Reading notification configuration from '{}'.", source);
             try {
-                return Optional.of(RefreshableNotificationProperties.readUrl(new URL(source)));
+                return RefreshableNotificationProperties.readUrl(new URL(source));
             } catch (final IOException ex) { // fall back to the property file
                 LOGGER.warn("Failed reading configuration from '{}' due to '{}'.", source, ex.getMessage());
             }
@@ -75,12 +75,7 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
         // will read the default source file and silently ignore if missing, as this config is purely optional
         final File defaultConfigFile = RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION;
         LOGGER.debug("Read config file '{}'.", defaultConfigFile.getAbsolutePath());
-        try {
-            final URL u = defaultConfigFile.toURI().toURL();
-            return Optional.of(RefreshableNotificationProperties.readUrl(u));
-        } catch (final IOException ex) {
-            LOGGER.debug("Failed reading configuration file '{}' due to '{}'.", defaultConfigFile, ex.getMessage());
-            return Optional.empty();
-        }
+        final URL u = defaultConfigFile.toURI().toURL();
+        return RefreshableNotificationProperties.readUrl(u);
     }
 }

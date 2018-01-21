@@ -23,7 +23,7 @@ import javax.management.MBeanServer;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.runtime.Lifecycle;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class ManagementTest {
     @Test
     public void registerAndUnregister() {
         final int beanCountBeforeRegister = ManagementTest.SERVER.getMBeanCount();
-        final Management m = new Management(new RuntimeHandler());
+        final Management m = new Management(new Lifecycle());
         final Optional<Consumer<ShutdownHook.Result>> hook = m.get(); // register the mbeans
         final int beanCountAfterRegister = ManagementTest.SERVER.getMBeanCount();
         SoftAssertions.assertSoftly(softly -> {

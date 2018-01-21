@@ -36,14 +36,13 @@ public class LocalhostAddress extends Refreshable<String> {
     }
 
     @Override
-    protected Optional<String> getLatestSource() {
+    protected String getLatestSource() {
         try {
             final URL url = new URL(CHECKIP_URL);
-            final String contents = IOUtils.toString(url, Defaults.CHARSET).trim();
-            return Optional.of(contents);
+            return IOUtils.toString(url, Defaults.CHARSET).trim();
         } catch (final IOException ex) {
             LOGGER.debug("Failed retrieving local host address.", ex);
-            return Optional.of("localhost");
+            return "localhost";
         }
     }
 

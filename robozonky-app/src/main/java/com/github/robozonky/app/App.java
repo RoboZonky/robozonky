@@ -19,15 +19,13 @@ package com.github.robozonky.app;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Locale;
-import java.util.Optional;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.management.Management;
-import com.github.robozonky.app.runtime.RuntimeHandler;
-import com.github.robozonky.app.version.LivenessCheck;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.version.UpdateMonitor;
 import com.github.robozonky.util.Scheduler;
 import org.slf4j.Logger;
@@ -40,11 +38,11 @@ public class App {
 
     private static final ShutdownHook SHUTDOWN_HOOKS = new ShutdownHook();
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final RuntimeHandler RUNTIME = new RuntimeHandler();
+    private static final Lifecycle LIFECYCLE = new Lifecycle();
 
     private static void exit(final ReturnCode returnCode) {
         App.LOGGER.trace("Exit requested with return code {}.", returnCode);
-        final ShutdownHook.Result r = RUNTIME.getTerminationCause()
+        final ShutdownHook.Result r = LIFECYCLE.getTerminationCause()
                 .map(t -> new ShutdownHook.Result(ReturnCode.ERROR_UNEXPECTED, t))
                 .orElse(new ShutdownHook.Result(returnCode, null));
         App.exit(r);
@@ -62,11 +60,10 @@ public class App {
 
     static ReturnCode execute(final InvestmentMode mode) {
         Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
-        App.SHUTDOWN_HOOKS.register(RUNTIME.getShutdownEnabler());
-        App.SHUTDOWN_HOOKS.register(new Management(RUNTIME));
+        App.SHUTDOWN_HOOKS.register(new Management(LIFECYCLE));
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
         try {
-            return mode.apply(RUNTIME);
+            return mode.apply(LIFECYCLE);
         } finally {
             try {
                 mode.close();
@@ -77,20 +74,27 @@ public class App {
     }
 
     private static ReturnCode execute(final String[] args) {
-        return CommandLine.parse(RUNTIME::resumeToFail, args)
+        return CommandLine.parse(LIFECYCLE::resumeToFail, args)
                 .map(App::execute)
                 .orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
     }
 
+    private static void ensureLiveness() {
+        App.LIFECYCLE.getShutdownHooks().forEach(App.SHUTDOWN_HOOKS::register);
+        if (!App.LIFECYCLE.waitUntilOnline()) {
+            App.exit(ReturnCode.ERROR_DOWN);
+        }
+    }
+
     public static void main(final String... args) {
         App.LOGGER.debug("Current working directory is '{}'.", System.getProperty("user.dir"));
-        Events.fire(new RoboZonkyStartingEvent());
         App.LOGGER.debug("Running {} {} v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vm.vendor"),
                          System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
                          System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
-                         Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
-        App.SHUTDOWN_HOOKS.register(LivenessCheck.setup());
-        App.SHUTDOWN_HOOKS.register(() -> Optional.of(returnCode -> Scheduler.inBackground().close()));
+                         java.lang.Runtime.getRuntime().availableProcessors(), Locale.getDefault(),
+                         Charset.defaultCharset());
+        ensureLiveness();
+        Events.fire(new RoboZonkyStartingEvent());
         // check for new RoboZonky version every now and then
         try { // call core code
             App.exit(App.execute(args));

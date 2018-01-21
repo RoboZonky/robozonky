@@ -19,33 +19,33 @@ package com.github.robozonky.app.management;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.runtime.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 enum MBean {
 
-    RUNTIME(Runtime.class) {
+    RUNTIME(com.github.robozonky.app.management.Runtime.class) {
         @Override
-        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
-            return new Runtime(runtimeHandler);
+        BaseMBean newImplementation(final Lifecycle lifecycle) {
+            return new com.github.robozonky.app.management.Runtime(lifecycle);
         }
     },
     OPERATIONS(Operations.class) {
         @Override
-        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
+        BaseMBean newImplementation(final Lifecycle lifecycle) {
             return new Operations();
         }
     },
     DELINQUENCY(Delinquency.class) {
         @Override
-        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
+        BaseMBean newImplementation(final Lifecycle lifecycle) {
             return new Delinquency();
         }
     },
     PORTFOLIO(Portfolio.class) {
         @Override
-        BaseMBean newImplementation(final RuntimeHandler runtimeHandler) {
+        BaseMBean newImplementation(final Lifecycle lifecycle) {
             return new Portfolio();
         }
     };
@@ -71,6 +71,6 @@ enum MBean {
         return objectName;
     }
 
-    abstract BaseMBean newImplementation(final RuntimeHandler runtimeHandler);
+    abstract BaseMBean newImplementation(final Lifecycle lifecycle);
 
 }

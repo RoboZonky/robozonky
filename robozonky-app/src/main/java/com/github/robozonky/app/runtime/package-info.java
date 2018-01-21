@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
-
-import com.github.robozonky.app.runtime.RuntimeHandler;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-public class RuntimeTest {
-
-    @Test
-    public void shutdown() {
-        final RuntimeHandler h = Mockito.mock(RuntimeHandler.class);
-        final Runtime r = new Runtime(h);
-        r.stopDaemon();
-        Mockito.verify(h).resumeToShutdown();
-    }
-}
+/**
+ * This package deals with the business of network and Zonky availability, as well as the handover of control between
+ * the main thread and the daemon threads. It is imperative that the internal APIs remain internal, as this is very
+ * sensitive, multi-threaded orchestration code.
+ */
+package com.github.robozonky.app.runtime;

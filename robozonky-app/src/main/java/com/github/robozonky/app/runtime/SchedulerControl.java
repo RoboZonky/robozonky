@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.app.runtime;
 
 import com.github.robozonky.util.Refreshable;
 import com.github.robozonky.util.Schedulers;
@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
  * Will pause and/or resume all background tasks, effectively pausing the application, based on the availability of
  * Zonky servers as notified by {@link LivenessCheck}.
  */
-class RuntimeControl implements Refreshable.RefreshListener<ApiVersion> {
+class SchedulerControl implements Refreshable.RefreshListener<ApiVersion> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeControl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerControl.class);
 
     @Override
     public void valueSet(final ApiVersion newValue) {

@@ -80,8 +80,8 @@ public abstract class Refreshable<T> implements Runnable,
         return new Refreshable<I>(toReturn == null ? "null" : toReturn.toString()) {
 
             @Override
-            protected Optional<String> getLatestSource() {
-                return Optional.of("");
+            protected String getLatestSource() {
+                return "";
             }
 
             @Override
@@ -95,10 +95,10 @@ public abstract class Refreshable<T> implements Runnable,
      * Result of this method will be used to fetch the latest resource state. While {@link #run()} is being
      * executed, if the result of the call no longer {@link #equals(Object)} its value from previous call,
      * {@link #transform(String)} will be called, resulting in {@link #get()} changing its return value.
-     * @return Method to retrieve identifier for the content. If empty, {@link #transform(String)} will not be called
-     * and {@link #get()} will become empty.
+     * @return The latest state of the resource.
+     * @throws Exception When the resource could not be fetched for whatever reason.
      */
-    protected abstract Optional<String> getLatestSource();
+    protected abstract String getLatestSource() throws Exception;
 
     /**
      * Transform resource source into a new version of the resource. This method will be called when a fresh resource
@@ -160,8 +160,17 @@ public abstract class Refreshable<T> implements Runnable,
         }
     }
 
+    private Optional<String> getSource() {
+        try {
+            return Optional.ofNullable(this.getLatestSource());
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed reading resource.", ex);
+            return Optional.empty();
+        }
+    }
+
     private void runLocked() {
-        final Optional<String> maybeNewSource = this.getLatestSource();
+        final Optional<String> maybeNewSource = this.getSource();
         if (maybeNewSource.isPresent()) {
             final String newSource = maybeNewSource.get();
             if (Objects.equals(newSource, latestKnownSource.get())) {

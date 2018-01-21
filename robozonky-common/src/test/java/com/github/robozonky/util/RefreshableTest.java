@@ -18,46 +18,16 @@ package com.github.robozonky.util;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RefreshableTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshableTest.class);
-    private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
-
     private static String transform(final String original) {
         return "Transformed " + original;
-    }
-
-    private static final class TestingRefreshable extends Refreshable<String> {
-
-        private String latestSource = null;
-
-        public TestingRefreshable(final String intialSource) {
-            this.latestSource = intialSource;
-        }
-
-        public void setLatestSource(final String latestSource) {
-            this.latestSource = latestSource;
-        }
-
-        @Override
-        protected Optional<String> getLatestSource() {
-            return Optional.ofNullable(latestSource);
-        }
-
-        @Override
-        protected Optional<String> transform(final String source) {
-            return Optional.of(RefreshableTest.transform(source));
-        }
     }
 
     @Test
@@ -108,22 +78,6 @@ public class RefreshableTest {
         Mockito.verify(l, Mockito.times(2)).valueSet(ArgumentMatchers.eq(s));
     }
 
-    private static class RefreshableString extends Refreshable<String> {
-
-        public RefreshableString() {
-        }
-
-        @Override
-        protected Optional<String> getLatestSource() {
-            return Optional.of(UUID.randomUUID().toString());
-        }
-
-        @Override
-        protected Optional<String> transform(final String source) {
-            return Optional.of(source);
-        }
-    }
-
     @Test
     public void checkListeners() {
         final String initial = "initial";
@@ -144,4 +98,26 @@ public class RefreshableTest {
                 .valueUnset(RefreshableTest.transform(otherValue));
     }
 
+    private static final class TestingRefreshable extends Refreshable<String> {
+
+        private String latestSource;
+
+        public TestingRefreshable(final String intialSource) {
+            this.latestSource = intialSource;
+        }
+
+        @Override
+        protected String getLatestSource() {
+            return latestSource;
+        }
+
+        public void setLatestSource(final String latestSource) {
+            this.latestSource = latestSource;
+        }
+
+        @Override
+        protected Optional<String> transform(final String source) {
+            return Optional.of(RefreshableTest.transform(source));
+        }
+    }
 }

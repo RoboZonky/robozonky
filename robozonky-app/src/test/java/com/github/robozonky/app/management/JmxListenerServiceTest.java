@@ -46,7 +46,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.runtime.RuntimeHandler;
+import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -75,8 +75,8 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     @Parameterized.Parameter(3)
     public Consumer<SoftAssertions> assertionsAfter;
 
-    private static Runtime getRuntimeMBean() {
-        return (Runtime) JmxListenerService.getMBean(MBean.RUNTIME)
+    private static com.github.robozonky.app.management.Runtime getRuntimeMBean() {
+        return (com.github.robozonky.app.management.Runtime) JmxListenerService.getMBean(MBean.RUNTIME)
                 .orElseThrow(() -> new IllegalStateException("Not found"));
     }
 
@@ -227,7 +227,7 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     @BeforeClass
     public static void loadAll() {
-        MGMT = new Management(Mockito.mock(RuntimeHandler.class)).get();
+        MGMT = new Management(Mockito.mock(Lifecycle.class)).get();
     }
 
     @AfterClass
