@@ -60,7 +60,7 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
     }
 
     @Override
-    protected String getLatestSource() throws Exception {
+    protected String getLatestSource() {
         final String source =
                 Settings.INSTANCE.get(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY, (String) null);
         if (source != null) { // attempt to read from the URL specified by the property
@@ -75,7 +75,12 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
         // will read the default source file and silently ignore if missing, as this config is purely optional
         final File defaultConfigFile = RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION;
         LOGGER.debug("Read config file '{}'.", defaultConfigFile.getAbsolutePath());
-        final URL u = defaultConfigFile.toURI().toURL();
-        return RefreshableNotificationProperties.readUrl(u);
+        try {
+            final URL u = defaultConfigFile.toURI().toURL();
+            return RefreshableNotificationProperties.readUrl(u);
+        } catch (final IOException ex) {
+            LOGGER.debug("Failed reading configuration file '{}' due to '{}'.", defaultConfigFile, ex.getMessage());
+            return null;
+        }
     }
 }
