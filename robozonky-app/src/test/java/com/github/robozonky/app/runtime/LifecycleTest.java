@@ -42,6 +42,7 @@ public class LifecycleTest {
         h.resumeToFail(t);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(h.getTerminationCause()).contains(t);
+            softly.assertThat(h.getZonkyApiVersion()).isEmpty();
             softly.assertThat(c.getCount()).isEqualTo(0);
         });
     }

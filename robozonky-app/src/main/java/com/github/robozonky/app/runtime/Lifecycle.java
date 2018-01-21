@@ -56,6 +56,10 @@ public class Lifecycle {
         this.cleanup = LivenessCheck.setup(livenessCheck);
     }
 
+    public Optional<String> getZonkyApiVersion() {
+        return livenessCheck.getApiVersion().map(ApiVersion::getBuildVersion);
+    }
+
     /**
      * Will block until RoboZonky is back online.
      * @return True if now online, false if interrupted.

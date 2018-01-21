@@ -43,6 +43,11 @@ class Runtime implements RuntimeMBean {
         return this.zonkyUsername;
     }
 
+    @Override
+    public String getZonkyApiVersion() {
+        return lifecycle.getZonkyApiVersion().orElse("N/A");
+    }
+
     void handle(final ExecutionCompletedEvent event, final SessionInfo sessionInfo) {
         this.lastUpdatedDateTime = event.getCreatedOn();
         this.zonkyUsername = sessionInfo.getUserName();

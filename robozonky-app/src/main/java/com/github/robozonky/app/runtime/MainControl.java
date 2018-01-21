@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,6 +31,7 @@ class MainControl implements Refreshable.RefreshListener<ApiVersion> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainControl.class);
     private final AtomicReference<CountDownLatch> trigger = new AtomicReference<>(new CountDownLatch(1));
+    private final AtomicReference<ApiVersion> version = new AtomicReference<>();
 
     public void waitUntilTriggered() throws InterruptedException {
         LOGGER.trace("Waiting on {}.", this);
@@ -37,14 +39,20 @@ class MainControl implements Refreshable.RefreshListener<ApiVersion> {
         LOGGER.trace("Wait over on {}.", this);
     }
 
+    public Optional<ApiVersion> getApiVersion() {
+        return Optional.ofNullable(version.get());
+    }
+
     @Override
     public void valueSet(final ApiVersion newValue) { // becomes online, release
+        version.set(newValue);
         trigger.get().countDown();
         LOGGER.trace("Counted down on {}.", this);
     }
 
     @Override
     public void valueUnset(final ApiVersion oldValue) { // becomes offline, block
+        version.set(null);
         trigger.updateAndGet(currentTrigger -> {
             if (currentTrigger.getCount() == 0) { // already triggered, can set new trigger
                 LOGGER.trace("Countdown restarted on {}.", this);

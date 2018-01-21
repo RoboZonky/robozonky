@@ -49,7 +49,9 @@ public class MainControlTest {
         mainControl.valueUnset(null);
         Assertions.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                 .isInstanceOf(TimeoutException.class);  // nothing will happen
-        mainControl.valueSet(Mockito.mock(ApiVersion.class));
+        final ApiVersion v = Mockito.mock(ApiVersion.class);
+        mainControl.valueSet(v);
         f.get(); // make sure task finished
+        Assertions.assertThat(mainControl.getApiVersion()).contains(v);
     }
 }
