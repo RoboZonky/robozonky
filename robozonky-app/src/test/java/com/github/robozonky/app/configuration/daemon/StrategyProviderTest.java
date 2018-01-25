@@ -23,9 +23,9 @@ import java.util.UUID;
 import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class StrategyProviderTest {
+class StrategyProviderTest {
 
     private static final String MINIMAL_STRATEGY = "Robot má udržovat konzervativní portfolio.";
 

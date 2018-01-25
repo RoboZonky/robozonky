@@ -21,9 +21,9 @@ import java.util.UUID;
 
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CounterTest extends AbstractRoboZonkyTest {
+class CounterTest extends AbstractRoboZonkyTest {
 
     @Test
     public void testTiming() throws InterruptedException {

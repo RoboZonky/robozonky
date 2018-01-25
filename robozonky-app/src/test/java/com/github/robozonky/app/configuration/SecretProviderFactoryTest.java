@@ -21,10 +21,10 @@ import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class SecretProviderFactoryTest {
+class SecretProviderFactoryTest {
 
     private static AuthenticationCommandLineFragment mockCli(final String username, final File file,
                                                              final char... password) {

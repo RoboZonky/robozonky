@@ -26,6 +26,9 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
+import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.app.App;
+import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
@@ -46,14 +49,15 @@ public class CommandLine {
     @Parameter(names = {"-h", "--help"}, help = true, description = "Print usage end exit.")
     private boolean help;
 
-    private static Optional<InvestmentMode> terminate(final ParameterException ex) {
+    private static void terminate(final ParameterException ex) {
         System.out.println(ex.getMessage()); // error will be shown to users on stdout
-        return CommandLine.terminate(ex.getJCommander());
+        ex.getJCommander().usage();
+        App.exit(new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null));
     }
 
-    private static Optional<InvestmentMode> terminate(final JCommander jc) {
+    private static void terminate(final JCommander jc) {
         jc.usage();
-        return Optional.empty();
+        App.exit(new ShutdownHook.Result(ReturnCode.OK, null));
     }
 
     /**
@@ -68,7 +72,8 @@ public class CommandLine {
             return CommandLine.parseUnsafe(shutdownCall, args);
         } catch (final ParameterException ex) {
             CommandLine.LOGGER.debug("Command line parsing ended with parameter exception.", ex);
-            return CommandLine.terminate(ex);
+            CommandLine.terminate(ex);
+            return Optional.empty();
         }
     }
 
@@ -83,7 +88,8 @@ public class CommandLine {
         final JCommander jc = builder.build();
         jc.parse(args);
         if (cli.help) { // don't validate since the CLI is likely to be invalid
-            return CommandLine.terminate(jc);
+            CommandLine.terminate(jc);
+            return Optional.empty();
         }
         final OperatingMode mode = cli.determineOperatingMode(jc);
         return cli.newApplicationConfiguration(mode);

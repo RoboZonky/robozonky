@@ -19,15 +19,16 @@ package com.github.robozonky.api.remote.enums;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
-@RunWith(Parameterized.class)
-public class SerializationTest {
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
+class SerializationTest {
 
     private static String escape(final String toEscape) {
         return '"' + toEscape + '"';
@@ -37,40 +38,44 @@ public class SerializationTest {
         return "\"" + toEscape + "\"";
     }
 
-    @Parameterized.Parameters(name = "{0} <=> {1}")
-    public static Collection<Object[]> getParameters() {
-        final Collection<Object[]> result = new ArrayList<>();
-        // process main income type
-        for (final MainIncomeType mit : MainIncomeType.values()) {
-            result.add(new Object[]{mit, escape(mit.name())});
-        }
-        // process purpose
-        for (final Purpose p : Purpose.values()) {
-            result.add(new Object[]{p, escape(p.ordinal() + 1)});
-        }
-        // process region
-        for (final Region r : Region.values()) {
-            result.add(new Object[]{r, escape(r.ordinal() + 1)});
-        }
-        return result;
-    }
-
-    @Parameterized.Parameter
-    public Object value;
-    @Parameterized.Parameter(1)
-    public String name;
-
-    @Test
-    public void deserialization() throws IOException {
+    private static void deserialize(final String name, final Object value) throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
         final Object result = mapper.readValue(name, value.getClass());
         Assertions.assertThat(result).isSameAs(value);
     }
 
-    @Test
-    public void deserializationOfInvalid() throws IOException {
+    private static void deserialize(final Class<? extends Enum<?>> value) {
         final ObjectMapper mapper = new ObjectMapper();
-        Assertions.assertThatThrownBy(() -> mapper.readValue(String.valueOf(Integer.MAX_VALUE), value.getClass()))
+        Assertions.assertThatThrownBy(() -> mapper.readValue(String.valueOf(Integer.MAX_VALUE), value))
                 .isInstanceOf(RuntimeException.class);
+    }
+
+    private static String deserializeTestName(final Enum<?> instance) {
+        return instance.getClass().getSimpleName() + '.' + instance;
+    }
+
+    @TestFactory
+    public Collection<DynamicTest> deserialize() {
+        final Collection<DynamicTest> tests = new ArrayList<>(0);
+        // test deserialization of all income types
+        for (final MainIncomeType toSerialize : MainIncomeType.values()) {
+            final String serialized = escape(toSerialize.name());
+            tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
+        }
+        // test deserialization of all purposes
+        for (final Purpose toSerialize : Purpose.values()) {
+            final String serialized = escape(toSerialize.ordinal() + 1);
+            tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
+        }
+        // test deserialization of all regions
+        for (final Region toSerialize : Region.values()) {
+            final String serialized = escape(toSerialize.ordinal() + 1);
+            tests.add(dynamicTest(deserializeTestName(toSerialize), () -> deserialize(serialized, toSerialize)));
+        }
+        // test that deserialization of invalid value properly fails
+        Stream.of(Region.class, Purpose.class, MainIncomeType.class)
+                .forEach(clz -> tests.add(dynamicTest("invalid " + clz.getSimpleName(),
+                                                      () -> deserialize(clz))));
+        return tests;
     }
 }

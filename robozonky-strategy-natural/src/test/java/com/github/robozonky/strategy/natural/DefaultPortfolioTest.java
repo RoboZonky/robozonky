@@ -16,38 +16,36 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
-@RunWith(Parameterized.class)
-public class DefaultPortfolioTest {
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-    @Parameterized.Parameters(name = "{0} + {1}")
-    public static Collection<Object[]> parameters() {
-        final Collection<Object[]> result = new ArrayList<>(Rating.values().length);
-        Stream.of(Rating.values()).forEach(r -> result.add(new Object[]{DefaultPortfolio.EMPTY, r}));
-        return result;
-    }
+class DefaultPortfolioTest {
 
-    @Parameterized.Parameter
-    public DefaultPortfolio p;
-    @Parameterized.Parameter(1)
-    public Rating r;
-
-    @Test
-    public void hasValue() {
+    private static void hasValue(final DefaultPortfolio p, final Rating r) {
         Assertions.assertThat(p.getDefaultShare(r)).isEqualTo(0);
     }
 
-    @Test
-    public void unknownValue() {
+    private static void unknownValue(final DefaultPortfolio p) {
         Assertions.assertThatThrownBy(() -> p.getDefaultShare(null)).isInstanceOf(IllegalStateException.class);
+    }
+
+    private static Stream<DynamicTest> forRating(final Rating r) {
+        return Stream.of(
+                dynamicTest("has value", () -> hasValue(DefaultPortfolio.EMPTY, r)),
+                dynamicTest("has unknown value", () -> unknownValue(DefaultPortfolio.EMPTY))
+        );
+    }
+
+    @TestFactory
+    Stream<DynamicNode> ratings() {
+        return Stream.of(Rating.values()).map(r -> dynamicContainer(r.toString(), forRating(r)));
     }
 }

@@ -25,11 +25,11 @@ import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class PortfolioTest {
+class PortfolioTest {
 
     @Test
     public void run() {

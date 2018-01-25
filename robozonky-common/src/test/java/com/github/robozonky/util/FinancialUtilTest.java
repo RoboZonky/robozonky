@@ -22,9 +22,9 @@ import java.util.stream.IntStream;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Percentage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FinancialUtilTest {
+class FinancialUtilTest {
 
     @Test
     public void ipmt() {

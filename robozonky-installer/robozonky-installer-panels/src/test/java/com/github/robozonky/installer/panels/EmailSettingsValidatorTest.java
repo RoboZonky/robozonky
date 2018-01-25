@@ -17,23 +17,50 @@
 package com.github.robozonky.installer.panels;
 
 import java.util.UUID;
-import javax.mail.MessagingException;
 
-import com.icegreen.greenmail.junit.GreenMailRule;
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class EmailSettingsValidatorTest {
+class EmailSettingsValidatorTest {
 
-    @Rule
-    public final GreenMailRule greenMail = new GreenMailRule(ServerSetupTest.SMTP);
+    private static final GreenMail EMAIL = new GreenMail(getServerSetup());
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailSettingsValidatorTest.class);
+
+    private static ServerSetup getServerSetup() {
+        final ServerSetup setup = ServerSetupTest.SMTP;
+        setup.setServerStartupTimeout(5000);
+        setup.setVerbose(true);
+        return setup;
+    }
+
+    @BeforeEach
+    void startEmailing() {
+        EMAIL.start();
+        LOGGER.info("Started e-mailing.");
+    }
+
+    @AfterEach
+    void stopEmailing() {
+        LOGGER.info("Stopping e-mailing.");
+        try {
+            EMAIL.purgeEmailFromAllMailboxes();
+            EMAIL.stop();
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed stopping e-mail server.", ex);
+        }
+    }
 
     @Test
     public void messages() {
@@ -47,14 +74,14 @@ public class EmailSettingsValidatorTest {
     }
 
     @Test
-    public void mailSent() throws MessagingException, InterruptedException {
+    public void mailSent() {
         final InstallData data = Mockito.mock(InstallData.class);
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.ZONKY_USERNAME.getKey())))
                 .thenReturn("someone@somewhere.cz");
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PORT.getKey())))
-                .thenReturn(String.valueOf(greenMail.getSmtp().getPort()));
+                .thenReturn(String.valueOf(EMAIL.getSmtp().getPort()));
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_HOSTNAME.getKey())))
-                .thenReturn(String.valueOf(greenMail.getSmtp().getBindTo()));
+                .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_TO.getKey())))
                 .thenReturn("recipient@server.cz");
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_USERNAME.getKey())))
@@ -67,12 +94,12 @@ public class EmailSettingsValidatorTest {
     }
 
     @Test
-    public void mailFailed() throws MessagingException {
+    public void mailFailed() {
         final InstallData data = Mockito.mock(InstallData.class);
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PORT.getKey())))
-                .thenReturn(String.valueOf(greenMail.getSmtp().getPort()));
+                .thenReturn(String.valueOf(EMAIL.getSmtp().getPort()));
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_HOSTNAME.getKey())))
-                .thenReturn(String.valueOf(greenMail.getSmtp().getBindTo()));
+                .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_USERNAME.getKey())))
                 .thenReturn("sender@server.cz");
         Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PASSWORD.getKey())))
@@ -80,6 +107,6 @@ public class EmailSettingsValidatorTest {
         final DataValidator validator = new EmailSettingsValidator();
         final DataValidator.Status result = validator.validateData(data);
         Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
-        Assertions.assertThat(greenMail.getReceivedMessages()).hasSize(0);
+        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(0);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.test.exit;
 
-public class MainIncomeTypeTest extends AbstractBaseEnumTest {
+import com.github.robozonky.util.SystemExit;
+import com.github.robozonky.util.SystemExitService;
 
-    public MainIncomeTypeTest() {
-        super(MainIncomeType::values, MainIncomeType::findByCode);
+public final class TestingSystemExitService implements SystemExitService {
+
+    public static final TestingSystemExit INSTANCE = new TestingSystemExit();
+
+    @Override
+    public SystemExit newSystemExit() {
+        return INSTANCE;
     }
 }

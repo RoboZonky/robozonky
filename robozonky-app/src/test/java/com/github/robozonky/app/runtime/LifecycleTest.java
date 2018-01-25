@@ -16,30 +16,32 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.github.robozonky.app.ShutdownHook;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class LifecycleTest {
+class LifecycleTest {
 
     private final ExecutorService e = Executors.newFixedThreadPool(1);
 
-    @After
+    @AfterEach
     public void shutdown() {
         e.shutdownNow();
     }
 
-    @Test(timeout = 1000)
+    @Test
     public void failing() {
         final Throwable t = new IllegalStateException("Testing exception.");
         final CountDownLatch c = new CountDownLatch(1);
         final Lifecycle h = new Lifecycle(c);
-        h.resumeToFail(t);
+        Assertions.assertTimeout(Duration.ofSeconds(1), () -> h.resumeToFail(t));
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(h.getTerminationCause()).contains(t);
             softly.assertThat(h.getZonkyApiVersion()).isEmpty();

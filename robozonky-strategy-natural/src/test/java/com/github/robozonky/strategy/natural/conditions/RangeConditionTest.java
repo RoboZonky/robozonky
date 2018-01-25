@@ -20,9 +20,9 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RangeConditionTest {
+class RangeConditionTest {
 
     @Test
     public void constructor() {

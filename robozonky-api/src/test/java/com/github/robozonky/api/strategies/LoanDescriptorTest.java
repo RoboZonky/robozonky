@@ -26,11 +26,11 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class LoanDescriptorTest {
+class LoanDescriptorTest {
 
     private static Loan mockLoan() {
         return mockLoan(Rating.D);
@@ -46,7 +46,7 @@ public class LoanDescriptorTest {
         return mockedLoan;
     }
 
-    @Ignore("Looks like CAPTCHA is disabled for now. Let's wait and see if it comes back.")
+    @Disabled("Looks like CAPTCHA is disabled for now. Let's wait and see if it comes back.")
     @Test
     public void constructorForCaptcha() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();

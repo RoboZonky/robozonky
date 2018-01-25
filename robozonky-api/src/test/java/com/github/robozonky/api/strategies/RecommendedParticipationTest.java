@@ -22,10 +22,10 @@ import java.util.UUID;
 import com.github.robozonky.api.remote.entities.Participation;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class RecommendedParticipationTest {
+class RecommendedParticipationTest {
 
     private static Participation mock() {
         final Participation p = Mockito.mock(Participation.class);

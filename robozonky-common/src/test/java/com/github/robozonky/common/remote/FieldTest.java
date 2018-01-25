@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FieldTest {
+class FieldTest {
 
     private <T> void unique(final Field<T>... values) {
         final Set<String> uniqueValues = Stream.of(values).map(Field::id).collect(Collectors.toSet());

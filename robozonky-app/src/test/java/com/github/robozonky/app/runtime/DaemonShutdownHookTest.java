@@ -16,24 +16,29 @@
 
 package com.github.robozonky.app.runtime;
 
+import java.time.Duration;
+
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class DaemonShutdownHookTest {
+class DaemonShutdownHookTest {
 
-    @Test(timeout = 5000)
-    public void runtime() throws InterruptedException {
+    @Test
+    public void runtime() {
         final Lifecycle lifecycle = Mockito.mock(Lifecycle.class);
         final ShutdownEnabler se = Mockito.mock(ShutdownEnabler.class);
         final DaemonShutdownHook hook = new DaemonShutdownHook(lifecycle, se);
         hook.start();
         se.get().ifPresent(c -> c.accept(new ShutdownHook.Result(ReturnCode.OK, null)));
-        while (hook.isAlive()) { // wait until the hook to terminate
-            Thread.sleep(1);
-        }
-        Mockito.verify(se).waitUntilTriggered();
-        Mockito.verify(lifecycle).resumeToShutdown();
+        Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
+            while (hook.isAlive()) { // wait until the hook to terminate
+                Thread.sleep(1);
+            }
+            Mockito.verify(se).waitUntilTriggered();
+            Mockito.verify(lifecycle).resumeToShutdown();
+        });
     }
 }

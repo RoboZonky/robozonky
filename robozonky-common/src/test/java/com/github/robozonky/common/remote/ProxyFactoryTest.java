@@ -19,9 +19,9 @@ package com.github.robozonky.common.remote;
 import com.github.robozonky.api.remote.LoanApi;
 import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ProxyFactoryTest {
+class ProxyFactoryTest {
 
     @Test
     public void api() {

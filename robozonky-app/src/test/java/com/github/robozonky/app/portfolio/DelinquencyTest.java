@@ -27,9 +27,9 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class DelinquencyTest extends AbstractRoboZonkyTest {
+class DelinquencyTest extends AbstractRoboZonkyTest {
 
     @Test
     public void endless() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,56 @@
 
 package com.github.robozonky.app;
 
+import java.util.List;
+
 import com.github.robozonky.api.ReturnCode;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
+import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.test.exit.TestingSystemExit;
+import com.github.robozonky.test.exit.TestingSystemExitService;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class AppTest extends AbstractEventLeveragingTest {
+class AppTest extends AbstractEventLeveragingTest {
 
-    @Rule
-    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+    private static final TestingSystemExit EXIT = TestingSystemExitService.INSTANCE;
 
-    @Test
-    public void notWellFormedCli() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
-        App.main();
+    @BeforeEach
+    @AfterEach
+    void reset() {
+        EXIT.reset();
     }
 
     @Test
-    public void wrongKeyStore() {
-        exit.expectSystemExitWithStatus(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
-        App.main("-g", "some.random.file", "-p", "password", "single", "-l", "1", "-a", "1000");
+    void notWellFormedCli() {
+        App.main();
+        Assertions.assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
+    }
+
+    @Test
+    void help() {
+        App.main("-h");
+        Assertions.assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
+    }
+
+    @Test
+    void proper() {
+        App.main("-u", "someone", "-p", "password", "test");
+        final List<Event> events = getNewEvents();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
+            softly.assertThat(events).hasSize(3);
+        });
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
+            softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
+            softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);
+        });
     }
 }
+

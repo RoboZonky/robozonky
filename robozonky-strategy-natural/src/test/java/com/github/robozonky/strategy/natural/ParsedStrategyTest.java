@@ -31,11 +31,11 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ParsedStrategyTest {
+class ParsedStrategyTest {
 
     private static ParticipationDescriptor mock(final Loan loan) {
         final Participation p = Mockito.mock(Participation.class);

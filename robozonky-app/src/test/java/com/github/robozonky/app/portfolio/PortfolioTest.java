@@ -36,11 +36,11 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class PortfolioTest extends AbstractZonkyLeveragingTest {
+class PortfolioTest extends AbstractZonkyLeveragingTest {
 
     private static final Investment mock(final boolean isEligible, final boolean isOnSmp) {
         final Investment i = Mockito.mock(Investment.class);

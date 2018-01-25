@@ -24,20 +24,19 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.ProvideSystemProperty;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
-    @Rule
-    public final ProvideSystemProperty property =
-            new ProvideSystemProperty(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE.getName(), "true");
+    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>(0);
 
-    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>();
+    @BeforeEach
+    public void enableEventDebug() {
+        System.setProperty(Settings.Key.DEBUG_ENABLE_EVENT_STORAGE.getName(), "true");
+    }
 
-    @After
+    @AfterEach
     public void clear() {
         Events.getFired().clear();
         Events.INSTANCE.registries.clear();
@@ -49,7 +48,7 @@ public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest 
                 .collect(Collectors.toList());
     }
 
-    @Before
+    @BeforeEach
     public void readPreexistingEvents() {
         previouslyExistingEvents.addAll(Events.getFired());
     }

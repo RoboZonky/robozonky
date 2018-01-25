@@ -20,12 +20,12 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class PaginatedApiTest {
+class PaginatedApiTest {
 
     @Test
     public void checkSort() {

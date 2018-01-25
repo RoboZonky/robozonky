@@ -28,10 +28,10 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ActivityTest extends AbstractEventLeveragingTest {
+class ActivityTest extends AbstractEventLeveragingTest {
 
     private static final int SLEEP_PERIOD_MINUTES = 60;
 

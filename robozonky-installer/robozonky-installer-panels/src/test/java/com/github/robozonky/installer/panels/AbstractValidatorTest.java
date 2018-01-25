@@ -19,9 +19,9 @@ package com.github.robozonky.installer.panels;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AbstractValidatorTest {
+class AbstractValidatorTest {
 
     private static class TestValidator extends AbstractValidator {
 

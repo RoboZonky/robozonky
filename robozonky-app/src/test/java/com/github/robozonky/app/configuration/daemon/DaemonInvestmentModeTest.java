@@ -32,37 +32,39 @@ import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
+class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
     private final Lifecycle lifecycle = new Lifecycle();
 
-    @Test(timeout = 5000)
+    @Test
     public void get() throws Exception {
         final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final Marketplace m = Mockito.mock(Marketplace.class);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final PortfolioUpdater p = Mockito.mock(PortfolioUpdater.class);
+        final BlockedAmountsUpdater bau = Mockito.mock(BlockedAmountsUpdater.class);
         try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, m, Mockito.mock(StrategyProvider.class),
-                                                                     Mockito.mock(Runnable.class),
-                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1),
+                                                                     bau, Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             Assertions.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                     .isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
-            f.get(); // should now finish
+            Assertions.assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
+            Mockito.verify(p).run();
+            Mockito.verify(bau).run();
         } finally {
             e.shutdownNow();
         }
         Mockito.verify(m).close();
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
         lifecycle.getShutdownHooks().forEach(h -> h.get().ifPresent(s -> s.accept(r)));

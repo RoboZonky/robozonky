@@ -22,10 +22,10 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class MarketplaceFilterTest {
+class MarketplaceFilterTest {
 
     private static final Supplier<MarketplaceFilterCondition> MATCHING = MarketplaceFilterCondition::alwaysAccepting;
     private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = MarketplaceFilterCondition::neverAccepting;

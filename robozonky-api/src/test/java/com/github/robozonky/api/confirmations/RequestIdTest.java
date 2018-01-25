@@ -20,13 +20,14 @@ import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RequestIdTest {
+class RequestIdTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void nullUsername() {
-        new RequestId(null);
+        Assertions.assertThatThrownBy(() -> new RequestId(null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

@@ -20,10 +20,9 @@ import java.io.File;
 
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.test.schedulers.TestingSchedulerService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +35,25 @@ public abstract class AbstractRoboZonkyTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRoboZonkyTest.class);
 
-    @Rule
-    public final RestoreSystemProperties properties = new RestoreSystemProperties();
+    @BeforeAll
+    static void loadSystemProperties() {
+        SystemProperties.INSTANCE.save();
+    }
 
-    @Before
-    @After
-    public void reinitScheduler() {
+    @AfterEach
+    void restoreSystemProperties() {
+        SystemProperties.INSTANCE.restore();
+    }
+
+    @BeforeEach
+    @AfterEach
+    protected void reinitScheduler() {
         Mockito.reset(TestingSchedulerService.MOCK_SERVICE);
     }
 
-    @Before
-    @After
-    public void deleteState() {
+    @BeforeEach
+    @AfterEach
+    protected void deleteState() {
         final File f = Settings.INSTANCE.getStateFile();
         AbstractRoboZonkyTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
     }

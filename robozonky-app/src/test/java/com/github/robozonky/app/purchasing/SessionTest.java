@@ -36,11 +36,11 @@ import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class SessionTest extends AbstractZonkyLeveragingTest {
+class SessionTest extends AbstractZonkyLeveragingTest {
 
     private static Zonky mockZonky() {
         return mockZonky(BigDecimal.ZERO);

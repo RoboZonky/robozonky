@@ -19,25 +19,11 @@ package com.github.robozonky.app.configuration;
 import java.util.Optional;
 
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.jupiter.api.Test;
 
-public class CommandLineTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
-
-    @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
-
-    @Before
-    public void clearLog() {
-        systemOutRule.clearLog();
-    }
+class CommandLineTest extends AbstractRoboZonkyTest {
 
     @Test
     public void properScriptIdentification() {
@@ -48,29 +34,25 @@ public class CommandLineTest {
     }
 
     @Test
-    public void helpCli() {
-        final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
-        }, "-h");
-        Assertions.assertThat(cfg).isEmpty();
-        Assertions.assertThat(systemOutRule.getLog()).contains(CommandLine.getScriptIdentifier());
-    }
-
-    @Test
-    public void invalidFragmentCli() {
-        // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
-        final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
-                                                               }, "-u", "someone", "-g", "somewhere", "-p",
-                                                               "password", "single", "-s", "somewhere");
-        Assertions.assertThat(cfg).isEmpty();
-        Assertions.assertThat(systemOutRule.getLog()).contains(CommandLine.getScriptIdentifier());
-    }
-
-    @Test
     public void validDaemonCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
                                                                }, "-u", "someone", "-p", "password",
                                                                "daemon", "-s", "somewhere");
         Assertions.assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
+    }
+
+    @Test
+    public void helpCli() {
+        final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
+        }, "-h");
+        Assertions.assertThat(cfg).isEmpty(); // would have called System.exit(), but we prevented that
+    }
+
+    @Test
+    public void invalidCli() {
+        final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
+        });
+        Assertions.assertThat(cfg).isEmpty(); // would have called System.exit(), but we prevented that
     }
 }

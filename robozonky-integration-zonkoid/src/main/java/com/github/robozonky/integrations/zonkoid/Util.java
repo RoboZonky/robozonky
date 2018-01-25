@@ -25,9 +25,10 @@ import org.apache.http.HttpEntity;
 class Util {
 
     public static String readEntity(final HttpEntity entity) {
-        try (final ByteArrayOutputStream outstream = new ByteArrayOutputStream()) {
+        final ByteArrayOutputStream outstream = new ByteArrayOutputStream(); // no need to close this one
+        try {
             entity.writeTo(outstream);
-            return new String(outstream.toByteArray(), Defaults.CHARSET);
+            return outstream.toString(Defaults.CHARSET.displayName());
         } catch (final IOException e) { // don't even log the exception as it's entirely uninteresting
             return null;
         }

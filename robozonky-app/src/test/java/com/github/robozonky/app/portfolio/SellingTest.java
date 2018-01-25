@@ -37,12 +37,12 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.verification.VerificationMode;
 
-public class SellingTest extends AbstractZonkyLeveragingTest {
+class SellingTest extends AbstractZonkyLeveragingTest {
 
     private static final SellStrategy ALL_ACCEPTING_STRATEGY =
             (available, portfolio) -> available.stream().map(d -> d.recommend().get());

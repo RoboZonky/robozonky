@@ -20,20 +20,24 @@ import java.time.Duration;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import static java.time.Duration.ofMillis;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 public class BackoffTest {
 
     private static final int DURATION = 1000;
 
-    @Test(timeout = BackoffTest.DURATION * 3)
+    @Test
     public void exponentialAlwaysFailing() {
-        final Duration maxDuration = Duration.ofMillis(DURATION);
+        final Duration maxDuration = ofMillis(DURATION);
         final long now = System.nanoTime();
         // never succeed
         final Backoff.Operation<String> o = Mockito.mock(Backoff.Operation.class);
-        final Backoff<String> b = Backoff.exponential(o, Duration.ofMillis(1), maxDuration);
+        final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
+                                                () -> Backoff.exponential(o, ofMillis(1), maxDuration));
         final Optional<String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure result was not successful
@@ -44,13 +48,14 @@ public class BackoffTest {
         Mockito.verify(o, Mockito.times(11)).get();
     }
 
-    @Test(timeout = BackoffTest.DURATION * 3)
+    @Test
     public void exponentialWillReturn() {
         final String resulting = "";
-        final Duration maxDuration = Duration.ofMillis(DURATION);
+        final Duration maxDuration = ofMillis(DURATION);
         final long now = System.nanoTime();
         // succeeding immediately
-        final Backoff<String> b = Backoff.exponential(() -> resulting, Duration.ofMillis(1), maxDuration);
+        final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
+                                                () -> Backoff.exponential(() -> resulting, ofMillis(1), maxDuration));
         final Optional<String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure we get the propert result

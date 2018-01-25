@@ -23,11 +23,11 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class PaginatedImplTest {
+class PaginatedImplTest {
 
     @Test
     public void constructor() {

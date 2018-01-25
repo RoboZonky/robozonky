@@ -21,54 +21,55 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.IoTestUtil;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
-@RunWith(Parameterized.class)
-public class IncompleteStrategyTest {
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
+class IncompleteStrategyTest {
 
     private static final InputStream PROPER = IncompleteStrategyTest.class.getResourceAsStream("strategy-sample.cfg");
-
-    @Parameterized.Parameters(name = "removed \"{0}\" from {1}")
-    public static Collection<Object[]> getParameters() throws IOException {
-        final File f = IoTestUtil.streamToFile(IncompleteStrategyTest.PROPER);
-        final List<String> lines = Files.lines(f.toPath()).collect(Collectors.toList());
-        final Collection<Object[]> files = new ArrayList<>(lines.size());
-        for (int i = 0; i < lines.size(); i++) {
-            final List<String> newLines = new ArrayList<>(lines);
-            final String line = newLines.remove(i);
-            final File tmp = File.createTempFile("robozonky-", ".cfg");
-            Files.write(tmp.toPath(), newLines);
-            files.add(new Object[]{line, tmp});
-        }
-        return files;
-    }
 
     private static String fileToString(final File f) throws IOException {
         return Files.readAllLines(f.toPath(), Defaults.CHARSET).stream().collect(
                 Collectors.joining(System.lineSeparator()));
     }
 
-    @Parameterized.Parameter
-    public String lineBeingRemoved;
-
-    @Parameterized.Parameter(1)
-    public File strategyFile;
-
-    @Test
-    public void propertyIsMissing() throws IOException {
-        final Optional<InvestmentStrategy> result =
-                new SimpleStrategyService().toInvest(fileToString(this.strategyFile));
+    private static void propertyIsMissing(final File strategyFile) throws IOException {
+        final Optional<InvestmentStrategy> result = new SimpleStrategyService().toInvest(fileToString(strategyFile));
         Assertions.assertThat(result).isEmpty();
+    }
+
+    private static File writeToNewTempFile(final List<String> lines) {
+        try {
+            final File tmp = File.createTempFile("robozonky-", ".cfg");
+            Files.write(tmp.toPath(), lines);
+            return tmp;
+        } catch (final IOException ex) {
+            throw new IllegalStateException("Should not happen.", ex);
+        }
+    }
+
+    @TestFactory
+    Stream<DynamicTest> removeLine() throws IOException {
+        final File f = IoTestUtil.streamToFile(IncompleteStrategyTest.PROPER);
+        final List<String> lines = Files.lines(f.toPath()).collect(Collectors.toList());
+        return IntStream.range(0, lines.size())
+                .mapToObj(lineId -> {
+                    final List<String> newLines = new ArrayList<>(lines);
+                    final String line = newLines.remove(lineId);
+                    final File tmp = writeToNewTempFile(newLines);
+                    return dynamicTest("' " + line + "'", () -> propertyIsMissing(tmp));
+                });
     }
 }

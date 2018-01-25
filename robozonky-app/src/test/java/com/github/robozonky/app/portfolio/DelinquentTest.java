@@ -20,9 +20,9 @@ import java.time.LocalDate;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class DelinquentTest {
+class DelinquentTest {
 
     @Test
     public void withActiveDelinquency() {

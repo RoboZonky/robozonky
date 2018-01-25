@@ -26,11 +26,11 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.common.remote.ApiProvider;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class CheckerTest {
+class CheckerTest {
 
     private static final char[] SECRET = new char[0];
 

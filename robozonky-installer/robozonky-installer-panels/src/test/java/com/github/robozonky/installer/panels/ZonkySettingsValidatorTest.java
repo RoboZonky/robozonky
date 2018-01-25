@@ -30,11 +30,11 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ZonkySettingsValidatorTest {
+class ZonkySettingsValidatorTest {
 
     private static final String USERNAME = "someone@somewhere.cz", PASSWORD = UUID.randomUUID().toString();
 
@@ -68,6 +68,13 @@ public class ZonkySettingsValidatorTest {
         return mockApiProvider(oAuth, null, Mockito.mock(Zonky.class));
     }
 
+    private static InstallData mockInstallData() {
+        final InstallData d = Mockito.mock(InstallData.class);
+        Mockito.when(d.getVariable(Variables.ZONKY_USERNAME.getKey())).thenReturn(ZonkySettingsValidatorTest.USERNAME);
+        Mockito.when(d.getVariable(Variables.ZONKY_PASSWORD.getKey())).thenReturn(ZonkySettingsValidatorTest.PASSWORD);
+        return d;
+    }
+
     @Test
     public void messages() {
         final ZonkySettingsValidator validator = new ZonkySettingsValidator();
@@ -77,13 +84,6 @@ public class ZonkySettingsValidatorTest {
             softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
             softly.assertThat(validator.getErrorMessageId()).isNotEqualTo(validator.getWarningMessageId());
         });
-    }
-
-    private static InstallData mockInstallData() {
-        final InstallData d = Mockito.mock(InstallData.class);
-        Mockito.when(d.getVariable(Variables.ZONKY_USERNAME.getKey())).thenReturn(ZonkySettingsValidatorTest.USERNAME);
-        Mockito.when(d.getVariable(Variables.ZONKY_PASSWORD.getKey())).thenReturn(ZonkySettingsValidatorTest.PASSWORD);
-        return d;
     }
 
     @Test

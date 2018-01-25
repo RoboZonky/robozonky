@@ -23,9 +23,9 @@ import java.util.UUID;
 
 import com.github.robozonky.api.notifications.ListenerService;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ExtensionsManagerTest {
+class ExtensionsManagerTest {
 
     private static final ClassLoader CLASSLOADER = ExtensionsManager.class.getClassLoader();
 

@@ -21,9 +21,9 @@ import java.time.LocalDate;
 import com.github.robozonky.strategy.natural.ExitProperties;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ExitPropertiesTest {
+class ExitPropertiesTest {
 
     @Test
     public void defaults() {

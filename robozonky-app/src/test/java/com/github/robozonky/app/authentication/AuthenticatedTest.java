@@ -34,11 +34,11 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class AuthenticatedTest extends AbstractZonkyLeveragingTest {
+class AuthenticatedTest extends AbstractZonkyLeveragingTest {
 
     private static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
         final ApiProvider api = Mockito.mock(ApiProvider.class);

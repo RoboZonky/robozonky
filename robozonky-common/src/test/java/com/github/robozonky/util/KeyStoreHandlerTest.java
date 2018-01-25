@@ -24,15 +24,15 @@ import java.security.KeyStoreException;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
 import org.assertj.core.api.Assertions;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class KeyStoreHandlerTest {
+class KeyStoreHandlerTest {
 
     private static File TARGET;
     private static final char[] PASSWORD = "ABš CD1234-".toCharArray();
 
-    @BeforeClass
+    @BeforeAll
     public static void createTempFile() {
         try {
             KeyStoreHandlerTest.TARGET = File.createTempFile("robozonky-", ".keystore");

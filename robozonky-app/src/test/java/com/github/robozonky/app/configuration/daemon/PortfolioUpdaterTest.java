@@ -27,11 +27,11 @@ import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
+class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void updatingDependants() {
@@ -50,7 +50,7 @@ public class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         Assertions.assertThat(instance.isUpdating()).isFalse(); // it's false when update finished
     }
 
-    @Test(timeout = 5000)
+    @Test
     public void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
         Mockito.doThrow(IllegalStateException.class).when(z).getInvestments(); // will always fail

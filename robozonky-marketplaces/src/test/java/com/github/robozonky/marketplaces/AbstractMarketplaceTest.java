@@ -16,39 +16,41 @@
 
 package com.github.robozonky.marketplaces;
 
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-@RunWith(Parameterized.class)
-public class AbstractMarketplaceTest {
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> getMarketplaces() {
-        return Arrays.asList(new Object[]{ZotifyMarketplace.class}, new Object[]{ZonkyMarketplace.class});
-    }
+class AbstractMarketplaceTest {
 
-    @Parameterized.Parameter
-    public Class<? extends Marketplace> marketClass;
-
-    @Test
-    public void retrieval() throws Exception {
+    private static void retrieval(final Class<? extends Marketplace> marketClass) throws Exception {
         final Consumer<Collection<Loan>> consumer = Mockito.mock(Consumer.class);
-        try (final Marketplace market = marketClass.newInstance()) {
+        try (final Marketplace market = marketClass.getConstructor().newInstance()) {
             Mockito.verify(consumer, Mockito.never()).accept(ArgumentMatchers.any());
             Assertions.assertThat(market.registerListener(consumer)).isTrue();
             market.run();
             Mockito.verify(consumer, Mockito.times(1))
                     .accept(ArgumentMatchers.argThat(argument -> argument != null && !argument.isEmpty()));
+        } catch (final InvocationTargetException | NoSuchMethodException ex) {
+            Assertions.fail("Failed creating marketplace instance.", ex);
         }
+    }
+
+    @TestFactory
+    public Stream<DynamicTest> marketplaces() {
+        return Stream.of(
+                dynamicTest("Zonky", () -> retrieval(ZonkyMarketplace.class)),
+                dynamicTest("Zotify", () -> retrieval(ZotifyMarketplace.class))
+        );
     }
 }

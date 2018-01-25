@@ -21,9 +21,9 @@ import java.util.Collections;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class StreamUtilTest {
+class StreamUtilTest {
 
     @Test
     public void notParallel() {

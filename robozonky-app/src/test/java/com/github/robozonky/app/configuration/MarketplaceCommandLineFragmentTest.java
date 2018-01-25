@@ -19,9 +19,9 @@ package com.github.robozonky.app.configuration;
 import java.time.Duration;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class MarketplaceCommandLineFragmentTest {
+class MarketplaceCommandLineFragmentTest {
 
     @Test
     public void delayBetweenPrimaryMarketplaceChecks() {

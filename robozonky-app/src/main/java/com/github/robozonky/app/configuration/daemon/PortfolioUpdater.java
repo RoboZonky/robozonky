@@ -29,7 +29,6 @@ import java.util.function.Function;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
-import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +79,7 @@ public class PortfolioUpdater implements Runnable,
         try {
             return combined.get();
         } catch (final Throwable t) {
-            new DaemonRuntimeExceptionHandler().handle(t);
-            return null;
+            throw new IllegalStateException("Portfolio update failed.", t);
         }
     }
 

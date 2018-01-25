@@ -17,8 +17,6 @@
 package com.github.robozonky.app.management;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -50,30 +48,19 @@ import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.Mockito;
 
-@RunWith(Parameterized.class)
-public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
+class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     private static final String USERNAME = "someone@somewhere.cz";
     private static Optional<Consumer<ShutdownHook.Result>> MGMT;
-    /**
-     * This exists so that parameterized tests can have a nicely readable ID. Don't put anything more complicated
-     * there, as PIT mutation testing will silently ignore the test if the name of the test is weird.
-     */
-    @Parameterized.Parameter
-    public Class<? extends Event> eventType;
-    @Parameterized.Parameter(1)
-    public Event event;
-    @Parameterized.Parameter(2)
-    public Consumer<SoftAssertions> assertionsBefore;
-    @Parameterized.Parameter(3)
-    public Consumer<SoftAssertions> assertionsAfter;
 
     private static com.github.robozonky.app.management.Runtime getRuntimeMBean() {
         return (com.github.robozonky.app.management.Runtime) JmxListenerService.getMBean(MBean.RUNTIME)
@@ -90,7 +77,17 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
                 .orElseThrow(() -> new IllegalStateException("Not found"));
     }
 
-    private static Object[] getParametersForExecutionCompleted() {
+    @BeforeAll
+    static void loadAll() {
+        MGMT = new Management(Mockito.mock(Lifecycle.class)).get();
+    }
+
+    @AfterAll
+    static void unloadAll() {
+        MGMT.ifPresent(rc -> rc.accept(new ShutdownHook.Result(ReturnCode.OK, null)));
+    }
+
+    private DynamicTest getParametersForExecutionCompleted() {
         final ExecutionCompletedEvent evt = new ExecutionCompletedEvent(Collections.emptyList(), null);
         final Consumer<SoftAssertions> before = (softly) -> {
             softly.assertThat(getRuntimeMBean().getZonkyUsername()).isEqualTo("");
@@ -100,35 +97,40 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
             softly.assertThat(getRuntimeMBean().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
             softly.assertThat(getPortfolioMBean().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[]{evt.getClass(), evt, before, after};
+        return getParameters(evt, before, after);
     }
 
-    private static Object[] getParameters(final Event evt) {
+    private DynamicTest getParameters(final Event evt) {
         final Consumer<SoftAssertions> before = (softly) -> {
         };
         final Consumer<SoftAssertions> after = (softly) -> {
             softly.assertThat(getPortfolioMBean().getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[]{evt.getClass(), evt, before, after};
+        return getParameters(evt, before, after);
     }
 
-    private static Object[] getParametersForSellingStarted() {
+    private DynamicTest getParametersForSellingStarted() {
         return getParameters(new SellingStartedEvent(Collections.emptyList(), null));
     }
 
-    private static Object[] getParametersForSellingCompleted() {
+    private DynamicTest getParametersForSellingCompleted() {
         return getParameters(new SellingCompletedEvent(Collections.emptyList(), null));
     }
 
-    private static Object[] getParametersForPurchasingStarted() {
+    private DynamicTest getParametersForPurchasingStarted() {
         return getParameters(new PurchasingStartedEvent(Collections.emptyList(), null));
     }
 
-    private static Object[] getParametersForPurchasingCompleted() {
+    private DynamicTest getParametersForPurchasingCompleted() {
         return getParameters(new PurchasingCompletedEvent(Collections.emptyList(), null));
     }
 
-    private static Object[] getParametersForInvestmentDelegated() {
+    private DynamicTest getParameters(final Event evt, final Consumer<SoftAssertions> before,
+                                      final Consumer<SoftAssertions> after) {
+        return dynamicTest(evt.getClass().getSimpleName(), () -> testSet(evt, before, after));
+    }
+
+    private DynamicTest getParametersForInvestmentDelegated() {
         final Loan l = new Loan(1, 1000);
         final LoanDescriptor ld = new LoanDescriptor(l);
         final RecommendedLoan r = ld.recommend(200).get();
@@ -142,10 +144,10 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
             softly.assertThat(mbean.getDelegatedInvestments()).containsOnlyKeys(l.getId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[]{evt.getClass(), evt, before, after};
+        return getParameters(evt, before, after);
     }
 
-    private static Object[] getParametersForInvestmentRejected() {
+    private DynamicTest getParametersForInvestmentRejected() {
         final Loan l = new Loan(1, 1000);
         final LoanDescriptor ld = new LoanDescriptor(l);
         final RecommendedLoan r = ld.recommend(200).get();
@@ -159,10 +161,10 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
             softly.assertThat(mbean.getRejectedInvestments()).containsOnlyKeys(l.getId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[]{evt.getClass(), evt, before, after};
+        return getParameters(evt, before, after);
     }
 
-    private static Object[] getParametersForInvestmentMade() {
+    private DynamicTest getParametersForInvestmentMade() {
         final Loan l = new Loan(1, 1000);
         final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.valueOf(1000), Stream.empty());
         final Event evt = new InvestmentMadeEvent(new Investment(l, 200), l, po);
@@ -175,10 +177,10 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
             softly.assertThat(mbean.getSuccessfulInvestments()).containsOnlyKeys(l.getId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[]{evt.getClass(), evt, before, after};
+        return getParameters(evt, before, after);
     }
 
-    private static Object[] getParametersForSaleOffered() {
+    private DynamicTest getParametersForSaleOffered() {
         final Loan l = new Loan(1, 1000);
         final Investment i = new Investment(l, 200);
         final Event evt = new SaleOfferedEvent(i, l);
@@ -191,10 +193,10 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
             softly.assertThat(mbean.getOfferedInvestments()).containsOnlyKeys(i.getLoanId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[]{evt.getClass(), evt, before, after};
+        return getParameters(evt, before, after);
     }
 
-    private static Object[] getParametersForInvestmentPurchased() {
+    private DynamicTest getParametersForInvestmentPurchased() {
         final Loan l = new Loan(1, 1000);
         final Investment i = new Investment(l, 200);
         final Event evt = new InvestmentPurchasedEvent(i, l, PortfolioOverview.calculate(BigDecimal.valueOf(2000),
@@ -208,31 +210,29 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
             softly.assertThat(mbean.getPurchasedInvestments()).containsOnlyKeys(i.getLoanId());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isEqualTo(evt.getCreatedOn());
         };
-        return new Object[]{evt.getClass(), evt, before, after};
+        return getParameters(evt, before, after);
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> getParameters() {
-        return Arrays.asList(JmxListenerServiceTest.getParametersForExecutionCompleted(),
-                             JmxListenerServiceTest.getParametersForPurchasingStarted(),
-                             JmxListenerServiceTest.getParametersForPurchasingCompleted(),
-                             JmxListenerServiceTest.getParametersForSellingStarted(),
-                             JmxListenerServiceTest.getParametersForSellingCompleted(),
-                             JmxListenerServiceTest.getParametersForInvestmentDelegated(),
-                             JmxListenerServiceTest.getParametersForInvestmentMade(),
-                             JmxListenerServiceTest.getParametersForInvestmentRejected(),
-                             JmxListenerServiceTest.getParametersForSaleOffered(),
-                             JmxListenerServiceTest.getParametersForInvestmentPurchased());
+    private void testSet(final Event event, final Consumer<SoftAssertions> assertionsBefore,
+                         final Consumer<SoftAssertions> assertionsAfter) {
+        SoftAssertions.assertSoftly(assertionsBefore);
+        handleEvent(event);
+        SoftAssertions.assertSoftly(assertionsAfter);
     }
 
-    @BeforeClass
-    public static void loadAll() {
-        MGMT = new Management(Mockito.mock(Lifecycle.class)).get();
-    }
-
-    @AfterClass
-    public static void unloadAll() {
-        MGMT.ifPresent(rc -> rc.accept(new ShutdownHook.Result(ReturnCode.OK, null)));
+    @TestFactory
+    Stream<DynamicTest> events() {
+        return Stream.of(
+                getParametersForExecutionCompleted(),
+                getParametersForPurchasingStarted(),
+                getParametersForPurchasingCompleted(),
+                getParametersForSellingStarted(),
+                getParametersForSellingCompleted(),
+                getParametersForInvestmentDelegated(),
+                getParametersForInvestmentMade(),
+                getParametersForInvestmentRejected(),
+                getParametersForSaleOffered(),
+                getParametersForInvestmentPurchased());
     }
 
     private <T extends Event> void handleEvent(final T event) {
@@ -243,14 +243,7 @@ public class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    public void set() {
-        SoftAssertions.assertSoftly(assertionsBefore);
-        this.handleEvent(event);
-        SoftAssertions.assertSoftly(assertionsAfter);
-    }
-
-    @Test
-    public void setInvalid() {
+    void setInvalid() {
         final JmxListenerService service = new JmxListenerService();
         final EventListenerSupplier<RoboZonkyEndingEvent> r = service.findListener(RoboZonkyEndingEvent.class);
         Assertions.assertThat(r).isNull();

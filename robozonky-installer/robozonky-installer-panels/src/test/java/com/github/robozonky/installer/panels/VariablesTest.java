@@ -23,10 +23,10 @@ import java.util.stream.Stream;
 
 import com.izforge.izpack.api.data.InstallData;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class VariablesTest {
+class VariablesTest {
 
     @Test
     public void unique() {

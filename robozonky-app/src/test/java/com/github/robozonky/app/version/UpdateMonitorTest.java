@@ -20,9 +20,9 @@ import java.util.Collections;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockserver.integration.ClientAndServer;
@@ -32,24 +32,24 @@ import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class UpdateMonitorTest {
+class UpdateMonitorTest {
 
     private ClientAndServer server;
     private String serverUrl;
 
-    @Before
+    @BeforeEach
     public void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "http://127.0.0.1:" + server.getPort();
     }
 
-    @After
+    @AfterEach
     public void stopServer() {
         server.stop();
     }
 
     @Test
-    public void checkRetrieval() throws Exception {
+    public void checkRetrieval() {
         server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
                 .respond(HttpResponse.response().withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                                                   "<metadata>\n" +

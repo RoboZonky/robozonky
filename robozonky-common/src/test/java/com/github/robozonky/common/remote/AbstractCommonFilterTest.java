@@ -22,7 +22,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 abstract class AbstractCommonFilterTest {

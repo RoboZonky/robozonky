@@ -29,11 +29,11 @@ import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class EntitySpliteratorTest {
+class EntitySpliteratorTest {
 
     @Test
     public void empty() {

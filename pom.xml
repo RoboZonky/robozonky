@@ -51,10 +51,11 @@
     <!-- Expected Maven version to execute the build against. -->
     <version.org.apache.maven>3.5.2</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
-    <surefire.version>2.20.1</surefire.version>
+    <surefire.version>2.19.1</surefire.version> <!-- 2.20 doesn't work with JUnit 5 -->
     <version.org.jboss.resteasy>3.1.4.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <version.org.antlr>4.7.1</version.org.antlr>
+    <version.org.junit>5.0.3</version.org.junit>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -186,6 +187,12 @@
         <artifactId>greenmail</artifactId>
         <version>1.5.5</version>
         <scope>test</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <!-- Java 9 does not open this anymore. -->
       <dependency>
@@ -226,9 +233,10 @@
       </dependency>
       <!-- Testing. -->
       <dependency>
-        <groupId>org.junit.vintage</groupId>
-        <artifactId>junit-vintage-engine</artifactId>
-        <version>4.12.3</version>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${version.org.junit}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -238,7 +246,7 @@
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.8.0</version>
+        <version>3.9.0</version>
       </dependency>
       <dependency>
         <groupId>com.github.stefanbirkner</groupId>
@@ -248,7 +256,13 @@
       <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-netty</artifactId>
-        <version>3.12</version>
+        <version>5.3.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <!-- Logging. -->
       <dependency>
@@ -421,6 +435,13 @@
           <groupId>org.pitest</groupId>
           <artifactId>pitest-maven</artifactId>
           <version>1.3.1</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.pitest</groupId>
+              <artifactId>pitest-junit5-plugin</artifactId>
+              <version>0.3</version>
+            </dependency>
+          </dependencies>
           <configuration>
             <skip>${skipTests}</skip>
             <timestampedReports>false</timestampedReports>
@@ -449,6 +470,22 @@
             </avoidCallsTo>
           </configuration>
         </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-surefire-provider</artifactId>
+              <version>1.0.3</version>
+            </dependency>
+            <dependency>
+              <groupId>org.junit.jupiter</groupId>
+              <artifactId>junit-jupiter-engine</artifactId>
+              <version>${version.org.junit}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -463,8 +500,8 @@
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>${surefire.version}</version>
             <configuration>
+              <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
               <reuseForks>false</reuseForks>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
               <workingDirectory>${basedir}/target</workingDirectory>
@@ -489,8 +526,8 @@
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>${surefire.version}</version>
             <configuration>
+              <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
               <reuseForks>false</reuseForks>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
               <workingDirectory>${basedir}/target</workingDirectory>

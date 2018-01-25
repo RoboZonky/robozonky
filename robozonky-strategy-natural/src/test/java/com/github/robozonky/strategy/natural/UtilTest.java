@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class UtilTest {
+class UtilTest {
 
     private static Map<Rating, BigDecimal> prepareShareMap(final BigDecimal ratingA, final BigDecimal ratingB,
                                                            final BigDecimal ratingC) {

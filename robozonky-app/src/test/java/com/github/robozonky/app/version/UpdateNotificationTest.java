@@ -25,11 +25,11 @@ import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.Events;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class UpdateNotificationTest extends AbstractEventLeveragingTest {
+class UpdateNotificationTest extends AbstractEventLeveragingTest {
 
     @Test
     public void valueChangeDelegates() {

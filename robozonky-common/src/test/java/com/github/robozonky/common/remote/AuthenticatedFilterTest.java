@@ -30,10 +30,10 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class AuthenticatedFilterTest extends AbstractCommonFilterTest {
+class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
     static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID().toString(),
                                                          UUID.randomUUID().toString(), 300);

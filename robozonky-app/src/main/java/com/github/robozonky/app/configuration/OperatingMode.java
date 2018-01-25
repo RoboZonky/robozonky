@@ -65,15 +65,16 @@ abstract class OperatingMode implements CommandLineFragment {
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final Authenticated auth) {
         final SecretProvider secretProvider = auth.getSecretProvider();
+        final boolean isDryRun = cli.getTweaksFragment().isDryRunEnabled();
         // initialize SessionInfo before the robot potentially sends the first notification
-        Events.initialize(new SessionInfo(secretProvider.getUsername(), cli.getTweaksFragment().isDryRunEnabled()));
+        Events.initialize(new SessionInfo(secretProvider.getUsername(), isDryRun));
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secretProvider))
                 .map(credentials -> this.getZonkyProxyBuilder(credentials, secretProvider))
                 .orElse(Optional.of(new Investor.Builder()))
                 .map(builder -> {
-                    if (cli.getTweaksFragment().isDryRunEnabled()) {
+                    if (isDryRun) {
                         LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
                         builder.asDryRun();
                     }

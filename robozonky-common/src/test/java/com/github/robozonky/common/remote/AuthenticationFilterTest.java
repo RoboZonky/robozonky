@@ -21,10 +21,10 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class AuthenticationFilterTest extends AbstractCommonFilterTest {
+class AuthenticationFilterTest extends AbstractCommonFilterTest {
 
     @Override
     protected RoboZonkyFilter getTestedFilter() {

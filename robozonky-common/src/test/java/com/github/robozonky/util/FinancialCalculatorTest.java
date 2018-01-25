@@ -17,43 +17,27 @@
 package com.github.robozonky.util;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.Mockito;
 
-@RunWith(Parameterized.class)
-public class FinancialCalculatorTest {
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-    @Parameterized.Parameters(name = "{1},{0}")
-    public static Collection<Object[]> parameters() {
-        final Collection<Integer> thresholds = Arrays.asList(150_000, 200_000, 500_000, 1_000_000);
-        final Collection<Rating> ratings = Arrays.asList(Rating.values());
-        final Collection<Object[]> result = new ArrayList<>();
-        for (final int threshold : thresholds) {
-            for (final Rating rating : ratings) {
-                result.add(new Object[]{threshold, rating});
-            }
-        }
-        return result;
-    }
-
-    @Parameterized.Parameter
-    public int threshold;
-    @Parameterized.Parameter(1)
-    public Rating rating;
+class FinancialCalculatorTest {
 
     private static PortfolioOverview getPortfolioOverview(final int total) {
         final int amountPerRating = total / Rating.values().length;
@@ -62,8 +46,7 @@ public class FinancialCalculatorTest {
         return PortfolioOverview.calculate(BigDecimal.valueOf(1000), shares);
     }
 
-    @Test
-    public void fees() {
+    private static void fees(final Rating rating, final int threshold) {
         final Loan l = Mockito.spy(new Loan(1, 100000));
         Mockito.when(l.getRating()).thenReturn(rating);
         Mockito.when(l.getTermInMonths()).thenReturn(84);
@@ -73,8 +56,7 @@ public class FinancialCalculatorTest {
         Assertions.assertThat(after).isLessThan(before);
     }
 
-    @Test
-    public void expectedInterestRate() {
+    private static void expectedInterestRate(final Rating rating, final int threshold) {
         final Loan l = Mockito.spy(new Loan(1, 100000));
         Mockito.when(l.getRating()).thenReturn(rating);
         Mockito.when(l.getTermInMonths()).thenReturn(84);
@@ -86,8 +68,7 @@ public class FinancialCalculatorTest {
         Assertions.assertThat(after).isGreaterThan(before);
     }
 
-    @Test
-    public void actualInterestRate() {
+    private static void actualInterestRate(final Rating rating, final int threshold) {
         final Loan l = Mockito.spy(new Loan(1, 100000));
         Mockito.when(l.getRating()).thenReturn(rating);
         Mockito.when(l.getTermInMonths()).thenReturn(84);
@@ -114,8 +95,7 @@ public class FinancialCalculatorTest {
         Assertions.assertThat(after).isGreaterThan(afterSmpFee);
     }
 
-    @Test
-    public void actualInterest() {
+    private static void actualInterest(final Rating rating, final int threshold) {
         final Loan l = Mockito.spy(new Loan(1, 100000));
         Mockito.when(l.getRating()).thenReturn(rating);
         Mockito.when(l.getTermInMonths()).thenReturn(84);
@@ -131,5 +111,27 @@ public class FinancialCalculatorTest {
                                                                                    getPortfolioOverview(threshold),
                                                                                    true);
         Assertions.assertThat(after).isGreaterThan(afterSmpFee);
+    }
+
+    private static Stream<DynamicNode> getTestsPerRating(final Rating rating) {
+        final Collection<Integer> thresholds = Arrays.asList(150_000, 200_000, 500_000, 1_000_000);
+        return thresholds.stream()
+                .map(threshold -> dynamicContainer(" with portfolio size " + threshold,
+                                                   getTestsPerThreshold(rating, threshold)));
+    }
+
+    private static Stream<DynamicTest> getTestsPerThreshold(final Rating rating, final int threshold) {
+        return Stream.of(
+                dynamicTest("has proper fees", () -> fees(rating, threshold)),
+                dynamicTest("has proper expected interest rate", () -> expectedInterestRate(rating, threshold)),
+                dynamicTest("has proper actual interest rate", () -> actualInterestRate(rating, threshold)),
+                dynamicTest("has proper actual interest", () -> actualInterest(rating, threshold))
+        );
+    }
+
+    @TestFactory
+    public Stream<DynamicNode> ratings() {
+        return Stream.of(Rating.values())
+                .map(rating -> dynamicContainer(rating.getCode(), getTestsPerRating(rating)));
     }
 }

@@ -27,9 +27,9 @@ import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CommandLinePartTest {
+class CommandLinePartTest {
 
     @Test
     public void options() {

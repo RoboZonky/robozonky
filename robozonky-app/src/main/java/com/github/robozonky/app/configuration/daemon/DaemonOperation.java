@@ -19,9 +19,10 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.function.BiConsumer;
 
+import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
+import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.util.DaemonRuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +62,8 @@ abstract class DaemonOperation implements Runnable {
             }
             LOGGER.trace("Finished.");
         } catch (final Throwable t) {
-            // we catch Throwable so that we can inform users even about errors
-            new DaemonRuntimeExceptionHandler().handle(t);
+            LOGGER.warn("Caught unexpected exception, continuing operation.", t);
+            Events.fire(new RoboZonkyDaemonFailedEvent(t));
         }
     }
 }

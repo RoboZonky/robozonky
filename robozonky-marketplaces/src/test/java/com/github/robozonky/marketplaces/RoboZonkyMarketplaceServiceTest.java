@@ -19,9 +19,9 @@ package com.github.robozonky.marketplaces;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RoboZonkyMarketplaceServiceTest {
+class RoboZonkyMarketplaceServiceTest {
 
     @Test
     public void zotifyRetrieval() {

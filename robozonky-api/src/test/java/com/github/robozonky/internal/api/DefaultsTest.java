@@ -17,9 +17,9 @@
 package com.github.robozonky.internal.api;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class DefaultsTest {
+class DefaultsTest {
 
     @Test
     public void userAgent() {

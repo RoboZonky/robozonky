@@ -24,9 +24,9 @@ import java.util.function.Function;
 import com.github.robozonky.installer.panels.CommandLinePart;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RunScriptGeneratorTest {
+class RunScriptGeneratorTest {
 
     private static File getTempFile() {
         try {

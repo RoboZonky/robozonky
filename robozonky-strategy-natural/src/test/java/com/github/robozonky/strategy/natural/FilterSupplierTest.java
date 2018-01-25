@@ -19,9 +19,9 @@ package com.github.robozonky.strategy.natural;
 import java.util.Collections;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FilterSupplierTest {
+class FilterSupplierTest {
 
     @Test
     public void nullHandling() {

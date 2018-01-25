@@ -19,10 +19,10 @@ package com.github.robozonky.util;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class SchedulerServiceTest {
+class SchedulerServiceTest {
 
     @Test
     public void defaults() {

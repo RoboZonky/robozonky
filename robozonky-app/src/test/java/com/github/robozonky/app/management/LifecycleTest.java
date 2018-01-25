@@ -20,10 +20,10 @@ import java.util.Optional;
 
 import com.github.robozonky.app.runtime.Lifecycle;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class LifecycleTest {
+class LifecycleTest {
 
     @Test
     public void version() {

@@ -21,9 +21,9 @@ import java.util.Locale;
 import com.github.robozonky.internal.api.Defaults;
 import freemarker.template.Configuration;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TemplateProcessorTest {
+class TemplateProcessorTest {
 
     @Test
     public void properConfiguration() {

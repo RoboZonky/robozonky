@@ -19,42 +19,24 @@ package com.github.robozonky.notifications.email;
 import java.util.UUID;
 
 import com.github.robozonky.internal.api.State;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class BalanceTrackerTest {
-
-    @After
-    public void deleteBalance() {
-        BalanceTracker.INSTANCE.reset();
-    }
-
-    @Before
-    public void makeSureNoState() {
-        final State.ClassSpecificState state = State.forClass(BalanceTracker.class);
-        Assume.assumeFalse(state.getValue(BalanceTracker.BALANCE_KEY).isPresent());
-    }
+class BalanceTrackerTest extends AbstractRoboZonkyTest {
 
     @Test
     public void lifecycle() {
-        System.out.println("A");
-        Assume.assumeFalse(State.forClass(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY).isPresent());
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
         // store new value
-        System.out.println("B");
         final int newBalance = 200;
         BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
         // overwrite value
-        System.out.println("C");
         final int newerBalance = 100;
         BalanceTracker.INSTANCE.setLastKnownBalance(newerBalance);
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newerBalance);
         Assertions.assertThat(State.forClass(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY)).isPresent();
-        System.out.println("D");
         // reset value
         Assertions.assertThat(BalanceTracker.INSTANCE.reset()).isTrue();
         Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();

@@ -21,10 +21,10 @@ import java.util.Optional;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ShutdownHookTest {
+class ShutdownHookTest {
 
     @Test
     public void noShutdownHandler() {

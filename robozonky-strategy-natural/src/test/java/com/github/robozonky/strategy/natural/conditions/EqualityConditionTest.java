@@ -16,73 +16,62 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.Mockito;
 
-@RunWith(Parameterized.class)
-public class EqualityConditionTest {
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> parameters() {
-        final List<Rating> all = Arrays.asList(Rating.values());
-        final int total = all.size();
-        final Collection<Object[]> result = new ArrayList<>();
-        for (int i = 0; i < total; i++) {
-            final Rating current = all.get(i);
-            final Collection<Rating> betterThan = Stream.of(Rating.values())
-                    .filter(r -> r.compareTo(current) < 0)
-                    .collect(Collectors.toSet());
-            final Collection<Rating> worseThan = Stream.of(Rating.values())
-                    .filter(r -> r.compareTo(current) > 0)
-                    .collect(Collectors.toSet());
-            result.add(new Object[]{current, betterThan, worseThan});
-        }
-        return result;
+class EqualityConditionTest {
+
+    private static Stream<DynamicTest> betterThan(final Rating current) {
+        return Stream.of(Rating.values())
+                .filter(r -> r.compareTo(current) < 0)
+                .map(r -> dynamicTest(r.getCode(), () -> testBetterThan(current, r)));
     }
 
-    @Parameterized.Parameter
-    public Rating current;
-    @Parameterized.Parameter(1)
-    public Collection<Rating> betterThanCurrent;
-    @Parameterized.Parameter(2)
-    public Collection<Rating> worseThanCurrent;
+    private static Stream<DynamicTest> worseThan(final Rating current) {
+        return Stream.of(Rating.values())
+                .filter(r -> r.compareTo(current) > 0)
+                .map(r -> dynamicTest(r.getCode(), () -> testWorseThan(current, r)));
+    }
 
-    private Wrapper mockLoan(final Rating r) {
+    private static Wrapper mockLoan(final Rating r) {
         final Loan l = Mockito.mock(Loan.class);
         Mockito.when(l.getRating()).thenReturn(r);
         return new Wrapper(l);
     }
 
-    @Test
-    public void testBetterThan() {
+    private static void testBetterThan(final Rating current, final Rating r) {
         final MarketplaceFilterCondition c = new LoanRatingBetterCondition(current);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(c.test(mockLoan(current))).isFalse();
-            betterThanCurrent.forEach(r -> softly.assertThat(c.test(mockLoan(r))).isTrue());
-            worseThanCurrent.forEach(r -> softly.assertThat(c.test(mockLoan(r))).isFalse());
+            softly.assertThat(c.test(mockLoan(r))).isTrue();
         });
     }
 
-    @Test
-    public void testWorseThan() {
+    private static void testWorseThan(final Rating current, final Rating r) {
         final MarketplaceFilterCondition c = new LoanRatingWorseCondition(current);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(c.test(mockLoan(current))).isFalse();
-            betterThanCurrent.forEach(r -> softly.assertThat(c.test(mockLoan(r))).isFalse());
-            worseThanCurrent.forEach(r -> softly.assertThat(c.test(mockLoan(r))).isTrue());
+            softly.assertThat(c.test(mockLoan(r))).isTrue();
         });
+    }
+
+    @TestFactory
+    Stream<DynamicNode> ratings() {
+        return Stream.of(Rating.values())
+                .map(rating -> dynamicContainer(rating.getCode(), Stream.of(
+                        dynamicContainer("is better than", betterThan(rating)),
+                        dynamicContainer("is worse than", worseThan(rating))
+                )));
     }
 }

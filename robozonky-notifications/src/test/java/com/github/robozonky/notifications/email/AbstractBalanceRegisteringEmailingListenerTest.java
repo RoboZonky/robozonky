@@ -23,9 +23,9 @@ import java.util.function.Function;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AbstractBalanceRegisteringEmailingListenerTest extends AbstractRoboZonkyTest {
+class AbstractBalanceRegisteringEmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static final int RESULT = 123456;
     private static final Function<RoboZonkyTestingEvent, Integer> F = (e) -> RESULT;

@@ -35,7 +35,7 @@ import com.github.robozonky.internal.api.Settings;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
+public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
 

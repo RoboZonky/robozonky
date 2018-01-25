@@ -18,10 +18,10 @@ package com.github.robozonky.app.investing;
 
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class InvestorBuilderTest {
+class InvestorBuilderTest {
 
     @Test
     public void build() {

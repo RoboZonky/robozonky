@@ -18,9 +18,9 @@ package com.github.robozonky.app.configuration;
 
 import com.beust.jcommander.ParameterException;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class PositiveIntegerValueValidatorTest {
+class PositiveIntegerValueValidatorTest {
 
     @Test
     public void isPositive() {

@@ -22,9 +22,9 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RatingTest {
+class RatingTest {
 
     @Test
     public void noRatingCodeTwice() {

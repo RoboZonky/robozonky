@@ -28,10 +28,10 @@ import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class RoboZonkyFilterTest {
+class RoboZonkyFilterTest {
 
     @Test
     public void userAgent() throws IOException {

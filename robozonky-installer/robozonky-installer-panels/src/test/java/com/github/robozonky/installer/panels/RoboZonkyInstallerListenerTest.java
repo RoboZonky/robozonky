@@ -23,28 +23,25 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.event.InstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-public class RoboZonkyInstallerListenerTest {
+class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
 
     private static final String ZONKY_PASSWORD = UUID.randomUUID().toString();
     private static final String ZONKY_USERNAME = "user@zonky.cz";
 
-    @Rule
-    public final RestoreSystemProperties propertiesRestore = new RestoreSystemProperties();
     private final InstallData data = RoboZonkyInstallerListenerTest.mockData();
 
     private static File newFile(final boolean withContent) {
@@ -93,7 +90,7 @@ public class RoboZonkyInstallerListenerTest {
         file.delete();
     }
 
-    @Before
+    @BeforeEach
     public void createStructure() throws IOException {
         final File installDir = new File(Variables.INSTALL_PATH.getValue(data));
         if (installDir.exists()) {
@@ -107,7 +104,7 @@ public class RoboZonkyInstallerListenerTest {
         strategy.createNewFile();
     }
 
-    @After
+    @AfterEach
     public void tearDownStructure() throws IOException {
         final File folder = new File(Variables.INSTALL_PATH.getValue(data));
         RoboZonkyInstallerListenerTest.deleteDir(folder);

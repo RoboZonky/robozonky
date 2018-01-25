@@ -21,10 +21,10 @@ import java.io.File;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class InstallDirValidatorTest {
+class InstallDirValidatorTest {
 
     private static InstallData mockBaseData(final String installPath) {
         final InstallData data = Mockito.mock(InstallData.class);

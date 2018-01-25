@@ -60,9 +60,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${version.org.junit}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -73,11 +75,6 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.stefanbirkner</groupId>
-      <artifactId>system-rules</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -498,8 +495,17 @@
                         "classSimpleName": "BlockedAmount",
                         "elementKind": "class",
                         "justification": "BlockedAmount is no longer Comparable."
+                      }, {
+                        "code": "java.method.exception.checkedRemoved",
+                        "old": "method void com.github.robozonky.api.marketplaces.Marketplace::close() throws java.lang.Exception",
+                        "new": "method void com.github.robozonky.api.marketplaces.Marketplace::close()",
+                        "exception": "java.lang.Exception",
+                        "package": "com.github.robozonky.api.marketplaces",
+                        "classSimpleName": "Marketplace",
+                        "methodName": "close",
+                        "elementKind": "method",
+                        "justification": "Unnecessary."
                       }
-
                     ]
                   }
                 }

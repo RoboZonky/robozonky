@@ -17,9 +17,9 @@
 package com.github.robozonky.strategy.natural;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class InvestmentSizeTest {
+class InvestmentSizeTest {
 
     private static final int MIN = 400, MAX = 2 * InvestmentSizeTest.MIN;
 

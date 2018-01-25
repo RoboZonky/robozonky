@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.util.concurrent.ExecutionException;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -27,12 +27,13 @@ import java.util.function.Consumer;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
-public class ShutdownEnablerTest {
+class ShutdownEnablerTest {
 
-    @Test(timeout = 5000)
-    public void standard() throws ExecutionException, InterruptedException {
+    @Test
+    public void standard() {
         final ShutdownEnabler se = new ShutdownEnabler();
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final Future<?> f = e.submit(se::waitUntilTriggered);
@@ -41,7 +42,8 @@ public class ShutdownEnablerTest {
         final Consumer<ShutdownHook.Result> c = se.get()
                 .orElseThrow(() -> new IllegalStateException("Should have returned."));
         c.accept(new ShutdownHook.Result(ReturnCode.OK, null)); // this unblocks the thread
-        f.get(); // this should return
+        // this should return
+        org.junit.jupiter.api.Assertions.assertTimeout(Duration.ofSeconds(5), (Executable) f::get);
         Assertions.assertThat(f).isDone();
         e.shutdownNow();
     }

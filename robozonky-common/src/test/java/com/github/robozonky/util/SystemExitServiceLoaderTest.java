@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.util;
 
-public class PurposeTest extends AbstractBaseEnumTest {
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-    public PurposeTest() {
-        super(Purpose::values, Purpose::findByCode);
+class SystemExitServiceLoaderTest {
+
+    @Test
+    void standard() {
+        final SystemExitService s = SystemExitServiceLoader.load();
+        Assertions.assertThat(s).isEqualTo(SystemExitServiceLoader.REAL);
     }
 }

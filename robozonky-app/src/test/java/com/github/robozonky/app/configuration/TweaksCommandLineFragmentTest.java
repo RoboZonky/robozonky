@@ -17,9 +17,9 @@
 package com.github.robozonky.app.configuration;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TweaksCommandLineFragmentTest {
+class TweaksCommandLineFragmentTest {
 
     @Test
     public void defaults() {

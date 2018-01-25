@@ -27,15 +27,15 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class StrategySettingsValidatorTest {
+class StrategySettingsValidatorTest {
 
-    @After
+    @AfterEach
     public void resetDataTransfer() {
         RoboZonkyInstallerListener.resetInstallData();
     }
@@ -96,7 +96,7 @@ public class StrategySettingsValidatorTest {
     @Test
     public void fileMissing() throws IOException {
         final File f = File.createTempFile("robozonky-", ".cfg");
-        Assume.assumeTrue(f.delete());
+        Assumptions.assumeTrue(f.delete());
         final InstallData d = StrategySettingsValidatorTest.mockInstallData(f);
         // execute sut
         final DataValidator validator = new StrategySettingsValidator();
@@ -131,7 +131,7 @@ public class StrategySettingsValidatorTest {
     @Test
     public void urlWrong() throws IOException {
         final File f = File.createTempFile("robozonky-", ".cfg");
-        Assume.assumeTrue(f.delete());
+        Assumptions.assumeTrue(f.delete());
         final InstallData d = StrategySettingsValidatorTest.mockInstallData(f.toURI().toURL());
         // execute sut
         final DataValidator validator = new StrategySettingsValidator();

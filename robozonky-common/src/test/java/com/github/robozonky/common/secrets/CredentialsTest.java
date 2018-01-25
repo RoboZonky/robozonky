@@ -18,9 +18,9 @@ package com.github.robozonky.common.secrets;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CredentialsTest {
+class CredentialsTest {
 
     private static final SecretProvider SECRETS = SecretProvider.fallback("");
 

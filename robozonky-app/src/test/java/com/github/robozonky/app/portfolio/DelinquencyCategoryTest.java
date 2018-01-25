@@ -18,12 +18,9 @@ package com.github.robozonky.app.portfolio;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.temporal.TemporalAmount;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
@@ -33,37 +30,28 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.Mockito;
 
-@RunWith(Parameterized.class)
-public class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
+class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
     private static final Function<Integer, Investment> INVESTMENT_SUPPLIER = (id) -> Mockito.mock(Investment.class);
-    @Parameterized.Parameter
-    public DelinquencyCategory category;
-    private TemporalAmount minimumMatchingDuration;
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> parameters() {
-        return Stream.of(DelinquencyCategory.values()).map(c -> new Object[]{c}).collect(Collectors.toSet());
-    }
-
-    @Before
-    public void prepareTimelines() {
-        minimumMatchingDuration = Period.ofDays(category.getThresholdInDays());
-    }
-
-    @Test
-    public void empty() {
+    private static void testEmpty(final DelinquencyCategory category) {
         Assertions.assertThat(category.update(Collections.emptyList(), null, null)).isEmpty();
     }
 
-    @Test
-    public void addAndRead() {
+    private void reinit() { // JUnit 5 doesn't execute before/after methods for dynamic tests
+        this.deleteState();
+        this.readPreexistingEvents();
+    }
+
+    private void testAddAndRead(final DelinquencyCategory category, final Period minimumMatchingDuration) {
+        this.reinit();
         final int loanId = 1;
         final Function<Integer, Loan> f = (id) -> new Loan(loanId, 200);
         // store a delinquent loan
@@ -83,5 +71,17 @@ public class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         // now update with no delinquents, making sure nothing is returned
         Assertions.assertThat(category.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f)).isEmpty();
         Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
+    }
+
+    @TestFactory
+    Stream<DynamicNode> categories() {
+        return Stream.of(DelinquencyCategory.values())
+                .map(category -> {
+                    final Period minimumMatchindDuration = Period.ofDays(category.getThresholdInDays());
+                    return dynamicContainer(category.toString(), Stream.of(
+                            dynamicTest("updates", () -> testAddAndRead(category, minimumMatchindDuration)),
+                            dynamicTest("empty", () -> testEmpty(category))
+                    ));
+                });
     }
 }

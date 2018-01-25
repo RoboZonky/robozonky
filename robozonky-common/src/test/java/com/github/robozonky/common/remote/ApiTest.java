@@ -22,11 +22,11 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.remote.LoanApi;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ApiTest {
+class ApiTest {
 
     @Test
     public void executeFunction() {

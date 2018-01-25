@@ -23,11 +23,11 @@ import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ZonkoidSettingsValidatorTest {
+class ZonkoidSettingsValidatorTest {
 
     private static final String USER = "someone@somewhere.cz", TOKEN = String.valueOf((int) (Math.random() * 100_000));
 

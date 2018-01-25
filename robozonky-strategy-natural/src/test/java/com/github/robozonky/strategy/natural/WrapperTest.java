@@ -19,9 +19,9 @@ package com.github.robozonky.strategy.natural;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class WrapperTest {
+class WrapperTest {
 
     @Test
     public void fromInvestment() {

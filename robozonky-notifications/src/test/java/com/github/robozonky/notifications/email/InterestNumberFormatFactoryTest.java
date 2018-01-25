@@ -28,16 +28,16 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class InterestNumberFormatFactoryTest {
+class InterestNumberFormatFactoryTest {
 
-    @BeforeClass
+    @BeforeAll
     public static void checkJava9() { // turns out that CZ locale outputs on Java 8 are different
         // TODO remove when Java 9 is the minimum platform
-        Assume.assumeTrue("Need Java 9 to run.", System.getProperty("java.version").startsWith("9"));
+        Assumptions.assumeTrue(System.getProperty("java.version").startsWith("9"), () -> "Need Java 9 to run.");
     }
 
     @Test
@@ -95,5 +95,4 @@ public class InterestNumberFormatFactoryTest {
                     .isInstanceOf(InvalidFormatParametersException.class);
         });
     }
-
 }

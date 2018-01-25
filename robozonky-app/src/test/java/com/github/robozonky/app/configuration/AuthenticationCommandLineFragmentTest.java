@@ -21,9 +21,9 @@ import java.io.File;
 import com.beust.jcommander.ParameterException;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AuthenticationCommandLineFragmentTest {
+class AuthenticationCommandLineFragmentTest {
 
     @Test
     public void defaults() {

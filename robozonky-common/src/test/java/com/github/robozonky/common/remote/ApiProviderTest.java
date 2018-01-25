@@ -20,10 +20,10 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ApiProviderTest {
+class ApiProviderTest {
 
     private static final Function<OAuth, OAuth> AUTH_OPERATION = Mockito::spy;
     private static final Function<Zonky, Zonky> ZONKY_OPERATION = Mockito::spy;

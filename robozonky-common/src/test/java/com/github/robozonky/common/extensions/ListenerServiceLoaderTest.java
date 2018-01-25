@@ -27,11 +27,11 @@ import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ListenerServiceLoaderTest {
+class ListenerServiceLoaderTest {
 
     @Test
     public void correctLoading() {

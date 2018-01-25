@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.util;
 
-public class RegionTest extends AbstractBaseEnumTest {
+/**
+ * Pluggable {@link SystemExit} for the purposes of testing what RoboZonky does when exiting. Load with
+ * {@link SystemExitServiceLoader}.
+ */
+public interface SystemExitService {
 
-    public RegionTest() {
-        super(Region::values, Region::findByCode);
-    }
+    SystemExit newSystemExit();
 }

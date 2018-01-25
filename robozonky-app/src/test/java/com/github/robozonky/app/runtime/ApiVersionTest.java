@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ApiVersionTest {
+class ApiVersionTest {
 
     private static final String SAMPLE = "{\"branch\":\"origin/master\"," +
             "\"commitId\":\"e51d4fcb9eac1a9599a64c93c181325a2c38e779\"," +

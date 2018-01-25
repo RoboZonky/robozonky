@@ -28,11 +28,11 @@ import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
+class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void standard() {

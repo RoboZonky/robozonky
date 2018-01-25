@@ -19,20 +19,14 @@ package com.github.robozonky.notifications.email;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.mail.internet.MimeMessage;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
@@ -69,7 +63,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.State;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.util.Refreshable;
 import com.icegreen.greenmail.util.GreenMail;
@@ -77,50 +70,26 @@ import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import freemarker.template.TemplateException;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.ProvideSystemProperty;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicContainer;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(Parameterized.class)
-public class EmailingListenerTest extends AbstractRoboZonkyTest {
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+class EmailingListenerTest extends AbstractRoboZonkyTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailingListenerTest.class);
     private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
 
     private static final GreenMail EMAIL = new GreenMail(getServerSetup());
-    @Rule
-    public final ProvideSystemProperty myPropertyHasMyValue = new ProvideSystemProperty(
-            RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-            NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
-    @Parameterized.Parameter(1)
-    public AbstractEmailingListener<Event> listener;
-    // only exists so that the parameter can have a nice constant description. otherwise PIT will report 0 coverage.
-    @Parameterized.Parameter(2)
-    public Event event;
-    @Parameterized.Parameter
-    public SupportedListener listenerType;
-
-    @BeforeClass
-    public static void startEmailing() {
-        EMAIL.start();
-    }
-
-    @AfterClass
-    public static void stopEmailing() {
-        try {
-            EMAIL.stop();
-        } catch (final Exception ex) {
-            LoggerFactory.getLogger(EmailingListenerTest.class).warn("Failed stopping e-mail server.", ex);
-        }
-    }
+    private static final PortfolioOverview MAX_PORTFOLIO = mockPortfolio(Integer.MAX_VALUE);
 
     private static ServerSetup getServerSetup() {
         final ServerSetup setup = ServerSetupTest.SMTP;
@@ -130,13 +99,9 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
     }
 
     private static NotificationProperties getNotificationProperties() {
-        System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                           NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
         final Refreshable<NotificationProperties> r = new RefreshableNotificationProperties();
         r.run();
-        final Optional<NotificationProperties> p = r.get();
-        System.clearProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
-        return p.get();
+        return r.get().get();
     }
 
     private static PortfolioOverview mockPortfolio(final int balance) {
@@ -145,15 +110,107 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         return portfolioOverview;
     }
 
-    private static EventListener<Event> getListener(final SupportedListener s, final NotificationProperties p) {
+    private static AbstractEmailingListener<Event> getListener(final SupportedListener s,
+                                                               final NotificationProperties p) {
         final AbstractEmailingListener<Event> e = Mockito.spy((AbstractEmailingListener<Event>) s.getListener(p));
         // always return a listener that WILL send an e-mail, even though this means shouldSendEmail() is not tested
         Mockito.doReturn(true).when(e).shouldSendEmail(ArgumentMatchers.any());
         return e;
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> getListeners() {
+    private DynamicContainer forListener(final SupportedListener listener, final Event e) {
+        final NotificationProperties p = getNotificationProperties();
+        final AbstractEmailingListener<Event> l = getListener(listener, p);
+        return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
+                dynamicTest("is formally correct", () -> testFormal(l, e, listener)),
+                dynamicTest("is processed correctly", () -> testProcessingWithoutErrors(l, e)),
+                dynamicTest("sends email", () -> {
+                    BalanceTracker.INSTANCE.reset();  // dynamic tests in JUnit don't call before/after methods !!!
+                    testMailSent(l, e);
+                }),
+                dynamicTest("has listener enabled", () -> testListenerEnabled(e))
+        ));
+    }
+
+    private static void testMailSent(final AbstractEmailingListener<Event> listener,
+                                     final Event event) throws Exception {
+        final int originalMessages = EMAIL.getReceivedMessages().length;
+        listener.handle(event, new SessionInfo("someone@somewhere.net"));
+        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
+        final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
+        Assertions.assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
+        Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(listener.getSubject(event));
+        Assertions.assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
+    }
+
+    private static void testFormal(final AbstractEmailingListener<Event> listener, final Event event,
+                                   final SupportedListener listenerType) {
+        Assertions.assertThat(event).isInstanceOf(listenerType.getEventType());
+        Assertions.assertThat(listener.getTemplateFileName())
+                .isNotNull()
+                .isNotEmpty();
+    }
+
+    private static void testProcessingWithoutErrors(final AbstractEmailingListener<Event> listener,
+                                                    final Event event) throws IOException, TemplateException {
+        final String s = TemplateProcessor.INSTANCE.process(listener.getTemplateFileName(),
+                                                            listener.getData(event, new SessionInfo(
+                                                                    "someone@somewhere.net")));
+        Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
+    }
+
+    private static void testListenerEnabled(final Event event) {
+        final EmailListenerService service = new EmailListenerService();
+        final EventListenerSupplier<?> supplier = service.findListener(event.getClass());
+        Assertions.assertThat(supplier.get()).isPresent();
+    }
+
+    @BeforeEach
+    void setProperty() {
+        System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
+                           NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
+    }
+
+    @Test
+    void testSpamProtectionAvailable() throws IOException {
+        this.deleteState(); // for some reason, JUnit 5 doesn't invoke this from the abstract parent
+        final Properties props = new Properties();
+        props.load(NotificationPropertiesTest.class.getResourceAsStream("notifications-enabled.cfg"));
+        props.setProperty("hourlyMaxEmails", String.valueOf(1)); // spam protection
+        final ListenerSpecificNotificationProperties p =
+                new ListenerSpecificNotificationProperties(SupportedListener.TESTING,
+                                                           new NotificationProperties(props));
+        final Consumer<RoboZonkyTestingEvent> c = Mockito.mock(Consumer.class);
+        final TestingEmailingListener l = new TestingEmailingListener(p);
+        l.registerFinisher(c);
+        Assertions.assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
+        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
+        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(1);
+        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
+        // e-mail not re-sent, finisher not called again
+        Mockito.verify(c, Mockito.times(1)).accept(ArgumentMatchers.any());
+        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(1);
+    }
+
+    @BeforeEach
+    void startEmailing() {
+        EMAIL.start();
+        LOGGER.info("Started e-mailing.");
+    }
+
+    @AfterEach
+    void stopEmailing() {
+        LOGGER.info("Stopping e-mailing.");
+        try {
+            EMAIL.purgeEmailFromAllMailboxes();
+            EMAIL.stop();
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed stopping e-mail server.", ex);
+        }
+    }
+
+    @TestFactory
+    Stream<DynamicNode> listeners() {
         // prepare data
         final Loan loan = Mockito.spy(new Loan(66666, 100000));
         Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now().minusMonths(2));
@@ -168,123 +225,48 @@ public class EmailingListenerTest extends AbstractRoboZonkyTest {
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = new Investment(loan, 1000);
-        final NotificationProperties properties = EmailingListenerTest.getNotificationProperties();
         // create events for listeners
-        final Map<SupportedListener, Event> events = new HashMap<>(SupportedListener.values().length);
-        events.put(SupportedListener.INVESTMENT_DELEGATED, new InvestmentDelegatedEvent(recommendation, "random"));
-        events.put(SupportedListener.INVESTMENT_MADE,
-                   new InvestmentMadeEvent(i, loan, mockPortfolio(Integer.MAX_VALUE)));
-        events.put(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, loan,
-                                                                              mockPortfolio(Integer.MAX_VALUE)));
-        events.put(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation));
-        events.put(SupportedListener.INVESTMENT_REJECTED, new InvestmentRejectedEvent(recommendation, "random"));
-        events.put(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
-                   new LoanNoLongerDelinquentEvent(i, loan, LocalDate.now()));
-        events.put(SupportedListener.LOAN_DEFAULTED, new LoanDefaultedEvent(i, loan, LocalDate.now()));
-        events.put(SupportedListener.LOAN_NOW_DELINQUENT, new LoanNowDelinquentEvent(i, loan, LocalDate.now()));
-        events.put(SupportedListener.LOAN_DELINQUENT_10_PLUS,
-                   new LoanDelinquent10DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(11)));
-        events.put(SupportedListener.LOAN_DELINQUENT_30_PLUS,
-                   new LoanDelinquent30DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(31)));
-        events.put(SupportedListener.LOAN_DELINQUENT_60_PLUS,
-                   new LoanDelinquent60DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(61)));
-        events.put(SupportedListener.LOAN_DELINQUENT_90_PLUS,
-                   new LoanDelinquent90DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(91)));
-        events.put(SupportedListener.LOAN_REPAID, new LoanRepaidEvent(i, loan, mockPortfolio(Integer.MAX_VALUE)));
-        events.put(SupportedListener.BALANCE_ON_TARGET,
-                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(Integer.MAX_VALUE)));
-        events.put(SupportedListener.BALANCE_UNDER_MINIMUM,
-                   new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(0)));
-        events.put(SupportedListener.CRASHED,
-                   new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException()));
-        events.put(SupportedListener.REMOTE_OPERATION_FAILED, new RemoteOperationFailedEvent(new RuntimeException()));
-        events.put(SupportedListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException()));
-        events.put(SupportedListener.INITIALIZED, new RoboZonkyInitializedEvent());
-        events.put(SupportedListener.ENDING, new RoboZonkyEndingEvent());
-        events.put(SupportedListener.TESTING, new RoboZonkyTestingEvent());
-        events.put(SupportedListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3"));
-        events.put(SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
-                   new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1"));
-        events.put(SupportedListener.INVESTMENT_PURCHASED,
-                   new InvestmentPurchasedEvent(i, loan, mockPortfolio(Integer.MAX_VALUE)));
-        events.put(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, loan));
-        // create the listeners
-        return Stream.of(SupportedListener.values())
-                .map(s -> new Object[]{s, getListener(s, properties), events.get(s)})
-                .collect(Collectors.toList());
-    }
-
-    @Before
-    @After
-    public void resetEmailing() throws Exception {
-        EMAIL.purgeEmailFromAllMailboxes();
-    }
-
-    @After
-    public void resetBalanceTracker() { // to make sure the tests always return consistent results
-        BalanceTracker.INSTANCE.reset();
-    }
-
-    @After
-    public void resetDelinquencyTracker() { // to make sure the tests always return consistent results
-        State.forClass(DelinquencyTracker.class).newBatch(true).call();
-    }
-
-    @Test
-    public void testMailSent() throws Exception {
-        final AbstractEmailingListener<Event> l = this.listener;
-        l.handle(this.event, new SessionInfo("someone@somewhere.net"));
-        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(1);
-        final MimeMessage m = EMAIL.getReceivedMessages()[0];
-        Assertions.assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
-        Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(l.getSubject(this.event));
-        Assertions.assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
-    }
-
-    @Test
-    public void formal() {
-        Assertions.assertThat(this.event).isInstanceOf(this.listenerType.getEventType());
-        final AbstractEmailingListener<Event> l = this.listener;
-        Assertions.assertThat(l.getTemplateFileName())
-                .isNotNull()
-                .isNotEmpty();
-    }
-
-    @Test
-    public void processingWithoutErrors() throws IOException, TemplateException {
-        final String s = TemplateProcessor.INSTANCE.process(this.listener.getTemplateFileName(),
-                                                            this.listener.getData(event, new SessionInfo(
-                                                                    "someone@somewhere.net")));
-        Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
-    }
-
-    @Test
-    public void reportingEnabledHaveListeners() {
-        final EmailListenerService service = new EmailListenerService();
-        final EventListenerSupplier<?> supplier = service.findListener(this.event.getClass());
-        Assertions.assertThat(supplier.get()).isPresent();
-    }
-
-    @Test
-    public void spamProtectionAvailable() throws IOException {
-        final Properties props = new Properties();
-        props.load(NotificationPropertiesTest.class.getResourceAsStream("notifications-enabled.cfg"));
-        int sendCount = 1;
-        props.setProperty("hourlyMaxEmails", String.valueOf(sendCount)); // spam protection
-        final ListenerSpecificNotificationProperties p =
-                new ListenerSpecificNotificationProperties(SupportedListener.TESTING,
-                                                           new NotificationProperties(props));
-        final Consumer<RoboZonkyTestingEvent> c = Mockito.mock(Consumer.class);
-        final TestingEmailingListener l = new TestingEmailingListener(p);
-        l.registerFinisher(c);
-        Assertions.assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
-        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
-        Mockito.verify(c, Mockito.times(sendCount)).accept(ArgumentMatchers.any());
-        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(sendCount);
-        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
-        // e-mail not re-sent, finisher not called again
-        Mockito.verify(c, Mockito.times(sendCount)).accept(ArgumentMatchers.any());
-        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(sendCount);
+        return Stream.of(
+                forListener(SupportedListener.INVESTMENT_DELEGATED,
+                            new InvestmentDelegatedEvent(recommendation, "random")),
+                forListener(SupportedListener.INVESTMENT_MADE, new InvestmentMadeEvent(i, loan, MAX_PORTFOLIO)),
+                forListener(SupportedListener.INVESTMENT_SOLD, new InvestmentSoldEvent(i, loan, MAX_PORTFOLIO)),
+                forListener(SupportedListener.INVESTMENT_SKIPPED, new InvestmentSkippedEvent(recommendation)),
+                forListener(SupportedListener.INVESTMENT_REJECTED,
+                            new InvestmentRejectedEvent(recommendation, "random")),
+                forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
+                            new LoanNoLongerDelinquentEvent(i, loan, LocalDate.now())),
+                forListener(SupportedListener.LOAN_DEFAULTED, new LoanDefaultedEvent(i, loan, LocalDate.now())),
+                forListener(SupportedListener.LOAN_NOW_DELINQUENT,
+                            new LoanNowDelinquentEvent(i, loan, LocalDate.now())),
+                forListener(SupportedListener.LOAN_DELINQUENT_10_PLUS,
+                            new LoanDelinquent10DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(11))),
+                forListener(SupportedListener.LOAN_DELINQUENT_30_PLUS,
+                            new LoanDelinquent30DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(31))),
+                forListener(SupportedListener.LOAN_DELINQUENT_60_PLUS,
+                            new LoanDelinquent60DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(61))),
+                forListener(SupportedListener.LOAN_DELINQUENT_90_PLUS,
+                            new LoanDelinquent90DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(91))),
+                forListener(SupportedListener.LOAN_REPAID, new LoanRepaidEvent(i, loan, MAX_PORTFOLIO)),
+                forListener(SupportedListener.BALANCE_ON_TARGET,
+                            new ExecutionStartedEvent(Collections.emptyList(), MAX_PORTFOLIO)),
+                forListener(SupportedListener.BALANCE_UNDER_MINIMUM,
+                            new ExecutionStartedEvent(Collections.emptyList(), mockPortfolio(0))),
+                forListener(SupportedListener.CRASHED,
+                            new RoboZonkyCrashedEvent(ReturnCode.ERROR_UNEXPECTED, new RuntimeException())),
+                forListener(SupportedListener.REMOTE_OPERATION_FAILED,
+                            new RemoteOperationFailedEvent(new RuntimeException())),
+                forListener(SupportedListener.DAEMON_FAILED, new RoboZonkyDaemonFailedEvent(new RuntimeException())),
+                forListener(SupportedListener.INITIALIZED, new RoboZonkyInitializedEvent()),
+                forListener(SupportedListener.ENDING, new RoboZonkyEndingEvent()),
+                forListener(SupportedListener.TESTING, new RoboZonkyTestingEvent()),
+                forListener(SupportedListener.UPDATE_DETECTED, new RoboZonkyUpdateDetectedEvent("1.2.3")),
+                forListener(SupportedListener.EXPERIMENTAL_UPDATE_DETECTED,
+                            new RoboZonkyExperimentalUpdateDetectedEvent("1.3.0-beta-1")),
+                forListener(SupportedListener.INVESTMENT_PURCHASED,
+                            new InvestmentPurchasedEvent(i, loan, MAX_PORTFOLIO)),
+                forListener(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, loan))
+        );
     }
 
     private static final class TestingEmailingListener extends AbstractEmailingListener<RoboZonkyTestingEvent> {

@@ -20,10 +20,10 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class DefaultValuesTest {
+class DefaultValuesTest {
 
     @Test
     public void construct() {

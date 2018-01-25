@@ -17,31 +17,31 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.mockito.Mockito;
 
-public class LoanPurposeConditionTest extends AbstractEnumeratedConditionTest<Purpose> {
+class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Rating> {
 
     @Override
-    protected AbstractEnumeratedCondition<Purpose> getSUT() {
-        return new LoanPurposeCondition();
+    public AbstractEnumeratedCondition<Rating> getImplementation() {
+        return new LoanRatingEnumeratedCondition();
     }
 
     @Override
-    protected Wrapper getMocked() {
+    public Wrapper getMocked() {
         final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getPurpose()).thenReturn(this.getTriggerItem());
+        Mockito.when(loan.getRating()).thenReturn(this.getTriggerItem());
         return new Wrapper(loan);
     }
 
     @Override
-    protected Purpose getTriggerItem() {
-        return Purpose.AUTO_MOTO;
+    public Rating getTriggerItem() {
+        return Rating.A;
     }
 
     @Override
-    protected Purpose getNotTriggerItem() {
-        return Purpose.CESTOVANI;
+    public Rating getNotTriggerItem() {
+        return Rating.D;
     }
 }

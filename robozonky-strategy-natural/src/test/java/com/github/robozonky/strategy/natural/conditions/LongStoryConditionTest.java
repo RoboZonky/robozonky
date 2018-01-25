@@ -19,10 +19,10 @@ package com.github.robozonky.strategy.natural.conditions;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class LongStoryConditionTest {
+class LongStoryConditionTest {
 
     @Test
     public void longerOk() {

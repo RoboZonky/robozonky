@@ -28,10 +28,10 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class MarketplaceLoaderTest {
+class MarketplaceLoaderTest {
 
     private static final SecretProvider SECRETS = Mockito.mock(SecretProvider.class);
 

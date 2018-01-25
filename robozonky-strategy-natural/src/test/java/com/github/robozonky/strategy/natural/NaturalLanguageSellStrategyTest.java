@@ -28,10 +28,10 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class NaturalLanguageSellStrategyTest {
+class NaturalLanguageSellStrategyTest {
 
     private final InvestmentDescriptor mockDescriptor() {
         return mockDescriptor(mock());

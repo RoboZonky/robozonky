@@ -19,9 +19,9 @@ package com.github.robozonky.installer.panels;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class UtilTest {
+class UtilTest {
 
     @Test
     public void testCopyOptions() {

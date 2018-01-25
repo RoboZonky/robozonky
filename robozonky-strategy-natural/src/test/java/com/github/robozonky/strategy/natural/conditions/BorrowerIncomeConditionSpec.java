@@ -16,31 +16,32 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.mockito.Mockito;
 
-public class BorrowerRegionConditionTest extends AbstractEnumeratedConditionTest<Region> {
+class BorrowerIncomeConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<MainIncomeType> {
 
     @Override
-    protected AbstractEnumeratedCondition<Region> getSUT() {
-        return new BorrowerRegionCondition();
+    public AbstractEnumeratedCondition<MainIncomeType> getImplementation() {
+        return new BorrowerIncomeCondition();
     }
 
     @Override
-    protected Wrapper getMocked() {
-        final Wrapper w = Mockito.mock(Wrapper.class);
-        Mockito.when(w.getRegion()).thenReturn(this.getTriggerItem());
-        return w;
+    public Wrapper getMocked() {
+        final Loan loan = Mockito.mock(Loan.class);
+        Mockito.when(loan.getMainIncomeType()).thenReturn(this.getTriggerItem());
+        return new Wrapper(loan);
     }
 
     @Override
-    protected Region getTriggerItem() {
-        return Region.JIHOCESKY;
+    public MainIncomeType getTriggerItem() {
+        return MainIncomeType.EMPLOYMENT;
     }
 
     @Override
-    protected Region getNotTriggerItem() {
-        return Region.JIHOMORAVSKY;
+    public MainIncomeType getNotTriggerItem() {
+        return MainIncomeType.ENTREPRENEUR;
     }
 }

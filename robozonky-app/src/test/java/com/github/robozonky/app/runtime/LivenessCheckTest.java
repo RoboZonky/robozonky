@@ -20,16 +20,16 @@ import java.util.UUID;
 
 import com.github.robozonky.util.Schedulers;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.socket.PortFactory;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-public class LivenessCheckTest {
+class LivenessCheckTest {
 
     private static final String SAMPLE = "{\"branch\":\"origin/master\"," +
             "\"commitId\":\"e51d4fcb9eac1a9599a64c93c181325a2c38e779\"," +
@@ -41,18 +41,18 @@ public class LivenessCheckTest {
     private ClientAndServer server;
     private String serverUrl;
 
-    @Before
+    @BeforeEach
     public void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getPort();
     }
 
-    @After
+    @AfterEach
     public void stopServer() {
         server.stop();
     }
 
-    @After
+    @AfterEach
     public void resumeSchedulers() {
         Schedulers.INSTANCE.resume(); // reset
     }

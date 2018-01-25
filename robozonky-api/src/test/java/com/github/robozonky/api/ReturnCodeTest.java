@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ReturnCodeTest {
+class ReturnCodeTest {
 
     @Test
     public void noReturnCodeTwice() {

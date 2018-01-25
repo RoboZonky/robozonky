@@ -21,9 +21,9 @@ import java.math.BigDecimal;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ApiUtilTest extends AbstractZonkyLeveragingTest {
+class ApiUtilTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void getBalancePropertyInDryRun() {

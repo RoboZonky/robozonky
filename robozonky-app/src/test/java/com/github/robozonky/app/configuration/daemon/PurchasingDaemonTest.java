@@ -25,11 +25,11 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
+class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void standard() {

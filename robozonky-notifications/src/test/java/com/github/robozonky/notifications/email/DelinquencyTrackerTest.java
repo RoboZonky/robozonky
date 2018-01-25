@@ -20,16 +20,16 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.State;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class DelinquencyTrackerTest {
+class DelinquencyTrackerTest {
 
     private static final Investment INVESTMENT = new Investment(new Loan(1, 200), 200);
 
-    @After
-    @Before
+    @AfterEach
+    @BeforeEach
     public void reset() {
         State.forClass(DelinquencyTracker.class).newBatch(true).call();
     }

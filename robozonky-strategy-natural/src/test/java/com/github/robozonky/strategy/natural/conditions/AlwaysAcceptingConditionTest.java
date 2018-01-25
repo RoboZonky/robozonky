@@ -17,9 +17,9 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AlwaysAcceptingConditionTest {
+class AlwaysAcceptingConditionTest {
 
     @Test
     public void negate() {

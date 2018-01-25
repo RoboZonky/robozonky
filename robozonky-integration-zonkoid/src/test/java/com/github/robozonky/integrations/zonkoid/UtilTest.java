@@ -26,11 +26,11 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class UtilTest {
+class UtilTest {
 
     @Test
     public void success() {
@@ -50,7 +50,7 @@ public class UtilTest {
     }
 
     @Test
-    public void responseContent() throws IOException {
+    public void responseContent() {
         final Collection<NameValuePair> nvp = Collections.singletonList(new BasicNameValuePair("key", "value"));
         final HttpEntity e = new UrlEncodedFormEntity(nvp);
         Assertions.assertThat(Util.readEntity(e)).isNotEmpty();

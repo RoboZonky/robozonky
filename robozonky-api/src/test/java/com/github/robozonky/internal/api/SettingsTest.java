@@ -28,36 +28,12 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-public class SettingsTest {
+class SettingsTest {
 
-    private static final class TemporalPredicate implements Predicate<TemporalAmount> {
-
-        private final long seconds;
-
-        public TemporalPredicate(final long seconds) {
-            this.seconds = seconds;
-        }
-
-        @Override
-        public boolean test(final TemporalAmount o) {
-            return o.get(ChronoUnit.SECONDS) == seconds;
-        }
-
-        @Override
-        public String toString() {
-            return "seconds = " + seconds;
-        }
-    }
-
-    @Rule
-    public final RestoreSystemProperties propertiesRestorer = new RestoreSystemProperties();
-
-    @After
+    @AfterEach
     public void reinit() {
         Settings.INSTANCE.reinit();
     }
@@ -119,5 +95,24 @@ public class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(1000);
         });
+    }
+
+    private static final class TemporalPredicate implements Predicate<TemporalAmount> {
+
+        private final long seconds;
+
+        public TemporalPredicate(final long seconds) {
+            this.seconds = seconds;
+        }
+
+        @Override
+        public boolean test(final TemporalAmount o) {
+            return o.get(ChronoUnit.SECONDS) == seconds;
+        }
+
+        @Override
+        public String toString() {
+            return "seconds = " + seconds;
+        }
     }
 }

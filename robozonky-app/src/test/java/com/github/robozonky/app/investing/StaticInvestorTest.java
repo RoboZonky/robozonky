@@ -20,9 +20,9 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class StaticInvestorTest extends AbstractZonkyLeveragingTest {
+class StaticInvestorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void investmentFromAmountlessConfirmation() {

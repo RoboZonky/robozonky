@@ -20,11 +20,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class RefreshableTest {
+class RefreshableTest {
 
     private static String transform(final String original) {
         return "Transformed " + original;

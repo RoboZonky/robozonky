@@ -16,43 +16,35 @@
 
 package com.github.robozonky.app.version;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+
 public class VersionComparatorTest {
 
-    @Parameterized.Parameters(name = "compare({0}, {1}) == {2}")
-    public static Collection<Object[]> parameters() {
-        return Arrays.asList(
-                new Object[]{"1.0.0", "1.0.1", -1},
-                new Object[]{"1.1.0", "1.0.1", 1},
-                new Object[]{"1.11.0", "1.1.1", 1},
-                new Object[]{"1.1.3", "1.1.21", -1},
-                new Object[]{"1.1.4", "1.1.4-CR1", 1},
-                new Object[]{"1.1.3-CR1", "1.1.3-BETA1", 1},
-                new Object[]{"1.1.2-BETA1", "1.1.2-ALPHA1", 1},
-                new Object[]{"1.0.0", "01.0.00", 0}
-        );
+    private static DynamicTest forVersion(final String left, final String right, final int result) {
+        return DynamicTest.dynamicTest("left to right", () -> compares(left, right, result));
     }
 
-    @Parameterized.Parameter
-    public String left;
+    private static DynamicTest forVersionReversed(final String left, final String right, final int result) {
+        return DynamicTest.dynamicTest("right to left", () -> comparesReverse(left, right, result));
+    }
 
-    @Parameterized.Parameter(1)
-    public String right;
+    private static DynamicNode forBoth(final String left, final String right, final int result) {
+        return dynamicContainer(left + " v. " + right, Stream.of(
+                forVersion(left, right, result),
+                forVersionReversed(left, right, result)
+        ));
+    }
 
-    @Parameterized.Parameter(2)
-    public int compareResult;
-
-    @Test
-    public void compares() {
-        final boolean result = VersionComparator.isSmallerThan(this.left, this.right);
+    private static void compares(final String left, final String right, final int compareResult) {
+        final boolean result = VersionComparator.isSmallerThan(left, right);
         if (compareResult > -1) {
             Assertions.assertThat(result).isFalse();
         } else {
@@ -60,9 +52,8 @@ public class VersionComparatorTest {
         }
     }
 
-    @Test
-    public void comparesReverse() {
-        final boolean result = VersionComparator.isSmallerThan(this.right, this.left);
+    private static void comparesReverse(final String left, final String right, final int compareResult) {
+        final boolean result = VersionComparator.isSmallerThan(right, left);
         if (compareResult < 1) {
             Assertions.assertThat(result).isFalse();
         } else {
@@ -70,8 +61,22 @@ public class VersionComparatorTest {
         }
     }
 
+    @TestFactory
+    Stream<DynamicNode> versions() {
+        return Stream.of(
+                forBoth("1.0.0", "1.0.1", -1),
+                forBoth("1.1.0", "1.0.1", 1),
+                forBoth("1.11.0", "1.1.1", 1),
+                forBoth("1.1.3", "1.1.21", -1),
+                forBoth("1.1.4", "1.1.4-CR1", 1),
+                forBoth("1.1.3-CR1", "1.1.3-BETA1", 1),
+                forBoth("1.1.2-BETA1", "1.1.2-ALPHA1", 1),
+                forBoth("1.0.0", "01.0.00", 0)
+        );
+    }
+
     @Test
-    public void compareNulls() throws Exception {
+    void compareNulls() {
         Assertions.assertThat(VersionComparator.isSmallerThan(null, null)).isFalse();
     }
 }

@@ -20,11 +20,11 @@ import java.util.Properties;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class EmailingEventListenerSupplierTest {
+class EmailingEventListenerSupplierTest {
 
     private static NotificationProperties mockProperties(final SupportedListener listener) {
         final NotificationProperties p = Mockito.spy(new NotificationProperties(new Properties()));

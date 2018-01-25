@@ -25,9 +25,9 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class PrimaryMarketplaceComparatorTest {
+class PrimaryMarketplaceComparatorTest {
 
     private final Comparator<LoanDescriptor> c = new PrimaryMarketplaceComparator();
 

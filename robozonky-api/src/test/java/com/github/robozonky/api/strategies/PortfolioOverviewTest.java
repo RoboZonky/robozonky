@@ -23,10 +23,10 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class PortfolioOverviewTest {
+class PortfolioOverviewTest {
 
     @Test
     public void emptyPortfolio() {

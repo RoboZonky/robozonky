@@ -22,9 +22,9 @@ import java.util.UUID;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SchedulerControlTest {
+class SchedulerControlTest {
 
     @Test
     public void check() {

@@ -20,9 +20,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SchedulerTest {
+class SchedulerTest {
 
     private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
 

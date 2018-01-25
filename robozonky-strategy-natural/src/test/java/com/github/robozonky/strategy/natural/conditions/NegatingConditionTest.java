@@ -19,10 +19,10 @@ package com.github.robozonky.strategy.natural.conditions;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class NegatingConditionTest {
+class NegatingConditionTest {
 
     @Test
     public void negatingTrue() {

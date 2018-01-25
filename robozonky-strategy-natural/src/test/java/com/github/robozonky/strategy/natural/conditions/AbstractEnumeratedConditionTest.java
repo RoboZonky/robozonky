@@ -17,44 +17,65 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
-public abstract class AbstractEnumeratedConditionTest<T> {
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-    protected abstract AbstractEnumeratedCondition<T> getSUT();
+class AbstractEnumeratedConditionTest {
 
-    protected abstract Wrapper getMocked();
+    private static <T> Stream<DynamicTest> forSpec(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
+        return Stream.of(
+                dynamicTest("has description", () -> nonEmptyDescription(spec)),
+                dynamicTest("works with collection", () -> properAsCollection(spec)),
+                dynamicTest("works with single item", () -> properAsOne(spec))
+        );
+    }
 
-    protected abstract T getTriggerItem();
-
-    protected abstract T getNotTriggerItem();
-
-    @Test
-    public void properAsCollection() {
-        final Wrapper i = this.getMocked();
-        final AbstractEnumeratedCondition<T> sut = this.getSUT();
+    private static <T> void properAsCollection(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
+        final Wrapper i = spec.getMocked();
+        final AbstractEnumeratedCondition<T> sut = spec.getImplementation();
         Assertions.assertThat(sut.test(i)).isFalse();
-        sut.add(Arrays.asList(this.getTriggerItem(), this.getNotTriggerItem()));
+        sut.add(Arrays.asList(spec.getTriggerItem(), spec.getNotTriggerItem()));
         Assertions.assertThat(sut.test(i)).isTrue();
         Assertions.assertThat(sut.getDescription()).isPresent();
     }
 
-    @Test
-    public void properAsOne() {
-        final Wrapper i = this.getMocked();
-        final AbstractEnumeratedCondition<T> sut = this.getSUT();
+    private static <T> void properAsOne(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
+        final Wrapper i = spec.getMocked();
+        final AbstractEnumeratedCondition<T> sut = spec.getImplementation();
         Assertions.assertThat(sut.test(i)).isFalse();
-        sut.add(this.getTriggerItem());
-        sut.add(this.getNotTriggerItem());
+        sut.add(spec.getTriggerItem());
+        sut.add(spec.getNotTriggerItem());
         Assertions.assertThat(sut.test(i)).isTrue();
         Assertions.assertThat(sut.getDescription()).isPresent();
     }
 
-    @Test
-    public void nonEmptyDescription() {
-        Assertions.assertThat(getSUT().getDescription()).isPresent();
+    private static <T> void nonEmptyDescription(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
+        Assertions.assertThat(spec.getImplementation().getDescription()).isPresent();
+    }
+
+    @TestFactory
+    Stream<DynamicNode> conditions() {
+        return Stream.of(new BorrowerIncomeConditionSpec(), new BorrowerRegionConditionSpec(),
+                         new LoanPurposeConditionSpec(), new LoanRatingEnumeratedConditionSpec())
+                .map(spec -> dynamicContainer(spec.getImplementation().getClass().getSimpleName(), forSpec(spec)));
+    }
+
+    public interface ConditionSpec<T> {
+
+        AbstractEnumeratedCondition<T> getImplementation();
+
+        Wrapper getMocked();
+
+        T getTriggerItem();
+
+        T getNotTriggerItem();
     }
 }

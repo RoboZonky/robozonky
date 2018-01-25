@@ -20,6 +20,10 @@ import com.github.robozonky.common.remote.ApiProvider;
 
 class ZonkyMarketplace extends AbstractMarketplace {
 
+    public ZonkyMarketplace() {
+        // otherwise the tests will fail to instantiate
+    }
+
     @Override
     protected ApiProvider api() {
         return new ApiProvider();

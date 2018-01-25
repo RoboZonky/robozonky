@@ -21,16 +21,15 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Properties;
 
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.util.Refreshable;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.ClearSystemProperties;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class NotificationPropertiesTest {
+class NotificationPropertiesTest extends AbstractRoboZonkyTest {
 
     private static final URL CONFIG_ENABLED =
             NotificationPropertiesTest.class.getResource("notifications-enabled.cfg");
@@ -43,17 +42,13 @@ public class NotificationPropertiesTest {
         return r.get();
     }
 
-    @Rule
-    public final ClearSystemProperties myPropertyIsCleared =
-            new ClearSystemProperties(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY);
-
-    @Before
+    @BeforeEach
     public void prepareBackupConfig() throws Exception {
         Files.write(RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath(),
                     "enabled = false".getBytes());
     }
 
-    @After
+    @AfterEach
     public void deleteBackupConfig() {
         RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.delete();
     }

@@ -24,9 +24,9 @@ import java.util.UUID;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class InterceptingInputStreamTest {
+class InterceptingInputStreamTest {
 
     @Test
     public void standard() throws IOException {

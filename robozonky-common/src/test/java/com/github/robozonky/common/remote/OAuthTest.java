@@ -22,11 +22,11 @@ import java.util.UUID;
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class OAuthTest {
+class OAuthTest {
 
     private static final String USERNAME = "username", PASSWORD = "password";
 

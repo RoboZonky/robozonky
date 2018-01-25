@@ -17,9 +17,9 @@
 package com.github.robozonky.util;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RoboZonkyThreadFactoryTest {
+class RoboZonkyThreadFactoryTest {
 
     private static void newThread(final int priority, final boolean isDaemon) {
         final ThreadGroup tg = new ThreadGroup("testing");

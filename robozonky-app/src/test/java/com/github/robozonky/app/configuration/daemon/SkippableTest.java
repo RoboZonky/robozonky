@@ -16,10 +16,10 @@
 
 package com.github.robozonky.app.configuration.daemon;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class SkippableTest {
+class SkippableTest {
 
     @Test
     public void skips() {

@@ -20,15 +20,15 @@ import java.io.File;
 
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-public class FallbackSecretProviderTest {
+class FallbackSecretProviderTest {
 
     private static final String USR = "username";
     private static final String PWD = "password";
 
-    @After
+    @AfterEach
     public void deleteState() {
         final File f = Settings.INSTANCE.getStateFile();
         f.delete();

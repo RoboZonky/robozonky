@@ -29,6 +29,8 @@ import com.github.robozonky.app.management.Management;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.version.UpdateMonitor;
 import com.github.robozonky.util.Scheduler;
+import com.github.robozonky.util.SystemExitService;
+import com.github.robozonky.util.SystemExitServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,12 +56,14 @@ public class App {
      * so may result in unpredictable behavior of this instance of RoboZonky or future ones.
      * @param result Will be passed to {@link System#exit(int)}.
      */
-    static void exit(final ShutdownHook.Result result) {
+    public static void exit(final ShutdownHook.Result result) {
         App.SHUTDOWN_HOOKS.execute(result);
-        System.exit(result.getReturnCode().getCode());
+        final SystemExitService exit = SystemExitServiceLoader.load();
+        LOGGER.trace("System exit service received: {}.", exit);
+        exit.newSystemExit().call(result.getReturnCode().getCode());
     }
 
-    static ReturnCode execute(final InvestmentMode mode) {
+    private static ReturnCode execute(final InvestmentMode mode) {
         Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
         App.SHUTDOWN_HOOKS.register(new Management(LIFECYCLE));
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
@@ -74,10 +78,15 @@ public class App {
         }
     }
 
-    private static ReturnCode execute(final String[] args) {
-        return CommandLine.parse(LIFECYCLE::resumeToFail, args)
-                .map(App::execute)
-                .orElse(ReturnCode.ERROR_WRONG_PARAMETERS);
+    private static ReturnCode execute(final String... args) {
+        try {
+            return CommandLine.parse(LIFECYCLE::resumeToFail, args)
+                    .map(App::execute)
+                    .orElse(ReturnCode.ERROR_SETUP);
+        } catch (final Exception ex) {
+            LOGGER.error("Caught unexpected exception, terminating daemon.", ex);
+            return ReturnCode.ERROR_UNEXPECTED;
+        }
     }
 
     private static void ensureLiveness() {
@@ -96,11 +105,6 @@ public class App {
         ensureLiveness();
         App.SHUTDOWN_HOOKS.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
         Events.fire(new RoboZonkyStartingEvent());
-        // check for new RoboZonky version every now and then
-        try { // call core code
-            App.exit(App.execute(args));
-        } catch (final Exception ex) {
-            new AppRuntimeExceptionHandler().handle(ex);
-        }
+        App.exit(App.execute(args)); // call the core code
     }
 }

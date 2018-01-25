@@ -37,11 +37,11 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class InvestingTest extends AbstractZonkyLeveragingTest {
+class InvestingTest extends AbstractZonkyLeveragingTest {
 
     private static final InvestmentStrategy NONE_ACCEPTING_STRATEGY = (a, p, r) -> Stream.empty(),
             ALL_ACCEPTING_STRATEGY = (a, p, r) -> a.stream().map(d -> d.recommend(200).get());

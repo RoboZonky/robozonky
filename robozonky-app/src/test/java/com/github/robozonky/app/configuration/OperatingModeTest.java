@@ -20,12 +20,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class OperatingModeTest {
+class OperatingModeTest {
 
     private static final String SERVICE = "zonkoid", SERVICE_TOKEN = "123456";
 
@@ -43,8 +45,10 @@ public class OperatingModeTest {
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
-        Assertions.assertThat(config).isPresent();
-        Assertions.assertThat(secretProvider.getSecret(SERVICE)).contains(SERVICE_TOKEN.toCharArray());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(config).containsInstanceOf(DaemonInvestmentMode.class);
+            softly.assertThat(secretProvider.getSecret(SERVICE)).contains(SERVICE_TOKEN.toCharArray());
+        });
     }
 
     @Test

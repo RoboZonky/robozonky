@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class PausableScheduledThreadPoolExecutorTest {
+class PausableScheduledThreadPoolExecutorTest {
 
     @Test
     public void pausing() throws InterruptedException, TimeoutException, ExecutionException {

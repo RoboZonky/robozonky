@@ -25,11 +25,11 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class DaemonOperationTest extends AbstractZonkyLeveragingTest {
+class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     private static final class CustomOperation extends DaemonOperation {
 

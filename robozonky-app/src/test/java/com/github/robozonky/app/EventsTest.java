@@ -22,11 +22,11 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class EventsTest extends AbstractEventLeveragingTest {
+class EventsTest extends AbstractEventLeveragingTest {
 
     @Test
     public void firingAndFailing() {

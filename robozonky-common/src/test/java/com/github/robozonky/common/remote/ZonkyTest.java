@@ -34,11 +34,11 @@ import com.github.robozonky.api.remote.entities.Wallet;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class ZonkyTest {
+class ZonkyTest {
 
     private <T, S extends EntityCollectionApi<T>> PaginatedApi<T, S> mockApi() {
         final PaginatedApi<T, S> api = Mockito.mock(PaginatedApi.class);

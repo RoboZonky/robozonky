@@ -19,9 +19,9 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.math.BigDecimal;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class LoanInterestRateConditionTest {
+class LoanInterestRateConditionTest {
 
     @Test
     public void leftBoundary() {

@@ -48,16 +48,11 @@ import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-public class SessionTest extends AbstractZonkyLeveragingTest {
-
-    @Rule
-    public final RestoreSystemProperties propertyRestore = new RestoreSystemProperties();
+class SessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     public void constructor() {

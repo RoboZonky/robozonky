@@ -24,9 +24,9 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.ConfirmationProviderService;
 import com.github.robozonky.api.confirmations.RequestId;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ConfirmationProviderLoaderTest {
+class ConfirmationProviderLoaderTest {
 
     @Test
     public void unknown() {

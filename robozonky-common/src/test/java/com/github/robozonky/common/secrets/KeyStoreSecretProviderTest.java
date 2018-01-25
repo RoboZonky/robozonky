@@ -22,10 +22,10 @@ import java.security.KeyStoreException;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class KeyStoreSecretProviderTest {
+class KeyStoreSecretProviderTest {
 
     private static final String USR = "username";
     private static final String PWD = "password";

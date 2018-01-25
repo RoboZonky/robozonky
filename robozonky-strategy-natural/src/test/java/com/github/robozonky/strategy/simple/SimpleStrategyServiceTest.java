@@ -28,9 +28,9 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SimpleStrategyServiceTest {
+class SimpleStrategyServiceTest {
 
     private static final InputStream REAL_LIFE =
             SimpleStrategyServiceTest.class.getResourceAsStream("strategy-complex.cfg");

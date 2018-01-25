@@ -26,9 +26,9 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.socket.PortFactory;
 
@@ -36,18 +36,18 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.verify.VerificationTimes.once;
 
-public class ZonkoidConfirmationProviderTest {
+class ZonkoidConfirmationProviderTest {
 
     private ClientAndServer server;
     private String serverUrl;
 
-    @Before
+    @BeforeEach
     public void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getPort();
     }
 
-    @After
+    @AfterEach
     public void stopServer() {
         server.stop();
     }
@@ -107,14 +107,14 @@ public class ZonkoidConfirmationProviderTest {
     }
 
     @Test
-    public void errorOverHttps() throws NoSuchAlgorithmException {
+    public void errorOverHttps() {
         final boolean result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some", "https",
                                                                        new RuntimeException());
         Assertions.assertThat(result).isFalse();
     }
 
     @Test
-    public void errorOverHttp() throws NoSuchAlgorithmException {
+    public void errorOverHttp() {
         final boolean result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some", "http",
                                                                        new RuntimeException());
         Assertions.assertThat(result).isFalse();
