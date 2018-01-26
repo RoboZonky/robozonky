@@ -22,14 +22,10 @@ import java.util.function.Consumer;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.app.configuration.daemon.BlockedAmountsUpdater;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.configuration.daemon.PortfolioUpdater;
 import com.github.robozonky.app.configuration.daemon.StrategyProvider;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.app.portfolio.Delinquents;
-import com.github.robozonky.app.portfolio.Repayments;
-import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.common.extensions.MarketplaceLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
@@ -66,19 +62,9 @@ class DaemonOperatingMode extends OperatingMode {
         final Credentials cred = new Credentials(marketplaceId == null ? "zonky" : marketplaceId, secretProvider);
         return MarketplaceLoader.load(cred)
                 .map(marketplaceImpl -> {
-                    final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth);
-                    final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(auth, updater);
-                    // run update of blocked amounts automatically with every portfolio update
-                    updater.registerDependant(bau.getDependant());
-                    // update loans repaid with every portfolio update
-                    final boolean isDryRun = builder.isDryRun();
-                    updater.registerDependant(new Repayments(isDryRun));
-                    // update delinquents automatically with every portfolio update
-                    updater.registerDependant((p, a) -> Delinquents.update(a, p, isDryRun));
                     final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
-                    // attempt to sell participations after every portfolio update
-                    updater.registerDependant(new Selling(sp::getToSell, isDryRun));
-                    final InvestmentMode m = new DaemonInvestmentMode(auth, updater, builder, marketplaceImpl, sp, bau,
+                    final PortfolioUpdater u = PortfolioUpdater.create(shutdownCall, auth, sp, builder.isDryRun());
+                    final InvestmentMode m = new DaemonInvestmentMode(auth, u, builder, marketplaceImpl, sp,
                                                                       marketplace.getMaximumSleepDuration(),
                                                                       marketplace.getPrimaryMarketplaceCheckDelay(),
                                                                       marketplace.getSecondaryMarketplaceCheckDelay());

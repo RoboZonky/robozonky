@@ -27,8 +27,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
+import com.github.robozonky.app.portfolio.Repayments;
+import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +43,7 @@ public class PortfolioUpdater implements Runnable,
     private final Authenticated authenticated;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArraySet<>();
+    private final BlockedAmountsUpdater blockedAmountsUpdater;
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
     private final Duration retryFor;
@@ -49,10 +53,29 @@ public class PortfolioUpdater implements Runnable,
         this.shutdownCall = shutdownCall;
         this.authenticated = authenticated;
         this.retryFor = retryFor;
+        // run update of blocked amounts automatically with every portfolio update
+        this.blockedAmountsUpdater = new BlockedAmountsUpdater(authenticated, this);
+        registerDependant(blockedAmountsUpdater.getDependant());
     }
 
-    public PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated) {
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated) {
         this(shutdownCall, authenticated, Duration.ofHours(1));
+    }
+
+    public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+                                          final StrategyProvider sp, final boolean isDryRun) {
+        final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth);
+        // update loans repaid with every portfolio update
+        updater.registerDependant(new Repayments(isDryRun));
+        // update delinquents automatically with every portfolio update
+        updater.registerDependant((p, a) -> Delinquents.update(a, p, isDryRun));
+        // attempt to sell participations after every portfolio update
+        updater.registerDependant(new Selling(sp::getToSell, isDryRun));
+        return updater;
+    }
+
+    public Runnable getBlockedAmountsUpdater() {
+        return this.blockedAmountsUpdater;
     }
 
     public void registerDependant(final PortfolioDependant updater) {

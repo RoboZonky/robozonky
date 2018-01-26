@@ -41,15 +41,14 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
     private final Lifecycle lifecycle = new Lifecycle();
 
     @Test
-    public void get() throws Exception {
+    void get() throws Exception {
         final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final Marketplace m = Mockito.mock(Marketplace.class);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final PortfolioUpdater p = Mockito.mock(PortfolioUpdater.class);
-        final BlockedAmountsUpdater bau = Mockito.mock(BlockedAmountsUpdater.class);
         try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, m, Mockito.mock(StrategyProvider.class),
-                                                                     bau, Duration.ofMinutes(1), Duration.ofSeconds(1),
+                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             Assertions.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
@@ -57,7 +56,6 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             lifecycle.resumeToShutdown(); // unblock
             Assertions.assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             Mockito.verify(p).run();
-            Mockito.verify(bau).run();
         } finally {
             e.shutdownNow();
         }
@@ -65,7 +63,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
         lifecycle.getShutdownHooks().forEach(h -> h.get().ifPresent(s -> s.accept(r)));
     }

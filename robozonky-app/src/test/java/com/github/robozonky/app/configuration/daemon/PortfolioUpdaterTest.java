@@ -25,43 +25,56 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.*;
 
 class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    public void updatingDependants() {
-        final Zonky z = harmlessZonky(10_000);
-        final Authenticated a = mockAuthentication(z);
-        final PortfolioDependant dependant = Mockito.mock(PortfolioDependant.class);
-        final PortfolioUpdater instance = new PortfolioUpdater((t) -> {
-        }, a);
-        Assertions.assertThat(instance.isUpdating()).isTrue(); // by default it's true
-        instance.registerDependant(dependant);
-        instance.run();
-        Mockito.verify(a).call(ArgumentMatchers.any()); // this is the call to update Portfolio
-        final Optional<Portfolio> result = instance.get();
-        // make sure that the dependants were called with the proper value of Portfolio
-        Mockito.verify(dependant).accept(ArgumentMatchers.eq(result.get()), ArgumentMatchers.eq(a));
-        Assertions.assertThat(instance.isUpdating()).isFalse(); // it's false when update finished
+    void creation() {
+        final PortfolioUpdater instance = PortfolioUpdater.create((t) -> {
+                                                                  }, mock(Authenticated.class),
+                                                                  mock(StrategyProvider.class), true);
+        assertSoftly(softly -> {
+            softly.assertThat(instance.getBlockedAmountsUpdater()).isNotNull();
+            softly.assertThat(instance.isUpdating()).isTrue(); // by default it's true
+        });
     }
 
     @Test
-    public void backoffFailed() {
+    void updatingDependants() {
         final Zonky z = harmlessZonky(10_000);
-        Mockito.doThrow(IllegalStateException.class).when(z).getInvestments(); // will always fail
         final Authenticated a = mockAuthentication(z);
-        final Consumer<Throwable> t = Mockito.mock(Consumer.class);
+        final PortfolioDependant dependant = mock(PortfolioDependant.class);
+        final PortfolioUpdater instance = new PortfolioUpdater((t) -> {
+        }, a);
+        instance.registerDependant(dependant);
+        instance.run();
+        verify(a, times(2)).call(any()); // this is the call to update Portfolio
+        final Optional<Portfolio> result = instance.get();
+        // make sure that the dependants were called with the proper value of Portfolio
+        verify(dependant).accept(eq(result.get()), eq(a));
+        assertThat(instance.isUpdating()).isFalse(); // it's false when update finished
+    }
+
+    @Test
+    void backoffFailed() {
+        final Zonky z = harmlessZonky(10_000);
+        doThrow(IllegalStateException.class).when(z).getInvestments(); // will always fail
+        final Authenticated a = mockAuthentication(z);
+        final Consumer<Throwable> t = mock(Consumer.class);
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, Duration.ofSeconds(2));
         instance.run();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(instance.get()).isEmpty();
             softly.assertThat(instance.isUpdating()).isTrue();
         });
-        Mockito.verify(t).accept(ArgumentMatchers.notNull());
+        verify(t).accept(notNull());
     }
 }

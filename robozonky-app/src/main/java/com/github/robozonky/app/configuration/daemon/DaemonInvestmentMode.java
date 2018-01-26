@@ -41,16 +41,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final Marketplace marketplace;
     private final List<DaemonOperation> daemons;
     private final PortfolioUpdater portfolioUpdater;
-    private final Runnable blockedAmountsUpdater;
 
     public DaemonInvestmentMode(final Authenticated auth, final PortfolioUpdater p, final Investor.Builder builder,
-                                final Marketplace marketplace,
-                                final StrategyProvider strategyProvider, final Runnable blockedAmountsUpdater,
+                                final Marketplace marketplace, final StrategyProvider strategyProvider,
                                 final Duration maximumSleepPeriod, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.marketplace = marketplace;
         this.portfolioUpdater = p;
-        this.blockedAmountsUpdater = blockedAmountsUpdater;
         this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, strategyProvider::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
                                      new PurchasingDaemon(auth, strategyProvider::getToPurchase, p, maximumSleepPeriod,
@@ -69,7 +66,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         executor.submit(portfolioUpdater, Duration.ofHours(12));
         // also run blocked amounts update every now and then to detect changes made outside of the robot
         final Duration oneHour = Duration.ofHours(1);
-        executor.submit(blockedAmountsUpdater, oneHour, oneHour);
+        executor.submit(portfolioUpdater.getBlockedAmountsUpdater(), oneHour, oneHour);
         // run investing and purchasing daemons
         IntStream.range(0, daemons.size()).boxed().forEach(daemonId -> {
             final DaemonOperation d = daemons.get(daemonId);
