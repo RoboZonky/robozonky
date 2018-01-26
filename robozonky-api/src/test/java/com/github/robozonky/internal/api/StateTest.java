@@ -18,11 +18,12 @@ package com.github.robozonky.internal.api;
 
 import java.util.UUID;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class StateTest {
 
@@ -30,17 +31,17 @@ class StateTest {
 
     @BeforeEach
     @AfterEach
-    public void reset() {
+    void reset() {
         state.newBatch(true).call();
     }
 
     @Test
-    public void empty() {
-        Assertions.assertThat(state.getKeys()).isEmpty();
+    void empty() {
+        assertThat(state.getKeys()).isEmpty();
     }
 
     @Test
-    public void store() {
+    void store() {
         final State.ClassSpecificState state = State.forClass(this.getClass());
         // store
         final State.Batch b = state.newBatch();
@@ -50,19 +51,19 @@ class StateTest {
                 .set(key2, value2)
                 .call();
         // read stored
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(state.getValue(key)).contains(value);
             softly.assertThat(state.getValue(key2)).contains(value2);
         });
         // unset something
         state.newBatch().unset(key).set(key2, value).call();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(state.getValue(key)).isEmpty();
             softly.assertThat(state.getValue(key2)).contains(value);
         });
         // and perform plain reset
         state.newBatch(true).set(key, value2).call();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(state.getKeys()).containsExactly(key);
             softly.assertThat(state.getValue(key)).contains(value2);
         });

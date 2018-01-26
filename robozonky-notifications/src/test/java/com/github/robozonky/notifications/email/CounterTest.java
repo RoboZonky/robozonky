@@ -20,18 +20,19 @@ import java.time.Duration;
 import java.util.UUID;
 
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class CounterTest extends AbstractRoboZonkyTest {
 
     @Test
-    public void testTiming() throws InterruptedException {
+    void testTiming() throws InterruptedException {
         final int seconds = 1;
         final Counter c = new Counter(UUID.randomUUID().toString(), 1, Duration.ofSeconds(seconds));
-        Assertions.assertThat(c.allow()).isTrue();
-        Assertions.assertThat(c.increase()).isTrue();
-        Assertions.assertThat(c.allow()).isFalse();
+        assertThat(c.allow()).isTrue();
+        assertThat(c.increase()).isTrue();
+        assertThat(c.allow()).isFalse();
         int millis = 0;
         boolean isAllowed = false;
         while (millis < seconds * 5 * 1000) { // spend the absolute minimum time waiting
@@ -43,7 +44,7 @@ class CounterTest extends AbstractRoboZonkyTest {
             }
         }
         if (!isAllowed) {
-            Assertions.fail("Did not reset counter in time.");
+            fail("Did not reset counter in time.");
         }
     }
 }

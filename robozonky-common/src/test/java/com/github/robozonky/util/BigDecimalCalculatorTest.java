@@ -18,34 +18,35 @@ package com.github.robozonky.util;
 
 import java.math.BigDecimal;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class BigDecimalCalculatorTest {
 
     @Test
-    public void multiplication() {
-        Assertions.assertThat(BigDecimalCalculator.times(2, 3)).isEqualTo(new BigDecimal("6"));
+    void multiplication() {
+        assertThat(BigDecimalCalculator.times(2, 3)).isEqualTo(new BigDecimal("6"));
     }
 
     @Test
-    public void division() {
-        Assertions.assertThat(BigDecimalCalculator.divide(3, 2)).isEqualTo(new BigDecimal("1.5"));
+    void division() {
+        assertThat(BigDecimalCalculator.divide(3, 2)).isEqualTo(new BigDecimal("1.5"));
     }
 
     @Test
-    public void addition() {
-        Assertions.assertThat(BigDecimalCalculator.plus(0, 1.0)).isEqualTo(BigDecimal.ONE);
+    void addition() {
+        assertThat(BigDecimalCalculator.plus(0, 1.0)).isEqualTo(BigDecimal.ONE);
     }
 
     @Test
-    public void subtraction() {
-        Assertions.assertThat(BigDecimalCalculator.minus(0.0, 1)).isEqualTo(BigDecimal.ONE.negate());
+    void subtraction() {
+        assertThat(BigDecimalCalculator.minus(0.0, 1)).isEqualTo(BigDecimal.ONE.negate());
     }
 
     @Test
-    public void scaling() {
+    void scaling() {
         final BigDecimal result = BigDecimalCalculator.toScale(BigDecimal.ZERO);
-        Assertions.assertThat(result.scale()).isEqualTo(BigDecimalCalculator.DEFAULT_SCALE);
+        assertThat(result.scale()).isEqualTo(BigDecimalCalculator.DEFAULT_SCALE);
     }
 }

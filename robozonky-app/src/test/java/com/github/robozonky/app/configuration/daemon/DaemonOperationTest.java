@@ -24,10 +24,10 @@ import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
@@ -35,8 +35,8 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
         private final BiConsumer<Portfolio, Authenticated> operation;
 
-        public CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
-            super(auth, () -> Optional.of(Mockito.mock(Portfolio.class)), Duration.ofSeconds(1));
+        CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
+            super(auth, () -> Optional.of(mock(Portfolio.class)), Duration.ofSeconds(1));
             this.operation = operation;
         }
 
@@ -52,21 +52,21 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    public void exceptional() {
-        final Authenticated a = Mockito.mock(Authenticated.class);
-        Mockito.doThrow(IllegalStateException.class).when(a).run(ArgumentMatchers.any());
+    void exceptional() {
+        final Authenticated a = mock(Authenticated.class);
+        doThrow(IllegalStateException.class).when(a).run(any());
         final DaemonOperation d = new CustomOperation(a, null);
         d.run();
-        Assertions.assertThat(this.getNewEvents()).first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
+        assertThat(this.getNewEvents()).first().isInstanceOf(RoboZonkyDaemonFailedEvent.class);
     }
 
     @Test
-    public void standard() {
-        final Authenticated a = Mockito.mock(Authenticated.class);
-        final BiConsumer<Portfolio, Authenticated> operation = Mockito.mock(BiConsumer.class);
+    void standard() {
+        final Authenticated a = mock(Authenticated.class);
+        final BiConsumer<Portfolio, Authenticated> operation = mock(BiConsumer.class);
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
-        Mockito.verify(operation).accept(ArgumentMatchers.any(), ArgumentMatchers.eq(a));
-        Assertions.assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
+        verify(operation).accept(any(), eq(a));
+        assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }

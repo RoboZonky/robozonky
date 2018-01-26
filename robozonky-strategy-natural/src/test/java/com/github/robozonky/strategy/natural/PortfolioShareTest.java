@@ -17,14 +17,15 @@
 package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class PortfolioShareTest {
 
     @Test
-    public void leftBoundWrong() {
-        SoftAssertions.assertSoftly(softly -> {
+    void leftBoundWrong() {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, -1, 0))
                     .isInstanceOf(IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new PortfolioShare(Rating.A, 0, -1))
@@ -33,8 +34,8 @@ class PortfolioShareTest {
     }
 
     @Test
-    public void rightBoundWrong() {
-        SoftAssertions.assertSoftly(softly -> {
+    void rightBoundWrong() {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, 101, 0))
                     .isInstanceOf(IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new PortfolioShare(Rating.B, 0, 101))
@@ -43,9 +44,9 @@ class PortfolioShareTest {
     }
 
     @Test
-    public void correct() {
+    void correct() {
         final PortfolioShare p = new PortfolioShare(Rating.C, 0, 100);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(p.getMininumShareInPercent()).isEqualTo(0);
             softly.assertThat(p.getMaximumShareInPercent()).isEqualTo(100);
             softly.assertThat(p.getRating()).isEqualTo(Rating.C);
@@ -53,9 +54,9 @@ class PortfolioShareTest {
     }
 
     @Test
-    public void reversed() {
+    void reversed() {
         final PortfolioShare p = new PortfolioShare(Rating.D, 51, 50);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(p.getMininumShareInPercent()).isEqualTo(50);
             softly.assertThat(p.getMaximumShareInPercent()).isEqualTo(51);
             softly.assertThat(p.getRating()).isEqualTo(Rating.D);

@@ -32,18 +32,18 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.*;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
 
-    protected static Loan mockLoan(final int loanId) {
-        final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getId()).thenReturn(loanId);
-        Mockito.when(loan.getRemainingInvestment()).thenReturn(Double.MAX_VALUE);
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
+    private static Loan mockLoan(final int loanId) {
+        final Loan loan = mock(Loan.class);
+        when(loan.getId()).thenReturn(loanId);
+        when(loan.getRemainingInvestment()).thenReturn(Double.MAX_VALUE);
+        when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         return loan;
     }
 
@@ -59,40 +59,40 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return AbstractZonkyLeveragingTest.mockLoanDescriptor(AbstractZonkyLeveragingTest.RANDOM.nextInt(), false);
     }
 
-    protected static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
+    private static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
         final Loan loan = AbstractZonkyLeveragingTest.mockLoan(loanId);
         if (withCaptcha) {
             System.setProperty(Settings.Key.CAPTCHA_DELAY_D.getName(), "120"); // enable CAPTCHA for the rating
-            Mockito.when(loan.getRating()).thenReturn(Rating.D);
+            when(loan.getRating()).thenReturn(Rating.D);
         } else {
             System.setProperty(Settings.Key.CAPTCHA_DELAY_AAAAA.getName(), "0"); // disable CAPTCHA for the rating
-            Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
+            when(loan.getRating()).thenReturn(Rating.AAAAA);
         }
         return new LoanDescriptor(loan);
     }
 
     protected static Zonky harmlessZonky(final int availableBalance) {
-        final Zonky zonky = Mockito.mock(Zonky.class);
+        final Zonky zonky = mock(Zonky.class);
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
-        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
-        Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
+        when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
+        when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
         return zonky;
     }
 
     protected static Authenticated mockAuthentication(final Zonky zonky) {
-        final Authenticated auth = Mockito.mock(Authenticated.class);
-        Mockito.when(auth.getSecretProvider())
+        final Authenticated auth = mock(Authenticated.class);
+        when(auth.getSecretProvider())
                 .thenReturn(SecretProvider.fallback("someone", "password".toCharArray()));
-        Mockito.when(auth.getRestrictions()).thenReturn(new Restrictions());
-        Mockito.doAnswer(invocation -> {
+        when(auth.getRestrictions()).thenReturn(new Restrictions());
+        doAnswer(invocation -> {
             final Function<Zonky, Object> operation = invocation.getArgument(0);
             return operation.apply(zonky);
-        }).when(auth).call(ArgumentMatchers.any());
-        Mockito.doAnswer(invocation -> {
+        }).when(auth).call(any());
+        doAnswer(invocation -> {
             final Consumer<Zonky> operation = invocation.getArgument(0);
             operation.accept(zonky);
             return null;
-        }).when(auth).run(ArgumentMatchers.any());
+        }).when(auth).run(any());
         return auth;
     }
 }

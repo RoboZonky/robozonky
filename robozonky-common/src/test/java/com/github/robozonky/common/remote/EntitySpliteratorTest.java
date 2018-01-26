@@ -27,25 +27,25 @@ import java.util.stream.StreamSupport;
 
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.entities.Loan;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class EntitySpliteratorTest {
 
     @Test
-    public void empty() {
+    void empty() {
         final EntitySpliterator<Loan> e = new EntitySpliterator<>(Collections.emptyList());
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(e.hasCharacteristics(Spliterator.IMMUTABLE)).isTrue(); // no way to add data
             softly.assertThat(e.hasCharacteristics(Spliterator.NONNULL)).isTrue();
             softly.assertThat(e.hasCharacteristics(Spliterator.SIZED)).isTrue();
             softly.assertThat(e.hasCharacteristics(Spliterator.DISTINCT)).isFalse();
             softly.assertThat(e.hasCharacteristics(Spliterator.CONCURRENT)).isFalse();
         });
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(e.trySplit()).isSameAs(Spliterators.emptySpliterator());
             softly.assertThat(e.getExactSizeIfKnown()).isEqualTo(0);
             softly.assertThat(e.tryAdvance(null)).isFalse();
@@ -58,25 +58,25 @@ class EntitySpliteratorTest {
     }
 
     @Test
-    public void twoPages() {
+    void twoPages() {
         final int pageSize = 2;
         final int totalResultCount = 3;
         final Loan loan1 = new Loan(1, 200);
         final Loan loan2 = new Loan(2, 300);
         final Loan loan3 = new Loan(3, 400);
-        final PaginatedApi<Loan, LoanApi> api = Mockito.mock(PaginatedApi.class);
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(0),
-                                 ArgumentMatchers.eq(pageSize)))
+        final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
+        when(api.execute(any(), any(), eq(0),
+                         eq(pageSize)))
                 .thenReturn(EntitySpliteratorTest.getResult(Arrays.asList(loan1, loan2), 0, totalResultCount));
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(1),
-                                 ArgumentMatchers.eq(pageSize)))
+        when(api.execute(any(), any(), eq(1),
+                         eq(pageSize)))
                 .thenReturn(EntitySpliteratorTest.getResult(Collections.singleton(loan3), 1, totalResultCount));
         final Paginated<Loan> p = new PaginatedImpl<>(api, Sort.unspecified(), 2);
         final EntitySpliterator<Loan> e = new EntitySpliterator<>(p);
-        Assertions.assertThat(e.getExactSizeIfKnown()).isEqualTo(totalResultCount);
+        assertThat(e.getExactSizeIfKnown()).isEqualTo(totalResultCount);
         final Stream<Loan> s = StreamSupport.stream(e, false);
-        Assertions.assertThat(s.distinct().collect(Collectors.toList()))
+        assertThat(s.distinct().collect(Collectors.toList()))
                 .containsExactly(loan1, loan2, loan3);
-        Assertions.assertThat(e.getExactSizeIfKnown()).isEqualTo(0);
+        assertThat(e.getExactSizeIfKnown()).isEqualTo(0);
     }
 }

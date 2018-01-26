@@ -23,15 +23,15 @@ import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class EmailSettingsValidatorTest {
 
@@ -63,9 +63,9 @@ class EmailSettingsValidatorTest {
     }
 
     @Test
-    public void messages() {
+    void messages() {
         final DataValidator validator = new EmailSettingsValidator();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(validator.getDefaultAnswer()).isFalse();
             softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
             softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
@@ -74,39 +74,39 @@ class EmailSettingsValidatorTest {
     }
 
     @Test
-    public void mailSent() {
-        final InstallData data = Mockito.mock(InstallData.class);
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.ZONKY_USERNAME.getKey())))
+    void mailSent() {
+        final InstallData data = mock(InstallData.class);
+        when(data.getVariable(eq(Variables.ZONKY_USERNAME.getKey())))
                 .thenReturn("someone@somewhere.cz");
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PORT.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_PORT.getKey())))
                 .thenReturn(String.valueOf(EMAIL.getSmtp().getPort()));
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_HOSTNAME.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_HOSTNAME.getKey())))
                 .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_TO.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_TO.getKey())))
                 .thenReturn("recipient@server.cz");
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_USERNAME.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_USERNAME.getKey())))
                 .thenReturn("sender@server.cz");
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PASSWORD.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_PASSWORD.getKey())))
                 .thenReturn(UUID.randomUUID().toString());
         final DataValidator validator = new EmailSettingsValidator();
         final DataValidator.Status result = validator.validateData(data);
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);
+        assertThat(result).isEqualTo(DataValidator.Status.OK);
     }
 
     @Test
-    public void mailFailed() {
-        final InstallData data = Mockito.mock(InstallData.class);
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PORT.getKey())))
+    void mailFailed() {
+        final InstallData data = mock(InstallData.class);
+        when(data.getVariable(eq(Variables.SMTP_PORT.getKey())))
                 .thenReturn(String.valueOf(EMAIL.getSmtp().getPort()));
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_HOSTNAME.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_HOSTNAME.getKey())))
                 .thenReturn(String.valueOf(EMAIL.getSmtp().getBindTo()));
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_USERNAME.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_USERNAME.getKey())))
                 .thenReturn("sender@server.cz");
-        Mockito.when(data.getVariable(ArgumentMatchers.eq(Variables.SMTP_PASSWORD.getKey())))
+        when(data.getVariable(eq(Variables.SMTP_PASSWORD.getKey())))
                 .thenReturn(UUID.randomUUID().toString());
         final DataValidator validator = new EmailSettingsValidator();
         final DataValidator.Status result = validator.validateData(data);
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
-        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(0);
+        assertThat(result).isEqualTo(DataValidator.Status.WARNING);
+        assertThat(EMAIL.getReceivedMessages()).hasSize(0);
     }
 }

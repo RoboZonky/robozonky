@@ -16,22 +16,23 @@
 
 package com.github.robozonky.notifications.email;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class UtilTest {
 
     @Test
-    public void emailObfuscation() {
-        Assertions.assertThat(Util.obfuscateEmailAddress("someone@somewhere.net")).isEqualTo("s...e@s...t");
-        Assertions.assertThat(Util.obfuscateEmailAddress("ab@cd")).isEqualTo("a...b@c...d");
+    void emailObfuscation() {
+        assertThat(Util.obfuscateEmailAddress("someone@somewhere.net")).isEqualTo("s...e@s...t");
+        assertThat(Util.obfuscateEmailAddress("ab@cd")).isEqualTo("a...b@c...d");
         // too short to obfuscate
-        Assertions.assertThat(Util.obfuscateEmailAddress("a@b")).isEqualTo("a@b");
+        assertThat(Util.obfuscateEmailAddress("a@b")).isEqualTo("a@b");
     }
 
     @Test
-    public void stackTrace() {
+    void stackTrace() {
         final String result = Util.stackTraceToString(new IllegalStateException());
-        Assertions.assertThat(result).contains("IllegalStateException");
+        assertThat(result).contains("IllegalStateException");
     }
 }

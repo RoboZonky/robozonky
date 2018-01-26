@@ -18,8 +18,9 @@ package com.github.robozonky.installer.panels;
 
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class AbstractValidatorTest {
 
@@ -42,8 +43,8 @@ class AbstractValidatorTest {
     }
 
     @Test
-    public void doesNotThrow() {
+    void doesNotThrow() {
         final AbstractValidator v = new TestValidator();
-        Assertions.assertThat(v.validateData(null)).isEqualTo(DataValidator.Status.ERROR);
+        assertThat(v.validateData(null)).isEqualTo(DataValidator.Status.ERROR);
     }
 }

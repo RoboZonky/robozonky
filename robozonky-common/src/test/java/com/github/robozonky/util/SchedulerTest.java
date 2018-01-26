@@ -19,20 +19,21 @@ package com.github.robozonky.util;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class SchedulerTest {
 
     private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
 
     @Test
-    public void lifecycle() {
+    void lifecycle() {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
+            assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
             final ScheduledFuture<?> f = s.submit(REFRESHABLE);
-            Assertions.assertThat((Future) f).isNotNull();
-            Assertions.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
+            assertThat((Future) f).isNotNull();
+            assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
         }
     }
 }

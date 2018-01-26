@@ -23,16 +23,15 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.*;
 
 /**
  * There are the following kinds of proxies:
@@ -166,16 +165,16 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
             case SIMPLE:
                 return new Investor.Builder().build(api);
             case CONFIRMING:
-                final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
-                Mockito.when(cp.getId()).thenReturn("something");
+                final ConfirmationProvider cp = mock(ConfirmationProvider.class);
+                when(cp.getId()).thenReturn("something");
                 switch (confirmationResponse) {
                     case ACK:
-                        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                                            ArgumentMatchers.anyInt())).thenReturn(true);
+                        when(cp.requestConfirmation(any(), anyInt(),
+                                                    anyInt())).thenReturn(true);
                         break;
                     case NAK:
-                        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                                            ArgumentMatchers.anyInt())).thenReturn(false);
+                        when(cp.requestConfirmation(any(), anyInt(),
+                                                    anyInt())).thenReturn(false);
                         break;
                     default:
                         throw new IllegalStateException();
@@ -188,18 +187,18 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
 
     private void test(final ProxyType proxyType, final ZonkyResponseType responseType, final RecommendedLoan r,
                       final RemoteResponse confirmationResponse, final boolean seenBefore) {
-        final Zonky api = Mockito.mock(Zonky.class);
+        final Zonky api = mock(Zonky.class);
         final Investor p = getZonkyProxy(proxyType, confirmationResponse, api);
         ZonkyResponse result;
         try {
             result = p.invest(r, seenBefore);
         } catch (final Exception ex) {
             if (responseType != null) {
-                Assertions.fail("Thrown an exception when it shouldn't have.", ex);
+                fail("Thrown an exception when it shouldn't have.", ex);
             }
             return;
         }
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             if (proxyType == InvestorTest.ProxyType.CONFIRMING) {
                 softly.assertThat(p.getConfirmationProviderId()).isPresent();
             } else {
@@ -217,9 +216,9 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
             }
         });
         if (responseType == ZonkyResponseType.INVESTED) {
-            Mockito.verify(api).invest(ArgumentMatchers.any());
+            verify(api).invest(any());
         } else {
-            Mockito.verify(api, Mockito.never()).invest(ArgumentMatchers.any());
+            verify(api, never()).invest(any());
         }
     }
 
@@ -228,8 +227,8 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         test(proxyType, responseType, r, confirmationResponse, false);
     }
 
-    public void testBeforeSeen(final ProxyType proxyType, final RemoteResponse confirmationResponse,
-                               final ZonkyResponseType responseType, final RecommendedLoan r) {
+    private void testBeforeSeen(final ProxyType proxyType, final RemoteResponse confirmationResponse,
+                                final ZonkyResponseType responseType, final RecommendedLoan r) {
         test(proxyType, responseType, r, confirmationResponse, true);
     }
 

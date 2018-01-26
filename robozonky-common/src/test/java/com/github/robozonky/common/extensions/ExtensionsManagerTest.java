@@ -22,31 +22,32 @@ import java.util.ServiceLoader;
 import java.util.UUID;
 
 import com.github.robozonky.api.notifications.ListenerService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ExtensionsManagerTest {
 
     private static final ClassLoader CLASSLOADER = ExtensionsManager.class.getClassLoader();
 
     @Test
-    public void retrieveDefaultClassLoader() {
+    void retrieveDefaultClassLoader() {
         final ClassLoader result = ExtensionsManager.INSTANCE.retrieveExtensionClassLoader("");
-        Assertions.assertThat(result).isSameAs(ExtensionsManagerTest.CLASSLOADER);
+        assertThat(result).isSameAs(ExtensionsManagerTest.CLASSLOADER);
     }
 
     @Test
-    public void noExtensionsWithFolderPresent() {
+    void noExtensionsWithFolderPresent() {
         final ServiceLoader<ListenerService> result =
                 ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class);
-        Assertions.assertThat(result).isNotNull();
+        assertThat(result).isNotNull();
     }
 
     @Test
-    public void noExtensionsWithFolderMissing() {
+    void noExtensionsWithFolderMissing() {
         final ServiceLoader<ListenerService> result =
                 ExtensionsManager.INSTANCE.getServiceLoader(ListenerService.class, UUID.randomUUID().toString());
-        Assertions.assertThat(result).isNotNull();
+        assertThat(result).isNotNull();
     }
 
     private static File getFolder(final String pathname) {
@@ -58,16 +59,16 @@ class ExtensionsManagerTest {
     }
 
     @Test
-    public void loadJarsFromFolderWithJars() {
+    void loadJarsFromFolderWithJars() {
         final File f = ExtensionsManagerTest.getFolder("target");
-        Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
+        assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
                 .isInstanceOf(URLClassLoader.class);
     }
 
     @Test
-    public void loadJarsFromFolderWithNoJars() {
+    void loadJarsFromFolderWithNoJars() {
         final File f = ExtensionsManagerTest.getFolder("src");
-        Assertions.assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
+        assertThat(ExtensionsManager.INSTANCE.retrieveExtensionClassLoader(f))
                 .isInstanceOf(URLClassLoader.class);
     }
 }

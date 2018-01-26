@@ -20,9 +20,10 @@ import java.io.IOException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class AuthenticationFilterTest extends AbstractCommonFilterTest {
 
@@ -32,11 +33,11 @@ class AuthenticationFilterTest extends AbstractCommonFilterTest {
     }
 
     @Test
-    public void wasAuthorizationAdded() throws IOException {
-        final ClientRequestContext crc = Mockito.mock(ClientRequestContext.class);
-        Mockito.when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
+    void wasAuthorizationAdded() throws IOException {
+        final ClientRequestContext crc = mock(ClientRequestContext.class);
+        when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
 
         this.getTestedFilter().filter(crc);
-        Assertions.assertThat(crc.getHeaders()).containsKey("Authorization");
+        assertThat(crc.getHeaders()).containsKey("Authorization");
     }
 }

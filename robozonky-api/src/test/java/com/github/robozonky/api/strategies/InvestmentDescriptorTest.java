@@ -21,55 +21,56 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.Investment;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class InvestmentDescriptorTest {
 
-    private static Investment mock(final BigDecimal amount) {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getRemainingPrincipal()).thenReturn(amount);
+    private static Investment mockInvestment(final BigDecimal amount) {
+        final Investment i = mock(Investment.class);
+        when(i.getRemainingPrincipal()).thenReturn(amount);
         return i;
     }
 
     @Test
-    public void recommend() {
-        final Investment i = mock(BigDecimal.TEN);
+    void recommend() {
+        final Investment i = mockInvestment(BigDecimal.TEN);
         final InvestmentDescriptor id = new InvestmentDescriptor(i);
         final Optional<RecommendedInvestment> r = id.recommend(i.getRemainingPrincipal());
-        Assertions.assertThat(r).isPresent();
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(r).isPresent();
+        assertSoftly(softly -> {
             softly.assertThat(r.get().amount()).isEqualTo(i.getRemainingPrincipal());
             softly.assertThat(r.get().descriptor()).isEqualTo(id);
         });
     }
 
     @Test
-    public void recommendWrong() {
-        final Investment i = mock(BigDecimal.TEN);
+    void recommendWrong() {
+        final Investment i = mockInvestment(BigDecimal.TEN);
         final InvestmentDescriptor id = new InvestmentDescriptor(i);
         final Optional<RecommendedInvestment> r = id.recommend(i.getRemainingPrincipal().subtract(BigDecimal.ONE));
-        Assertions.assertThat(r).isEmpty();
+        assertThat(r).isEmpty();
     }
 
     @Test
-    public void equals() {
-        final Investment i = mock(BigDecimal.TEN);
+    void equals() {
+        final Investment i = mockInvestment(BigDecimal.TEN);
         final InvestmentDescriptor id = new InvestmentDescriptor(i);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(id).isNotEqualTo(null);
             softly.assertThat(id).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(id).isEqualTo(id);
         });
         final InvestmentDescriptor id2 = new InvestmentDescriptor(i);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(id).isEqualTo(id2);
             softly.assertThat(id2).isEqualTo(id);
         });
-        final InvestmentDescriptor id3 = new InvestmentDescriptor(mock(BigDecimal.ONE));
-        SoftAssertions.assertSoftly(softly -> {
+        final InvestmentDescriptor id3 = new InvestmentDescriptor(mockInvestment(BigDecimal.ONE));
+        assertSoftly(softly -> {
             softly.assertThat(id).isNotEqualTo(id3);
         });
     }

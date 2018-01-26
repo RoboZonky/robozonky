@@ -18,21 +18,22 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class LoanInterestRateConditionTest {
 
     @Test
-    public void leftBoundary() {
-        Assertions.assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO.subtract(BigDecimal.ONE)))
+    void leftBoundary() {
+        assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO.subtract(BigDecimal.ONE)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void rightBoundary() {
+    void rightBoundary() {
         final BigDecimal maxInterestRate = LoanInterestRateCondition.moreThan(BigDecimal.valueOf(Double.MAX_VALUE));
-        Assertions.assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO, maxInterestRate))
+        assertThatThrownBy(() -> new LoanInterestRateCondition(BigDecimal.ZERO, maxInterestRate))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

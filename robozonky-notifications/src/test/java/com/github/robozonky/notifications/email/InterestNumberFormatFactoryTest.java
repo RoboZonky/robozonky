@@ -26,65 +26,66 @@ import freemarker.core.TemplateNumberFormat;
 import freemarker.core.TemplateValueFormatException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+
 class InterestNumberFormatFactoryTest {
 
     @BeforeAll
-    public static void checkJava9() { // turns out that CZ locale outputs on Java 8 are different
+    static void checkJava9() { // turns out that CZ locale outputs on Java 8 are different
         // TODO remove when Java 9 is the minimum platform
         Assumptions.assumeTrue(System.getProperty("java.version").startsWith("9"), () -> "Need Java 9 to run.");
     }
 
     @Test
-    public void formattingCzech() throws TemplateValueFormatException, TemplateModelException {
+    void formattingCzech() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0001");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Defaults.LOCALE,
                                                                                 Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
-        Assertions.assertThat(result.trim()).isEqualTo("0,01" + (char) 160 + "%");
+        assertThat(result.trim()).isEqualTo("0,01" + (char) 160 + "%");
     }
 
     @Test
-    public void formattingCzech2() throws TemplateValueFormatException, TemplateModelException {
+    void formattingCzech2() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0000");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Defaults.LOCALE,
                                                                                 Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
-        Assertions.assertThat(result.trim()).isEqualTo("0" + (char) 160 + "%");
+        assertThat(result.trim()).isEqualTo("0" + (char) 160 + "%");
     }
 
     @Test
-    public void formattingCzech3() throws TemplateValueFormatException, TemplateModelException {
+    void formattingCzech3() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.001");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Defaults.LOCALE,
                                                                                 Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final String result = f.formatToPlainText(m);
-        Assertions.assertThat(result.trim()).isEqualTo("0,1" + (char) 160 + "%");
+        assertThat(result.trim()).isEqualTo("0,1" + (char) 160 + "%");
     }
 
     @Test
-    public void formattingEnglish() throws TemplateValueFormatException, TemplateModelException {
+    void formattingEnglish() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0001");
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
                                                                                 Environment.getCurrentEnvironment());
         final TemplateNumberModel m = () -> n;
         final Object result = f.formatToPlainText(m);
-        Assertions.assertThat(result).isEqualTo("0.01%");
+        assertThat(result).isEqualTo("0.01%");
     }
 
     @Test
-    public void formal() throws TemplateValueFormatException {
+    void formal() throws TemplateValueFormatException {
         final TemplateNumberFormat f = InterestNumberFormatFactory.INSTANCE.get("", Locale.ENGLISH,
                                                                                 Environment.getCurrentEnvironment());
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(f.isLocaleBound()).isTrue();
             softly.assertThat(f.getDescription())
                     .isNotNull()

@@ -27,29 +27,30 @@ import com.github.robozonky.api.marketplaces.MarketplaceService;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class MarketplaceLoaderTest {
 
-    private static final SecretProvider SECRETS = Mockito.mock(SecretProvider.class);
+    private static final SecretProvider SECRETS = mock(SecretProvider.class);
 
     @Test
-    public void loadNonexistent() {
+    void loadNonexistent() {
         final Credentials c = new Credentials(UUID.randomUUID().toString(), MarketplaceLoaderTest.SECRETS);
-        Assertions.assertThat(MarketplaceLoader.load(c)).isEmpty();
+        assertThat(MarketplaceLoader.load(c)).isEmpty();
     }
 
     @Test
-    public void processing() {
+    void processing() {
         final Credentials c = new Credentials(UUID.randomUUID().toString(), MarketplaceLoaderTest.SECRETS);
-        Assertions.assertThat(MarketplaceLoader.processMarketplace(Mockito.mock(MarketplaceService.class), c))
+        assertThat(MarketplaceLoader.processMarketplace(mock(MarketplaceService.class), c))
                 .isEmpty();
     }
 
     @Test
-    public void loading() {
+    void loading() {
         final Marketplace m = new Marketplace() {
             @Override
             public boolean registerListener(final Consumer<Collection<Loan>> listener) {
@@ -63,6 +64,6 @@ class MarketplaceLoaderTest {
         };
         final MarketplaceService ms = (marketplaceId, secret) -> Optional.of(m);
         final Credentials c = new Credentials("", SecretProvider.fallback(""));
-        Assertions.assertThat(MarketplaceLoader.load(c, Collections.singleton(ms))).contains(m);
+        assertThat(MarketplaceLoader.load(c, Collections.singleton(ms))).contains(m);
     }
 }

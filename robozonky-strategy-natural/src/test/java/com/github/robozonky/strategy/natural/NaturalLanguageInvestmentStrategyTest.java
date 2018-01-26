@@ -33,90 +33,90 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class NaturalLanguageInvestmentStrategyTest {
 
     @Test
-    public void unacceptablePortfolioDueToLowBalance() {
+    void unacceptablePortfolioDueToLowBalance() {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance() - 1);
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance() - 1);
         final Stream<RecommendedLoan> result =
                 s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio,
                             new Restrictions());
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void unacceptablePortfolioDueToOverInvestment() {
+    void unacceptablePortfolioDueToOverInvestment() {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);
         v.setTargetPortfolioSize(1000);
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
         final Stream<RecommendedLoan> result =
                 s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio,
                             new Restrictions());
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void noLoansApplicable() {
+    void noLoansApplicable() {
         final MarketplaceFilter filter = MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting());
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         final Stream<RecommendedLoan> result =
                 s.recommend(Collections.singletonList(new LoanDescriptor(new Loan(1, 2))), portfolio,
                             new Restrictions());
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void nothingRecommendedDueToRatingOverinvested() {
+    void nothingRecommendedDueToRatingOverinvested() {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
-        Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.any())).thenReturn(BigDecimal.ZERO);
-        final Loan l = Mockito.spy(new Loan(1, 2));
-        Mockito.doReturn(Rating.A).when(l).getRating();
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        final Loan l = spy(new Loan(1, 2));
+        doReturn(Rating.A).when(l).getRating();
         final Stream<RecommendedLoan> result =
                 s.recommend(Collections.singletonList(new LoanDescriptor(l)), portfolio,
                             new Restrictions());
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void recommendationIsMade() {
+    void recommendationIsMade() {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
-        Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.any())).thenReturn(BigDecimal.ZERO);
-        final Loan l = Mockito.spy(new Loan(1, 100000));
-        Mockito.doReturn(Rating.A).when(l).getRating();
-        final Loan l2 = Mockito.spy(new Loan(1, 100)); // will not be recommended due to low amount
-        Mockito.doReturn(Rating.A).when(l2).getRating();
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        final Loan l = spy(new Loan(1, 100000));
+        doReturn(Rating.A).when(l).getRating();
+        final Loan l2 = spy(new Loan(1, 100)); // will not be recommended due to low amount
+        doReturn(Rating.A).when(l2).getRating();
         final LoanDescriptor ld = new LoanDescriptor(l);
         final List<RecommendedLoan> result =
                 s.recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio, new Restrictions())
                         .collect(Collectors.toList());
-        Assertions.assertThat(result).hasSize(1);
+        assertThat(result).hasSize(1);
         final RecommendedLoan r = result.get(0);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.descriptor()).isEqualTo(ld);
             softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
             softly.assertThat(r.isConfirmationRequired()).isFalse();

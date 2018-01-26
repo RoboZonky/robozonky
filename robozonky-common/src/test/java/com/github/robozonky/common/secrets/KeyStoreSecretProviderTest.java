@@ -21,9 +21,10 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class KeyStoreSecretProviderTest {
 
@@ -32,8 +33,8 @@ class KeyStoreSecretProviderTest {
 
     private static KeyStoreSecretProvider newMockProvider() {
         // make sure any query returns no value
-        final KeyStoreHandler ksh = Mockito.mock(KeyStoreHandler.class);
-        Mockito.when(ksh.get(Mockito.any())).thenReturn(Optional.empty());
+        final KeyStoreHandler ksh = mock(KeyStoreHandler.class);
+        when(ksh.get(any())).thenReturn(Optional.empty());
         return (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh);
     }
 
@@ -43,12 +44,12 @@ class KeyStoreSecretProviderTest {
             f.delete();
             return KeyStoreHandler.create(f, KeyStoreSecretProviderTest.PWD.toCharArray());
         } catch (final IOException | KeyStoreException e) {
-            Assertions.fail("Something went wrong.", e);
+            fail("Something went wrong.", e);
             return null;
         }
     }
 
-    private static KeyStoreSecretProvider newProvider() {
+    static KeyStoreSecretProvider newProvider() {
         final KeyStoreHandler ksh = KeyStoreSecretProviderTest.getKeyStoreHandler();
         return (KeyStoreSecretProvider) SecretProvider.keyStoreBased(ksh);
     }
@@ -59,41 +60,41 @@ class KeyStoreSecretProviderTest {
     }
 
     @Test
-    public void usernameNotSet() {
-        Assertions.assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getUsername())
+    void usernameNotSet() {
+        assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getUsername())
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void passwordNotSet() {
-        Assertions.assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getPassword())
+    void passwordNotSet() {
+        assertThatThrownBy(() -> KeyStoreSecretProviderTest.newMockProvider().getPassword())
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void setUsernameAndPassword() {
+    void setUsernameAndPassword() {
         final KeyStoreSecretProvider p =
                 KeyStoreSecretProviderTest.newProvider(KeyStoreSecretProviderTest.USR, KeyStoreSecretProviderTest.PWD);
         // make sure original values were set
-        Assertions.assertThat(p.getUsername()).isEqualTo(KeyStoreSecretProviderTest.USR);
-        Assertions.assertThat(p.getPassword()).isEqualTo(KeyStoreSecretProviderTest.PWD.toCharArray());
+        assertThat(p.getUsername()).isEqualTo(KeyStoreSecretProviderTest.USR);
+        assertThat(p.getPassword()).isEqualTo(KeyStoreSecretProviderTest.PWD.toCharArray());
         // make sure updating them works
         final String usr = "something";
-        Assertions.assertThat(p.setUsername(usr)).isTrue();
-        Assertions.assertThat(p.getUsername()).isEqualTo(usr);
+        assertThat(p.setUsername(usr)).isTrue();
+        assertThat(p.getUsername()).isEqualTo(usr);
         final String pwd = "somethingElse";
-        Assertions.assertThat(p.setPassword(pwd.toCharArray())).isTrue();
-        Assertions.assertThat(p.getPassword()).isEqualTo(pwd.toCharArray());
+        assertThat(p.setPassword(pwd.toCharArray())).isTrue();
+        assertThat(p.getPassword()).isEqualTo(pwd.toCharArray());
         // set some secrets
         final String key = "key", value = "value";
-        Assertions.assertThat(p.setSecret(key, value.toCharArray())).isTrue();
-        Assertions.assertThat(p.getSecret(key)).contains(value.toCharArray());
-        Assertions.assertThat(p.isPersistent()).isTrue();
+        assertThat(p.setSecret(key, value.toCharArray())).isTrue();
+        assertThat(p.getSecret(key)).contains(value.toCharArray());
+        assertThat(p.isPersistent()).isTrue();
     }
 
     @Test
-    public void noKeyStoreHandlerProvided() {
-        Assertions.assertThatThrownBy(() -> new KeyStoreSecretProvider(null))
+    void noKeyStoreHandlerProvided() {
+        assertThatThrownBy(() -> new KeyStoreSecretProvider(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

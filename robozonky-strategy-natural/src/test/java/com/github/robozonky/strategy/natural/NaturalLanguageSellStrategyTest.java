@@ -27,35 +27,36 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class NaturalLanguageSellStrategyTest {
 
-    private final InvestmentDescriptor mockDescriptor() {
-        return mockDescriptor(mock());
+    private InvestmentDescriptor mockDescriptor() {
+        return mockDescriptor(mockInvestment());
     }
 
-    private final InvestmentDescriptor mockDescriptor(final Investment investment) {
+    private InvestmentDescriptor mockDescriptor(final Investment investment) {
         final Loan l = new Loan(1, 2);
         return new InvestmentDescriptor(investment, l);
     }
 
-    private final Investment mock() {
-        return Mockito.mock(Investment.class);
+    private final Investment mockInvestment() {
+        return mock(Investment.class);
     }
 
     @Test
-    public void noLoansApplicable() {
+    void noLoansApplicable() {
         final MarketplaceFilter filter = MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting());
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         final Stream<RecommendedInvestment> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio);
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 }

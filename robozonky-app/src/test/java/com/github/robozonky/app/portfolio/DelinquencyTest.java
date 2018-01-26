@@ -25,20 +25,21 @@ import java.time.temporal.TemporalAmount;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class DelinquencyTest extends AbstractRoboZonkyTest {
 
     @Test
-    public void endless() {
+    void endless() {
         final ZoneId zone = Defaults.ZONE_ID;
         final LocalDate epoch = OffsetDateTime.ofInstant(Instant.EPOCH, zone).toLocalDate();
         final LocalDate now = OffsetDateTime.now(zone).toLocalDate();
         final Duration duration = Duration.between(epoch.atStartOfDay(zone), now.atStartOfDay(zone));
         final Delinquency d = new Delinquency(null, epoch);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d.getPaymentMissedDate()).isEqualTo(epoch);
             softly.assertThat(d.getFixedOn()).isEmpty();
             softly.assertThat(d.getParent()).isNull();
@@ -47,20 +48,20 @@ class DelinquencyTest extends AbstractRoboZonkyTest {
         final LocalDate fixed = now.minusDays(1);
         final TemporalAmount newDuration = Duration.between(epoch.atStartOfDay(zone), fixed.atStartOfDay(zone));
         d.setFixedOn(fixed);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d.getFixedOn()).contains(fixed);
             softly.assertThat(d.getDuration()).isEqualTo(newDuration);
         });
     }
 
     @Test
-    public void ended() {
+    void ended() {
         final ZoneId zone = Defaults.ZONE_ID;
         final LocalDate epoch = OffsetDateTime.ofInstant(Instant.EPOCH, zone).toLocalDate();
         final LocalDate fixed = LocalDate.now();
         final Duration daysUntilFixed = Duration.between(epoch.atStartOfDay(zone), fixed.atStartOfDay(zone));
         final Delinquency d = new Delinquency(null, epoch, fixed);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d.getPaymentMissedDate()).isEqualTo(epoch);
             softly.assertThat(d.getFixedOn()).contains(fixed);
             softly.assertThat(d.getParent()).isNull();
@@ -69,34 +70,34 @@ class DelinquencyTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    public void equalsDifferentParent() {
+    void equalsDifferentParent() {
         final LocalDate now = LocalDate.now();
         final Delinquency d1 = new Delinquency(null, now);
         final Delinquency d2 = new Delinquency(new Delinquent(1), now);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d1).isNotEqualTo(d2);
             softly.assertThat(d2).isNotEqualTo(d1);
         });
     }
 
     @Test
-    public void equalsDifferentSince() {
+    void equalsDifferentSince() {
         final Delinquent d = new Delinquent(1);
         final Delinquency d1 = new Delinquency(d, LocalDate.now());
         final Delinquency d2 = new Delinquency(d, LocalDate.now().minusDays(1));
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d1).isNotEqualTo(d2);
             softly.assertThat(d2).isNotEqualTo(d1);
         });
     }
 
     @Test
-    public void equalsDifferentFixed() {
+    void equalsDifferentFixed() {
         final Delinquent d = new Delinquent(1);
         final LocalDate since = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID).toLocalDate();
         final Delinquency d1 = new Delinquency(d, since);
         final Delinquency d2 = new Delinquency(d, since, LocalDate.now());
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d1).isNotEqualTo(null);
             softly.assertThat(d1).isEqualTo(d1);
             softly.assertThat(d1).isEqualTo(d2);
@@ -105,9 +106,9 @@ class DelinquencyTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    public void failsOnReset() {
+    void failsOnReset() {
         final Delinquency d = new Delinquency(new Delinquent(1), LocalDate.now(), LocalDate.now());
-        Assertions.assertThatThrownBy(() -> d.setFixedOn(LocalDate.now()))
+        assertThatThrownBy(() -> d.setFixedOn(LocalDate.now()))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

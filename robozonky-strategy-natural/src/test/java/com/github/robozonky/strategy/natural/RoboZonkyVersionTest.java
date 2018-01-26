@@ -16,16 +16,17 @@
 
 package com.github.robozonky.strategy.natural;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class RoboZonkyVersionTest {
 
     @Test
-    public void comparator() {
+    void comparator() {
         final RoboZonkyVersion current = new RoboZonkyVersion("4.1.0");
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(current).isGreaterThan(new RoboZonkyVersion("3.9.9"));
             softly.assertThat(current).isEqualByComparingTo(current);
             softly.assertThat(current).isLessThan(new RoboZonkyVersion("4.1.1"));
@@ -35,15 +36,15 @@ class RoboZonkyVersionTest {
     }
 
     @Test
-    public void snapshot() {
+    void snapshot() {
         final RoboZonkyVersion current = new RoboZonkyVersion((String) null);
-        Assertions.assertThat(current).isGreaterThan(new RoboZonkyVersion("999.999.999"));
+        assertThat(current).isGreaterThan(new RoboZonkyVersion("999.999.999"));
     }
 
     @Test
-    public void equality() {
+    void equality() {
         final RoboZonkyVersion current = new RoboZonkyVersion("4.1.0");
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(current).isEqualTo(current);
             softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0"));
             softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-SNAPSHOT")); // SNAPSHOTs do not matter

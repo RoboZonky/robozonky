@@ -20,10 +20,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class BaseEnumTest {
@@ -31,11 +31,11 @@ class BaseEnumTest {
     private static <T extends BaseEnum> void bidirectionality(final T i, final Function<String, T> converter) {
         final String code = i.getCode();
         final BaseEnum type = converter.apply(code);
-        Assertions.assertThat(type).isSameAs(i);
+        assertThat(type).isSameAs(i);
     }
 
     private static <T extends BaseEnum> void wrong(final Function<String, T> converter) {
-        Assertions.assertThatThrownBy(() -> converter.apply(UUID.randomUUID().toString()))
+        assertThatThrownBy(() -> converter.apply(UUID.randomUUID().toString()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -50,7 +50,7 @@ class BaseEnumTest {
     }
 
     @TestFactory
-    public Stream<DynamicTest> code() {
+    Stream<DynamicTest> code() {
         final Stream<DynamicTest> purpose = code(Purpose.class, Purpose.values(), Purpose::findByCode);
         final Stream<DynamicTest> mainIncomeType = code(MainIncomeType.class, MainIncomeType.values(),
                                                         MainIncomeType::findByCode);

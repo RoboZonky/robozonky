@@ -21,43 +21,43 @@ import java.util.UUID;
 
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class OAuthTest {
 
     private static final String USERNAME = "username", PASSWORD = "password";
 
     @Test
-    public void login() {
-        final ZonkyOAuthApi api = Mockito.mock(ZonkyOAuthApi.class);
+    void login() {
+        final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         try (final OAuth oauth = new OAuth(wrapper)) {
             oauth.login(USERNAME, PASSWORD.toCharArray());
         }
-        Mockito.verify(api, Mockito.times(1))
-                .login(ArgumentMatchers.eq(USERNAME), ArgumentMatchers.eq(PASSWORD),
-                       ArgumentMatchers.eq("password"),
-                       ArgumentMatchers.eq("SCOPE_APP_WEB"));
-        Assertions.assertThat(wrapper.isClosed()).isTrue();
+        verify(api, times(1))
+                .login(eq(USERNAME), eq(PASSWORD),
+                       eq("password"),
+                       eq("SCOPE_APP_WEB"));
+        assertThat(wrapper.isClosed()).isTrue();
     }
 
     @Test
-    public void refresh() {
+    void refresh() {
         final String originalTokenId = UUID.randomUUID().toString();
         final ZonkyApiToken originToken = new ZonkyApiToken(UUID.randomUUID().toString(), originalTokenId,
                                                             OffsetDateTime.now());
-        final ZonkyApiToken resultToken = Mockito.mock(ZonkyApiToken.class);
-        final ZonkyOAuthApi api = Mockito.mock(ZonkyOAuthApi.class);
-        Mockito.when(api.refresh(ArgumentMatchers.eq(originalTokenId),
-                                 ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(resultToken);
+        final ZonkyApiToken resultToken = mock(ZonkyApiToken.class);
+        final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
+        when(api.refresh(eq(originalTokenId),
+                         anyString(), anyString())).thenReturn(resultToken);
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         try (final OAuth oauth = new OAuth(wrapper)) {
             final ZonkyApiToken returnedToken = oauth.refresh(originToken);
-            Assertions.assertThat(returnedToken).isEqualTo(resultToken);
+            assertThat(returnedToken).isEqualTo(resultToken);
         }
-        Assertions.assertThat(wrapper.isClosed()).isTrue();
+        assertThat(wrapper.isClosed()).isTrue();
     }
 }

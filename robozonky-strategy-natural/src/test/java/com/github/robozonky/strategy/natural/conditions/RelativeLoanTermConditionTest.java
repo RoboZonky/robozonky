@@ -17,16 +17,17 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class RelativeLoanTermConditionTest {
 
     @Test
-    public void leftBoundWrong() {
-        SoftAssertions.assertSoftly(softly -> {
+    void leftBoundWrong() {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(-1, 0)).isInstanceOf(
                     IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(0, -1)).isInstanceOf(
@@ -35,8 +36,8 @@ class RelativeLoanTermConditionTest {
     }
 
     @Test
-    public void rightBoundWrong() {
-        SoftAssertions.assertSoftly(softly -> {
+    void rightBoundWrong() {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(101, 0)).isInstanceOf(
                     IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new RelativeLoanTermCondition(0, 101)).isInstanceOf(
@@ -45,29 +46,29 @@ class RelativeLoanTermConditionTest {
     }
 
     @Test
-    public void boundaryCorrect() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getOriginalTermInMonths()).thenReturn(2);
-        Mockito.when(l.getRemainingTermInMonths()).thenReturn(1);
+    void boundaryCorrect() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getOriginalTermInMonths()).thenReturn(2);
+        when(l.getRemainingTermInMonths()).thenReturn(1);
         final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(0, 100);
-        Assertions.assertThat(condition.test(l)).isTrue();
+        assertThat(condition.test(l)).isTrue();
     }
 
     @Test
-    public void leftOutOfBounds() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getOriginalTermInMonths()).thenReturn(2);
-        Mockito.when(l.getRemainingTermInMonths()).thenReturn(0);
+    void leftOutOfBounds() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getOriginalTermInMonths()).thenReturn(2);
+        when(l.getRemainingTermInMonths()).thenReturn(0);
         final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(1, 100);
-        Assertions.assertThat(condition.test(l)).isFalse();
+        assertThat(condition.test(l)).isFalse();
     }
 
     @Test
-    public void rightOutOfBounds() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getOriginalTermInMonths()).thenReturn(2);
-        Mockito.when(l.getRemainingTermInMonths()).thenReturn(1);
+    void rightOutOfBounds() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getOriginalTermInMonths()).thenReturn(2);
+        when(l.getRemainingTermInMonths()).thenReturn(1);
         final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(0, 20);
-        Assertions.assertThat(condition.test(l)).isFalse();
+        assertThat(condition.test(l)).isFalse();
     }
 }

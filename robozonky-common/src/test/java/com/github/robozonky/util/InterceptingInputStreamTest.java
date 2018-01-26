@@ -23,20 +23,21 @@ import java.util.UUID;
 
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class InterceptingInputStreamTest {
 
     @Test
-    public void standard() throws IOException {
+    void standard() throws IOException {
         final String contents = UUID.randomUUID().toString();
         final InputStream s = new ByteArrayInputStream(contents.getBytes());
         try (final InterceptingInputStream s2 = new InterceptingInputStream(s)) {
             // first check content has been intercepted
-            Assertions.assertThat(s2.getContents()).isEqualTo(contents);
+            assertThat(s2.getContents()).isEqualTo(contents);
             // then check content is still available
-            Assertions.assertThat(IOUtils.toString(s2, Defaults.CHARSET)).isEqualTo(contents);
+            assertThat(IOUtils.toString(s2, Defaults.CHARSET)).isEqualTo(contents);
         }
     }
 }

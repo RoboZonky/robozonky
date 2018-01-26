@@ -22,24 +22,25 @@ import java.util.UUID;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.google.common.io.Files;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class StrategyProviderTest {
 
     private static final String MINIMAL_STRATEGY = "Robot má udržovat konzervativní portfolio.";
 
     @Test
-    public void setAndWrong() {
+    void setAndWrong() {
         final StrategyProvider r = new StrategyProvider();
         r.valueSet(MINIMAL_STRATEGY); // store correct strategy
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
         });
         r.valueChanged(MINIMAL_STRATEGY, UUID.randomUUID().toString()); // store invalid strategy
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isEmpty();
@@ -47,16 +48,16 @@ class StrategyProviderTest {
     }
 
     @Test
-    public void setAndUnset() {
+    void setAndUnset() {
         final StrategyProvider r = new StrategyProvider();
         r.valueSet(MINIMAL_STRATEGY); // store correct strategy
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
         });
         r.valueUnset(MINIMAL_STRATEGY);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isEmpty();
@@ -70,9 +71,9 @@ class StrategyProviderTest {
     }
 
     @Test
-    public void loadStrategyAsFile() throws IOException {
+    void loadStrategyAsFile() throws IOException {
         final StrategyProvider r = StrategyProvider.createFor(newStrategyFile().getAbsolutePath());
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();
@@ -80,10 +81,10 @@ class StrategyProviderTest {
     }
 
     @Test
-    public void loadWrongStrategyAsFile() throws IOException {
+    void loadWrongStrategyAsFile() throws IOException {
         final File tmp = File.createTempFile("robozonky-", ".cfg");
         final StrategyProvider r = StrategyProvider.createFor(tmp.getAbsolutePath());
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isEmpty();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isEmpty();
@@ -91,10 +92,10 @@ class StrategyProviderTest {
     }
 
     @Test
-    public void loadStrategyAsUrl() throws IOException {
+    void loadStrategyAsUrl() throws IOException {
         final String url = newStrategyFile().toURI().toURL().toString();
         final StrategyProvider r = StrategyProvider.createFor(url);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r.getToInvest()).isPresent();
             softly.assertThat(r.getToSell()).isEmpty();
             softly.assertThat(r.getToPurchase()).isPresent();

@@ -25,17 +25,17 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class StrategyLoaderTest {
 
     @Test
-    public void unknown() {
-        SoftAssertions.assertSoftly(softly -> {
+    void unknown() {
+        assertSoftly(softly -> {
             softly.assertThat(StrategyLoader.toInvest(UUID.randomUUID().toString())).isEmpty();
             softly.assertThat(StrategyLoader.toSell(UUID.randomUUID().toString())).isEmpty();
             softly.assertThat(StrategyLoader.toPurchase(UUID.randomUUID().toString())).isEmpty();
@@ -43,10 +43,10 @@ class StrategyLoaderTest {
     }
 
     @Test
-    public void failedProcessing() {
-        final StrategyService iss = Mockito.mock(StrategyService.class);
-        Mockito.doThrow(new IllegalStateException("Testing")).when(iss).toInvest(ArgumentMatchers.any());
-        SoftAssertions.assertSoftly(softly -> {
+    void failedProcessing() {
+        final StrategyService iss = mock(StrategyService.class);
+        doThrow(new IllegalStateException("Testing")).when(iss).toInvest(any());
+        assertSoftly(softly -> {
             softly.assertThat(StrategyLoader.processStrategyService(iss, "", StrategyService::toInvest))
                     .isEmpty();
             softly.assertThat(StrategyLoader.processStrategyService(iss, "", StrategyService::toSell))
@@ -57,11 +57,11 @@ class StrategyLoaderTest {
     }
 
     @Test
-    public void standardProcessing() {
-        final StrategyService iss = Mockito.mock(StrategyService.class);
-        Mockito.when(iss.toInvest(ArgumentMatchers.any())).thenReturn(
-                Optional.of(Mockito.mock(InvestmentStrategy.class)));
-        SoftAssertions.assertSoftly(softly -> {
+    void standardProcessing() {
+        final StrategyService iss = mock(StrategyService.class);
+        when(iss.toInvest(any())).thenReturn(
+                Optional.of(mock(InvestmentStrategy.class)));
+        assertSoftly(softly -> {
             softly.assertThat(StrategyLoader.processStrategyService(iss, "", StrategyService::toInvest))
                     .isPresent();
             softly.assertThat(StrategyLoader.processStrategyService(iss, "", StrategyService::toSell))
@@ -72,7 +72,7 @@ class StrategyLoaderTest {
     }
 
     @Test
-    public void loading() {
+    void loading() {
         final InvestmentStrategy is = (availableLoans, portfolio, restrictions) -> Stream.empty();
         final StrategyService iss = new StrategyService() {
             @Override
@@ -90,7 +90,7 @@ class StrategyLoaderTest {
                 return Optional.empty();
             }
         };
-        Assertions.assertThat(StrategyLoader.load("", Collections.singleton(iss), StrategyService::toInvest))
+        assertThat(StrategyLoader.load("", Collections.singleton(iss), StrategyService::toInvest))
                 .contains(is);
     }
 }

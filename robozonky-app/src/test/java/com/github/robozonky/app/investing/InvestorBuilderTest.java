@@ -17,18 +17,19 @@
 package com.github.robozonky.app.investing;
 
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class InvestorBuilderTest {
 
     @Test
-    public void build() {
+    void build() {
         final String username = "user";
         final Investor.Builder b = new Investor.Builder();
         b.asUser(username).asDryRun();
-        final Investor p = b.build(Mockito.mock(Zonky.class));
-        Assertions.assertThat(p.isDryRun()).isTrue();
+        final Investor p = b.build(mock(Zonky.class));
+        assertThat(p.isDryRun()).isTrue();
     }
 }

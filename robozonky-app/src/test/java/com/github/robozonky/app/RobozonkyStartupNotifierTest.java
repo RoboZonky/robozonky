@@ -23,22 +23,23 @@ import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
 
     @Test
-    public void properEventsFired() {
+    void properEventsFired() {
         final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier();
         final Optional<Consumer<ShutdownHook.Result>> result = rzsn.get();
-        Assertions.assertThat(result).isPresent();
-        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
+        assertThat(result).isPresent();
+        assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);
         final ShutdownHook.Result r = new ShutdownHook.Result(ReturnCode.OK, null);
         result.get().accept(r);
-        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyEndingEvent.class);
+        assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyEndingEvent.class);
         final ShutdownHook.Result r2 = new ShutdownHook.Result(ReturnCode.ERROR_WRONG_PARAMETERS, null);
         result.get().accept(r2);
-        Assertions.assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyCrashedEvent.class);
+        assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyCrashedEvent.class);
     }
 }

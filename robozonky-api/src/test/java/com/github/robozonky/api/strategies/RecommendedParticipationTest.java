@@ -20,35 +20,37 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.Participation;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class RecommendedParticipationTest {
 
-    private static Participation mock() {
-        final Participation p = Mockito.mock(Participation.class);
-        Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+    private static Participation mockParticipation() {
+        final Participation p = mock(Participation.class);
+        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
         return p;
     }
 
     @Test
-    public void equals() {
-        final Participation p = mock();
+    void equals() {
+        final Participation p = mockParticipation();
         final ParticipationDescriptor d = new ParticipationDescriptor(p);
         final RecommendedParticipation r = new RecommendedParticipation(d);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r).isNotEqualTo(null);
             softly.assertThat(r).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(r).isEqualTo(r);
         });
         final RecommendedParticipation r2 = new RecommendedParticipation(d);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r).isEqualTo(r2);
             softly.assertThat(r2).isEqualTo(r);
         });
-        final RecommendedParticipation r3 = new RecommendedParticipation(new ParticipationDescriptor(mock()));
-        Assertions.assertThat(r).isNotEqualTo(r3);
+        final RecommendedParticipation r3 =
+                new RecommendedParticipation(new ParticipationDescriptor(mockParticipation()));
+        assertThat(r).isNotEqualTo(r3);
     }
 }

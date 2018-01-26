@@ -23,19 +23,20 @@ import java.util.UUID;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.ConfirmationProviderService;
 import com.github.robozonky.api.confirmations.RequestId;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ConfirmationProviderLoaderTest {
 
     @Test
-    public void unknown() {
+    void unknown() {
         final Optional<ConfirmationProvider> result = ConfirmationProviderLoader.load(UUID.randomUUID().toString());
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void loading() {
+    void loading() {
         final String id = UUID.randomUUID().toString();
         final ConfirmationProvider cp = new ConfirmationProvider() {
             @Override
@@ -49,6 +50,6 @@ class ConfirmationProviderLoaderTest {
             }
         };
         final ConfirmationProviderService cps = strategy -> Optional.of(cp);
-        Assertions.assertThat(ConfirmationProviderLoader.load(id, Collections.singleton(cps))).contains(cp);
+        assertThat(ConfirmationProviderLoader.load(id, Collections.singleton(cps))).contains(cp);
     }
 }

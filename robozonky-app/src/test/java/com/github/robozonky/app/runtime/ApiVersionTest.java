@@ -19,8 +19,9 @@ package com.github.robozonky.app.runtime;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class ApiVersionTest {
 
@@ -32,9 +33,9 @@ class ApiVersionTest {
             "\"tags\":[\"0.77.0\"]}";
 
     @Test
-    public void parse() throws IOException {
+    void parse() throws IOException {
         final ApiVersion v = ApiVersion.read(SAMPLE);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(v.getBranch()).isEqualTo("origin/master");
             softly.assertThat(v.getCommitId()).isEqualTo("e51d4fcb9eac1a9599a64c93c181325a2c38e779");
             softly.assertThat(v.getCommitId()).startsWith(v.getCommitIdAbbrev());

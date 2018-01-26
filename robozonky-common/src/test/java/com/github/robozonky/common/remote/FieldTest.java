@@ -20,23 +20,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class FieldTest {
 
     private <T> void unique(final Field<T>... values) {
         final Set<String> uniqueValues = Stream.of(values).map(Field::id).collect(Collectors.toSet());
-        Assertions.assertThat(uniqueValues).hasSize(values.length);
+        assertThat(uniqueValues).hasSize(values.length);
     }
 
     @Test
-    public void uniqueInvestmentFields() {
+    void uniqueInvestmentFields() {
         unique(InvestmentField.values());
     }
 
     @Test
-    public void uniqueLoanFields() {
+    void uniqueLoanFields() {
         unique(LoanField.values());
     }
 }

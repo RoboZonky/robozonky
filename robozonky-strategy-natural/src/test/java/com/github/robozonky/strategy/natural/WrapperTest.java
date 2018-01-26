@@ -18,17 +18,18 @@ package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class WrapperTest {
 
     @Test
-    public void fromInvestment() {
+    void fromInvestment() {
         final Loan loan = new Loan(1, 2);
         final Investment investment = new Investment(loan, 200);
         final Wrapper w = new Wrapper(investment, loan);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(w.getLoanId()).isEqualTo(loan.getId());
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
             softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
@@ -42,16 +43,16 @@ class WrapperTest {
     }
 
     @Test
-    public void equality() {
+    void equality() {
         final Loan loan = new Loan(1, 2);
         final Wrapper w = new Wrapper(loan);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w);
             softly.assertThat(w).isNotEqualTo(null);
             softly.assertThat(w).isNotEqualTo("");
         });
         final Wrapper w2 = new Wrapper(loan);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w2);
             softly.assertThat(w2).isEqualTo(w);
         });

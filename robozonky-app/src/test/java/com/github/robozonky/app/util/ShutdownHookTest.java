@@ -20,50 +20,51 @@ import java.util.Optional;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ShutdownHookTest {
 
     @Test
-    public void noShutdownHandler() {
-        final ShutdownHook.Handler h = Mockito.mock(ShutdownHook.Handler.class);
-        Mockito.when(h.get()).thenReturn(Optional.empty());
+    void noShutdownHandler() {
+        final ShutdownHook.Handler h = mock(ShutdownHook.Handler.class);
+        when(h.get()).thenReturn(Optional.empty());
         final ShutdownHook s = new ShutdownHook();
-        Assertions.assertThat(s.register(h)).isFalse();
+        assertThat(s.register(h)).isFalse();
         try {
             s.execute(new ShutdownHook.Result(ReturnCode.OK, null));
         } catch (final RuntimeException ex) {
-            Assertions.fail("Should not have been thrown.", ex);
+            fail("Should not have been thrown.", ex);
         }
     }
 
     @Test
-    public void exceptionHandlingOnRegistration() {
-        final ShutdownHook.Handler h = Mockito.mock(ShutdownHook.Handler.class);
-        Mockito.doThrow(new IllegalStateException("Testing exception")).when(h).get();
-        Assertions.assertThat(new ShutdownHook().register(h)).isFalse();
+    void exceptionHandlingOnRegistration() {
+        final ShutdownHook.Handler h = mock(ShutdownHook.Handler.class);
+        doThrow(new IllegalStateException("Testing exception")).when(h).get();
+        assertThat(new ShutdownHook().register(h)).isFalse();
     }
 
     @Test
-    public void nullHandler() {
-        Assertions.assertThatThrownBy(() -> new ShutdownHook().register(null))
+    void nullHandler() {
+        assertThatThrownBy(() -> new ShutdownHook().register(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void exceptionHandlingOnShutdown() {
-        final ShutdownHook.Handler h = Mockito.mock(ShutdownHook.Handler.class);
-        Mockito.when(h.get()).thenReturn(Optional.of(code -> {
+    void exceptionHandlingOnShutdown() {
+        final ShutdownHook.Handler h = mock(ShutdownHook.Handler.class);
+        when(h.get()).thenReturn(Optional.of(code -> {
             throw new IllegalStateException("Testing exception.");
         }));
         final ShutdownHook s = new ShutdownHook();
-        Assertions.assertThat(s.register(h)).isTrue();
+        assertThat(s.register(h)).isTrue();
         try {
             s.execute(new ShutdownHook.Result(ReturnCode.OK, null));
         } catch (final RuntimeException ex) {
-            Assertions.fail("Should not have been thrown.", ex);
+            fail("Should not have been thrown.", ex);
         }
     }
 }

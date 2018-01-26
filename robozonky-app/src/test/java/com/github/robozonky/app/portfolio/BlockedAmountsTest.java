@@ -24,9 +24,9 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+
+import static org.mockito.Mockito.*;
 
 class BlockedAmountsTest extends AbstractZonkyLeveragingTest {
 
@@ -35,23 +35,23 @@ class BlockedAmountsTest extends AbstractZonkyLeveragingTest {
             BA3 = new BlockedAmount(3, BigDecimal.valueOf(2000));
 
     @Test
-    public void newBlockedAmounts() {
+    void newBlockedAmounts() {
         final Zonky zonky = harmlessZonky(10_000);
-        Mockito.when(zonky.getBlockedAmounts()).thenReturn(Stream.of(BA1, BA2));
+        when(zonky.getBlockedAmounts()).thenReturn(Stream.of(BA1, BA2));
         final Authenticated auth = mockAuthentication(zonky);
-        final Portfolio p = Mockito.mock(Portfolio.class);
+        final Portfolio p = mock(Portfolio.class);
         final BlockedAmounts blockedAmounts = new BlockedAmounts();
         // verify the first two blocked amounts were registered
         blockedAmounts.accept(p, auth);
-        Mockito.verify(p).newBlockedAmount(ArgumentMatchers.eq(zonky), ArgumentMatchers.eq(BA1));
-        Mockito.verify(p).newBlockedAmount(ArgumentMatchers.eq(zonky), ArgumentMatchers.eq(BA2));
+        verify(p).newBlockedAmount(eq(zonky), eq(BA1));
+        verify(p).newBlockedAmount(eq(zonky), eq(BA2));
         // verify only the new blocked amount was registered, and that it only happened the first time
-        Mockito.reset(p);
-        Mockito.when(zonky.getBlockedAmounts())
+        reset(p);
+        when(zonky.getBlockedAmounts())
                 .thenAnswer((Answer<Stream<BlockedAmount>>) invocation -> Stream.of(BA1, BA2, BA3));
         blockedAmounts.accept(p, auth);
         blockedAmounts.accept(p, auth);
-        Mockito.verify(p, Mockito.times(1))
-                .newBlockedAmount(ArgumentMatchers.eq(zonky), ArgumentMatchers.eq(BA3));
+        verify(p, times(1))
+                .newBlockedAmount(eq(zonky), eq(BA3));
     }
 }

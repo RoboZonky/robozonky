@@ -18,19 +18,20 @@ package com.github.robozonky.installer.panels;
 
 import java.util.UUID;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class UtilTest {
 
     @Test
-    public void testCopyOptions() {
+    void testCopyOptions() {
         final String key = UUID.randomUUID().toString();
         final String[] values = new String[]{"a", "b", "c"};
         final CommandLinePart source = new CommandLinePart();
         source.setOption(key, values);
         final CommandLinePart target = new CommandLinePart();
         Util.copyOptions(source, target);
-        Assertions.assertThat(target.getOptions().get(key)).containsExactly(values);
+        assertThat(target.getOptions().get(key)).containsExactly(values);
     }
 }

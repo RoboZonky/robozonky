@@ -19,9 +19,10 @@ package com.github.robozonky.common.secrets;
 import java.io.File;
 
 import com.github.robozonky.internal.api.Settings;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class FallbackSecretProviderTest {
 
@@ -29,23 +30,23 @@ class FallbackSecretProviderTest {
     private static final String PWD = "password";
 
     @AfterEach
-    public void deleteState() {
+    void deleteState() {
         final File f = Settings.INSTANCE.getStateFile();
         f.delete();
     }
 
     @Test
-    public void setUsernameAndPassword() {
+    void setUsernameAndPassword() {
         final SecretProvider p = SecretProvider.fallback(FallbackSecretProviderTest.USR,
                                                          FallbackSecretProviderTest.PWD.toCharArray());
         // make sure original values were set
-        Assertions.assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
-        Assertions.assertThat(p.getPassword()).isEqualTo(FallbackSecretProviderTest.PWD.toCharArray());
+        assertThat(p.getUsername()).isEqualTo(FallbackSecretProviderTest.USR);
+        assertThat(p.getPassword()).isEqualTo(FallbackSecretProviderTest.PWD.toCharArray());
         // set some secrets
         final String key = "key", value = "value";
-        Assertions.assertThat(p.getSecret(key)).isEmpty();
-        Assertions.assertThat(p.setSecret(key, value.toCharArray())).isTrue();
-        Assertions.assertThat(p.getSecret(key)).contains(value.toCharArray());
-        Assertions.assertThat(p.isPersistent()).isFalse();
+        assertThat(p.getSecret(key)).isEmpty();
+        assertThat(p.setSecret(key, value.toCharArray())).isTrue();
+        assertThat(p.getSecret(key)).contains(value.toCharArray());
+        assertThat(p.isPersistent()).isFalse();
     }
 }

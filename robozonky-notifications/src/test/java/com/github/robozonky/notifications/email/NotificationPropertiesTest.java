@@ -23,11 +23,12 @@ import java.util.Properties;
 
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.util.Refreshable;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class NotificationPropertiesTest extends AbstractRoboZonkyTest {
 
@@ -43,49 +44,49 @@ class NotificationPropertiesTest extends AbstractRoboZonkyTest {
     }
 
     @BeforeEach
-    public void prepareBackupConfig() throws Exception {
+    void prepareBackupConfig() throws Exception {
         Files.write(RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.toPath(),
                     "enabled = false".getBytes());
     }
 
     @AfterEach
-    public void deleteBackupConfig() {
+    void deleteBackupConfig() {
         RefreshableNotificationProperties.DEFAULT_CONFIG_FILE_LOCATION.delete();
     }
 
     @Test
-    public void wrongPropertiesUrlReadsPropertyFile() {
+    void wrongPropertiesUrlReadsPropertyFile() {
         System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                            "wrongprotocol://somewhere");
         final Optional<NotificationProperties> np = NotificationPropertiesTest.getProperties();
-        Assertions.assertThat(np).isPresent();
-        Assertions.assertThat(np.get().isEnabled()).isFalse();
+        assertThat(np).isPresent();
+        assertThat(np.get().isEnabled()).isFalse();
     }
 
     @Test
-    public void correctUrlIgnoresPropertyFile() {
+    void correctUrlIgnoresPropertyFile() {
         System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                            NotificationPropertiesTest.CONFIG_ENABLED.toString());
         final Optional<NotificationProperties> np = NotificationPropertiesTest.getProperties();
-        Assertions.assertThat(np).isPresent();
-        Assertions.assertThat(np.get().isEnabled()).isTrue();
+        assertThat(np).isPresent();
+        assertThat(np.get().isEnabled()).isTrue();
     }
 
     @Test
-    public void windowsEncoding() {
+    void windowsEncoding() {
         System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
                            NotificationPropertiesTest.WINDOWS_ENCODED.toString());
         final Optional<NotificationProperties> np = NotificationPropertiesTest.getProperties();
-        Assertions.assertThat(np).isPresent();
-        Assertions.assertThat(np.get().isEnabled()).isTrue();
+        assertThat(np).isPresent();
+        assertThat(np.get().isEnabled()).isTrue();
     }
 
     @Test
-    public void equality() {
+    void equality() {
         final Properties p = new Properties();
         final NotificationProperties n = new NotificationProperties(p);
         final NotificationProperties n2 = new NotificationProperties(p);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(n).isNotEqualTo(null);
             softly.assertThat(n).isNotEqualTo("some string");
             softly.assertThat(n).isEqualTo(n);

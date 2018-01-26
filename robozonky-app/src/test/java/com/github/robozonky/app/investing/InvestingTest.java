@@ -36,10 +36,10 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class InvestingTest extends AbstractZonkyLeveragingTest {
 
@@ -50,53 +50,53 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
             ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi() {
-        final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
+        final Zonky zonky = mock(Zonky.class);
+        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
         return zonky;
     }
 
     @Test
-    public void noStrategy() {
+    void noStrategy() {
         final Loan loan = new Loan(1, 2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Portfolio portfolio = Portfolio.create(z);
-        Assertions.assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
+        assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
-        Assertions.assertThat(events).isEmpty();
+        assertThat(events).isEmpty();
     }
 
     @Test
-    public void noItems() {
+    void noItems() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Portfolio portfolio = Portfolio.create(z);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
-        final Authenticated auth = Mockito.mock(Authenticated.class);
-        Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
+        final Authenticated auth = mock(Authenticated.class);
+        when(auth.call(isNotNull())).thenAnswer(invocation -> {
             final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
             return f.apply(z);
         });
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
+        assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
     }
 
     @Test
-    public void noneAccepted() {
+    void noneAccepted() {
         final int loanId = 1;
         final Loan mock = new Loan(loanId, 100_000);
         final LoanDescriptor ld = new LoanDescriptor(mock);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky zonky = mockApi();
         final Portfolio portfolio = Portfolio.create(zonky);
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(loanId))).thenReturn(mock);
-        final Authenticated auth = Mockito.mock(Authenticated.class);
-        Mockito.when(auth.call(ArgumentMatchers.isNotNull())).thenAnswer(invocation -> {
+        when(zonky.getLoan(eq(loanId))).thenReturn(mock);
+        final Authenticated auth = mock(Authenticated.class);
+        when(auth.call(isNotNull())).thenAnswer(invocation -> {
             final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
             return f.apply(zonky);
         });
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));
-        Assertions.assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
+        assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
     }
 }

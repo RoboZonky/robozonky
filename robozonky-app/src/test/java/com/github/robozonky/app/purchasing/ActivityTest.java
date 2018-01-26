@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.purchasing;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -26,38 +25,39 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class ActivityTest extends AbstractEventLeveragingTest {
 
     private static final int SLEEP_PERIOD_MINUTES = 60;
 
     @Test
-    public void timestampFailover() {
+    void timestampFailover() {
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, "definitelyNotADate").call();
-        Assertions.assertThat(Activity.getLatestMarketplaceAction())
+        assertThat(Activity.getLatestMarketplaceAction())
                 .isEqualTo(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
     }
 
     @Test
-    public void noTimestamp() {
+    void noTimestamp() {
         Activity.STATE.newBatch(true).call();
-        Assertions.assertThat(Activity.getLatestMarketplaceAction())
+        assertThat(Activity.getLatestMarketplaceAction())
                 .isEqualTo(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
     }
 
     @Test
-    public void properTimestamp() {
+    void properTimestamp() {
         final OffsetDateTime now = OffsetDateTime.now();
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, now.toString()).call();
-        Assertions.assertThat(Activity.getLatestMarketplaceAction()).isEqualTo(now);
+        assertThat(Activity.getLatestMarketplaceAction()).isEqualTo(now);
     }
 
     @Test
-    public void doesWakeUpWhenNewParticipationAndThenSleeps() throws IOException {
+    void doesWakeUpWhenNewParticipationAndThenSleeps() {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp =
                 OffsetDateTime.now().minus(ActivityTest.SLEEP_PERIOD_MINUTES / 2, ChronoUnit.MINUTES);
@@ -67,12 +67,12 @@ class ActivityTest extends AbstractEventLeveragingTest {
                 .call();
         // load API that has marketplace more recent than that
         final Loan l = new Loan(1, 200);
-        final Participation p = Mockito.mock(Participation.class);
+        final Participation p = mock(Participation.class);
         // test proper wakeup
         final Activity activity = new Activity(Collections.singletonList(p));
-        Assertions.assertThat(activity.shouldSleep()).isFalse();
+        assertThat(activity.shouldSleep()).isFalse();
         activity.settle();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             // after which it should properly fall asleep again
             softly.assertThat(activity.shouldSleep()).isTrue();
             // marketplace status has been stored

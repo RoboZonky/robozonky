@@ -24,7 +24,6 @@ import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.socket.PortFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.verify.VerificationTimes.once;
@@ -42,13 +42,13 @@ class ZonkoidConfirmationProviderTest {
     private String serverUrl;
 
     @BeforeEach
-    public void startServer() {
+    void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getPort();
     }
 
     @AfterEach
-    public void stopServer() {
+    void stopServer() {
         server.stop();
     }
 
@@ -76,61 +76,61 @@ class ZonkoidConfirmationProviderTest {
     }
 
     @Test
-    public void normalResponse() {
+    void normalResponse() {
         final boolean result = this.execute(200);
-        Assertions.assertThat(result).isTrue();
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void unknownResponse() {
+    void unknownResponse() {
         final boolean result = this.execute(500);
-        Assertions.assertThat(result).isFalse();
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void failingReponse1() {
+    void failingReponse1() {
         final boolean result = this.execute(400);
-        Assertions.assertThat(result).isFalse();
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void failingResponse2() {
+    void failingResponse2() {
         final boolean result = this.execute(403);
-        Assertions.assertThat(result).isFalse();
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void md5() throws NoSuchAlgorithmException {
+    void md5() throws NoSuchAlgorithmException {
         final String in = "654321|ROBOZONKY|name@surname.cz|12345";
         final String out = "cd15efe487e98e83a215091221568eda";
-        Assertions.assertThat(ZonkoidConfirmationProvider.md5(in)).isEqualTo(out);
+        assertThat(ZonkoidConfirmationProvider.md5(in)).isEqualTo(out);
     }
 
     @Test
-    public void errorOverHttps() {
+    void errorOverHttps() {
         final boolean result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some", "https",
                                                                        new RuntimeException());
-        Assertions.assertThat(result).isFalse();
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void errorOverHttp() {
+    void errorOverHttp() {
         final boolean result = ZonkoidConfirmationProvider.handleError(null, 0, 0, "some", "http",
                                                                        new RuntimeException());
-        Assertions.assertThat(result).isFalse();
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void errorOverUnknown() {
-        Assertions.assertThatThrownBy(() -> ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
-                                                                                    UUID.randomUUID().toString(),
-                                                                                    new RuntimeException()))
+    void errorOverUnknown() {
+        assertThatThrownBy(() -> ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
+                                                                         UUID.randomUUID().toString(),
+                                                                         new RuntimeException()))
                 .isInstanceOf(
                         IllegalStateException.class);
     }
 
     @Test
-    public void properHttpPost() throws UnsupportedEncodingException {
+    void properHttpPost() throws UnsupportedEncodingException {
         final int loanId = 1;
         final RequestId r = new RequestId("user@somewhere.cz", "apitest".toCharArray());
         final HttpPost post = ZonkoidConfirmationProvider.getRequest(r, loanId, 200, "https", "somewhere");
@@ -144,8 +144,8 @@ class ZonkoidConfirmationProviderTest {
     }
 
     @Test
-    public void properId() {
+    void properId() {
         final ZonkoidConfirmationProvider p = new ZonkoidConfirmationProvider();
-        Assertions.assertThat(p.getId()).contains("Zonkoid").contains("Zonkios");
+        assertThat(p.getId()).contains("Zonkoid").contains("Zonkios");
     }
 }

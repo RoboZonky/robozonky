@@ -24,26 +24,27 @@ import javax.management.MBeanServer;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.runtime.Lifecycle;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class ManagementTest {
 
     private static final MBeanServer SERVER = ManagementFactory.getPlatformMBeanServer();
 
     @Test
-    public void registerAndUnregister() {
+    void registerAndUnregister() {
         final int beanCountBeforeRegister = ManagementTest.SERVER.getMBeanCount();
         final Management m = new Management(new Lifecycle());
         final Optional<Consumer<ShutdownHook.Result>> hook = m.get(); // register the mbeans
         final int beanCountAfterRegister = ManagementTest.SERVER.getMBeanCount();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(hook).isPresent();
             softly.assertThat(beanCountAfterRegister).isEqualTo(beanCountBeforeRegister + MBean.values().length);
         });
         hook.get().accept(new ShutdownHook.Result(ReturnCode.OK, null)); // unregister the mbeans
         final int beanCountAfterUnregister = ManagementTest.SERVER.getMBeanCount();
-        Assertions.assertThat(beanCountAfterUnregister).isEqualTo(beanCountBeforeRegister);
+        assertThat(beanCountAfterUnregister).isEqualTo(beanCountBeforeRegister);
     }
 }

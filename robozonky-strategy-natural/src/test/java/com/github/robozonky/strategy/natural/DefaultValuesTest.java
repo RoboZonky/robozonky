@@ -18,56 +18,57 @@ package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class DefaultValuesTest {
 
     @Test
-    public void construct() {
+    void construct() {
         final DefaultPortfolio p = DefaultPortfolio.BALANCED;
         final DefaultValues sut = new DefaultValues(p);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(sut.getPortfolio()).isSameAs(p);
             softly.assertThat(sut.getInvestmentSize().getMinimumInvestmentInCzk()).isEqualTo(0);
-            softly.assertThat(sut.needsConfirmation(Mockito.mock(Loan.class))).isFalse();
+            softly.assertThat(sut.needsConfirmation(mock(Loan.class))).isFalse();
         });
     }
 
     @Test
-    public void setMinimumBalance() {
+    void setMinimumBalance() {
         final DefaultPortfolio p = DefaultPortfolio.BALANCED;
         final DefaultValues sut = new DefaultValues(p);
-        Assertions.assertThat(sut.getMinimumBalance()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+        assertThat(sut.getMinimumBalance()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
         sut.setMinimumBalance(400);
-        Assertions.assertThat(sut.getMinimumBalance()).isEqualTo(400);
+        assertThat(sut.getMinimumBalance()).isEqualTo(400);
         sut.setMinimumBalance(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-        Assertions.assertThat(sut.getMinimumBalance()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+        assertThat(sut.getMinimumBalance()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
     }
 
     @Test
-    public void setWrongMinimumBalance() {
+    void setWrongMinimumBalance() {
         final DefaultPortfolio p = DefaultPortfolio.CONSERVATIVE;
         final DefaultValues sut = new DefaultValues(p);
-        Assertions.assertThatThrownBy(() -> sut.setMinimumBalance(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1))
+        assertThatThrownBy(() -> sut.setMinimumBalance(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void setTargetPortfolioSize() {
+    void setTargetPortfolioSize() {
         final DefaultPortfolio p = DefaultPortfolio.PROGRESSIVE;
         final DefaultValues sut = new DefaultValues(p);
-        Assertions.assertThat(sut.getTargetPortfolioSize()).isEqualTo(Integer.MAX_VALUE);
+        assertThat(sut.getTargetPortfolioSize()).isEqualTo(Integer.MAX_VALUE);
         sut.setTargetPortfolioSize(400);
-        Assertions.assertThat(sut.getTargetPortfolioSize()).isEqualTo(400);
+        assertThat(sut.getTargetPortfolioSize()).isEqualTo(400);
     }
 
     @Test
-    public void setWrongTargetPortfolioSize() {
+    void setWrongTargetPortfolioSize() {
         final DefaultPortfolio p = DefaultPortfolio.EMPTY;
         final DefaultValues sut = new DefaultValues(p);
-        Assertions.assertThatThrownBy(() -> sut.setTargetPortfolioSize(0)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> sut.setTargetPortfolioSize(0)).isInstanceOf(IllegalArgumentException.class);
     }
 }

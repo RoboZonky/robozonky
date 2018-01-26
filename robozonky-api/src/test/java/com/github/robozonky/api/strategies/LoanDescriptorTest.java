@@ -24,11 +24,13 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class LoanDescriptorTest {
 
@@ -37,55 +39,55 @@ class LoanDescriptorTest {
     }
 
     private static Loan mockLoan(final Rating r) {
-        final Loan mockedLoan = Mockito.mock(Loan.class);
-        Mockito.when(mockedLoan.getId()).thenReturn(1);
-        Mockito.when(mockedLoan.getRating()).thenReturn(r);
-        Mockito.when(mockedLoan.getAmount()).thenReturn(2000.0);
-        Mockito.when(mockedLoan.getRemainingInvestment()).thenReturn(1000.0);
-        Mockito.when(mockedLoan.getDatePublished()).thenReturn(OffsetDateTime.now());
+        final Loan mockedLoan = mock(Loan.class);
+        when(mockedLoan.getId()).thenReturn(1);
+        when(mockedLoan.getRating()).thenReturn(r);
+        when(mockedLoan.getAmount()).thenReturn(2000.0);
+        when(mockedLoan.getRemainingInvestment()).thenReturn(1000.0);
+        when(mockedLoan.getDatePublished()).thenReturn(OffsetDateTime.now());
         return mockedLoan;
     }
 
     @Disabled("Looks like CAPTCHA is disabled for now. Let's wait and see if it comes back.")
     @Test
-    public void constructorForCaptcha() {
+    void constructorForCaptcha() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(ld.item()).isSameAs(mockedLoan);
-        softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime())
-                .isPresent()
-                .contains(mockedLoan.getDatePublished().plus(Settings.INSTANCE.getCaptchaDelay()));
-        softly.assertAll();
+        assertSoftly(softly -> {
+            softly.assertThat(ld.item()).isSameAs(mockedLoan);
+            softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime())
+                    .isPresent()
+                    .contains(mockedLoan.getDatePublished().plus(Settings.INSTANCE.getCaptchaDelay()));
+        });
     }
 
     @Test
-    public void constructorForCaptchaLess() {
+    void constructorForCaptchaLess() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan(Rating.AAAAA);
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(ld.item()).isSameAs(mockedLoan);
             softly.assertThat(ld.getLoanCaptchaProtectionEndDateTime()).isEmpty();
         });
     }
 
     @Test
-    public void equalsSelf() {
+    void equalsSelf() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        Assertions.assertThat(ld)
+        assertThat(ld)
                 .isNotEqualTo(null)
                 .isEqualTo(ld);
         final LoanDescriptor ld2 = new LoanDescriptor(mockedLoan);
-        Assertions.assertThat(ld).isEqualTo(ld2);
+        assertThat(ld).isEqualTo(ld2);
     }
 
     @Test
-    public void recommendAmount() {
+    void recommendAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<RecommendedLoan> r = ld.recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
-        Assertions.assertThat(r).isPresent();
+        assertThat(r).isPresent();
         final RecommendedLoan recommendation = r.get();
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(recommendation.descriptor()).isSameAs(ld);
@@ -96,10 +98,10 @@ class LoanDescriptorTest {
     }
 
     @Test
-    public void recommendWrongAmount() {
+    void recommendWrongAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<RecommendedLoan> r = ld.recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1));
-        Assertions.assertThat(r).isEmpty();
+        assertThat(r).isEmpty();
     }
 }

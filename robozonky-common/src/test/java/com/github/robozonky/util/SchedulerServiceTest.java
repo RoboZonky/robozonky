@@ -18,17 +18,18 @@ package com.github.robozonky.util;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class SchedulerServiceTest {
 
     @Test
-    public void defaults() {
-        final PausableScheduledExecutorService expected = Mockito.mock(PausableScheduledExecutorService.class);
+    void defaults() {
+        final PausableScheduledExecutorService expected = mock(PausableScheduledExecutorService.class);
         final SchedulerService s = (parallelism, threadFactory) -> expected;
         final ScheduledExecutorService ses = s.newScheduledExecutorService(1);
-        Assertions.assertThat(ses).isSameAs(expected);
+        assertThat(ses).isSameAs(expected);
     }
 }

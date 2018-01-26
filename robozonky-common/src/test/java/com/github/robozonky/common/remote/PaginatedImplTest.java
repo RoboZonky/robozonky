@@ -21,24 +21,24 @@ import java.util.Collections;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Settings;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class PaginatedImplTest {
 
     @Test
-    public void constructor() {
-        final PaginatedApi<Loan, LoanApi> api = Mockito.mock(PaginatedApi.class);
+    void constructor() {
+        final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
         final int pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         // when execute is called with the right parameters, we pretend the API returned no results
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(0),
-                                 ArgumentMatchers.eq(pageSize)))
+        when(api.execute(any(), any(), eq(0),
+                         eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 0, 0));
         final Paginated<Loan> p = new PaginatedImpl<>(api);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(p.getExpectedPageSize()).isEqualTo(pageSize);
             softly.assertThat(p.getPageId()).isEqualTo(0);
             softly.assertThat(p.getTotalItemCount()).isEqualTo(0);
@@ -48,26 +48,26 @@ class PaginatedImplTest {
     }
 
     @Test
-    public void nextPageMissing() {
-        final PaginatedApi<Loan, LoanApi> api = Mockito.mock(PaginatedApi.class);
+    void nextPageMissing() {
+        final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
         final int pageSize = 1;
         // when execute calls for first page, we pretend the API returned 1 result
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(0),
-                                 ArgumentMatchers.eq(pageSize)))
+        when(api.execute(any(), any(), eq(0),
+                         eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.singleton(new Loan(1, 200)), 0, 1));
         // when execute calls for second page, we pretend the API returned no results
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(1),
-                                 ArgumentMatchers.eq(pageSize)))
+        when(api.execute(any(), any(), eq(1),
+                         eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 1, 1));
         final Paginated<Loan> p = new PaginatedImpl<>(api, Sort.unspecified(), pageSize);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(p.getExpectedPageSize()).isEqualTo(pageSize);
             softly.assertThat(p.getPageId()).isEqualTo(0);
             softly.assertThat(p.getTotalItemCount()).isEqualTo(1);
             softly.assertThat(p.getItemsOnPage()).hasSize(1);
         });
-        Assertions.assertThat(p.nextPage()).isFalse();
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(p.nextPage()).isFalse();
+        assertSoftly(softly -> {
             softly.assertThat(p.getExpectedPageSize()).isEqualTo(pageSize);
             softly.assertThat(p.getPageId()).isEqualTo(1);
             softly.assertThat(p.getTotalItemCount()).isEqualTo(1);

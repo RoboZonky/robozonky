@@ -22,14 +22,15 @@ import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.*;
 
 class DaemonShutdownHookTest {
 
     @Test
-    public void runtime() {
-        final Lifecycle lifecycle = Mockito.mock(Lifecycle.class);
-        final ShutdownEnabler se = Mockito.mock(ShutdownEnabler.class);
+    void runtime() {
+        final Lifecycle lifecycle = mock(Lifecycle.class);
+        final ShutdownEnabler se = mock(ShutdownEnabler.class);
         final DaemonShutdownHook hook = new DaemonShutdownHook(lifecycle, se);
         hook.start();
         se.get().ifPresent(c -> c.accept(new ShutdownHook.Result(ReturnCode.OK, null)));
@@ -37,8 +38,8 @@ class DaemonShutdownHookTest {
             while (hook.isAlive()) { // wait until the hook to terminate
                 Thread.sleep(1);
             }
-            Mockito.verify(se).waitUntilTriggered();
-            Mockito.verify(lifecycle).resumeToShutdown();
+            verify(se).waitUntilTriggered();
+            verify(lifecycle).resumeToShutdown();
         });
     }
 }

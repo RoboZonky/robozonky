@@ -30,10 +30,10 @@ import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ZonkyApiTokenSupplierTest {
 
@@ -51,8 +51,8 @@ class ZonkyApiTokenSupplierTest {
     }
 
     private static ApiProvider mockApi(final OAuth oAuth) {
-        final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth(ArgumentMatchers.any())).thenAnswer(invocation -> {
+        final ApiProvider api = mock(ApiProvider.class);
+        when(api.oauth(any())).thenAnswer(invocation -> {
             final Function<OAuth, Object> f = invocation.getArgument(0);
             return f.apply(oAuth);
         });
@@ -60,82 +60,82 @@ class ZonkyApiTokenSupplierTest {
     }
 
     @Test
-    public void fixesExpiredToken() {
-        final OAuth oAuth = Mockito.mock(OAuth.class);
-        Mockito.when(oAuth.login(ArgumentMatchers.eq(SECRETS.getUsername()),
-                                 ArgumentMatchers.eq(SECRETS.getPassword())))
+    void fixesExpiredToken() {
+        final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.login(eq(SECRETS.getUsername()),
+                         eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getStaleToken());
         final ApiProvider api = mockApi(oAuth);
         final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         final Optional<ZonkyApiToken> token = t.get();
-        Assertions.assertThat(token).isPresent();
+        assertThat(token).isPresent();
         final Optional<ZonkyApiToken> token2 = t.get();
-        Assertions.assertThat(token2).isPresent();
-        Assertions.assertThat(token2).isNotEqualTo(token);
+        assertThat(token2).isPresent();
+        assertThat(token2).isNotEqualTo(token);
     }
 
     @Test
-    public void reusesExistingToken() {
-        final OAuth oAuth = Mockito.mock(OAuth.class);
-        Mockito.when(oAuth.login(ArgumentMatchers.eq(SECRETS.getUsername()),
-                                 ArgumentMatchers.eq(SECRETS.getPassword())))
+    void reusesExistingToken() {
+        final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.login(eq(SECRETS.getUsername()),
+                         eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofMinutes(5)));
         final ApiProvider api = mockApi(oAuth);
         final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         final Optional<ZonkyApiToken> token = t.get();
-        Assertions.assertThat(token).isPresent();
+        assertThat(token).isPresent();
         final Optional<ZonkyApiToken> token2 = t.get();
-        Assertions.assertThat(token2).isPresent();
-        Assertions.assertThat(token2).isEqualTo(token);
+        assertThat(token2).isPresent();
+        assertThat(token2).isEqualTo(token);
     }
 
     @Test
-    public void refreshesTokenBeforeExpiration() {
-        final OAuth oAuth = Mockito.mock(OAuth.class);
-        Mockito.when(oAuth.login(ArgumentMatchers.eq(SECRETS.getUsername()),
-                                 ArgumentMatchers.eq(SECRETS.getPassword())))
+    void refreshesTokenBeforeExpiration() {
+        final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.login(eq(SECRETS.getUsername()),
+                         eq(SECRETS.getPassword())))
                 .thenReturn(getTokenExpiringIn(Duration.ofSeconds(5)));
-        Mockito.when(oAuth.refresh(ArgumentMatchers.any()))
+        when(oAuth.refresh(any()))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
         final ApiProvider api = mockApi(oAuth);
         final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ofSeconds(1));
         final Optional<ZonkyApiToken> token = t.get();
-        Assertions.assertThat(token).isPresent();
+        assertThat(token).isPresent();
         final Optional<ZonkyApiToken> token2 = t.get();
-        Assertions.assertThat(token2).isPresent();
-        Assertions.assertThat(token2).isNotEqualTo(token);
+        assertThat(token2).isPresent();
+        assertThat(token2).isNotEqualTo(token);
     }
 
     @Test
-    public void refreshFailOnToken() {
-        final OAuth oAuth = Mockito.mock(OAuth.class);
-        Mockito.when(oAuth.login(ArgumentMatchers.eq(SECRETS.getUsername()),
-                                 ArgumentMatchers.eq(SECRETS.getPassword())))
+    void refreshFailOnToken() {
+        final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.login(eq(SECRETS.getUsername()),
+                         eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
-        Mockito.when(oAuth.refresh(ArgumentMatchers.any()))
+        when(oAuth.refresh(any()))
                 .thenThrow(BadRequestException.class);
         final ApiProvider api = mockApi(oAuth);
         final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         final Optional<ZonkyApiToken> token = t.get();
-        Assertions.assertThat(token).isPresent();
+        assertThat(token).isPresent();
         final Optional<ZonkyApiToken> token2 = t.get();
-        Assertions.assertThat(token2).isPresent();
-        Assertions.assertThat(token2).isNotEqualTo(token);
+        assertThat(token2).isPresent();
+        assertThat(token2).isNotEqualTo(token);
     }
 
     @Test
-    public void refreshFailUnknown() {
-        final OAuth oAuth = Mockito.mock(OAuth.class);
-        Mockito.when(oAuth.login(ArgumentMatchers.eq(SECRETS.getUsername()),
-                                 ArgumentMatchers.eq(SECRETS.getPassword())))
+    void refreshFailUnknown() {
+        final OAuth oAuth = mock(OAuth.class);
+        when(oAuth.login(eq(SECRETS.getUsername()),
+                         eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
-        Mockito.when(oAuth.refresh(ArgumentMatchers.any()))
+        when(oAuth.refresh(any()))
                 .thenThrow(IllegalStateException.class);
         final ApiProvider api = mockApi(oAuth);
         final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
         final Optional<ZonkyApiToken> token = t.get();
-        Assertions.assertThat(token).isPresent();
+        assertThat(token).isPresent();
         final Optional<ZonkyApiToken> token2 = t.get();
-        Assertions.assertThat(token2).isEmpty();
+        assertThat(token2).isEmpty();
     }
 }

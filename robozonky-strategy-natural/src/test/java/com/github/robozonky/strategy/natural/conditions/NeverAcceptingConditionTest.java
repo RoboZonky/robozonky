@@ -16,14 +16,15 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class NeverAcceptingConditionTest {
 
     @Test
-    public void negate() {
+    void negate() {
         final MarketplaceFilterCondition negated = NeverAceptingCondition.INSTANCE.negate();
-        Assertions.assertThat(negated).isEqualTo(AlwaysAcceptingCondition.INSTANCE);
+        assertThat(negated).isEqualTo(AlwaysAcceptingCondition.INSTANCE);
     }
 }

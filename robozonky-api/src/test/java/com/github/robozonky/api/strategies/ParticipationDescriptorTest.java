@@ -21,55 +21,57 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.Participation;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class ParticipationDescriptorTest {
 
-    private static Participation mock(final BigDecimal amount) {
-        final Participation p = Mockito.mock(Participation.class);
-        Mockito.when(p.getRemainingPrincipal()).thenReturn(amount);
+    private static Participation mockParticipation(final BigDecimal amount) {
+        final Participation p = mock(Participation.class);
+        when(p.getRemainingPrincipal()).thenReturn(amount);
         return p;
     }
 
     @Test
-    public void recommend() {
-        final Participation p = mock(BigDecimal.TEN);
+    void recommend() {
+        final Participation p = ParticipationDescriptorTest.mockParticipation(BigDecimal.TEN);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p);
         final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal());
-        Assertions.assertThat(r).isPresent();
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(r).isPresent();
+        assertSoftly(softly -> {
             softly.assertThat(r.get().amount()).isEqualTo(p.getRemainingPrincipal());
             softly.assertThat(r.get().descriptor()).isEqualTo(pd);
         });
     }
 
     @Test
-    public void recommendWrong() {
-        final Participation p = mock(BigDecimal.TEN);
+    void recommendWrong() {
+        final Participation p = ParticipationDescriptorTest.mockParticipation(BigDecimal.TEN);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p);
         final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal().subtract(BigDecimal.ONE));
-        Assertions.assertThat(r).isEmpty();
+        assertThat(r).isEmpty();
     }
 
     @Test
-    public void equals() {
-        final Participation p = mock(BigDecimal.TEN);
+    void equals() {
+        final Participation p = ParticipationDescriptorTest.mockParticipation(BigDecimal.TEN);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(pd).isNotEqualTo(null);
             softly.assertThat(pd).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(pd).isEqualTo(pd);
         });
         final ParticipationDescriptor pd2 = new ParticipationDescriptor(p);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(pd).isEqualTo(pd2);
             softly.assertThat(pd2).isEqualTo(pd);
         });
-        final ParticipationDescriptor pd3 = new ParticipationDescriptor(mock(BigDecimal.ONE));
-        SoftAssertions.assertSoftly(softly -> {
+        final ParticipationDescriptor pd3 = new ParticipationDescriptor(
+                ParticipationDescriptorTest.mockParticipation(BigDecimal.ONE));
+        assertSoftly(softly -> {
             softly.assertThat(pd).isNotEqualTo(pd3);
         });
     }

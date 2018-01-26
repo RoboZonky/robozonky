@@ -20,39 +20,40 @@ import java.util.Optional;
 
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class CommandLineTest extends AbstractRoboZonkyTest {
 
     @Test
-    public void properScriptIdentification() {
+    void properScriptIdentification() {
         System.setProperty("os.name", "Some Windows System");
-        Assertions.assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.bat");
+        assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.bat");
         System.setProperty("os.name", "Any Other System");
-        Assertions.assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.sh");
+        assertThat(CommandLine.getScriptIdentifier()).isEqualTo("robozonky.sh");
     }
 
     @Test
-    public void validDaemonCli() {
+    void validDaemonCli() {
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
                                                                }, "-u", "someone", "-p", "password",
                                                                "daemon", "-s", "somewhere");
-        Assertions.assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
+        assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
     }
 
     @Test
-    public void helpCli() {
+    void helpCli() {
         final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
         }, "-h");
-        Assertions.assertThat(cfg).isEmpty(); // would have called System.exit(), but we prevented that
+        assertThat(cfg).isEmpty(); // would have called System.exit(), but we prevented that
     }
 
     @Test
-    public void invalidCli() {
+    void invalidCli() {
         final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
         });
-        Assertions.assertThat(cfg).isEmpty(); // would have called System.exit(), but we prevented that
+        assertThat(cfg).isEmpty(); // would have called System.exit(), but we prevented that
     }
 }

@@ -27,26 +27,26 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    public void standard() {
-        final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
-        final Marketplace m = Mockito.mock(Marketplace.class);
+    void standard() {
+        final Authenticated a = mockAuthentication(mock(Zonky.class));
+        final Marketplace m = mock(Marketplace.class);
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, s,
-                                                      () -> Optional.of(Mockito.mock(Portfolio.class)), Duration.ZERO,
+                                                      () -> Optional.of(mock(Portfolio.class)), Duration.ZERO,
                                                       Duration.ofSeconds(1));
         d.run();
-        Mockito.verify(m, Mockito.times(1)).registerListener(ArgumentMatchers.any());
+        verify(m, times(1)).registerListener(any());
         d.run();
-        Mockito.verify(m, Mockito.times(1)).registerListener(ArgumentMatchers.any()); // still 1
-        Mockito.verify(m, Mockito.times(2)).run();
-        Assertions.assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
+        verify(m, times(1)).registerListener(any()); // still 1
+        verify(m, times(2)).run();
+        assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }

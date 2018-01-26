@@ -19,47 +19,47 @@ package com.github.robozonky.notifications.email;
 import java.util.Properties;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class EmailingEventListenerSupplierTest {
 
     private static NotificationProperties mockProperties(final SupportedListener listener) {
-        final NotificationProperties p = Mockito.spy(new NotificationProperties(new Properties()));
-        Mockito.doReturn(false).when(p).isListenerEnabled(ArgumentMatchers.any());
-        Mockito.doReturn(true).when(p).isListenerEnabled(ArgumentMatchers.eq(listener));
+        final NotificationProperties p = spy(new NotificationProperties(new Properties()));
+        doReturn(false).when(p).isListenerEnabled(any());
+        doReturn(true).when(p).isListenerEnabled(eq(listener));
         return p;
     }
 
     @Test
-    public void lifecycle() {
+    void lifecycle() {
         final EmailingEventListenerSupplier<RoboZonkyTestingEvent> s =
                 new EmailingEventListenerSupplier<>(RoboZonkyTestingEvent.class);
-        Assertions.assertThat(s.get()).isEmpty();
+        assertThat(s.get()).isEmpty();
         final NotificationProperties p = mockProperties(SupportedListener.TESTING);
         s.valueSet(p);
-        Assertions.assertThat(s.get())
+        assertThat(s.get())
                 .isPresent()
                 .containsInstanceOf(RoboZonkyTestingEventListener.class);
         s.valueUnset(p);
-        Assertions.assertThat(s.get()).isEmpty();
+        assertThat(s.get()).isEmpty();
     }
 
     @Test
-    public void setDisabled() {
+    void setDisabled() {
         final EmailingEventListenerSupplier<RoboZonkyTestingEvent> s =
                 new EmailingEventListenerSupplier<>(RoboZonkyTestingEvent.class);
-        Assertions.assertThat(s.get()).isEmpty();
+        assertThat(s.get()).isEmpty();
         final NotificationProperties p = mockProperties(SupportedListener.TESTING);
         s.valueSet(p);
-        Assertions.assertThat(s.get())
+        assertThat(s.get())
                 .isPresent()
                 .containsInstanceOf(RoboZonkyTestingEventListener.class);
         // new properties don't have this listener enabled, therefore empty optional should be returned
         final NotificationProperties p2 = mockProperties(SupportedListener.CRASHED);
         s.valueChanged(p, p2);
-        Assertions.assertThat(s.get()).isEmpty();
+        assertThat(s.get()).isEmpty();
     }
 }

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 public abstract class AbstractEventLeveragingTest extends AbstractRoboZonkyTest {
 
-    private Collection<Event> previouslyExistingEvents = new LinkedHashSet<>(0);
+    private final Collection<Event> previouslyExistingEvents = new LinkedHashSet<>(0);
 
     @BeforeEach
     public void enableEventDebug() {

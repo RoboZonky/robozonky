@@ -20,38 +20,39 @@ import java.io.File;
 
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class InstallDirValidatorTest {
 
     private static InstallData mockBaseData(final String installPath) {
-        final InstallData data = Mockito.mock(InstallData.class);
-        Mockito.when(data.getVariable(Variables.INSTALL_PATH.getKey()))
+        final InstallData data = mock(InstallData.class);
+        when(data.getVariable(Variables.INSTALL_PATH.getKey()))
                 .thenReturn(new File(installPath).getAbsolutePath());
         return data;
     }
 
     @Test
-    public void correctDirLinux() {
+    void correctDirLinux() {
         final InstallData d = InstallDirValidatorTest.mockBaseData("/home/lpetrovi/RoboZonky/4.0.0-SNAPSHOT");
         final InstallDirValidator v = new InstallDirValidator();
-        Assertions.assertThat(v.validateData(d)).isEqualTo(DataValidator.Status.OK);
+        assertThat(v.validateData(d)).isEqualTo(DataValidator.Status.OK);
     }
 
     @Test
-    public void correctDirWindows() {
+    void correctDirWindows() {
         final InstallData d = InstallDirValidatorTest.mockBaseData("C:\\RoboZonky\\4.0.0-SNAPSHOT");
         final InstallDirValidator v = new InstallDirValidator();
-        Assertions.assertThat(v.validateData(d)).isEqualTo(DataValidator.Status.OK);
+        assertThat(v.validateData(d)).isEqualTo(DataValidator.Status.OK);
     }
 
     @Test
-    public void wrongDir() {
+    void wrongDir() {
         final InstallData d = InstallDirValidatorTest.mockBaseData("C:\\Program Files\\RoboZonky\\4.0.0-SNAPSHOT");
         final InstallDirValidator v = new InstallDirValidator();
-        Assertions.assertThat(v.validateData(d)).isEqualTo(DataValidator.Status.ERROR);
-        Assertions.assertThat(v.getErrorMessageId()).isNotEmpty();
+        assertThat(v.validateData(d)).isEqualTo(DataValidator.Status.ERROR);
+        assertThat(v.getErrorMessageId()).isNotEmpty();
     }
 }

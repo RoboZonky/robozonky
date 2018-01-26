@@ -18,25 +18,26 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class VeryShortStoryConditionTest {
 
     @Test
-    public void longerNotOk() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
+    void longerNotOk() {
+        final Wrapper l = mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.VERY_SHORT_STORY_THRESHOLD, '*');
-        Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new VeryShortStoryCondition().test(l)).isFalse();
+        when(l.getStory()).thenReturn(story);
+        assertThat(new VeryShortStoryCondition().test(l)).isFalse();
     }
 
     @Test
-    public void shorterOk() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
+    void shorterOk() {
+        final Wrapper l = mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.VERY_SHORT_STORY_THRESHOLD - 1, '*');
-        Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new VeryShortStoryCondition().test(l)).isTrue();
+        when(l.getStory()).thenReturn(story);
+        assertThat(new VeryShortStoryCondition().test(l)).isTrue();
     }
 }

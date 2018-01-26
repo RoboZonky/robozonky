@@ -18,25 +18,26 @@ package com.github.robozonky.marketplaces;
 
 import java.util.UUID;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class RoboZonkyMarketplaceServiceTest {
 
     @Test
-    public void zotifyRetrieval() {
-        Assertions.assertThat(new RobozonkyMarketplaceService().find("zotify"))
+    void zotifyRetrieval() {
+        assertThat(new RobozonkyMarketplaceService().find("zotify"))
                 .isPresent().containsInstanceOf(ZotifyMarketplace.class);
     }
 
     @Test
-    public void zonkyRetrieval() {
-        Assertions.assertThat(new RobozonkyMarketplaceService().find("zonky"))
+    void zonkyRetrieval() {
+        assertThat(new RobozonkyMarketplaceService().find("zonky"))
                 .isPresent().containsInstanceOf(ZonkyMarketplace.class);
     }
 
     @Test
-    public void nonexistent() {
-        Assertions.assertThat(new RobozonkyMarketplaceService().find(UUID.randomUUID().toString())).isEmpty();
+    void nonexistent() {
+        assertThat(new RobozonkyMarketplaceService().find(UUID.randomUUID().toString())).isEmpty();
     }
 }

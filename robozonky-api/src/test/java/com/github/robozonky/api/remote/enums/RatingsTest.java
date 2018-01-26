@@ -16,79 +16,80 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class RatingsTest {
 
     @Test
-    public void ratingsAreProperlySerialized() {
-        Assertions.assertThat(Ratings.of(Rating.A).toString()).isEqualTo("[\"A\"]");
-        Assertions.assertThat(Ratings.of(Rating.AA, Rating.AAAA, Rating.AA).toString()).isEqualTo("[\"AAAA\", \"AA\"]");
+    void ratingsAreProperlySerialized() {
+        assertThat(Ratings.of(Rating.A).toString()).isEqualTo("[\"A\"]");
+        assertThat(Ratings.of(Rating.AA, Rating.AAAA, Rating.AA).toString()).isEqualTo("[\"AAAA\", \"AA\"]");
     }
 
     @Test
-    public void ratingsAreProperlyEnumerated() {
-        Assertions.assertThat(Ratings.of(Rating.AAA).getRatings()).containsExactly(Rating.AAA);
-        Assertions.assertThat(Ratings.of(Rating.B, Rating.C, Rating.B).getRatings()).containsExactly(Rating.B,
+    void ratingsAreProperlyEnumerated() {
+        assertThat(Ratings.of(Rating.AAA).getRatings()).containsExactly(Rating.AAA);
+        assertThat(Ratings.of(Rating.B, Rating.C, Rating.B).getRatings()).containsExactly(Rating.B,
                                                                                                      Rating.C);
     }
 
     @Test
-    public void ofAll() {
+    void ofAll() {
         final Ratings result = Ratings.all();
-        Assertions.assertThat(result.getRatings()).containsOnly(Rating.values());
+        assertThat(result.getRatings()).containsOnly(Rating.values());
     }
 
     @Test
-    public void correctValueOf() {
+    void correctValueOf() {
         // test no items
-        Assertions.assertThat(Ratings.valueOf("[]").getRatings()).isEmpty();
-        Assertions.assertThat(Ratings.valueOf(" [ ] ").getRatings()).isEmpty();
+        assertThat(Ratings.valueOf("[]").getRatings()).isEmpty();
+        assertThat(Ratings.valueOf(" [ ] ").getRatings()).isEmpty();
         // test one item
-        Assertions.assertThat(Ratings.valueOf("[ \"A\" ]").getRatings())
+        assertThat(Ratings.valueOf("[ \"A\" ]").getRatings())
                 .containsExactly(Rating.A);
-        Assertions.assertThat(Ratings.valueOf(" [ \"AA\"]").getRatings())
+        assertThat(Ratings.valueOf(" [ \"AA\"]").getRatings())
                 .containsExactly(Rating.AA);
         // test multiple items
-        Assertions.assertThat(Ratings.valueOf(" [\"AAA\", \"B\"]").getRatings())
+        assertThat(Ratings.valueOf(" [\"AAA\", \"B\"]").getRatings())
                 .containsExactly(Rating.AAA, Rating.B);
-        Assertions.assertThat(Ratings.valueOf(" [\"B\" , \"AAA\"] ").getRatings())
+        assertThat(Ratings.valueOf(" [\"B\" , \"AAA\"] ").getRatings())
                 .containsExactly(Rating.AAA, Rating.B);
     }
 
     @Test
-    public void invalidValueOf() {
-        Assertions.assertThatThrownBy(() -> Ratings.valueOf("[")).isInstanceOf(IllegalArgumentException.class);
+    void invalidValueOf() {
+        assertThatThrownBy(() -> Ratings.valueOf("[")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void invalidValueOf2() {
-        Assertions.assertThatThrownBy(() -> Ratings.valueOf("]")).isInstanceOf(IllegalArgumentException.class);
+    void invalidValueOf2() {
+        assertThatThrownBy(() -> Ratings.valueOf("]")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void unquotedValueOf() {
-        Assertions.assertThatThrownBy(() -> Ratings.valueOf("[A]")).isInstanceOf(IllegalArgumentException.class);
+    void unquotedValueOf() {
+        assertThatThrownBy(() -> Ratings.valueOf("[A]")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void unknownValueOf() {
-        Assertions.assertThatThrownBy(() -> Ratings.valueOf("[\"SOME_UNKNOWN_VALUE\"]"))
+    void unknownValueOf() {
+        assertThatThrownBy(() -> Ratings.valueOf("[\"SOME_UNKNOWN_VALUE\"]"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void equality() {
+    void equality() {
         final Ratings r1 = Ratings.of(Rating.A, Rating.B);
-        Assertions.assertThat(r1)
+        assertThat(r1)
                 .isSameAs(r1)
                 .isEqualTo(r1)
                 .isNotEqualTo(null)
                 .isNotEqualTo(this.getClass());
         final Ratings r2 = Ratings.of(Rating.A, Rating.B);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r1).isNotSameAs(r2).isEqualTo(r2);
             softly.assertThat(r2).isEqualTo(r1);
         });

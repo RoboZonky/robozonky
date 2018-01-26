@@ -19,25 +19,26 @@ package com.github.robozonky.app.management;
 import java.util.Optional;
 
 import com.github.robozonky.app.runtime.Lifecycle;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class LifecycleTest {
 
     @Test
-    public void version() {
-        final Lifecycle l = Mockito.mock(Lifecycle.class);
-        Mockito.when(l.getZonkyApiVersion()).thenReturn(Optional.empty());
+    void version() {
+        final Lifecycle l = mock(Lifecycle.class);
+        when(l.getZonkyApiVersion()).thenReturn(Optional.empty());
         final Runtime r = new Runtime(l);
-        Assertions.assertThat(r.getZonkyApiVersion()).isEqualTo("N/A");
+        assertThat(r.getZonkyApiVersion()).isEqualTo("N/A");
     }
 
     @Test
-    public void shutdown() {
-        final Lifecycle l = Mockito.mock(Lifecycle.class);
+    void shutdown() {
+        final Lifecycle l = mock(Lifecycle.class);
         final Runtime r = new Runtime(l);
         r.stopDaemon();
-        Mockito.verify(l).resumeToShutdown();
+        verify(l).resumeToShutdown();
     }
 }

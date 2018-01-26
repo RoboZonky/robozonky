@@ -46,16 +46,17 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.mockito.Mockito;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.*;
 
 class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
@@ -79,7 +80,7 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     @BeforeAll
     static void loadAll() {
-        MGMT = new Management(Mockito.mock(Lifecycle.class)).get();
+        MGMT = new Management(mock(Lifecycle.class)).get();
     }
 
     @AfterAll
@@ -215,9 +216,9 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     private void testSet(final Event event, final Consumer<SoftAssertions> assertionsBefore,
                          final Consumer<SoftAssertions> assertionsAfter) {
-        SoftAssertions.assertSoftly(assertionsBefore);
+        assertSoftly(assertionsBefore);
         handleEvent(event);
-        SoftAssertions.assertSoftly(assertionsAfter);
+        assertSoftly(assertionsAfter);
     }
 
     @TestFactory
@@ -246,6 +247,6 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     void setInvalid() {
         final JmxListenerService service = new JmxListenerService();
         final EventListenerSupplier<RoboZonkyEndingEvent> r = service.findListener(RoboZonkyEndingEvent.class);
-        Assertions.assertThat(r).isNull();
+        assertThat(r).isNull();
     }
 }

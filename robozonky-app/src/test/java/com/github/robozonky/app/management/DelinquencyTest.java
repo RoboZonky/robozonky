@@ -24,17 +24,18 @@ import java.util.stream.Stream;
 import com.github.robozonky.app.portfolio.Delinquent;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class DelinquencyTest extends AbstractRoboZonkyTest {
 
     private final OffsetDateTime EPOCH = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
 
     @Test
-    public void empty() {
+    void empty() {
         final Delinquency d = new Delinquency();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d.getAll()).isEmpty();
             softly.assertThat(d.get10Plus()).isEmpty();
             softly.assertThat(d.get30Plus()).isEmpty();
@@ -44,12 +45,12 @@ class DelinquencyTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    public void something() {
+    void something() {
         final Delinquent delinquent = new Delinquent(1, EPOCH.toLocalDate());
         final Supplier<Stream<Delinquent>> supplier = () -> Stream.of(delinquent);
         final Delinquency d = new Delinquency(supplier);
         final int loanId = delinquent.getLoanId();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(d.getAll()).containsOnlyKeys(loanId);
             softly.assertThat(d.get10Plus()).containsOnlyKeys(loanId);
             softly.assertThat(d.get30Plus()).containsOnlyKeys(loanId);

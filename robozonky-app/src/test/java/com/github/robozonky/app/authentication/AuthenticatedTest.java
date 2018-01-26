@@ -32,21 +32,21 @@ import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class AuthenticatedTest extends AbstractZonkyLeveragingTest {
 
     private static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
-        final ApiProvider api = Mockito.mock(ApiProvider.class);
-        Mockito.when(api.oauth(ArgumentMatchers.any(Function.class))).then(i -> {
+        final ApiProvider api = mock(ApiProvider.class);
+        when(api.oauth(any(Function.class))).then(i -> {
             final Function f = i.getArgument(0);
             return f.apply(oauth);
         });
-        Mockito.when(api.authenticated(ArgumentMatchers.any(ZonkyApiToken.class), ArgumentMatchers.any(Function.class)))
+        when(api.authenticated(any(ZonkyApiToken.class), any(Function.class)))
                 .then(i -> {
                     final Function f = i.getArgument(1);
                     return f.apply(z);
@@ -55,9 +55,9 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    public void restrictions() {
-        final Zonky z = Mockito.mock(Zonky.class);
-        Mockito.when(z.getRestrictions()).thenAnswer(invocation -> Mockito.mock(Restrictions.class));
+    void restrictions() {
+        final Zonky z = mock(Zonky.class);
+        when(z.getRestrictions()).thenAnswer(invocation -> mock(Restrictions.class));
         final AbstractAuthenticated a = new AbstractAuthenticated() {
             @Override
             public <T> T call(final Function<Zonky, T> operation) {
@@ -70,14 +70,14 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
             }
         };
         final Restrictions r = a.getRestrictions(Instant.now().minus(Duration.ofMinutes(10))); // stale
-        Assertions.assertThat(r).isNotNull();
+        assertThat(r).isNotNull();
         final Restrictions r2 = a.getRestrictions(); // should refresh
-        Assertions.assertThat(r2).isNotNull().isNotEqualTo(r);
+        assertThat(r2).isNotNull().isNotEqualTo(r);
     }
 
     @Test
-    public void run() {
-        final Zonky z = Mockito.mock(Zonky.class);
+    void run() {
+        final Zonky z = mock(Zonky.class);
         final AbstractAuthenticated a = new AbstractAuthenticated() {
             @Override
             public <T> T call(final Function<Zonky, T> operation) {
@@ -89,86 +89,86 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
                 return null;
             }
         };
-        final Consumer<Zonky> runnable = Mockito.mock(Consumer.class);
+        final Consumer<Zonky> runnable = mock(Consumer.class);
         a.run(runnable);
-        Mockito.verify(runnable).accept(ArgumentMatchers.eq(z));
+        verify(runnable).accept(eq(z));
     }
 
     @Test
-    public void defaultMethod() {
-        final Zonky z = Mockito.mock(Zonky.class);
+    void defaultMethod() {
+        final Zonky z = mock(Zonky.class);
         final Authenticated a = mockAuthentication(z);
         final Consumer<Zonky> c = zonky -> z.logout();
         a.run(c);
-        Mockito.verify(z).logout();
+        verify(z).logout();
     }
 
     @Test
-    public void passwordProper() {
+    void passwordProper() {
         // prepare SUT
         final SecretProvider sp = SecretProvider.fallback(UUID.randomUUID().toString(), new char[0]);
         final String username = sp.getUsername();
         final char[] password = sp.getPassword();
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
-        final OAuth oauth = Mockito.mock(OAuth.class);
-        Mockito.when(oauth.login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password))).thenReturn(token);
-        final Zonky z = Mockito.mock(Zonky.class);
+        final OAuth oauth = mock(OAuth.class);
+        when(oauth.login(eq(username), eq(password))).thenReturn(token);
+        final Zonky z = mock(Zonky.class);
         final ApiProvider api = mockApiProvider(oauth, z);
         final Authenticated a = Authenticated.passwordBased(api, sp);
         // call SUT
-        final Function<Zonky, Collection<Investment>> f = Mockito.mock(Function.class);
+        final Function<Zonky, Collection<Investment>> f = mock(Function.class);
         final Collection<Investment> expectedResult = Collections.emptyList();
-        Mockito.when(f.apply(ArgumentMatchers.eq(z))).thenReturn(expectedResult);
+        when(f.apply(eq(z))).thenReturn(expectedResult);
         final Collection<Investment> result = a.call(f);
-        Assertions.assertThat(result).isSameAs(expectedResult);
-        Mockito.verify(oauth).login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password));
-        Mockito.verify(oauth, Mockito.never()).refresh(ArgumentMatchers.any());
-        Mockito.verify(z).logout();
+        assertThat(result).isSameAs(expectedResult);
+        verify(oauth).login(eq(username), eq(password));
+        verify(oauth, never()).refresh(any());
+        verify(z).logout();
     }
 
     @Test
-    public void passwordLogsOutEvenWhenFailing() {
+    void passwordLogsOutEvenWhenFailing() {
         // prepare SUT
         final SecretProvider sp = SecretProvider.fallback(UUID.randomUUID().toString(), new char[0]);
         final String username = sp.getUsername();
         final char[] password = sp.getPassword();
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
-        final OAuth oauth = Mockito.mock(OAuth.class);
-        Mockito.when(oauth.login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password))).thenReturn(token);
-        final Zonky z = Mockito.mock(Zonky.class);
+        final OAuth oauth = mock(OAuth.class);
+        when(oauth.login(eq(username), eq(password))).thenReturn(token);
+        final Zonky z = mock(Zonky.class);
         final ApiProvider api = mockApiProvider(oauth, z);
         final Authenticated a = Authenticated.passwordBased(api, sp);
         // call SUT
-        final Function<Zonky, Collection<Investment>> f = Mockito.mock(Function.class);
-        Mockito.when(f.apply(ArgumentMatchers.eq(z))).thenThrow(new IllegalStateException());
-        Assertions.assertThatThrownBy(() -> a.call(f)).isInstanceOf(IllegalStateException.class);
-        Mockito.verify(z).logout();
+        final Function<Zonky, Collection<Investment>> f = mock(Function.class);
+        when(f.apply(eq(z))).thenThrow(new IllegalStateException());
+        assertThatThrownBy(() -> a.call(f)).isInstanceOf(IllegalStateException.class);
+        verify(z).logout();
     }
 
     @Test
-    public void tokenProper() {
+    void tokenProper() {
         // prepare SUT
         final SecretProvider sp = SecretProvider.fallback(UUID.randomUUID().toString(), new char[0]);
         final String username = sp.getUsername();
         final char[] password = sp.getPassword();
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 299);
-        final OAuth oauth = Mockito.mock(OAuth.class);
-        Mockito.when(oauth.login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password))).thenReturn(token);
-        final Zonky z = Mockito.mock(Zonky.class);
+        final OAuth oauth = mock(OAuth.class);
+        when(oauth.login(eq(username), eq(password))).thenReturn(token);
+        final Zonky z = mock(Zonky.class);
         final ApiProvider api = mockApiProvider(oauth, z);
         final TokenBasedAccess a = (TokenBasedAccess) Authenticated.tokenBased(api, sp, Duration.ofSeconds(60));
         // call SUT
-        final Function<Zonky, Collection<Investment>> f = Mockito.mock(Function.class);
+        final Function<Zonky, Collection<Investment>> f = mock(Function.class);
         final Collection<Investment> expectedResult = Collections.emptyList();
-        Mockito.when(f.apply(ArgumentMatchers.eq(z))).thenReturn(expectedResult);
+        when(f.apply(eq(z))).thenReturn(expectedResult);
         final Collection<Investment> result = a.call(f);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(result).isSameAs(expectedResult);
             softly.assertThat(a.getSecretProvider()).isSameAs(sp);
         });
-        Mockito.verify(oauth).login(ArgumentMatchers.eq(username), ArgumentMatchers.eq(password));
-        Mockito.verify(oauth, Mockito.never()).refresh(ArgumentMatchers.any());
-        Mockito.verify(z, Mockito.never()).logout();
+        verify(oauth).login(eq(username), eq(password));
+        verify(oauth, never()).refresh(any());
+        verify(z, never()).logout();
     }
 
 }

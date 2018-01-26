@@ -19,19 +19,20 @@ package com.github.robozonky.util;
 import java.math.BigDecimal;
 import java.util.stream.IntStream;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class FinancialUtilTest {
 
     @Test
-    public void ipmt() {
+    void ipmt() {
         final BigDecimal rate = new BigDecimal("0.1");
         final BigDecimal principal = BigDecimal.valueOf(100);
         final int maxTerm = 10;
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(FinancialUtil.ipmt(rate, 1, maxTerm, principal).toEngineeringString())
                     .isEqualTo(BigDecimal.TEN.negate().toEngineeringString());
             softly.assertThat(FinancialUtil.ipmt(rate, maxTerm, maxTerm, principal)).isLessThan(BigDecimal.ZERO);
@@ -39,24 +40,24 @@ class FinancialUtilTest {
     }
 
     @Test
-    public void ppmt() {
+    void ppmt() {
         final BigDecimal rate = new BigDecimal("0.1");
         final BigDecimal principal = BigDecimal.valueOf(100);
         final int maxTerm = 10;
         final BigDecimal result = IntStream.range(0, maxTerm)
                 .mapToObj(term -> FinancialUtil.ppmt(rate, term + 1, maxTerm, principal))
                 .reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
-        Assertions.assertThat(result).isCloseTo(principal.negate(), Percentage.withPercentage(0.01));
+        assertThat(result).isCloseTo(principal.negate(), Percentage.withPercentage(0.01));
     }
 
     @Test
-    public void pmt() {
+    void pmt() {
         final BigDecimal rate = new BigDecimal("0.1");
         final BigDecimal principal = BigDecimal.valueOf(100);
         final int maxTerm = 10;
         final BigDecimal result = IntStream.range(0, maxTerm)
                 .mapToObj(term -> FinancialUtil.pmt(rate, maxTerm, principal))
                 .reduce(BigDecimal.ZERO, BigDecimalCalculator::plus);
-        Assertions.assertThat(result).isCloseTo(BigDecimal.valueOf(-162), Percentage.withPercentage(0.5));
+        assertThat(result).isCloseTo(BigDecimal.valueOf(-162), Percentage.withPercentage(0.5));
     }
 }

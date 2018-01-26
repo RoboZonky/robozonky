@@ -31,36 +31,36 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Wallet;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class ZonkyTest {
 
     private <T, S extends EntityCollectionApi<T>> PaginatedApi<T, S> mockApi() {
-        final PaginatedApi<T, S> api = Mockito.mock(PaginatedApi.class);
+        final PaginatedApi<T, S> api = mock(PaginatedApi.class);
         final PaginatedResult<T> apiReturn = new PaginatedResult<>(Collections.emptyList(), 0, 0);
-        Mockito.when(api.execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                 ArgumentMatchers.anyInt()))
+        when(api.execute(any(), any(), anyInt(),
+                         anyInt()))
                 .thenReturn(apiReturn);
         return api;
     }
 
     private <T> Api<T> mockApi(final T apiMock) {
-        return new Api<>(apiMock, Mockito.mock(ResteasyClient.class));
+        return new Api<>(apiMock, mock(ResteasyClient.class));
     }
 
     @Test
-    public void constructor() {
-        final Api<ControlApi> ca = mockApi(Mockito.mock(ControlApi.class));
+    void constructor() {
+        final Api<ControlApi> ca = mockApi(mock(ControlApi.class));
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new Zonky(null, la, sa, pa, wa))
                     .isInstanceOf(IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new Zonky(ca, null, sa, pa, wa))
@@ -75,14 +75,14 @@ class ZonkyTest {
     }
 
     @Test
-    public void streams() {
-        final Api<ControlApi> ca = mockApi(Mockito.mock(ControlApi.class));
+    void streams() {
+        final Api<ControlApi> ca = mockApi(mock(ControlApi.class));
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
         final Zonky z = new Zonky(ca, la, sa, pa, wa);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(z.getAvailableLoans()).isEmpty();
             softly.assertThat(z.getAvailableLoans(Sort.unspecified())).isEmpty();
             softly.assertThat(z.getBlockedAmounts()).isEmpty();
@@ -93,13 +93,13 @@ class ZonkyTest {
     }
 
     @Test
-    public void investAndlogout() {
-        final ControlApi control = Mockito.mock(ControlApi.class);
+    void investAndlogout() {
+        final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
-        Assertions.assertThat(ca.isClosed()).isFalse();
+        assertThat(ca.isClosed()).isFalse();
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final int loanId = 1;
-        Mockito.when(la.execute((Function<LoanApi, Loan>) ArgumentMatchers.any())).thenReturn(new Loan(loanId, 200));
+        when(la.execute((Function<LoanApi, Loan>) any())).thenReturn(new Loan(loanId, 200));
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
@@ -109,79 +109,79 @@ class ZonkyTest {
             z.invest(i);
             z.logout();
         }
-        Mockito.verify(control, Mockito.times(1)).invest(ArgumentMatchers.any());
-        Mockito.verify(control, Mockito.times(1)).logout();
-        Assertions.assertThat(ca.isClosed()).isTrue();
+        verify(control, times(1)).invest(any());
+        verify(control, times(1)).logout();
+        assertThat(ca.isClosed()).isTrue();
     }
 
     @Test
-    public void wallet() {
-        final ControlApi control = Mockito.mock(ControlApi.class);
+    void wallet() {
+        final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
-        Assertions.assertThat(ca.isClosed()).isFalse();
+        assertThat(ca.isClosed()).isFalse();
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
-        Mockito.when(wa.execute((Function<WalletApi, Wallet>) ArgumentMatchers.any()))
-                .thenReturn(Mockito.mock(Wallet.class));
+        when(wa.execute((Function<WalletApi, Wallet>) any()))
+                .thenReturn(mock(Wallet.class));
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
         try (final Zonky z = new Zonky(ca, la, sa, pa, wa)) {
             final Wallet w = z.getWallet();
-            Assertions.assertThat(w).isNotNull();
+            assertThat(w).isNotNull();
         }
     }
 
     @Test
-    public void purchase() {
-        final ControlApi control = Mockito.mock(ControlApi.class);
+    void purchase() {
+        final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
-        Assertions.assertThat(ca.isClosed()).isFalse();
+        assertThat(ca.isClosed()).isFalse();
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
         try (final Zonky z = new Zonky(ca, la, sa, pa, wa)) {
-            final Participation p = Mockito.mock(Participation.class);
-            Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
-            Mockito.when(p.getId()).thenReturn(1);
+            final Participation p = mock(Participation.class);
+            when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+            when(p.getId()).thenReturn(1);
             z.purchase(p);
-            Mockito.verify(control).purchase(ArgumentMatchers.eq(p.getId()), ArgumentMatchers.any());
+            verify(control).purchase(eq(p.getId()), any());
         }
     }
 
     @Test
-    public void sell() {
-        final ControlApi control = Mockito.mock(ControlApi.class);
+    void sell() {
+        final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
-        Assertions.assertThat(ca.isClosed()).isFalse();
+        assertThat(ca.isClosed()).isFalse();
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
         try (final Zonky z = new Zonky(ca, la, sa, pa, wa)) {
-            final Investment p = Mockito.mock(Investment.class);
-            Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
-            Mockito.when(p.getSmpFee()).thenReturn(BigDecimal.ONE);
-            Mockito.when(p.getId()).thenReturn(1);
+            final Investment p = mock(Investment.class);
+            when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+            when(p.getSmpFee()).thenReturn(BigDecimal.ONE);
+            when(p.getId()).thenReturn(1);
             z.sell(p);
-            Mockito.verify(control).offer(ArgumentMatchers.any());
+            verify(control).offer(any());
         }
     }
 
     @Test
-    public void cancel() {
-        final ControlApi control = Mockito.mock(ControlApi.class);
+    void cancel() {
+        final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
-        Assertions.assertThat(ca.isClosed()).isFalse();
+        assertThat(ca.isClosed()).isFalse();
         final PaginatedApi<Loan, LoanApi> la = mockApi();
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<Investment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
         try (final Zonky z = new Zonky(ca, la, sa, pa, wa)) {
-            final Investment i = Mockito.mock(Investment.class);
-            Mockito.when(i.getId()).thenReturn(1);
+            final Investment i = mock(Investment.class);
+            when(i.getId()).thenReturn(1);
             z.cancel(i);
-            Mockito.verify(control).cancel(ArgumentMatchers.eq(i.getId()));
+            verify(control).cancel(eq(i.getId()));
         }
     }
 

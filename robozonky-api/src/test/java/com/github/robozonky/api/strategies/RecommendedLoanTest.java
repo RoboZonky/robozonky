@@ -21,16 +21,17 @@ import java.time.OffsetDateTime;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-public class RecommendedLoanTest {
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class RecommendedLoanTest {
 
     private static Loan mockLoan() {
-        final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
+        final Loan loan = mock(Loan.class);
+        when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
         return loan;
     }
 
@@ -40,7 +41,7 @@ public class RecommendedLoanTest {
     }
 
     @Test
-    public void constructor() {
+    void constructor() {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final RecommendedLoan r = new RecommendedLoan(ld, amount, true);
@@ -52,64 +53,64 @@ public class RecommendedLoanTest {
     }
 
     @Test
-    public void constructorNoLoanDescriptor() {
+    void constructorNoLoanDescriptor() {
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
-        Assertions.assertThatThrownBy(() -> new RecommendedLoan(null, amount, true))
+        assertThatThrownBy(() -> new RecommendedLoan(null, amount, true))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void constructorSmallAmount() {
-        Assertions.assertThatThrownBy(() -> new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(),
-                                                                Defaults.MINIMUM_INVESTMENT_IN_CZK - 1, true))
+    void constructorSmallAmount() {
+        assertThatThrownBy(() -> new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(),
+                                                     Defaults.MINIMUM_INVESTMENT_IN_CZK - 1, true))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void equalsSame() {
+    void equalsSame() {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final boolean confirmationRequired = true;
         final RecommendedLoan r1 = new RecommendedLoan(ld, amount, confirmationRequired);
-        Assertions.assertThat(r1).isEqualTo(r1);
+        assertThat(r1).isEqualTo(r1);
         final RecommendedLoan r2 = new RecommendedLoan(ld, amount, confirmationRequired);
-        Assertions.assertThat(r1).isEqualTo(r2);
+        assertThat(r1).isEqualTo(r2);
     }
 
     @Test
-    public void notEqualsDifferentLoanDescriptor() {
+    void notEqualsDifferentLoanDescriptor() {
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final boolean confirmationRequired = true;
         final RecommendedLoan r1 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), amount,
                                                        confirmationRequired);
         final RecommendedLoan r2 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(), amount,
                                                        confirmationRequired);
-        Assertions.assertThat(r1).isNotEqualTo(r2);
+        assertThat(r1).isNotEqualTo(r2);
     }
 
     @Test
-    public void notEqualsDifferentAmount() {
+    void notEqualsDifferentAmount() {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final boolean confirmationRequired = true;
         final RecommendedLoan r1 = new RecommendedLoan(ld, amount, confirmationRequired);
         final RecommendedLoan r2 = new RecommendedLoan(ld, amount + 1, confirmationRequired);
-        Assertions.assertThat(r1).isNotEqualTo(r2);
+        assertThat(r1).isNotEqualTo(r2);
     }
 
     @Test
-    public void notEqualsDifferentConfirmationRequirements() {
+    void notEqualsDifferentConfirmationRequirements() {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final RecommendedLoan r1 = new RecommendedLoan(ld, amount, true);
         final RecommendedLoan r2 = new RecommendedLoan(ld, amount, false);
-        Assertions.assertThat(r1).isNotEqualTo(r2);
+        assertThat(r1).isNotEqualTo(r2);
     }
 
     @Test
-    public void notEqualsDifferentJavaType() {
+    void notEqualsDifferentJavaType() {
         final RecommendedLoan r1 = new RecommendedLoan(RecommendedLoanTest.mockLoanDescriptor(),
                                                        Defaults.MINIMUM_INVESTMENT_IN_CZK, true);
-        Assertions.assertThat(r1).isNotEqualTo(r1.toString());
+        assertThat(r1).isNotEqualTo(r1.toString());
     }
 }

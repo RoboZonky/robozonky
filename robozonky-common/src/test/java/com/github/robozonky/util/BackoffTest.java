@@ -19,37 +19,37 @@ package com.github.robozonky.util;
 import java.time.Duration;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static java.time.Duration.ofMillis;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
+import static org.mockito.Mockito.*;
 
-public class BackoffTest {
+class BackoffTest {
 
     private static final int DURATION = 1000;
 
     @Test
-    public void exponentialAlwaysFailing() {
+    void exponentialAlwaysFailing() {
         final Duration maxDuration = ofMillis(DURATION);
         final long now = System.nanoTime();
         // never succeed
-        final Backoff.Operation<String> o = Mockito.mock(Backoff.Operation.class);
+        final Backoff.Operation<String> o = mock(Backoff.Operation.class);
         final Backoff<String> b = assertTimeout(maxDuration.multipliedBy(3),
                                                 () -> Backoff.exponential(o, ofMillis(1), maxDuration));
         final Optional<String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure result was not successful
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
         // make sure the operation took at least the expected duration
-        Assertions.assertThat(took).isGreaterThan(maxDuration);
+        assertThat(took).isGreaterThan(maxDuration);
         // make sure the operation was tried the expected number of times, the sum of n^2 for n=[0, ...)
-        Mockito.verify(o, Mockito.times(11)).get();
+        verify(o, times(11)).get();
     }
 
     @Test
-    public void exponentialWillReturn() {
+    void exponentialWillReturn() {
         final String resulting = "";
         final Duration maxDuration = ofMillis(DURATION);
         final long now = System.nanoTime();
@@ -59,8 +59,8 @@ public class BackoffTest {
         final Optional<String> result = b.get();
         final Duration took = Duration.ofNanos(System.nanoTime() - now);
         // make sure we get the propert result
-        Assertions.assertThat(result).contains(resulting);
+        assertThat(result).contains(resulting);
         // make sure the operation took less than the max duration
-        Assertions.assertThat(took).isLessThan(maxDuration);
+        assertThat(took).isLessThan(maxDuration);
     }
 }

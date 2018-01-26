@@ -20,11 +20,11 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -41,24 +41,24 @@ class AbstractEnumeratedConditionTest {
     private static <T> void properAsCollection(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
         final Wrapper i = spec.getMocked();
         final AbstractEnumeratedCondition<T> sut = spec.getImplementation();
-        Assertions.assertThat(sut.test(i)).isFalse();
+        assertThat(sut.test(i)).isFalse();
         sut.add(Arrays.asList(spec.getTriggerItem(), spec.getNotTriggerItem()));
-        Assertions.assertThat(sut.test(i)).isTrue();
-        Assertions.assertThat(sut.getDescription()).isPresent();
+        assertThat(sut.test(i)).isTrue();
+        assertThat(sut.getDescription()).isPresent();
     }
 
     private static <T> void properAsOne(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
         final Wrapper i = spec.getMocked();
         final AbstractEnumeratedCondition<T> sut = spec.getImplementation();
-        Assertions.assertThat(sut.test(i)).isFalse();
+        assertThat(sut.test(i)).isFalse();
         sut.add(spec.getTriggerItem());
         sut.add(spec.getNotTriggerItem());
-        Assertions.assertThat(sut.test(i)).isTrue();
-        Assertions.assertThat(sut.getDescription()).isPresent();
+        assertThat(sut.test(i)).isTrue();
+        assertThat(sut.getDescription()).isPresent();
     }
 
     private static <T> void nonEmptyDescription(final AbstractEnumeratedConditionTest.ConditionSpec<T> spec) {
-        Assertions.assertThat(spec.getImplementation().getDescription()).isPresent();
+        assertThat(spec.getImplementation().getDescription()).isPresent();
     }
 
     @TestFactory

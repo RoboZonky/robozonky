@@ -20,32 +20,33 @@ import java.util.UUID;
 
 import com.github.robozonky.internal.api.State;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class BalanceTrackerTest extends AbstractRoboZonkyTest {
 
     @Test
-    public void lifecycle() {
-        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+    void lifecycle() {
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
         // store new value
         final int newBalance = 200;
         BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
-        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
         // overwrite value
         final int newerBalance = 100;
         BalanceTracker.INSTANCE.setLastKnownBalance(newerBalance);
-        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newerBalance);
-        Assertions.assertThat(State.forClass(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY)).isPresent();
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newerBalance);
+        assertThat(State.forClass(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY)).isPresent();
         // reset value
-        Assertions.assertThat(BalanceTracker.INSTANCE.reset()).isTrue();
-        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+        assertThat(BalanceTracker.INSTANCE.reset()).isTrue();
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
     }
 
     @Test
-    public void wrongData() {
+    void wrongData() {
         final State.ClassSpecificState state = State.forClass(BalanceTracker.class);
         state.newBatch().set(BalanceTracker.BALANCE_KEY, UUID.randomUUID().toString()).call();
-        Assertions.assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
     }
 }

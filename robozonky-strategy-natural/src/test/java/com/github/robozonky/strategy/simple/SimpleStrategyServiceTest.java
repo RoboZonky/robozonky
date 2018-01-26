@@ -27,8 +27,9 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class SimpleStrategyServiceTest {
 
@@ -52,53 +53,53 @@ class SimpleStrategyServiceTest {
     }
 
     @Test
-    public void shareSumsUnder100Percent() throws IOException {
+    void shareSumsUnder100Percent() throws IOException {
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.PARTIAL))).isPresent();
+        assertThat(s.toInvest(toString(SimpleStrategyServiceTest.PARTIAL))).isPresent();
     }
 
     @Test
-    public void proper() throws IOException {
+    void proper() throws IOException {
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.PROPER))).isPresent();
+        assertThat(s.toInvest(toString(SimpleStrategyServiceTest.PROPER))).isPresent();
     }
 
     @Test
-    public void improper() throws IOException {
+    void improper() throws IOException {
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.IMPROPER))).isEmpty();
+        assertThat(s.toInvest(toString(SimpleStrategyServiceTest.IMPROPER))).isEmpty();
     }
 
     @Test
-    public void wrongShares() throws IOException {
+    void wrongShares() throws IOException {
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.WRONG_SHARES))).isEmpty();
+        assertThat(s.toInvest(toString(SimpleStrategyServiceTest.WRONG_SHARES))).isEmpty();
     }
 
     @Test
-    public void wrongTerms() throws IOException {
+    void wrongTerms() throws IOException {
         final SimpleStrategyService s = new SimpleStrategyService();
         final Optional<InvestmentStrategy> result = s.toInvest(toString(SimpleStrategyServiceTest.WRONG_TERMS));
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void wrongAsks() throws IOException {
+    void wrongAsks() throws IOException {
         final SimpleStrategyService s = new SimpleStrategyService();
         final Optional<InvestmentStrategy> result = s.toInvest(toString(SimpleStrategyServiceTest.WRONG_ASKS));
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void complex() throws IOException {
+    void complex() throws IOException {
         final SimpleStrategyService s = new SimpleStrategyService();
-        Assertions.assertThat(s.toInvest(toString(SimpleStrategyServiceTest.REAL_LIFE))).isPresent();
-        Assertions.assertThat(s.toSell(toString(SimpleStrategyServiceTest.REAL_LIFE))).isEmpty();
-        Assertions.assertThat(s.toPurchase(toString(SimpleStrategyServiceTest.REAL_LIFE))).isEmpty();
+        assertThat(s.toInvest(toString(SimpleStrategyServiceTest.REAL_LIFE))).isPresent();
+        assertThat(s.toSell(toString(SimpleStrategyServiceTest.REAL_LIFE))).isEmpty();
+        assertThat(s.toPurchase(toString(SimpleStrategyServiceTest.REAL_LIFE))).isEmpty();
     }
 
     @Test
-    public void whitespace() throws IOException {
+    void whitespace() throws IOException {
         // my IDE keeps removing whitespace at the end of lines in files, so let's generate a file on the run
         final String[] lines = new String[]{
                 "minimumBalance                = 200 ", "maximumInvestment             = 20000\t",

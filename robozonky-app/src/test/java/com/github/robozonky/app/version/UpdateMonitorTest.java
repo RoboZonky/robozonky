@@ -18,13 +18,9 @@ package com.github.robozonky.app.version;
 
 import java.util.Collections;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
@@ -32,24 +28,28 @@ import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
+
 class UpdateMonitorTest {
 
     private ClientAndServer server;
     private String serverUrl;
 
     @BeforeEach
-    public void startServer() {
+    void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "http://127.0.0.1:" + server.getPort();
     }
 
     @AfterEach
-    public void stopServer() {
+    void stopServer() {
         server.stop();
     }
 
     @Test
-    public void checkRetrieval() {
+    void checkRetrieval() {
         server.when(HttpRequest.request().withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
                 .respond(HttpResponse.response().withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                                                   "<metadata>\n" +
@@ -68,51 +68,51 @@ class UpdateMonitorTest {
                                                                   "</metadata>"));
         final UpdateMonitor v = new UpdateMonitor(serverUrl);
         v.run();
-        Assertions.assertThat(v.get()).isPresent();
+        assertThat(v.get()).isPresent();
     }
 
     @Test
-    public void checkNonExistentUrl() throws Exception {
+    void checkNonExistentUrl() {
         server.when(HttpRequest.request()).respond(HttpResponse.notFoundResponse());
         final UpdateMonitor v = new UpdateMonitor(serverUrl, "com.github.robozonky", "robozonky-nonexistent");
         v.run();
-        Assertions.assertThat(v.get()).isEmpty();
+        assertThat(v.get()).isEmpty();
     }
 
     @Test
-    public void checkNoStable() {
-        Assertions.assertThatThrownBy(() -> UpdateMonitor.findFirstStable(Collections.singleton("1.2.0-beta-1")))
+    void checkNoStable() {
+        assertThatThrownBy(() -> UpdateMonitor.findFirstStable(Collections.singleton("1.2.0-beta-1")))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void parseSingleNodeList() {
+    void parseSingleNodeList() {
         final String version = "1.2.3";
-        final Node n = Mockito.mock(Node.class);
-        Mockito.when(n.getTextContent()).thenReturn(version);
-        final NodeList l = Mockito.mock(NodeList.class);
-        Mockito.when(l.getLength()).thenReturn(1);
-        Mockito.when(l.item(ArgumentMatchers.eq(0))).thenReturn(n);
+        final Node n = mock(Node.class);
+        when(n.getTextContent()).thenReturn(version);
+        final NodeList l = mock(NodeList.class);
+        when(l.getLength()).thenReturn(1);
+        when(l.item(eq(0))).thenReturn(n);
         final VersionIdentifier actual = UpdateMonitor.parseNodeList(l);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(actual.getLatestStable()).isEqualTo(version);
             softly.assertThat(actual.getLatestUnstable()).isEmpty();
         });
     }
 
     @Test
-    public void parseLongerNodeList() {
+    void parseLongerNodeList() {
         final String version = "1.2.3", version2 = "1.2.4-SNAPSHOT";
-        final Node n1 = Mockito.mock(Node.class);
-        Mockito.when(n1.getTextContent()).thenReturn(version);
-        final Node n2 = Mockito.mock(Node.class);
-        Mockito.when(n2.getTextContent()).thenReturn(version2);
-        final NodeList l = Mockito.mock(NodeList.class);
-        Mockito.when(l.getLength()).thenReturn(2);
-        Mockito.when(l.item(ArgumentMatchers.eq(0))).thenReturn(n1);
-        Mockito.when(l.item(ArgumentMatchers.eq(1))).thenReturn(n2);
+        final Node n1 = mock(Node.class);
+        when(n1.getTextContent()).thenReturn(version);
+        final Node n2 = mock(Node.class);
+        when(n2.getTextContent()).thenReturn(version2);
+        final NodeList l = mock(NodeList.class);
+        when(l.getLength()).thenReturn(2);
+        when(l.item(eq(0))).thenReturn(n1);
+        when(l.item(eq(1))).thenReturn(n2);
         final VersionIdentifier actual = UpdateMonitor.parseNodeList(l);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(actual.getLatestStable()).isEqualTo(version);
             softly.assertThat(actual.getLatestUnstable()).contains(version2);
         });

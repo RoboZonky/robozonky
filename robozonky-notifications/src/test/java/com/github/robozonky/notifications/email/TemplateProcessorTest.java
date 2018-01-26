@@ -20,16 +20,17 @@ import java.util.Locale;
 
 import com.github.robozonky.internal.api.Defaults;
 import freemarker.template.Configuration;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class TemplateProcessorTest {
 
     @Test
-    public void properConfiguration() {
+    void properConfiguration() {
         final Configuration configuration = TemplateProcessor.getFreemarkerConfiguration();
         final String targetEncoding = Defaults.CHARSET.toString();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(configuration.getLogTemplateExceptions()).isFalse();
             softly.assertThat(configuration.getEncoding(Locale.getDefault())).isEqualTo(targetEncoding);
             softly.assertThat(configuration.getEncoding(Locale.ENGLISH)).isEqualTo(targetEncoding);

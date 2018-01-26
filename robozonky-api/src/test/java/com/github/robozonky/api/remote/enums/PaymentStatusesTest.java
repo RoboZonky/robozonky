@@ -16,61 +16,62 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class PaymentStatusesTest {
 
     @Test
-    public void ofArrayOfPaymentStatuses() {
+    void ofArrayOfPaymentStatuses() {
         final PaymentStatus[] statuses = new PaymentStatus[]{PaymentStatus.OK, PaymentStatus.COVERED};
         final PaymentStatuses result = PaymentStatuses.of(statuses);
-        Assertions.assertThat(result.getPaymentStatuses()).containsOnly(statuses);
+        assertThat(result.getPaymentStatuses()).containsOnly(statuses);
     }
 
     @Test
-    public void ofAllPaymentStatuses() {
+    void ofAllPaymentStatuses() {
         final PaymentStatuses result = PaymentStatuses.all();
-        Assertions.assertThat(result.getPaymentStatuses()).containsOnly(PaymentStatus.values());
+        assertThat(result.getPaymentStatuses()).containsOnly(PaymentStatus.values());
     }
 
     @Test
-    public void correctToString() {
+    void correctToString() {
         // test no items
-        Assertions.assertThat(PaymentStatuses.of(new PaymentStatus[]{}).toString()).isEqualTo("[]");
+        assertThat(PaymentStatuses.of(new PaymentStatus[]{}).toString()).isEqualTo("[]");
         // test one item
-        Assertions.assertThat(PaymentStatuses.of(PaymentStatus.OK).toString()).isEqualTo("[OK]");
+        assertThat(PaymentStatuses.of(PaymentStatus.OK).toString()).isEqualTo("[OK]");
         // test multiple items
-        Assertions.assertThat(PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.COVERED).toString())
+        assertThat(PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.COVERED).toString())
                 .isEqualTo("[OK, COVERED]");
     }
 
     @Test
-    public void correctValueOf() {
+    void correctValueOf() {
         // test no items
-        Assertions.assertThat(PaymentStatuses.valueOf("[]").getPaymentStatuses()).isEmpty();
-        Assertions.assertThat(PaymentStatuses.valueOf(" [ ] ").getPaymentStatuses()).isEmpty();
+        assertThat(PaymentStatuses.valueOf("[]").getPaymentStatuses()).isEmpty();
+        assertThat(PaymentStatuses.valueOf(" [ ] ").getPaymentStatuses()).isEmpty();
         // test one item
-        Assertions.assertThat(PaymentStatuses.valueOf("[ COVERED ]").getPaymentStatuses())
+        assertThat(PaymentStatuses.valueOf("[ COVERED ]").getPaymentStatuses())
                 .containsExactly(PaymentStatus.COVERED);
-        Assertions.assertThat(PaymentStatuses.valueOf(" [ COVERED]").getPaymentStatuses())
+        assertThat(PaymentStatuses.valueOf(" [ COVERED]").getPaymentStatuses())
                 .containsExactly(PaymentStatus.COVERED);
         // test multiple items
-        Assertions.assertThat(PaymentStatuses.valueOf(" [COVERED, OK]").getPaymentStatuses())
+        assertThat(PaymentStatuses.valueOf(" [COVERED, OK]").getPaymentStatuses())
                 .containsExactly(PaymentStatus.OK, PaymentStatus.COVERED);
-        Assertions.assertThat(PaymentStatuses.valueOf(" [OK, COVERED]").getPaymentStatuses())
+        assertThat(PaymentStatuses.valueOf(" [OK, COVERED]").getPaymentStatuses())
                 .containsExactly(PaymentStatus.OK, PaymentStatus.COVERED);
     }
 
     @Test
-    public void invalidValueOf() {
-        Assertions.assertThatThrownBy(() -> PaymentStatuses.valueOf("["))
+    void invalidValueOf() {
+        assertThatThrownBy(() -> PaymentStatuses.valueOf("["))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void unknownValueOf() {
-        Assertions.assertThatThrownBy(() -> PaymentStatuses.valueOf("[SOME_UNKNOWN_VALUE]"))
+    void unknownValueOf() {
+        assertThatThrownBy(() -> PaymentStatuses.valueOf("[SOME_UNKNOWN_VALUE]"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

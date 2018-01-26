@@ -18,29 +18,30 @@ package com.github.robozonky.app.configuration;
 
 import java.time.Duration;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class MarketplaceCommandLineFragmentTest {
 
     @Test
-    public void delayBetweenPrimaryMarketplaceChecks() {
+    void delayBetweenPrimaryMarketplaceChecks() {
         final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
         final Duration a = f.getPrimaryMarketplaceCheckDelay();
-        Assertions.assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
+        assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
     }
 
     @Test
-    public void delayBetweenSecondaryMarketplaceChecks() {
+    void delayBetweenSecondaryMarketplaceChecks() {
         final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
         final Duration a = f.getSecondaryMarketplaceCheckDelay();
-        Assertions.assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
+        assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
     }
 
     @Test
-    public void durationForSleeping() {
+    void durationForSleeping() {
         final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
         final Duration a = f.getMaximumSleepDuration();
-        Assertions.assertThat(a).isEqualByComparingTo(Duration.ofMinutes(60));
+        assertThat(a).isEqualByComparingTo(Duration.ofMinutes(60));
     }
 }

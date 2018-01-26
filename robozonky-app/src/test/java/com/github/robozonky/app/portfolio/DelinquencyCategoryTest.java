@@ -28,21 +28,21 @@ import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
-import org.mockito.Mockito;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.*;
 
 class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
-    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER = (id) -> Mockito.mock(Investment.class);
+    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER = (id) -> mock(Investment.class);
 
     private static void testEmpty(final DelinquencyCategory category) {
-        Assertions.assertThat(category.update(Collections.emptyList(), null, null)).isEmpty();
+        assertThat(category.update(Collections.emptyList(), null, null)).isEmpty();
     }
 
     private void reinit() { // JUnit 5 doesn't execute before/after methods for dynamic tests
@@ -57,20 +57,20 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         // store a delinquent loan
         final Delinquent d = new Delinquent(loanId);
         final Delinquency dy = d.addDelinquency(LocalDate.now().minus(minimumMatchingDuration));
-        Assertions.assertThat(category.update(Collections.singleton(dy), INVESTMENT_SUPPLIER, f))
+        assertThat(category.update(Collections.singleton(dy), INVESTMENT_SUPPLIER, f))
                 .containsExactly(loanId);
         final List<Event> events = this.getNewEvents();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(events).hasSize(1);
             softly.assertThat(events).first().isInstanceOf(LoanDelinquentEvent.class);
         });
         // attempt to store it again, making sure no event is fired
-        Assertions.assertThat(category.update(Collections.singleton(dy), INVESTMENT_SUPPLIER, f))
+        assertThat(category.update(Collections.singleton(dy), INVESTMENT_SUPPLIER, f))
                 .containsExactly(loanId);
-        Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
+        assertThat(this.getNewEvents()).isEqualTo(events);
         // now update with no delinquents, making sure nothing is returned
-        Assertions.assertThat(category.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f)).isEmpty();
-        Assertions.assertThat(this.getNewEvents()).isEqualTo(events);
+        assertThat(category.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f)).isEmpty();
+        assertThat(this.getNewEvents()).isEqualTo(events);
     }
 
     @TestFactory

@@ -34,108 +34,108 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class PortfolioTest extends AbstractZonkyLeveragingTest {
 
-    private static final Investment mock(final boolean isEligible, final boolean isOnSmp) {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getStatus()).thenReturn(InvestmentStatus.ACTIVE);
-        Mockito.when(i.isCanBeOffered()).thenReturn(isEligible);
-        Mockito.when(i.isOnSmp()).thenReturn(isOnSmp);
+    private static Investment mockInvestment(final boolean isEligible, final boolean isOnSmp) {
+        final Investment i = mock(Investment.class);
+        when(i.getStatus()).thenReturn(InvestmentStatus.ACTIVE);
+        when(i.isCanBeOffered()).thenReturn(isEligible);
+        when(i.isOnSmp()).thenReturn(isOnSmp);
         return i;
     }
 
-    private static final Investment mock(final PaymentStatus paymentStatus) {
-        final Investment i = mock(true, false);
-        Mockito.when(i.getPaymentStatus()).thenReturn(paymentStatus);
-        Mockito.when(i.getNextPaymentDate()).thenReturn(OffsetDateTime.now());
+    private static Investment mockInvestment(final PaymentStatus paymentStatus) {
+        final Investment i = mockInvestment(true, false);
+        when(i.getPaymentStatus()).thenReturn(paymentStatus);
+        when(i.getNextPaymentDate()).thenReturn(OffsetDateTime.now());
         return i;
     }
 
-    private static final Investment mockSold() {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getStatus()).thenReturn(InvestmentStatus.SOLD);
+    private static Investment mockSold() {
+        final Investment i = mock(Investment.class);
+        when(i.getStatus()).thenReturn(InvestmentStatus.SOLD);
         return i;
     }
 
     @Test
-    public void getActiveWithPaymentStatus() {
-        final Investment i = mock(PaymentStatus.OK);
-        final Investment i2 = mock(PaymentStatus.DUE);
-        final Investment i3 = mock(PaymentStatus.WRITTEN_OFF); // ignored because not interested
+    void getActiveWithPaymentStatus() {
+        final Investment i = mockInvestment(PaymentStatus.OK);
+        final Investment i2 = mockInvestment(PaymentStatus.DUE);
+        final Investment i3 = mockInvestment(PaymentStatus.WRITTEN_OFF); // ignored because not interested
         final Investment i4 = mockSold(); // ignored because sold
-        final Zonky z = Mockito.mock(Zonky.class);
-        Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4));
+        final Zonky z = mock(Zonky.class);
+        when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4));
         final Portfolio instance = Portfolio.create(z);
         final PaymentStatuses p = PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE);
-        Assertions.assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
+        assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
     }
 
     @Test
-    public void getActiveForSecondaryMarketplace() {
-        final Investment i = mock(true, true);
-        final Investment i2 = mock(true, false);
-        final Investment i3 = mock(false, false);
-        final Investment i4 = mock(false, true);
+    void getActiveForSecondaryMarketplace() {
+        final Investment i = mockInvestment(true, true);
+        final Investment i2 = mockInvestment(true, false);
+        final Investment i3 = mockInvestment(false, false);
+        final Investment i4 = mockInvestment(false, true);
         final Investment i5 = mockSold(); // ignored because sold
-        final Zonky z = Mockito.mock(Zonky.class);
-        Mockito.when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4, i5));
+        final Zonky z = mock(Zonky.class);
+        when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4, i5));
         final Portfolio instance = Portfolio.create(z);
-        Assertions.assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
+        assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
     }
 
     @Test
-    public void liveBalance() {
+    void liveBalance() {
         final Portfolio instance = new Portfolio();
         final int balance = 10_000;
         final Zonky zonky = harmlessZonky(balance);
-        Assertions.assertThat(instance.calculateOverview(zonky, false).getCzkAvailable())
+        assertThat(instance.calculateOverview(zonky, false).getCzkAvailable())
                 .isEqualTo(balance);
     }
 
     @Test
-    public void dryRunBalance() {
+    void dryRunBalance() {
         final Portfolio instance = new Portfolio();
         final int balance = 10_000;
         final Zonky zonky = harmlessZonky(balance - 1);
         System.setProperty(Settings.Key.DEFAULTS_DRY_RUN_BALANCE.getName(), String.valueOf(balance));
-        Assertions.assertThat(instance.calculateOverview(zonky, true).getCzkAvailable())
+        assertThat(instance.calculateOverview(zonky, true).getCzkAvailable())
                 .isEqualTo(balance);
     }
 
     @Test
-    public void newSale() {
+    void newSale() {
         final Loan l = new Loan(1, 1000);
         final Investment i = new Investment(l, 200);
         final BlockedAmount ba = new BlockedAmount(l.getId(), BigDecimal.valueOf(l.getAmount()),
                                                    TransactionCategory.SMP_SALE_FEE);
         final Zonky zonky = harmlessZonky(10_000);
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
+        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         final Portfolio portfolio = new Portfolio(Collections.singletonList(i));
-        Assertions.assertThat(portfolio.wasOnceSold(l)).isFalse();
+        assertThat(portfolio.wasOnceSold(l)).isFalse();
         i.setIsOnSmp(true);
-        Assertions.assertThat(portfolio.wasOnceSold(l)).isTrue();
+        assertThat(portfolio.wasOnceSold(l)).isTrue();
         portfolio.newBlockedAmount(zonky, ba);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(i.isOnSmp()).isFalse();
             softly.assertThat(i.getStatus()).isEqualTo(InvestmentStatus.SOLD);
         });
         final List<Event> events = this.getNewEvents();
-        Assertions.assertThat(events).first().isInstanceOf(InvestmentSoldEvent.class);
+        assertThat(events).first().isInstanceOf(InvestmentSoldEvent.class);
         // doing the same thing again shouldn't do anything
         this.readPreexistingEvents();
         portfolio.newBlockedAmount(zonky, ba);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(i.isOnSmp()).isFalse();
             softly.assertThat(i.getStatus()).isEqualTo(InvestmentStatus.SOLD);
             softly.assertThat(portfolio.wasOnceSold(l)).isTrue();
         });
         final List<Event> newEvents = this.getNewEvents();
-        Assertions.assertThat(newEvents).isEmpty();
+        assertThat(newEvents).isEmpty();
     }
 }

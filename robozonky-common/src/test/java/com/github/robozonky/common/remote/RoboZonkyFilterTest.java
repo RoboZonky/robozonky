@@ -25,38 +25,39 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import com.github.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class RoboZonkyFilterTest {
 
     @Test
-    public void userAgent() throws IOException {
+    void userAgent() throws IOException {
         final MultivaluedMap<String, Object> map = new MultivaluedMapImpl<>();
-        final ClientRequestContext ctx = Mockito.mock(ClientRequestContext.class);
-        Mockito.when(ctx.getHeaders()).thenReturn(map);
+        final ClientRequestContext ctx = mock(ClientRequestContext.class);
+        when(ctx.getHeaders()).thenReturn(map);
         new RoboZonkyFilter().filter(ctx);
-        Assertions.assertThat(map.get("User-Agent").get(0)).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
+        assertThat(map.get("User-Agent").get(0)).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
     }
 
     @Test
-    public void response() throws IOException {
+    void response() throws IOException {
         final String key = UUID.randomUUID().toString();
         final String key2 = UUID.randomUUID().toString();
         final String value = UUID.randomUUID().toString();
         final MultivaluedMap<String, String> map = new MultivaluedMapImpl<>();
         map.add(key, value);
         map.addAll(key2, Collections.emptyList());
-        final ClientRequestContext ctx = Mockito.mock(ClientRequestContext.class);
-        final ClientResponseContext ctx2 = Mockito.mock(ClientResponseContext.class);
-        Mockito.when(ctx2.getHeaders()).thenReturn(map);
-        Mockito.when(ctx2.getStatusInfo()).thenReturn(Mockito.mock(Response.StatusType.class));
+        final ClientRequestContext ctx = mock(ClientRequestContext.class);
+        final ClientResponseContext ctx2 = mock(ClientResponseContext.class);
+        when(ctx2.getHeaders()).thenReturn(map);
+        when(ctx2.getStatusInfo()).thenReturn(mock(Response.StatusType.class));
         final RoboZonkyFilter filter = new RoboZonkyFilter();
         filter.filter(ctx, ctx2);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(filter.getLastResponseHeader(key)).contains(value);
             softly.assertThat(filter.getLastResponseHeader(key2)).isEmpty();
         });

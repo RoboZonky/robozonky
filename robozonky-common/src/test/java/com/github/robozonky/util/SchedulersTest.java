@@ -16,33 +16,34 @@
 
 package com.github.robozonky.util;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class SchedulersTest {
 
     @Test
-    public void create() {
+    void create() {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            Assertions.assertThat(s.isPaused()).isFalse();
+            assertThat(s.isPaused()).isFalse();
             Schedulers.INSTANCE.pause();
-            Assertions.assertThat(s.isPaused()).isTrue();
+            assertThat(s.isPaused()).isTrue();
             Schedulers.INSTANCE.resume();
-            Assertions.assertThat(s.isPaused()).isFalse();
+            assertThat(s.isPaused()).isFalse();
         }
     }
 
     @Test
-    public void overPause() {
+    void overPause() {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
-            Assertions.assertThat(s.isPaused()).isFalse();
+            assertThat(s.isPaused()).isFalse();
             Schedulers.INSTANCE.pause();
-            Assertions.assertThat(s.isPaused()).isTrue();
+            assertThat(s.isPaused()).isTrue();
             Schedulers.INSTANCE.pause();
             Schedulers.INSTANCE.resume();
-            Assertions.assertThat(s.isPaused()).isTrue();
+            assertThat(s.isPaused()).isTrue();
             Schedulers.INSTANCE.resume();
-            Assertions.assertThat(s.isPaused()).isFalse();
+            assertThat(s.isPaused()).isFalse();
             Schedulers.INSTANCE.resume();
         }
     }

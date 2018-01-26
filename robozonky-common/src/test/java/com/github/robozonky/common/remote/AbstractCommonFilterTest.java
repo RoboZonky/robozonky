@@ -21,20 +21,21 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
 import com.github.robozonky.internal.api.Defaults;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 abstract class AbstractCommonFilterTest {
 
     protected abstract RoboZonkyFilter getTestedFilter();
 
     @Test
-    public void wasUserAgentHeaderAdded() throws IOException {
-        final ClientRequestContext crc = Mockito.mock(ClientRequestContext.class);
-        Mockito.when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
+    void wasUserAgentHeaderAdded() throws IOException {
+        final ClientRequestContext crc = mock(ClientRequestContext.class);
+        when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
 
         this.getTestedFilter().filter(crc);
-        Assertions.assertThat(crc.getHeaders().getFirst("User-Agent")).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
+        assertThat(crc.getHeaders().getFirst("User-Agent")).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
     }
 }

@@ -21,20 +21,21 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class PausableScheduledThreadPoolExecutorTest {
 
     @Test
-    public void pausing() throws InterruptedException, TimeoutException, ExecutionException {
+    void pausing() throws InterruptedException, TimeoutException, ExecutionException {
         final PausableScheduledExecutorService e = new PausableScheduledThreadPoolExecutor(1);
         e.pause();
         final Runnable r = () -> {
             // no need to do anything
         };
         final Future<?> f = e.schedule(r, 0, TimeUnit.SECONDS);
-        Assertions.assertThatThrownBy(() -> {
+        assertThatThrownBy(() -> {
             f.get(1, TimeUnit.SECONDS); // make sure nothing was run, meaning that the task was queued
         }).isInstanceOf(TimeoutException.class);
         e.resume();

@@ -20,35 +20,36 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.Investment;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class RecommendedInvestmentTest {
 
-    private static Investment mock() {
-        final Investment i = Mockito.mock(Investment.class);
-        Mockito.when(i.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+    private static Investment mockInvestment() {
+        final Investment i = mock(Investment.class);
+        when(i.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
         return i;
     }
 
     @Test
-    public void equals() {
-        final Investment i = mock();
+    void equals() {
+        final Investment i = mockInvestment();
         final InvestmentDescriptor d = new InvestmentDescriptor(i);
         final RecommendedInvestment r = new RecommendedInvestment(d);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r).isNotEqualTo(null);
             softly.assertThat(r).isNotEqualTo(UUID.randomUUID().toString());
             softly.assertThat(r).isEqualTo(r);
         });
         final RecommendedInvestment r2 = new RecommendedInvestment(d);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(r).isEqualTo(r2);
             softly.assertThat(r2).isEqualTo(r);
         });
-        final RecommendedInvestment r3 = new RecommendedInvestment(new InvestmentDescriptor(mock()));
-        Assertions.assertThat(r).isNotEqualTo(r3);
+        final RecommendedInvestment r3 = new RecommendedInvestment(new InvestmentDescriptor(mockInvestment()));
+        assertThat(r).isNotEqualTo(r3);
     }
 }

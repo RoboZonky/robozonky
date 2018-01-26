@@ -22,78 +22,79 @@ import java.util.UUID;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.common.secrets.SecretProvider;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class OperatingModeTest {
 
     private static final String SERVICE = "zonkoid", SERVICE_TOKEN = "123456";
 
     @Test
-    public void withConfirmation() {
-        final TweaksCommandLineFragment f = Mockito.mock(TweaksCommandLineFragment.class);
-        Mockito.when(f.isDryRunEnabled()).thenReturn(true);
-        final CommandLine cli = Mockito.mock(CommandLine.class);
-        Mockito.when(cli.getTweaksFragment()).thenReturn(f);
+    void withConfirmation() {
+        final TweaksCommandLineFragment f = mock(TweaksCommandLineFragment.class);
+        when(f.isDryRunEnabled()).thenReturn(true);
+        final CommandLine cli = mock(CommandLine.class);
+        when(cli.getTweaksFragment()).thenReturn(f);
         final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
         final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE + ":" + SERVICE_TOKEN;
-        Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
+        when(cli.getConfirmationFragment()).thenReturn(fragment);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(config).containsInstanceOf(DaemonInvestmentMode.class);
             softly.assertThat(secretProvider.getSecret(SERVICE)).contains(SERVICE_TOKEN.toCharArray());
         });
     }
 
     @Test
-    public void withConfirmationAndUnknownId() {
-        final CommandLine cli = Mockito.mock(CommandLine.class);
-        Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
+    void withConfirmationAndUnknownId() {
+        final CommandLine cli = mock(CommandLine.class);
+        when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
         final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
         final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = UUID.randomUUID().toString();
-        Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
+        when(cli.getConfirmationFragment()).thenReturn(fragment);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
-        Assertions.assertThat(config).isEmpty();
-        Assertions.assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
+        assertThat(config).isEmpty();
+        assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
     }
 
     @Test
-    public void withConfirmationAndNoSecret() {
-        final CommandLine cli = Mockito.mock(CommandLine.class);
-        Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
+    void withConfirmationAndNoSecret() {
+        final CommandLine cli = mock(CommandLine.class);
+        when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
         final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
         final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE;
-        Mockito.when(cli.getConfirmationFragment()).thenReturn(fragment);
+        when(cli.getConfirmationFragment()).thenReturn(fragment);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
-        Assertions.assertThat(config).isEmpty();
-        Assertions.assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
+        assertThat(config).isEmpty();
+        assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
     }
 
     @Test
-    public void withoutConfirmation() {
-        final CommandLine cli = Mockito.mock(CommandLine.class);
-        Mockito.when(cli.getTweaksFragment()).thenReturn(Mockito.mock(TweaksCommandLineFragment.class));
-        Mockito.when(cli.getConfirmationFragment()).thenReturn(Mockito.mock(ConfirmationCommandLineFragment.class));
+    void withoutConfirmation() {
+        final CommandLine cli = mock(CommandLine.class);
+        when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
+        when(cli.getConfirmationFragment()).thenReturn(mock(ConfirmationCommandLineFragment.class));
         final SecretProvider secretProvider = SecretProvider.fallback("user", new char[0]);
         final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
         final Optional<InvestmentMode> config = mode.configure(cli, auth);
-        Assertions.assertThat(config).isPresent();
-        Assertions.assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
+        assertThat(config).isPresent();
+        assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
     }
 }

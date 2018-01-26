@@ -18,16 +18,17 @@ package com.github.robozonky.util;
 
 import java.math.BigDecimal;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class NumberUtilTest {
 
     @Test
-    public void rounding() {
+    void rounding() {
         final double result = NumberUtil.toCurrency(new BigDecimal("0.554"));
-        Assertions.assertThat(result).isEqualTo(0.55);
+        assertThat(result).isEqualTo(0.55);
         final double result2 = NumberUtil.toCurrency(new BigDecimal("0.556"));
-        Assertions.assertThat(result2).isEqualTo(0.56);
+        assertThat(result2).isEqualTo(0.56);
     }
 }

@@ -17,50 +17,51 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class LoanTermConditionTest {
 
     @Test
-    public void leftBoundWrong() {
-        SoftAssertions.assertSoftly(softly -> {
+    void leftBoundWrong() {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new LoanTermCondition(-1, 0)).isInstanceOf(IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new LoanTermCondition(0, -1)).isInstanceOf(IllegalArgumentException.class);
         });
     }
 
     @Test
-    public void rightBoundWrong() {
-        SoftAssertions.assertSoftly(softly -> {
+    void rightBoundWrong() {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new LoanTermCondition(85, 0)).isInstanceOf(IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new LoanTermCondition(0, 85)).isInstanceOf(IllegalArgumentException.class);
         });
     }
 
     @Test
-    public void boundaryCorrect() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getRemainingTermInMonths()).thenReturn(1);
+    void boundaryCorrect() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getRemainingTermInMonths()).thenReturn(1);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
-        Assertions.assertThat(condition.test(l)).isTrue();
+        assertThat(condition.test(l)).isTrue();
     }
 
     @Test
-    public void leftOutOfBounds() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getRemainingTermInMonths()).thenReturn(0);
+    void leftOutOfBounds() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getRemainingTermInMonths()).thenReturn(0);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
-        Assertions.assertThat(condition.test(l)).isFalse();
+        assertThat(condition.test(l)).isFalse();
     }
 
     @Test
-    public void rightOutOfBounds() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getRemainingTermInMonths()).thenReturn(2);
+    void rightOutOfBounds() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getRemainingTermInMonths()).thenReturn(2);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
-        Assertions.assertThat(condition.test(l)).isFalse();
+        assertThat(condition.test(l)).isFalse();
     }
 }

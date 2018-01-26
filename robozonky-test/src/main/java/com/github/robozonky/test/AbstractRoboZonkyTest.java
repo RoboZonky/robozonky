@@ -23,9 +23,10 @@ import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.mockito.Mockito.*;
 
 /**
  * This is a suggested parent class for all RoboZonky tests using this module. It will make sure to clear shared state
@@ -48,7 +49,7 @@ public abstract class AbstractRoboZonkyTest {
     @BeforeEach
     @AfterEach
     protected void reinitScheduler() {
-        Mockito.reset(TestingSchedulerService.MOCK_SERVICE);
+        reset(TestingSchedulerService.MOCK_SERVICE);
     }
 
     @BeforeEach

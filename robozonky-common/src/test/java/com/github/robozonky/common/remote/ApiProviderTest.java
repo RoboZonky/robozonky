@@ -19,9 +19,10 @@ package com.github.robozonky.common.remote;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ApiProviderTest {
 
@@ -30,19 +31,19 @@ class ApiProviderTest {
     private static final char[] PASSWORD = new char[0];
 
     @Test
-    public void unathenticatedApisProperlyClosed() {
+    void unathenticatedApisProperlyClosed() {
         final ApiProvider provider = new ApiProvider();
-        Assertions.assertThat(provider.marketplace()).isNotNull();
+        assertThat(provider.marketplace()).isNotNull();
         final OAuth spy = provider.oauth(AUTH_OPERATION);
-        Assertions.assertThatThrownBy(() -> spy.login("", PASSWORD)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> spy.login("", PASSWORD)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void authenticatedApisProperlyClosed() {
+    void authenticatedApisProperlyClosed() {
         final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
         final ApiProvider provider = new ApiProvider();
         final Zonky spy = provider.authenticated(token, ZONKY_OPERATION);
-        Assertions.assertThatThrownBy(spy::logout).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(spy::logout).isInstanceOf(IllegalStateException.class);
 
     }
 }

@@ -20,36 +20,37 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ApiUtilTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    public void getBalancePropertyInDryRun() {
+    void getBalancePropertyInDryRun() {
         final int value = 0;
         System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
-        Assertions.assertThat(ApiUtil.getDryRunBalance(null).intValue()).isEqualTo(value);
+        assertThat(ApiUtil.getDryRunBalance(null).intValue()).isEqualTo(value);
     }
 
     @Test
-    public void getLiveBalanceInDryRun() {
+    void getLiveBalanceInDryRun() {
         final int value = -1;
         System.setProperty("robozonky.default.dry_run_balance", String.valueOf(value));
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
-        Assertions.assertThat(ApiUtil.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
+        assertThat(ApiUtil.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
-    public void getBalancePropertyIgnoredWhenNotDryRun() {
+    void getBalancePropertyIgnoredWhenNotDryRun() {
         System.setProperty("robozonky.default.dry_run_balance", "200");
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
-        Assertions.assertThat(ApiUtil.getLiveBalance(z)).isEqualTo(BigDecimal.ZERO);
+        assertThat(ApiUtil.getLiveBalance(z)).isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
-    public void getRemoteBalanceInDryRun() {
+    void getRemoteBalanceInDryRun() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
-        Assertions.assertThat(ApiUtil.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
+        assertThat(ApiUtil.getDryRunBalance(z)).isEqualTo(BigDecimal.ZERO);
     }
 }

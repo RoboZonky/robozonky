@@ -25,14 +25,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class MainControlTest {
 
     @Test
-    public void operation() throws InterruptedException, ExecutionException {
+    void operation() throws InterruptedException, ExecutionException {
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final MainControl mainControl = new MainControl();
         final AtomicBoolean started = new AtomicBoolean(false);
@@ -50,11 +51,11 @@ class MainControlTest {
             }
         });
         mainControl.valueUnset(null);
-        Assertions.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
+        assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                 .isInstanceOf(TimeoutException.class);  // nothing will happen
-        final ApiVersion v = Mockito.mock(ApiVersion.class);
+        final ApiVersion v = mock(ApiVersion.class);
         mainControl.valueSet(v);
         f.get(); // make sure task finished
-        Assertions.assertThat(mainControl.getApiVersion()).contains(v);
+        assertThat(mainControl.getApiVersion()).contains(v);
     }
 }

@@ -18,16 +18,17 @@ package com.github.robozonky.strategy.natural;
 
 import java.util.Collections;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class FilterSupplierTest {
 
     @Test
-    public void nullHandling() {
+    void nullHandling() {
         final FilterSupplier f = new FilterSupplier(new DefaultValues(DefaultPortfolio.PROGRESSIVE), null, null,
                                                     Collections.emptyList());
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(f.getPrimaryMarketplaceFilters()).isEmpty();
             softly.assertThat(f.getSecondaryMarketplaceFilters()).isEmpty();
             softly.assertThat(f.getSellFilters()).isEmpty();

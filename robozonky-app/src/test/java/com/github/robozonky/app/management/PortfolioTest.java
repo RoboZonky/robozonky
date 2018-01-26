@@ -24,24 +24,24 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class PortfolioTest {
 
     @Test
-    public void run() {
-        final PortfolioOverview portfolio = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolio.getCzkAvailable()).thenReturn(1000);
-        Mockito.when(portfolio.getCzkInvested()).thenReturn(10000);
-        Mockito.when(portfolio.getShareOnInvestment(ArgumentMatchers.any())).thenReturn(BigDecimal.ONE);
-        Mockito.when(portfolio.getCzkInvested(ArgumentMatchers.any())).thenReturn(1000);
+    void run() {
+        final PortfolioOverview portfolio = mock(PortfolioOverview.class);
+        when(portfolio.getCzkAvailable()).thenReturn(1000);
+        when(portfolio.getCzkInvested()).thenReturn(10000);
+        when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ONE);
+        when(portfolio.getCzkInvested(any())).thenReturn(1000);
         final Portfolio mbean = new Portfolio();
         final ExecutionStartedEvent evt = new ExecutionStartedEvent(Collections.emptyList(), portfolio);
         mbean.handle(evt);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(mbean.getAvailableBalance()).isEqualTo(portfolio.getCzkAvailable());
             softly.assertThat(mbean.getInvestedAmount()).isEqualTo(portfolio.getCzkInvested());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());

@@ -19,24 +19,25 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.math.BigDecimal;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class RangeConditionTest {
 
     @Test
-    public void constructor() {
+    void constructor() {
         final RangeCondition<Wrapper> c = new RangeCondition<>((w) -> 0, 0, 1);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(c.getMinInclusive()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(c.getMaxInclusive()).isEqualTo(BigDecimal.ONE);
         });
     }
 
     @Test
-    public void constructorReversed() {
+    void constructorReversed() {
         final RangeCondition<Wrapper> c = new RangeCondition<>((w) -> 0, 1, 0);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(c.getMinInclusive()).isEqualTo(BigDecimal.ZERO);
             softly.assertThat(c.getMaxInclusive()).isEqualTo(BigDecimal.ONE);
         });

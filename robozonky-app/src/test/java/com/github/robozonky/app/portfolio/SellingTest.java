@@ -35,12 +35,12 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.mockito.verification.VerificationMode;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class SellingTest extends AbstractZonkyLeveragingTest {
 
@@ -51,83 +51,83 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi(final Investment... investments) {
-        final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ZERO));
-        Mockito.when(zonky.getInvestments()).thenReturn(Stream.of(investments));
-        Mockito.when(zonky.getLoan(ArgumentMatchers.anyInt())).thenReturn(Mockito.mock(Loan.class));
+        final Zonky zonky = mock(Zonky.class);
+        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ZERO));
+        when(zonky.getInvestments()).thenReturn(Stream.of(investments));
+        when(zonky.getLoan(anyInt())).thenReturn(mock(Loan.class));
         return zonky;
     }
 
-    private static Investment mock() {
-        final Investment investment = Mockito.mock(Investment.class);
-        Mockito.when(investment.getStatus()).thenReturn(InvestmentStatus.ACTIVE);
-        Mockito.when(investment.isOnSmp()).thenReturn(false);
-        Mockito.when(investment.isCanBeOffered()).thenReturn(true);
+    private static Investment mockInvestment() {
+        final Investment investment = mock(Investment.class);
+        when(investment.getStatus()).thenReturn(InvestmentStatus.ACTIVE);
+        when(investment.isOnSmp()).thenReturn(false);
+        when(investment.isCanBeOffered()).thenReturn(true);
         return investment;
     }
 
     @Test
-    public void noSaleDueToNoStrategy() {
-        new Selling(Optional::empty, true).accept(Mockito.mock(Portfolio.class), null);
+    void noSaleDueToNoStrategy() {
+        new Selling(Optional::empty, true).accept(mock(Portfolio.class), null);
         final List<Event> e = getNewEvents();
-        Assertions.assertThat(e).hasSize(0);
+        assertThat(e).hasSize(0);
     }
 
     @Test
-    public void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
+    void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = mockApi();
         final Portfolio portfolio = Portfolio.create(zonky);
         new Selling(ALL_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
-        Assertions.assertThat(e).hasSize(2);
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(e).hasSize(2);
+        assertSoftly(softly -> {
             softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
             softly.assertThat(e.get(1)).isInstanceOf(SellingCompletedEvent.class);
         });
-        Mockito.verify(zonky, Mockito.never()).sell(ArgumentMatchers.any());
+        verify(zonky, never()).sell(any());
     }
 
     @Test
-    public void noSaleDueToStrategyForbidding() {
-        final Investment i = mock();
+    void noSaleDueToStrategyForbidding() {
+        final Investment i = mockInvestment();
         final Zonky zonky = mockApi(i);
         final Portfolio portfolio = Portfolio.create(zonky);
         new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
-        Assertions.assertThat(e).hasSize(2);
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(e).hasSize(2);
+        assertSoftly(softly -> {
             softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
             softly.assertThat(e.get(1)).isInstanceOf(SellingCompletedEvent.class);
         });
-        Mockito.verify(zonky, Mockito.never()).sell(ArgumentMatchers.eq(i));
+        verify(zonky, never()).sell(eq(i));
     }
 
     private void saleMade(final boolean isDryRun) {
-        final Investment i = mock();
+        final Investment i = mockInvestment();
         final Zonky zonky = mockApi(i);
         final Portfolio portfolio = Portfolio.create(zonky);
         new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
-        Assertions.assertThat(e).hasSize(5);
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(e).hasSize(5);
+        assertSoftly(softly -> {
             softly.assertThat(e.get(0)).isInstanceOf(SellingStartedEvent.class);
             softly.assertThat(e.get(1)).isInstanceOf(SaleRecommendedEvent.class);
             softly.assertThat(e.get(2)).isInstanceOf(SaleRequestedEvent.class);
             softly.assertThat(e.get(3)).isInstanceOf(SaleOfferedEvent.class);
             softly.assertThat(e.get(4)).isInstanceOf(SellingCompletedEvent.class);
         });
-        final VerificationMode m = isDryRun ? Mockito.never() : Mockito.times(1);
-        Mockito.verify(i, m).setIsOnSmp(ArgumentMatchers.eq(true));
-        Mockito.verify(zonky, m).sell(ArgumentMatchers.eq(i));
+        final VerificationMode m = isDryRun ? never() : times(1);
+        verify(i, m).setIsOnSmp(eq(true));
+        verify(zonky, m).sell(eq(i));
     }
 
     @Test
-    public void saleMade() {
+    void saleMade() {
         saleMade(false);
     }
 
     @Test
-    public void saleMadeDryRun() {
+    void saleMadeDryRun() {
         saleMade(true);
     }
 }

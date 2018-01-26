@@ -18,48 +18,48 @@ package com.github.robozonky.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class FileUtilTest {
 
     @Test
-    public void processFaultyFiles() throws MalformedURLException, URISyntaxException {
+    void processFaultyFiles() throws URISyntaxException {
         final URI uri = new URI("wrongproto://thisiswrong");
-        final File f = Mockito.mock(File.class);
-        Mockito.when(f.toURI()).thenReturn(uri);
-        Assertions.assertThat(FileUtil.filesToUrls(f)).isEmpty();
+        final File f = mock(File.class);
+        when(f.toURI()).thenReturn(uri);
+        assertThat(FileUtil.filesToUrls(f)).isEmpty();
     }
 
     @Test
-    public void lookupNonexistentFolder() {
-        Assertions.assertThat(FileUtil.findFolder("target")).isPresent();
+    void lookupNonexistentFolder() {
+        assertThat(FileUtil.findFolder("target")).isPresent();
     }
 
     @Test
-    public void lookupExistingFileAsFolder() {
-        Assertions.assertThat(FileUtil.findFolder("pom.xml")).isEmpty();
+    void lookupExistingFileAsFolder() {
+        assertThat(FileUtil.findFolder("pom.xml")).isEmpty();
     }
 
     @Test
-    public void someUrls() throws IOException {
+    void someUrls() throws IOException {
         File f = File.createTempFile("robozonky-", ".testing");
-        Assertions.assertThat(FileUtil.filesToUrls(f)).contains(f.toURI().toURL());
+        assertThat(FileUtil.filesToUrls(f)).contains(f.toURI().toURL());
     }
 
     @Test
-    public void nullUrls() {
-        Assertions.assertThatThrownBy(() -> FileUtil.filesToUrls((File[]) null))
+    void nullUrls() {
+        assertThatThrownBy(() -> FileUtil.filesToUrls((File[]) null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void emptyUrls() {
-        Assertions.assertThat(FileUtil.filesToUrls(new File[0])).isEmpty();
+    void emptyUrls() {
+        assertThat(FileUtil.filesToUrls(new File[0])).isEmpty();
     }
 }

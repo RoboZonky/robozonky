@@ -25,11 +25,12 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.test.exit.TestingSystemExit;
 import com.github.robozonky.test.exit.TestingSystemExitService;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class AppTest extends AbstractEventLeveragingTest {
 
@@ -44,24 +45,24 @@ class AppTest extends AbstractEventLeveragingTest {
     @Test
     void notWellFormedCli() {
         App.main();
-        Assertions.assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
+        assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.ERROR_WRONG_PARAMETERS.getCode());
     }
 
     @Test
     void help() {
         App.main("-h");
-        Assertions.assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
+        assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
     }
 
     @Test
     void proper() {
         App.main("-u", "someone", "-p", "password", "test");
         final List<Event> events = getNewEvents();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(EXIT.getReturnCode()).hasValue(ReturnCode.OK.getCode());
             softly.assertThat(events).hasSize(3);
         });
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(events.get(0)).isInstanceOf(RoboZonkyStartingEvent.class);
             softly.assertThat(events.get(1)).isInstanceOf(RoboZonkyInitializedEvent.class);
             softly.assertThat(events.get(2)).isInstanceOf(RoboZonkyEndingEvent.class);

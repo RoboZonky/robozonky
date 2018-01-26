@@ -34,11 +34,11 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class PurchasingTest extends AbstractZonkyLeveragingTest {
 
@@ -48,51 +48,51 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
             NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi() {
-        final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(zonky.getLoan(ArgumentMatchers.anyInt()))
+        final Zonky zonky = mock(Zonky.class);
+        when(zonky.getLoan(anyInt()))
                 .thenAnswer(invocation -> {
                     final int id = invocation.getArgument(0);
                     return new Loan(id, 200);
                 });
-        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
+        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
         return zonky;
     }
 
     @Test
-    public void noStrategy() {
-        final Participation mock = Mockito.mock(Participation.class);
+    void noStrategy() {
+        final Participation mock = mock(Participation.class);
         final Purchasing exec = new Purchasing(Optional::empty, null, Duration.ofMinutes(60), true);
-        final Portfolio portfolio = Mockito.mock(Portfolio.class);
-        Assertions.assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
+        final Portfolio portfolio = mock(Portfolio.class);
+        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
-        Assertions.assertThat(events).isEmpty();
+        assertThat(events).isEmpty();
     }
 
     @Test
-    public void noneAccepted() {
+    void noneAccepted() {
         final Zonky zonky = mockApi();
-        final Participation mock = Mockito.mock(Participation.class);
-        Mockito.when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        final Participation mock = mock(Participation.class);
+        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockAuthentication(zonky), Duration.ofMinutes(60), true);
         final Portfolio portfolio = Portfolio.create(zonky);
-        Assertions.assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
+        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
-        Assertions.assertThat(e).hasSize(2);
-        SoftAssertions.assertSoftly(softly -> {
+        assertThat(e).hasSize(2);
+        assertSoftly(softly -> {
             softly.assertThat(e).first().isInstanceOf(PurchasingStartedEvent.class);
             softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
         });
     }
 
     @Test
-    public void noItems() {
+    void noItems() {
         final Zonky zonky = mockApi();
         final Purchasing exec =
                 new Purchasing(ALL_ACCEPTING, mockAuthentication(zonky), Duration.ofMinutes(60), true);
         final Portfolio portfolio = Portfolio.create(zonky);
-        Assertions.assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
+        assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
-        Assertions.assertThat(e).isEmpty();
+        assertThat(e).isEmpty();
     }
 }

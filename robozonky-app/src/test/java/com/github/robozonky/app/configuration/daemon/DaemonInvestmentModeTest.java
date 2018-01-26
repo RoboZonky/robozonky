@@ -31,10 +31,11 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
@@ -42,24 +43,24 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void get() throws Exception {
-        final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
+        final Authenticated a = mockAuthentication(mock(Zonky.class));
         final Investor.Builder b = new Investor.Builder().asDryRun();
-        final Marketplace m = Mockito.mock(Marketplace.class);
+        final Marketplace m = mock(Marketplace.class);
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        final PortfolioUpdater p = Mockito.mock(PortfolioUpdater.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, m, Mockito.mock(StrategyProvider.class),
+        final PortfolioUpdater p = mock(PortfolioUpdater.class);
+        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, m, mock(StrategyProvider.class),
                                                                      Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                      Duration.ofSeconds(1))) {
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
-            Assertions.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
+            assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                     .isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
-            Assertions.assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
-            Mockito.verify(p).run();
+            assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
+            verify(p).run();
         } finally {
             e.shutdownNow();
         }
-        Mockito.verify(m).close();
+        verify(m).close();
     }
 
     @AfterEach

@@ -21,14 +21,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class RatingTest {
 
     @Test
-    public void noRatingCodeTwice() {
+    void noRatingCodeTwice() {
         final Set<String> codes = Stream.of(Rating.values()).map(Rating::getCode).collect(Collectors.toSet());
-        Assertions.assertThat(codes).hasSize(Rating.values().length);
+        assertThat(codes).hasSize(Rating.values().length);
     }
 }

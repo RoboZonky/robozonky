@@ -69,19 +69,18 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import freemarker.template.TemplateException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.*;
 
 class EmailingListenerTest extends AbstractRoboZonkyTest {
 
@@ -105,16 +104,16 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     }
 
     private static PortfolioOverview mockPortfolio(final int balance) {
-        final PortfolioOverview portfolioOverview = Mockito.mock(PortfolioOverview.class);
-        Mockito.when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
+        final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
+        when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
         return portfolioOverview;
     }
 
     private static AbstractEmailingListener<Event> getListener(final SupportedListener s,
                                                                final NotificationProperties p) {
-        final AbstractEmailingListener<Event> e = Mockito.spy((AbstractEmailingListener<Event>) s.getListener(p));
+        final AbstractEmailingListener<Event> e = spy((AbstractEmailingListener<Event>) s.getListener(p));
         // always return a listener that WILL send an e-mail, even though this means shouldSendEmail() is not tested
-        Mockito.doReturn(true).when(e).shouldSendEmail(ArgumentMatchers.any());
+        doReturn(true).when(e).shouldSendEmail(any());
         return e;
     }
 
@@ -136,17 +135,17 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
                                      final Event event) throws Exception {
         final int originalMessages = EMAIL.getReceivedMessages().length;
         listener.handle(event, new SessionInfo("someone@somewhere.net"));
-        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
+        assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
-        Assertions.assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
-        Assertions.assertThat(m.getSubject()).isNotNull().isEqualTo(listener.getSubject(event));
-        Assertions.assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
+        assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
+        assertThat(m.getSubject()).isNotNull().isEqualTo(listener.getSubject(event));
+        assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
     }
 
     private static void testFormal(final AbstractEmailingListener<Event> listener, final Event event,
                                    final SupportedListener listenerType) {
-        Assertions.assertThat(event).isInstanceOf(listenerType.getEventType());
-        Assertions.assertThat(listener.getTemplateFileName())
+        assertThat(event).isInstanceOf(listenerType.getEventType());
+        assertThat(listener.getTemplateFileName())
                 .isNotNull()
                 .isNotEmpty();
     }
@@ -156,13 +155,13 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         final String s = TemplateProcessor.INSTANCE.process(listener.getTemplateFileName(),
                                                             listener.getData(event, new SessionInfo(
                                                                     "someone@somewhere.net")));
-        Assertions.assertThat(s).contains(Defaults.ROBOZONKY_URL);
+        assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 
     private static void testListenerEnabled(final Event event) {
         final EmailListenerService service = new EmailListenerService();
         final EventListenerSupplier<?> supplier = service.findListener(event.getClass());
-        Assertions.assertThat(supplier.get()).isPresent();
+        assertThat(supplier.get()).isPresent();
     }
 
     @BeforeEach
@@ -180,16 +179,16 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         final ListenerSpecificNotificationProperties p =
                 new ListenerSpecificNotificationProperties(SupportedListener.TESTING,
                                                            new NotificationProperties(props));
-        final Consumer<RoboZonkyTestingEvent> c = Mockito.mock(Consumer.class);
+        final Consumer<RoboZonkyTestingEvent> c = mock(Consumer.class);
         final TestingEmailingListener l = new TestingEmailingListener(p);
         l.registerFinisher(c);
-        Assertions.assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
+        assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
         l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
-        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(1);
+        assertThat(EMAIL.getReceivedMessages()).hasSize(1);
         l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
         // e-mail not re-sent, finisher not called again
-        Mockito.verify(c, Mockito.times(1)).accept(ArgumentMatchers.any());
-        Assertions.assertThat(EMAIL.getReceivedMessages()).hasSize(1);
+        verify(c, times(1)).accept(any());
+        assertThat(EMAIL.getReceivedMessages()).hasSize(1);
     }
 
     @BeforeEach
@@ -212,16 +211,16 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     @TestFactory
     Stream<DynamicNode> listeners() {
         // prepare data
-        final Loan loan = Mockito.spy(new Loan(66666, 100000));
-        Mockito.when(loan.getDatePublished()).thenReturn(OffsetDateTime.now().minusMonths(2));
-        Mockito.when(loan.getName()).thenReturn("Úvěr");
-        Mockito.when(loan.getRegion()).thenReturn(Region.JIHOCESKY);
-        Mockito.when(loan.getPurpose()).thenReturn(Purpose.AUTO_MOTO);
-        Mockito.when(loan.getMainIncomeType()).thenReturn(MainIncomeType.EMPLOYMENT);
-        Mockito.when(loan.getRemainingInvestment()).thenReturn(2000.0);
-        Mockito.when(loan.getRating()).thenReturn(Rating.AAAAA);
-        Mockito.when(loan.getTermInMonths()).thenReturn(25);
-        Mockito.when(loan.getUrl()).thenReturn("http://www.robozonky.cz/");
+        final Loan loan = spy(new Loan(66666, 100000));
+        when(loan.getDatePublished()).thenReturn(OffsetDateTime.now().minusMonths(2));
+        when(loan.getName()).thenReturn("Úvěr");
+        when(loan.getRegion()).thenReturn(Region.JIHOCESKY);
+        when(loan.getPurpose()).thenReturn(Purpose.AUTO_MOTO);
+        when(loan.getMainIncomeType()).thenReturn(MainIncomeType.EMPLOYMENT);
+        when(loan.getRemainingInvestment()).thenReturn(2000.0);
+        when(loan.getRating()).thenReturn(Rating.AAAAA);
+        when(loan.getTermInMonths()).thenReturn(25);
+        when(loan.getUrl()).thenReturn("http://www.robozonky.cz/");
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
         final Investment i = new Investment(loan, 1000);
@@ -271,7 +270,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static final class TestingEmailingListener extends AbstractEmailingListener<RoboZonkyTestingEvent> {
 
-        public TestingEmailingListener(final ListenerSpecificNotificationProperties properties) {
+        TestingEmailingListener(final ListenerSpecificNotificationProperties properties) {
             super(properties);
         }
 

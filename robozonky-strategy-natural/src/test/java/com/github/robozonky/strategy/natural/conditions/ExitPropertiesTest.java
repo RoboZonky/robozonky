@@ -19,37 +19,38 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.time.LocalDate;
 
 import com.github.robozonky.strategy.natural.ExitProperties;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class ExitPropertiesTest {
 
     @Test
-    public void defaults() {
+    void defaults() {
         final LocalDate now = LocalDate.now();
         final ExitProperties e = new ExitProperties(now);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             e.getAccountTermination().isEqual(now);
             e.getSelloffStart().isEqual(now.minusMonths(3));
         });
     }
 
     @Test
-    public void customSelloff() {
+    void customSelloff() {
         final LocalDate now = LocalDate.now();
         final LocalDate selloff = LocalDate.now().minusDays(1);
         final ExitProperties e = new ExitProperties(now, selloff);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             e.getAccountTermination().isEqual(now);
             e.getSelloffStart().isEqual(selloff);
         });
     }
 
     @Test
-    public void invalidSelloff() {
+    void invalidSelloff() {
         final LocalDate now = LocalDate.now();
-        Assertions.assertThatThrownBy(() -> new ExitProperties(now, now))
+        assertThatThrownBy(() -> new ExitProperties(now, now))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

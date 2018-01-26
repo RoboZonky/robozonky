@@ -18,9 +18,10 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class MarketplaceFilterConditionImplTest {
 
@@ -32,10 +33,10 @@ class MarketplaceFilterConditionImplTest {
     };
 
     @Test
-    public void doubleNegation() {
+    void doubleNegation() {
         final MarketplaceFilterCondition negated = CONDITION.negate();
-        Assertions.assertThat(negated.test(new Wrapper(Mockito.mock(Loan.class)))).isFalse();
+        assertThat(negated.test(new Wrapper(mock(Loan.class)))).isFalse();
         final MarketplaceFilterCondition doubleNegated = negated.negate();
-        Assertions.assertThat(doubleNegated).isSameAs(CONDITION);
+        assertThat(doubleNegated).isSameAs(CONDITION);
     }
 }

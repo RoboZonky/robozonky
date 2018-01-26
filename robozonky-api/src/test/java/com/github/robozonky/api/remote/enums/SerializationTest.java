@@ -22,10 +22,10 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class SerializationTest {
@@ -41,12 +41,12 @@ class SerializationTest {
     private static void deserialize(final String name, final Object value) throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
         final Object result = mapper.readValue(name, value.getClass());
-        Assertions.assertThat(result).isSameAs(value);
+        assertThat(result).isSameAs(value);
     }
 
     private static void deserialize(final Class<? extends Enum<?>> value) {
         final ObjectMapper mapper = new ObjectMapper();
-        Assertions.assertThatThrownBy(() -> mapper.readValue(String.valueOf(Integer.MAX_VALUE), value))
+        assertThatThrownBy(() -> mapper.readValue(String.valueOf(Integer.MAX_VALUE), value))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -55,7 +55,7 @@ class SerializationTest {
     }
 
     @TestFactory
-    public Collection<DynamicTest> deserialize() {
+    Collection<DynamicTest> deserialize() {
         final Collection<DynamicTest> tests = new ArrayList<>(0);
         // test deserialization of all income types
         for (final MainIncomeType toSerialize : MainIncomeType.values()) {

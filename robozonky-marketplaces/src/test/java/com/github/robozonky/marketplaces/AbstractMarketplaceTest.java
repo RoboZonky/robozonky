@@ -23,31 +23,30 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.remote.entities.Loan;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.*;
 
 class AbstractMarketplaceTest {
 
     private static void retrieval(final Class<? extends Marketplace> marketClass) throws Exception {
-        final Consumer<Collection<Loan>> consumer = Mockito.mock(Consumer.class);
+        final Consumer<Collection<Loan>> consumer = mock(Consumer.class);
         try (final Marketplace market = marketClass.getConstructor().newInstance()) {
-            Mockito.verify(consumer, Mockito.never()).accept(ArgumentMatchers.any());
-            Assertions.assertThat(market.registerListener(consumer)).isTrue();
+            verify(consumer, never()).accept(any());
+            assertThat(market.registerListener(consumer)).isTrue();
             market.run();
-            Mockito.verify(consumer, Mockito.times(1))
-                    .accept(ArgumentMatchers.argThat(argument -> argument != null && !argument.isEmpty()));
+            verify(consumer, times(1))
+                    .accept(argThat(argument -> argument != null && !argument.isEmpty()));
         } catch (final InvocationTargetException | NoSuchMethodException ex) {
-            Assertions.fail("Failed creating marketplace instance.", ex);
+            fail("Failed creating marketplace instance.", ex);
         }
     }
 
     @TestFactory
-    public Stream<DynamicTest> marketplaces() {
+    Stream<DynamicTest> marketplaces() {
         return Stream.of(
                 dynamicTest("Zonky", () -> retrieval(ZonkyMarketplace.class)),
                 dynamicTest("Zotify", () -> retrieval(ZotifyMarketplace.class))

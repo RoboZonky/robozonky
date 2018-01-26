@@ -19,10 +19,10 @@ package com.github.robozonky.util;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class RefreshableTest {
 
@@ -31,70 +31,70 @@ class RefreshableTest {
     }
 
     @Test
-    public void immutable() {
+    void immutable() {
         final Refreshable<Void> r = Refreshable.createImmutable();
         r.run();
-        Assertions.assertThat(r.get()).isEmpty();
+        assertThat(r.get()).isEmpty();
     }
 
     @Test
-    public void mutableNoRefresh() {
+    void mutableNoRefresh() {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
         r.run();
-        Assertions.assertThat(r.get()).isPresent().contains(RefreshableTest.transform(initial));
+        assertThat(r.get()).isPresent().contains(RefreshableTest.transform(initial));
         final String original = r.get().get();
         r.run();
-        Assertions.assertThat(r.get()).isPresent().contains(original);
-        Assertions.assertThat(r.get().get()).isSameAs(original);
+        assertThat(r.get()).isPresent().contains(original);
+        assertThat(r.get().get()).isSameAs(original);
     }
 
     @Test
-    public void mutableRefreshing() {
+    void mutableRefreshing() {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
         r.run();
-        Assertions.assertThat(r.get()).isPresent().contains(RefreshableTest.transform(initial));
+        assertThat(r.get()).isPresent().contains(RefreshableTest.transform(initial));
         r.setLatestSource(null); // make sure latest will get reset
         r.run();
-        Assertions.assertThat(r.get()).isEmpty();
+        assertThat(r.get()).isEmpty();
     }
 
     @Test
-    public void registersListeners() {
+    void registersListeners() {
         final String s = UUID.randomUUID().toString();
         final Refreshable<String> r = Refreshable.createImmutable(s);
         r.run();
-        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
-        Assertions.assertThat(r.registerListener(l)).isTrue();
-        Mockito.verify(l).valueSet(ArgumentMatchers.eq(s));
-        Assertions.assertThat(r.registerListener(l)).isFalse(); // repeat registration
-        Mockito.verify(l, Mockito.times(1)).valueSet(ArgumentMatchers.eq(s));
-        Assertions.assertThat(r.unregisterListener(l)).isTrue();
-        Mockito.verify(l).valueUnset(ArgumentMatchers.eq(s));
-        Assertions.assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
-        Mockito.verify(l, Mockito.times(1)).valueUnset(ArgumentMatchers.eq(s));
-        Assertions.assertThat(r.registerListener(l)).isTrue(); // re-registration
-        Mockito.verify(l, Mockito.times(2)).valueSet(ArgumentMatchers.eq(s));
+        final Refreshable.RefreshListener<String> l = mock(Refreshable.RefreshListener.class);
+        assertThat(r.registerListener(l)).isTrue();
+        verify(l).valueSet(eq(s));
+        assertThat(r.registerListener(l)).isFalse(); // repeat registration
+        verify(l, times(1)).valueSet(eq(s));
+        assertThat(r.unregisterListener(l)).isTrue();
+        verify(l).valueUnset(eq(s));
+        assertThat(r.unregisterListener(l)).isFalse(); // repeat unregistration
+        verify(l, times(1)).valueUnset(eq(s));
+        assertThat(r.registerListener(l)).isTrue(); // re-registration
+        verify(l, times(2)).valueSet(eq(s));
     }
 
     @Test
-    public void checkListeners() {
+    void checkListeners() {
         final String initial = "initial";
         final RefreshableTest.TestingRefreshable r = new RefreshableTest.TestingRefreshable(initial);
-        final Refreshable.RefreshListener<String> l = Mockito.mock(Refreshable.RefreshListener.class);
+        final Refreshable.RefreshListener<String> l = mock(Refreshable.RefreshListener.class);
         r.registerListener(l);
         r.setLatestSource(initial);
         r.run();
-        Mockito.verify(l, Mockito.times(1)).valueSet(RefreshableTest.transform(initial));
+        verify(l, times(1)).valueSet(RefreshableTest.transform(initial));
         final String otherValue = "other";
         r.setLatestSource(otherValue);
         r.run();
-        Mockito.verify(l, Mockito.times(1))
+        verify(l, times(1))
                 .valueChanged(RefreshableTest.transform(initial), RefreshableTest.transform(otherValue));
         r.setLatestSource(null);
         r.run();
-        Mockito.verify(l, Mockito.times(1))
+        verify(l, times(1))
                 .valueUnset(RefreshableTest.transform(otherValue));
     }
 
@@ -102,7 +102,7 @@ class RefreshableTest {
 
         private String latestSource;
 
-        public TestingRefreshable(final String intialSource) {
+        TestingRefreshable(final String intialSource) {
             this.latestSource = intialSource;
         }
 
@@ -111,7 +111,7 @@ class RefreshableTest {
             return latestSource;
         }
 
-        public void setLatestSource(final String latestSource) {
+        void setLatestSource(final String latestSource) {
             this.latestSource = latestSource;
         }
 

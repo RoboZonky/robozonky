@@ -21,14 +21,14 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.mockito.Mockito;
 
+import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.*;
 
 class EqualityConditionTest {
 
@@ -45,14 +45,14 @@ class EqualityConditionTest {
     }
 
     private static Wrapper mockLoan(final Rating r) {
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getRating()).thenReturn(r);
+        final Loan l = mock(Loan.class);
+        when(l.getRating()).thenReturn(r);
         return new Wrapper(l);
     }
 
     private static void testBetterThan(final Rating current, final Rating r) {
         final MarketplaceFilterCondition c = new LoanRatingBetterCondition(current);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(c.test(mockLoan(current))).isFalse();
             softly.assertThat(c.test(mockLoan(r))).isTrue();
         });
@@ -60,7 +60,7 @@ class EqualityConditionTest {
 
     private static void testWorseThan(final Rating current, final Rating r) {
         final MarketplaceFilterCondition c = new LoanRatingWorseCondition(current);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(c.test(mockLoan(current))).isFalse();
             softly.assertThat(c.test(mockLoan(r))).isTrue();
         });

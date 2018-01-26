@@ -17,16 +17,17 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class LoanAmountConditionTest {
 
     @Test
-    public void leftBoundWrong() {
-        SoftAssertions.assertSoftly(softly -> {
+    void leftBoundWrong() {
+        assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new LoanAmountCondition(-1, 0))
                     .isInstanceOf(IllegalArgumentException.class);
             softly.assertThatThrownBy(() -> new LoanAmountCondition(0, -1))
@@ -37,26 +38,26 @@ class LoanAmountConditionTest {
     }
 
     @Test
-    public void boundaryCorrect() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getOriginalAmount()).thenReturn(0);
+    void boundaryCorrect() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getOriginalAmount()).thenReturn(0);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(0, 0);
-        Assertions.assertThat(condition.test(l)).isTrue();
+        assertThat(condition.test(l)).isTrue();
     }
 
     @Test
-    public void leftOutOfBounds() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getOriginalAmount()).thenReturn(0);
+    void leftOutOfBounds() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getOriginalAmount()).thenReturn(0);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
-        Assertions.assertThat(condition.test(l)).isFalse();
+        assertThat(condition.test(l)).isFalse();
     }
 
     @Test
-    public void rightOutOfBounds() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
-        Mockito.when(l.getOriginalAmount()).thenReturn(2);
+    void rightOutOfBounds() {
+        final Wrapper l = mock(Wrapper.class);
+        when(l.getOriginalAmount()).thenReturn(2);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
-        Assertions.assertThat(condition.test(l)).isFalse();
+        assertThat(condition.test(l)).isFalse();
     }
 }

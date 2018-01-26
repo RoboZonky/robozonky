@@ -21,9 +21,10 @@ import java.util.Collections;
 import java.util.function.Supplier;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class MarketplaceFilterTest {
 
@@ -31,36 +32,36 @@ class MarketplaceFilterTest {
     private static final Supplier<MarketplaceFilterCondition> NOT_MATCHING = MarketplaceFilterCondition::neverAccepting;
 
     @Test
-    public void noConditions() {
+    void noConditions() {
         final MarketplaceFilterConditionImpl f = new MarketplaceFilter();
-        Assertions.assertThat(f.test(Mockito.mock(Wrapper.class))).isTrue();
+        assertThat(f.test(mock(Wrapper.class))).isTrue();
     }
 
     @Test
-    public void oneMatching() {
+    void oneMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.when(Collections.singletonList(MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Wrapper.class))).isTrue();
+        assertThat(f.test(mock(Wrapper.class))).isTrue();
     }
 
     @Test
-    public void notAllMatching() {
+    void notAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.when(Arrays.asList(MATCHING.get(), NOT_MATCHING.get(), MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Wrapper.class))).isFalse();
+        assertThat(f.test(mock(Wrapper.class))).isFalse();
     }
 
     @Test
-    public void secondaryOneNotMatching() {
+    void secondaryOneNotMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.butNotWhen(Collections.singleton(NOT_MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Wrapper.class))).isTrue();
+        assertThat(f.test(mock(Wrapper.class))).isTrue();
     }
 
     @Test
-    public void secondaryAllMatching() {
+    void secondaryAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.butNotWhen(Arrays.asList(MATCHING.get(), MATCHING.get()));
-        Assertions.assertThat(f.test(Mockito.mock(Wrapper.class))).isFalse();
+        assertThat(f.test(mock(Wrapper.class))).isFalse();
     }
 }

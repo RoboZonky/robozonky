@@ -22,28 +22,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.izforge.izpack.api.data.InstallData;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class VariablesTest {
 
     @Test
-    public void unique() {
+    void unique() {
         final Set<String> values = Stream.of(Variables.values())
                 .map(Variables::getKey)
                 .collect(Collectors.toSet());
-        Assertions.assertThat(values).hasSameSizeAs(Variables.values());
+        assertThat(values).hasSameSizeAs(Variables.values());
     }
 
     @Test
-    public void readValue() {
+    void readValue() {
         for (final Variables variable : Variables.values()) {
             final String key = variable.getKey();
             final String value = UUID.randomUUID().toString();
-            final InstallData data = Mockito.mock(InstallData.class);
-            Mockito.when(data.getVariable(key)).thenReturn(value);
-            Assertions.assertThat(variable.getValue(data)).isSameAs(value);
+            final InstallData data = mock(InstallData.class);
+            when(data.getVariable(key)).thenReturn(value);
+            assertThat(variable.getValue(data)).isSameAs(value);
         }
     }
 }

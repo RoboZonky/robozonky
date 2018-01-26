@@ -18,23 +18,24 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class NegatingConditionTest {
 
     @Test
-    public void negatingTrue() {
+    void negatingTrue() {
         final MarketplaceFilterCondition c = MarketplaceFilterCondition.alwaysAccepting();
         final NegatingCondition nc = new NegatingCondition(c);
-        Assertions.assertThat(nc.test(new Wrapper(Mockito.mock(Loan.class)))).isFalse();
+        assertThat(nc.test(new Wrapper(mock(Loan.class)))).isFalse();
     }
 
     @Test
-    public void negatingFalse() {
+    void negatingFalse() {
         final MarketplaceFilterCondition c = MarketplaceFilterCondition.neverAccepting();
         final NegatingCondition nc = new NegatingCondition(c);
-        Assertions.assertThat(nc.test(new Wrapper(Mockito.mock(Loan.class)))).isTrue();
+        assertThat(nc.test(new Wrapper(mock(Loan.class)))).isTrue();
     }
 }

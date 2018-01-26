@@ -21,20 +21,20 @@ import java.util.Optional;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class ZonkoidSettingsValidatorTest {
 
     private static final String USER = "someone@somewhere.cz", TOKEN = String.valueOf((int) (Math.random() * 100_000));
 
     @Test
-    public void messages() {
+    void messages() {
         final DataValidator validator = new ZonkoidSettingsValidator();
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(validator.getDefaultAnswer()).isFalse();
             softly.assertThat(validator.getWarningMessageId()).isNotEmpty();
             softly.assertThat(validator.getErrorMessageId()).isNotEmpty();
@@ -43,45 +43,45 @@ class ZonkoidSettingsValidatorTest {
     }
 
     @Test
-    public void zonkoidMissing() {
+    void zonkoidMissing() {
         // execute SUT
         final DataValidator validator =
                 new ZonkoidSettingsValidator(Optional::empty);
-        final DataValidator.Status result = validator.validateData(Mockito.mock(InstallData.class));
+        final DataValidator.Status result = validator.validateData(mock(InstallData.class));
         // run test
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.ERROR);
+        assertThat(result).isEqualTo(DataValidator.Status.ERROR);
     }
 
     private static InstallData mockInstallData() {
-        final InstallData d = Mockito.mock(InstallData.class);
-        Mockito.when(d.getVariable(Variables.ZONKY_USERNAME.getKey())).thenReturn(ZonkoidSettingsValidatorTest.USER);
-        Mockito.when(d.getVariable(Variables.ZONKOID_TOKEN.getKey())).thenReturn(ZonkoidSettingsValidatorTest.TOKEN);
+        final InstallData d = mock(InstallData.class);
+        when(d.getVariable(Variables.ZONKY_USERNAME.getKey())).thenReturn(ZonkoidSettingsValidatorTest.USER);
+        when(d.getVariable(Variables.ZONKOID_TOKEN.getKey())).thenReturn(ZonkoidSettingsValidatorTest.TOKEN);
         return d;
     }
 
     @Test
-    public void zonkoidPresentButRejecting() {
-        final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
-        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(false);
+    void zonkoidPresentButRejecting() {
+        final ConfirmationProvider cp = mock(ConfirmationProvider.class);
+        when(cp.requestConfirmation(any(), anyInt(),
+                                    anyInt())).thenReturn(false);
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
         final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
         final DataValidator.Status result = validator.validateData(d);
         // run test
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.WARNING);
+        assertThat(result).isEqualTo(DataValidator.Status.WARNING);
     }
 
     @Test
-    public void zonkoidProper() {
-        final ConfirmationProvider cp = Mockito.mock(ConfirmationProvider.class);
-        Mockito.when(cp.requestConfirmation(ArgumentMatchers.any(), ArgumentMatchers.anyInt(),
-                                            ArgumentMatchers.anyInt())).thenReturn(true);
+    void zonkoidProper() {
+        final ConfirmationProvider cp = mock(ConfirmationProvider.class);
+        when(cp.requestConfirmation(any(), anyInt(),
+                                    anyInt())).thenReturn(true);
         final InstallData d = ZonkoidSettingsValidatorTest.mockInstallData();
         // execute SUT
         final DataValidator validator = new ZonkoidSettingsValidator(() -> Optional.of(cp));
         final DataValidator.Status result = validator.validateData(d);
         // run test
-        Assertions.assertThat(result).isEqualTo(DataValidator.Status.OK);
+        assertThat(result).isEqualTo(DataValidator.Status.OK);
     }
 }

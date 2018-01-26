@@ -25,14 +25,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class CommandLinePartTest {
 
     @Test
-    public void options() {
+    void options() {
         final String firstOption = UUID.randomUUID().toString();
         final String secondOption = UUID.randomUUID().toString();
         final String thirdOption = UUID.randomUUID().toString();
@@ -43,7 +44,7 @@ class CommandLinePartTest {
                 .setOption(secondOption, firstValue)
                 .setOption(thirdOption, firstValue, secondValue)
                 .setOption(secondOption, secondValue, firstValue); // override
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             final Map<String, Collection<String>> options = clp.getOptions();
             softly.assertThat(options.get(UUID.randomUUID().toString())).isNull();
             softly.assertThat(options.get(firstOption)).isEmpty();
@@ -57,7 +58,7 @@ class CommandLinePartTest {
     }
 
     @Test
-    public void properties() {
+    void properties() {
         final String firstProperty = UUID.randomUUID().toString();
         final String secondProperty = UUID.randomUUID().toString();
         final String firstValue = UUID.randomUUID().toString();
@@ -65,7 +66,7 @@ class CommandLinePartTest {
         final CommandLinePart clp = new CommandLinePart()
                 .setProperty(firstProperty, firstValue)
                 .setProperty(secondProperty, secondValue);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             final Map<String, String> properties = clp.getProperties();
             softly.assertThat(properties.get(UUID.randomUUID().toString())).isNull();
             softly.assertThat(properties.get(firstProperty)).isSameAs(firstValue);
@@ -77,7 +78,7 @@ class CommandLinePartTest {
     }
 
     @Test
-    public void environmentVariables() {
+    void environmentVariables() {
         final String firstVariable = UUID.randomUUID().toString();
         final String secondVariable = UUID.randomUUID().toString();
         final String firstValue = UUID.randomUUID().toString();
@@ -85,7 +86,7 @@ class CommandLinePartTest {
         final CommandLinePart clp = new CommandLinePart()
                 .setEnvironmentVariable(firstVariable, firstValue)
                 .setEnvironmentVariable(secondVariable, secondValue);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             final Map<String, String> variables = clp.getEnvironmentVariables();
             softly.assertThat(variables.get(UUID.randomUUID().toString())).isNull();
             softly.assertThat(variables.get(firstVariable)).isSameAs(firstValue);
@@ -97,14 +98,14 @@ class CommandLinePartTest {
     }
 
     @Test
-    public void jvmArguments() {
+    void jvmArguments() {
         final String firstVariable = UUID.randomUUID().toString();
         final String secondVariable = UUID.randomUUID().toString();
         final String firstValue = UUID.randomUUID().toString();
         final CommandLinePart clp = new CommandLinePart()
                 .setJvmArgument(firstVariable, firstValue)
                 .setJvmArgument(secondVariable);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             final Map<String, Optional<String>> variables = clp.getJvmArguments();
             softly.assertThat(variables.get(UUID.randomUUID().toString())).isNull();
             softly.assertThat(variables.get(firstVariable)).isPresent().contains(firstValue);
@@ -116,7 +117,7 @@ class CommandLinePartTest {
     }
 
     @Test
-    public void optionStorage() throws IOException {
+    void optionStorage() throws IOException {
         final File target = File.createTempFile("robozonky-", ".cli");
         new CommandLinePart()
                 .setOption("-noarg")
@@ -124,6 +125,6 @@ class CommandLinePartTest {
                 .setOption("-twoarg", "a2", "a3")
                 .storeOptions(target);
         final List<String> result = Files.readAllLines(target.toPath());
-        Assertions.assertThat(result).containsExactly("-noarg", "-onearg", "\"a1\"", "-twoarg", "\"a2\"", "\"a3\"");
+        assertThat(result).containsExactly("-noarg", "-onearg", "\"a1\"", "-twoarg", "\"a2\"", "\"a3\"");
     }
 }

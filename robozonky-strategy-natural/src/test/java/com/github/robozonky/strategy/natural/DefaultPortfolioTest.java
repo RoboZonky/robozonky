@@ -19,22 +19,22 @@ package com.github.robozonky.strategy.natural;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class DefaultPortfolioTest {
 
     private static void hasValue(final DefaultPortfolio p, final Rating r) {
-        Assertions.assertThat(p.getDefaultShare(r)).isEqualTo(0);
+        assertThat(p.getDefaultShare(r)).isEqualTo(0);
     }
 
     private static void unknownValue(final DefaultPortfolio p) {
-        Assertions.assertThatThrownBy(() -> p.getDefaultShare(null)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> p.getDefaultShare(null)).isInstanceOf(IllegalStateException.class);
     }
 
     private static Stream<DynamicTest> forRating(final Rating r) {

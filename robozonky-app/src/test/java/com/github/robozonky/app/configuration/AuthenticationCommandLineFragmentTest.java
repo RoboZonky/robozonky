@@ -19,52 +19,53 @@ package com.github.robozonky.app.configuration;
 import java.io.File;
 
 import com.beust.jcommander.ParameterException;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class AuthenticationCommandLineFragmentTest {
 
     @Test
-    public void defaults() {
+    void defaults() {
         final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment();
-        SoftAssertions.assertSoftly(softly -> {
-            Assertions.assertThat(fragment.getUsername()).isEmpty();
-            Assertions.assertThat(fragment.getKeystore()).isEmpty();
+        assertSoftly(softly -> {
+            assertThat(fragment.getUsername()).isEmpty();
+            assertThat(fragment.getKeystore()).isEmpty();
         });
-        Assertions.assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
+        assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
     }
 
     @Test
-    public void bothSet() {
+    void bothSet() {
         final String username = "usr";
         final File keystore = new File("");
         final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment(username, keystore);
-        SoftAssertions.assertSoftly(softly -> {
-            Assertions.assertThat(fragment.getUsername()).hasValue(username);
-            Assertions.assertThat(fragment.getKeystore()).hasValue(keystore);
+        assertSoftly(softly -> {
+            assertThat(fragment.getUsername()).hasValue(username);
+            assertThat(fragment.getKeystore()).hasValue(keystore);
         });
-        Assertions.assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
+        assertThatThrownBy(() -> fragment.validate(null)).isInstanceOf(ParameterException.class);
     }
 
     @Test
-    public void userSet() {
+    void userSet() {
         final String username = "usr";
         final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment(username, null);
-        SoftAssertions.assertSoftly(softly -> {
-            Assertions.assertThat(fragment.getUsername()).hasValue(username);
-            Assertions.assertThat(fragment.getKeystore()).isEmpty();
+        assertSoftly(softly -> {
+            assertThat(fragment.getUsername()).hasValue(username);
+            assertThat(fragment.getKeystore()).isEmpty();
         });
         fragment.validate(null);
     }
 
     @Test
-    public void keystoreSet() {
+    void keystoreSet() {
         final File keystore = new File("");
         final AuthenticationCommandLineFragment fragment = new AuthenticationCommandLineFragment(null, keystore);
-        SoftAssertions.assertSoftly(softly -> {
-            Assertions.assertThat(fragment.getUsername()).isEmpty();
-            Assertions.assertThat(fragment.getKeystore()).hasValue(keystore);
+        assertSoftly(softly -> {
+            assertThat(fragment.getUsername()).isEmpty();
+            assertThat(fragment.getKeystore()).hasValue(keystore);
         });
         fragment.validate(null);
     }

@@ -17,15 +17,16 @@
 package com.github.robozonky.common.remote;
 
 import com.github.robozonky.api.remote.LoanApi;
-import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ProxyFactoryTest {
 
     @Test
-    public void api() {
+    void api() {
         final ResteasyClient client = ProxyFactory.newResteasyClient();
-        Assertions.assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
+        assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
     }
 }

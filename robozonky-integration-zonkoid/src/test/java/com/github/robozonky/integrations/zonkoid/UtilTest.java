@@ -24,17 +24,17 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.Mockito.*;
 
 class UtilTest {
 
     @Test
-    public void success() {
-        SoftAssertions.assertSoftly(softly -> {
+    void success() {
+        assertSoftly(softly -> {
             softly.assertThat(Util.isHttpSuccess(199)).isFalse();
             softly.assertThat(Util.isHttpSuccess(200)).isTrue();
             softly.assertThat(Util.isHttpSuccess(299)).isTrue();
@@ -43,16 +43,16 @@ class UtilTest {
     }
 
     @Test
-    public void responseFails() throws IOException {
-        final HttpEntity e = Mockito.mock(HttpEntity.class);
-        Mockito.doThrow(IOException.class).when(e).writeTo(ArgumentMatchers.any());
-        Assertions.assertThat(Util.readEntity(e)).isNull();
+    void responseFails() throws IOException {
+        final HttpEntity e = mock(HttpEntity.class);
+        doThrow(IOException.class).when(e).writeTo(any());
+        assertThat(Util.readEntity(e)).isNull();
     }
 
     @Test
-    public void responseContent() {
+    void responseContent() {
         final Collection<NameValuePair> nvp = Collections.singletonList(new BasicNameValuePair("key", "value"));
         final HttpEntity e = new UrlEncodedFormEntity(nvp);
-        Assertions.assertThat(Util.readEntity(e)).isNotEmpty();
+        assertThat(Util.readEntity(e)).isNotEmpty();
     }
 }

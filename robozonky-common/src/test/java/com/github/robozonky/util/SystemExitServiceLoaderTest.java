@@ -16,14 +16,15 @@
 
 package com.github.robozonky.util;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class SystemExitServiceLoaderTest {
 
     @Test
     void standard() {
         final SystemExitService s = SystemExitServiceLoader.load();
-        Assertions.assertThat(s).isEqualTo(SystemExitServiceLoader.REAL);
+        assertThat(s).isEqualTo(SystemExitServiceLoader.REAL);
     }
 }

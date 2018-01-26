@@ -18,20 +18,21 @@ package com.github.robozonky.api.confirmations;
 
 import java.util.UUID;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class RequestIdTest {
 
     @Test
-    public void nullUsername() {
-        Assertions.assertThatThrownBy(() -> new RequestId(null))
+    void nullUsername() {
+        assertThatThrownBy(() -> new RequestId(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void emptyPassword() {
+    void emptyPassword() {
         final String username = "user";
         final RequestId r = new RequestId(username);
         final SoftAssertions softly = new SoftAssertions();
@@ -41,7 +42,7 @@ class RequestIdTest {
     }
 
     @Test
-    public void passwordDefensivelyCopied() {
+    void passwordDefensivelyCopied() {
         final char[] password = "pass".toCharArray();
         final RequestId r = new RequestId("user", password);
         final SoftAssertions softly = new SoftAssertions();
@@ -52,34 +53,34 @@ class RequestIdTest {
     }
 
     @Test
-    public void equalsSame() {
+    void equalsSame() {
         final char[] password = "pass".toCharArray();
         final String username = "user";
         final RequestId r1 = new RequestId(username, password);
-        Assertions.assertThat(r1).isEqualTo(r1);
+        assertThat(r1).isEqualTo(r1);
         final RequestId r2 = new RequestId(username, password);
-        Assertions.assertThat(r1).isEqualTo(r2);
+        assertThat(r1).isEqualTo(r2);
     }
 
     @Test
-    public void notEqualsPassword() {
+    void notEqualsPassword() {
         final String username = "user";
         final RequestId r1 = new RequestId(username, UUID.randomUUID().toString().toCharArray());
         final RequestId r2 = new RequestId(username, UUID.randomUUID().toString().toCharArray());
-        Assertions.assertThat(r1).isNotEqualTo(r2);
+        assertThat(r1).isNotEqualTo(r2);
     }
 
     @Test
-    public void notEqualsUsername() {
+    void notEqualsUsername() {
         final char[] password = "password".toCharArray();
         final RequestId r1 = new RequestId(UUID.randomUUID().toString(), password);
         final RequestId r2 = new RequestId(UUID.randomUUID().toString(), password);
-        Assertions.assertThat(r1).isNotEqualTo(r2);
+        assertThat(r1).isNotEqualTo(r2);
     }
 
     @Test
-    public void notEqualsDifferentJavaType() {
+    void notEqualsDifferentJavaType() {
         final RequestId r1 = new RequestId(UUID.randomUUID().toString(), UUID.randomUUID().toString().toCharArray());
-        Assertions.assertThat(r1).isNotEqualTo(r1.toString());
+        assertThat(r1).isNotEqualTo(r1.toString());
     }
 }

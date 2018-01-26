@@ -16,13 +16,14 @@
 
 package com.github.robozonky.internal.api;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class DefaultsTest {
 
     @Test
-    public void userAgent() {
-        Assertions.assertThat(Defaults.ROBOZONKY_USER_AGENT).contains(Defaults.ROBOZONKY_URL);
+    void userAgent() {
+        assertThat(Defaults.ROBOZONKY_USER_AGENT).contains(Defaults.ROBOZONKY_URL);
     }
 }

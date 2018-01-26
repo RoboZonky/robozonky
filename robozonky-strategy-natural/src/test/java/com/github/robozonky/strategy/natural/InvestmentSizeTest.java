@@ -16,35 +16,36 @@
 
 package com.github.robozonky.strategy.natural;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class InvestmentSizeTest {
 
     private static final int MIN = 400, MAX = 2 * InvestmentSizeTest.MIN;
 
     @Test
-    public void regular() {
+    void regular() {
         final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MIN, InvestmentSizeTest.MAX);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MIN);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
         });
     }
 
     @Test
-    public void switched() {
+    void switched() {
         final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX, InvestmentSizeTest.MIN);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MIN);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
         });
     }
 
     @Test
-    public void omitted() {
+    void omitted() {
         final InvestmentSize s = new InvestmentSize(InvestmentSizeTest.MAX);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(s.getMinimumInvestmentInCzk()).isEqualTo(0);
             softly.assertThat(s.getMaximumInvestmentInCzk()).isEqualTo(InvestmentSizeTest.MAX);
         });

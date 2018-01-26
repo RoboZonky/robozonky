@@ -16,50 +16,50 @@
 
 package com.github.robozonky.common.remote;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class SortTest {
 
     @Test
-    public void unspecified() {
-        final RoboZonkyFilter filter = Mockito.mock(RoboZonkyFilter.class);
+    void unspecified() {
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         Sort.unspecified().apply(filter);
-        Mockito.verify(filter, Mockito.times(0))
-                .setRequestHeader(ArgumentMatchers.any(), ArgumentMatchers.any());
+        verify(filter, times(0))
+                .setRequestHeader(any(), any());
     }
 
     @Test
-    public void simple() {
-        final RoboZonkyFilter filter = Mockito.mock(RoboZonkyFilter.class);
+    void simple() {
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         Sort.by(LoanField.COVERED).apply(filter);
-        Mockito.verify(filter, Mockito.times(1))
-                .setRequestHeader(ArgumentMatchers.eq("X-Order"), ArgumentMatchers.eq("covered"));
+        verify(filter, times(1))
+                .setRequestHeader(eq("X-Order"), eq("covered"));
     }
 
     @Test
-    public void simpleDescending() {
-        final RoboZonkyFilter filter = Mockito.mock(RoboZonkyFilter.class);
+    void simpleDescending() {
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         Sort.by(LoanField.COVERED, false).apply(filter);
-        Mockito.verify(filter, Mockito.times(1))
-                .setRequestHeader(ArgumentMatchers.eq("X-Order"), ArgumentMatchers.eq("-covered"));
+        verify(filter, times(1))
+                .setRequestHeader(eq("X-Order"), eq("-covered"));
     }
 
     @Test
-    public void complex() {
-        final RoboZonkyFilter filter = Mockito.mock(RoboZonkyFilter.class);
+    void complex() {
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         Sort.by(LoanField.COVERED).thenBy(LoanField.DATE_PUBLISHED).thenBy(LoanField.INTEREST_RATE, false)
                 .apply(filter);
-        Mockito.verify(filter, Mockito.times(1))
-                .setRequestHeader(ArgumentMatchers.eq("X-Order"),
-                                  ArgumentMatchers.eq("covered,datePublished,-interestRate"));
+        verify(filter, times(1))
+                .setRequestHeader(eq("X-Order"),
+                                  eq("covered,datePublished,-interestRate"));
     }
 
     @Test
-    public void orderTwiceOnSameField() {
-        Assertions.assertThatThrownBy(() -> Sort.by(LoanField.COVERED).thenBy(LoanField.COVERED))
+    void orderTwiceOnSameField() {
+        assertThatThrownBy(() -> Sort.by(LoanField.COVERED).thenBy(LoanField.COVERED))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

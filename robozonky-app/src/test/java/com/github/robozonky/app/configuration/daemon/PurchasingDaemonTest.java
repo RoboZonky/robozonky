@@ -26,18 +26,18 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.*;
 
 class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    public void standard() {
-        final Authenticated a = mockAuthentication(Mockito.mock(Zonky.class));
+    void standard() {
+        final Authenticated a = mockAuthentication(mock(Zonky.class));
         final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
-        final PurchasingDaemon d = new PurchasingDaemon(a, s, () -> Optional.of(Mockito.mock(Portfolio.class)),
+        final PurchasingDaemon d = new PurchasingDaemon(a, s, () -> Optional.of(mock(Portfolio.class)),
                                                         Duration.ZERO, Duration.ofSeconds(1), true);
         d.run();
-        Mockito.verify(a, Mockito.times(1)).call(ArgumentMatchers.notNull());
+        verify(a, times(1)).call(notNull());
     }
 }

@@ -26,9 +26,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class UtilTest {
 
@@ -49,7 +50,7 @@ class UtilTest {
     private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
         final Rating first = result.get(0);
         final Rating last = result.get(ratingsOrderedDown.length - 1);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(first).isGreaterThan(last);
             softly.assertThat(first).isEqualTo(ratingsOrderedDown[0]);
             softly.assertThat(last).isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
@@ -61,11 +62,11 @@ class UtilTest {
     }
 
     private static void assertOrder(final List<Rating> result, final Rating r) {
-        Assertions.assertThat(result.get(0)).isEqualTo(r);
+        assertThat(result.get(0)).isEqualTo(r);
     }
 
     @Test
-    public void properRankingOfRatings() {
+    void properRankingOfRatings() {
         final int targetShareA = 1;
         final int targetShareB = targetShareA * 5;
         final int targetShareC = targetShareB * 5;

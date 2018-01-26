@@ -18,15 +18,15 @@ package com.github.robozonky.app.version;
 
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 
-public class VersionComparatorTest {
+class VersionComparatorTest {
 
     private static DynamicTest forVersion(final String left, final String right, final int result) {
         return DynamicTest.dynamicTest("left to right", () -> compares(left, right, result));
@@ -46,18 +46,18 @@ public class VersionComparatorTest {
     private static void compares(final String left, final String right, final int compareResult) {
         final boolean result = VersionComparator.isSmallerThan(left, right);
         if (compareResult > -1) {
-            Assertions.assertThat(result).isFalse();
+            assertThat(result).isFalse();
         } else {
-            Assertions.assertThat(result).isTrue();
+            assertThat(result).isTrue();
         }
     }
 
     private static void comparesReverse(final String left, final String right, final int compareResult) {
         final boolean result = VersionComparator.isSmallerThan(right, left);
         if (compareResult < 1) {
-            Assertions.assertThat(result).isFalse();
+            assertThat(result).isFalse();
         } else {
-            Assertions.assertThat(result).isTrue();
+            assertThat(result).isTrue();
         }
     }
 
@@ -77,6 +77,6 @@ public class VersionComparatorTest {
 
     @Test
     void compareNulls() {
-        Assertions.assertThat(VersionComparator.isSmallerThan(null, null)).isFalse();
+        assertThat(VersionComparator.isSmallerThan(null, null)).isFalse();
     }
 }

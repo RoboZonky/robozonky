@@ -20,15 +20,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class StreamUtilTest {
 
     @Test
-    public void notParallel() {
+    void notParallel() {
         final Collection<String> c = Collections.emptyList();
         final Stream<String> s = StreamUtil.toStream(c);
-        Assertions.assertThat(s.isParallel()).isFalse();
+        assertThat(s.isParallel()).isFalse();
     }
 }

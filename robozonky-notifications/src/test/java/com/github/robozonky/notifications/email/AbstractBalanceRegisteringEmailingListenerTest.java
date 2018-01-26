@@ -22,8 +22,9 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class AbstractBalanceRegisteringEmailingListenerTest extends AbstractRoboZonkyTest {
 
@@ -31,21 +32,21 @@ class AbstractBalanceRegisteringEmailingListenerTest extends AbstractRoboZonkyTe
     private static final Function<RoboZonkyTestingEvent, Integer> F = (e) -> RESULT;
 
     @Test
-    public void checkBalance() throws IOException {
+    void checkBalance() throws IOException {
         final Properties props = new Properties();
         props.load(NotificationPropertiesTest.class.getResourceAsStream("notifications-enabled.cfg"));
         final ListenerSpecificNotificationProperties p =
                 new ListenerSpecificNotificationProperties(SupportedListener.TESTING,
                                                            new NotificationProperties(props));
         final TestingEmailingListener t = new TestingEmailingListener(p);
-        Assertions.assertThat(t.getBalance()).isEqualTo(RESULT);
-        Assertions.assertThat(t.countFinishers()).isEqualTo(2); // the core finisher and the balance finisher
+        assertThat(t.getBalance()).isEqualTo(RESULT);
+        assertThat(t.countFinishers()).isEqualTo(2); // the core finisher and the balance finisher
     }
 
     private static final class TestingEmailingListener extends
                                                        AbstractBalanceRegisteringEmailingListener<RoboZonkyTestingEvent> {
 
-        public TestingEmailingListener(final ListenerSpecificNotificationProperties properties) {
+        TestingEmailingListener(final ListenerSpecificNotificationProperties properties) {
             super(F, properties);
         }
 
@@ -59,7 +60,7 @@ class AbstractBalanceRegisteringEmailingListenerTest extends AbstractRoboZonkyTe
             return "testing.ftl";
         }
 
-        public int getBalance() {
+        int getBalance() {
             return this.getNewBalance(null);
         }
     }

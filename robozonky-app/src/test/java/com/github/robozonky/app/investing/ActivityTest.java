@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.investing;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -27,70 +26,71 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.api.Settings;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ActivityTest extends AbstractEventLeveragingTest {
 
     private static final int SLEEP_PERIOD_MINUTES = 60;
 
     @Test
-    public void timestampFailover() {
+    void timestampFailover() {
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, "definitelyNotADate").call();
-        Assertions.assertThat(Activity.getLatestMarketplaceAction()).isNotNull();
+        assertThat(Activity.getLatestMarketplaceAction()).isNotNull();
     }
 
     @Test
-    public void doesWakeUpWhenNewLoanAndThenSleeps() throws IOException {
+    void doesWakeUpWhenNewLoanAndThenSleeps() {
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp =
                 OffsetDateTime.now().minus(ActivityTest.SLEEP_PERIOD_MINUTES / 2, ChronoUnit.MINUTES);
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
         // load API that has marketplace more recent than that, but makes sure not to come within the closed period
-        final Loan l = Mockito.mock(Loan.class);
-        Mockito.when(l.getRating()).thenReturn(Rating.D);
-        Mockito.when(l.getDatePublished()).thenReturn(timestamp.plus(10, ChronoUnit.MINUTES));
-        Mockito.when(l.getRemainingInvestment()).thenReturn(1000.0);
+        final Loan l = mock(Loan.class);
+        when(l.getRating()).thenReturn(Rating.D);
+        when(l.getDatePublished()).thenReturn(timestamp.plus(10, ChronoUnit.MINUTES));
+        when(l.getRemainingInvestment()).thenReturn(1000.0);
         final LoanDescriptor ld = new LoanDescriptor(l);
         // test proper wakeup
         final Activity activity = new Activity(Collections.singletonList(ld));
-        Assertions.assertThat(activity.shouldSleep()).isFalse();
+        assertThat(activity.shouldSleep()).isFalse();
         activity.settle();
         // after which it should properly fall asleep again
-        Assertions.assertThat(activity.shouldSleep()).isTrue();
+        assertThat(activity.shouldSleep()).isTrue();
         // and make sure that the timestamp has changed to a new reasonable value
         final OffsetDateTime newTimestamp =
                 OffsetDateTime.parse(Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID).get());
-        Assertions.assertThat(newTimestamp).isAfter(timestamp);
+        assertThat(newTimestamp).isAfter(timestamp);
     }
 
     @Test
-    public void doesTakeIntoAccountClosedPeriod() throws IOException {
+    void doesTakeIntoAccountClosedPeriod() {
         System.setProperty(Settings.Key.CAPTCHA_DELAY_AAAAA.getName(), "0"); // disable CAPTCHA for AAAAA rating
         System.setProperty(Settings.Key.CAPTCHA_DELAY_C.getName(), "120"); // enable CAPTCHA for C rating
         // make sure we have a marketplace check timestamp that would fall into sleeping range
         final OffsetDateTime timestamp = OffsetDateTime.now();
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
         // load API that has marketplace within the closed period
-        final Loan activeLoan = Mockito.mock(Loan.class);
-        Mockito.when(activeLoan.getId()).thenReturn(1);
-        Mockito.when(activeLoan.getRating()).thenReturn(Rating.C); // captcha
-        Mockito.when(activeLoan.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
-        Mockito.when(activeLoan.getRemainingInvestment()).thenReturn(1000.0);
-        final Loan ignoredLoan = Mockito.mock(Loan.class);
-        Mockito.when(ignoredLoan.getRating()).thenReturn(Rating.AAAAA); // no captcha
-        Mockito.when(ignoredLoan.getId()).thenReturn(2);
-        Mockito.when(ignoredLoan.getDatePublished()).thenReturn(timestamp);
-        Mockito.when(ignoredLoan.getRemainingInvestment()).thenReturn(100.0); // not enough => ignored
+        final Loan activeLoan = mock(Loan.class);
+        when(activeLoan.getId()).thenReturn(1);
+        when(activeLoan.getRating()).thenReturn(Rating.C); // captcha
+        when(activeLoan.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
+        when(activeLoan.getRemainingInvestment()).thenReturn(1000.0);
+        final Loan ignoredLoan = mock(Loan.class);
+        when(ignoredLoan.getRating()).thenReturn(Rating.AAAAA); // no captcha
+        when(ignoredLoan.getId()).thenReturn(2);
+        when(ignoredLoan.getDatePublished()).thenReturn(timestamp);
+        when(ignoredLoan.getRemainingInvestment()).thenReturn(100.0); // not enough => ignored
         // there is nothing to do, so the app should fall asleep...
         final Activity activity =
                 new Activity(Arrays.asList(new LoanDescriptor(activeLoan), new LoanDescriptor(ignoredLoan)));
-        Assertions.assertThat(activity.shouldSleep()).isFalse();
+        assertThat(activity.shouldSleep()).isFalse();
         activity.settle();
         // ... but reconfigure the timestamp so that we treat the closed-season marketplace as new marketplace
         final OffsetDateTime newTimestamp =
                 OffsetDateTime.parse(Activity.STATE.getValue(Activity.LAST_MARKETPLACE_CHECK_STATE_ID).get());
-        Assertions.assertThat(newTimestamp).isBefore(activeLoan.getDatePublished());
+        assertThat(newTimestamp).isBefore(activeLoan.getDatePublished());
     }
 }

@@ -19,52 +19,52 @@ package com.github.robozonky.common.remote;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class PaginatedApiTest {
 
     @Test
-    public void checkSort() {
-        final PaginatedApi p = Mockito.spy(new PaginatedApi(null, null, null));
-        Mockito.doReturn(null).when(p)
-                .execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
+    void checkSort() {
+        final PaginatedApi p = spy(new PaginatedApi(null, null, null));
+        doReturn(null).when(p)
+                .execute(any(), any(), any());
         final Function f = o -> null;
         p.execute(f);
-        Mockito.verify(p)
-                .execute(ArgumentMatchers.eq(f), ArgumentMatchers.notNull(), ArgumentMatchers.notNull());
+        verify(p)
+                .execute(eq(f), notNull(), notNull());
     }
 
     @Test
-    public void checkFilter() {
-        final PaginatedApi p = Mockito.spy(new PaginatedApi(null, null, null));
-        Mockito.doReturn(null).when(p).execute(ArgumentMatchers.any(), ArgumentMatchers.any());
+    void checkFilter() {
+        final PaginatedApi p = spy(new PaginatedApi(null, null, null));
+        doReturn(null).when(p).execute(any(), any());
         final Function f = o -> null;
-        final Sort s = Mockito.mock(Sort.class);
+        final Sort s = mock(Sort.class);
         final RoboZonkyFilter filter = new RoboZonkyFilter();
         p.execute(f, s, filter);
-        Mockito.verify(s).apply(filter);
-        Mockito.verify(p).execute(ArgumentMatchers.eq(f), ArgumentMatchers.notNull());
+        verify(s).apply(filter);
+        verify(p).execute(eq(f), notNull());
     }
 
     @Test
-    public void checkPagination() {
-        final PaginatedApi p = Mockito.spy(new PaginatedApi(null, null, null));
-        Mockito.doReturn(null)
-                .when(p).execute(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
+    void checkPagination() {
+        final PaginatedApi p = spy(new PaginatedApi(null, null, null));
+        doReturn(null)
+                .when(p).execute(any(), any(), any());
         final Function f = o -> null;
-        final Sort s = Mockito.mock(Sort.class);
+        final Sort s = mock(Sort.class);
         final int total = 1000;
-        final RoboZonkyFilter filter = Mockito.mock(RoboZonkyFilter.class);
-        Mockito.when(filter.getLastResponseHeader(ArgumentMatchers.eq("X-Total")))
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        when(filter.getLastResponseHeader(eq("X-Total")))
                 .thenReturn(Optional.of("" + total));
         final PaginatedResult result = p.execute(f, s, 1, 10, filter);
-        Assertions.assertThat(result.getTotalResultCount()).isEqualTo(total);
-        Mockito.verify(filter).setRequestHeader(ArgumentMatchers.eq("X-Size"), ArgumentMatchers.eq("10"));
-        Mockito.verify(filter).setRequestHeader(ArgumentMatchers.eq("X-Page"), ArgumentMatchers.eq("1"));
-        Mockito.verify(p).execute(ArgumentMatchers.eq(f), ArgumentMatchers.notNull(), ArgumentMatchers.eq(filter));
+        assertThat(result.getTotalResultCount()).isEqualTo(total);
+        verify(filter).setRequestHeader(eq("X-Size"), eq("10"));
+        verify(filter).setRequestHeader(eq("X-Page"), eq("1"));
+        verify(p).execute(eq(f), notNull(), eq(filter));
     }
 }

@@ -16,20 +16,21 @@
 
 package com.github.robozonky.util;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class LocalhostAddressTest {
 
     @Test
-    public void isSubmitted() {
-        Assertions.assertThat(Scheduler.inBackground().isSubmitted(LocalhostAddress.INSTANCE)).isTrue();
+    void isSubmitted() {
+        assertThat(Scheduler.inBackground().isSubmitted(LocalhostAddress.INSTANCE)).isTrue();
     }
 
     @Test
-    public void hasValue() {
+    void hasValue() {
         final LocalhostAddress address = new LocalhostAddress();
         address.run();
-        Assertions.assertThat(address.get()).isPresent();
+        assertThat(address.get()).isPresent();
     }
 }

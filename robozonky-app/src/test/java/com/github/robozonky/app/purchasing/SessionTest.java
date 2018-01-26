@@ -34,11 +34,11 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class SessionTest extends AbstractZonkyLeveragingTest {
 
@@ -47,26 +47,26 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     }
 
     private static Zonky mockZonky(final BigDecimal balance) {
-        final Zonky zonky = Mockito.mock(Zonky.class);
-        Mockito.when(zonky.getWallet()).thenReturn(new Wallet(balance, balance));
+        final Zonky zonky = mock(Zonky.class);
+        when(zonky.getWallet()).thenReturn(new Wallet(balance, balance));
         return zonky;
     }
 
     @Test
-    public void empty() {
+    void empty() {
         final Zonky z = mockZonky();
         final Portfolio portfolio = Portfolio.create(z);
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.emptyList(), null, true);
-        Assertions.assertThat(i).isEmpty();
+        assertThat(i).isEmpty();
     }
 
     @Test
-    public void underBalance() {
-        final Participation p = Mockito.mock(Participation.class);
-        Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
-        final Loan l = Mockito.mock(Loan.class);
-        final PurchaseStrategy s = Mockito.mock(PurchaseStrategy.class);
-        Mockito.when(s.recommend(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+    void underBalance() {
+        final Participation p = mock(Participation.class);
+        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        final Loan l = mock(Loan.class);
+        final PurchaseStrategy s = mock(PurchaseStrategy.class);
+        when(s.recommend(any(), any(), any()))
                 .thenAnswer(i -> {
                     final Collection<ParticipationDescriptor> participations = i.getArgument(0);
                     return participations.stream()
@@ -78,8 +78,8 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(z);
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), true);
-        Assertions.assertThat(i).isEmpty();
-        Assertions.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
+        assertThat(i).isEmpty();
+        assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
             @Override
             public boolean matches(final List<? extends Event> events) {
                 return events.stream().noneMatch(e -> e instanceof PurchaseRequestedEvent);
@@ -88,13 +88,13 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    public void properDryRun() {
+    void properDryRun() {
         final Loan l = new Loan(1, 200);
-        final Participation p = Mockito.mock(Participation.class);
-        Mockito.when(p.getLoanId()).thenReturn(l.getId());
-        Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
-        final PurchaseStrategy s = Mockito.mock(PurchaseStrategy.class);
-        Mockito.when(s.recommend(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        final Participation p = mock(Participation.class);
+        when(p.getLoanId()).thenReturn(l.getId());
+        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        final PurchaseStrategy s = mock(PurchaseStrategy.class);
+        when(s.recommend(any(), any(), any()))
                 .thenAnswer(i -> {
                     final Collection<ParticipationDescriptor> participations = i.getArgument(0);
                     return participations.stream()
@@ -102,26 +102,26 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
         final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = Mockito.spy(Portfolio.create(zonky));
+        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
+        final Portfolio portfolio = spy(Portfolio.create(zonky));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), true);
-        Assertions.assertThat(i).hasSize(1);
-        Assertions.assertThat(this.getNewEvents()).hasSize(5);
-        Mockito.verify(zonky, Mockito.never()).purchase(ArgumentMatchers.eq(p));
-        Mockito.verify(portfolio).newBlockedAmount(ArgumentMatchers.eq(zonky),
-                                                   ArgumentMatchers.argThat((a) -> a.getLoanId() == l.getId()));
+        assertThat(i).hasSize(1);
+        assertThat(this.getNewEvents()).hasSize(5);
+        verify(zonky, never()).purchase(eq(p));
+        verify(portfolio).newBlockedAmount(eq(zonky),
+                                           argThat((a) -> a.getLoanId() == l.getId()));
     }
 
     @Test
-    public void properReal() {
+    void properReal() {
         final Loan l = new Loan(1, 200);
-        final Participation p = Mockito.mock(Participation.class);
-        Mockito.when(p.getLoanId()).thenReturn(l.getId());
-        Mockito.when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
-        final PurchaseStrategy s = Mockito.mock(PurchaseStrategy.class);
-        Mockito.when(s.recommend(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        final Participation p = mock(Participation.class);
+        when(p.getLoanId()).thenReturn(l.getId());
+        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
+        final PurchaseStrategy s = mock(PurchaseStrategy.class);
+        when(s.recommend(any(), any(), any()))
                 .thenAnswer(i -> {
                     final Collection<ParticipationDescriptor> participations = i.getArgument(0);
                     return participations.stream()
@@ -129,15 +129,15 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
         final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
-        Mockito.when(zonky.getLoan(ArgumentMatchers.eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = Mockito.spy(Portfolio.create(zonky));
+        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
+        final Portfolio portfolio = spy(Portfolio.create(zonky));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), false);
-        Assertions.assertThat(i).hasSize(1);
-        Assertions.assertThat(this.getNewEvents()).hasSize(5);
-        Mockito.verify(zonky).purchase(ArgumentMatchers.eq(p));
-        Mockito.verify(portfolio).newBlockedAmount(ArgumentMatchers.eq(zonky),
-                                                   ArgumentMatchers.argThat((a) -> a.getLoanId() == l.getId()));
+        assertThat(i).hasSize(1);
+        assertThat(this.getNewEvents()).hasSize(5);
+        verify(zonky).purchase(eq(p));
+        verify(portfolio).newBlockedAmount(eq(zonky),
+                                           argThat((a) -> a.getLoanId() == l.getId()));
     }
 }

@@ -18,25 +18,26 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class LongStoryConditionTest {
 
     @Test
-    public void longerOk() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
+    void longerOk() {
+        final Wrapper l = mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.LONG_STORY_THRESHOLD + 1, '*');
-        Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new LongStoryCondition().test(l)).isTrue();
+        when(l.getStory()).thenReturn(story);
+        assertThat(new LongStoryCondition().test(l)).isTrue();
     }
 
     @Test
-    public void shorterNotOk() {
-        final Wrapper l = Mockito.mock(Wrapper.class);
+    void shorterNotOk() {
+        final Wrapper l = mock(Wrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.LONG_STORY_THRESHOLD, '*');
-        Mockito.when(l.getStory()).thenReturn(story);
-        Assertions.assertThat(new LongStoryCondition().test(l)).isFalse();
+        when(l.getStory()).thenReturn(story);
+        assertThat(new LongStoryCondition().test(l)).isFalse();
     }
 }

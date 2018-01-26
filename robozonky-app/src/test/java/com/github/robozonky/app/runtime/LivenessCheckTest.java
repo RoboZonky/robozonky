@@ -19,13 +19,13 @@ package com.github.robozonky.app.runtime;
 import java.util.UUID;
 
 import com.github.robozonky.util.Schedulers;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.socket.PortFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -42,23 +42,23 @@ class LivenessCheckTest {
     private String serverUrl;
 
     @BeforeEach
-    public void startServer() {
+    void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "127.0.0.1:" + server.getPort();
     }
 
     @AfterEach
-    public void stopServer() {
+    void stopServer() {
         server.stop();
     }
 
     @AfterEach
-    public void resumeSchedulers() {
+    void resumeSchedulers() {
         Schedulers.INSTANCE.resume(); // reset
     }
 
     @Test
-    public void check() {
+    void check() {
         server
                 .when(request())
                 .respond(response()
@@ -66,35 +66,35 @@ class LivenessCheckTest {
                                  .withBody(SAMPLE));
         final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
-        Assertions.assertThat(l.get()).isPresent();
-        Assertions.assertThat(l.get().get().getBuildVersion()).isEqualTo("0.77.0");
+        assertThat(l.get()).isPresent();
+        assertThat(l.get().get().getBuildVersion()).isEqualTo("0.77.0");
         Schedulers.INSTANCE.resume(); // reset
     }
 
     @Test
-    public void wrongResponse() {
+    void wrongResponse() {
         server
                 .when(request())
                 .respond(response()
                                  .withStatusCode(500));
         final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
-        Assertions.assertThat(l.get()).isEmpty();
+        assertThat(l.get()).isEmpty();
     }
 
     @Test
-    public void wrongUrl() {
+    void wrongUrl() {
         server
                 .when(request())
                 .respond(response()
                                  .withStatusCode(500));
         final LivenessCheck l = new LivenessCheck(serverUrl); // no protocol
         l.run();
-        Assertions.assertThat(l.get()).isEmpty();
+        assertThat(l.get()).isEmpty();
     }
 
     @Test
-    public void malformedResponse() {
+    void malformedResponse() {
         server
                 .when(request())
                 .respond(response()
@@ -102,7 +102,7 @@ class LivenessCheckTest {
                                  .withBody(UUID.randomUUID().toString()));
         final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
-        Assertions.assertThat(l.get()).isEmpty();
+        assertThat(l.get()).isEmpty();
         Schedulers.INSTANCE.resume(); // reset
     }
 }

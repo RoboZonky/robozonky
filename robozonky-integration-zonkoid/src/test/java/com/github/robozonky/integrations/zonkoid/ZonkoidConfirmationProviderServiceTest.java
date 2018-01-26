@@ -16,23 +16,24 @@
 
 package com.github.robozonky.integrations.zonkoid;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ZonkoidConfirmationProviderServiceTest {
 
     @Test
-    public void zonkoid() {
-        Assertions.assertThat(new ZonkoidConfirmationProviderService().find("zonkoid")).isPresent();
+    void zonkoid() {
+        assertThat(new ZonkoidConfirmationProviderService().find("zonkoid")).isPresent();
     }
 
     @Test
-    public void zonkios() {
-        Assertions.assertThat(new ZonkoidConfirmationProviderService().find("zonkios")).isPresent();
+    void zonkios() {
+        assertThat(new ZonkoidConfirmationProviderService().find("zonkios")).isPresent();
     }
 
     @Test
-    public void wrongId() {
-        Assertions.assertThat(new ZonkoidConfirmationProviderService().find("random")).isEmpty();
+    void wrongId() {
+        assertThat(new ZonkoidConfirmationProviderService().find("random")).isEmpty();
     }
 }

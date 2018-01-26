@@ -27,20 +27,21 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.SoftAssertions.*;
 
 class SettingsTest {
 
     @AfterEach
-    public void reinit() {
+    void reinit() {
         Settings.INSTANCE.reinit();
     }
 
     @Test
-    public void defaultProperties() {
-        SoftAssertions.assertSoftly(softly -> {
+    void defaultProperties() {
+        assertSoftly(softly -> {
             softly.assertThat(Settings.INSTANCE.get("user.dir", "")).isNotEqualTo("");
             softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
                     .isEqualTo("");
@@ -66,13 +67,13 @@ class SettingsTest {
     }
 
     @Test
-    public void setProperties() throws IOException {
+    void setProperties() throws IOException {
         final Properties p = new Properties();
         Stream.of(Settings.Key.values()).forEach(v -> p.setProperty(v.getName(), "1000"));
         final File f = File.createTempFile("robozonky-", ".properties");
         p.store(new FileWriter(f), "Testing properties");
         System.setProperty(Settings.FILE_LOCATION_PROPERTY, f.getAbsolutePath());
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(Settings.INSTANCE.get("user.dir", "")).isNotEqualTo("");
             softly.assertThat(Settings.INSTANCE.get(UUID.randomUUID().toString(), ""))
                     .isEqualTo("");
@@ -101,7 +102,7 @@ class SettingsTest {
 
         private final long seconds;
 
-        public TemporalPredicate(final long seconds) {
+        TemporalPredicate(final long seconds) {
             this.seconds = seconds;
         }
 

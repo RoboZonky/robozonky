@@ -20,14 +20,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ReturnCodeTest {
 
     @Test
-    public void noReturnCodeTwice() {
+    void noReturnCodeTwice() {
         final Set<Integer> codes = Stream.of(ReturnCode.values()).map(ReturnCode::getCode).collect(Collectors.toSet());
-        Assertions.assertThat(codes).hasSize(ReturnCode.values().length);
+        assertThat(codes).hasSize(ReturnCode.values().length);
     }
 }

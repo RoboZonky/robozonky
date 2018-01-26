@@ -17,23 +17,24 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.*;
 
 class SkippableTest {
 
     @Test
-    public void skips() {
-        final Runnable r = Mockito.mock(Runnable.class);
+    void skips() {
+        final Runnable r = mock(Runnable.class);
         final Skippable s = new Skippable(r, () -> true);
         s.run();
-        Mockito.verify(r, Mockito.never()).run();
+        verify(r, never()).run();
     }
 
     @Test
-    public void doesNotSkip() {
-        final Runnable r = Mockito.mock(Runnable.class);
+    void doesNotSkip() {
+        final Runnable r = mock(Runnable.class);
         final Skippable s = new Skippable(r, () -> false);
         s.run();
-        Mockito.verify(r, Mockito.times(1)).run();
+        verify(r, times(1)).run();
     }
 }

@@ -21,29 +21,29 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.LoanApi;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ApiTest {
 
     @Test
-    public void executeFunction() {
-        final LoanApi mock = Mockito.mock(LoanApi.class);
+    void executeFunction() {
+        final LoanApi mock = mock(LoanApi.class);
         final Api<LoanApi> api = new Api<>(mock);
         final String expected = UUID.randomUUID().toString();
         final Function<LoanApi, String> function = (a) -> expected;
         final String result = api.execute(function);
-        Assertions.assertThat(result).isSameAs(expected);
+        assertThat(result).isSameAs(expected);
     }
 
     @Test
-    public void executeProcedure() {
-        final LoanApi mock = Mockito.mock(LoanApi.class);
+    void executeProcedure() {
+        final LoanApi mock = mock(LoanApi.class);
         final Api<LoanApi> api = new Api<>(mock);
-        final Consumer<LoanApi> procedure = Mockito.mock(Consumer.class);
+        final Consumer<LoanApi> procedure = mock(Consumer.class);
         api.execute(procedure);
-        Mockito.verify(procedure, Mockito.times(1)).accept(ArgumentMatchers.eq(mock));
+        verify(procedure, times(1)).accept(eq(mock));
     }
 }

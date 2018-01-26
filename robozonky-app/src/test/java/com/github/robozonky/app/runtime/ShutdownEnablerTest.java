@@ -26,25 +26,26 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.ShutdownHook;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+
+import static org.assertj.core.api.Assertions.*;
 
 class ShutdownEnablerTest {
 
     @Test
-    public void standard() {
+    void standard() {
         final ShutdownEnabler se = new ShutdownEnabler();
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final Future<?> f = e.submit(se::waitUntilTriggered);
-        Assertions.assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
+        assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
                 .isInstanceOf(TimeoutException.class); // the thread is blocked
         final Consumer<ShutdownHook.Result> c = se.get()
                 .orElseThrow(() -> new IllegalStateException("Should have returned."));
         c.accept(new ShutdownHook.Result(ReturnCode.OK, null)); // this unblocks the thread
         // this should return
         org.junit.jupiter.api.Assertions.assertTimeout(Duration.ofSeconds(5), (Executable) f::get);
-        Assertions.assertThat(f).isDone();
+        assertThat(f).isDone();
         e.shutdownNow();
     }
 }

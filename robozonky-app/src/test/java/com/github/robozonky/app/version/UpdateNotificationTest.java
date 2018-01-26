@@ -24,23 +24,23 @@ import com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetecte
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.app.Events;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class UpdateNotificationTest extends AbstractEventLeveragingTest {
 
     @Test
-    public void valueChangeDelegates() {
-        final UpdateNotification n = Mockito.spy(new UpdateNotification());
+    void valueChangeDelegates() {
+        final UpdateNotification n = spy(new UpdateNotification());
         final VersionIdentifier newValue = new VersionIdentifier("1.0.1");
         n.valueChanged(null, newValue);
-        Mockito.verify(n).valueSet(ArgumentMatchers.eq(newValue));
+        verify(n).valueSet(eq(newValue));
     }
 
     @Test
-    public void stableUpdate() {
+    void stableUpdate() {
         final String currentVersion = "1.0.0";
         final String newVersion = "1.0.1";
         final VersionIdentifier newVersionIdentifier = new VersionIdentifier(newVersion);
@@ -48,20 +48,20 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
         // check that the event is fired
         n.valueSet(newVersionIdentifier);
         final Collection<Event> eventsOriginallyFired = Events.getFired();
-        Assertions.assertThat(eventsOriginallyFired).hasSize(1)
+        assertThat(eventsOriginallyFired).hasSize(1)
                 .first()
                 .isInstanceOf(RoboZonkyUpdateDetectedEvent.class);
         // check that the event has the proper version
-        Assertions.assertThat(eventsOriginallyFired)
+        assertThat(eventsOriginallyFired)
                 .first()
                 .matches(e -> Objects.equals(((RoboZonkyUpdateDetectedEvent) e).getNewVersion(), newVersion));
         // check that the event is not fired again since there is no change in new version
         n.valueSet(newVersionIdentifier);
-        Assertions.assertThat(Events.getFired()).hasSize(1);
+        assertThat(Events.getFired()).hasSize(1);
     }
 
     @Test
-    public void unstableUpdate() {
+    void unstableUpdate() {
         final String currentVersion = "1.0.0";
         final String newVersion = "1.0.1-beta-1";
         final VersionIdentifier newVersionIdentifier = new VersionIdentifier(currentVersion, newVersion);
@@ -69,21 +69,21 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
         // check that the event is fired
         n.valueSet(newVersionIdentifier);
         final Collection<Event> eventsOriginallyFired = Events.getFired();
-        Assertions.assertThat(eventsOriginallyFired).hasSize(1)
+        assertThat(eventsOriginallyFired).hasSize(1)
                 .first()
                 .isInstanceOf(RoboZonkyExperimentalUpdateDetectedEvent.class);
         // check that the event has the proper version
-        Assertions.assertThat(eventsOriginallyFired)
+        assertThat(eventsOriginallyFired)
                 .first()
                 .matches(e -> Objects.equals(((RoboZonkyExperimentalUpdateDetectedEvent) e).getNewVersion(),
                                              newVersion));
         // check that the event is not fired again since there is no change in new version
         n.valueSet(newVersionIdentifier);
-        Assertions.assertThat(Events.getFired()).hasSize(1);
+        assertThat(Events.getFired()).hasSize(1);
     }
 
     @Test
-    public void stableDoNotUpdateOlder() {
+    void stableDoNotUpdateOlder() {
         final String currentVersion = "1.0.1";
         final String newVersion = "1.0.0";
         final VersionIdentifier newVersionIdentifier = new VersionIdentifier(newVersion);
@@ -91,9 +91,9 @@ class UpdateNotificationTest extends AbstractEventLeveragingTest {
         // check that the event is not fired
         n.valueSet(newVersionIdentifier);
         final Collection<Event> eventsOriginallyFired = Events.getFired();
-        Assertions.assertThat(eventsOriginallyFired).isEmpty();
+        assertThat(eventsOriginallyFired).isEmpty();
         // check that the event is still not fired when we submit the current version again
         n.valueSet(new VersionIdentifier(currentVersion));
-        Assertions.assertThat(Events.getFired()).isEmpty();
+        assertThat(Events.getFired()).isEmpty();
     }
 }

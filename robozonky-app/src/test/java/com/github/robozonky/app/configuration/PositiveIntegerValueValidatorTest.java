@@ -17,19 +17,20 @@
 package com.github.robozonky.app.configuration;
 
 import com.beust.jcommander.ParameterException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class PositiveIntegerValueValidatorTest {
 
     @Test
-    public void isPositive() {
+    void isPositive() {
         new PositiveIntegerValueValidator().validate("something", 0);
     }
 
     @Test
-    public void isNotPositive() {
-        Assertions.assertThatThrownBy(() -> new PositiveIntegerValueValidator().validate("something", -1))
+    void isNotPositive() {
+        assertThatThrownBy(() -> new PositiveIntegerValueValidator().validate("something", -1))
                 .isInstanceOf(ParameterException.class);
     }
 }

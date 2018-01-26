@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.test.IoTestUtil;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class IncompleteStrategyTest {
@@ -47,7 +47,7 @@ class IncompleteStrategyTest {
 
     private static void propertyIsMissing(final File strategyFile) throws IOException {
         final Optional<InvestmentStrategy> result = new SimpleStrategyService().toInvest(fileToString(strategyFile));
-        Assertions.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     private static File writeToNewTempFile(final List<String> lines) {

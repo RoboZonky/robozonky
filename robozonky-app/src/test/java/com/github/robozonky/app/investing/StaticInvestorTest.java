@@ -19,16 +19,17 @@ package com.github.robozonky.app.investing;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class StaticInvestorTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    public void investmentFromAmountlessConfirmation() {
+    void investmentFromAmountlessConfirmation() {
         final LoanDescriptor ld = mockLoanDescriptor();
         final int recommended = 200;
         final Investment i = Investor.convertToInvestment(ld.recommend(recommended).get());
-        Assertions.assertThat(i.getAmount().intValue()).isEqualTo(recommended);
+        assertThat(i.getAmount().intValue()).isEqualTo(recommended);
     }
 }

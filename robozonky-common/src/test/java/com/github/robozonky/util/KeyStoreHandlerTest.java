@@ -23,9 +23,10 @@ import java.nio.file.FileAlreadyExistsException;
 import java.security.KeyStoreException;
 
 import com.github.robozonky.common.secrets.KeyStoreHandler;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class KeyStoreHandlerTest {
 
@@ -33,68 +34,68 @@ class KeyStoreHandlerTest {
     private static final char[] PASSWORD = "ABš CD1234-".toCharArray();
 
     @BeforeAll
-    public static void createTempFile() {
+    static void createTempFile() {
         try {
             KeyStoreHandlerTest.TARGET = File.createTempFile("robozonky-", ".keystore");
             KeyStoreHandlerTest.TARGET.delete();
-            Assertions.assertThat(KeyStoreHandlerTest.TARGET).doesNotExist();
+            assertThat(KeyStoreHandlerTest.TARGET).doesNotExist();
         } catch (final IOException e) {
-            Assertions.fail("Could not create temp file.", e);
+            fail("Could not create temp file.", e);
         }
     }
 
     @Test
-    public void nullFileOnCreate() {
-        Assertions.assertThatThrownBy(() -> KeyStoreHandler.create(null))
+    void nullFileOnCreate() {
+        assertThatThrownBy(() -> KeyStoreHandler.create(null))
                 .isInstanceOf(FileNotFoundException.class);
     }
 
     @Test
-    public void nullFileOnOpen() {
-        Assertions.assertThatThrownBy(() -> KeyStoreHandler.open(null))
+    void nullFileOnOpen() {
+        assertThatThrownBy(() -> KeyStoreHandler.open(null))
                 .isInstanceOf(FileNotFoundException.class);
     }
 
     @Test
-    public void preexistingFileOnCreate() throws IOException {
+    void preexistingFileOnCreate() throws IOException {
         File f = File.createTempFile("robozonky-", ".keystore");
-        Assertions.assertThatThrownBy(() -> KeyStoreHandler.create(f))
+        assertThatThrownBy(() -> KeyStoreHandler.create(f))
                 .isInstanceOf(FileAlreadyExistsException.class);
     }
 
     @Test
-    public void noneexistentFileOnOpen() throws IOException {
+    void noneexistentFileOnOpen() throws IOException {
         File f = File.createTempFile("robozonky-", ".keystore");
         f.delete();
-        Assertions.assertThatThrownBy(() -> KeyStoreHandler.open(f)).isInstanceOf(FileNotFoundException.class);
+        assertThatThrownBy(() -> KeyStoreHandler.open(f)).isInstanceOf(FileNotFoundException.class);
     }
 
     @Test
-    public void storeSomethingAndReadIt() throws IOException, KeyStoreException {
+    void storeSomethingAndReadIt() throws IOException, KeyStoreException {
         final String key = "abc";
         final String value = "def";
         // store
-        Assertions.assertThat(KeyStoreHandlerTest.TARGET).doesNotExist();
+        assertThat(KeyStoreHandlerTest.TARGET).doesNotExist();
         final KeyStoreHandler ksh = KeyStoreHandler.create(KeyStoreHandlerTest.TARGET, KeyStoreHandlerTest.PASSWORD);
-        Assertions.assertThat(ksh.isDirty()).isFalse();
-        Assertions.assertThat(KeyStoreHandlerTest.TARGET).exists();
+        assertThat(ksh.isDirty()).isFalse();
+        assertThat(KeyStoreHandlerTest.TARGET).exists();
         final boolean isStored = ksh.set(key, value.toCharArray());
-        Assertions.assertThat(isStored).isTrue();
-        Assertions.assertThat(ksh.isDirty()).isTrue();
+        assertThat(isStored).isTrue();
+        assertThat(ksh.isDirty()).isTrue();
         ksh.save();
-        Assertions.assertThat(ksh.isDirty()).isFalse();
+        assertThat(ksh.isDirty()).isFalse();
         // read same
-        Assertions.assertThat(ksh.get(key)).isPresent();
-        Assertions.assertThat(ksh.get(key)).contains(value.toCharArray());
+        assertThat(ksh.get(key)).isPresent();
+        assertThat(ksh.get(key)).contains(value.toCharArray());
         // read new
         final KeyStoreHandler ksh2 = KeyStoreHandler.open(KeyStoreHandlerTest.TARGET, KeyStoreHandlerTest.PASSWORD);
-        Assertions.assertThat(ksh2.isDirty()).isFalse();
-        Assertions.assertThat(ksh2.get(key)).isPresent();
-        Assertions.assertThat(ksh2.get(key)).contains(value.toCharArray());
+        assertThat(ksh2.isDirty()).isFalse();
+        assertThat(ksh2.get(key)).isPresent();
+        assertThat(ksh2.get(key)).contains(value.toCharArray());
         // delete
         final boolean isDeleted = ksh2.delete(key);
-        Assertions.assertThat(isDeleted).isTrue();
-        Assertions.assertThat(ksh2.isDirty()).isTrue();
-        Assertions.assertThat(ksh2.get(key)).isEmpty();
+        assertThat(isDeleted).isTrue();
+        assertThat(ksh2.isDirty()).isTrue();
+        assertThat(ksh2.get(key)).isEmpty();
     }
 }

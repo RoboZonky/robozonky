@@ -22,21 +22,22 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import javax.xml.bind.JAXBException;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class ZonkyApiTokenTest {
 
     @Test
-    public void roundTrip() throws JAXBException {
+    void roundTrip() throws JAXBException {
         final OffsetDateTime obtainedOn = OffsetDateTime.MIN;
         final int expirationInSeconds = 60;
         final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                                                       expirationInSeconds, obtainedOn);
         final String marshalled = ZonkyApiToken.marshal(token);
         final ZonkyApiToken unmarshalled = ZonkyApiToken.unmarshal(new StringReader(marshalled));
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(unmarshalled.getObtainedOn()).isEqualTo(obtainedOn);
             softly.assertThat(unmarshalled.getExpiresOn())
                     .isEqualTo(obtainedOn.plus(expirationInSeconds, ChronoUnit.SECONDS));
@@ -44,13 +45,13 @@ class ZonkyApiTokenTest {
     }
 
     @Test
-    public void fresh() {
+    void fresh() {
         final ZonkyApiToken token = new ZonkyApiToken();
-        Assertions.assertThat(token.getObtainedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
+        assertThat(token.getObtainedOn()).isBeforeOrEqualTo(OffsetDateTime.now());
     }
 
     @Test
-    public void unmarshallWithObtained() throws JAXBException {
+    void unmarshallWithObtained() throws JAXBException {
         final String datetime = "2017-01-27T11:36:13.413+01:00";
         final String token = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                 "<token>" +
@@ -62,11 +63,11 @@ class ZonkyApiTokenTest {
                 "<obtained_on>" + datetime + "</obtained_on>" +
                 "</token>";
         final ZonkyApiToken unmarshalled = ZonkyApiToken.unmarshal(new StringReader(token));
-        Assertions.assertThat(unmarshalled.getObtainedOn()).isEqualTo(OffsetDateTime.parse(datetime));
+        assertThat(unmarshalled.getObtainedOn()).isEqualTo(OffsetDateTime.parse(datetime));
     }
 
     @Test
-    public void unmarshallWithoutObtained() throws JAXBException {
+    void unmarshallWithoutObtained() throws JAXBException {
         final String token = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                 "<token>" +
                 "<access_token>abc</access_token>" +
@@ -77,6 +78,6 @@ class ZonkyApiTokenTest {
                 "</token>";
         final ZonkyApiToken unmarshalled = ZonkyApiToken.unmarshal(new StringReader(token));
         final OffsetDateTime earlyEnough = OffsetDateTime.now().minus(5, ChronoUnit.SECONDS);
-        Assertions.assertThat(unmarshalled.getObtainedOn()).isAfter(earlyEnough);
+        assertThat(unmarshalled.getObtainedOn()).isAfter(earlyEnough);
     }
 }

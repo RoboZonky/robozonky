@@ -16,38 +16,39 @@
 
 package com.github.robozonky.common.secrets;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class CredentialsTest {
 
     private static final SecretProvider SECRETS = SecretProvider.fallback("");
 
     @Test
-    public void tokenLess() {
+    void tokenLess() {
         final String first = "zonkoid";
         final Credentials cc = new Credentials(first, CredentialsTest.SECRETS);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(cc.getToolId()).isEqualTo(first);
             softly.assertThat(cc.getToken()).isEmpty();
         });
     }
 
     @Test
-    public void withToken() {
+    void withToken() {
         final String first = "zonkoid";
         final String second = "password";
         final Credentials cc = new Credentials(first + ':' + second, CredentialsTest.SECRETS);
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(cc.getToolId()).isEqualTo(first);
             softly.assertThat(cc.getToken()).contains(second.toCharArray());
         });
     }
 
     @Test
-    public void wrong() {
+    void wrong() {
         final String wrong = "zonkoid:password:extra";
-        Assertions.assertThatThrownBy(() -> new Credentials(wrong, null)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Credentials(wrong, null)).isInstanceOf(IllegalArgumentException.class);
     }
 }

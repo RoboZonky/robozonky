@@ -21,38 +21,39 @@ import java.util.Collection;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class SessionStateTest extends AbstractZonkyLeveragingTest {
 
     @Test
-    public void discardPersistence() {
+    void discardPersistence() {
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         // ignore the loan and persist
         final SessionState it = new SessionState(lds);
         it.discard(ld);
-        Assertions.assertThat(it.getSeenLoans()).isEmpty();
-        Assertions.assertThat(it.getDiscardedLoans()).isNotEmpty().contains(ld);
+        assertThat(it.getSeenLoans()).isEmpty();
+        assertThat(it.getDiscardedLoans()).isNotEmpty().contains(ld);
         // load again and check that persisted
         final SessionState it2 = new SessionState(lds);
-        Assertions.assertThat(it.getSeenLoans()).isEmpty();
-        Assertions.assertThat(it2.getDiscardedLoans()).isNotEmpty().contains(ld);
+        assertThat(it.getSeenLoans()).isEmpty();
+        assertThat(it2.getDiscardedLoans()).isNotEmpty().contains(ld);
     }
 
     @Test
-    public void skipPersistence() {
+    void skipPersistence() {
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         // skip the loan and persist
         final SessionState it = new SessionState(lds);
         it.skip(ld);
-        Assertions.assertThat(it.getDiscardedLoans()).isEmpty();
-        Assertions.assertThat(it.getSeenLoans()).isNotEmpty().contains(ld);
+        assertThat(it.getDiscardedLoans()).isEmpty();
+        assertThat(it.getSeenLoans()).isNotEmpty().contains(ld);
         // load again and check that persisted
         final SessionState it2 = new SessionState(lds);
-        Assertions.assertThat(it.getDiscardedLoans()).isEmpty();
-        Assertions.assertThat(it2.getSeenLoans()).isNotEmpty().contains(ld);
+        assertThat(it.getDiscardedLoans()).isEmpty();
+        assertThat(it2.getSeenLoans()).isNotEmpty().contains(ld);
     }
 }

@@ -19,10 +19,11 @@ package com.github.robozonky.notifications.email;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.State;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 class DelinquencyTrackerTest {
 
@@ -30,32 +31,32 @@ class DelinquencyTrackerTest {
 
     @AfterEach
     @BeforeEach
-    public void reset() {
+    void reset() {
         State.forClass(DelinquencyTracker.class).newBatch(true).call();
     }
 
     @Test
-    public void standard() {
+    void standard() {
         final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
-        Assertions.assertThat(t.isDelinquent(INVESTMENT)).isFalse();
-        Assertions.assertThat(t.setDelinquent(INVESTMENT)).isTrue();
-        Assertions.assertThat(t.isDelinquent(INVESTMENT)).isTrue();
-        Assertions.assertThat(t.unsetDelinquent(INVESTMENT)).isTrue();
-        Assertions.assertThat(t.isDelinquent(INVESTMENT)).isFalse();
+        assertThat(t.isDelinquent(INVESTMENT)).isFalse();
+        assertThat(t.setDelinquent(INVESTMENT)).isTrue();
+        assertThat(t.isDelinquent(INVESTMENT)).isTrue();
+        assertThat(t.unsetDelinquent(INVESTMENT)).isTrue();
+        assertThat(t.isDelinquent(INVESTMENT)).isFalse();
     }
 
     @Test
-    public void settingSet() {
+    void settingSet() {
         final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
-        Assertions.assertThat(t.setDelinquent(INVESTMENT)).isTrue();
-        Assertions.assertThat(t.setDelinquent(INVESTMENT)).isFalse();
+        assertThat(t.setDelinquent(INVESTMENT)).isTrue();
+        assertThat(t.setDelinquent(INVESTMENT)).isFalse();
         this.reset();
-        Assertions.assertThat(t.isDelinquent(INVESTMENT)).isFalse();
+        assertThat(t.isDelinquent(INVESTMENT)).isFalse();
     }
 
     @Test
-    public void unsettingNeverSet() {
+    void unsettingNeverSet() {
         final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
-        Assertions.assertThat(t.unsetDelinquent(INVESTMENT)).isFalse();
+        assertThat(t.unsetDelinquent(INVESTMENT)).isFalse();
     }
 }

@@ -22,34 +22,34 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.BlockedAmounts;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class BlockedAmountsUpdaterTest {
 
     @Test
-    public void hasDependant() {
-        final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(Mockito.mock(Authenticated.class), Optional::empty);
-        Assertions.assertThat(bau.getDependant()).isInstanceOf(BlockedAmounts.class);
+    void hasDependant() {
+        final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(mock(Authenticated.class), Optional::empty);
+        assertThat(bau.getDependant()).isInstanceOf(BlockedAmounts.class);
     }
 
     @Test
-    public void noDependant() {
-        final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(Mockito.mock(Authenticated.class), Optional::empty,
+    void noDependant() {
+        final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(mock(Authenticated.class), Optional::empty,
                                                                     null);
         bau.run(); // quietly ignored
     }
 
     @Test
-    public void customDependant() {
-        final Portfolio p = Mockito.mock(Portfolio.class);
-        final PortfolioDependant d = Mockito.mock(PortfolioDependant.class);
-        final Authenticated auth = Mockito.mock(Authenticated.class);
+    void customDependant() {
+        final Portfolio p = mock(Portfolio.class);
+        final PortfolioDependant d = mock(PortfolioDependant.class);
+        final Authenticated auth = mock(Authenticated.class);
         final BlockedAmountsUpdater bau = new BlockedAmountsUpdater(auth, () -> Optional.of(p), d);
         bau.run();
-        Mockito.verify(d).accept(ArgumentMatchers.eq(p), ArgumentMatchers.eq(auth));
+        verify(d).accept(eq(p), eq(auth));
     }
 }
 
