@@ -37,27 +37,12 @@ import com.github.robozonky.internal.api.Defaults;
  * provide non-failing deserializers which handle the missing values gracefully and provide a message warning users that
  * something needs an upgrade.
  */
+// FIXME put the non-public bits (myinvestment, myotherinvestments, borrowerrelatedinvestmentinfo) into child class
 public class Loan extends BaseEntity {
 
     private static final Function<Integer, String> LOAN_URL_SUPPLIER =
             (id) -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
-
-    /**
-     * Zonky's API documentation states that {@link #getUrl()} is optional. Therefore the only safe use of that
-     * attribute is through this method.
-     * @return URL to a loan on Zonky's website. Guessed if not present.
-     */
-    public static String getUrlSafe(final Loan l) {
-        // in case investment has no loan, we guess loan URL
-        final String providedUrl = l.getUrl();
-        return providedUrl == null ? Loan.LOAN_URL_SUPPLIER.apply(l.getId()) : providedUrl;
-    }
-
-    public static String guessUrl(final int loanId) {
-        return Loan.LOAN_URL_SUPPLIER.apply(loanId);
-    }
-
-    private boolean topped, covered, published, questionsAllowed;
+    private boolean topped, covered, published, questionsAllowed, insuranceActive;
     private int id, termInMonths = 1, investmentsCount, questionsCount, userId, activeLoansCount;
     private double amount, remainingInvestment;
     private String name, nickName, story, url;
@@ -66,6 +51,7 @@ public class Loan extends BaseEntity {
     private Rating rating = Rating.D;
     private Collection<Photo> photos = Collections.emptyList();
     private BigDecimal investmentRate = BigDecimal.ZERO;
+    private BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
     private MyInvestment myInvestment;
     private OtherInvestments myOtherInvestments;
     private MainIncomeType mainIncomeType = MainIncomeType.OTHERS_MAIN;
@@ -85,6 +71,21 @@ public class Loan extends BaseEntity {
         this.amount = amount;
         this.remainingInvestment = amount;
         this.datePublished = datePublished;
+    }
+
+    /**
+     * Zonky's API documentation states that {@link #getUrl()} is optional. Therefore the only safe use of that
+     * attribute is through this method.
+     * @return URL to a loan on Zonky's website. Guessed if not present.
+     */
+    public static String getUrlSafe(final Loan l) {
+        // in case investment has no loan, we guess loan URL
+        final String providedUrl = l.getUrl();
+        return providedUrl == null ? Loan.LOAN_URL_SUPPLIER.apply(l.getId()) : providedUrl;
+    }
+
+    public static String guessUrl(final int loanId) {
+        return Loan.LOAN_URL_SUPPLIER.apply(loanId);
     }
 
     @XmlElement
@@ -210,6 +211,16 @@ public class Loan extends BaseEntity {
     @XmlElement
     public OtherInvestments getMyOtherInvestments() {
         return myOtherInvestments;
+    }
+
+    @XmlElement
+    public boolean isInsuranceActive() {
+        return insuranceActive;
+    }
+
+    @XmlElement
+    public BorrowerRelatedInvestmentInfo getBorrowerRelatedInvestmentInfo() {
+        return borrowerRelatedInvestmentInfo;
     }
 
     @XmlElement

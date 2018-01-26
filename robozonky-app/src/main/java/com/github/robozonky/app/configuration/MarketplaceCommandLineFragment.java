@@ -22,8 +22,8 @@ import com.beust.jcommander.Parameter;
 
 class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
 
-    @Parameter(names = {"-m", "--marketplace"}, description = "Which marketplace to use.")
-    private String marketplaceCredentials = "zotify";
+    @Parameter(hidden = true, names = {"-m", "--marketplace"}, description = "Which marketplace to use.")
+    private String marketplaceCredentials;
 
     @Parameter(names = {"-z", "--zonk"},
             description = "The longest amount of time in minutes for which Zonky is allowed to sleep.")

@@ -52,12 +52,18 @@ class DaemonOperatingMode extends OperatingMode {
                                                          final Investor.Builder builder) {
         final boolean isFaultTolerant = cli.getTweaksFragment().isFaultTolerant();
         if (isFaultTolerant) {
-            LOGGER.info("RoboZonky is now fault tolerant by default and cannot be configured otherwise."
-                                + " '-t' command-line option will be removed in the next RoboZonky major version. " +
+            LOGGER.warn("RoboZonky is now fault tolerant by default and cannot be configured otherwise."
+                                + " '-t' command-line option will be removed in the next RoboZonky minor version. " +
                                 "Kindly stop using it.");
         }
         final SecretProvider secretProvider = auth.getSecretProvider();
-        final Credentials cred = new Credentials(marketplace.getMarketplaceCredentials(), secretProvider);
+        final String marketplaceId = marketplace.getMarketplaceCredentials();
+        if (marketplaceId != null) {
+            LOGGER.warn("RoboZonky will soon stop supporting Zotify marketplace cache, instead using Zonky directly."
+                                + " '-m' command-line option will be removed in the next RoboZonky minor version. " +
+                                "Kindly stop using it.");
+        }
+        final Credentials cred = new Credentials(marketplaceId == null ? "zonky" : marketplaceId, secretProvider);
         return MarketplaceLoader.load(cred)
                 .map(marketplaceImpl -> {
                     final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth);

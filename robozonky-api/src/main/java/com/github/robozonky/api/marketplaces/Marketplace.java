@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.Loan;
  * become active when the {@link #run()} method has been called, and will cease all operations when {@link #close()}
  * is called.
  */
+@Deprecated
 public interface Marketplace extends AutoCloseable,
                                      Runnable {
 

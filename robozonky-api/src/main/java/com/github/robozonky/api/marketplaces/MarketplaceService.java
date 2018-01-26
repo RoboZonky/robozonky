@@ -23,6 +23,7 @@ import java.util.ServiceLoader;
  * Represents a provider for Zonky loans, such as Zonky Marketplace, Zotify or Pushbullet, to be used via
  * {@link ServiceLoader}.
  */
+@Deprecated
 public interface MarketplaceService {
 
     /**
