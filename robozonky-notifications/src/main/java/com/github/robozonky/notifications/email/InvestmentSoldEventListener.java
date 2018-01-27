@@ -56,7 +56,7 @@ class InvestmentSoldEventListener extends AbstractBalanceRegisteringEmailingList
         result.put("yield",
                    FinancialCalculator.actualInterestAfterFees(event.getInvestment(), event.getPortfolioOverview(),
                                                                true));
-        final long monthsElapsed = monthsBetweenNowAnd(event.getInvestment().getInvestmentDate());
+        final long monthsElapsed = (long) result.get("monthsElapsed");
         final BigDecimal interestRate =
                 FinancialCalculator.actualInterestRateAfterFees(event.getInvestment(), event.getPortfolioOverview(),
                                                                 monthsElapsed, true);

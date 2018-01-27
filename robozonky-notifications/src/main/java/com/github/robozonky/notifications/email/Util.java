@@ -18,7 +18,6 @@ package com.github.robozonky.notifications.email;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,13 +27,14 @@ import java.util.regex.Pattern;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.util.InvestmentInference;
 
 class Util {
 
     private static final String AT = "@";
     private static final Pattern COMPILE = Pattern.compile("\\Q" + AT + "\\E");
 
-    public static Date toDate(final LocalDate localDate) {
+    private static Date toDate(final LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(Defaults.ZONE_ID).toInstant());
     }
 
@@ -52,38 +52,21 @@ class Util {
         }};
     }
 
-    private static BigDecimal getOriginalAmount(final Investment i) {
-        final BigDecimal purchasePrice = i.getPurchasePrice();
-        if (purchasePrice != null && purchasePrice.compareTo(BigDecimal.ZERO) > 0) { // bought on secondary marketplace
-            return purchasePrice;
-        } else { // bought on primary marketplace
-            return i.getAmount();
-        }
-    }
-
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
+        final InvestmentInference infered = InvestmentInference.with(i, l);
         final Map<String, Object> loanData = getLoanData(l);
-        loanData.put("loanAmount", getOriginalAmount(i));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
-        loanData.put("loanTermElapsed", i.getLoanTermInMonth() - i.getCurrentTerm());
-        loanData.put("investedAmount", i.getRemainingPrincipal());
-        loanData.put("totalPaid", i.getPaidInterest().add(i.getPaidPrincipal()).add(i.getPaidPenalty()));
+        loanData.put("amountRemaining", i.getRemainingPrincipal());
+        loanData.put("amountHeld", infered.getOriginalAmount());
+        loanData.put("amountPaid", infered.getTotalAmountPaid());
+        loanData.put("monthsElapsed", infered.getElapsed(LocalDate.now()).toTotalMonths());
         return loanData;
     }
 
-    public static Map<String, Object> getDelinquentData(final Investment i, final LocalDate date) {
-        final int loanId = i.getLoanId();
-        return new HashMap<String, Object>() {{
-            put("loanRating", i.getRating());
-            put("loanName", i.getLoanName());
-            put("loanId", loanId);
-            put("totalAmount", getOriginalAmount(i));
-            put("remainingAmount", i.getRemainingPrincipal());
-            put("totalMonths", i.getLoanTermInMonth());
-            put("remainingMonths", i.getRemainingMonths());
-            put("since", Util.toDate(date));
-            put("loanUrl", Loan.guessUrl(loanId));
-        }};
+    public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan, final LocalDate date) {
+        final Map<String, Object> result = getLoanData(i, loan);
+        result.put("since", Util.toDate(date));
+        return result;
     }
 
     public static String stackTraceToString(final Throwable t) {

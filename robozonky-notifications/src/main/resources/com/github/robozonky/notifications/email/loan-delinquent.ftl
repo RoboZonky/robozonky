@@ -2,8 +2,12 @@ Půjčka s následujícími parametry je v prodlení:
 
 - Půjčka:                      #${data.loanId?c} ${data.loanName?cap_first}
 - Rating:                      ${data.loanRating}
-- Zbývá splatit:               ${data.remainingAmount?string.currency} z ${data.totalAmount?string.currency}
-- Zbývá splátek:               ${data.remainingMonths?c} z ${data.totalMonths?c}
+- Zbývá splatit:               ${data.amountRemaining?string.currency} z ${data.amountHeld?string.currency}
+- Zbývá splátek:               ${data.loanTermRemaining?c} z ${data.loanTerm?c}
 - Po splatnosti od:            ${data.since?date}
 
-Více o půjčce na ${data.loanUrl}.
+Dodatečné informace o půjčce:
+- Účel:                        ${data.loanPurpose.getCode()?cap_first}
+- Kraj:                        ${data.loanRegion.getCode()?cap_first}
+- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
+- Více na:                     ${data.loanUrl}

@@ -3,7 +3,7 @@ Půjčka s následujícími parametry byla úspěšně zainvestována:
 - Půjčka:                      #${data.loanId?c} ${data.loanName?cap_first}
 - Rating:                      ${data.loanRating}
 - Délka splácení:              ${data.loanTerm?c} měsíců
-- Investovaná částka:          ${data.investedAmount?string.currency}
+- Investovaná částka:          ${data.amountHeld?string.currency}
 - Dosažitelný výnos*:          ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
 
 Dodatečné informace o půjčce:

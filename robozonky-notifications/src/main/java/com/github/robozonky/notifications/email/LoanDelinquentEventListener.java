@@ -45,6 +45,6 @@ class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquen
 
     @Override
     protected Map<String, Object> getData(final LoanDelinquentEvent event) {
-        return Util.getDelinquentData(event.getInvestment(), event.getDelinquentSince());
+        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getDelinquentSince());
     }
 }

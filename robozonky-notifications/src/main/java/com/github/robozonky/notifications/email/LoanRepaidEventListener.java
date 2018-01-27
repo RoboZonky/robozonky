@@ -44,7 +44,7 @@ public class LoanRepaidEventListener extends AbstractEmailingListener<LoanRepaid
         final PortfolioOverview p = event.getPortfolioOverview();
         final Map<String, Object> result = Util.getLoanData(event.getInvestment(), event.getLoan());
         result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), p));
-        final int monthsElapsed = (int) result.get("loanTermElapsed");
+        final long monthsElapsed = (long) result.get("monthsElapsed");
         final BigDecimal interestRate = FinancialCalculator.actualInterestRateAfterFees(event.getInvestment(),
                                                                                         p,
                                                                                         monthsElapsed);

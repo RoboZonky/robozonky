@@ -2,8 +2,8 @@ Participace s následujícími parametry byla úspěšně prodána:
 
 - Půjčka:                      #${data.loanId?c} ${data.loanName?cap_first}
 - Rating:                      ${data.loanRating}
-- Zbývá splátek:               ${data.loanTermRemaining?c}
-- Hodnota participace:         ${data.investedAmount?string.currency}
+- Hodnota participace:         ${data.amountRemaining?string.currency}
+- Doba držení:                 ${data.monthsElapsed?c} měsíců
 - Dosažený výnos*:             ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
 
 Dodatečné informace o půjčce:

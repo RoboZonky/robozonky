@@ -21,7 +21,8 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 class LoanNoLongerDelinquentEventListener extends AbstractLoanTerminatedEmailingListener<LoanNoLongerDelinquentEvent> {
 
     public LoanNoLongerDelinquentEventListener(final ListenerSpecificNotificationProperties properties) {
-        super(LoanNoLongerDelinquentEvent::getInvestment, LoanNoLongerDelinquentEvent::getDelinquentSince, properties);
+        super(LoanNoLongerDelinquentEvent::getInvestment, LoanNoLongerDelinquentEvent::getLoan,
+              LoanNoLongerDelinquentEvent::getDelinquentSince, properties);
     }
 
     @Override

@@ -22,17 +22,21 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 
 abstract class AbstractLoanTerminatedEmailingListener<T extends Event> extends AbstractEmailingListener<T> {
 
     private final Function<T, Investment> investmentSupplier;
+    private final Function<T, Loan> loanSupplier;
     private final Function<T, LocalDate> dateSupplier;
 
     protected AbstractLoanTerminatedEmailingListener(final Function<T, Investment> investmentSupplier,
+                                                     final Function<T, Loan> loanSupplier,
                                                      final Function<T, LocalDate> dateSupplier,
                                                      final ListenerSpecificNotificationProperties properties) {
         super(properties);
         this.investmentSupplier = investmentSupplier;
+        this.loanSupplier = loanSupplier;
         this.dateSupplier = dateSupplier;
         registerFinisher(event -> DelinquencyTracker.INSTANCE.unsetDelinquent(investmentSupplier.apply(event)));
     }
@@ -46,6 +50,7 @@ abstract class AbstractLoanTerminatedEmailingListener<T extends Event> extends A
     @Override
     protected Map<String, Object> getData(final T event) {
         final Investment i = investmentSupplier.apply(event);
-        return Util.getDelinquentData(i, dateSupplier.apply(event));
+        final Loan l = loanSupplier.apply(event);
+        return Util.getDelinquentData(i, l, dateSupplier.apply(event));
     }
 }

@@ -90,12 +90,12 @@ public class Scheduler implements AutoCloseable {
      * several times in a row will require equal amount of calls to {@link #resume()} to resume the scheduler later.
      */
     void pause() {
-        synchronized (this) {
-            final int requests = pauseRequests.incrementAndGet();
-            if (requests == 1) {
+        pauseRequests.updateAndGet(old -> {
+            if (old == 0) {
                 executor.pause();
             }
-        }
+            return old + 1;
+        });
         LOGGER.trace("Incrementing pause counter for {}.", this);
     }
 
@@ -109,14 +109,12 @@ public class Scheduler implements AutoCloseable {
      */
     void resume() {
         LOGGER.trace("Decrementing pause counter for {}.", this);
-        synchronized (this) {
-            final int requests = pauseRequests.decrementAndGet();
-            if (requests == 0) {
+        pauseRequests.updateAndGet(old -> {
+            if (old == 1) {
                 executor.resume();
-            } else if (requests < 0) {
-                pauseRequests.set(0);
             }
-        }
+            return Math.max(0, old - 1);
+        });
     }
 
     @Override
