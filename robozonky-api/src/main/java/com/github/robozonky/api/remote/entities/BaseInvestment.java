@@ -18,9 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 
@@ -83,16 +81,6 @@ abstract class BaseInvestment extends BaseEntity {
     @XmlElement
     public int getId() {
         return id;
-    }
-
-    /**
-     * There should be no need to ever use this. Please don't.
-     * @return
-     */
-    @Deprecated
-    @XmlTransient
-    public Optional<Loan> getLoan() {
-        return Optional.ofNullable(loan);
     }
 
     public void setStatus(final InvestmentStatus status) {

@@ -37,11 +37,6 @@ public enum ReturnCode {
      */
     ERROR_DOWN(3),
     /**
-     * Remote API call failed. No longer used.
-     */
-    @Deprecated
-    ERROR_REMOTE(4),
-    /**
      * Unexpected error state, possibly app bug.
      */
     ERROR_UNEXPECTED(255);

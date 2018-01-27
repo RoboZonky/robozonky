@@ -63,11 +63,6 @@ public class PortfolioOverview {
         return vals.stream().reduce(0, (a, b) -> a + b);
     }
 
-    @Deprecated
-    public static PortfolioOverview calculate(final BigDecimal balance, final Collection<Investment> investments) {
-        return calculate(balance, investments.stream());
-    }
-
     /**
      * Prepare an immutable portfolio overview, based on the provided information.
      * @param balance Current available balance in the wallet.

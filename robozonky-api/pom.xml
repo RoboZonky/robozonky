@@ -136,6 +136,49 @@
                         "classSimpleName": "MarketplaceService",
                         "elementKind": "interface",
                         "justification": "Deprecated for removal in 4.3.0."
+                      }, {
+                        "code": "java.field.removed",
+                        "old": "field com.github.robozonky.api.ReturnCode.ERROR_REMOTE",
+                        "package": "com.github.robozonky.api",
+                        "classSimpleName": "ReturnCode",
+                        "fieldName": "ERROR_REMOTE",
+                        "elementKind": "enumConstant",
+                        "justification": "Deprecated for removal in 4.3.0."
+                      }, {
+                        "code": "java.field.enumConstantOrderChanged",
+                        "old": "field com.github.robozonky.api.ReturnCode.ERROR_UNEXPECTED",
+                        "new": "field com.github.robozonky.api.ReturnCode.ERROR_UNEXPECTED",
+                        "oldOrdinal": "5",
+                        "newOrdinal": "4",
+                        "package": "com.github.robozonky.api",
+                        "classSimpleName": "ReturnCode",
+                        "fieldName": "ERROR_UNEXPECTED",
+                        "elementKind": "enumConstant",
+                        "justification": "Moved up due to ERROR_REMOTE removal."
+                      }, {
+                        "code": "java.method.removed",
+                        "old": "method java.util.Optional<com.github.robozonky.api.remote.entities.Loan> com.github.robozonky.api.remote.entities.BaseInvestment::getLoan() @ com.github.robozonky.api.remote.entities.Investment",
+                        "package": "com.github.robozonky.api.remote.entities",
+                        "classSimpleName": "Investment",
+                        "methodName": "getLoan",
+                        "elementKind": "method",
+                        "justification": "Deprecated for removal in 4.3.0."
+                      }, {
+                        "code": "java.method.removed",
+                        "old": "method java.util.Optional<com.github.robozonky.api.remote.entities.Loan> com.github.robozonky.api.remote.entities.BaseInvestment::getLoan() @ com.github.robozonky.api.remote.entities.MyInvestment",
+                        "package": "com.github.robozonky.api.remote.entities",
+                        "classSimpleName": "MyInvestment",
+                        "methodName": "getLoan",
+                        "elementKind": "method",
+                        "justification": "Deprecated for removal in 4.3.0."
+                      }, {
+                        "code": "java.method.removed",
+                        "old": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, java.util.Collection<com.github.robozonky.api.remote.entities.Investment>)",
+                        "package": "com.github.robozonky.api.strategies",
+                        "classSimpleName": "PortfolioOverview",
+                        "methodName": "calculate",
+                        "elementKind": "method",
+                        "justification": "Deprecated for removal in 4.3.0."
                       }
                     ]
                   }
