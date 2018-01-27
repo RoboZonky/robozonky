@@ -46,12 +46,6 @@ class DaemonOperatingMode extends OperatingMode {
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
-        final boolean isFaultTolerant = cli.getTweaksFragment().isFaultTolerant();
-        if (isFaultTolerant) {
-            LOGGER.warn("RoboZonky is now fault tolerant by default and cannot be configured otherwise."
-                                + " '-t' command-line option will be removed in the next RoboZonky minor version. " +
-                                "Kindly stop using it.");
-        }
         final SecretProvider secretProvider = auth.getSecretProvider();
         final String marketplaceId = marketplace.getMarketplaceCredentials();
         if (marketplaceId != null) {

@@ -18,16 +18,13 @@ package com.github.robozonky.app.configuration;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 class TweaksCommandLineFragmentTest {
 
     @Test
     void defaults() {
         final TweaksCommandLineFragment fragment = new TweaksCommandLineFragment();
-        assertSoftly(softly -> {
-            softly.assertThat(fragment.isFaultTolerant()).isFalse();
-            softly.assertThat(fragment.isDryRunEnabled()).isFalse();
-        });
+        assertThat(fragment.isDryRunEnabled()).isFalse();
     }
 }

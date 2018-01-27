@@ -24,15 +24,8 @@ class TweaksCommandLineFragment extends AbstractCommandLineFragment {
             description = "RoboZonky will simulate investments, but never actually spend money.")
     private boolean dryRunEnabled = false;
 
-    @Parameter(hidden = true, names = {"-t", "--fault-tolerant"},
-            description = "RoboZonky will not report errors if it thinks Zonky is down. Use with caution.")
-    private boolean faultTolerant = false;
-
     public boolean isDryRunEnabled() {
         return dryRunEnabled;
     }
 
-    public boolean isFaultTolerant() {
-        return faultTolerant;
-    }
 }
