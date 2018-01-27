@@ -31,8 +31,7 @@ public class ToStringBuilder {
     private final ReflectionToStringBuilder builder;
 
     public ToStringBuilder(final Object o, final String... excludeFields) {
-        final String[] fieldExclusions = Stream.concat(Stream.of("password", "toStringIgnoredFields"),
-                                                       Arrays.stream(excludeFields))
+        final String[] fieldExclusions = Stream.concat(Stream.of("password"), Arrays.stream(excludeFields))
                 .distinct()
                 .toArray(String[]::new);
         this.builder = new ToStringBuilder.CustomReflectionToStringBuilder(o)
