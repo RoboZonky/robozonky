@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -45,22 +44,20 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
     void get() throws Exception {
         final Authenticated a = mockAuthentication(mock(Zonky.class));
         final Investor.Builder b = new Investor.Builder().asDryRun();
-        final Marketplace m = mock(Marketplace.class);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final PortfolioUpdater p = mock(PortfolioUpdater.class);
-        try (final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, m, mock(StrategyProvider.class),
-                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1),
-                                                                     Duration.ofSeconds(1))) {
+        try {
+            final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, mock(StrategyProvider.class),
+                                                                    Duration.ofMinutes(1), Duration.ofSeconds(1),
+                                                                    Duration.ofSeconds(1));
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
-            assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS))
-                    .isInstanceOf(TimeoutException.class);
+            assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             verify(p).run();
         } finally {
             e.shutdownNow();
         }
-        verify(m).close();
     }
 
     @AfterEach

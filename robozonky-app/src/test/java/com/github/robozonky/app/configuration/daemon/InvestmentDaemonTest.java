@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -36,17 +35,14 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void standard() {
-        final Authenticated a = mockAuthentication(mock(Zonky.class));
-        final Marketplace m = mock(Marketplace.class);
+        final Zonky z = harmlessZonky(10_000);
+        final Authenticated a = mockAuthentication(z);
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
-        final InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), m, s,
+        final InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), s,
                                                       () -> Optional.of(mock(Portfolio.class)), Duration.ZERO,
                                                       Duration.ofSeconds(1));
         d.run();
-        verify(m, times(1)).registerListener(any());
-        d.run();
-        verify(m, times(1)).registerListener(any()); // still 1
-        verify(m, times(2)).run();
+        verify(z).getAvailableLoans();
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }

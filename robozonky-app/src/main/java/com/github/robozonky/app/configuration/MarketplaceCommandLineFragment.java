@@ -22,9 +22,6 @@ import com.beust.jcommander.Parameter;
 
 class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
 
-    @Parameter(hidden = true, names = {"-m", "--marketplace"}, description = "Which marketplace to use.")
-    private String marketplaceCredentials;
-
     @Parameter(names = {"-z", "--zonk"},
             description = "The longest amount of time in minutes for which Zonky is allowed to sleep.")
     private int maximumSleepDuration = 60;
@@ -43,10 +40,6 @@ class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
 
     public Duration getSecondaryMarketplaceCheckDelay() {
         return Duration.ofSeconds(secondaryMarketplaceCheckDelay);
-    }
-
-    public String getMarketplaceCredentials() {
-        return marketplaceCredentials;
     }
 
     public Duration getMaximumSleepDuration() {

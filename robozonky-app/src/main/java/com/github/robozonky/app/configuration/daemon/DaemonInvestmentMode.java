@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.stream.IntStream;
 
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.api.marketplaces.Marketplace;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
@@ -38,17 +37,15 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
-    private final Marketplace marketplace;
     private final List<DaemonOperation> daemons;
     private final PortfolioUpdater portfolioUpdater;
 
     public DaemonInvestmentMode(final Authenticated auth, final PortfolioUpdater p, final Investor.Builder builder,
-                                final Marketplace marketplace, final StrategyProvider strategyProvider,
-                                final Duration maximumSleepPeriod, final Duration primaryMarketplaceCheckPeriod,
+                                final StrategyProvider strategyProvider, final Duration maximumSleepPeriod,
+                                final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.marketplace = marketplace;
         this.portfolioUpdater = p;
-        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, marketplace, strategyProvider::getToInvest, p,
+        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, strategyProvider::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
                                      new PurchasingDaemon(auth, strategyProvider::getToPurchase, p, maximumSleepPeriod,
                                                           secondaryMarketplaceCheckPeriod, builder.isDryRun()));
@@ -89,9 +86,4 @@ public class DaemonInvestmentMode implements InvestmentMode {
         }
     }
 
-    @Override
-    public void close() throws Exception {
-        LOGGER.trace("Closing marketplace.");
-        this.marketplace.close();
-    }
 }

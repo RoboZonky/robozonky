@@ -67,15 +67,7 @@ public class App {
         Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
         App.SHUTDOWN_HOOKS.register(new Management(LIFECYCLE));
         App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
-        try {
-            return mode.apply(LIFECYCLE);
-        } finally {
-            try {
-                mode.close();
-            } catch (final Exception ex) {
-                App.LOGGER.debug("Failed cleaning up post investing.", ex);
-            }
-        }
+        return mode.apply(LIFECYCLE);
     }
 
     private static ReturnCode execute(final String... args) {

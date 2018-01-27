@@ -26,9 +26,6 @@ import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.app.configuration.daemon.PortfolioUpdater;
 import com.github.robozonky.app.configuration.daemon.StrategyProvider;
 import com.github.robozonky.app.investing.Investor;
-import com.github.robozonky.common.extensions.MarketplaceLoader;
-import com.github.robozonky.common.secrets.Credentials;
-import com.github.robozonky.common.secrets.SecretProvider;
 
 @Parameters(commandNames = "daemon", commandDescription = "Constantly checks marketplaces, invests based on strategy.")
 class DaemonOperatingMode extends OperatingMode {
@@ -46,23 +43,11 @@ class DaemonOperatingMode extends OperatingMode {
     @Override
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
-        final SecretProvider secretProvider = auth.getSecretProvider();
-        final String marketplaceId = marketplace.getMarketplaceCredentials();
-        if (marketplaceId != null) {
-            LOGGER.warn("RoboZonky will soon stop supporting Zotify marketplace cache, instead using Zonky directly."
-                                + " '-m' command-line option will be removed in the next RoboZonky minor version. " +
-                                "Kindly stop using it.");
-        }
-        final Credentials cred = new Credentials(marketplaceId == null ? "zonky" : marketplaceId, secretProvider);
-        return MarketplaceLoader.load(cred)
-                .map(marketplaceImpl -> {
-                    final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
-                    final PortfolioUpdater u = PortfolioUpdater.create(shutdownCall, auth, sp, builder.isDryRun());
-                    final InvestmentMode m = new DaemonInvestmentMode(auth, u, builder, marketplaceImpl, sp,
-                                                                      marketplace.getMaximumSleepDuration(),
-                                                                      marketplace.getPrimaryMarketplaceCheckDelay(),
-                                                                      marketplace.getSecondaryMarketplaceCheckDelay());
-                    return Optional.of(m);
-                }).orElse(Optional.empty());
+        final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
+        final PortfolioUpdater u = PortfolioUpdater.create(shutdownCall, auth, sp, builder.isDryRun());
+        final InvestmentMode m = new DaemonInvestmentMode(auth, u, builder, sp, marketplace.getMaximumSleepDuration(),
+                                                          marketplace.getPrimaryMarketplaceCheckDelay(),
+                                                          marketplace.getSecondaryMarketplaceCheckDelay());
+        return Optional.of(m);
     }
 }

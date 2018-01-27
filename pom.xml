@@ -26,7 +26,6 @@
     <module>robozonky-integration-zonkoid</module>
     <module>robozonky-notifications</module>
     <module>robozonky-extensions</module>
-    <module>robozonky-marketplaces</module>
     <module>robozonky-installer</module>
     <module>robozonky-common</module>
     <module>robozonky-strategy-natural</module>
@@ -74,11 +73,6 @@
         <artifactId>robozonky-test</artifactId>
         <version>${project.version}</version>
         <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-marketplaces</artifactId>
-        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>

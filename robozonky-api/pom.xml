@@ -122,6 +122,21 @@
                       }
                     },
                     "ignore": [
+                      {
+                        "code": "java.class.removed",
+                        "old": "interface com.github.robozonky.api.marketplaces.Marketplace",
+                        "package": "com.github.robozonky.api.marketplaces",
+                        "classSimpleName": "Marketplace",
+                        "elementKind": "interface",
+                        "justification": "Deprecated for removal in 4.3.0."
+                      }, {
+                        "code": "java.class.removed",
+                        "old": "interface com.github.robozonky.api.marketplaces.MarketplaceService",
+                        "package": "com.github.robozonky.api.marketplaces",
+                        "classSimpleName": "MarketplaceService",
+                        "elementKind": "interface",
+                        "justification": "Deprecated for removal in 4.3.0."
+                      }
                     ]
                   }
                 }

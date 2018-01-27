@@ -21,11 +21,7 @@ import java.util.function.Function;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.runtime.Lifecycle;
 
-public interface InvestmentMode extends Function<Lifecycle, ReturnCode>,
-                                        AutoCloseable {
+@FunctionalInterface
+public interface InvestmentMode extends Function<Lifecycle, ReturnCode> {
 
-    @Override
-    default void close() throws Exception {
-        // no need to do anything
-    }
 }
