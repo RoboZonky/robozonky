@@ -45,16 +45,15 @@ abstract class BaseEntity {
     @JsonAnyGetter
     void handleUnknownGetter(final String key) {
         if (!hasBeenCalledBefore(key)) {
-            LOGGER.warn("Trying to get value of unknown property '{}'. Indicates an unexpected API change, " +
-                                "RoboZonky may misbehave.", key);
+            LOGGER.info("Trying to get value of unknown property '{}'. Indicates an unexpected API change.", key);
         }
     }
 
     @JsonAnySetter
     void handleUnknownSetter(final String key, final Object value) {
         if (!hasBeenCalledBefore(key)) {
-            LOGGER.warn("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change, " +
-                                "RoboZonky may misbehave.", value, key);
+            LOGGER.info("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change",
+                        value, key);
         }
     }
 
