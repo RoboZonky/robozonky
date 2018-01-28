@@ -16,7 +16,6 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
@@ -44,11 +43,6 @@ public class LoanRepaidEventListener extends AbstractEmailingListener<LoanRepaid
         final PortfolioOverview p = event.getPortfolioOverview();
         final Map<String, Object> result = Util.getLoanData(event.getInvestment(), event.getLoan());
         result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), p));
-        final long monthsElapsed = (long) result.get("monthsElapsed");
-        final BigDecimal interestRate = FinancialCalculator.actualInterestRateAfterFees(event.getInvestment(),
-                                                                                        p,
-                                                                                        monthsElapsed);
-        result.put("relativeYield", interestRate);
         result.put("newBalance", p.getCzkAvailable());
         return result;
     }

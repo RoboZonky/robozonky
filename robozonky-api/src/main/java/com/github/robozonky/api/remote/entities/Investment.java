@@ -26,6 +26,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 
 public class Investment extends BaseInvestment {
 
+    private static final BigDecimal SMP_FEE_RATE = new BigDecimal("0.015");
     private PaymentStatus paymentStatus;
     private boolean smpRelated, onSmp, canBeOffered, inWithdrawal;
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
@@ -34,7 +35,7 @@ public class Investment extends BaseInvestment {
             activeTo = investmentDate.plusMonths(loanTermInMonth);
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
             duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
-            smpFee = new BigDecimal("0.015"), paidPenalty = BigDecimal.ZERO;
+            smpFee, paidPenalty = BigDecimal.ZERO;
     private Rating rating;
 
     Investment() {
@@ -52,6 +53,7 @@ public class Investment extends BaseInvestment {
         this.currentTerm = this.loanTermInMonth;
         this.remainingMonths = loan.getTermInMonths();
         this.remainingPrincipal = BigDecimal.valueOf(amount);
+        this.smpFee = remainingPrincipal.multiply(SMP_FEE_RATE);
         this.paymentStatus = PaymentStatus.OK;
         this.paid = BigDecimal.ZERO;
         this.paidPrincipal = BigDecimal.ZERO;
@@ -76,6 +78,7 @@ public class Investment extends BaseInvestment {
         this.currentTerm = loan.getTermInMonths();
         this.remainingMonths = participation.getRemainingInstalmentCount();
         this.remainingPrincipal = participation.getRemainingPrincipal();
+        this.smpFee = remainingPrincipal.multiply(SMP_FEE_RATE);
         this.paymentStatus = PaymentStatus.OK;
         this.paid = BigDecimal.ZERO;
         this.paidPrincipal = BigDecimal.ZERO;

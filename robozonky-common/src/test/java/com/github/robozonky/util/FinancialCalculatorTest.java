@@ -56,6 +56,17 @@ class FinancialCalculatorTest {
         assertThat(after).isLessThan(before);
     }
 
+    private static void expectedInterest(final Rating rating, final int threshold) {
+        final Loan l = spy(new Loan(1, 100000));
+        when(l.getRating()).thenReturn(rating);
+        when(l.getTermInMonths()).thenReturn(84);
+        final Investment i = spy(new Investment(l, 1000));
+        when(i.getRemainingMonths()).thenReturn(50);
+        final BigDecimal before = FinancialCalculator.expectedInterestAfterFees(i, getPortfolioOverview(threshold - 1));
+        final BigDecimal after = FinancialCalculator.expectedInterestAfterFees(i, getPortfolioOverview(threshold));
+        assertThat(after).isGreaterThan(before);
+    }
+
     private static void expectedInterestRate(final Rating rating, final int threshold) {
         final Loan l = spy(new Loan(1, 100000));
         when(l.getRating()).thenReturn(rating);
@@ -66,33 +77,6 @@ class FinancialCalculatorTest {
                 threshold - 1));
         final BigDecimal after = FinancialCalculator.expectedInterestRateAfterFees(i, getPortfolioOverview(threshold));
         assertThat(after).isGreaterThan(before);
-    }
-
-    private static void actualInterestRate(final Rating rating, final int threshold) {
-        final Loan l = spy(new Loan(1, 100000));
-        when(l.getRating()).thenReturn(rating);
-        when(l.getTermInMonths()).thenReturn(84);
-        final Investment i = spy(new Investment(l, 1000));
-        when(i.getPaidInterest()).thenReturn(BigDecimal.valueOf(500));
-        when(i.getPaidPenalty()).thenReturn(BigDecimal.ONE);
-        when(i.getCurrentTerm()).thenReturn(10);
-        when(i.getSmpFee()).thenReturn(BigDecimal.ONE);
-        final BigDecimal wrong = FinancialCalculator.actualInterestRateAfterFees(i,
-                                                                                 getPortfolioOverview(threshold - 1),
-                                                                                 10);
-        when(i.getPurchasePrice()).thenReturn(BigDecimal.valueOf(1200)); // override the amount
-        final BigDecimal before = FinancialCalculator.actualInterestRateAfterFees(i,
-                                                                                  getPortfolioOverview(threshold - 1),
-                                                                                  10);
-        assertThat(wrong).isGreaterThan(before);
-        final BigDecimal after = FinancialCalculator.actualInterestRateAfterFees(i, getPortfolioOverview(threshold),
-                                                                                 10);
-        assertThat(after).isGreaterThan(before);
-        final BigDecimal afterSmpFee = FinancialCalculator.actualInterestRateAfterFees(i,
-                                                                                       getPortfolioOverview(threshold),
-                                                                                       10,
-                                                                                       true);
-        assertThat(after).isGreaterThan(afterSmpFee);
     }
 
     private static void actualInterest(final Rating rating, final int threshold) {
@@ -123,8 +107,8 @@ class FinancialCalculatorTest {
     private static Stream<DynamicTest> getTestsPerThreshold(final Rating rating, final int threshold) {
         return Stream.of(
                 dynamicTest("has proper fees", () -> fees(rating, threshold)),
+                dynamicTest("has proper expected interest", () -> expectedInterest(rating, threshold)),
                 dynamicTest("has proper expected interest rate", () -> expectedInterestRate(rating, threshold)),
-                dynamicTest("has proper actual interest rate", () -> actualInterestRate(rating, threshold)),
                 dynamicTest("has proper actual interest", () -> actualInterest(rating, threshold))
         );
     }
