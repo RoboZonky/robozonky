@@ -16,7 +16,6 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
@@ -56,11 +55,6 @@ class InvestmentSoldEventListener extends AbstractBalanceRegisteringEmailingList
         result.put("yield",
                    FinancialCalculator.actualInterestAfterFees(event.getInvestment(), event.getPortfolioOverview(),
                                                                true));
-        final long monthsElapsed = (long) result.get("monthsElapsed");
-        final BigDecimal interestRate =
-                FinancialCalculator.actualInterestRateAfterFees(event.getInvestment(), event.getPortfolioOverview(),
-                                                                monthsElapsed, true);
-        result.put("relativeYield", interestRate);
         result.put("newBalance", getNewBalance(event));
         return result;
     }

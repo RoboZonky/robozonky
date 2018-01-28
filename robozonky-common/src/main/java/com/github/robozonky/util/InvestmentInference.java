@@ -29,13 +29,10 @@ import org.slf4j.LoggerFactory;
 public class InvestmentInference {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentInference.class);
-    private final boolean fromSecondaryMarketplace;
     private final OffsetDateTime investmentDate;
     private final BigDecimal originalAmount, totalAmountPaid;
 
     private InvestmentInference(final Investment investment, final Loan loan) {
-        final BigDecimal purchasePrice = investment.getPurchasePrice();
-        this.fromSecondaryMarketplace = purchasePrice != null;
         this.investmentDate = getInvestmentDate(investment, loan);
         LOGGER.trace("Investment date determined to be {} for {}.", investmentDate, investment);
         this.originalAmount = getOriginalAmount(investment);
@@ -60,16 +57,16 @@ public class InvestmentInference {
         }
     }
 
-    public BigDecimal getTotalAmountPaid() {
-        return totalAmountPaid;
-    }
-
-    private BigDecimal getOriginalAmount(final Investment i) {
-        if (fromSecondaryMarketplace) {
+    static BigDecimal getOriginalAmount(final Investment i) {
+        if (i.getPurchasePrice() != null) {
             return i.getPurchasePrice();
         } else {
             return i.getAmount();
         }
+    }
+
+    public BigDecimal getTotalAmountPaid() {
+        return totalAmountPaid;
     }
 
     public BigDecimal getOriginalAmount() {

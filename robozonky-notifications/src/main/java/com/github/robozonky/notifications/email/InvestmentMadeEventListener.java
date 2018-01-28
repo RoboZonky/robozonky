@@ -44,7 +44,7 @@ class InvestmentMadeEventListener extends AbstractBalanceRegisteringEmailingList
     protected Map<String, Object> getData(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
         final Map<String, Object> result = Util.getLoanData(i, event.getLoan());
-        result.put("yield", FinancialCalculator.expectedInterest(i));
+        result.put("yield", FinancialCalculator.expectedInterestAfterFees(i, event.getPortfolioOverview()));
         final BigDecimal interestRate =
                 FinancialCalculator.expectedInterestRateAfterFees(i, event.getPortfolioOverview());
         result.put("relativeYield", interestRate);

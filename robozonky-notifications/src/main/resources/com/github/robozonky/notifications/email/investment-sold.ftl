@@ -4,7 +4,7 @@ Participace s následujícími parametry byla úspěšně prodána:
 - Rating:                      ${data.loanRating}
 - Hodnota participace:         ${data.amountRemaining?string.currency}
 - Doba držení:                 ${data.monthsElapsed?c} měsíců
-- Dosažený výnos*:             ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
+- Dosažený výnos*:             ${data.yield?string.currency}
 
 Dodatečné informace o půjčce:
 - Účel:                        ${data.loanPurpose.getCode()?cap_first}
