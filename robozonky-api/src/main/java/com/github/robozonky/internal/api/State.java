@@ -72,9 +72,9 @@ public class State {
                     LOGGER.trace("Creating state: '{}'.", stateLocation);
                     stateLocation.createNewFile();
                 }
+                LOGGER.trace("Reading state: '{}'.", stateLocation);
+                return new Ini(stateLocation);
             }
-            LOGGER.trace("Reading state: '{}'.", stateLocation);
-            return new Ini(stateLocation);
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed initializing state.", ex);
         }
