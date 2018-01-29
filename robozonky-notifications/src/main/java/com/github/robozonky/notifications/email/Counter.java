@@ -51,7 +51,7 @@ final class Counter {
 
     private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
         final Stream<String> result = timestamps.stream().map(OffsetDateTime::toString);
-        LOGGER.error("Storing timestamps: {}.", timestamps);
+        LOGGER.trace("Storing timestamps: {}.", timestamps);
         return State.forClass(Counter.class).newBatch().set(id, result).call();
     }
 
