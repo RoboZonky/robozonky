@@ -80,13 +80,13 @@ public class ParsedStrategy {
     private static boolean matchesAnyFilter(final Wrapper item, final Stream<MarketplaceFilter> filters,
                                             final String logMessage) {
         return filters.filter(f -> f.test(item))
-                .peek(f -> ParsedStrategy.LOGGER.debug(logMessage, item.getIdentifier(), f))
+                .peek(f -> Decisions.report(logger -> logger.debug(logMessage, item.getIdentifier(), f)))
                 .findFirst()
                 .isPresent();
     }
 
     private static boolean matchesNoFilter(final Wrapper item, final Collection<MarketplaceFilter> filters) {
-        return !matchesAnyFilter(item, filters.stream(), "{} ignored, matched {}.");
+        return !matchesAnyFilter(item, filters.stream(), "{} to be ignored as it matched {}.");
     }
 
     private int sumMinimalShares() {
@@ -150,7 +150,7 @@ public class ParsedStrategy {
     }
 
     private boolean matchesAnySellFilter(final Wrapper item) {
-        return matchesAnyFilter(item, filters.getSellFilters().stream(), "{} matched {}.");
+        return matchesAnyFilter(item, filters.getSellFilters().stream(), "{} to be sold as it matched {}.");
     }
 
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
