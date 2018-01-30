@@ -39,10 +39,11 @@ class RoboZonkyCrashedEventListener extends AbstractEmailingListener<RoboZonkyCr
 
     @Override
     protected Map<String, Object> getData(final RoboZonkyCrashedEvent event) {
-        final Map<String, Object> result = new HashMap<>();
-        result.put("returnCodeName", event.getReturnCode().name());
-        result.put("returnCodeId", event.getReturnCode().getCode());
-        result.put("isCauseKnown", event.getCause().isPresent());
+        final Map<String, Object> result = new HashMap<String, Object>() {{
+            put("returnCodeName", event.getReturnCode().name());
+            put("returnCodeId", event.getReturnCode().getCode());
+            put("isCauseKnown", event.getCause().isPresent());
+        }};
         event.getCause().ifPresent(cause -> result.put("cause", Util.stackTraceToString(cause)));
         return result;
     }

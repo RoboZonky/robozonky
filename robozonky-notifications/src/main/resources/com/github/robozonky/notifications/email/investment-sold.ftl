@@ -6,12 +6,8 @@ Participace s následujícími parametry byla úspěšně prodána:
 - Doba držení:                 ${data.monthsElapsed?c} měsíců
 - Dosažený výnos*:             ${data.yield?string.currency}
 
-Dodatečné informace o půjčce:
-- Účel:                        ${data.loanPurpose.getCode()?cap_first}
-- Kraj:                        ${data.loanRegion.getCode()?cap_first}
-- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
-- Více na:                     ${data.loanUrl}
+<#include "additional-loan-info.ftl">
 
-Nový zůstatek na Zonky účtu je ${data.newBalance?string.currency}.
+<#include "additional-portfolio-info.ftl">
 
 <#include "warning-interest.ftl">

@@ -44,8 +44,7 @@ class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingLis
 
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
-        return new HashMap<String, Object>() {{
-            put("newBalance", getNewBalance(event));
+        return new HashMap<String, Object>(super.getData(event)) {{
             put("targetBalance", targetBalance);
         }};
     }

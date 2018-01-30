@@ -16,9 +16,6 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.Period;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
@@ -42,20 +39,12 @@ class InvestmentSoldEventListener extends AbstractBalanceRegisteringEmailingList
         return "investment-sold.ftl";
     }
 
-    private long monthsBetweenNowAnd(final OffsetDateTime then) {
-        final LocalDate thenDate = then.toLocalDate();
-        final LocalDate now = LocalDate.now();
-        return Period.between(now, thenDate).toTotalMonths();
-    }
-
     @Override
     protected Map<String, Object> getData(final InvestmentSoldEvent event) {
-        final Investment i = event.getInvestment();
-        final Map<String, Object> result = Util.getLoanData(i, event.getLoan());
+        final Map<String, Object> result = super.getData(event);
         result.put("yield",
                    FinancialCalculator.actualInterestAfterFees(event.getInvestment(), event.getPortfolioOverview(),
                                                                true));
-        result.put("newBalance", getNewBalance(event));
         return result;
     }
 }

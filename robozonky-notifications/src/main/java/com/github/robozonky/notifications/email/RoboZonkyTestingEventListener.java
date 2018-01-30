@@ -16,9 +16,6 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.Collections;
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 
 class RoboZonkyTestingEventListener extends AbstractEmailingListener<RoboZonkyTestingEvent> {
@@ -35,10 +32,5 @@ class RoboZonkyTestingEventListener extends AbstractEmailingListener<RoboZonkyTe
     @Override
     String getTemplateFileName() {
         return "testing.ftl";
-    }
-
-    @Override
-    protected Map<String, Object> getData(final RoboZonkyTestingEvent event) {
-        return Collections.emptyMap();
     }
 }

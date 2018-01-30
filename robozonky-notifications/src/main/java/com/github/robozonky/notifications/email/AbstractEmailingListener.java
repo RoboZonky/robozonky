@@ -25,7 +25,12 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.api.notifications.Financial;
+import com.github.robozonky.api.notifications.InvestmentBased;
+import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.SessionInfo;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
@@ -85,12 +90,35 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
 
     abstract String getTemplateFileName();
 
-    protected Map<String, Object> getData(final T event) {
+    private Map<String, Object> getBaseData(final T event) {
+        if (event instanceof LoanBased) {
+            if (event instanceof InvestmentBased) {
+                final InvestmentBased e = (InvestmentBased) event;
+                return Util.getLoanData(e.getInvestment(), e.getLoan());
+            } else {
+                final LoanBased e = (LoanBased) event;
+                return Util.getLoanData(e.getLoan());
+            }
+        }
         return Collections.emptyMap();
+    }
+
+    protected Map<String, Object> getData(final T event) {
+        final Map<String, Object> result = new HashMap<>(getBaseData(event));
+        if (event instanceof Financial) {
+            final PortfolioOverview portfolioOverview = ((Financial) event).getPortfolioOverview();
+            result.put("portfolio", Util.summarizePortfolioStructure(portfolioOverview));
+        }
+        return result;
     }
 
     final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
         return Collections.unmodifiableMap(new HashMap<String, Object>(this.getData(event)) {{
+            put("ratings", new LinkedHashSet() {{
+                for (final Rating r : Rating.values()) {
+                    add(r);
+                }
+            }});
             put("session", new HashMap<String, Object>() {{
                 put("userName", Util.obfuscateEmailAddress(sessionInfo.getUserName()));
                 put("userAgent", sessionInfo.getUserAgent());

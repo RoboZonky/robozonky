@@ -6,9 +6,4 @@ Půjčka s následujícími parametry byla zamítnuta:
 - Požadovaná částka:           ${data.loanAmount?string.currency}
 - Navržená výše investice:     ${data.loanRecommendation?string.currency}
 
-Dodatečné informace o půjčce:
-- Účel:                        ${data.loanPurpose.getCode()?cap_first}
-- Kraj:                        ${data.loanRegion.getCode()?cap_first}
-- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
-- Více na:                     ${data.loanUrl}
-
+<#include "additional-loan-info.ftl">

@@ -17,6 +17,7 @@
 package com.github.robozonky.notifications.email;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -106,6 +107,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     private static PortfolioOverview mockPortfolio(final int balance) {
         final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
         when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
+        when(portfolioOverview.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         return portfolioOverview;
     }
 

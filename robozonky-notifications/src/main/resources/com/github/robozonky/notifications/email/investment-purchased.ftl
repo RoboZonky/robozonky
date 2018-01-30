@@ -6,12 +6,8 @@ Na sekundárním trhu byla právě zakoupena následující participace:
 - Hodnota participace:         ${data.amountHeld?string.currency}
 - Dosažitelný výnos*:          ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
 
-Dodatečné informace o půjčce:
-- Účel:                        ${data.loanPurpose.getCode()?cap_first}
-- Kraj:                        ${data.loanRegion.getCode()?cap_first}
-- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
-- Více na:                     ${data.loanUrl}
+<#include "additional-loan-info.ftl">
 
-Nový zůstatek na Zonky účtu je ${data.newBalance?string.currency}.
+<#include "additional-portfolio-info.ftl">
 
 <#include "warning-interest.ftl">

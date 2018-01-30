@@ -19,13 +19,18 @@ package com.github.robozonky.notifications.email;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.InvestmentInference;
 
@@ -50,6 +55,25 @@ class Util {
             put("loanPurpose", loan.getPurpose());
             put("loanName", loan.getName());
         }};
+    }
+
+    public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
+        final Map<String, Object> result = new HashMap<>(3);
+        result.put("absoluteShare", new LinkedHashMap<String, Object>() {{
+            Stream.of(Rating.values()).forEach(r -> put(r.getCode(), portfolioOverview.getCzkInvested(r)));
+        }});
+        result.put("relativeShare", new LinkedHashMap<String, Object>() {{
+            Stream.of(Rating.values()).forEach(r -> put(r.getCode(), portfolioOverview.getShareOnInvestment(r)));
+        }});
+        result.put("total", portfolioOverview.getCzkInvested());
+        result.put("balance", portfolioOverview.getCzkAvailable());
+        for (final Rating rating : Rating.values()) {
+            final Map<String, Object> map = (Map<String, Object>) result.get("absoluteShare");
+            map.put(rating.getCode(), portfolioOverview.getCzkInvested(rating));
+            final Map<String, Object> map2 = (Map<String, Object>) result.get("relativeShare");
+            map2.put(rating.getCode(), portfolioOverview.getShareOnInvestment(rating));
+        }
+        return Collections.unmodifiableMap(result);
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {

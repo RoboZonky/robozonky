@@ -7,8 +7,5 @@ Půjčka s následujícími parametry byla předána k investování jiným nás
 - Navržená výše investice:     ${data.loanRecommendation?string.currency}
 - Cílový nástroj:              ${data.confirmationProviderId}
 
-Dodatečné informace o půjčce:
-- Účel:                        ${data.loanPurpose.getCode()?cap_first}
-- Kraj:                        ${data.loanRegion.getCode()?cap_first}
-- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
-- Více na:                     ${data.loanUrl}
+<#include "additional-loan-info.ftl">
+

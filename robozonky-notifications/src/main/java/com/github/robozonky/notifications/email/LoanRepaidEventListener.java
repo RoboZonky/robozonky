@@ -41,9 +41,8 @@ public class LoanRepaidEventListener extends AbstractEmailingListener<LoanRepaid
     @Override
     protected Map<String, Object> getData(final LoanRepaidEvent event) {
         final PortfolioOverview p = event.getPortfolioOverview();
-        final Map<String, Object> result = Util.getLoanData(event.getInvestment(), event.getLoan());
+        final Map<String, Object> result = super.getData(event);
         result.put("yield", FinancialCalculator.actualInterestAfterFees(event.getInvestment(), p));
-        result.put("newBalance", p.getCzkAvailable());
         return result;
     }
 }

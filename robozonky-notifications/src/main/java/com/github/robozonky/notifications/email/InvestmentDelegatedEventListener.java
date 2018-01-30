@@ -39,7 +39,7 @@ class InvestmentDelegatedEventListener extends AbstractEmailingListener<Investme
 
     @Override
     protected Map<String, Object> getData(final InvestmentDelegatedEvent event) {
-        final Map<String, Object> result = Util.getLoanData(event.getLoan());
+        final Map<String, Object> result = super.getData(event);
         result.put("loanRecommendation", event.getRecommendation());
         result.put("confirmationProviderId", event.getConfirmationProviderId());
         return result;

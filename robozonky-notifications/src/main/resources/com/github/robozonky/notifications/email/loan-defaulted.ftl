@@ -6,8 +6,4 @@ Půjčka s následujícími parametry byla zesplatněna:
 - Zbývá splátek:               ${data.loanTermRemaining?c} z ${data.loanTerm?c}
 - Po splatnosti od:            ${data.since?date}
 
-Dodatečné informace o půjčce:
-- Účel:                        ${data.loanPurpose.getCode()?cap_first}
-- Kraj:                        ${data.loanRegion.getCode()?cap_first}
-- Zdroj příjmů:                ${data.loanMainIncomeType.getCode()?cap_first}
-- Více na:                     ${data.loanUrl}
+<#include "additional-loan-info.ftl">

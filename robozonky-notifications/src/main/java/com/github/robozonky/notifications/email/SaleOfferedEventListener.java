@@ -16,8 +16,6 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.Map;
-
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 
 class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent> {
@@ -34,10 +32,5 @@ class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent
     @Override
     String getTemplateFileName() {
         return "sale-offered.ftl";
-    }
-
-    @Override
-    protected Map<String, Object> getData(final SaleOfferedEvent event) {
-        return Util.getLoanData(event.getInvestment(), event.getLoan());
     }
 }
