@@ -34,7 +34,7 @@ final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
     private final String id;
-    private final int maxItems;
+    private final long maxItems;
     private final TemporalAmount period;
     private final Set<OffsetDateTime> timestamps;
 
@@ -49,12 +49,6 @@ final class Counter {
         this.timestamps = new CopyOnWriteArraySet<>(Counter.load(id));
     }
 
-    private static boolean store(final String id, final Set<OffsetDateTime> timestamps) {
-        final Stream<String> result = timestamps.stream().map(OffsetDateTime::toString);
-        LOGGER.trace("Storing timestamps: {}.", timestamps);
-        return State.forClass(Counter.class).newBatch().set(id, result).call();
-    }
-
     private static Collection<OffsetDateTime> load(final String id) {
         return State.forClass(Counter.class).getValues(id)
                 .map(value -> value.stream()
@@ -64,21 +58,27 @@ final class Counter {
                 .orElse(Collections.emptySet());
     }
 
+    private boolean store(final String id, final Set<OffsetDateTime> timestamps) {
+        final Stream<String> result = getValidTimestamps().map(OffsetDateTime::toString);
+        LOGGER.trace("Storing timestamps: {}.", timestamps);
+        return State.forClass(Counter.class).newBatch().set(id, result).call();
+    }
+
+    private Stream<OffsetDateTime> getValidTimestamps() {
+        final OffsetDateTime now = OffsetDateTime.now();
+        return timestamps.stream()
+                .filter(timestamp -> timestamp.plus(period).isAfter(now));
+    }
+
     /**
      * @return True when the counter increase was properly persisted.
      */
     public boolean increase() {
         timestamps.add(OffsetDateTime.now());
-        return Counter.store(id, timestamps);
+        return store(id, timestamps);
     }
 
     public boolean allow() {
-        final OffsetDateTime now = OffsetDateTime.now();
-        final boolean removed = timestamps.removeIf(timestamp -> timestamp.plus(period).isBefore(now));
-        if (removed) {
-            Counter.LOGGER.trace("Some timestamps removed.");
-            Counter.store(id, timestamps);
-        }
-        return timestamps.size() < maxItems;
+        return getValidTimestamps().count() < maxItems;
     }
 }
