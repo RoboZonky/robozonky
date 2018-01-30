@@ -28,12 +28,8 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Util {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     public static Stream<Rating> rankRatingsByDemand(final ParsedStrategy strategy,
                                                      final Map<Rating, BigDecimal> currentShare) {
@@ -45,7 +41,10 @@ public class Util {
                     .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_EVEN);
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
             if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
-                LOGGER.trace("Rating {} over-invested by {}.", r, undershare.negate());
+                Decisions.report(logger -> {
+                    logger.debug("Rating {} will be skipped; rating over-invested by {} percentage points.",
+                                 r, undershare.negate());
+                });
                 return;
             }
             mostWantedRatings.compute(undershare, (k, v) -> {
@@ -62,11 +61,13 @@ public class Util {
     public static boolean isAcceptable(final ParsedStrategy strategy, final PortfolioOverview portfolio) {
         final int balance = portfolio.getCzkAvailable();
         if (balance < strategy.getMinimumBalance()) {
+            Decisions.report(logger -> logger.debug("Not recommending any loans due to balance under minimum."));
             return false;
         }
         final int invested = portfolio.getCzkInvested();
         final int investmentCeiling = strategy.getMaximumInvestmentSizeInCzk();
         if (invested >= investmentCeiling) {
+            Decisions.report(logger -> logger.debug("Not recommending any loans due to reaching the ceiling."));
             return false;
         }
         return true;
@@ -75,5 +76,4 @@ public class Util {
     public static BigDecimal toBigDecimal(final Number num) {
         return new BigDecimal(num.toString());
     }
-
 }

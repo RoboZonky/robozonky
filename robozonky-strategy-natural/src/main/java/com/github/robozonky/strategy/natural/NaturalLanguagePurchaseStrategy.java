@@ -32,17 +32,19 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguagePurchaseStrategy.class);
     private static final Comparator<ParticipationDescriptor>
             BY_TERM = Comparator.comparingInt(p -> p.item().getRemainingInstalmentCount()),
             BY_RECENCY = Comparator.comparing(p -> p.item().getDeadline()),
             BY_REMAINING =
                     Comparator.comparing((ParticipationDescriptor p) -> p.item().getRemainingPrincipal()).reversed();
+    private final ParsedStrategy strategy;
+
+    public NaturalLanguagePurchaseStrategy(final ParsedStrategy p) {
+        this.strategy = p;
+    }
 
     private static Map<Rating, Collection<ParticipationDescriptor>> sortByRating(
             final Stream<ParticipationDescriptor> items) {
@@ -58,12 +60,6 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         return BY_TERM.thenComparing(BY_REMAINING).thenComparing(BY_RECENCY);
     }
 
-    private final ParsedStrategy strategy;
-
-    public NaturalLanguagePurchaseStrategy(final ParsedStrategy p) {
-        this.strategy = p;
-    }
-
     private int[] getRecommendationBoundaries(final Participation participation) {
         final Rating rating = participation.getRating();
         final int minimumInvestment = strategy.getMinimumInvestmentSizeInCzk(rating);
@@ -77,24 +73,25 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         final int[] recommended = getRecommendationBoundaries(participation);
         final int minimumRecommendation = recommended[0];
         final int maximumRecommendation = recommended[1];
-        LOGGER.trace("Recommended investment range for loan #{} (participation #{}) is <{}; {}> CZK.", id,
-                     participationId, minimumRecommendation, maximumRecommendation);
+        Decisions.report(logger -> logger.trace("Loan #{} (participation #{}) recommended range <{}; {}> CZK.", id,
+                                                participationId, minimumRecommendation, maximumRecommendation));
         // round to nearest lower increment
         final double price = participation.getRemainingPrincipal().doubleValue();
         if (balance < price) {
-            LOGGER.debug("Loan #{} (participation #{}) not recommended due to price over balance.", id,
-                         participationId);
+            Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; over balance.",
+                                                    id, participationId));
             return false;
         } else if (minimumRecommendation > price) {
-            LOGGER.debug("Loan #{} (participation #{}) not recommended due to price below minimum.", id,
-                         participationId);
+            Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; below minimum.",
+                                                    id, participationId));
             return false;
         } else if (price > maximumRecommendation) {
-            LOGGER.debug("Loan #{} (participation #{}) not recommended due to price over maximum.", id,
-                         participationId);
+            Decisions.report(logger -> logger.debug("Loan #{} (participation #{}) not recommended; over maximum.",
+                                                    id, participationId));
             return false;
         } else {
-            LOGGER.debug("Final recommendation for loan #{} (participation #{}) is to buy.", id, participationId);
+            Decisions.report(logger -> logger.debug("Final recommendation: buy loan #{} (participation #{}).", id,
+                                                    participationId));
             return true;
         }
     }
@@ -104,7 +101,6 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                                                       final PortfolioOverview portfolio,
                                                       final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
-            LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
@@ -118,7 +114,7 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
                     return splitByRating.get(rating).stream().sorted(getLoanComparator());
                 })
-                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+                .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
                 .filter(d -> sizeMatchesStrategy(d.item(), portfolio.getCzkAvailable()))
                 .map(ParticipationDescriptor::recommend) // must do full amount; Zonky enforces
                 .flatMap(r -> r.map(Stream::of).orElse(Stream.empty()));

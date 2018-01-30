@@ -31,12 +31,9 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageInvestmentStrategy.class);
     private static final PrimaryMarketplaceComparator COMPARATOR = new PrimaryMarketplaceComparator();
     private final ParsedStrategy strategy;
 
@@ -56,7 +53,6 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     public Stream<RecommendedLoan> recommend(final Collection<LoanDescriptor> loans, final PortfolioOverview portfolio,
                                              final Restrictions restrictions) {
         if (!Util.isAcceptable(strategy, portfolio)) {
-            LOGGER.debug("Not recommending anything due to unacceptable portfolio.");
             return Stream.empty();
         }
         // split available marketplace into buckets per rating
@@ -71,7 +67,7 @@ public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
                 new InvestmentSizeRecommender(strategy, restrictions.getMaximumInvestmentAmount());
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> splitByRating.get(rating).stream().sorted(COMPARATOR))
-                .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
+                .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
                 .map(l -> { // recommend amount to invest per strategy
                     final int recommendedAmount = recommender.apply(l.item(), balance);
                     if (recommendedAmount > 0) {
