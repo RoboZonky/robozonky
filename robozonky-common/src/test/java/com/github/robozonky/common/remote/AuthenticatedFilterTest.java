@@ -19,6 +19,8 @@ package com.github.robozonky.common.remote;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.UUID;
 import javax.ws.rs.client.ClientRequestContext;
@@ -51,8 +53,9 @@ class AuthenticatedFilterTest extends AbstractCommonFilterTest {
     }
 
     @Test
-    void hasToken() throws IOException {
+    void hasToken() throws URISyntaxException {
         final ClientRequestContext crc = mock(ClientRequestContext.class);
+        when(crc.getUri()).thenReturn(new URI("http://somewhere"));
         when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
         getTestedFilter().filter(crc);
         assertThat(crc.getHeaders().getFirst("Authorization"))

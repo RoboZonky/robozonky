@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package com.github.robozonky.common.remote;
 
-import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 
 import com.github.robozonky.internal.api.Defaults;
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -31,11 +33,12 @@ abstract class AbstractCommonFilterTest {
     protected abstract RoboZonkyFilter getTestedFilter();
 
     @Test
-    void wasUserAgentHeaderAdded() throws IOException {
-        final ClientRequestContext crc = mock(ClientRequestContext.class);
-        when(crc.getHeaders()).thenReturn(new MultivaluedHashMap<>());
-
-        this.getTestedFilter().filter(crc);
-        assertThat(crc.getHeaders().getFirst("User-Agent")).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
+    void userAgent() throws URISyntaxException {
+        final MultivaluedMap<String, Object> map = new MultivaluedMapImpl<>();
+        final ClientRequestContext ctx = mock(ClientRequestContext.class);
+        when(ctx.getUri()).thenReturn(new URI("http://localhost/"));
+        when(ctx.getHeaders()).thenReturn(map);
+        getTestedFilter().filter(ctx);
+        assertThat(map.get("User-Agent").get(0)).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
     }
 }

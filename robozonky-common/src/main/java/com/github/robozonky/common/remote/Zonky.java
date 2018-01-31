@@ -66,6 +66,41 @@ public class Zonky implements AutoCloseable {
         this.walletApi = wallet;
     }
 
+    static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api) {
+        return Zonky.getStream(api, Sort.unspecified());
+    }
+
+    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
+                                                                             final Sort<T> ordering) {
+        return Zonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize(), ordering);
+    }
+
+    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
+                                                                             final int pageSize,
+                                                                             final Sort<T> ordering) {
+        return getStream(api, new Select(), pageSize, ordering);
+    }
+
+    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
+                                                                             final Select select) {
+        return Zonky.getStream(api, select, Sort.unspecified());
+    }
+
+    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
+                                                                             final Select select,
+                                                                             final Sort<T> ordering) {
+        return Zonky.getStream(api, select, Settings.INSTANCE.getDefaultApiPageSize(), ordering);
+    }
+
+    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
+                                                                             final Select select,
+                                                                             final int pageSize,
+                                                                             final Sort<T> ordering) {
+        final Paginated<T> p = new PaginatedImpl<>(api, select, ordering, pageSize);
+        final Spliterator<T> s = new EntitySpliterator<>(p);
+        return StreamSupport.stream(s, false);
+    }
+
     public void invest(final Investment investment) {
         LOGGER.info("Investing into loan #{}.", investment.getLoanId());
         controlApi.execute(api -> {
@@ -96,23 +131,6 @@ public class Zonky implements AutoCloseable {
 
     public Wallet getWallet() {
         return walletApi.execute(WalletApi::wallet);
-    }
-
-    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api) {
-        return Zonky.getStream(api, Sort.unspecified());
-    }
-
-    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
-                                                                             final Sort<T> ordering) {
-        return Zonky.getStream(api, Settings.INSTANCE.getDefaultApiPageSize(), ordering);
-    }
-
-    private static <T, S extends EntityCollectionApi<T>> Stream<T> getStream(final PaginatedApi<T, S> api,
-                                                                             final int pageSize,
-                                                                             final Sort<T> ordering) {
-        final Paginated<T> p = new PaginatedImpl<>(api, ordering, pageSize);
-        final Spliterator<T> s = new EntitySpliterator<>(p);
-        return StreamSupport.stream(s, false);
     }
 
     /**
@@ -152,6 +170,15 @@ public class Zonky implements AutoCloseable {
      */
     public Stream<Loan> getAvailableLoans() {
         return Zonky.getStream(loanApi);
+    }
+
+    /**
+     * Retrieve loans from marketplace via {@link LoanApi}.
+     * @param select Rules to filter the selection by.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Loan> getAvailableLoans(final Select select) {
+        return Zonky.getStream(loanApi, select);
     }
 
     /**

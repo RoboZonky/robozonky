@@ -17,6 +17,8 @@
 package com.github.robozonky.common.remote;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.UUID;
 import javax.ws.rs.client.ClientRequestContext;
@@ -24,7 +26,6 @@ import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import com.github.robozonky.internal.api.Defaults;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.junit.jupiter.api.Test;
 
@@ -35,12 +36,10 @@ import static org.mockito.Mockito.*;
 class RoboZonkyFilterTest {
 
     @Test
-    void userAgent() throws IOException {
-        final MultivaluedMap<String, Object> map = new MultivaluedMapImpl<>();
-        final ClientRequestContext ctx = mock(ClientRequestContext.class);
-        when(ctx.getHeaders()).thenReturn(map);
-        new RoboZonkyFilter().filter(ctx);
-        assertThat(map.get("User-Agent").get(0)).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
+    void rebuildUri() throws URISyntaxException {
+        final URI u = new URI("http://localhost/somewhere/something?param1=b&param2=c");
+        final URI u2 = RoboZonkyFilter.addQueryParams(u, Collections.singletonMap("param2", new Object[]{1, 2}));
+        assertThat(u2).isNotEqualTo(u);
     }
 
     @Test

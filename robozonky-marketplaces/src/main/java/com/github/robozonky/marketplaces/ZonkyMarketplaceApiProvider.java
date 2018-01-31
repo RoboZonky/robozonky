@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.util.Collection;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.Select;
 
-class MarketplaceApiProvider extends ApiProvider {
+class ZonkyMarketplaceApiProvider extends ApiProvider {
 
-    private static final String ZOTIFY_URL = "https://zotify.cz";
+    private static final Select SELECT = new Select().greaterThan("remainingInvestment", 0);
 
     /**
      * Retrieve Zotify's marketplace cache.
@@ -31,6 +32,6 @@ class MarketplaceApiProvider extends ApiProvider {
      */
     @Override
     public Collection<Loan> marketplace() {
-        return this.marketplace(ZotifyApi.class, MarketplaceApiProvider.ZOTIFY_URL);
+        return this.marketplace(SELECT);
     }
 }

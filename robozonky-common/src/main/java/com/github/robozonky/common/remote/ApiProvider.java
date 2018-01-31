@@ -19,6 +19,7 @@ package com.github.robozonky.common.remote;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.EntityCollectionApi;
@@ -44,7 +45,7 @@ public class ApiProvider {
     public static final String ZONKY_URL = "https://api.zonky.cz";
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private static <X> Function<X, Void> toFunction(final Consumer<X> f) {
+    static <X> Function<X, Void> toFunction(final Consumer<X> f) {
         return (x) -> {
             f.accept(x);
             return null;
@@ -78,6 +79,19 @@ public class ApiProvider {
         return new PaginatedApi<>(api, url, token);
     }
 
+    /**
+     * Instantiate an API as a RESTEasy client proxy.
+     * @param api RESTEasy endpoint.
+     * @param url URL to the web API represented by the endpoint.
+     * @param <T> API type.
+     * @return RESTEasy client proxy for the API, ready to be called.
+     */
+    protected <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
+                                                                                       final String url,
+                                                                                       final RoboZonkyFilter filter) {
+        return new PaginatedApi<>(api, url, filter);
+    }
+
     private OAuth oauth() {
         return new OAuth(this.obtain(ZonkyOAuthApi.class, ApiProvider.ZONKY_URL, new AuthenticationFilter()));
     }
@@ -101,12 +115,24 @@ public class ApiProvider {
         }
     }
 
+    private <T> Collection<T> marketplace(final Class<? extends EntityCollectionApi<T>> target, final Select select,
+                                          final String url) {
+        final RoboZonkyFilter filter = new RoboZonkyFilter();
+        select.accept(filter);
+        final PaginatedApi<T, ? extends EntityCollectionApi<T>> api = this.obtainPaginated(target, url, filter);
+        return Zonky.getStream(api).collect(Collectors.toList());
+    }
+
+    public Collection<Loan> marketplace(final Select select) {
+        return marketplace(LoanApi.class, select, ApiProvider.ZONKY_URL);
+    }
+
     /**
      * Retrieve available loans from Zonky marketplace cache, which requires no authentication.
      * @return Loans existing in the marketplace at the time this method was called.
      */
     public Collection<Loan> marketplace() {
-        return this.marketplace(LoanApi.class, ApiProvider.ZONKY_URL);
+        return marketplace(new Select());
     }
 
     private Zonky authenticated(final ZonkyApiToken token) {

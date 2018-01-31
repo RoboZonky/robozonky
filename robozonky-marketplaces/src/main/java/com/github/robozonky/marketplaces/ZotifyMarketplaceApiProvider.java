@@ -16,16 +16,21 @@
 
 package com.github.robozonky.marketplaces;
 
+import java.util.Collection;
+
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.common.remote.ApiProvider;
 
-class ZotifyMarketplace extends AbstractMarketplace {
+class ZotifyMarketplaceApiProvider extends ApiProvider {
 
-    public ZotifyMarketplace() {
-        // otherwise the tests will fail to instantiate
-    }
+    private static final String ZOTIFY_URL = "https://zotify.cz";
 
+    /**
+     * Retrieve Zotify's marketplace cache.
+     * @return New API instance.
+     */
     @Override
-    protected ApiProvider api() {
-        return new ZotifyMarketplaceApiProvider();
+    public Collection<Loan> marketplace() {
+        return this.marketplace(ZotifyApi.class, ZotifyMarketplaceApiProvider.ZOTIFY_URL);
     }
 }

@@ -25,23 +25,33 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
 
-    private final AuthenticatedFilter filter;
+    private final RoboZonkyFilter filter;
     private final Class<T> api;
     private final String url;
 
     PaginatedApi(final Class<T> api, final String url, final ZonkyApiToken token) {
+        this(api, url, new AuthenticatedFilter(token));
+    }
+
+    PaginatedApi(final Class<T> api, final String url, final RoboZonkyFilter filter) {
         this.api = api;
         this.url = url;
-        this.filter = new AuthenticatedFilter(token);
+        this.filter = filter;
     }
 
     @Override
     public <Q> Q execute(final Function<T, Q> function) {
-        return this.execute(function, Sort.unspecified(), filter);
+        return this.execute(function, new Select(), Sort.unspecified(), filter);
     }
 
-    <Q> Q execute(final Function<T, Q> function, final Sort<S> sort, final RoboZonkyFilter filter) {
+    <Q> Q execute(final Function<T, Q> function, final Select select, final Sort<S> sort,
+                  final RoboZonkyFilter filter) {
+        select.accept(filter);
         sort.apply(filter);
+        return execute(function, filter);
+    }
+
+    <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter) {
         final ResteasyClient client = ProxyFactory.newResteasyClient(filter);
         try {
             return execute(function, client);
@@ -55,16 +65,16 @@ class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<
         return function.apply(proxy);
     }
 
-    public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Sort<S> sort, final int pageNo,
-                                      final int pageSize) {
-        return this.execute(function, sort, pageNo, pageSize, filter);
+    public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Select select,
+                                      final Sort<S> sort, final int pageNo, final int pageSize) {
+        return this.execute(function, select, sort, pageNo, pageSize, filter);
     }
 
-    PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Sort<S> sort,
+    PaginatedResult<S> execute(final Function<T, Collection<S>> function, final Select select, final Sort<S> sort,
                                final int pageNo, final int pageSize, final RoboZonkyFilter filter) {
         filter.setRequestHeader("X-Page", String.valueOf(pageNo));
         filter.setRequestHeader("X-Size", String.valueOf(pageSize));
-        final Collection<S> result = this.execute(function, sort, filter);
+        final Collection<S> result = this.execute(function, select, sort, filter);
         final int totalSize = filter.getLastResponseHeader("X-Total")
                 .map(Integer::parseInt)
                 .orElse(-1);
@@ -72,6 +82,6 @@ class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<
     }
 
     public PaginatedResult<S> execute(final Function<T, Collection<S>> function, final int pageNo, final int pageSize) {
-        return this.execute(function, Sort.unspecified(), pageNo, pageSize, filter);
+        return this.execute(function, new Select(), Sort.unspecified(), pageNo, pageSize, filter);
     }
 }
