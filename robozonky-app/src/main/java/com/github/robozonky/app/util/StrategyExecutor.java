@@ -63,6 +63,7 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
 
     @Override
     public Collection<Investment> apply(final Portfolio portfolio, final Collection<T> marketplace) {
+        LOGGER.debug("Received {} items from the marketplace.", marketplace.size());
         return strategyProvider.get()
                 .map(strategy -> invest(portfolio, strategy, marketplace))
                 .orElseGet(() -> {

@@ -34,8 +34,7 @@ class PaginatedImplTest {
         final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
         final int pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         // when execute is called with the right parameters, we pretend the API returned no results
-        when(api.execute(any(), any(), eq(0),
-                         eq(pageSize)))
+        when(api.execute(any(), any(), any(), eq(0), eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 0, 0));
         final Paginated<Loan> p = new PaginatedImpl<>(api);
         assertSoftly(softly -> {
@@ -52,14 +51,12 @@ class PaginatedImplTest {
         final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
         final int pageSize = 1;
         // when execute calls for first page, we pretend the API returned 1 result
-        when(api.execute(any(), any(), eq(0),
-                         eq(pageSize)))
+        when(api.execute(any(), any(), any(), eq(0), eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.singleton(new Loan(1, 200)), 0, 1));
         // when execute calls for second page, we pretend the API returned no results
-        when(api.execute(any(), any(), eq(1),
-                         eq(pageSize)))
+        when(api.execute(any(), any(), any(), eq(1), eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 1, 1));
-        final Paginated<Loan> p = new PaginatedImpl<>(api, Sort.unspecified(), pageSize);
+        final Paginated<Loan> p = new PaginatedImpl<>(api, new Select(), Sort.unspecified(), pageSize);
         assertSoftly(softly -> {
             softly.assertThat(p.getExpectedPageSize()).isEqualTo(pageSize);
             softly.assertThat(p.getPageId()).isEqualTo(0);

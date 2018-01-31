@@ -31,6 +31,10 @@ import com.github.robozonky.internal.api.Defaults;
 @Consumes(Defaults.MEDIA_TYPE)
 public interface LoanApi extends EntityCollectionApi<Loan> {
 
+    /**
+     * @return Every single loan that ever was.
+     * @see <a href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Filtering Zonky.</a>
+     */
     @GET
     @Path("marketplace")
     @Override

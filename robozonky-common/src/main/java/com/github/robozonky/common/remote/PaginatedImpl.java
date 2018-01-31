@@ -27,15 +27,17 @@ final class PaginatedImpl<T> implements Paginated<T> {
     private final PaginatedApi<T, ? extends EntityCollectionApi<T>> api;
     private final int pageSize;
     private final Sort<T> ordering;
+    private final Select select;
     private PaginatedResult<T> itemsOnPage;
 
     PaginatedImpl(final PaginatedApi<T, ? extends EntityCollectionApi<T>> api) {
-        this(api, Sort.unspecified(), Settings.INSTANCE.getDefaultApiPageSize()); // for testing purposes
+        this(api, new Select(), Sort.unspecified(), Settings.INSTANCE.getDefaultApiPageSize()); // for testing purposes
     }
 
-    public PaginatedImpl(final PaginatedApi<T, ? extends EntityCollectionApi<T>> api, final Sort<T> ordering,
-                         final int pageSize) {
+    public PaginatedImpl(final PaginatedApi<T, ? extends EntityCollectionApi<T>> api, final Select select,
+                         final Sort<T> ordering, final int pageSize) {
         this.ordering = ordering;
+        this.select = select;
         this.api = api;
         this.pageSize = pageSize;
         this.nextPage();
@@ -43,7 +45,8 @@ final class PaginatedImpl<T> implements Paginated<T> {
 
     @Override
     public boolean nextPage() {
-        this.itemsOnPage = api.execute(EntityCollectionApi::items, this.ordering, this.getPageId() + 1, this.pageSize);
+        this.itemsOnPage = api.execute(EntityCollectionApi::items, this.select, this.ordering, this.getPageId() + 1,
+                                       this.pageSize);
         return this.itemsOnPage != null && !this.itemsOnPage.getPage().isEmpty();
     }
 

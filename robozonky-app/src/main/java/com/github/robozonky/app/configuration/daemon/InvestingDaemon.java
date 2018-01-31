@@ -29,10 +29,14 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investing;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.common.remote.Select;
 
 class InvestingDaemon extends DaemonOperation {
 
+    /**
+     * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
+     */
+    private static final Select SELECT = new Select().greaterThan("remainingInvestment", 0);
     private final BiConsumer<Portfolio, Authenticated> investor;
 
     public InvestingDaemon(final Authenticated auth, final Investor.Builder builder,
@@ -41,7 +45,7 @@ class InvestingDaemon extends DaemonOperation {
         super(auth, portfolio, refreshPeriod);
         this.investor = (p, a) -> {
             final Investing i = new Investing(builder, strategy, a, maximumSleepPeriod);
-            final Collection<LoanDescriptor> descriptors = a.call(Zonky::getAvailableLoans)
+            final Collection<LoanDescriptor> descriptors = a.call(zonky -> zonky.getAvailableLoans(SELECT))
                     .map(LoanDescriptor::new)
                     .collect(Collectors.toList());
             i.apply(p, descriptors);

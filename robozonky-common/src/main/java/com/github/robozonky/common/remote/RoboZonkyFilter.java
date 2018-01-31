@@ -17,6 +17,7 @@
 package com.github.robozonky.common.remote;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
+import javax.ws.rs.core.UriBuilder;
 
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
@@ -44,6 +46,7 @@ public class RoboZonkyFilter implements ClientRequestFilter,
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final Map<String, String> headersToSet = new LinkedHashMap<>(0);
+    private final Map<String, Object[]> queryParams = new LinkedHashMap<>(0);
     private Map<String, String> responseHeaders = new LinkedHashMap<>(0);
 
     public RoboZonkyFilter() {
@@ -60,6 +63,17 @@ public class RoboZonkyFilter implements ClientRequestFilter,
         }
     }
 
+    static URI addQueryParams(final URI info, final Map<String, Object[]> params) {
+        final UriBuilder builder = UriBuilder.fromUri(info);
+        builder.uri(info);
+        params.forEach(builder::queryParam);
+        return builder.build();
+    }
+
+    public void setQueryParam(final String key, final Object... values) {
+        queryParams.put(key, values);
+    }
+
     public void setRequestHeader(final String key, final String value) {
         headersToSet.put(key, value);
     }
@@ -68,9 +82,14 @@ public class RoboZonkyFilter implements ClientRequestFilter,
         return Optional.ofNullable(responseHeaders.get(key));
     }
 
+    private URI rebuild(final URI info) {
+        return addQueryParams(info, queryParams);
+    }
+
     @Override
-    public void filter(final ClientRequestContext clientRequestContext) throws IOException {
+    public void filter(final ClientRequestContext clientRequestContext) {
         headersToSet.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
+        clientRequestContext.setUri(rebuild(clientRequestContext.getUri()));
         this.logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }
 

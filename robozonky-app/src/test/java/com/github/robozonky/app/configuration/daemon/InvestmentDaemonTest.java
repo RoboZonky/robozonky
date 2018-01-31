@@ -25,6 +25,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +43,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
                                                       () -> Optional.of(mock(Portfolio.class)), Duration.ZERO,
                                                       Duration.ofSeconds(1));
         d.run();
-        verify(z).getAvailableLoans();
+        verify(z).getAvailableLoans((Select) notNull());
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }
