@@ -1,6 +1,6 @@
 FROM perlur/centos-base
 
-ENV CONTAINER_NAME "RoboZonky"
+ENV SERVICE_NAME "RoboZonky"
 ENV ROBOZONKY_VERSION "4.4.0-SNAPSHOT"
 
 COPY . /usr/src/robozonky
