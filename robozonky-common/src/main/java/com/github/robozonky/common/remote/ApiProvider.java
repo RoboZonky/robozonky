@@ -70,6 +70,7 @@ public class ApiProvider {
      * Instantiate an API as a RESTEasy client proxy.
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
+     * @param token OAuth token for the API to authenticate with.
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
@@ -83,6 +84,7 @@ public class ApiProvider {
      * Instantiate an API as a RESTEasy client proxy.
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
+     * @param filter The filter to use for REST calls.
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
@@ -99,6 +101,7 @@ public class ApiProvider {
     /**
      * Retrieve Zonky's OAuth endpoint.
      * @param operation Operation to execute over the endpoint.
+     * @param <T> Return type of the operation.
      * @return Return value of the operation.
      */
     public <T> T oauth(final Function<OAuth, T> operation) {

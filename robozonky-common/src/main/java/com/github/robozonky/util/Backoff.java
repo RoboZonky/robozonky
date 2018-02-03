@@ -48,7 +48,7 @@ public class Backoff<T> implements Supplier<Optional<T>> {
      * @param cancelAfter When the total time spent within the algorithm exceeds this, it will be terminated.
      * @param <O> Return type of the operation.
      * @return Return value of the operation, or empty if not reached in time.
-     * @see <a href="https://en.wikipedia.org/wiki/Exponential_backoff">Exponential backoff on Wikipedia</a>.
+     * @see <a href="https://en.wikipedia.org/wiki/Exponential_backoff">Exponential backoff on Wikipedia</a>
      */
     public static <O> Backoff<O> exponential(final Operation<O> operation, final Duration initialBackoffTime,
                                              final Duration cancelAfter) {
