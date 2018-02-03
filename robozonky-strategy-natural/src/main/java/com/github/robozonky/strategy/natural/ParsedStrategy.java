@@ -77,16 +77,13 @@ public class ParsedStrategy {
         }
     }
 
-    private static boolean matchesAnyFilter(final Wrapper item, final Stream<MarketplaceFilter> filters,
-                                            final String logMessage) {
-        return filters.filter(f -> f.test(item))
+    private static boolean matchesFilter(final Wrapper item, final Collection<MarketplaceFilter> filters,
+                                         final String logMessage) {
+        return filters.stream()
+                .filter(f -> f.test(item))
                 .peek(f -> Decisions.report(logger -> logger.debug(logMessage, item.getIdentifier(), f)))
                 .findFirst()
                 .isPresent();
-    }
-
-    private static boolean matchesNoFilter(final Wrapper item, final Collection<MarketplaceFilter> filters) {
-        return !matchesAnyFilter(item, filters.stream(), "{} to be ignored as it matched {}.");
     }
 
     private int sumMinimalShares() {
@@ -149,17 +146,17 @@ public class ParsedStrategy {
         return getInvestmentSize(rating).getMaximumInvestmentInCzk();
     }
 
-    private boolean matchesAnySellFilter(final Wrapper item) {
-        return matchesAnyFilter(item, filters.getSellFilters().stream(), "{} to be sold as it matched {}.");
-    }
-
     public Stream<LoanDescriptor> getApplicableLoans(final Collection<LoanDescriptor> items) {
         if (!isInvestingEnabled()) {
             return Stream.empty();
         }
         return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item());
-            return matchesNoFilter(w, filters.getPrimaryMarketplaceFilters());
+            return !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
+                                  "{} to be ignored as it matched primary marketplace filter {}.");
+        }).filter(i -> {
+            final Wrapper w = new Wrapper(i.item());
+            return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
         });
     }
 
@@ -170,7 +167,11 @@ public class ParsedStrategy {
         }
         return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
-            return matchesNoFilter(w, filters.getSecondaryMarketplaceFilters());
+            return !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
+                                  "{} to be ignored as it matched secondary marketplace filter {}.");
+        }).filter(i -> {
+            final Wrapper w = new Wrapper(i.item(), i.related());
+            return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
         });
     }
 
@@ -189,7 +190,7 @@ public class ParsedStrategy {
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
         return items.stream().filter(i -> {
             final Wrapper w = new Wrapper(i.item(), i.related());
-            return matchesAnySellFilter(w);
+            return matchesFilter(w, filters.getSellFilters(), "{} to be sold as it matched sell filter {}.");
         });
     }
 

@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 import com.github.robozonky.api.remote.entities.Investment;
@@ -29,6 +30,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
+import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -150,5 +152,20 @@ class ParsedStrategyTest {
             softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.D)).isEqualTo(600);
             softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(1000);
         });
+    }
+
+    @Test
+    void matchesAlsoSellFilter() {
+        final MarketplaceFilter accepting = MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting());
+        final Collection<MarketplaceFilter> filters = Collections.singleton(accepting);
+        final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
+        final FilterSupplier s = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet(), filters);
+        final ParsedStrategy ps = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(), s);
+        final Loan l = new Loan(1, 200_000);
+        final LoanDescriptor ld = new LoanDescriptor(l);
+        assertThat(ps.getApplicableLoans(Collections.singleton(ld))).isEmpty();
+        final Participation p = mock(Participation.class);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
+        assertThat(ps.getApplicableParticipations(Collections.singleton(pd))).isEmpty();
     }
 }
