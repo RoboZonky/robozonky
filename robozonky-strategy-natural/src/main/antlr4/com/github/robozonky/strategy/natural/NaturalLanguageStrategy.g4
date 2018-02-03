@@ -87,17 +87,17 @@ complexExpression returns [ParsedStrategy result]
         )
     )
 
-    { boolean emptySellFiltersIsOk = false; }
+    { boolean emptySellFiltersIsOk = true; }
     (
         (
             DELIM 'Prodej participací'
             s=sellFilterExpression {
                 sellFilters = $s.result;
+                if (sellFilters.isEmpty()) emptySellFiltersIsOk = false;
             }
         ) | (
             'Prodej participací zakázán.' {
                 sellFilters = Collections.emptySet();
-                emptySellFiltersIsOk = true;
             }
         )
     )? {
