@@ -110,7 +110,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
             try {
                 Util.copyFile(new File(content), strategyFile);
-                return new CommandLinePart().setOption("-s", strategyFile.getName());
+                return new CommandLinePart().setOption("-s", strategyFile.getAbsolutePath());
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed copying strategy file.", ex);
             }
