@@ -69,6 +69,7 @@ public class ApiProvider {
      * Instantiate an API as a RESTEasy client proxy.
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
+     * @param token OAuth token to authenticate with.
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */

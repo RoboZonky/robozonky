@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 /**
  * Allows to filter Zonky API requests based on the values of individual fields.
- * @see <~ href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Zonky API docs.</~>
+ * @see <a href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Zonky API docs.</a>
  */
 public class Select implements Consumer<RoboZonkyFilter> {
 
