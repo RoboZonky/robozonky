@@ -36,8 +36,8 @@ import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -284,7 +284,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         assertThat(result).isTrue();
         final List<Investment> investments = t.getResult();
         assertThat(investments).hasSize(1);
-        assertThat(investments.get(0).getAmount().intValue()).isEqualTo(amountToInvest);
+        assertThat(investments.get(0).getOriginalPrincipal().intValue()).isEqualTo(amountToInvest);
         // validate event sequence
         final List<Event> newEvents = this.getNewEvents();
         assertThat(newEvents).hasSize(2);

@@ -18,15 +18,16 @@ package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
@@ -43,23 +44,27 @@ import static org.mockito.Mockito.*;
 class PortfolioTest extends AbstractZonkyLeveragingTest {
 
     private static Investment mockInvestment(final boolean isEligible, final boolean isOnSmp) {
-        final Investment i = mock(Investment.class);
-        when(i.getStatus()).thenReturn(InvestmentStatus.ACTIVE);
-        when(i.isCanBeOffered()).thenReturn(isEligible);
-        when(i.isOnSmp()).thenReturn(isOnSmp);
-        return i;
+        return buildInvestment(isEligible, isOnSmp).build();
+    }
+
+    private static InvestmentBuilder buildInvestment(final boolean isEligible, final boolean isOnSmp) {
+        return Investment.custom()
+                .setStatus(InvestmentStatus.ACTIVE)
+                .setOfferable(isEligible)
+                .setOnSmp(isOnSmp)
+                .setInWithdrawal(false);
     }
 
     private static Investment mockInvestment(final PaymentStatus paymentStatus) {
-        final Investment i = mockInvestment(true, false);
-        when(i.getPaymentStatus()).thenReturn(paymentStatus);
-        when(i.getNextPaymentDate()).thenReturn(OffsetDateTime.now());
-        return i;
+        return buildInvestment(true, false)
+                .setPaymentStatus(paymentStatus)
+                .setNextPaymentDate(OffsetDateTime.now())
+                .build();
     }
 
     private static Investment mockSold() {
-        final Investment i = mock(Investment.class);
-        when(i.getStatus()).thenReturn(InvestmentStatus.SOLD);
+        final Investment i = Investment.custom().build();
+        Investment.markAsSold(i);
         return i;
     }
 
@@ -69,9 +74,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Investment i2 = mockInvestment(PaymentStatus.DUE);
         final Investment i3 = mockInvestment(PaymentStatus.WRITTEN_OFF); // ignored because not interested
         final Investment i4 = mockSold(); // ignored because sold
-        final Zonky z = mock(Zonky.class);
-        when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4));
-        final Portfolio instance = Portfolio.create(z);
+        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4));
         final PaymentStatuses p = PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE);
         assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
     }
@@ -83,9 +86,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Investment i3 = mockInvestment(false, false);
         final Investment i4 = mockInvestment(false, true);
         final Investment i5 = mockSold(); // ignored because sold
-        final Zonky z = mock(Zonky.class);
-        when(z.getInvestments()).thenReturn(Stream.of(i, i2, i3, i4, i5));
-        final Portfolio instance = Portfolio.create(z);
+        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4, i5));
         assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
     }
 
@@ -110,15 +111,19 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void newSale() {
-        final Loan l = new Loan(1, 1000);
-        final Investment i = new Investment(l, 200);
+        final Loan l = Loan.custom()
+                .setId(1)
+                .setAmount(1000)
+                .setMyInvestment(mockMyInvestment())
+                .build();
+        final Investment i = Investment.fresh(l, 200);
         final BlockedAmount ba = new BlockedAmount(l.getId(), BigDecimal.valueOf(l.getAmount()),
                                                    TransactionCategory.SMP_SALE_FEE);
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         final Portfolio portfolio = new Portfolio(Collections.singletonList(i));
         assertThat(portfolio.wasOnceSold(l)).isFalse();
-        i.setIsOnSmp(true);
+        Investment.putOnSmp(i);
         assertThat(portfolio.wasOnceSold(l)).isTrue();
         portfolio.newBlockedAmount(zonky, ba);
         assertSoftly(softly -> {

@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
@@ -35,11 +35,11 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.*;
 
 class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
-    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER = (id) -> mock(Investment.class);
+    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER =
+            (id) -> Investment.custom().build();
 
     private static void testEmpty(final DelinquencyCategory category) {
         assertThat(category.update(Collections.emptyList(), null, null)).isEmpty();
@@ -53,7 +53,7 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
     private void testAddAndRead(final DelinquencyCategory category, final Period minimumMatchingDuration) {
         this.reinit();
         final int loanId = 1;
-        final Function<Integer, Loan> f = (id) -> new Loan(loanId, 200);
+        final Function<Integer, Loan> f = (id) -> Loan.custom().setId(loanId).setAmount(200).build();
         // store a delinquent loan
         final Delinquent d = new Delinquent(loanId);
         final Delinquency dy = d.addDelinquency(LocalDate.now().minus(minimumMatchingDuration));

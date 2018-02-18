@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -42,18 +42,20 @@ import static org.mockito.Mockito.*;
 
 class NaturalLanguagePurchaseStrategyTest {
 
-    private ParticipationDescriptor mockDescriptor() {
+    private static ParticipationDescriptor mockDescriptor() {
         return mockDescriptor(mockParticipation());
     }
 
-    private ParticipationDescriptor mockDescriptor(final Participation participation) {
-        final Loan l = new Loan(1, 2);
+    private static ParticipationDescriptor mockDescriptor(final Participation participation) {
+        final Loan l = Loan.custom()
+                .setId(1)
+                .setAmount(100_000)
+                .build();
         return new ParticipationDescriptor(participation, l);
     }
 
-    private final Participation mockParticipation() {
-        final Participation p = mock(Participation.class);
-        return p;
+    private static Participation mockParticipation() {
+        return mock(Participation.class);
     }
 
     @Test

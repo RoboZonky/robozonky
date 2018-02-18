@@ -23,8 +23,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
+import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.internal.api.Defaults;
@@ -51,7 +51,7 @@ public interface ControlApi {
 
     @POST
     @Path("/marketplace/investment")
-    void invest(Investment investment);
+    void invest(RawInvestment investment);
 
     @POST
     @Path(ControlApi.ME + "/traded-investments")

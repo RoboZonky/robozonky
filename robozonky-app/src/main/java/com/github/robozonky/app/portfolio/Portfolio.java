@@ -28,8 +28,8 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
@@ -95,9 +95,9 @@ public class Portfolio {
         return isLoanRelated(i, blockedAmount.getLoanId());
     }
 
-    private Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
+    private static Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
         final Loan l = LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky);
-        return new Investment(l, blockedAmount.getAmount().intValue());
+        return Investment.fresh(l, blockedAmount.getAmount());
     }
 
     /**
@@ -152,10 +152,7 @@ public class Portfolio {
                             final Loan l = LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky);
                             Events.fire(new InvestmentSoldEvent(i, l, po));
                         })
-                        .forEach(i -> {
-                            i.setIsOnSmp(false);
-                            i.setStatus(InvestmentStatus.SOLD);
-                        });
+                        .forEach(Investment::markAsSold);
                 return;
             default: // no other notable events
                 return;
@@ -164,7 +161,7 @@ public class Portfolio {
 
     public Stream<Investment> getActiveWithPaymentStatus(final PaymentStatuses statuses) {
         return getActive().filter(i -> statuses.getPaymentStatuses().stream()
-                .anyMatch(s -> Objects.equals(s, i.getPaymentStatus())));
+                .anyMatch(s -> Objects.equals(s, i.getPaymentStatus().orElse(null))));
     }
 
     /**
@@ -174,8 +171,8 @@ public class Portfolio {
      */
     public Stream<Investment> getActiveForSecondaryMarketplace() {
         return getActive()
-                .filter(Investment::isCanBeOffered)
-                .filter(i -> !i.isInWithdrawal())
+                .filter(Investment::canBeOffered)
+                .filter(i -> !i.isInWithdrawal().orElse(true))
                 .filter(i -> !i.isOnSmp());
     }
 

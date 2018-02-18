@@ -38,8 +38,9 @@ import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -131,8 +132,16 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         return dynamicTest(evt.getClass().getSimpleName(), () -> testSet(evt, before, after));
     }
 
+    private static Loan mockLoan() {
+        return Loan.custom()
+                .setId(1)
+                .setAmount(1000)
+                .setRemainingInvestment(1000)
+                .build();
+    }
+
     private DynamicTest getParametersForInvestmentDelegated() {
-        final Loan l = new Loan(1, 1000);
+        final Loan l = mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(l);
         final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentDelegatedEvent(r, "");
@@ -149,7 +158,7 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     }
 
     private DynamicTest getParametersForInvestmentRejected() {
-        final Loan l = new Loan(1, 1000);
+        final Loan l = mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(l);
         final RecommendedLoan r = ld.recommend(200).get();
         final Event evt = new InvestmentRejectedEvent(r, "");
@@ -166,9 +175,10 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     }
 
     private DynamicTest getParametersForInvestmentMade() {
-        final Loan l = new Loan(1, 1000);
+        final Loan l = mockLoan();
+        final Investment i = Investment.fresh((MarketplaceLoan) l, 200);
         final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.valueOf(1000), Stream.empty());
-        final Event evt = new InvestmentMadeEvent(new Investment(l, 200), l, po);
+        final Event evt = new InvestmentMadeEvent(i, l, po);
         final Consumer<SoftAssertions> before = (softly) -> {
             final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getSuccessfulInvestments()).isEmpty();
@@ -182,8 +192,8 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     }
 
     private DynamicTest getParametersForSaleOffered() {
-        final Loan l = new Loan(1, 1000);
-        final Investment i = new Investment(l, 200);
+        final Loan l = mockLoan();
+        final Investment i = Investment.fresh((MarketplaceLoan) l, 200);
         final Event evt = new SaleOfferedEvent(i, l);
         final Consumer<SoftAssertions> before = (softly) -> {
             final OperationsMBean mbean = getOperationsMBean();
@@ -198,8 +208,8 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     }
 
     private DynamicTest getParametersForInvestmentPurchased() {
-        final Loan l = new Loan(1, 1000);
-        final Investment i = new Investment(l, 200);
+        final Loan l = mockLoan();
+        final Investment i = Investment.fresh((MarketplaceLoan) l, 200);
         final Event evt = new InvestmentPurchasedEvent(i, l, PortfolioOverview.calculate(BigDecimal.valueOf(2000),
                                                                                          Stream.empty()));
         final Consumer<SoftAssertions> before = (softly) -> {

@@ -19,7 +19,7 @@ package com.github.robozonky.strategy.natural;
 import java.util.Collections;
 import java.util.function.BiFunction;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,15 @@ class InvestmentSizeRecommenderTest {
 
     private static final int MAXIMUM_SHARE = 1;
     private static final int MAXIMUM_INVESTMENT = 1000;
-    private static final Loan LOAN = new Loan(1, 50000);
+
+    private static Loan mockLoan(final int amount) {
+        return Loan.custom()
+                .setId(1)
+                .setRating(Rating.A)
+                .setAmount(amount)
+                .setRemainingInvestment(amount)
+                .build();
+    }
 
     private static ParsedStrategy getStrategy() {
         // no filters, as the SUT doesn't do filtering; no portfolio, as that is not used either
@@ -39,7 +47,7 @@ class InvestmentSizeRecommenderTest {
         defaults.setInvestmentShare(new DefaultInvestmentShare(MAXIMUM_SHARE));
         final InvestmentSize target = new InvestmentSize(MAXIMUM_INVESTMENT);
         return new ParsedStrategy(defaults, Collections.emptyList(),
-                                  Collections.singletonMap(LOAN.getRating(), target));
+                                  Collections.singletonMap(mockLoan(0).getRating(), target));
     }
 
     @Test
@@ -47,31 +55,28 @@ class InvestmentSizeRecommenderTest {
         final ParsedStrategy s = getStrategy();
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s, Defaults.MAXIMUM_INVESTMENT_IN_CZK);
         // with unlimited balance, make maximum possible recommendation
-        final int actualInvestment = r.apply(LOAN, Integer.MAX_VALUE);
+        final Loan loan = mockLoan(50_000);
+        final int actualInvestment = r.apply(loan, Integer.MAX_VALUE);
         // at most 1 percent of 50000, rounded down to nearest increment of 200
         assertThat(actualInvestment).isEqualTo(400);
 
         // with balance less that the recommendation, recommend less than 400 but more than 0; 200 only possible
-        final int investmentOnLowBalance = r.apply(LOAN, actualInvestment - 1);
+        final int investmentOnLowBalance = r.apply(loan, actualInvestment - 1);
         assertThat(investmentOnLowBalance)
                 .isEqualTo(actualInvestment - Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK);
-
         // with no balance, don't make a recommendation
-        final int investmentOnNoBalance = r.apply(LOAN, investmentOnLowBalance - 1);
+        final int investmentOnNoBalance = r.apply(loan, investmentOnLowBalance - 1);
         assertThat(investmentOnNoBalance).isEqualTo(0);
     }
 
     @Test
     void byDefault() {
         final ParsedStrategy s = getStrategy();
-        final Loan l = spy(LOAN);
-        doReturn(Rating.A).when(l).getRating();
-        doReturn(100000.0).when(l).getAmount();
+        final Loan l = mockLoan(100_000);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s, Defaults.MAXIMUM_INVESTMENT_IN_CZK);
         // with unlimited balance, make maximum possible recommendation
         final int actualInvestment = r.apply(l, Integer.MAX_VALUE);
         assertThat(actualInvestment).isEqualTo(MAXIMUM_INVESTMENT);
-
         // with balance less that the recommendation, go just under maximum
         final int investmentOnLowBalance = r.apply(l, actualInvestment - 1);
         assertThat(investmentOnLowBalance)
@@ -81,7 +86,7 @@ class InvestmentSizeRecommenderTest {
     @Test
     void nothingMoreToInvest() {
         final ParsedStrategy s = getStrategy();
-        final Loan l = new Loan(1, Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
+        final Loan l = mockLoan(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s, Defaults.MAXIMUM_INVESTMENT_IN_CZK);
         // with unlimited balance, make maximum possible recommendation
         final int actualInvestment = r.apply(l, Integer.MAX_VALUE);
@@ -90,7 +95,7 @@ class InvestmentSizeRecommenderTest {
 
     @Test
     void minimumOverBalance() {
-        final Loan l = new Loan(1, 100_000);
+        final Loan l = mockLoan(100_000);
         final ParsedStrategy s = mock(ParsedStrategy.class);
         final int minimumInvestment = 1000;
         when(s.getMinimumInvestmentSizeInCzk(eq(l.getRating()))).thenReturn(minimumInvestment);
@@ -104,7 +109,7 @@ class InvestmentSizeRecommenderTest {
     @Test
     void minimumOverRemaining() {
         final int minimumInvestment = 1000;
-        final Loan l = new Loan(1, minimumInvestment - 1);
+        final Loan l = mockLoan(minimumInvestment - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
         when(s.getMinimumInvestmentSizeInCzk(eq(l.getRating()))).thenReturn(minimumInvestment);
         when(s.getMaximumInvestmentSizeInCzk(eq(l.getRating())))
@@ -117,7 +122,7 @@ class InvestmentSizeRecommenderTest {
     @Test
     void recommendationRoundedUnderMinimum() {
         final int minimumInvestment = 1000;
-        final Loan l = new Loan(1, minimumInvestment - 1);
+        final Loan l = mockLoan(minimumInvestment - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
         // next line will cause the recommendation to be rounded to 800, which will be below the minimum investment
         when(s.getMinimumInvestmentSizeInCzk(eq(l.getRating()))).thenReturn(

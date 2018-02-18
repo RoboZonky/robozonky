@@ -19,9 +19,9 @@ package com.github.robozonky.strategy.natural;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -54,7 +54,7 @@ public class Wrapper {
         this.loan = loan;
         this.identifier = "Loan #" + loan.getId() + " (investment #" + investment.getId() + ")";
         this.remainingTermInMonths = investment.getRemainingMonths();
-        this.originalTermInMonths = investment.getLoanTermInMonth();
+        this.originalTermInMonths = investment.getOriginalTerm();
         this.remainingAmount = investment.getRemainingPrincipal();
     }
 
@@ -114,7 +114,7 @@ public class Wrapper {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
         final Wrapper wrapper = (Wrapper) o;

@@ -30,7 +30,7 @@ import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +38,15 @@ import org.slf4j.LoggerFactory;
 public class Checker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Checker.class);
-    private static final Comparator<Loan> SUBCOMPARATOR =
-            Comparator.comparing(Loan::getRemainingInvestment).reversed();
-    private static final Comparator<Loan> COMPARATOR =
-            Comparator.comparing(Loan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
+    private static final Comparator<RawLoan> SUBCOMPARATOR =
+            Comparator.comparing(RawLoan::getRemainingInvestment).reversed();
+    private static final Comparator<RawLoan> COMPARATOR =
+            Comparator.comparing(RawLoan::getInterestRate).thenComparing(Checker.SUBCOMPARATOR);
 
-    static Optional<Loan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
+    static Optional<RawLoan> getOneLoanFromMarketplace(final Supplier<ApiProvider> apiProviderSupplier) {
         try {
             final ApiProvider p = apiProviderSupplier.get();
-            final Collection<Loan> loans = p.marketplace();
+            final Collection<RawLoan> loans = p.marketplace();
             /*
              * find a loan that is likely to stay on the marketplace for so long that the notification will
              * successfully come through.
@@ -58,7 +58,7 @@ public class Checker {
         }
     }
 
-    static boolean notifyProvider(final Loan loan, final ConfirmationProvider zonkoid, final String username,
+    static boolean notifyProvider(final RawLoan loan, final ConfirmationProvider zonkoid, final String username,
                                   final char[] secret) {
         final RequestId id = new RequestId(username, secret);
         return zonkoid.requestConfirmation(id, loan.getId(), 200);

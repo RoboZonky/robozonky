@@ -19,9 +19,9 @@ package com.github.robozonky.api.notifications;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.SellRequest;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
 /**

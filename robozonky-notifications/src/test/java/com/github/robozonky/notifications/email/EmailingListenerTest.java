@@ -18,6 +18,8 @@ package com.github.robozonky.notifications.email;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -54,8 +56,9 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -211,21 +214,25 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     }
 
     @TestFactory
-    Stream<DynamicNode> listeners() {
+    Stream<DynamicNode> listeners() throws MalformedURLException {
         // prepare data
-        final Loan loan = spy(new Loan(66666, 100000));
-        when(loan.getDatePublished()).thenReturn(OffsetDateTime.now().minusMonths(2));
-        when(loan.getName()).thenReturn("Úvěr");
-        when(loan.getRegion()).thenReturn(Region.JIHOCESKY);
-        when(loan.getPurpose()).thenReturn(Purpose.AUTO_MOTO);
-        when(loan.getMainIncomeType()).thenReturn(MainIncomeType.EMPLOYMENT);
-        when(loan.getRemainingInvestment()).thenReturn(2000.0);
-        when(loan.getRating()).thenReturn(Rating.AAAAA);
-        when(loan.getTermInMonths()).thenReturn(25);
-        when(loan.getUrl()).thenReturn("http://www.robozonky.cz/");
+        final Loan loan = Loan.custom()
+                .setId(66666)
+                .setAmount(100_000)
+                .setInterestRate(BigDecimal.TEN)
+                .setDatePublished(OffsetDateTime.now().minusMonths(2))
+                .setName("Úvěr")
+                .setRegion(Region.JIHOCESKY)
+                .setPurpose(Purpose.AUTO_MOTO)
+                .setMainIncomeType(MainIncomeType.EMPLOYMENT)
+                .setRemainingInvestment(2000)
+                .setRating(Rating.AAAAA)
+                .setTermInMonths(25)
+                .setUrl(new URL("http://www.robozonky.cz"))
+                .build();
         final LoanDescriptor loanDescriptor = new LoanDescriptor(loan);
         final RecommendedLoan recommendation = loanDescriptor.recommend(1200, false).get();
-        final Investment i = new Investment(loan, 1000);
+        final Investment i = Investment.fresh((MarketplaceLoan) loan, 1000).build();
         // create events for listeners
         return Stream.of(
                 forListener(SupportedListener.INVESTMENT_DELEGATED,

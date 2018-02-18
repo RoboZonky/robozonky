@@ -37,7 +37,7 @@ import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -92,8 +92,8 @@ final class Session {
         return l.item().getId() == loanId;
     }
 
-    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor, final Zonky api,
-                                                final Collection<LoanDescriptor> loans,
+    public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,
+                                                final Zonky api, final Collection<LoanDescriptor> loans,
                                                 final RestrictedInvestmentStrategy strategy) {
         final Session session = new Session(portfolio, new LinkedHashSet<>(loans), investor, api);
         final int balance = session.getPortfolioOverview().getCzkAvailable();
@@ -184,7 +184,8 @@ final class Session {
                 return false;
             case INVESTED:
                 final int confirmedAmount = response.getConfirmedAmount().getAsInt();
-                final Investment i = new Investment(recommendation.descriptor().item(), confirmedAmount);
+                final Investment i = Investment.fresh(recommendation.descriptor().item(),
+                                                      confirmedAmount);
                 markSuccessfulInvestment(i);
                 Events.fire(new InvestmentMadeEvent(i, loan.item(), portfolioOverview));
                 return true;
@@ -198,9 +199,10 @@ final class Session {
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> isSameLoan(l, i));
-        final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getAmount(), TransactionCategory.INVESTMENT);
+        final BigDecimal amountInvested = i.getOriginalPrincipal();
+        final BlockedAmount b = new BlockedAmount(i.getLoanId(), amountInvested, TransactionCategory.INVESTMENT);
         portfolio.newBlockedAmount(zonky, b);
-        final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(i.getAmount());
+        final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(amountInvested);
         portfolioOverview = portfolio.calculateOverview(newBalance);
     }
 

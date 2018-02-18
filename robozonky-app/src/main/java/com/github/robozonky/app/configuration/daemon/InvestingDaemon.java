@@ -23,12 +23,15 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.investing.Investing;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 
 class InvestingDaemon extends DaemonOperation {
@@ -45,7 +48,23 @@ class InvestingDaemon extends DaemonOperation {
         super(auth, portfolio, refreshPeriod);
         this.investor = (p, a) -> {
             final Investing i = new Investing(builder, strategy, a, maximumSleepPeriod);
-            final Collection<LoanDescriptor> descriptors = a.call(zonky -> zonky.getAvailableLoans(SELECT))
+            final Collection<MarketplaceLoan> loans =
+                    a.call(zonky -> zonky.getAvailableLoans(SELECT)).collect(Collectors.toList());
+            final Collection<LoanDescriptor> descriptors = loans.stream().parallel()
+                    .map(l -> {
+                        /*
+                         * Loan is first retrieved from the authenticated API. This way, we get all available
+                         * information, such as borrower nicknames from other loans made by the same person.
+                         */
+                        final Loan complete = a.call(zonky -> LoanCache.INSTANCE.getLoan(l.getId(), zonky));
+                        /*
+                         * We update the loan within the cache with latest information from the marketplace. This is
+                         * done so that we don't cache stale loan information, such as how much of the loan is remaining
+                         * to be invested.
+                         */
+                        Loan.updateFromMarketplace(complete, l);
+                        return complete;
+                    })
                     .map(LoanDescriptor::new)
                     .collect(Collectors.toList());
             i.apply(p, descriptors);

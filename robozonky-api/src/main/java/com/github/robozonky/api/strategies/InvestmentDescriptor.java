@@ -20,11 +20,12 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 
 /**
- * Carries metadata regarding a {@link Loan}.
+ * Carries metadata regarding a {@link MarketplaceLoan}.
  */
 public final class InvestmentDescriptor implements Descriptor<RecommendedInvestment, InvestmentDescriptor, Investment> {
 
@@ -50,14 +51,18 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
         return related;
     }
 
+    private BigDecimal getRemainingPrincipal() {
+        return investment.getRemainingPrincipal();
+    }
+
     public Optional<RecommendedInvestment> recommend() {
-        return recommend(investment.getRemainingPrincipal());
+        return recommend(getRemainingPrincipal());
     }
 
     @Override
     public Optional<RecommendedInvestment> recommend(final BigDecimal amount) {
-        if (Objects.equals(amount, investment.getRemainingPrincipal())) {
-            return Optional.of(new RecommendedInvestment(this));
+        if (Objects.equals(amount, getRemainingPrincipal())) {
+            return Optional.of(new RecommendedInvestment(this, amount));
         } else {
             return Optional.empty();
         }
@@ -68,7 +73,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
         final InvestmentDescriptor that = (InvestmentDescriptor) o;

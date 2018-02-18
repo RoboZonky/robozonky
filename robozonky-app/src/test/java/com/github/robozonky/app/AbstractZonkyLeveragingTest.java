@@ -23,15 +23,20 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.mockito.Mockito.*;
 
@@ -39,12 +44,14 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     private static final Random RANDOM = new Random(0);
 
-    private static Loan mockLoan(final int loanId) {
-        final Loan loan = mock(Loan.class);
-        when(loan.getId()).thenReturn(loanId);
-        when(loan.getRemainingInvestment()).thenReturn(Double.MAX_VALUE);
-        when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        return loan;
+    protected static MyInvestment mockMyInvestment() {
+        return mockMyInvestment(OffsetDateTime.now());
+    }
+
+    protected static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
+        final MyInvestment m = mock(MyInvestment.class);
+        when(m.getTimeCreated()).thenReturn(creationDate);
+        return m;
     }
 
     protected static LoanDescriptor mockLoanDescriptor() {
@@ -60,15 +67,19 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
     }
 
     private static LoanDescriptor mockLoanDescriptor(final int loanId, final boolean withCaptcha) {
-        final Loan loan = AbstractZonkyLeveragingTest.mockLoan(loanId);
+        final LoanBuilder b = Loan.custom()
+                .setId(loanId)
+                .setRemainingInvestment(Integer.MAX_VALUE)
+                .setDatePublished(OffsetDateTime.now())
+                .setMyInvestment(mockMyInvestment());
         if (withCaptcha) {
             System.setProperty(Settings.Key.CAPTCHA_DELAY_D.getName(), "120"); // enable CAPTCHA for the rating
-            when(loan.getRating()).thenReturn(Rating.D);
+            b.setRating(Rating.D);
         } else {
             System.setProperty(Settings.Key.CAPTCHA_DELAY_AAAAA.getName(), "0"); // disable CAPTCHA for the rating
-            when(loan.getRating()).thenReturn(Rating.AAAAA);
+            b.setRating(Rating.AAAAA);
         }
-        return new LoanDescriptor(loan);
+        return new LoanDescriptor(b.build());
     }
 
     protected static Zonky harmlessZonky(final int availableBalance) {
@@ -94,5 +105,11 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
             return null;
         }).when(auth).run(any());
         return auth;
+    }
+
+    @BeforeEach
+    @AfterEach
+    public void clearCache() {
+        LoanCache.INSTANCE.clean();
     }
 }

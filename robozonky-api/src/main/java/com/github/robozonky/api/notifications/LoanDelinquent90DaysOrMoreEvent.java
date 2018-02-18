@@ -18,8 +18,8 @@ package com.github.robozonky.api.notifications;
 
 import java.time.LocalDate;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 public final class LoanDelinquent90DaysOrMoreEvent extends LoanDelinquentEvent {
 

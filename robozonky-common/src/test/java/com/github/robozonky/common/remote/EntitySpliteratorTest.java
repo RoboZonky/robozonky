@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawLoan;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -35,9 +35,22 @@ import static org.mockito.Mockito.*;
 
 class EntitySpliteratorTest {
 
+    private static <Q> PaginatedResult<Q> getResult(final Collection<Q> items, final int pageId,
+                                                    final int totalResults) {
+        return new PaginatedResult<Q>(items, pageId, totalResults);
+    }
+
+    private static RawLoan mockLoan(final int loanId, final double amount) {
+        final RawLoan loan = mock(RawLoan.class);
+        when(loan.getId()).thenReturn(loanId);
+        when(loan.getAmount()).thenReturn(amount);
+        when(loan.getRemainingInvestment()).thenReturn(amount);
+        return loan;
+    }
+
     @Test
     void empty() {
-        final EntitySpliterator<Loan> e = new EntitySpliterator<>(Collections.emptyList());
+        final EntitySpliterator<RawLoan> e = new EntitySpliterator<>(Collections.emptyList());
         assertSoftly(softly -> {
             softly.assertThat(e.hasCharacteristics(Spliterator.IMMUTABLE)).isTrue(); // no way to add data
             softly.assertThat(e.hasCharacteristics(Spliterator.NONNULL)).isTrue();
@@ -52,29 +65,24 @@ class EntitySpliteratorTest {
         });
     }
 
-    private static <Q> PaginatedResult<Q> getResult(final Collection<Q> items, final int pageId,
-                                                    final int totalResults) {
-        return new PaginatedResult<Q>(items, pageId, totalResults);
-    }
-
     @Test
     void twoPages() {
         final int pageSize = 2;
         final int totalResultCount = 3;
-        final Loan loan1 = new Loan(1, 200);
-        final Loan loan2 = new Loan(2, 300);
-        final Loan loan3 = new Loan(3, 400);
-        final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
+        final RawLoan loan1 = mockLoan(1, 200);
+        final RawLoan loan2 = mockLoan(2, 300);
+        final RawLoan loan3 = mockLoan(3, 400);
+        final PaginatedApi<RawLoan, LoanApi> api = mock(PaginatedApi.class);
         when(api.execute(any(), any(), any(), eq(0),
                          eq(pageSize)))
                 .thenReturn(EntitySpliteratorTest.getResult(Arrays.asList(loan1, loan2), 0, totalResultCount));
         when(api.execute(any(), any(), any(), eq(1),
                          eq(pageSize)))
                 .thenReturn(EntitySpliteratorTest.getResult(Collections.singleton(loan3), 1, totalResultCount));
-        final Paginated<Loan> p = new PaginatedImpl<>(api, new Select(), Sort.unspecified(), 2);
-        final EntitySpliterator<Loan> e = new EntitySpliterator<>(p);
+        final Paginated<RawLoan> p = new PaginatedImpl<>(api, new Select(), Sort.unspecified(), 2);
+        final EntitySpliterator<RawLoan> e = new EntitySpliterator<>(p);
         assertThat(e.getExactSizeIfKnown()).isEqualTo(totalResultCount);
-        final Stream<Loan> s = StreamSupport.stream(e, false);
+        final Stream<RawLoan> s = StreamSupport.stream(e, false);
         assertThat(s.distinct().collect(Collectors.toList()))
                 .containsExactly(loan1, loan2, loan3);
         assertThat(e.getExactSizeIfKnown()).isEqualTo(0);

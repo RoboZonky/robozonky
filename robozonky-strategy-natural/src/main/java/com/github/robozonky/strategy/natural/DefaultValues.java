@@ -19,7 +19,7 @@ package com.github.robozonky.strategy.natural;
 import java.time.LocalDate;
 import java.time.Period;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 

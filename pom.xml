@@ -343,9 +343,7 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -517,13 +515,6 @@
               <reuseForks>false</reuseForks>
               <redirectTestOutputToFile>true</redirectTestOutputToFile>
               <workingDirectory>${basedir}/target</workingDirectory>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.pitest</groupId>
-            <artifactId>pitest-maven</artifactId>
-            <configuration>  <!-- Only run PITest on the primary platform; takes long and occasionally fails. -->
-              <skip>true</skip>
             </configuration>
           </plugin>
         </plugins>

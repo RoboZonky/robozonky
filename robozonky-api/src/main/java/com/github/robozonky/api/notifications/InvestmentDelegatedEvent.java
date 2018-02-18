@@ -19,7 +19,7 @@ package com.github.robozonky.api.notifications;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
 /**

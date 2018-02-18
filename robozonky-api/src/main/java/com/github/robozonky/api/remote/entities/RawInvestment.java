@@ -20,74 +20,58 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
 
-public class Investment extends BaseInvestment {
+/**
+ * It is not recommended to use this class directly as Zonky will return various null references for fields at various
+ * points in the investment lifecycle. Please use {@link Investment} as a null-safe alternative. Instances may be
+ * created with static methods such as {@link Investment#sanitized(RawInvestment)}.
+ */
+public class RawInvestment extends BaseInvestment {
 
-    private static final BigDecimal SMP_FEE_RATE = new BigDecimal("0.015");
     private PaymentStatus paymentStatus;
     private boolean smpRelated, onSmp, canBeOffered, inWithdrawal;
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
     private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate = OffsetDateTime.now(), nextPaymentDate = investmentDate.plusMonths(1),
-            activeTo = investmentDate.plusMonths(loanTermInMonth);
+            activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
             duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
             smpFee, paidPenalty = BigDecimal.ZERO;
     private Rating rating;
 
-    Investment() {
+    RawInvestment() {
         // for JAXB
     }
 
-    public Investment(final Loan loan, final int amount) {
-        super(loan, BigDecimal.valueOf(amount));
-        this.legalDpd = 0;
-        this.loanName = loan.getName();
-        this.nickname = loan.getNickName();
-        this.rating = loan.getRating();
-        this.loanTermInMonth = loan.getTermInMonths();
-        this.interestRate = loan.getInterestRate();
-        this.currentTerm = this.loanTermInMonth;
-        this.remainingMonths = loan.getTermInMonths();
-        this.remainingPrincipal = BigDecimal.valueOf(amount);
-        this.smpFee = remainingPrincipal.multiply(SMP_FEE_RATE);
-        this.paymentStatus = PaymentStatus.OK;
-        this.paid = BigDecimal.ZERO;
-        this.paidPrincipal = BigDecimal.ZERO;
-        this.duePrincipal = BigDecimal.valueOf(amount);
-        this.purchasePrice = this.duePrincipal;
-        this.canBeOffered = false;
-        this.onSmp = false;
-        this.smpRelated = false;
-        this.activeTo = OffsetDateTime.MAX;
-    }
-
-    public Investment(final ParticipationDescriptor participationDescriptor) {
-        super(participationDescriptor.related(), participationDescriptor.item().getRemainingPrincipal());
-        final Loan loan = participationDescriptor.related();
-        final Participation participation = participationDescriptor.item();
-        this.legalDpd = 0;
-        this.loanName = loan.getName();
-        this.nickname = loan.getNickName();
-        this.rating = loan.getRating();
-        this.loanTermInMonth = loan.getTermInMonths();
-        this.interestRate = loan.getInterestRate();
-        this.currentTerm = loan.getTermInMonths();
-        this.remainingMonths = participation.getRemainingInstalmentCount();
-        this.remainingPrincipal = participation.getRemainingPrincipal();
-        this.smpFee = remainingPrincipal.multiply(SMP_FEE_RATE);
-        this.paymentStatus = PaymentStatus.OK;
-        this.paid = BigDecimal.ZERO;
-        this.paidPrincipal = BigDecimal.ZERO;
-        this.duePrincipal = BigDecimal.ZERO;
-        this.purchasePrice = participation.getRemainingPrincipal();
-        this.canBeOffered = true;
-        this.onSmp = false;
-        this.smpRelated = false;
-        this.activeTo = OffsetDateTime.MAX;
+    public RawInvestment(final Investment investment) {
+        super(investment);
+        this.paymentStatus = investment.getPaymentStatus().orElse(null);
+        this.onSmp = investment.isOnSmp();
+        this.canBeOffered = investment.canBeOffered();
+        this.inWithdrawal = investment.isInWithdrawal().orElse(false);
+        this.legalDpd = investment.getDaysPastDue().orElse(0);
+        this.loanTermInMonth = investment.getOriginalTerm();
+        this.remainingMonths = investment.getRemainingMonths();
+        this.currentTerm = investment.getCurrentTerm();
+        this.loanName = investment.getLoanName();
+        this.nickname = investment.getNickname();
+        this.investmentDate = investment.getInvestmentDate().orElse(null);
+        this.nextPaymentDate = investment.getNextPaymentDate().orElse(null);
+        this.interestRate = investment.getInterestRate();
+        this.paidInterest = investment.getPaidInterest();
+        this.dueInterest = investment.getDueInterest();
+        this.paidPrincipal = investment.getPaidPrincipal();
+        this.duePrincipal = investment.getDuePrincipal();
+        this.expectedInterest = investment.getExpectedInterest();
+        this.purchasePrice = investment.getOriginalPrincipal();
+        this.remainingPrincipal = investment.getRemainingPrincipal();
+        this.smpSoldFor = investment.getSmpSoldFor().orElse(null);
+        this.smpFee = investment.getSmpFee().orElse(null);
+        this.paidPenalty = investment.getPaidPenalty();
+        this.rating = investment.getRating();
     }
 
     @XmlElement
@@ -96,7 +80,7 @@ public class Investment extends BaseInvestment {
     }
 
     @XmlElement
-    public int getLegalDpd() {
+    public Integer getLegalDpd() {
         return legalDpd;
     }
 
@@ -119,6 +103,7 @@ public class Investment extends BaseInvestment {
         return currentTerm;
     }
 
+    @Deprecated
     @XmlElement
     public boolean isSmpRelated() {
         return smpRelated;
@@ -167,11 +152,13 @@ public class Investment extends BaseInvestment {
         return nickname;
     }
 
+    @Deprecated
     @XmlElement
     public String getFirstName() {
         return firstName;
     }
 
+    @Deprecated
     @XmlElement
     public String getSurname() {
         return surname;
@@ -182,6 +169,7 @@ public class Investment extends BaseInvestment {
         return paymentStatus;
     }
 
+    @Deprecated
     @XmlElement
     public OffsetDateTime getInvestmentDate() {
         return investmentDate;
@@ -190,13 +178,14 @@ public class Investment extends BaseInvestment {
     /**
      * In case of a presently delinquent loan, this always shows the date of the least recent instalment that is
      * delinquent.
-     * @return
+     * @return Null for loans where no payments are expected anymore.
      */
     @XmlElement
     public OffsetDateTime getNextPaymentDate() {
         return nextPaymentDate;
     }
 
+    @Deprecated
     @XmlElement
     public OffsetDateTime getActiveTo() {
         return activeTo;
@@ -212,11 +201,13 @@ public class Investment extends BaseInvestment {
         return paid;
     }
 
+    @Deprecated
     @XmlElement
     public BigDecimal getToPay() {
         return toPay;
     }
 
+    @Deprecated
     @XmlElement
     public BigDecimal getAmountDue() {
         return amountDue;
@@ -247,6 +238,9 @@ public class Investment extends BaseInvestment {
         return expectedInterest;
     }
 
+    /**
+     * @return Null when the investment is already sold.
+     */
     @XmlElement
     public BigDecimal getRemainingPrincipal() {
         return remainingPrincipal;
@@ -265,9 +259,5 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public BigDecimal getSmpFee() {
         return smpFee;
-    }
-
-    public void setIsOnSmp(final boolean isOnSmp) {
-        this.onSmp = isOnSmp;
     }
 }

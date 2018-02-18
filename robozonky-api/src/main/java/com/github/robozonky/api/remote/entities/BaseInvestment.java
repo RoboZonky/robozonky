@@ -20,32 +20,31 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 
+/**
+ * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
+ * various quirks of the Zonky API, returning null in unexpected places.
+ */
 abstract class BaseInvestment extends BaseEntity {
 
     private int id, loanId;
     private BigDecimal amount, additionalAmount, firstAmount;
-    private Loan loan;
     private InvestmentStatus status;
-    private OffsetDateTime timeCreated;
+    private OffsetDateTime timeCreated = OffsetDateTime.MIN;
 
     BaseInvestment() {
         // for JAXB
     }
 
-    BaseInvestment(final Loan loan, final BigDecimal amount) {
-        this.loan = loan;
-        this.loanId = loan.getId();
-        this.amount = amount;
+    BaseInvestment(final Investment investment) {
+        this.id = investment.getId();
+        this.loanId = investment.getLoanId();
+        this.amount = investment.getOriginalPrincipal();
+        this.additionalAmount = BigDecimal.ZERO;
+        this.firstAmount = BigDecimal.ZERO;
         this.status = InvestmentStatus.ACTIVE;
-        this.timeCreated = OffsetDateTime.MIN;
-        if (loan.getMyInvestment() != null) {
-            final MyInvestment m = loan.getMyInvestment();
-            this.id = m.getId();
-            this.additionalAmount = m.getAdditionalAmount();
-            this.firstAmount = m.getFirstAmount();
-        }
     }
 
     @XmlElement
@@ -81,9 +80,5 @@ abstract class BaseInvestment extends BaseEntity {
     @XmlElement
     public int getId() {
         return id;
-    }
-
-    public void setStatus(final InvestmentStatus status) {
-        this.status = status;
     }
 }

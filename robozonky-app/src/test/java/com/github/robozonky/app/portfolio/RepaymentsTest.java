@@ -19,9 +19,10 @@ package com.github.robozonky.app.portfolio;
 import java.util.Collections;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
@@ -34,9 +35,16 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void registerNewRepayments() {
-        final Loan l = spy(new Loan(1, 1000));
-        when(l.getRemainingInvestment()).thenReturn(0.0);
-        final Investment i = spy(new Investment(l, 200));
+        final Loan l = Loan.custom()
+                .setId(1)
+                .setAmount(200)
+                .setRating(Rating.D)
+                .setMyInvestment(mockMyInvestment())
+                .setRemainingInvestment(0)
+                .build();
+        final Investment i = Investment.fresh(l, 200)
+                .setPaymentStatus(PaymentStatus.OK)
+                .build();
         // first, portfolio contains one active investment; no repaid
         final Portfolio p = new Portfolio(Collections.singletonList(i));
         final Zonky z = harmlessZonky(10_000);
@@ -46,7 +54,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
         r.accept(p, a);
         assertThat(getNewEvents()).isEmpty();
         // now, portfolio has the same investment marked as paid; event will be triggered
-        when(i.getPaymentStatus()).thenReturn(PaymentStatus.PAID);
+        Investment.markAsPaid(i);
         r.accept(p, a);
         assertThat(getNewEvents())
                 .first()

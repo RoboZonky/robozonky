@@ -19,20 +19,17 @@ package com.github.robozonky.api.strategies;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.internal.api.Defaults;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class RecommendedLoanTest {
 
     private static Loan mockLoan() {
-        final Loan loan = mock(Loan.class);
-        when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        return loan;
+        return Loan.custom().setDatePublished(OffsetDateTime.now()).build();
     }
 
     private static LoanDescriptor mockLoanDescriptor() {
@@ -45,11 +42,11 @@ class RecommendedLoanTest {
         final LoanDescriptor ld = RecommendedLoanTest.mockLoanDescriptor();
         final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK;
         final RecommendedLoan r = new RecommendedLoan(ld, amount, true);
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(r.descriptor()).isSameAs(ld);
-        softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(amount));
-        softly.assertThat(r.isConfirmationRequired()).isTrue();
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(r.descriptor()).isSameAs(ld);
+            softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(amount));
+            softly.assertThat(r.isConfirmationRequired()).isTrue();
+        });
     }
 
     @Test

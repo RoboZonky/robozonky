@@ -24,8 +24,8 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -64,7 +64,8 @@ public class Repayments implements PortfolioDependant {
                 authenticated.call(zonky -> portfolio.calculateOverview(zonky, isDryRun));
         final Collection<Integer> active = getActiveLastTime();
         // detect and process loans that have been fully repaid, comparing to the last time active loans were checked
-        final Stream<Investment> repaid = portfolio.getActiveWithPaymentStatus(PaymentStatuses.of(PaymentStatus.PAID));
+        final Stream<Investment> repaid =
+                portfolio.getActiveWithPaymentStatus(PaymentStatuses.of(PaymentStatus.PAID));
         repaid.filter(i -> active.contains(i.getLoanId()))
                 .peek(i -> {
                     final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky));

@@ -19,10 +19,11 @@ package com.github.robozonky.util;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.EnumMap;
 import java.util.stream.IntStream;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
@@ -52,7 +53,8 @@ public class FinancialCalculator {
     }};
 
     private static BigDecimal baseFee(final Investment investment) {
-        if (investment.getInvestmentDate().toInstant().isBefore(MIDNIGHT_2017_09_01)) {
+        final OffsetDateTime investmentDate = investment.getInvestmentDate().orElse(OffsetDateTime.now());
+        if (investmentDate.toInstant().isBefore(MIDNIGHT_2017_09_01)) {
             return ONE_PERCENT;
         }
         return FEES.get(investment.getRating());
@@ -78,7 +80,8 @@ public class FinancialCalculator {
         }
     }
 
-    public static BigDecimal estimateFeeRate(final Investment investment, final PortfolioOverview portfolioOverview) {
+    public static BigDecimal estimateFeeRate(final Investment investment,
+                                             final PortfolioOverview portfolioOverview) {
         final BigDecimal baseFee = baseFee(investment);
         final BigDecimal feeDiscount = feeDiscount(portfolioOverview);
         return minus(baseFee, times(baseFee, feeDiscount));
@@ -89,10 +92,10 @@ public class FinancialCalculator {
         if (totalMonths == 0) {
             return BigDecimal.ZERO;
         }
-        final BigDecimal originalValue = InvestmentInference.getOriginalAmount(investment);
+        final BigDecimal originalValue = investment.getOriginalPrincipal();
         final BigDecimal monthlyRate = divide(investment.getInterestRate(), 12);
         final BigDecimal monthlyFee = divide(estimateFeeRate(investment, portfolioOverview), 12);
-        final BigDecimal pmt = FinancialUtil.pmt(monthlyRate, investment.getLoanTermInMonth(), originalValue);
+        final BigDecimal pmt = FinancialUtil.pmt(monthlyRate, investment.getOriginalTerm(), originalValue);
         final BigDecimal result = IntStream.range(0, totalMonths)
                 .mapToObj(term -> FinancialUtil.fv(monthlyRate, term + 1, pmt, originalValue).negate())
                 .map(fv -> times(fv, monthlyFee))
@@ -108,15 +111,16 @@ public class FinancialCalculator {
     }
 
     private static BigDecimal expectedInterest(final Investment i) {
-        return expectedInterest(i, i.getLoanTermInMonth());
+        return expectedInterest(i, i.getOriginalTerm());
     }
 
     public static BigDecimal actualInterestAfterFees(final Investment investment,
                                                      final PortfolioOverview portfolioOverview,
                                                      final boolean includeSmpSaleFee) {
-        final int termsInZonky = investment.getLoanTermInMonth() - investment.getCurrentTerm();
+        final int termsInZonky = investment.getOriginalTerm() - investment.getCurrentTerm();
         final BigDecimal fee = feePaid(investment, portfolioOverview, termsInZonky);
-        final BigDecimal actualFee = includeSmpSaleFee ? plus(fee, investment.getSmpFee()) : fee;
+        final BigDecimal actualFee = includeSmpSaleFee ? plus(fee,
+                                                              investment.getSmpFee().orElse(BigDecimal.ZERO)) : fee;
         final BigDecimal interest = plus(investment.getPaidInterest(), investment.getPaidPenalty());
         return minus(interest, actualFee);
     }

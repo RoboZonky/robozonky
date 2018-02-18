@@ -16,10 +16,9 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.mockito.Mockito;
 
 class BorrowerIncomeConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<MainIncomeType> {
 
@@ -30,8 +29,7 @@ class BorrowerIncomeConditionSpec implements AbstractEnumeratedConditionTest.Con
 
     @Override
     public Wrapper getMocked() {
-        final Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getMainIncomeType()).thenReturn(this.getTriggerItem());
+        final Loan loan = Loan.custom().setMainIncomeType(this.getTriggerItem()).build();
         return new Wrapper(loan);
     }
 

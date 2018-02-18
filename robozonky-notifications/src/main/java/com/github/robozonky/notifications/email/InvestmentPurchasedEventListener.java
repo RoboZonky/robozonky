@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.util.FinancialCalculator;
 
 class InvestmentPurchasedEventListener extends AbstractBalanceRegisteringEmailingListener<InvestmentPurchasedEvent> {

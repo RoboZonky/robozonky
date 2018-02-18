@@ -17,18 +17,17 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Function;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.remote.LoanApi;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.internal.api.Defaults;
 
 /**
  * This class carries several enumeration-based fields. Some of the enums are extremely important to the core function
@@ -36,58 +35,36 @@ import com.github.robozonky.internal.api.Defaults;
  * additional metadata. If the important enums change, we need RoboZonky to fail. However, in case of the others, we
  * provide non-failing deserializers which handle the missing values gracefully and provide a message warning users that
  * something needs an upgrade.
+ * <p>
+ * It is not recommended to use this class directly as Zonky will return various null references for fields at various
+ * points in the investment lifecycle. Please use {@link Loan} and {@link MarketplaceLoan} as a null-safe alternative.
+ * Instances may be created with static methods such as {@link Loan#sanitized(RawLoan)}.
  */
-// FIXME put the non-public bits (myinvestment, myotherinvestments, borrowerrelatedinvestmentinfo) into child class
-public class Loan extends BaseEntity {
+public class RawLoan extends BaseEntity {
 
-    private static final Function<Integer, String> LOAN_URL_SUPPLIER =
-            (id) -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
     private boolean topped, covered, published, questionsAllowed, insuranceActive;
-    private int id, termInMonths = 1, investmentsCount, questionsCount, userId, activeLoansCount;
+    private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount;
     private double amount, remainingInvestment;
     private String name, nickName, story, url;
-    private BigDecimal interestRate = new BigDecimal("0.1999");
-    private OffsetDateTime datePublished = OffsetDateTime.now(), deadline = datePublished.plusDays(2);
-    private Rating rating = Rating.D;
-    private Collection<Photo> photos = Collections.emptyList();
-    private BigDecimal investmentRate = BigDecimal.ZERO;
+    private BigDecimal interestRate;
+    private OffsetDateTime datePublished, deadline;
+    private Rating rating;
+    private Collection<Photo> photos;
+    private BigDecimal investmentRate;
     private BorrowerRelatedInvestmentInfo borrowerRelatedInvestmentInfo;
     private MyInvestment myInvestment;
     private OtherInvestments myOtherInvestments;
-    private MainIncomeType mainIncomeType = MainIncomeType.OTHERS_MAIN;
-    private Region region = Region.UNKNOWN;
-    private Purpose purpose = Purpose.JINE;
+    private MainIncomeType mainIncomeType;
+    private Region region;
+    private Purpose purpose;
 
-    protected Loan() {
+    protected RawLoan() {
         // for JAXB
     }
 
-    public Loan(final int id, final int amount) { // creates a simple "fake" loan
-        this(id, amount, OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
-    }
-
-    public Loan(final int id, final int amount, final OffsetDateTime datePublished) { // creates a simple "fake" loan
-        this.id = id;
-        this.amount = amount;
-        this.remainingInvestment = amount;
-        this.datePublished = datePublished;
-    }
-
     /**
-     * Zonky's API documentation states that {@link #getUrl()} is optional. Therefore the only safe use of that
-     * attribute is through this method.
-     * @return URL to a loan on Zonky's website. Guessed if not present.
+     * @return Null if the loan doesn't have an investment by the current user.
      */
-    public static String getUrlSafe(final Loan l) {
-        // in case investment has no loan, we guess loan URL
-        final String providedUrl = l.getUrl();
-        return providedUrl == null ? Loan.LOAN_URL_SUPPLIER.apply(l.getId()) : providedUrl;
-    }
-
-    public static String guessUrl(final int loanId) {
-        return Loan.LOAN_URL_SUPPLIER.apply(loanId);
-    }
-
     @XmlElement
     public MyInvestment getMyInvestment() {
         return myInvestment;
@@ -208,6 +185,10 @@ public class Loan extends BaseEntity {
         return photos;
     }
 
+    /**
+     * Holds the same information as {@link #getBorrowerRelatedInvestmentInfo()}, no need to use this.
+     * @return
+     */
     @XmlElement
     public OtherInvestments getMyOtherInvestments() {
         return myOtherInvestments;
@@ -218,6 +199,9 @@ public class Loan extends BaseEntity {
         return insuranceActive;
     }
 
+    /**
+     * @return Null unless the loan was queried using {@link LoanApi#item(int)}.
+     */
     @XmlElement
     public BorrowerRelatedInvestmentInfo getBorrowerRelatedInvestmentInfo() {
         return borrowerRelatedInvestmentInfo;
@@ -228,10 +212,6 @@ public class Loan extends BaseEntity {
         return userId;
     }
 
-    /**
-     * Return loan URL provided by Zonky API. Also see {@link #getUrlSafe(Loan)}.
-     * @return Zonky URL as provided by the API.
-     */
     @XmlElement
     public String getUrl() {
         return url;

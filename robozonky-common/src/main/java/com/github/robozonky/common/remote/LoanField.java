@@ -16,9 +16,9 @@
 
 package com.github.robozonky.common.remote;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawLoan;
 
-public enum LoanField implements Field<Loan> {
+public enum LoanField implements Field<RawLoan> {
 
     COVERED("covered"),
     DATE_PUBLISHED("datePublished"),

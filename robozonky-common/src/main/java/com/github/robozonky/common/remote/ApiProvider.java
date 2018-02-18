@@ -28,9 +28,9 @@ import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
@@ -106,7 +106,7 @@ public class ApiProvider {
      * Retrieve available loans from Zonky marketplace cache, which requires no authentication.
      * @return Loans existing in the marketplace at the time this method was called.
      */
-    public Collection<Loan> marketplace() {
+    public Collection<RawLoan> marketplace() {
         return this.marketplace(LoanApi.class, ApiProvider.ZONKY_URL);
     }
 
@@ -130,7 +130,7 @@ public class ApiProvider {
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      */
-    private PaginatedApi<Loan, LoanApi> marketplace(final ZonkyApiToken token) {
+    private PaginatedApi<RawLoan, LoanApi> marketplace(final ZonkyApiToken token) {
         return this.obtainPaginated(LoanApi.class, ApiProvider.ZONKY_URL, token);
     }
 
@@ -157,7 +157,7 @@ public class ApiProvider {
      * @param token The Zonky API token, representing an control user.
      * @return New API instance.
      */
-    private PaginatedApi<Investment, PortfolioApi> portfolio(final ZonkyApiToken token) {
+    private PaginatedApi<RawInvestment, PortfolioApi> portfolio(final ZonkyApiToken token) {
         return this.obtainPaginated(PortfolioApi.class, ApiProvider.ZONKY_URL, token);
     }
 

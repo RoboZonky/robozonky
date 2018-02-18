@@ -19,7 +19,7 @@ package com.github.robozonky.api.notifications;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**

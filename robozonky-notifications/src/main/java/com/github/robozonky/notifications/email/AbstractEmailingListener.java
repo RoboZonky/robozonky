@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
@@ -114,15 +116,12 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
 
     final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
         return Collections.unmodifiableMap(new HashMap<String, Object>(this.getData(event)) {{
-            put("ratings", new LinkedHashSet() {{
-                for (final Rating r : Rating.values()) {
-                    add(r);
-                }
-            }});
+            // ratings here need to have a stable iteration order, as it will be used to list them in notifications
+            put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
             put("session", new HashMap<String, Object>() {{
                 put("userName", Util.obfuscateEmailAddress(sessionInfo.getUserName()));
                 put("userAgent", sessionInfo.getUserAgent());
-                put("isDryRun", sessionInfo != null && sessionInfo.isDryRun());
+                put("isDryRun", sessionInfo.isDryRun());
             }});
         }});
     }

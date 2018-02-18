@@ -29,8 +29,9 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -44,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Historical record of which {@link Investment}s have been delinquent and when. This class updates shared state
+ * Historical record of which {@link RawInvestment}s have been delinquent and when. This class updates shared state
  * (implemented via {@link State}) which can then be retrieved through static methods, such as {@link #getDelinquents()}
  * and {@link #getLastUpdateTimestamp()}.
  */
@@ -151,7 +152,8 @@ public class Delinquents {
                     final Loan l = loanSupplier.apply(loanId);
                     final Investment inv = investmentSupplier.apply(loanId);
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
-                        final PaymentStatus s = inv.getPaymentStatus();
+                        final PaymentStatus s = inv.getPaymentStatus()
+                                .orElseThrow(() -> new IllegalStateException("Invalid investment " + inv));
                         switch (s) {
                             case PAID_OFF:
                                 Events.fire(new LoanDefaultedEvent(inv, l, since));
@@ -168,7 +170,14 @@ public class Delinquents {
                 }).collect(Collectors.toList());
     }
 
-    static void update(final Collection<Investment> presentlyDelinquent, final Collection<Investment> noLongerActive,
+    private static Delinquent createDelinquent(final Investment i) {
+        return i.getNextPaymentDate()
+                .map(date -> new Delinquent(i.getLoanId(), date.toLocalDate()))
+                .orElseThrow(() -> new IllegalStateException("Invalid investment " + i));
+    }
+
+    static void update(final Collection<Investment> presentlyDelinquent,
+                       final Collection<Investment> noLongerActive,
                        final Function<Integer, Investment> investmentSupplier,
                        final Function<Integer, Loan> loanSupplier, final PortfolioOverview portfolioOverview) {
         LOGGER.debug("Updating delinquent loans.");
@@ -182,7 +191,7 @@ public class Delinquents {
                 .map(i -> knownDelinquents.stream()
                         .filter(d -> related(d, i))
                         .findAny()
-                        .orElse(new Delinquent(i.getLoanId(), i.getNextPaymentDate().toLocalDate())));
+                        .orElse(createDelinquent(i)));
         final Stream<Delinquent> all = Stream.concat(delinquentInThePast, nowDelinquent).distinct();
         final Collection<Delinquency> result = persistAndReturnActiveDelinquents(all);
         // notify of new delinquencies over all known thresholds

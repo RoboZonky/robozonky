@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.DynamicNode;
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.TestFactory;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.*;
 
 class EqualityConditionTest {
 
@@ -45,9 +44,8 @@ class EqualityConditionTest {
     }
 
     private static Wrapper mockLoan(final Rating r) {
-        final Loan l = mock(Loan.class);
-        when(l.getRating()).thenReturn(r);
-        return new Wrapper(l);
+        final Loan loan = Loan.custom().setRating(r).build();
+        return new Wrapper(loan);
     }
 
     private static void testBetterThan(final Rating current, final Rating r) {

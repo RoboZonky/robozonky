@@ -18,11 +18,12 @@ package com.github.robozonky.api.notifications;
 
 import java.time.LocalDate;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 /**
- * Fired immediately after an {@link Investment} is identified as delinquent.
+ * Fired immediately after an {@link RawInvestment} is identified as delinquent.
  */
 public abstract class LoanDelinquentEvent extends Event implements InvestmentBased {
 

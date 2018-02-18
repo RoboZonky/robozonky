@@ -19,15 +19,17 @@ package com.github.robozonky.api.strategies;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 
 public final class RecommendedInvestment
         implements Recommended<RecommendedInvestment, InvestmentDescriptor, Investment> {
 
     private final InvestmentDescriptor descriptor;
+    private final BigDecimal amount;
 
-    RecommendedInvestment(final InvestmentDescriptor participationDescriptor) {
+    RecommendedInvestment(final InvestmentDescriptor participationDescriptor, final BigDecimal amount) {
         this.descriptor = participationDescriptor;
+        this.amount = amount;
     }
 
     @Override
@@ -37,7 +39,7 @@ public final class RecommendedInvestment
 
     @Override
     public BigDecimal amount() {
-        return descriptor.item().getRemainingPrincipal();
+        return amount;
     }
 
     @Override

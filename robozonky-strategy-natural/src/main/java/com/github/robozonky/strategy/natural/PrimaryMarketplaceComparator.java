@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.util.Comparator;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 
 /**
@@ -28,12 +28,11 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
 
     private static final Comparator<Loan> MOST_RECENT_FIRST = Comparator.comparing(Loan::getDatePublished).reversed(),
-            BIGGEST_FIRST = Comparator.comparing(Loan::getRemainingInvestment).reversed();
-
-    private final Comparator<Loan> c = MOST_RECENT_FIRST.thenComparing(BIGGEST_FIRST);
+            BIGGEST_FIRST = Comparator.comparing(Loan::getRemainingInvestment).reversed(),
+            FINAL = MOST_RECENT_FIRST.thenComparing(BIGGEST_FIRST);
 
     @Override
     public int compare(final LoanDescriptor loan1, final LoanDescriptor loan2) {
-        return c.compare(loan1.item(), loan2.item());
+        return FINAL.compare(loan1.item(), loan2.item());
     }
 }

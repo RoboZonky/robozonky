@@ -27,9 +27,9 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -52,7 +52,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(anyInt()))
                 .thenAnswer(invocation -> {
                     final int id = invocation.getArgument(0);
-                    return new Loan(id, 200);
+                    return Loan.custom().setId(id).setAmount(200).build();
                 });
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
         return zonky;

@@ -17,6 +17,7 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -28,9 +29,9 @@ import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -50,20 +51,22 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     private static final Supplier<Optional<SellStrategy>> ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY),
             NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
-    private static Zonky mockApi(final Investment... investments) {
+    private static Zonky mockApi() {
         final Zonky zonky = mock(Zonky.class);
         when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.TEN, BigDecimal.ZERO));
-        when(zonky.getInvestments()).thenReturn(Stream.of(investments));
-        when(zonky.getLoan(anyInt())).thenReturn(mock(Loan.class));
+        when(zonky.getLoan(anyInt())).thenReturn(Loan.custom().build());
         return zonky;
     }
 
     private static Investment mockInvestment() {
-        final Investment investment = mock(Investment.class);
-        when(investment.getStatus()).thenReturn(InvestmentStatus.ACTIVE);
-        when(investment.isOnSmp()).thenReturn(false);
-        when(investment.isCanBeOffered()).thenReturn(true);
-        return investment;
+        return Investment.custom()
+                .setOriginalTerm(200)
+                .setRemainingPrincipal(BigDecimal.valueOf(100))
+                .setStatus(InvestmentStatus.ACTIVE)
+                .setOnSmp(false)
+                .setOfferable(true)
+                .setInWithdrawal(false)
+                .build();
     }
 
     @Test
@@ -76,7 +79,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = mockApi();
-        final Portfolio portfolio = Portfolio.create(zonky);
+        final Portfolio portfolio = new Portfolio(Collections.emptyList());
         new Selling(ALL_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(2);
@@ -90,8 +93,8 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noSaleDueToStrategyForbidding() {
         final Investment i = mockInvestment();
-        final Zonky zonky = mockApi(i);
-        final Portfolio portfolio = Portfolio.create(zonky);
+        final Zonky zonky = mockApi();
+        final Portfolio portfolio = new Portfolio(Collections.singleton(i));
         new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(2);
@@ -104,8 +107,8 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     private void saleMade(final boolean isDryRun) {
         final Investment i = mockInvestment();
-        final Zonky zonky = mockApi(i);
-        final Portfolio portfolio = Portfolio.create(zonky);
+        final Zonky zonky = mockApi();
+        final Portfolio portfolio = new Portfolio(Collections.singleton(i));
         new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(5);
@@ -117,8 +120,8 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.get(4)).isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
-        verify(i, m).setIsOnSmp(eq(true));
-        verify(zonky, m).sell(eq(i));
+        assertThat(i.isOnSmp()).isTrue();
+        verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
     }
 
     @Test

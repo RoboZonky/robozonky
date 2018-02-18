@@ -20,38 +20,40 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
 
 class InvestmentDescriptorTest {
 
     private static Investment mockInvestment(final BigDecimal amount) {
-        final Investment i = mock(Investment.class);
-        when(i.getRemainingPrincipal()).thenReturn(amount);
-        return i;
+        final InvestmentBuilder i = Investment.custom();
+        i.setRemainingPrincipal(amount);
+        return i.build();
     }
 
     @Test
     void recommend() {
-        final Investment i = mockInvestment(BigDecimal.TEN);
+        final BigDecimal remainingPrincipal = BigDecimal.TEN;
+        final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor id = new InvestmentDescriptor(i);
-        final Optional<RecommendedInvestment> r = id.recommend(i.getRemainingPrincipal());
+        final Optional<RecommendedInvestment> r = id.recommend(remainingPrincipal);
         assertThat(r).isPresent();
         assertSoftly(softly -> {
-            softly.assertThat(r.get().amount()).isEqualTo(i.getRemainingPrincipal());
+            softly.assertThat(r.get().amount()).isEqualTo(remainingPrincipal);
             softly.assertThat(r.get().descriptor()).isEqualTo(id);
         });
     }
 
     @Test
     void recommendWrong() {
-        final Investment i = mockInvestment(BigDecimal.TEN);
+        final BigDecimal remainingPrincipal = BigDecimal.TEN;
+        final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor id = new InvestmentDescriptor(i);
-        final Optional<RecommendedInvestment> r = id.recommend(i.getRemainingPrincipal().subtract(BigDecimal.ONE));
+        final Optional<RecommendedInvestment> r = id.recommend(remainingPrincipal.subtract(BigDecimal.ONE));
         assertThat(r).isEmpty();
     }
 

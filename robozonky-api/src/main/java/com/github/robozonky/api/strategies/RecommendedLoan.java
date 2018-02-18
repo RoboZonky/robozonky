@@ -20,13 +20,14 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.internal.api.Defaults;
 
 /**
- * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link Loan} for investing.
+ * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link RawLoan} for investing.
  */
-public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, Loan> {
+public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
 
     private final LoanDescriptor loanDescriptor;
     private final int recommendedInvestmentAmount;

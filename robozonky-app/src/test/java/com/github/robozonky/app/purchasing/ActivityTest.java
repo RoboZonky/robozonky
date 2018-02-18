@@ -21,7 +21,6 @@ import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.api.Defaults;
@@ -66,7 +65,6 @@ class ActivityTest extends AbstractEventLeveragingTest {
                 .unset(Activity.LAST_MARKETPLACE_STATE_ID)
                 .call();
         // load API that has marketplace more recent than that
-        final Loan l = new Loan(1, 200);
         final Participation p = mock(Participation.class);
         // test proper wakeup
         final Activity activity = new Activity(Collections.singletonList(p));

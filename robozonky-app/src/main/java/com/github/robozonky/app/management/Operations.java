@@ -66,7 +66,7 @@ class Operations implements OperationsMBean {
     }
 
     void handle(final InvestmentMadeEvent event) {
-        this.successfulInvestments.put(event.getInvestment().getLoanId(), event.getInvestment().getAmount());
+        this.successfulInvestments.put(event.getInvestment().getLoanId(), event.getInvestment().getOriginalPrincipal());
         registerInvestmentRun(event);
     }
 
@@ -81,12 +81,12 @@ class Operations implements OperationsMBean {
     }
 
     void handle(final SaleOfferedEvent event) {
-        this.offeredInvestments.put(event.getInvestment().getLoanId(), event.getInvestment().getAmount());
+        this.offeredInvestments.put(event.getInvestment().getLoanId(), event.getInvestment().getOriginalPrincipal());
         registerInvestmentRun(event);
     }
 
     void handle(final InvestmentPurchasedEvent event) {
-        this.purchasedInvestments.put(event.getInvestment().getLoanId(), event.getInvestment().getAmount());
+        this.purchasedInvestments.put(event.getInvestment().getLoanId(), event.getInvestment().getOriginalPrincipal());
         registerInvestmentRun(event);
     }
 

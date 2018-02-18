@@ -16,9 +16,9 @@
 
 package com.github.robozonky.common.remote;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.RawInvestment;
 
-public enum InvestmentField implements Field<Investment> {
+public enum InvestmentField implements Field<RawInvestment> {
 
     ID("id"),
     TIME_CREATED("timeCreated"),

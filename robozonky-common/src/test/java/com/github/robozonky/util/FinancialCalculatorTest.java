@@ -17,6 +17,7 @@
 package com.github.robozonky.util;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -24,18 +25,19 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.*;
 
 class FinancialCalculatorTest {
 
@@ -46,33 +48,38 @@ class FinancialCalculatorTest {
         return PortfolioOverview.calculate(BigDecimal.valueOf(1000), shares);
     }
 
+    private static Loan mockLoan(final Rating rating) {
+        final MyInvestment investment = Mockito.mock(MyInvestment.class);
+        Mockito.when(investment.getTimeCreated()).thenReturn(OffsetDateTime.now());
+        return Loan.custom()
+                .setId(1)
+                .setAmount(100_000)
+                .setMyInvestment(investment)
+                .setRating(rating)
+                .setTermInMonths(84)
+                .build();
+    }
+
     private static void fees(final Rating rating, final int threshold) {
-        final Loan l = spy(new Loan(1, 100000));
-        when(l.getRating()).thenReturn(rating);
-        when(l.getTermInMonths()).thenReturn(84);
-        final Investment i = new Investment(l, 1000);
+        final Investment i = Investment.fresh(mockLoan(rating), 1000);
         final BigDecimal before = FinancialCalculator.estimateFeeRate(i, getPortfolioOverview(threshold - 1));
         final BigDecimal after = FinancialCalculator.estimateFeeRate(i, getPortfolioOverview(threshold));
         assertThat(after).isLessThan(before);
     }
 
     private static void expectedInterest(final Rating rating, final int threshold) {
-        final Loan l = spy(new Loan(1, 100000));
-        when(l.getRating()).thenReturn(rating);
-        when(l.getTermInMonths()).thenReturn(84);
-        final Investment i = spy(new Investment(l, 1000));
-        when(i.getRemainingMonths()).thenReturn(50);
+        final Investment i = Investment.fresh(mockLoan(rating), 1000)
+                .setInterestRate(BigDecimal.TEN)
+                .setRemainingMonths(50).build();
         final BigDecimal before = FinancialCalculator.expectedInterestAfterFees(i, getPortfolioOverview(threshold - 1));
         final BigDecimal after = FinancialCalculator.expectedInterestAfterFees(i, getPortfolioOverview(threshold));
         assertThat(after).isGreaterThan(before);
     }
 
     private static void expectedInterestRate(final Rating rating, final int threshold) {
-        final Loan l = spy(new Loan(1, 100000));
-        when(l.getRating()).thenReturn(rating);
-        when(l.getTermInMonths()).thenReturn(84);
-        final Investment i = spy(new Investment(l, 1000));
-        when(i.getRemainingMonths()).thenReturn(50);
+        final Investment i = Investment.fresh(mockLoan(rating), 1000)
+                .setInterestRate(BigDecimal.TEN)
+                .setRemainingMonths(50);
         final BigDecimal before = FinancialCalculator.expectedInterestRateAfterFees(i, getPortfolioOverview(
                 threshold - 1));
         final BigDecimal after = FinancialCalculator.expectedInterestRateAfterFees(i, getPortfolioOverview(threshold));
@@ -80,14 +87,12 @@ class FinancialCalculatorTest {
     }
 
     private static void actualInterest(final Rating rating, final int threshold) {
-        final Loan l = spy(new Loan(1, 100000));
-        when(l.getRating()).thenReturn(rating);
-        when(l.getTermInMonths()).thenReturn(84);
-        final Investment i = spy(new Investment(l, 1000));
-        when(i.getPaidInterest()).thenReturn(BigDecimal.valueOf(500));
-        when(i.getPaidPenalty()).thenReturn(BigDecimal.ONE);
-        when(i.getCurrentTerm()).thenReturn(50);
-        when(i.getSmpFee()).thenReturn(BigDecimal.ONE);
+        final Investment i = Investment.fresh(mockLoan(rating), 1000)
+                .setInterestRate(BigDecimal.TEN)
+                .setPaidInterest(BigDecimal.valueOf(500))
+                .setPaidPenalty(BigDecimal.ONE)
+                .setCurrentTerm(50)
+                .setSmpFee(BigDecimal.ONE);
         final BigDecimal before = FinancialCalculator.actualInterestAfterFees(i, getPortfolioOverview(threshold - 1));
         final BigDecimal after = FinancialCalculator.actualInterestAfterFees(i, getPortfolioOverview(threshold));
         assertThat(after).isGreaterThan(before);

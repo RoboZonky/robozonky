@@ -23,14 +23,15 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.configuration.daemon.MarketplaceActivity;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.util.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>, Collection<Investment>> {
+public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>,
+        Collection<Investment>> {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 

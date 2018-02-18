@@ -18,21 +18,23 @@ package com.github.robozonky.notifications.email;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.InvestmentInference;
 
 class Util {
 
@@ -49,7 +51,7 @@ class Util {
             put("loanAmount", loan.getAmount());
             put("loanRating", loan.getRating().getCode());
             put("loanTerm", loan.getTermInMonths());
-            put("loanUrl", Loan.getUrlSafe(loan));
+            put("loanUrl", loan.getUrl());
             put("loanRegion", loan.getRegion());
             put("loanMainIncomeType", loan.getMainIncomeType());
             put("loanPurpose", loan.getPurpose());
@@ -57,33 +59,36 @@ class Util {
         }};
     }
 
+    private static Map<String, Object> perRating(final Function<Rating, Number> provider) {
+        return Stream.of(Rating.values()).collect(Collectors.toMap(Rating::getCode, provider::apply));
+    }
+
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
-        final Map<String, Object> result = new HashMap<>(3);
-        result.put("absoluteShare", new LinkedHashMap<String, Object>() {{
-            Stream.of(Rating.values()).forEach(r -> put(r.getCode(), portfolioOverview.getCzkInvested(r)));
+        return Collections.unmodifiableMap(new HashMap<String, Object>() {{
+            put("absoluteShare", perRating(portfolioOverview::getCzkInvested));
+            put("relativeShare", perRating(portfolioOverview::getShareOnInvestment));
+            put("total", portfolioOverview.getCzkInvested());
+            put("balance", portfolioOverview.getCzkAvailable());
         }});
-        result.put("relativeShare", new LinkedHashMap<String, Object>() {{
-            Stream.of(Rating.values()).forEach(r -> put(r.getCode(), portfolioOverview.getShareOnInvestment(r)));
-        }});
-        result.put("total", portfolioOverview.getCzkInvested());
-        result.put("balance", portfolioOverview.getCzkAvailable());
-        for (final Rating rating : Rating.values()) {
-            final Map<String, Object> map = (Map<String, Object>) result.get("absoluteShare");
-            map.put(rating.getCode(), portfolioOverview.getCzkInvested(rating));
-            final Map<String, Object> map2 = (Map<String, Object>) result.get("relativeShare");
-            map2.put(rating.getCode(), portfolioOverview.getShareOnInvestment(rating));
-        }
-        return Collections.unmodifiableMap(result);
+    }
+
+    private static BigDecimal getTotalPaid(final Investment i) {
+        return i.getPaidInterest().add(i.getPaidPrincipal()).add(i.getPaidPenalty());
+    }
+
+    private static long getMonthsElapsed(final Investment i) {
+        return i.getInvestmentDate()
+                .map(d -> Period.between(d.toLocalDate(), LocalDate.now()).toTotalMonths())
+                .orElse((long) (i.getOriginalTerm() - i.getCurrentTerm() + 1));
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
-        final InvestmentInference infered = InvestmentInference.with(i, l);
         final Map<String, Object> loanData = getLoanData(l);
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal());
-        loanData.put("amountHeld", infered.getOriginalAmount());
-        loanData.put("amountPaid", infered.getTotalAmountPaid());
-        loanData.put("monthsElapsed", infered.getElapsed(LocalDate.now()).toTotalMonths());
+        loanData.put("amountHeld", i.getOriginalPrincipal());
+        loanData.put("amountPaid", getTotalPaid(i));
+        loanData.put("monthsElapsed", getMonthsElapsed(i));
         return loanData;
     }
 

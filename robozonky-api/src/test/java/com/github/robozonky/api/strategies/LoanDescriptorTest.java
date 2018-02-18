@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
 
 class LoanDescriptorTest {
 
@@ -39,13 +38,13 @@ class LoanDescriptorTest {
     }
 
     private static Loan mockLoan(final Rating r) {
-        final Loan mockedLoan = mock(Loan.class);
-        when(mockedLoan.getId()).thenReturn(1);
-        when(mockedLoan.getRating()).thenReturn(r);
-        when(mockedLoan.getAmount()).thenReturn(2000.0);
-        when(mockedLoan.getRemainingInvestment()).thenReturn(1000.0);
-        when(mockedLoan.getDatePublished()).thenReturn(OffsetDateTime.now());
-        return mockedLoan;
+        return Loan.custom()
+                .setId(1)
+                .setRating(r)
+                .setAmount(2000)
+                .setRemainingInvestment(1000)
+                .setDatePublished(OffsetDateTime.now())
+                .build();
     }
 
     @Disabled("Looks like CAPTCHA is disabled for now. Let's wait and see if it comes back.")

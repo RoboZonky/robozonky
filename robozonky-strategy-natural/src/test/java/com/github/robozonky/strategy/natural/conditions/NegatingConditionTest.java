@@ -16,12 +16,11 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class NegatingConditionTest {
 
@@ -29,13 +28,13 @@ class NegatingConditionTest {
     void negatingTrue() {
         final MarketplaceFilterCondition c = MarketplaceFilterCondition.alwaysAccepting();
         final NegatingCondition nc = new NegatingCondition(c);
-        assertThat(nc.test(new Wrapper(mock(Loan.class)))).isFalse();
+        assertThat(nc.test(new Wrapper(Loan.custom().build()))).isFalse();
     }
 
     @Test
     void negatingFalse() {
         final MarketplaceFilterCondition c = MarketplaceFilterCondition.neverAccepting();
         final NegatingCondition nc = new NegatingCondition(c);
-        assertThat(nc.test(new Wrapper(mock(Loan.class)))).isTrue();
+        assertThat(nc.test(new Wrapper(Loan.custom().build()))).isTrue();
     }
 }

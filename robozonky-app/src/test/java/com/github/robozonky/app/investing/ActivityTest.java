@@ -21,7 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractEventLeveragingTest;
@@ -29,7 +29,6 @@ import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class ActivityTest extends AbstractEventLeveragingTest {
 
@@ -48,10 +47,11 @@ class ActivityTest extends AbstractEventLeveragingTest {
                 OffsetDateTime.now().minus(ActivityTest.SLEEP_PERIOD_MINUTES / 2, ChronoUnit.MINUTES);
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
         // load API that has marketplace more recent than that, but makes sure not to come within the closed period
-        final Loan l = mock(Loan.class);
-        when(l.getRating()).thenReturn(Rating.D);
-        when(l.getDatePublished()).thenReturn(timestamp.plus(10, ChronoUnit.MINUTES));
-        when(l.getRemainingInvestment()).thenReturn(1000.0);
+        final Loan l = Loan.custom()
+                .setRating(Rating.D)
+                .setDatePublished(timestamp.plus(10, ChronoUnit.MINUTES))
+                .setRemainingInvestment(1000)
+                .build();
         final LoanDescriptor ld = new LoanDescriptor(l);
         // test proper wakeup
         final Activity activity = new Activity(Collections.singletonList(ld));
@@ -73,16 +73,18 @@ class ActivityTest extends AbstractEventLeveragingTest {
         final OffsetDateTime timestamp = OffsetDateTime.now();
         Activity.STATE.newBatch().set(Activity.LAST_MARKETPLACE_CHECK_STATE_ID, timestamp.toString()).call();
         // load API that has marketplace within the closed period
-        final Loan activeLoan = mock(Loan.class);
-        when(activeLoan.getId()).thenReturn(1);
-        when(activeLoan.getRating()).thenReturn(Rating.C); // captcha
-        when(activeLoan.getDatePublished()).thenReturn(timestamp.minus(1, ChronoUnit.SECONDS));
-        when(activeLoan.getRemainingInvestment()).thenReturn(1000.0);
-        final Loan ignoredLoan = mock(Loan.class);
-        when(ignoredLoan.getRating()).thenReturn(Rating.AAAAA); // no captcha
-        when(ignoredLoan.getId()).thenReturn(2);
-        when(ignoredLoan.getDatePublished()).thenReturn(timestamp);
-        when(ignoredLoan.getRemainingInvestment()).thenReturn(100.0); // not enough => ignored
+        final Loan activeLoan = Loan.custom()
+                .setId(1)
+                .setRating(Rating.C)
+                .setDatePublished(timestamp.minus(1, ChronoUnit.SECONDS))
+                .setRemainingInvestment(1000)
+                .build();
+        final Loan ignoredLoan = Loan.custom()
+                .setId(2)
+                .setRating(Rating.AAAAA)
+                .setDatePublished(timestamp)
+                .setRemainingInvestment(100) // not enough = ignored
+                .build();
         // there is nothing to do, so the app should fall asleep...
         final Activity activity =
                 new Activity(Arrays.asList(new LoanDescriptor(activeLoan), new LoanDescriptor(ignoredLoan)));

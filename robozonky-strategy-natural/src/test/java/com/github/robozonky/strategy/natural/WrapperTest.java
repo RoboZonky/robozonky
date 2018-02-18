@@ -16,8 +16,11 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import java.math.BigDecimal;
+
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.*;
@@ -26,25 +29,32 @@ class WrapperTest {
 
     @Test
     void fromInvestment() {
-        final Loan loan = new Loan(1, 2);
-        final Investment investment = new Investment(loan, 200);
+        final Loan loan = Loan.custom()
+                .setId(1)
+                .setAmount(100_000)
+                .build();
+        final int invested = 200;
+        final Investment investment = Investment.fresh((MarketplaceLoan) loan, invested).build();
         final Wrapper w = new Wrapper(investment, loan);
         assertSoftly(softly -> {
             softly.assertThat(w.getLoanId()).isEqualTo(loan.getId());
             softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
             softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo((int) loan.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
             softly.assertThat(w.getInterestRate()).isEqualTo(loan.getInterestRate());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
-            softly.assertThat(w.getRemainingAmount()).isEqualTo(investment.getRemainingPrincipal());
+            softly.assertThat(w.getRemainingAmount()).isEqualTo(BigDecimal.valueOf(invested));
             softly.assertThat(w.getIdentifier()).isNotNull();
         });
     }
 
     @Test
     void equality() {
-        final Loan loan = new Loan(1, 2);
+        final Loan loan = Loan.custom()
+                .setId(1)
+                .setAmount(2)
+                .build();
         final Wrapper w = new Wrapper(loan);
         assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w);

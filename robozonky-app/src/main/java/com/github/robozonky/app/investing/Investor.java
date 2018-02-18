@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ public class Investor {
 
     static Investment convertToInvestment(final RecommendedLoan r) {
         final int amount = r.amount().intValue();
-        return new Investment(r.descriptor().item(), amount);
+        return Investment.fresh(r.descriptor().item(), amount);
     }
 
     public Optional<String> getConfirmationProviderId() {
@@ -175,7 +175,7 @@ public class Investor {
                 final Investment i = Investor.convertToInvestment(recommendedLoan);
                 zonky.invest(i);
                 Investor.LOGGER.debug("Investment succeeded.");
-                return new ZonkyResponse(i.getAmount().intValue());
+                return new ZonkyResponse(i.getOriginalPrincipal().intValue());
             };
             return this.getConfirmationRequestUsed()
                     .map(r -> new Investor(r, provider, o))

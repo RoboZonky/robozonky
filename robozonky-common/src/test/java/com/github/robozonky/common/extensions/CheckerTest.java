@@ -23,7 +23,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.common.remote.ApiProvider;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +53,7 @@ class CheckerTest {
     }
 
     private static ApiProvider mockApiThatReturnsOneLoan() {
-        final Loan l = mock(Loan.class);
+        final RawLoan l = mock(RawLoan.class);
         final ApiProvider provider = mock(ApiProvider.class);
         doReturn(Collections.singletonList(l)).when(provider).marketplace();
         return provider;

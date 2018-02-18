@@ -24,15 +24,17 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Carries metadata regarding a {@link Loan}.
+ * Carries metadata regarding a {@link RawLoan}.
  */
-public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDescriptor, Loan> {
+public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDescriptor, MarketplaceLoan> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanDescriptor.class);
 

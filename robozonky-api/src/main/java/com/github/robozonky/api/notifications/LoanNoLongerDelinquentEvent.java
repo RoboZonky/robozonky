@@ -18,11 +18,12 @@ package com.github.robozonky.api.notifications;
 
 import java.time.LocalDate;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 /**
- * Fired immediately after an {@link Investment} is identified as no longer delinquent.
+ * Fired immediately after an {@link RawInvestment} is identified as no longer delinquent.
  */
 public final class LoanNoLongerDelinquentEvent extends Event implements InvestmentBased {
 
@@ -30,7 +31,8 @@ public final class LoanNoLongerDelinquentEvent extends Event implements Investme
     private final Loan loan;
     private final LocalDate delinquentSince;
 
-    public LoanNoLongerDelinquentEvent(final Investment investment, final Loan loan, final LocalDate delinquentSince) {
+    public LoanNoLongerDelinquentEvent(final Investment investment, final Loan loan,
+                                       final LocalDate delinquentSince) {
         this.investment = investment;
         this.loan = loan;
         this.delinquentSince = delinquentSince;

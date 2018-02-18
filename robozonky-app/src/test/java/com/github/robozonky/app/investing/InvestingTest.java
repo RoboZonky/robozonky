@@ -18,6 +18,7 @@ package com.github.robozonky.app.investing;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -27,9 +28,10 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -57,7 +59,10 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noStrategy() {
-        final Loan loan = new Loan(1, 2);
+        final Loan loan = Loan.custom()
+                .setId(1)
+                .setAmount(2)
+                .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
@@ -75,7 +80,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Authenticated auth = mock(Authenticated.class);
         when(auth.call(isNotNull())).thenAnswer(invocation -> {
-            final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
+            final Function<Zonky, Collection<RawInvestment>> f = invocation.getArgument(0);
             return f.apply(z);
         });
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
@@ -85,15 +90,21 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noneAccepted() {
         final int loanId = 1;
-        final Loan mock = new Loan(loanId, 100_000);
-        final LoanDescriptor ld = new LoanDescriptor(mock);
+        final Loan loan = Loan.custom()
+                .setId(loanId)
+                .setAmount(100_000)
+                .setRating(Rating.D)
+                .setMyInvestment(mockMyInvestment())
+                .setDatePublished(OffsetDateTime.now())
+                .build();
+        final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky zonky = mockApi();
         final Portfolio portfolio = Portfolio.create(zonky);
-        when(zonky.getLoan(eq(loanId))).thenReturn(mock);
+        when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         final Authenticated auth = mock(Authenticated.class);
         when(auth.call(isNotNull())).thenAnswer(invocation -> {
-            final Function<Zonky, Collection<Investment>> f = invocation.getArgument(0);
+            final Function<Zonky, Collection<RawInvestment>> f = invocation.getArgument(0);
             return f.apply(zonky);
         });
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));

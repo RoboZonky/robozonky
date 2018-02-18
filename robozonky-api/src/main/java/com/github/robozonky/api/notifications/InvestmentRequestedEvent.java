@@ -19,12 +19,12 @@ package com.github.robozonky.api.notifications;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 
 /**
- * Fired immediately before {@link ControlApi#invest(Investment)} call is made or, in case of dry run,
+ * Fired immediately before {@link ControlApi#invest(RawInvestment)} call is made or, in case of dry run,
  * immediately before such a call would otherwise be made. Will be followed by {@link InvestmentMadeEvent}.
  */
 public final class InvestmentRequestedEvent extends Event implements LoanBased,

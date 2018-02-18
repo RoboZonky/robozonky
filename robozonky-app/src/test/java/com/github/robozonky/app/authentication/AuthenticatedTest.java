@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -116,10 +116,10 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(oauth, z);
         final Authenticated a = Authenticated.passwordBased(api, sp);
         // call SUT
-        final Function<Zonky, Collection<Investment>> f = mock(Function.class);
-        final Collection<Investment> expectedResult = Collections.emptyList();
+        final Function<Zonky, Collection<RawInvestment>> f = mock(Function.class);
+        final Collection<RawInvestment> expectedResult = Collections.emptyList();
         when(f.apply(eq(z))).thenReturn(expectedResult);
-        final Collection<Investment> result = a.call(f);
+        final Collection<RawInvestment> result = a.call(f);
         assertThat(result).isSameAs(expectedResult);
         verify(oauth).login(eq(username), eq(password));
         verify(oauth, never()).refresh(any());
@@ -139,7 +139,7 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(oauth, z);
         final Authenticated a = Authenticated.passwordBased(api, sp);
         // call SUT
-        final Function<Zonky, Collection<Investment>> f = mock(Function.class);
+        final Function<Zonky, Collection<RawInvestment>> f = mock(Function.class);
         when(f.apply(eq(z))).thenThrow(new IllegalStateException());
         assertThatThrownBy(() -> a.call(f)).isInstanceOf(IllegalStateException.class);
         verify(z).logout();
@@ -158,10 +158,10 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(oauth, z);
         final TokenBasedAccess a = (TokenBasedAccess) Authenticated.tokenBased(api, sp, Duration.ofSeconds(60));
         // call SUT
-        final Function<Zonky, Collection<Investment>> f = mock(Function.class);
-        final Collection<Investment> expectedResult = Collections.emptyList();
+        final Function<Zonky, Collection<RawInvestment>> f = mock(Function.class);
+        final Collection<RawInvestment> expectedResult = Collections.emptyList();
         when(f.apply(eq(z))).thenReturn(expectedResult);
-        final Collection<Investment> result = a.call(f);
+        final Collection<RawInvestment> result = a.call(f);
         assertSoftly(softly -> {
             softly.assertThat(result).isSameAs(expectedResult);
             softly.assertThat(a.getSecretProvider()).isSameAs(sp);

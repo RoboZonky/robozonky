@@ -19,7 +19,7 @@ package com.github.robozonky.common.remote;
 import java.util.Collections;
 
 import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.Test;
 
@@ -31,12 +31,12 @@ class PaginatedImplTest {
 
     @Test
     void constructor() {
-        final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
+        final PaginatedApi<RawLoan, LoanApi> api = mock(PaginatedApi.class);
         final int pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         // when execute is called with the right parameters, we pretend the API returned no results
         when(api.execute(any(), any(), any(), eq(0), eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 0, 0));
-        final Paginated<Loan> p = new PaginatedImpl<>(api);
+        final Paginated<RawLoan> p = new PaginatedImpl<>(api);
         assertSoftly(softly -> {
             softly.assertThat(p.getExpectedPageSize()).isEqualTo(pageSize);
             softly.assertThat(p.getPageId()).isEqualTo(0);
@@ -48,15 +48,19 @@ class PaginatedImplTest {
 
     @Test
     void nextPageMissing() {
-        final PaginatedApi<Loan, LoanApi> api = mock(PaginatedApi.class);
+        final RawLoan loan = mock(RawLoan.class);
+        when(loan.getId()).thenReturn(1);
+        when(loan.getAmount()).thenReturn(200.0);
+        when(loan.getRemainingInvestment()).thenReturn(200.0);
+        final PaginatedApi<RawLoan, LoanApi> api = mock(PaginatedApi.class);
         final int pageSize = 1;
         // when execute calls for first page, we pretend the API returned 1 result
         when(api.execute(any(), any(), any(), eq(0), eq(pageSize)))
-                .thenReturn(new PaginatedResult<>(Collections.singleton(new Loan(1, 200)), 0, 1));
+                .thenReturn(new PaginatedResult<>(Collections.singleton(loan), 0, 1));
         // when execute calls for second page, we pretend the API returned no results
         when(api.execute(any(), any(), any(), eq(1), eq(pageSize)))
                 .thenReturn(new PaginatedResult<>(Collections.emptyList(), 1, 1));
-        final Paginated<Loan> p = new PaginatedImpl<>(api, new Select(), Sort.unspecified(), pageSize);
+        final Paginated<RawLoan> p = new PaginatedImpl<>(api, new Select(), Sort.unspecified(), pageSize);
         assertSoftly(softly -> {
             softly.assertThat(p.getExpectedPageSize()).isEqualTo(pageSize);
             softly.assertThat(p.getPageId()).isEqualTo(0);

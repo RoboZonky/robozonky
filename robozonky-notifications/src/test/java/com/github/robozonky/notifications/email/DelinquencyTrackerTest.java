@@ -16,8 +16,8 @@
 
 package com.github.robozonky.notifications.email;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.internal.api.State;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,8 @@ import static org.assertj.core.api.Assertions.*;
 
 class DelinquencyTrackerTest {
 
-    private static final Investment INVESTMENT = new Investment(new Loan(1, 200), 200);
+    private static final MarketplaceLoan LOAN = MarketplaceLoan.custom().setId(1).setAmount(200).build();
+    private static final Investment INVESTMENT = Investment.fresh(LOAN, 200).build();
 
     @AfterEach
     @BeforeEach

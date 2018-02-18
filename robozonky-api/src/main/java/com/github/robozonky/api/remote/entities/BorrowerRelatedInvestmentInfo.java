@@ -32,6 +32,9 @@ public class BorrowerRelatedInvestmentInfo extends BaseEntity {
         // for JAXB
     }
 
+    /**
+     * @return Will be null if no other nicknames.
+     */
     @XmlElement
     public Collection<String> getOtherBorrowerNicknames() {
         return otherBorrowerNicknames;
@@ -47,11 +50,17 @@ public class BorrowerRelatedInvestmentInfo extends BaseEntity {
         return remainingPrincipalToLoan;
     }
 
+    /**
+     * @return Will be null if no other loans to the borrower.
+     */
     @XmlElement
     public BigDecimal getTotalPrincipalToBorrower() {
         return totalPrincipalToBorrower;
     }
 
+    /**
+     * @return Will be null if no other loans to the borrower.
+     */
     @XmlElement
     public BigDecimal getRemainingPrincipalToBorrower() {
         return remainingPrincipalToBorrower;

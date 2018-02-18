@@ -28,7 +28,8 @@ import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SaleRequestedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -41,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implements selling of {@link Investment}s on the secondary marketplace. Use {@link #Selling(Supplier, boolean)} as
+ * Implements selling of {@link RawInvestment}s on the secondary marketplace. Use {@link #Selling(Supplier, boolean)} as
  * entry point.
  */
 public class Selling implements PortfolioDependant {
@@ -77,10 +78,9 @@ public class Selling implements PortfolioDependant {
         } else {
             LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
             zonky.sell(i);
-            i.setIsOnSmp(true); // send the investment to secondary marketplace; Portfolio class may use it later
-            // FIXME use the above also when doing dry run?
             LOGGER.trace("Request over.");
         }
+        Investment.putOnSmp(i);
         Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
         return Optional.of(i);
     }

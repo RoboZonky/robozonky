@@ -31,7 +31,10 @@ class TemplateProcessorTest {
         final Configuration configuration = TemplateProcessor.getFreemarkerConfiguration();
         final String targetEncoding = Defaults.CHARSET.toString();
         assertSoftly(softly -> {
+            softly.assertThat(configuration.getCustomNumberFormat("interest"))
+                    .isInstanceOf(InterestNumberFormatFactory.class);
             softly.assertThat(configuration.getLogTemplateExceptions()).isFalse();
+            softly.assertThat(configuration.getDefaultEncoding()).isEqualTo(targetEncoding);
             softly.assertThat(configuration.getEncoding(Locale.getDefault())).isEqualTo(targetEncoding);
             softly.assertThat(configuration.getEncoding(Locale.ENGLISH)).isEqualTo(targetEncoding);
             softly.assertThat(configuration.getEncoding(Defaults.LOCALE)).isEqualTo(targetEncoding);

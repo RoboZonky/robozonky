@@ -24,11 +24,12 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -64,7 +65,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     void underBalance() {
         final Participation p = mock(Participation.class);
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
-        final Loan l = mock(Loan.class);
+        final Loan l = Loan.custom().build();
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any()))
                 .thenAnswer(i -> {
@@ -77,7 +78,8 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = mockZonky();
         final Portfolio portfolio = Portfolio.create(z);
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
-                                                          new RestrictedPurchaseStrategy(s, new Restrictions()), true);
+                                                          new RestrictedPurchaseStrategy(s, new Restrictions()),
+                                                          true);
         assertThat(i).isEmpty();
         assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
             @Override
@@ -89,7 +91,13 @@ class SessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void properDryRun() {
-        final Loan l = new Loan(1, 200);
+        final Loan l = Loan.custom()
+                .setId(1)
+                .setAmount(200)
+                .setRating(Rating.D)
+                .setRemainingInvestment(200)
+                .setMyInvestment(mockMyInvestment())
+                .build();
         final Participation p = mock(Participation.class);
         when(p.getLoanId()).thenReturn(l.getId());
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
@@ -106,7 +114,8 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = spy(Portfolio.create(zonky));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd),
-                                                          new RestrictedPurchaseStrategy(s, new Restrictions()), true);
+                                                          new RestrictedPurchaseStrategy(s, new Restrictions()),
+                                                          true);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(zonky, never()).purchase(eq(p));
@@ -116,7 +125,13 @@ class SessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void properReal() {
-        final Loan l = new Loan(1, 200);
+        final Loan l = Loan.custom()
+                .setId(1)
+                .setAmount(200)
+                .setRating(Rating.D)
+                .setRemainingInvestment(200)
+                .setMyInvestment(mockMyInvestment())
+                .build();
         final Participation p = mock(Participation.class);
         when(p.getLoanId()).thenReturn(l.getId());
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
@@ -133,7 +148,8 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = spy(Portfolio.create(zonky));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd),
-                                                          new RestrictedPurchaseStrategy(s, new Restrictions()), false);
+                                                          new RestrictedPurchaseStrategy(s, new Restrictions()),
+                                                          false);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(zonky).purchase(eq(p));

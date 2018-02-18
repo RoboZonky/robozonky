@@ -30,8 +30,8 @@ import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -44,7 +44,8 @@ import static org.mockito.Mockito.*;
 
 class DelinquentsTest extends AbstractZonkyLeveragingTest {
 
-    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER = (id) -> mock(Investment.class);
+    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER =
+            (id) -> Investment.custom().build();
     private final static Random RANDOM = new Random(0);
 
     @Test
@@ -56,9 +57,14 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     @Test
     void newDelinquence() {
         final PortfolioOverview po = mock(PortfolioOverview.class);
-        final Loan l = new Loan(RANDOM.nextInt(10000), 200);
-        final Investment i = spy(new Investment(l, 200));
-        doReturn(OffsetDateTime.now().minusDays(1)).when(i).getNextPaymentDate();
+        final Loan l = Loan.custom()
+                .setId(RANDOM.nextInt(10000))
+                .setAmount(200)
+                .setMyInvestment(mockMyInvestment())
+                .build();
+        final Investment i = Investment.fresh(l, 200)
+                .setNextPaymentDate(OffsetDateTime.now().minusDays(1))
+                .build();
         final Function<Integer, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), INVESTMENT_SUPPLIER, f, po);
@@ -82,9 +88,13 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     @Test
     void oldDelinquency() {
         final PortfolioOverview po = mock(PortfolioOverview.class);
-        final Loan l = new Loan(RANDOM.nextInt(10000), 200);
-        final Investment i = spy(new Investment(l, 200));
-        doReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)).when(i).getNextPaymentDate();
+        final Loan l = Loan.custom()
+                .setId(RANDOM.nextInt(10000))
+                .setMyInvestment(mockMyInvestment())
+                .build();
+        final Investment i = Investment.fresh(l, 200)
+                .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
+                .build();
         final Function<Integer, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), INVESTMENT_SUPPLIER, f, po);
@@ -104,9 +114,13 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     @Test
     void noLongerDelinquent() {
         final PortfolioOverview po = mock(PortfolioOverview.class);
-        final Loan l = new Loan(RANDOM.nextInt(10000), 200);
-        final Investment i = spy(new Investment(l, 200));
-        doReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)).when(i).getNextPaymentDate();
+        final Loan l = Loan.custom()
+                .setId(RANDOM.nextInt(10000))
+                .setMyInvestment(mockMyInvestment())
+                .build();
+        final Investment i = Investment.fresh(l, 200)
+                .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
+                .build();
         final Function<Integer, Loan> f = (id) -> l;
         // register delinquence
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), INVESTMENT_SUPPLIER, f, po);
@@ -119,10 +133,14 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     @Test
     void defaulted() {
         final PortfolioOverview po = mock(PortfolioOverview.class);
-        final Loan l = new Loan(RANDOM.nextInt(10000), 200);
-        final Investment i = spy(new Investment(l, 200));
-        doReturn(PaymentStatus.PAID_OFF).when(i).getPaymentStatus();
-        doReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)).when(i).getNextPaymentDate();
+        final Loan l = Loan.custom()
+                .setId(RANDOM.nextInt(10000))
+                .setMyInvestment(mockMyInvestment())
+                .build();
+        final Investment i = Investment.fresh(l, 200)
+                .setPaymentStatus(PaymentStatus.PAID_OFF)
+                .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
+                .build();
         final Function<Integer, Loan> f = (id) -> l;
         // register delinquency
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), (id) -> i, f, po);
@@ -135,10 +153,14 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     @Test
     void paid() {
         final PortfolioOverview po = mock(PortfolioOverview.class);
-        final Loan l = new Loan(RANDOM.nextInt(10000), 200);
-        final Investment i = spy(new Investment(l, 200));
-        doReturn(PaymentStatus.PAID).when(i).getPaymentStatus();
-        doReturn(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)).when(i).getNextPaymentDate();
+        final Loan l = Loan.custom()
+                .setId(RANDOM.nextInt(10000))
+                .setMyInvestment(mockMyInvestment())
+                .build();
+        final Investment i = Investment.fresh(l, 200)
+                .setPaymentStatus(PaymentStatus.PAID)
+                .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
+                .build();
         final Function<Integer, Loan> f = (id) -> l;
         // register delinquence
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), (id) -> i, f, po);

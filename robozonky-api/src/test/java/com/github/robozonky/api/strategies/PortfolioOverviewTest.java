@@ -19,15 +19,21 @@ package com.github.robozonky.api.strategies;
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
 
 class PortfolioOverviewTest {
+
+    private static MarketplaceLoan mockLoan(final Rating r) {
+        return MarketplaceLoan.custom()
+                .setId(1)
+                .setRating(r)
+                .build();
+    }
 
     @Test
     void emptyPortfolio() {
@@ -42,17 +48,11 @@ class PortfolioOverviewTest {
         });
     }
 
-    private static Loan mockLoan(final Rating r) {
-        final Loan loan = mock(Loan.class);
-        when(loan.getRating()).thenReturn(r);
-        return loan;
-    }
-
     @Test
     void somePortfolio() {
         final int balance = 5000;
-        final Investment i1 = new Investment(mockLoan(Rating.A), 400);
-        final Investment i2 = new Investment(mockLoan(Rating.B), 600);
+        final Investment i1 = Investment.fresh(mockLoan(Rating.A), 400);
+        final Investment i2 = Investment.fresh(mockLoan(Rating.B), 600);
         final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Stream.of(i1, i2));
         assertSoftly(softly -> {
             softly.assertThat(o.getShareOnInvestment(Rating.A)).isEqualTo(new BigDecimal("0.4"));

@@ -22,15 +22,15 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.internal.api.Defaults;
 
 @Path(ControlApi.ME + "/investments")
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface PortfolioApi extends EntityCollectionApi<Investment> {
+public interface PortfolioApi extends EntityCollectionApi<RawInvestment> {
 
     @GET
     @Override
-    List<Investment> items();
+    List<RawInvestment> items();
 }

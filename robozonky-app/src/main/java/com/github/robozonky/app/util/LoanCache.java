@@ -18,16 +18,15 @@ package com.github.robozonky.app.util;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +35,10 @@ public class LoanCache {
 
     public static final LoanCache INSTANCE = new LoanCache();
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
-    private static final Duration EVICT_AFTER = Duration.ofDays(2); // maximum time a loan stays on the marketplace
-
-    private ConcurrentMap<Integer, Loan> cache;
-    private ConcurrentMap<Integer, Instant> storedOn;
+    private static final Duration EVICT_AFTER = Duration.ofHours(1);
     private final Lock updateLock = new ReentrantLock(true);
+    private volatile Map<Integer, Loan> cache;
+    private volatile Map<Integer, Instant> storedOn;
 
     LoanCache() {
         clean();
@@ -73,9 +71,6 @@ public class LoanCache {
     }
 
     boolean addLoan(final int loanId, final Loan loan) {
-        if (loan.getRemainingInvestment() > 0) {
-            return false;
-        }
         runLocked(() -> {
             cache.put(loanId, loan);
             storedOn.put(loanId, Instant.now());
@@ -84,19 +79,18 @@ public class LoanCache {
     }
 
     public Loan getLoan(final int loanId, final Zonky api) {
-        return getLoan(loanId)
-                .orElseGet(() -> {
-                    LOGGER.trace("Cache miss for loan #{}.", loanId);
-                    final Loan l = api.getLoan(loanId);
-                    addLoan(loanId, l);
-                    return l;
-                });
+        return getLoan(loanId).orElseGet(() -> {
+            LOGGER.trace("Cache miss for loan #{}.", loanId);
+            final Loan l = api.getLoan(loanId);
+            addLoan(loanId, l);
+            return l;
+        });
     }
 
     public void clean() {
         runLocked(() -> {
-            cache = new ConcurrentHashMap<>(0);
-            storedOn = new ConcurrentHashMap<>(0);
+            cache = new HashMap<>(0);
+            storedOn = new HashMap<>(0);
         });
     }
 }

@@ -33,8 +33,8 @@ import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -70,18 +70,10 @@ final class Session {
         this.portfolioOverview = portfolio.calculateOverview(zonky, dryRun);
     }
 
-    private void purchase(final RestrictedPurchaseStrategy strategy) {
-        boolean invested;
-        do {
-            invested = strategy.apply(getAvailable(), portfolioOverview)
-                    .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
-                    .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
-        } while (invested);
-    }
-
     public static Collection<Investment> purchase(final Portfolio portfolio, final Zonky api,
                                                   final Collection<ParticipationDescriptor> items,
-                                                  final RestrictedPurchaseStrategy strategy, final boolean dryRun) {
+                                                  final RestrictedPurchaseStrategy strategy,
+                                                  final boolean dryRun) {
         final Session session = new Session(portfolio, new LinkedHashSet<>(items), api, dryRun);
         final Collection<ParticipationDescriptor> c = session.getAvailable();
         if (c.isEmpty()) {
@@ -92,6 +84,15 @@ final class Session {
         final Collection<Investment> result = session.getResult();
         Events.fire(new PurchasingCompletedEvent(result, session.getPortfolioOverview()));
         return Collections.unmodifiableCollection(result);
+    }
+
+    private void purchase(final RestrictedPurchaseStrategy strategy) {
+        boolean invested;
+        do {
+            invested = strategy.apply(getAvailable(), portfolioOverview)
+                    .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
+                    .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
+        } while (invested);
     }
 
     /**
@@ -138,7 +139,8 @@ final class Session {
         final Participation participation = recommendation.descriptor().item();
         final boolean purchased = isDryRun || actualPurchase(participation);
         if (purchased) {
-            final Investment i = new Investment(recommendation.descriptor());
+            final Investment i = Investment.fresh(recommendation.descriptor().related(),
+                                                  recommendation.amount());
             markSuccessfulPurchase(i);
             Events.fire(new InvestmentPurchasedEvent(i, recommendation.descriptor().related(), portfolioOverview));
         }
@@ -149,10 +151,9 @@ final class Session {
         investmentsMadeNow.add(i);
         final int id = i.getLoanId();
         stillAvailable.removeIf(l -> l.item().getLoanId() == id);
-        final BigDecimal amount = i.getAmount();
+        final BigDecimal amount = i.getOriginalPrincipal();
         portfolio.newBlockedAmount(zonky, new BlockedAmount(id, amount, TransactionCategory.SMP_BUY));
         final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(amount);
         portfolioOverview = portfolio.calculateOverview(newBalance);
     }
-
 }

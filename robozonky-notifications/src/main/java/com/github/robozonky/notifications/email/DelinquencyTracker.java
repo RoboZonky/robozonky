@@ -18,7 +18,7 @@ package com.github.robozonky.notifications.email;
 
 import java.time.OffsetDateTime;
 
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.State;
 

@@ -32,8 +32,8 @@ import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.internal.api.State;
 import org.slf4j.Logger;
@@ -51,15 +51,8 @@ enum DelinquencyCategory {
     CRITICAL(60),
     HOPELESS(90);
 
-    @FunctionalInterface
-    private interface EventSupplier {
-
-        LoanDelinquentEvent apply(final Investment i, final Loan l, final LocalDate d);
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
     private final int thresholdInDays;
-
     DelinquencyCategory(final int thresholdInDays) {
         this.thresholdInDays = thresholdInDays;
     }
@@ -149,6 +142,12 @@ enum DelinquencyCategory {
         state.newBatch().set(fieldName, toIdString(storeThese.stream())).call();
         LOGGER.trace("Update over, stored {}.", storeThese);
         return storeThese;
+    }
+
+    @FunctionalInterface
+    private interface EventSupplier {
+
+        LoanDelinquentEvent apply(final Investment i, final Loan l, final LocalDate d);
     }
 
 }
