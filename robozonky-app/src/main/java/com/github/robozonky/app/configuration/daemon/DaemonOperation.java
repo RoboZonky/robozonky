@@ -18,6 +18,7 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.Events;
@@ -33,9 +34,11 @@ abstract class DaemonOperation implements Runnable {
     private final Duration refreshInterval;
     private final Authenticated api;
     private final PortfolioSupplier portfolio;
+    private final Consumer<Throwable> shutdownCall;
 
-    protected DaemonOperation(final Authenticated auth, final PortfolioSupplier portfolio,
-                              final Duration refreshInterval) {
+    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+                              final PortfolioSupplier portfolio, final Duration refreshInterval) {
+        this.shutdownCall = shutdownCall;
         this.api = auth;
         this.portfolio = portfolio;
         this.refreshInterval = refreshInterval;
@@ -61,9 +64,12 @@ abstract class DaemonOperation implements Runnable {
                 LOGGER.info("Access to marketplace disabled by Zonky.");
             }
             LOGGER.trace("Finished.");
-        } catch (final Throwable t) {
-            LOGGER.warn("Caught unexpected exception, continuing operation.", t);
-            Events.fire(new RoboZonkyDaemonFailedEvent(t));
+        } catch (final Exception ex) {
+            LOGGER.warn("Caught unexpected exception, continuing operation.", ex);
+            Events.fire(new RoboZonkyDaemonFailedEvent(ex));
+        } catch (final Error t) {
+            LOGGER.error("Caught unexpected error, terminating.", t);
+            shutdownCall.accept(t);
         }
     }
 }

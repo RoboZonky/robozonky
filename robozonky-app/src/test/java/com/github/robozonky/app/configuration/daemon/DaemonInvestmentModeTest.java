@@ -47,7 +47,8 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final ExecutorService e = Executors.newFixedThreadPool(1);
         final PortfolioUpdater p = mock(PortfolioUpdater.class);
         try {
-            final DaemonInvestmentMode d = new DaemonInvestmentMode(a, p, b, mock(StrategyProvider.class),
+            final DaemonInvestmentMode d = new DaemonInvestmentMode(t -> {
+            }, a, p, b, mock(StrategyProvider.class),
                                                                     Duration.ofMinutes(1), Duration.ofSeconds(1),
                                                                     Duration.ofSeconds(1));
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block

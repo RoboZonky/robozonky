@@ -31,26 +31,6 @@ import static org.mockito.Mockito.*;
 
 class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
-    private static final class CustomOperation extends DaemonOperation {
-
-        private final BiConsumer<Portfolio, Authenticated> operation;
-
-        CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
-            super(auth, () -> Optional.of(mock(Portfolio.class)), Duration.ofSeconds(1));
-            this.operation = operation;
-        }
-
-        @Override
-        protected boolean isEnabled(final Authenticated authenticated) {
-            return true;
-        }
-
-        @Override
-        protected BiConsumer<Portfolio, Authenticated> getInvestor() {
-            return operation;
-        }
-    }
-
     @Test
     void exceptional() {
         final Authenticated a = mock(Authenticated.class);
@@ -68,5 +48,26 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         d.run();
         verify(operation).accept(any(), eq(a));
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
+    }
+
+    private static final class CustomOperation extends DaemonOperation {
+
+        private final BiConsumer<Portfolio, Authenticated> operation;
+
+        CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
+            super((t) -> {
+            }, auth, () -> Optional.of(mock(Portfolio.class)), Duration.ofSeconds(1));
+            this.operation = operation;
+        }
+
+        @Override
+        protected boolean isEnabled(final Authenticated authenticated) {
+            return true;
+        }
+
+        @Override
+        protected BiConsumer<Portfolio, Authenticated> getInvestor() {
+            return operation;
+        }
     }
 }

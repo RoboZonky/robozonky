@@ -45,7 +45,9 @@ class DaemonOperatingMode extends OperatingMode {
                                                          final Investor.Builder builder) {
         final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
         final PortfolioUpdater u = PortfolioUpdater.create(shutdownCall, auth, sp, builder.isDryRun());
-        final InvestmentMode m = new DaemonInvestmentMode(auth, u, builder, sp, marketplace.getMaximumSleepDuration(),
+        final InvestmentMode m = new DaemonInvestmentMode(t -> {
+        }, auth, u, builder, sp,
+                                                          marketplace.getMaximumSleepDuration(),
                                                           marketplace.getPrimaryMarketplaceCheckDelay(),
                                                           marketplace.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);

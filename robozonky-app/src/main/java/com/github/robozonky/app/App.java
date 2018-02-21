@@ -75,8 +75,8 @@ public class App {
             return CommandLine.parse(LIFECYCLE::resumeToFail, args)
                     .map(App::execute)
                     .orElse(ReturnCode.ERROR_SETUP);
-        } catch (final Exception ex) {
-            LOGGER.error("Caught unexpected exception, terminating daemon.", ex);
+        } catch (final Throwable t) {
+            LOGGER.error("Caught unexpected exception, terminating daemon.", t);
             return ReturnCode.ERROR_UNEXPECTED;
         }
     }

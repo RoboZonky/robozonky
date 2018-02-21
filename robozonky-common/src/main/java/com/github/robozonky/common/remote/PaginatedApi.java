@@ -22,8 +22,12 @@ import java.util.function.Function;
 import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaginatedApi.class);
 
     private final AuthenticatedFilter filter;
     private final Class<T> api;
@@ -70,10 +74,12 @@ class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<
                                final int pageNo, final int pageSize, final RoboZonkyFilter filter) {
         filter.setRequestHeader("X-Page", String.valueOf(pageNo));
         filter.setRequestHeader("X-Size", String.valueOf(pageSize));
+        LOGGER.trace("Will request page #{} of size {}.", pageNo, pageSize);
         final Collection<S> result = this.execute(function, select, sort, filter);
         final int totalSize = filter.getLastResponseHeader("X-Total")
                 .map(Integer::parseInt)
                 .orElse(-1);
+        LOGGER.trace("Total size of {} reported.", totalSize);
         return new PaginatedResult<>(result, pageNo, totalSize);
     }
 

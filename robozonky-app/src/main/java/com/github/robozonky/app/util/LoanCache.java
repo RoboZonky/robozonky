@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -34,11 +36,12 @@ import org.slf4j.LoggerFactory;
 public class LoanCache {
 
     public static final LoanCache INSTANCE = new LoanCache();
+    private static final int INITIAL_CACHE_SIZE = 20;
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
     private static final Duration EVICT_AFTER = Duration.ofHours(1);
     private final Lock updateLock = new ReentrantLock(true);
     private volatile Map<Integer, Loan> cache;
-    private volatile Map<Integer, Instant> storedOn;
+    private volatile ConcurrentMap<Integer, Instant> storedOn;
 
     LoanCache() {
         clean();
@@ -89,8 +92,8 @@ public class LoanCache {
 
     public void clean() {
         runLocked(() -> {
-            cache = new HashMap<>(0);
-            storedOn = new HashMap<>(0);
+            cache = new HashMap<>(INITIAL_CACHE_SIZE);
+            storedOn = new ConcurrentHashMap<>(INITIAL_CACHE_SIZE);
         });
     }
 }

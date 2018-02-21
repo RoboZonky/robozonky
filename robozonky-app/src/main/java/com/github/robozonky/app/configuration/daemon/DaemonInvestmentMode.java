@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import com.github.robozonky.api.ReturnCode;
@@ -40,15 +41,17 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final List<DaemonOperation> daemons;
     private final PortfolioUpdater portfolioUpdater;
 
-    public DaemonInvestmentMode(final Authenticated auth, final PortfolioUpdater p, final Investor.Builder builder,
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+                                final PortfolioUpdater p, final Investor.Builder builder,
                                 final StrategyProvider strategyProvider, final Duration maximumSleepPeriod,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.portfolioUpdater = p;
-        this.daemons = Arrays.asList(new InvestingDaemon(auth, builder, strategyProvider::getToInvest, p,
+        this.daemons = Arrays.asList(new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, p,
                                                          maximumSleepPeriod, primaryMarketplaceCheckPeriod),
-                                     new PurchasingDaemon(auth, strategyProvider::getToPurchase, p, maximumSleepPeriod,
-                                                          secondaryMarketplaceCheckPeriod, builder.isDryRun()));
+                                     new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, p,
+                                                          maximumSleepPeriod, secondaryMarketplaceCheckPeriod,
+                                                          builder.isDryRun()));
     }
 
     private static ThreadGroup newThreadGroup(final String name) {
@@ -85,5 +88,4 @@ public class DaemonInvestmentMode implements InvestmentMode {
             return ReturnCode.OK;
         }
     }
-
 }

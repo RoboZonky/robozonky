@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -42,10 +43,11 @@ class InvestingDaemon extends DaemonOperation {
     private static final Select SELECT = new Select().greaterThan("remainingInvestment", 0);
     private final BiConsumer<Portfolio, Authenticated> investor;
 
-    public InvestingDaemon(final Authenticated auth, final Investor.Builder builder,
-                           final Supplier<Optional<InvestmentStrategy>> strategy, final PortfolioSupplier portfolio,
-                           final Duration maximumSleepPeriod, final Duration refreshPeriod) {
-        super(auth, portfolio, refreshPeriod);
+    public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+                           final Investor.Builder builder, final Supplier<Optional<InvestmentStrategy>> strategy,
+                           final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
+                           final Duration refreshPeriod) {
+        super(shutdownCall, auth, portfolio, refreshPeriod);
         this.investor = (p, a) -> {
             final Investing i = new Investing(builder, strategy, a, maximumSleepPeriod);
             final Collection<MarketplaceLoan> loans =

@@ -35,7 +35,8 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
     void standard() {
         final Authenticated a = mockAuthentication(mock(Zonky.class));
         final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
-        final PurchasingDaemon d = new PurchasingDaemon(a, s, () -> Optional.of(mock(Portfolio.class)),
+        final PurchasingDaemon d = new PurchasingDaemon(t -> {
+        }, a, s, () -> Optional.of(mock(Portfolio.class)),
                                                         Duration.ZERO, Duration.ofSeconds(1), true);
         d.run();
         verify(a, times(1)).call(notNull());

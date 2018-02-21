@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -33,10 +34,10 @@ class PurchasingDaemon extends DaemonOperation {
 
     private final BiConsumer<Portfolio, Authenticated> investor;
 
-    public PurchasingDaemon(final Authenticated auth, final Supplier<Optional<PurchaseStrategy>> strategy,
-                            final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
-                            final Duration refreshPeriod, final boolean isDryRun) {
-        super(auth, portfolio, refreshPeriod);
+    public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+                            final Supplier<Optional<PurchaseStrategy>> strategy, final PortfolioSupplier portfolio,
+                            final Duration maximumSleepPeriod, final Duration refreshPeriod, final boolean isDryRun) {
+        super(shutdownCall, auth, portfolio, refreshPeriod);
         this.investor = (folio, api) -> {
             final Collection<Participation> p =
                     api.call(zonky -> zonky.getAvailableParticipations().collect(Collectors.toList()));

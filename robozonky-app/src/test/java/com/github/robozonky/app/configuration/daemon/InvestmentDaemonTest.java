@@ -39,7 +39,8 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         final Authenticated a = mockAuthentication(z);
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
-        final InvestingDaemon d = new InvestingDaemon(a, new Investor.Builder(), s,
+        final InvestingDaemon d = new InvestingDaemon(t -> {
+        }, a, new Investor.Builder(), s,
                                                       () -> Optional.of(mock(Portfolio.class)), Duration.ZERO,
                                                       Duration.ofSeconds(1));
         d.run();
