@@ -67,7 +67,7 @@ public class Selling implements PortfolioDependant {
     }
 
     private InvestmentDescriptor getDescriptor(final Investment i, final Authenticated auth) {
-        return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky)));
+        return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, zonky)));
     }
 
     private Optional<Investment> processInvestment(final Zonky zonky, final RecommendedInvestment r) {

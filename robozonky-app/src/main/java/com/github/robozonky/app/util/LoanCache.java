@@ -28,6 +28,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
@@ -88,6 +89,16 @@ public class LoanCache {
             addLoan(loanId, l);
             return l;
         });
+    }
+
+    public Loan getLoan(final Investment investment, final Zonky api) {
+        final Loan loan = getLoan(investment.getLoanId(), api);
+        /*
+         * investment may have been created without access to the loan. now that we have the loan, we can update the
+         * investment, filling any missing information.
+         */
+        Investment.fillFrom(investment, loan);
+        return loan;
     }
 
     public void clean() {

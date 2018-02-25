@@ -53,6 +53,7 @@ enum DelinquencyCategory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
     private final int thresholdInDays;
+
     DelinquencyCategory(final int thresholdInDays) {
         this.thresholdInDays = thresholdInDays;
     }
@@ -117,7 +118,7 @@ enum DelinquencyCategory {
      */
     public Collection<Integer> update(final Collection<Delinquency> active,
                                       final Function<Integer, Investment> investmentSupplier,
-                                      final Function<Integer, Loan> loanSupplier) {
+                                      final Function<Investment, Loan> loanSupplier) {
         LOGGER.trace("Updating {}.", this);
         final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
@@ -132,7 +133,7 @@ enum DelinquencyCategory {
                 .peek(d -> {
                     final int loanId = d.getParent().getLoanId();
                     final Investment i = investmentSupplier.apply(loanId);
-                    final Loan l = loanSupplier.apply(loanId);
+                    final Loan l = loanSupplier.apply(i);
                     final Event e = getEvent(d.getPaymentMissedDate(), i, l, thresholdInDays);
                     Events.fire(e);
                 })

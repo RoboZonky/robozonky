@@ -136,7 +136,7 @@ public class Delinquents {
     private static Collection<Delinquent> getKnownDelinquents(final Collection<Investment> presentlyDelinquent,
                                                               final Collection<Investment> noLongerActive,
                                                               final Function<Integer, Investment> investmentSupplier,
-                                                              final Function<Integer, Loan> loanSupplier,
+                                                              final Function<Investment, Loan> loanSupplier,
                                                               final PortfolioOverview portfolioOverview) {
         final LocalDate now = LocalDate.now();
         // find out loans that are no longer delinquent, either through payment or through default
@@ -149,8 +149,8 @@ public class Delinquents {
                 .peek(d -> {  // notify
                     final int loanId = d.getLoanId();
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
-                    final Loan l = loanSupplier.apply(loanId);
                     final Investment inv = investmentSupplier.apply(loanId);
+                    final Loan l = loanSupplier.apply(inv);
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
                         final PaymentStatus s = inv.getPaymentStatus()
                                 .orElseThrow(() -> new IllegalStateException("Invalid investment " + inv));
@@ -179,7 +179,7 @@ public class Delinquents {
     static void update(final Collection<Investment> presentlyDelinquent,
                        final Collection<Investment> noLongerActive,
                        final Function<Integer, Investment> investmentSupplier,
-                       final Function<Integer, Loan> loanSupplier, final PortfolioOverview portfolioOverview) {
+                       final Function<Investment, Loan> loanSupplier, final PortfolioOverview portfolioOverview) {
         LOGGER.debug("Updating delinquent loans.");
         final Collection<Delinquent> knownDelinquents = getKnownDelinquents(presentlyDelinquent, noLongerActive,
                                                                             investmentSupplier, loanSupplier,

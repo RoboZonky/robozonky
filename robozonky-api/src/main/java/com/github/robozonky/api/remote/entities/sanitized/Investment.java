@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -54,6 +55,15 @@ public interface Investment {
 
     static InvestmentBuilder fresh(final Loan loan, final BigDecimal investedAmount) {
         return new MutableInvestmentImpl(loan, investedAmount);
+    }
+
+    static void fillFrom(final Investment investment, final Loan loan) {
+        if (investment instanceof MutableInvestment) {
+            final MutableInvestment i = (MutableInvestment) investment;
+            i.setInvestmentDate(loan.getMyInvestment().map(MyInvestment::getTimeCreated).orElse(null));
+        } else {
+            throw new IllegalArgumentException("Invalid investment " + investment);
+        }
     }
 
     static void markAsSold(final Investment investment) {

@@ -68,7 +68,7 @@ public class Repayments implements PortfolioDependant {
                 portfolio.getActiveWithPaymentStatus(PaymentStatuses.of(PaymentStatus.PAID));
         repaid.filter(i -> active.contains(i.getLoanId()))
                 .peek(i -> {
-                    final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky));
+                    final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
                     final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
                     Events.fire(e);
                 })

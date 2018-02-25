@@ -149,7 +149,7 @@ public class Portfolio {
                         .filter(i -> isLoanRelated(i, blockedAmount))
                         .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
                             final PortfolioOverview po = calculateOverview(zonky.getWallet().getAvailableBalance());
-                            final Loan l = LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky);
+                            final Loan l = LoanCache.INSTANCE.getLoan(i, zonky);
                             Events.fire(new InvestmentSoldEvent(i, l, po));
                         })
                         .forEach(Investment::markAsSold);

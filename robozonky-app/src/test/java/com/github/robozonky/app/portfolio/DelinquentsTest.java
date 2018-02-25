@@ -65,7 +65,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200)
                 .setNextPaymentDate(OffsetDateTime.now().minusDays(1))
                 .build();
-        final Function<Integer, Loan> f = (id) -> l;
+        final Function<Investment, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), INVESTMENT_SUPPLIER, f, po);
         assertSoftly(softly -> {
@@ -95,7 +95,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Integer, Loan> f = (id) -> l;
+        final Function<Investment, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), INVESTMENT_SUPPLIER, f, po);
         assertSoftly(softly -> {
@@ -121,7 +121,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Integer, Loan> f = (id) -> l;
+        final Function<Investment, Loan> f = (id) -> l;
         // register delinquence
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), INVESTMENT_SUPPLIER, f, po);
         this.readPreexistingEvents(); // ignore events just emitted
@@ -141,7 +141,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .setPaymentStatus(PaymentStatus.PAID_OFF)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Integer, Loan> f = (id) -> l;
+        final Function<Investment, Loan> f = (id) -> l;
         // register delinquency
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), (id) -> i, f, po);
         this.readPreexistingEvents(); // ignore events just emitted
@@ -161,7 +161,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .setPaymentStatus(PaymentStatus.PAID)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Integer, Loan> f = (id) -> l;
+        final Function<Investment, Loan> f = (id) -> l;
         // register delinquence
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), (id) -> i, f, po);
         this.readPreexistingEvents(); // ignore events just emitted

@@ -53,7 +53,7 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
     private void testAddAndRead(final DelinquencyCategory category, final Period minimumMatchingDuration) {
         this.reinit();
         final int loanId = 1;
-        final Function<Integer, Loan> f = (id) -> Loan.custom().setId(loanId).setAmount(200).build();
+        final Function<Investment, Loan> f = (i) -> Loan.custom().setId(loanId).setAmount(200).build();
         // store a delinquent loan
         final Delinquent d = new Delinquent(loanId);
         final Delinquency dy = d.addDelinquency(LocalDate.now().minus(minimumMatchingDuration));
