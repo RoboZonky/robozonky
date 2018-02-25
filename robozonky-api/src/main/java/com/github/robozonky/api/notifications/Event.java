@@ -17,8 +17,9 @@
 package com.github.robozonky.api.notifications;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.robozonky.internal.api.ToStringBuilder;
 
@@ -37,7 +38,8 @@ public abstract class Event {
         if (!this.getClass().getSimpleName().endsWith("Event")) { // guarantee for dependent code
             throw new IllegalStateException("Event subclass' names must end with 'Event'.");
         }
-        this.toStringIgnoredFields = Arrays.asList(toStringIgnoredFields);
+        this.toStringIgnoredFields = Stream.concat(Stream.of("toStringIgnoredFields"), Stream.of(toStringIgnoredFields))
+                .collect(Collectors.toList());
     }
 
     public OffsetDateTime getCreatedOn() {
