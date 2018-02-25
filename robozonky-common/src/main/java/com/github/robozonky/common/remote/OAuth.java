@@ -19,7 +19,7 @@ package com.github.robozonky.common.remote;
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
-public class OAuth implements AutoCloseable {
+public class OAuth {
 
     private final Api<ZonkyOAuthApi> api;
 
@@ -37,10 +37,5 @@ public class OAuth implements AutoCloseable {
         return api.execute(a -> {
             return a.refresh(String.valueOf(token.getRefreshToken()), "refresh_token", token.getScope());
         });
-    }
-
-    @Override
-    public void close() {
-        this.api.close();
     }
 }

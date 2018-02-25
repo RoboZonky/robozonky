@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,43 @@
 
 package com.github.robozonky.common.remote;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ApiProviderTest {
 
-    private static final Function<OAuth, OAuth> AUTH_OPERATION = Mockito::spy;
-    private static final Function<Zonky, Zonky> ZONKY_OPERATION = Mockito::spy;
-    private static final char[] PASSWORD = new char[0];
-
-    @Test
-    void unathenticatedApisProperlyClosed() {
-        final ApiProvider provider = new ApiProvider();
-        assertThat(provider.marketplace()).isNotNull();
-        final OAuth spy = provider.oauth(AUTH_OPERATION);
-        assertThatThrownBy(() -> spy.login("", PASSWORD)).isInstanceOf(IllegalStateException.class);
+    private static ZonkyApiToken mockToken() {
+        final ZonkyApiToken t = mock(ZonkyApiToken.class);
+        when(t.getAccessToken()).thenReturn(UUID.randomUUID().toString().toCharArray());
+        return t;
     }
 
     @Test
-    void authenticatedApisProperlyClosed() {
-        final ZonkyApiToken token = AuthenticatedFilterTest.TOKEN;
-        final ApiProvider provider = new ApiProvider();
-        final Zonky spy = provider.authenticated(token, ZONKY_OPERATION);
-        assertThatThrownBy(spy::logout).isInstanceOf(IllegalStateException.class);
-
+    void unauthenticatedProperlyClosed() {
+        final ApiProvider p = spy(new ApiProvider());
+        try (final ApiProvider provider = p) {
+            final OAuth result = provider.oauth(Function.identity());
+            assertThat(result).isNotNull();
+        }
+        verify(p).close();
+        assertThat(p.isClosed()).isTrue();
     }
+
+    @Test
+    void authenticatedProperlyClosed() {
+        final ApiProvider p = spy(new ApiProvider());
+        try (final ApiProvider provider = p) {
+            final Zonky result = provider.authenticated(mockToken(), Function.identity());
+            assertThat(result).isNotNull();
+        }
+        verify(p).close();
+        assertThat(p.isClosed()).isTrue();
+    }
+
 }

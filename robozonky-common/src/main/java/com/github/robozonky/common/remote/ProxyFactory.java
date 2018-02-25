@@ -18,32 +18,36 @@ package com.github.robozonky.common.remote;
 
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.core.Feature;
 
 import com.github.robozonky.internal.api.Settings;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder43;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 final class ProxyFactory {
 
-    private static final Feature CACHE = new BrowserCacheFeature();
-
-    public static ResteasyClient newResteasyClient(final RoboZonkyFilter filter) {
-        final ResteasyClient client = ProxyFactory.newResteasyClient();
-        client.register(filter);
-        return client;
-    }
-
     public static ResteasyClient newResteasyClient() {
+        final ResteasyClientBuilder builder = new ResteasyClientBuilder()
+                .readTimeout(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS), TimeUnit.SECONDS)
+                .connectTimeout(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS), TimeUnit.SECONDS);
+        /*
+         * In order to enable redirects, we need to configure the HTTP Client to support that. Unfortunately, if we then
+         * provide such client to the RESTEasy client builder, it will take the client as is and don't do other things
+         * that it would have otherwise done to a client that it itself created. Therefore, we do these things
+         * ourselves, represented by calling the HTTP engine builder.
+         */
+        final ApacheHttpClient43Engine engine = (ApacheHttpClient43Engine) new ClientHttpEngineBuilder43()
+                .resteasyClientBuilder(builder)
+                .build();
+        engine.setFollowRedirects(true);
         return new ResteasyClientBuilder()
-                .socketTimeout(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS), TimeUnit.SECONDS)
-                .establishConnectionTimeout(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS),
-                                            TimeUnit.SECONDS)
+                .httpEngine(engine)
                 .build();
     }
 
-    public static <T> T newProxy(final ResteasyClient client, final Class<T> api, final String url) {
-        return client.target(url).register(ProxyFactory.CACHE).proxy(api);
+    public static <T> T newProxy(final ResteasyClient client, final RoboZonkyFilter filter, final Class<T> api,
+                                 final String url) {
+        return client.target(url).register(filter).proxy(api);
     }
 }

@@ -25,21 +25,22 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<T> {
+class PaginatedApi<S, T extends EntityCollectionApi<S>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaginatedApi.class);
 
     private final AuthenticatedFilter filter;
     private final Class<T> api;
     private final String url;
+    private final ResteasyClient client;
 
-    PaginatedApi(final Class<T> api, final String url, final ZonkyApiToken token) {
+    PaginatedApi(final Class<T> api, final String url, final ZonkyApiToken token, final ResteasyClient client) {
         this.api = api;
         this.url = url;
         this.filter = new AuthenticatedFilter(token);
+        this.client = client;
     }
 
-    @Override
     public <Q> Q execute(final Function<T, Q> function) {
         return this.execute(function, new Select(), Sort.unspecified(), filter);
     }
@@ -52,16 +53,7 @@ class PaginatedApi<S, T extends EntityCollectionApi<S>> implements ApiBlueprint<
     }
 
     <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter) {
-        final ResteasyClient client = ProxyFactory.newResteasyClient(filter);
-        try {
-            return execute(function, client);
-        } finally {
-            client.close();
-        }
-    }
-
-    <Q> Q execute(final Function<T, Q> function, final ResteasyClient client) {
-        final T proxy = ProxyFactory.newProxy(client, api, url);
+        final T proxy = ProxyFactory.newProxy(client, filter, api, url);
         return function.apply(proxy);
     }
 

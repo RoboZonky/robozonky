@@ -29,7 +29,7 @@ class PaginatedApiTest {
 
     @Test
     void checkSort() {
-        final PaginatedApi p = spy(new PaginatedApi(null, null, null));
+        final PaginatedApi p = spy(new PaginatedApi(null, null, null, null));
         doReturn(null).when(p).execute(any(), any(), any(), any());
         final Function f = o -> null;
         p.execute(f);
@@ -42,7 +42,7 @@ class PaginatedApiTest {
         final Select sel = mock(Select.class);
         final Sort s = mock(Sort.class);
         final RoboZonkyFilter filter = new RoboZonkyFilter();
-        final PaginatedApi p = spy(new PaginatedApi(null, null, null));
+        final PaginatedApi p = spy(new PaginatedApi(null, null, null, null));
         doReturn(null).when(p).execute(eq(f), eq(filter));
         p.execute(f, sel, s, filter);
         verify(s).apply(filter);
@@ -52,7 +52,7 @@ class PaginatedApiTest {
 
     @Test
     void checkPagination() {
-        final PaginatedApi p = spy(new PaginatedApi(null, null, null));
+        final PaginatedApi p = spy(new PaginatedApi(null, null, null, null));
         doReturn(null).when(p).execute(any(), any(), any(), any());
         final Function f = o -> null;
         final Sort s = mock(Sort.class);

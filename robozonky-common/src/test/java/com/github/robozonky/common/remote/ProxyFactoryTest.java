@@ -27,6 +27,7 @@ class ProxyFactoryTest {
     @Test
     void api() {
         final ResteasyClient client = ProxyFactory.newResteasyClient();
-        assertThat(ProxyFactory.newProxy(client, LoanApi.class, "https://api.zonky.cz")).isNotNull();
+        final RoboZonkyFilter f = new RoboZonkyFilter();
+        assertThat(ProxyFactory.newProxy(client, f, LoanApi.class, "https://api.zonky.cz")).isNotNull();
     }
 }

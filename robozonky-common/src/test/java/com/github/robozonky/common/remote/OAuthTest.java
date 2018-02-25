@@ -34,14 +34,12 @@ class OAuthTest {
     void login() {
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
-        try (final OAuth oauth = new OAuth(wrapper)) {
-            oauth.login(USERNAME, PASSWORD.toCharArray());
-        }
+        final OAuth oauth = new OAuth(wrapper);
+        oauth.login(USERNAME, PASSWORD.toCharArray());
         verify(api, times(1))
                 .login(eq(USERNAME), eq(PASSWORD),
                        eq("password"),
                        eq("SCOPE_APP_WEB"));
-        assertThat(wrapper.isClosed()).isTrue();
     }
 
     @Test
@@ -54,10 +52,8 @@ class OAuthTest {
         when(api.refresh(eq(originalTokenId),
                          anyString(), anyString())).thenReturn(resultToken);
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
-        try (final OAuth oauth = new OAuth(wrapper)) {
-            final ZonkyApiToken returnedToken = oauth.refresh(originToken);
-            assertThat(returnedToken).isEqualTo(resultToken);
-        }
-        assertThat(wrapper.isClosed()).isTrue();
+        final OAuth oauth = new OAuth(wrapper);
+        final ZonkyApiToken returnedToken = oauth.refresh(originToken);
+        assertThat(returnedToken).isEqualTo(resultToken);
     }
 }

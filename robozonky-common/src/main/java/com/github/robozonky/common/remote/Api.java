@@ -16,45 +16,26 @@
 
 package com.github.robozonky.common.remote;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+class Api<T> {
 
-/**
- * Represents a close-able RESTEasy client proxy. Users should preferably call {@link #close()} after they're
- * done with the API.
- * @param <T> Type of the API to be handled.
- */
-class Api<T> implements ApiBlueprint<T>,
-                        AutoCloseable {
+    private final T proxy;
 
-    private final AtomicReference<ResteasyClient> client;
-    private final T api;
-
-    public Api(final T api) {
-        this(api, null);
+    public Api(final T proxy) {
+        this.proxy = proxy;
     }
 
-    public Api(final T api, final ResteasyClient client) {
-        this.client = new AtomicReference<>(client);
-        this.api = api;
+    <S> S execute(final Function<T, S> function) {
+        return function.apply(proxy);
     }
 
-    @Override
-    public <S> S execute(final Function<T, S> function) {
-        return function.apply(api);
-    }
-
-    boolean isClosed() {
-        return client.get() == null;
-    }
-
-    @Override
-    public void close() {
-        if (this.isClosed()) {
-            return;
-        }
-        client.getAndSet(null).close();
+    void execute(final Consumer<T> consumer) {
+        final Function<T, Void> wrapper = t -> {
+            consumer.accept(t);
+            return null;
+        };
+        execute(wrapper);
     }
 }

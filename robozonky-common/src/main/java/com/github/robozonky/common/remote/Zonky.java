@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
- * user. Consider {@link #logout()} when done, followed by {@link #close()}.
+ * user. Consider {@link #logout()} when done.
  */
-public class Zonky implements AutoCloseable {
+public class Zonky {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Zonky.class);
 
@@ -162,9 +162,7 @@ public class Zonky implements AutoCloseable {
     }
 
     public Loan getLoan(final int id) {
-        return Loan.sanitized(loanApi.execute(api -> {
-            return api.item(id);
-        }));
+        return Loan.sanitized(loanApi.execute(api -> api.item(id)));
     }
 
     /**
@@ -209,8 +207,4 @@ public class Zonky implements AutoCloseable {
         controlApi.execute(ControlApi::logout);
     }
 
-    @Override
-    public void close() {
-        this.controlApi.close();
-    }
 }
