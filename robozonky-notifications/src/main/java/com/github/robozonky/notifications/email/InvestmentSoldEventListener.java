@@ -33,7 +33,7 @@ class InvestmentSoldEventListener extends AbstractBalanceRegisteringEmailingList
     String getSubject(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
         final BigDecimal remaining = i.getRemainingPrincipal();
-        return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka č. " + i.getLoanId();
+        return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override

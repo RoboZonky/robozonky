@@ -28,8 +28,8 @@ class InvestmentRejectedEventListener extends AbstractEmailingListener<Investmen
 
     @Override
     String getSubject(final InvestmentRejectedEvent event) {
-        return "Investice zamítnuta - " + event.getRecommendation().intValue() + ",- Kč, " +
-                "půjčka č. " + event.getLoan().getId();
+        return "Investice zamítnuta - " + event.getRecommendation().intValue() + ",- Kč, " + "půjčka "
+                + Util.identifyLoan(event);
     }
 
     @Override

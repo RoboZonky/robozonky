@@ -27,7 +27,7 @@ class LoanDefaultedEventListener extends AbstractLoanTerminatedEmailingListener<
 
     @Override
     String getSubject(final LoanDefaultedEvent event) {
-        return "Půjčka č. " + event.getInvestment().getLoanId() + " byla zesplatněna";
+        return "Půjčka " + Util.identifyLoan(event) + " byla zesplatněna";
     }
 
     @Override

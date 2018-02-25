@@ -34,7 +34,7 @@ class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingLis
 
     @Override
     String getSubject(final ExecutionStartedEvent event) {
-        return "Zůstatek na Zonky účtu dosáhl " + this.targetBalance + ",- Kč";
+        return "Zůstatek na Zonky účtu přesáhl " + this.targetBalance + ",- Kč";
     }
 
     @Override
@@ -54,7 +54,7 @@ class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingLis
         // figure out whether or not the balance is over the threshold
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance();
         final int newBalance = event.getPortfolioOverview().getCzkAvailable();
-        final boolean balanceNowExceeded = newBalance >= targetBalance;
+        final boolean balanceNowExceeded = newBalance > targetBalance;
         final boolean wasFineLastTime = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() < targetBalance;
         if (balanceNowExceeded && wasFineLastTime) {
             // and continue with event-processing, possibly eventually sending the e-mail

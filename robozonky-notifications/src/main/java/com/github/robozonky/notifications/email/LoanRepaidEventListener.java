@@ -30,7 +30,7 @@ public class LoanRepaidEventListener extends AbstractEmailingListener<LoanRepaid
 
     @Override
     String getSubject(final LoanRepaidEvent event) {
-        return "Půjčka č. " + event.getLoan().getId() + " byla splacena";
+        return "Půjčka " + Util.identifyLoan(event) + " byla splacena";
     }
 
     @Override

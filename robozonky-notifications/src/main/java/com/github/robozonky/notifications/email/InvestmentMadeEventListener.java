@@ -32,7 +32,7 @@ class InvestmentMadeEventListener extends AbstractBalanceRegisteringEmailingList
     @Override
     String getSubject(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
-        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka č. " + i.getLoanId();
+        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override

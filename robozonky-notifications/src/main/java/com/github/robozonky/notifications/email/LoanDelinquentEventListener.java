@@ -30,11 +30,10 @@ class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquen
     @Override
     String getSubject(final LoanDelinquentEvent event) {
         final int threshold = event.getThresholdInDays();
-        final int loanId = event.getInvestment().getLoanId();
         if (threshold == 0) {
-            return "Půjčka č. " + loanId + " je nově v prodlení";
+            return "Půjčka " + Util.identifyLoan(event) + " je nově v prodlení";
         } else {
-            return "Půjčka č. " + loanId + " je " + threshold + " dní v prodlení";
+            return "Půjčka " + Util.identifyLoan(event) + " je " + threshold + " dní v prodlení";
         }
     }
 

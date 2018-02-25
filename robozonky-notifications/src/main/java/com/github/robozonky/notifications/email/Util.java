@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -43,6 +44,11 @@ class Util {
 
     private static Date toDate(final LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(Defaults.ZONE_ID).toInstant());
+    }
+
+    public static String identifyLoan(final LoanBased event) {
+        final Loan loan = event.getLoan();
+        return "č. " + loan.getId() + " (" + loan.getRating() + ", " + loan.getTermInMonths() + " m.)";
     }
 
     public static Map<String, Object> getLoanData(final Loan loan) {

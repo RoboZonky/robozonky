@@ -28,8 +28,8 @@ class InvestmentDelegatedEventListener extends AbstractEmailingListener<Investme
 
     @Override
     String getSubject(final InvestmentDelegatedEvent event) {
-        return "Investice delegována - " + event.getRecommendation().intValue() + ",- Kč, " +
-                "půjčka č. " + event.getLoan().getId();
+        return "Investice delegována - " + event.getRecommendation().intValue() + ",- Kč, " + "půjčka "
+                + Util.identifyLoan(event);
     }
 
     @Override

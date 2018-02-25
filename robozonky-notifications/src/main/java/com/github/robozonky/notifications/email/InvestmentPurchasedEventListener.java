@@ -31,7 +31,7 @@ class InvestmentPurchasedEventListener extends AbstractBalanceRegisteringEmailin
 
     @Override
     String getSubject(final InvestmentPurchasedEvent event) {
-        return "Zakoupena participace k půjčce č. " + event.getInvestment().getLoanId();
+        return "Zakoupena participace k půjčce " + Util.identifyLoan(event);
     }
 
     @Override

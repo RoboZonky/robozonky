@@ -28,7 +28,7 @@ class InvestmentSkippedEventListener extends AbstractEmailingListener<Investment
 
     @Override
     String getSubject(final InvestmentSkippedEvent event) {
-        return "Půjčka č. " + event.getLoan().getId() + " dočasně přeskočena";
+        return "Půjčka " + Util.identifyLoan(event) + " dočasně přeskočena";
     }
 
     @Override

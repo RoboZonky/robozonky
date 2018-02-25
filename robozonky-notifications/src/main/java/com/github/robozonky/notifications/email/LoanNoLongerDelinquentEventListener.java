@@ -27,7 +27,7 @@ class LoanNoLongerDelinquentEventListener extends AbstractLoanTerminatedEmailing
 
     @Override
     String getSubject(final LoanNoLongerDelinquentEvent event) {
-        return "Půjčka č. " + event.getInvestment().getLoanId() + " již není v prodlení";
+        return "Půjčka " + Util.identifyLoan(event) + " již není v prodlení";
     }
 
     @Override

@@ -26,7 +26,7 @@ class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent
 
     @Override
     String getSubject(final SaleOfferedEvent event) {
-        return "Participace k půjčce č. " + event.getInvestment().getLoanId() + " nabídnuta k prodeji";
+        return "Participace k půjčce " + Util.identifyLoan(event) + " nabídnuta k prodeji";
     }
 
     @Override
