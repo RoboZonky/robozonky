@@ -26,21 +26,21 @@ import freemarker.core.TemplateNumberFormat;
 import freemarker.core.TemplateValueFormatException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 
+/**
+ * Portions of this test are disabled on Java 8, as the percentage formatting for CZ locale changed in Java 9 and the
+ * test would just be too complicated if we wanted to cover both scenarios. (The change is that there was a space added
+ * between the number and the '%' character, which is the proper CZ way of doing this.
+ */
 class InterestNumberFormatFactoryTest {
 
-    @BeforeAll
-    static void checkJava9() { // turns out that CZ locale outputs on Java 8 are different
-        // TODO remove when Java 9 is the minimum platform
-        Assumptions.assumeTrue(System.getProperty("java.version").startsWith("9"), () -> "Need Java 9 to run.");
-    }
-
+    @DisabledOnJre(JRE.JAVA_8)
     @Test
     void formattingCzech() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0001");
@@ -51,6 +51,7 @@ class InterestNumberFormatFactoryTest {
         assertThat(result.trim()).isEqualTo("0,01" + (char) 160 + "%");
     }
 
+    @DisabledOnJre(JRE.JAVA_8)
     @Test
     void formattingCzech2() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.0000");
@@ -61,6 +62,7 @@ class InterestNumberFormatFactoryTest {
         assertThat(result.trim()).isEqualTo("0" + (char) 160 + "%");
     }
 
+    @DisabledOnJre(JRE.JAVA_8)
     @Test
     void formattingCzech3() throws TemplateValueFormatException, TemplateModelException {
         final BigDecimal n = new BigDecimal("0.001");
