@@ -194,4 +194,6 @@ public interface Investment {
     boolean isOnSmp();
 
     boolean canBeOffered();
+
+    boolean hasCollectionHistory();
 }

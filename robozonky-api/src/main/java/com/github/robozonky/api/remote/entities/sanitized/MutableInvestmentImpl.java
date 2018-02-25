@@ -32,7 +32,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private int loanId, id, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;
     private OffsetDateTime nextPaymentDate, investmentDate;
-    private boolean canBeOffered, isOnSmp;
+    private boolean canBeOffered, isOnSmp, hasCollectionHistory;
     private Boolean isInWithdrawal;
     private String loanName, nickname;
     private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
@@ -71,6 +71,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInWithdrawal = investment.isInWithdrawal();
         this.status = investment.getStatus();
         this.paymentStatus = investment.getPaymentStatus();
+        this.hasCollectionHistory = investment.hasCollectionHistory();
     }
 
     // TODO should calculate expected interest somehow
@@ -97,6 +98,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.status = InvestmentStatus.ACTIVE;
         this.paymentStatus = PaymentStatus.NOT_COVERED;
         this.investmentDate = loan.getMyInvestment().map(i -> i.getTimeCreated()).orElse(null);
+        this.hasCollectionHistory = false;
     }
 
     @Override
@@ -262,6 +264,12 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
+    public InvestmentBuilder setHasCollectionHistory(final boolean hasCollectionHistory) {
+        this.hasCollectionHistory = hasCollectionHistory;
+        return this;
+    }
+
+    @Override
     public Investment build() {
         Util.reportNulls(this);
         return this;
@@ -310,6 +318,11 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public boolean canBeOffered() {
         return canBeOffered;
+    }
+
+    @Override
+    public boolean hasCollectionHistory() {
+        return hasCollectionHistory;
     }
 
     @Override

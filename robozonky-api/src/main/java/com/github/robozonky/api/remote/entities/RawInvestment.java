@@ -32,7 +32,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 public class RawInvestment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
-    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal;
+    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal, hasCollectionHistory;
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
     private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate = OffsetDateTime.now(), nextPaymentDate = investmentDate.plusMonths(1),
@@ -72,6 +72,7 @@ public class RawInvestment extends BaseInvestment {
         this.smpFee = investment.getSmpFee().orElse(null);
         this.paidPenalty = investment.getPaidPenalty();
         this.rating = investment.getRating();
+        this.hasCollectionHistory = investment.hasCollectionHistory();
     }
 
     @XmlElement
@@ -259,5 +260,10 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public BigDecimal getSmpFee() {
         return smpFee;
+    }
+
+    @XmlElement
+    public boolean hasCollectionHistory() {
+        return hasCollectionHistory;
     }
 }

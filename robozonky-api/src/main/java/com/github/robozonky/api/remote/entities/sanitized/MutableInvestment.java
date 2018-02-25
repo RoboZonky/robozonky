@@ -25,57 +25,59 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 public interface MutableInvestment<T extends MutableInvestment<T>> extends Investment {
 
-    T setLoanId(final int loanId);
+    T setLoanId(int loanId);
 
-    T setAmountInvested(final BigDecimal amountInvested);
+    T setAmountInvested(BigDecimal amountInvested);
 
-    T setId(final int id);
+    T setId(int id);
 
-    T setLoanName(final String loanName);
+    T setLoanName(String loanName);
 
-    T setNickname(final String nickname);
+    T setNickname(String nickname);
 
-    T setInterestRate(final BigDecimal interestRate);
+    T setInterestRate(BigDecimal interestRate);
 
-    T setRating(final Rating rating);
+    T setRating(Rating rating);
 
-    T setOriginalTerm(final int originalTerm);
+    T setOriginalTerm(int originalTerm);
 
-    T setPaidPrincipal(final BigDecimal paidPrincipal);
+    T setPaidPrincipal(BigDecimal paidPrincipal);
 
-    T setDuePrincipal(final BigDecimal duePrincipal);
+    T setDuePrincipal(BigDecimal duePrincipal);
 
-    T setPaidInterest(final BigDecimal paidInterest);
+    T setPaidInterest(BigDecimal paidInterest);
 
-    T setDueInterest(final BigDecimal dueInterest);
+    T setDueInterest(BigDecimal dueInterest);
 
-    T setExpectedInterest(final BigDecimal expectedInterest);
+    T setExpectedInterest(BigDecimal expectedInterest);
 
-    T setPaidPenalty(final BigDecimal paidPenalty);
+    T setPaidPenalty(BigDecimal paidPenalty);
 
-    T setCurrentTerm(final int currentTerm);
+    T setCurrentTerm(int currentTerm);
 
-    T setRemainingMonths(final int remainingMonths);
+    T setRemainingMonths(int remainingMonths);
 
-    T setDaysPastDue(final int daysPastDue);
+    T setDaysPastDue(int daysPastDue);
 
-    T setRemainingPrincipal(final BigDecimal remainingPrincipal);
+    T setRemainingPrincipal(BigDecimal remainingPrincipal);
 
-    T setSmpFee(final BigDecimal smpFee);
+    T setSmpFee(BigDecimal smpFee);
 
-    T setNextPaymentDate(final OffsetDateTime nextPaymentDate);
+    T setNextPaymentDate(OffsetDateTime nextPaymentDate);
 
-    T setSmpSoldFor(final BigDecimal smpSoldFor);
+    T setSmpSoldFor(BigDecimal smpSoldFor);
 
-    T setOnSmp(final boolean isOnSmp);
+    T setOnSmp(boolean isOnSmp);
 
-    T setOfferable(final boolean canBeOffered);
+    T setOfferable(boolean canBeOffered);
 
-    T setInvestmentDate(final OffsetDateTime investmentDate);
+    T setInvestmentDate(OffsetDateTime investmentDate);
 
-    T setStatus(final InvestmentStatus investmentStatus);
+    T setStatus(InvestmentStatus investmentStatus);
 
-    T setPaymentStatus(final PaymentStatus paymentStatus);
+    T setPaymentStatus(PaymentStatus paymentStatus);
 
-    T setInWithdrawal(final boolean isInWithdrawal);
+    T setInWithdrawal(boolean isInWithdrawal);
+
+    T setHasCollectionHistory(boolean hasCollectionHistory);
 }
