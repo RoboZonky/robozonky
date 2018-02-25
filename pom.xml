@@ -51,7 +51,7 @@
     <version.org.apache.maven>3.5.2</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
     <surefire.version>2.19.1</surefire.version> <!-- 2.20 doesn't work with JUnit 5 -->
-    <version.org.jboss.resteasy>3.1.4.Final</version.org.jboss.resteasy>
+    <version.org.jboss.resteasy>3.5.0.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <version.org.antlr>4.7.1</version.org.antlr>
     <version.org.junit>5.0.3</version.org.junit>
@@ -124,30 +124,11 @@
       </dependency>
       <!-- JAX-RS. -->
       <dependency>
-        <groupId>org.jboss.spec.javax.ws.rs</groupId>
-        <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-        <version>1.0.1.Beta1</version>
-      </dependency>
-      <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jaxrs</artifactId>
+        <artifactId>resteasy-bom</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jackson2-provider</artifactId>
-        <version>${version.org.jboss.resteasy}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-client</artifactId>
-        <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion> <!-- Needs to be replaced by SLF4J. -->
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
-        </exclusions>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
