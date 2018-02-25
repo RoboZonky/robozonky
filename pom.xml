@@ -239,6 +239,11 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <dependency> <!-- For mockserver to function properly. Overrides a very old version coming from RESTEasy. -->
+        <groupId>com.github.fge</groupId>
+        <artifactId>jackson-coreutils</artifactId>
+        <version>1.8</version>
+      </dependency>
       <!-- Logging. -->
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -325,6 +330,9 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>${java.version}</source>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -473,7 +481,6 @@
           </dependencies>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>

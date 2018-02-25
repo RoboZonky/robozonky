@@ -77,18 +77,7 @@ public abstract class Refreshable<T> implements Runnable,
      * @return The returned instance will never change it's {@link #get()}.
      */
     public static <I> Refreshable<I> createImmutable(final I toReturn) {
-        return new Refreshable<I>(toReturn == null ? "null" : toReturn.toString()) {
-
-            @Override
-            protected String getLatestSource() {
-                return "";
-            }
-
-            @Override
-            protected Optional<I> transform(final String source) {
-                return Optional.ofNullable(toReturn);
-            }
-        };
+        return new ImmutableRefreshable<>(toReturn);
     }
 
     /**
@@ -247,6 +236,26 @@ public abstract class Refreshable<T> implements Runnable,
          */
         default void valueChanged(final T oldValue, final T newValue) {
             valueSet(newValue);
+        }
+    }
+
+    private static final class ImmutableRefreshable<I> extends Refreshable<I> {
+
+        private final I toReturn;
+
+        public ImmutableRefreshable(final I toReturn) {
+            super(toReturn == null ? "null" : toReturn.toString());
+            this.toReturn = toReturn;
+        }
+
+        @Override
+        protected String getLatestSource() {
+            return "";
+        }
+
+        @Override
+        protected Optional<I> transform(final String source) {
+            return Optional.ofNullable(toReturn);
         }
     }
 

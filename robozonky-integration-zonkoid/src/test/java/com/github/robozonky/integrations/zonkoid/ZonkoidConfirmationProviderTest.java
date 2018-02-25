@@ -57,12 +57,7 @@ class ZonkoidConfirmationProviderTest {
     }
 
     private void verifyClientRequest() {
-        server.verify(request()
-                              .withPath(ZonkoidConfirmationProvider.PATH)
-                              .withHeader("Accept", "text/plain")
-                              .withHeader("Authorization")
-                              .withHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT),
-                      once());
+        server.verify(request().withPath(ZonkoidConfirmationProvider.PATH), once());
     }
 
     private boolean execute(final int code) {
@@ -125,8 +120,7 @@ class ZonkoidConfirmationProviderTest {
         assertThatThrownBy(() -> ZonkoidConfirmationProvider.handleError(null, 0, 0, "some",
                                                                          UUID.randomUUID().toString(),
                                                                          new RuntimeException()))
-                .isInstanceOf(
-                        IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -134,13 +128,16 @@ class ZonkoidConfirmationProviderTest {
         final int loanId = 1;
         final RequestId r = new RequestId("user@somewhere.cz", "apitest".toCharArray());
         final HttpPost post = ZonkoidConfirmationProvider.getRequest(r, loanId, 200, "https", "somewhere");
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(post.getFirstHeader("Content-Type").getValue()).isEqualTo(
-                "application/x-www-form-urlencoded");
-        softly.assertThat(post.getFirstHeader("Authorization").getValue())
-                .isEqualTo(ZonkoidConfirmationProvider.getAuthenticationString(r, loanId));
-        softly.assertThat(post.getEntity()).isInstanceOf(UrlEncodedFormEntity.class);
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(post.getFirstHeader("Accept").getValue()).isEqualTo("text/plain");
+            softly.assertThat(post.getFirstHeader("Authorization").getValue())
+                    .isNotEmpty()
+                    .isEqualTo(ZonkoidConfirmationProvider.getAuthenticationString(r, loanId));
+            softly.assertThat(post.getFirstHeader("Content-Type").getValue()).isEqualTo(
+                    "application/x-www-form-urlencoded");
+            softly.assertThat(post.getEntity()).isInstanceOf(UrlEncodedFormEntity.class);
+            softly.assertThat(post.getFirstHeader("User-Agent").getValue()).isEqualTo(Defaults.ROBOZONKY_USER_AGENT);
+        });
     }
 
     @Test
