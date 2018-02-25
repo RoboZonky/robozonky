@@ -68,7 +68,7 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
         return strategyProvider.get()
                 .map(strategy -> invest(portfolio, strategy, marketplace))
                 .orElseGet(() -> {
-                    LOGGER.info("Asleep as there is no strategy.");
+                    LOGGER.info("Marketplace is disabled by the strategy.");
                     return Collections.emptyList();
                 });
     }

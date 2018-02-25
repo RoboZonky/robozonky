@@ -37,6 +37,10 @@ public class StrategyProvider implements Refreshable.RefreshListener<String> {
     private final AtomicReference<SellStrategy> toSell = new AtomicReference<>();
     private final AtomicReference<PurchaseStrategy> toPurchase = new AtomicReference<>();
 
+    StrategyProvider() {
+        // no external instances
+    }
+
     public static StrategyProvider createFor(final String strategyLocation) {
         final RefreshableStrategy strategy = new RefreshableStrategy(strategyLocation);
         final StrategyProvider sp = new StrategyProvider(); // will always have the latest parsed strategies
@@ -45,23 +49,30 @@ public class StrategyProvider implements Refreshable.RefreshListener<String> {
         return sp;
     }
 
-    StrategyProvider() {
-        // no external instances
+    private static void inform(final AtomicReference<?> ref, final String type) {
+        if (ref.get() == null) {
+            LOGGER.info("{} strategy missing, all such operations are disabled.", type);
+        } else {
+            LOGGER.info("{} strategy correctly loaded.", type);
+        }
     }
 
     @Override
     public void valueSet(final String newValue) {
         LOGGER.trace("Loading strategies.");
         toInvest.set(StrategyLoader.toInvest(newValue).orElse(null));
+        inform(toInvest, "Investment");
         toPurchase.set(StrategyLoader.toPurchase(newValue).orElse(null));
+        inform(toPurchase, "Purchasing");
         toSell.set(StrategyLoader.toSell(newValue).orElse(null));
+        inform(toSell, "Selling");
         LOGGER.trace("Finished.");
     }
 
     @Override
     public void valueUnset(final String oldValue) {
         Stream.of(toInvest, toSell, toPurchase).forEach(ref -> ref.set(null));
-        LOGGER.trace("Removed all strategies.");
+        LOGGER.warn("There are no strategies, all operations are disabled.");
     }
 
     @Override
