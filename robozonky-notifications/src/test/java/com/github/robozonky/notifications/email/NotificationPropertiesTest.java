@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Properties;
 
 import com.github.robozonky.test.AbstractRoboZonkyTest;
-import com.github.robozonky.util.Refreshable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,9 +37,7 @@ class NotificationPropertiesTest extends AbstractRoboZonkyTest {
             NotificationPropertiesTest.class.getResource("notifications-windows-encoding.cfg");
 
     private static Optional<NotificationProperties> getProperties() {
-        final Refreshable<NotificationProperties> r = new RefreshableNotificationProperties();
-        r.run();
-        return r.get();
+        return new RefreshableNotificationProperties().get();
     }
 
     @BeforeEach
