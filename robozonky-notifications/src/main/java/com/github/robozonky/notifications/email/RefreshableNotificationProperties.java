@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.Refreshable;
-import com.github.robozonky.util.Scheduler;
 
 public class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
 
@@ -38,7 +37,13 @@ public class RefreshableNotificationProperties extends Refreshable<NotificationP
     static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
 
     RefreshableNotificationProperties() {
-        Scheduler.inBackground().submit(this, Settings.INSTANCE.getRemoteResourceRefreshInterval());
+        /*
+         * force the code to have a value right away. this is done to ensure that even the event listeners initialized
+         * immediately after this call have notification properties available - otherwise initial emails of the platform
+         * wouldn't have been sent until this Refreshable has had time to initialize. this has been a problem in the
+         * installer already, as evidenced by https://github.com/RoboZonky/robozonky/issues/216.
+         */
+        run();
     }
 
     private static String readUrl(final URL url) throws IOException {
