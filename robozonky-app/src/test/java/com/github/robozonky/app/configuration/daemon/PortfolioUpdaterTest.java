@@ -41,6 +41,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         assertSoftly(softly -> {
             softly.assertThat(instance.getBlockedAmountsUpdater()).isNotNull();
             softly.assertThat(instance.isUpdating()).isTrue(); // by default it's true
+            softly.assertThat(instance.getRegisteredDependants()).hasSize(4); // expected contents
         });
     }
 

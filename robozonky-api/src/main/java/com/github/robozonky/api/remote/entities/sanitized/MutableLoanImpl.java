@@ -88,9 +88,10 @@ final class MutableLoanImpl extends AbstractMutableLoanImpl<LoanBuilder> impleme
         if (knownBorrowerNicknames == null) {
             this.knownBorrowerNicknames = Collections.emptySortedSet();
         } else {
-            this.knownBorrowerNicknames = Stream.concat(knownBorrowerNicknames.stream(), Stream.of(getNickName()))
+            final SortedSet<String> result = Stream.concat(knownBorrowerNicknames.stream(), Stream.of(getNickName()))
                     .filter(Objects::nonNull)
                     .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
+            this.knownBorrowerNicknames = Collections.unmodifiableSortedSet(result);
         }
         return this;
     }
@@ -117,6 +118,6 @@ final class MutableLoanImpl extends AbstractMutableLoanImpl<LoanBuilder> impleme
 
     @Override
     public Collection<String> getKnownBorrowerNicknames() {
-        return Collections.unmodifiableCollection(knownBorrowerNicknames);
+        return knownBorrowerNicknames;
     }
 }

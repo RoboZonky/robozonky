@@ -19,7 +19,10 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -36,7 +39,16 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void standard() {
+        final int loanId = 1;
+        final MarketplaceLoan ml = MarketplaceLoan.custom()
+                .setId(loanId)
+                .build();
+        final Loan l = Loan.custom()
+                .setId(loanId)
+                .build();
         final Zonky z = harmlessZonky(10_000);
+        when(z.getAvailableLoans((Select) notNull())).thenReturn(Stream.of(ml));
+        when(z.getLoan(eq(loanId))).thenReturn(l);
         final Authenticated a = mockAuthentication(z);
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(t -> {
@@ -45,6 +57,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
                                                       Duration.ofSeconds(1));
         d.run();
         verify(z).getAvailableLoans((Select) notNull());
+        verify(z).getLoan(ml.getId());
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 }

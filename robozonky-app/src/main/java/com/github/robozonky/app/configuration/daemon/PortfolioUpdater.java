@@ -18,6 +18,7 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -81,6 +82,10 @@ public class PortfolioUpdater implements Runnable,
     public void registerDependant(final PortfolioDependant updater) {
         LOGGER.debug("Registering dependant: {}.", updater);
         dependants.add(updater);
+    }
+
+    Collection<PortfolioDependant> getRegisteredDependants() {
+        return Collections.unmodifiableCollection(dependants);
     }
 
     public boolean isUpdating() {
