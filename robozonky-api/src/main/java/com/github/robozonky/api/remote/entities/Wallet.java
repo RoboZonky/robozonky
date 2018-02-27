@@ -30,6 +30,10 @@ public class Wallet extends BaseEntity {
         // for JAXB
     }
 
+    public Wallet(final BigDecimal balance) {
+        this(0, 0, balance, balance);
+    }
+
     public Wallet(final BigDecimal balance, final BigDecimal availableBalance) {
         this(0, 0, balance, availableBalance);
     }

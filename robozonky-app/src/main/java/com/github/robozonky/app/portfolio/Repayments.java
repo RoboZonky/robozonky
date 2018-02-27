@@ -60,8 +60,7 @@ public class Repayments implements PortfolioDependant {
 
     @Override
     public void accept(final Portfolio portfolio, final Authenticated authenticated) {
-        final PortfolioOverview portfolioOverview =
-                authenticated.call(zonky -> portfolio.calculateOverview(zonky, isDryRun));
+        final PortfolioOverview portfolioOverview = portfolio.calculateOverview();
         final Collection<Integer> active = getActiveLastTime();
         // detect and process loans that have been fully repaid, comparing to the last time active loans were checked
         final Stream<Investment> repaid =

@@ -66,7 +66,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
         // check events
         final List<Event> events = this.getNewEvents();
@@ -76,7 +76,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noItems() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Authenticated auth = mock(Authenticated.class);
         when(auth.call(isNotNull())).thenAnswer(invocation -> {
@@ -99,13 +99,13 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
-        final Zonky zonky = mockApi();
-        final Portfolio portfolio = Portfolio.create(zonky);
-        when(zonky.getLoan(eq(loanId))).thenReturn(loan);
+        final Zonky z = mockApi();
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
+        when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Authenticated auth = mock(Authenticated.class);
         when(auth.call(isNotNull())).thenAnswer(invocation -> {
             final Function<Zonky, Collection<RawInvestment>> f = invocation.getArgument(0);
-            return f.apply(zonky);
+            return f.apply(z);
         });
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();

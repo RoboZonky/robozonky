@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.RemoteBalance;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
@@ -42,7 +43,31 @@ import static org.mockito.Mockito.*;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
+    private static final class MockedBalance implements RemoteBalance {
+
+        private BigDecimal difference = BigDecimal.ZERO;
+        private final Zonky zonky;
+
+        public MockedBalance(final Zonky zonky) {
+            this.zonky = zonky;
+        }
+
+        @Override
+        public void update(final BigDecimal change) {
+            difference = difference.add(change);
+        }
+
+        @Override
+        public BigDecimal get() {
+            return zonky.getWallet().getAvailableBalance().add(difference);
+        }
+    }
+
     private static final Random RANDOM = new Random(0);
+
+    protected static RemoteBalance mockBalance(final Zonky zonky) {
+        return new MockedBalance(zonky);
+    }
 
     protected static MyInvestment mockMyInvestment() {
         return mockMyInvestment(OffsetDateTime.now());

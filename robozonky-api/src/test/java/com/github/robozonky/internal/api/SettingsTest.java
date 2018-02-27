@@ -57,7 +57,7 @@ class SettingsTest {
                         .as(r.toString())
                         .matches(new SettingsTest.TemporalPredicate(0));
             });
-            softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(-1);
+            softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
@@ -89,7 +89,7 @@ class SettingsTest {
                 softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
                         .matches(new SettingsTest.TemporalPredicate(1000));
             });
-            softly.assertThat(Settings.INSTANCE.getDefaultDryRunBalance()).isEqualTo(1000);
+            softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(1000);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())

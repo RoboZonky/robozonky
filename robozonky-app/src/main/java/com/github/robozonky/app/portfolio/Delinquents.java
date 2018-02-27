@@ -209,14 +209,12 @@ public class Delinquents {
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
      * @param auth The API that will be used to retrieve the loan instances.
      * @param portfolio Holds information about investments.
-     * @param isDryRun Whether or not to run in a dry run mode.
      */
-    public static void update(final Authenticated auth, final Portfolio portfolio, final boolean isDryRun) {
-        final PortfolioOverview portfolioOverview = auth.call(zonky -> portfolio.calculateOverview(zonky, isDryRun));
+    public static void update(final Authenticated auth, final Portfolio portfolio) {
         update(getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
                getWithPaymentStatus(portfolio, PaymentStatus.getDone()),
                portfolio::lookupOrFail,
                id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)),
-               portfolioOverview);
+               portfolio.calculateOverview());
     }
 }

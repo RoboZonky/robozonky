@@ -61,11 +61,6 @@ public class Selling implements PortfolioDependant {
         this.isDryRun = isDryRun;
     }
 
-    private static PortfolioOverview newPortfolioOverview(final Portfolio portfolio, final boolean isDryRun,
-                                                          final Authenticated auth) {
-        return auth.call(zonky -> portfolio.calculateOverview(zonky, isDryRun));
-    }
-
     private InvestmentDescriptor getDescriptor(final Investment i, final Authenticated auth) {
         return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, zonky)));
     }
@@ -86,7 +81,7 @@ public class Selling implements PortfolioDependant {
     }
 
     private void sell(final Portfolio portfolio, final SellStrategy strategy, final Authenticated auth) {
-        final PortfolioOverview overview = newPortfolioOverview(portfolio, isDryRun, auth);
+        final PortfolioOverview overview = portfolio.calculateOverview();
         final Set<InvestmentDescriptor> eligible = portfolio.getActiveForSecondaryMarketplace().parallel()
                 .map(i -> getDescriptor(i, auth))
                 .collect(Collectors.toSet());
@@ -96,7 +91,7 @@ public class Selling implements PortfolioDependant {
                 .map(r -> auth.call(zonky -> processInvestment(zonky, r)))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        Events.fire(new SellingCompletedEvent(investmentsSold, newPortfolioOverview(portfolio, isDryRun, auth)));
+        Events.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
     }
 
     /**

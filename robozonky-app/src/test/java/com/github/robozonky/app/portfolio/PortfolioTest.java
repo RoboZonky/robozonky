@@ -34,7 +34,6 @@ import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -74,7 +73,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Investment i2 = mockInvestment(PaymentStatus.DUE);
         final Investment i3 = mockInvestment(PaymentStatus.WRITTEN_OFF); // ignored because not interested
         final Investment i4 = mockSold(); // ignored because sold
-        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4));
+        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4), null);
         final PaymentStatuses p = PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE);
         assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
     }
@@ -86,27 +85,8 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Investment i3 = mockInvestment(false, false);
         final Investment i4 = mockInvestment(false, true);
         final Investment i5 = mockSold(); // ignored because sold
-        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4, i5));
+        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4, i5), null);
         assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
-    }
-
-    @Test
-    void liveBalance() {
-        final Portfolio instance = new Portfolio();
-        final int balance = 10_000;
-        final Zonky zonky = harmlessZonky(balance);
-        assertThat(instance.calculateOverview(zonky, false).getCzkAvailable())
-                .isEqualTo(balance);
-    }
-
-    @Test
-    void dryRunBalance() {
-        final Portfolio instance = new Portfolio();
-        final int balance = 10_000;
-        final Zonky zonky = harmlessZonky(balance - 1);
-        System.setProperty(Settings.Key.DEFAULTS_DRY_RUN_BALANCE.getName(), String.valueOf(balance));
-        assertThat(instance.calculateOverview(zonky, true).getCzkAvailable())
-                .isEqualTo(balance);
     }
 
     @Test
@@ -121,7 +101,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
                                                    TransactionCategory.SMP_SALE_FEE);
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = new Portfolio(Collections.singletonList(i));
+        final Portfolio portfolio = new Portfolio(Collections.singletonList(i), mockBalance(zonky));
         assertThat(portfolio.wasOnceSold(l)).isFalse();
         Investment.putOnSmp(i);
         assertThat(portfolio.wasOnceSold(l)).isTrue();

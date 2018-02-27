@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.purchasing;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,7 +66,7 @@ final class Session {
         this.isDryRun = dryRun;
         this.stillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
-        this.portfolioOverview = portfolio.calculateOverview(zonky, dryRun);
+        this.portfolioOverview = portfolio.calculateOverview();
     }
 
     public static Collection<Investment> purchase(final Portfolio portfolio, final Zonky api,
@@ -151,9 +150,8 @@ final class Session {
         investmentsMadeNow.add(i);
         final int id = i.getLoanId();
         stillAvailable.removeIf(l -> l.item().getLoanId() == id);
-        final BigDecimal amount = i.getOriginalPrincipal();
-        portfolio.newBlockedAmount(zonky, new BlockedAmount(id, amount, TransactionCategory.SMP_BUY));
-        final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(amount);
-        portfolioOverview = portfolio.calculateOverview(newBalance);
+        portfolio.newBlockedAmount(zonky, new BlockedAmount(id, i.getOriginalPrincipal(), TransactionCategory.SMP_BUY));
+        portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
+        portfolioOverview = portfolio.calculateOverview();
     }
 }

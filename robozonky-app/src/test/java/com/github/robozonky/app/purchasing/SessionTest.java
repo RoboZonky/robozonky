@@ -56,7 +56,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void empty() {
         final Zonky z = mockZonky();
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.emptyList(), null, true);
         assertThat(i).isEmpty();
     }
@@ -76,7 +76,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                 });
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Zonky z = mockZonky();
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()),
                                                           true);
@@ -109,17 +109,17 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                             .map(ParticipationDescriptor::recommend)
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
-        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = spy(Portfolio.create(zonky));
+        final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
+        when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()),
                                                           true);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
-        verify(zonky, never()).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(zonky),
+        verify(z, never()).purchase(eq(p));
+        verify(portfolio).newBlockedAmount(eq(z),
                                            argThat((a) -> a.getLoanId() == l.getId()));
     }
 
@@ -143,17 +143,17 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                             .map(ParticipationDescriptor::recommend)
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final Zonky zonky = mockZonky(BigDecimal.valueOf(100_000));
-        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = spy(Portfolio.create(zonky));
+        final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
+        when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, zonky, Collections.singleton(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()),
                                                           false);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
-        verify(zonky).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(zonky),
+        verify(z).purchase(eq(p));
+        verify(portfolio).newBlockedAmount(eq(z),
                                            argThat((a) -> a.getLoanId() == l.getId()));
     }
 }

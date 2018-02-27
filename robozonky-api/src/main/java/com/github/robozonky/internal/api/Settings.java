@@ -193,8 +193,8 @@ public enum Settings {
         return Duration.ofSeconds(get(Settings.Key.DEFAULTS_CAPTCHA_DELAY, 0));
     }
 
-    public int getDefaultDryRunBalance() {
-        return get(Settings.Key.DEFAULTS_DRY_RUN_BALANCE, -1);
+    public int getDryRunBalanceMinimum() {
+        return get(Settings.Key.DRY_RUN_BALANCE_MINIMUM, -1);
     }
 
     public int getDefaultApiPageSize() {
@@ -215,7 +215,6 @@ public enum Settings {
         DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),
         DEFAULTS_CAPTCHA_DELAY("robozonky.default.captcha_protection_seconds"),
-        DEFAULTS_DRY_RUN_BALANCE("robozonky.default.dry_run_balance"),
         DEFAULTS_API_PAGE_SIZE("robozonky.default.api_page_size"),
         CAPTCHA_DELAY_AAAAA("robozonky.aaaaa_loan_protection_seconds"),
         CAPTCHA_DELAY_AAAA("robozonky.aaaa_loan_protection_seconds"),
@@ -225,6 +224,7 @@ public enum Settings {
         CAPTCHA_DELAY_B("robozonky.b_loan_protection_seconds"),
         CAPTCHA_DELAY_C("robozonky.c_loan_protection_seconds"),
         CAPTCHA_DELAY_D("robozonky.d_loan_protection_seconds"),
+        DRY_RUN_BALANCE_MINIMUM("robozonky.dry_run_balance_minimum"),
         STATE_FILE_LOCATION("robozonky.state_file");
 
         private final String name;

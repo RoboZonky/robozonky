@@ -31,6 +31,7 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
+import com.github.robozonky.app.portfolio.RemoteBalance;
 import com.github.robozonky.app.portfolio.Repayments;
 import com.github.robozonky.app.portfolio.Selling;
 import com.github.robozonky.util.Backoff;
@@ -48,28 +49,33 @@ public class PortfolioUpdater implements Runnable,
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
     private final Duration retryFor;
+    private final RemoteBalance balance;
 
     PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated,
+                     final RemoteBalance balance,
                      final Duration retryFor) {
         this.shutdownCall = shutdownCall;
         this.authenticated = authenticated;
+        this.balance = balance;
         this.retryFor = retryFor;
         // run update of blocked amounts automatically with every portfolio update
         this.blockedAmountsUpdater = new BlockedAmountsUpdater(authenticated, this);
         registerDependant(blockedAmountsUpdater.getDependant());
     }
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated) {
-        this(shutdownCall, authenticated, Duration.ofHours(1));
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated,
+                     final RemoteBalance balance) {
+        this(shutdownCall, authenticated, balance, Duration.ofHours(1));
     }
 
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Authenticated auth,
                                           final StrategyProvider sp, final boolean isDryRun) {
-        final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth);
+        final RemoteBalance balance = RemoteBalance.create(auth, isDryRun);
+        final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
         // update loans repaid with every portfolio update
         updater.registerDependant(new Repayments(isDryRun));
         // update delinquents automatically with every portfolio update
-        updater.registerDependant((p, a) -> Delinquents.update(a, p, isDryRun));
+        updater.registerDependant((p, a) -> Delinquents.update(a, p));
         // attempt to sell participations after every portfolio update
         updater.registerDependant(new Selling(sp::getToSell, isDryRun));
         return updater;
@@ -93,7 +99,7 @@ public class PortfolioUpdater implements Runnable,
     }
 
     private Portfolio runIt() {
-        final Portfolio result = authenticated.call(Portfolio::create);
+        final Portfolio result = authenticated.call(zonky -> Portfolio.create(zonky, balance));
         final CompletableFuture<Portfolio> combined = dependants.stream()
                 .map(d -> (Function<Portfolio, Portfolio>) folio -> {
                     LOGGER.trace("Running {}.", d);

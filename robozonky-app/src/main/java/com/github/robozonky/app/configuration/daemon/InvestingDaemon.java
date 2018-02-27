@@ -34,6 +34,7 @@ import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
+import com.github.robozonky.internal.api.Defaults;
 
 class InvestingDaemon extends DaemonOperation {
 
@@ -49,6 +50,14 @@ class InvestingDaemon extends DaemonOperation {
                            final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
         this.investor = (p, a) -> {
+            // don't query anything unless we have enough money to invest
+            final int balance = p.getRemoteBalance().get().intValue();
+            final int minimum = Defaults.MINIMUM_INVESTMENT_IN_CZK;
+            if (balance < minimum) {
+                LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
+                return;
+            }
+            // query marketplace for investment opportunities
             final Investing i = new Investing(builder, strategy, a, maximumSleepPeriod);
             final Collection<MarketplaceLoan> loans =
                     a.call(zonky -> zonky.getAvailableLoans(SELECT)).collect(Collectors.toList());
@@ -69,6 +78,7 @@ class InvestingDaemon extends DaemonOperation {
                     })
                     .map(LoanDescriptor::new)
                     .collect(Collectors.toList());
+            // trigger the strategy
             i.apply(p, descriptors);
         };
     }

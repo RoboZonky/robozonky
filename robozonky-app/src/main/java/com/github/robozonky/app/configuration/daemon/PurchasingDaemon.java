@@ -29,6 +29,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.purchasing.Purchasing;
+import com.github.robozonky.common.remote.Select;
 
 class PurchasingDaemon extends DaemonOperation {
 
@@ -39,8 +40,10 @@ class PurchasingDaemon extends DaemonOperation {
                             final Duration maximumSleepPeriod, final Duration refreshPeriod, final boolean isDryRun) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
         this.investor = (folio, api) -> {
+            final long balance = folio.getRemoteBalance().get().longValue();
+            final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
             final Collection<Participation> p =
-                    api.call(zonky -> zonky.getAvailableParticipations().collect(Collectors.toList()));
+                    api.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
             new Purchasing(strategy, api, maximumSleepPeriod, isDryRun).apply(folio, p);
         };
     }

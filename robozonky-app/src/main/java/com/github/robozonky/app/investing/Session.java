@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.investing;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,7 +76,7 @@ final class Session {
                 .filter(l -> portfolio.getPending().noneMatch(i -> isSameLoan(l, i)))
                 .collect(Collectors.toList());
         this.portfolio = portfolio;
-        this.portfolioOverview = portfolio.calculateOverview(zonky, investor.isDryRun());
+        this.portfolioOverview = portfolio.calculateOverview();
     }
 
     private static boolean isSameLoan(final LoanDescriptor l, final Investment i) {
@@ -199,11 +198,11 @@ final class Session {
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> isSameLoan(l, i));
-        final BigDecimal amountInvested = i.getOriginalPrincipal();
-        final BlockedAmount b = new BlockedAmount(i.getLoanId(), amountInvested, TransactionCategory.INVESTMENT);
+        final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getOriginalPrincipal(),
+                                                  TransactionCategory.INVESTMENT);
         portfolio.newBlockedAmount(zonky, b);
-        final BigDecimal newBalance = BigDecimal.valueOf(portfolioOverview.getCzkAvailable()).subtract(amountInvested);
-        portfolioOverview = portfolio.calculateOverview(newBalance);
+        portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
+        portfolioOverview = portfolio.calculateOverview();
     }
 
     private void discard(final LoanDescriptor loan) {

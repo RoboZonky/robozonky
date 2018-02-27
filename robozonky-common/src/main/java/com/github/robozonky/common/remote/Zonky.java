@@ -191,6 +191,15 @@ public class Zonky {
     }
 
     /**
+     * Retrieve participations from secondary marketplace via {@link ParticipationApi}.
+     * @param select Rules to filter the selection by.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Participation> getAvailableParticipations(final Select select) {
+        return Zonky.getStream(participationApi, select);
+    }
+
+    /**
      * Retrieve loans from marketplace via {@link LoanApi}, in a given order.
      * @param ordering Ordering in which the results should be returned.
      * @return All items from the remote API, lazy-loaded.

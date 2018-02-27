@@ -75,7 +75,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Participation mock = mock(Participation.class);
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockAuthentication(zonky), Duration.ofMinutes(60), true);
-        final Portfolio portfolio = Portfolio.create(zonky);
+        final Portfolio portfolio = Portfolio.create(zonky, mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(2);
@@ -90,7 +90,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = mockApi();
         final Purchasing exec =
                 new Purchasing(ALL_ACCEPTING, mockAuthentication(zonky), Duration.ofMinutes(60), true);
-        final Portfolio portfolio = Portfolio.create(zonky);
+        final Portfolio portfolio = Portfolio.create(zonky, mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();
         assertThat(e).isEmpty();

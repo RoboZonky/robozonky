@@ -56,11 +56,11 @@ class SessionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void constructor() {
-        final Zonky zonky = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
-        final Portfolio portfolio = Portfolio.create(zonky);
-        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(zonky), zonky);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
+        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(z), z);
         assertSoftly(softly -> {
             softly.assertThat(it.getAvailable())
                     .isNotSameAs(lds)
@@ -79,14 +79,14 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final SessionState sst = new SessionState(lds);
         sst.discard(ld);
         // setup APIs
-        final Zonky zonky = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        when(zonky.getLoan(eq(loanId2))).thenReturn(ld2.item());
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
+        when(z.getLoan(eq(loanId2))).thenReturn(ld2.item());
         // prepare portfolio that has the other loan as pending
-        final Portfolio portfolio = Portfolio.create(zonky);
-        portfolio.newBlockedAmount(zonky, new BlockedAmount(loanId2, BigDecimal.valueOf(200),
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
+        portfolio.newBlockedAmount(z, new BlockedAmount(loanId2, BigDecimal.valueOf(200),
                                                             TransactionCategory.SMP_BUY));
         // test that the loans are not available
-        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(zonky), zonky);
+        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(z), z);
         assertSoftly(softly -> {
             softly.assertThat(it.getAvailable())
                     .hasSize(1)
@@ -116,7 +116,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = ld.item().getId();
         when(z.getLoan(eq(loanId))).thenReturn(ld.item());
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
-        final Portfolio portfolio = spy(Portfolio.create(z));
+        final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
         final Collection<Investment> i = Session.invest(portfolio, getInvestor(z), z, lds,
                                                         mockStrategy(loanId, amount));
         // check that one investment was made
@@ -138,7 +138,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     void underBalance() {
         // setup APIs
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         // run test
         final Session it = new Session(portfolio, Collections.emptySet(), getInvestor(z), z);
         final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
@@ -155,7 +155,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
         final RecommendedLoan recommendation =
                 AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Session t = new Session(portfolio, Collections.singleton(recommendation.descriptor()), getInvestor(z), z);
         final boolean result = t.invest(recommendation);
         // verify result
@@ -171,7 +171,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = mock(Investor.class);
         doThrow(thrown).when(p).invest(eq(r), anyBoolean());
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Session t = new Session(portfolio, Collections.emptySet(), p, z);
         assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
     }
@@ -184,7 +184,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Session t = new Session(portfolio, Collections.emptySet(), p, z);
         final boolean result = t.invest(r);
         assertThat(result).isFalse();
@@ -207,7 +207,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, z);
         final boolean result = t.invest(r);
         assertThat(result).isFalse();
@@ -230,7 +230,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, z);
         final boolean result = t.invest(r);
         assertThat(result).isFalse();
@@ -254,7 +254,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.empty()).when(p).getConfirmationProviderId();
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, z);
         final boolean result = t.invest(r);
         assertThat(result).isFalse();
@@ -278,7 +278,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         doReturn(new ZonkyResponse(amountToInvest))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
-        final Portfolio portfolio = Portfolio.create(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Session t = new Session(portfolio, Collections.emptySet(), p, z);
         final boolean result = t.invest(r);
         assertThat(result).isTrue();

@@ -51,7 +51,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         final Authenticated a = mockAuthentication(z);
         final PortfolioDependant dependant = mock(PortfolioDependant.class);
         final PortfolioUpdater instance = new PortfolioUpdater((t) -> {
-        }, a);
+        }, a, mockBalance(z));
         instance.registerDependant(dependant);
         instance.run();
         verify(a, times(2)).call(any()); // this is the call to update Portfolio
@@ -67,7 +67,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(z).getInvestments(); // will always fail
         final Authenticated a = mockAuthentication(z);
         final Consumer<Throwable> t = mock(Consumer.class);
-        final PortfolioUpdater instance = new PortfolioUpdater(t, a, Duration.ofSeconds(2));
+        final PortfolioUpdater instance = new PortfolioUpdater(t, a, mockBalance(z), Duration.ofSeconds(2));
         instance.run();
         assertSoftly(softly -> {
             softly.assertThat(instance.get()).isEmpty();

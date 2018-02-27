@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,38 +34,40 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.util.ApiUtil;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Internal representation of the user portfolio on Zonky. Refer to {@link #create(Zonky)} as the entry point.
+ * Internal representation of the user portfolio on Zonky. Refer to {@link #create(Zonky, RemoteBalance)} as the
+ * entry point.
  */
 public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Collection<Investment> investments, investmentsPending = new ArrayList<>(0);
+    private final RemoteBalance balance;
 
-    Portfolio() {
-        this(Collections.emptyList());
+    Portfolio(final RemoteBalance balance) {
+        this(Collections.emptyList(), balance);
     }
 
-    Portfolio(final Collection<Investment> investments) {
+    Portfolio(final Collection<Investment> investments, final RemoteBalance balance) {
         this.investments = new ArrayList<>(investments);
+        this.balance = balance;
     }
 
     /**
      * Return a new instance of the class, loading information about all investments present and past from the Zonky
      * interface. This operation may take a while, as there may easily be hundreds or thousands of such investments.
      * @param zonky The API to be used to retrieve the data from Zonky.
+     * @param balance Tracker for the presently available balance.
      * @return Empty in case there was a remote error.
      */
-    public static Portfolio create(final Zonky zonky) {
+    public static Portfolio create(final Zonky zonky, final RemoteBalance balance) {
         final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
-        final Portfolio p = new Portfolio(online);
+        final Portfolio p = new Portfolio(online, balance);
         LOGGER.debug("Loaded {} investments from Zonky.", online.size());
         return p;
     }
@@ -148,7 +149,7 @@ public class Portfolio {
                 getActive()
                         .filter(i -> isLoanRelated(i, blockedAmount))
                         .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
-                            final PortfolioOverview po = calculateOverview(zonky.getWallet().getAvailableBalance());
+                            final PortfolioOverview po = calculateOverview();
                             final Loan l = LoanCache.INSTANCE.getLoan(i, zonky);
                             Events.fire(new InvestmentSoldEvent(i, l, po));
                         })
@@ -184,25 +185,13 @@ public class Portfolio {
         return getStream(investmentsPending);
     }
 
-    /**
-     * Summarize portfolio data, knowing the available balance.
-     * @param balance Balance available in the Zonky account.
-     * @return Summary portfolio data.
-     */
-    public PortfolioOverview calculateOverview(final BigDecimal balance) {
-        final Stream<Investment> allInvestment =
-                Stream.concat(getActiveWithPaymentStatus(PaymentStatus.getActive()), getPending());
-        return PortfolioOverview.calculate(balance, allInvestment);
+    public RemoteBalance getRemoteBalance() {
+        return balance;
     }
 
-    /**
-     * Summarize portfolio data, retrieving the balance from remote server.
-     * @param zonky API to use to retrieve the data.
-     * @param isDryRun Whether or not to use {@link Settings.Key#DEFAULTS_DRY_RUN_BALANCE}.
-     * @return Summary portfolio data.
-     */
-    public PortfolioOverview calculateOverview(final Zonky zonky, final boolean isDryRun) {
-        final BigDecimal balance = isDryRun ? ApiUtil.getDryRunBalance(zonky) : ApiUtil.getLiveBalance(zonky);
-        return calculateOverview(balance);
+    public PortfolioOverview calculateOverview() {
+        final Stream<Investment> allInvestment =
+                Stream.concat(getActiveWithPaymentStatus(PaymentStatus.getActive()), getPending());
+        return PortfolioOverview.calculate(getRemoteBalance().get(), allInvestment);
     }
 }
