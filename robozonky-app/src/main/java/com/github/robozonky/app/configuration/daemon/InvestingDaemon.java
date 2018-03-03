@@ -58,9 +58,9 @@ class InvestingDaemon extends DaemonOperation {
                 return;
             }
             // query marketplace for investment opportunities
-            final Investing i = new Investing(builder, strategy, a, maximumSleepPeriod);
-            final Collection<MarketplaceLoan> loans =
-                    a.call(zonky -> zonky.getAvailableLoans(SELECT)).collect(Collectors.toList());
+            final Collection<MarketplaceLoan> loans = a.call(zonky -> zonky.getAvailableLoans(SELECT))
+                    .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
+                    .collect(Collectors.toList());
             final Collection<LoanDescriptor> descriptors = loans.stream().parallel()
                     .map(l -> {
                         /*
@@ -79,6 +79,7 @@ class InvestingDaemon extends DaemonOperation {
                     .map(LoanDescriptor::new)
                     .collect(Collectors.toList());
             // trigger the strategy
+            final Investing i = new Investing(builder, strategy, a, maximumSleepPeriod);
             i.apply(p, descriptors);
         };
     }
