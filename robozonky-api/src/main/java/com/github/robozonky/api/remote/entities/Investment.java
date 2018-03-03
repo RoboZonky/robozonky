@@ -28,7 +28,7 @@ public class Investment extends BaseInvestment {
 
     private static final BigDecimal SMP_FEE_RATE = new BigDecimal("0.015");
     private PaymentStatus paymentStatus;
-    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal;
+    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal, hasCollectionHistory;
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
     private String loanName, nickname, firstName, surname;
     private OffsetDateTime investmentDate = OffsetDateTime.now(), nextPaymentDate = investmentDate.plusMonths(1),
@@ -200,6 +200,11 @@ public class Investment extends BaseInvestment {
     @XmlElement
     public OffsetDateTime getActiveTo() {
         return activeTo;
+    }
+
+    @XmlElement
+    public boolean hasCollectionHistory() {
+        return hasCollectionHistory;
     }
 
     @XmlElement
