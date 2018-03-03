@@ -39,12 +39,6 @@ public class Repayments implements PortfolioDependant {
     private static final State.ClassSpecificState STATE = State.forClass(Repayments.class);
     private static final String STATE_KEY = "activeLastTime";
 
-    private final boolean isDryRun;
-
-    public Repayments(final boolean isDryRun) {
-        this.isDryRun = isDryRun;
-    }
-
     private static Set<Integer> getActiveLastTime() {
         return STATE.getValues(STATE_KEY)
                 .orElse(Collections.emptyList())

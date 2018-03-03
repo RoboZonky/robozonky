@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -30,6 +31,7 @@ import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,21 +44,37 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         final int loanId = 1;
         final MarketplaceLoan ml = MarketplaceLoan.custom()
                 .setId(loanId)
+                .setRating(Rating.A)
                 .build();
         final Loan l = Loan.custom()
                 .setId(loanId)
+                .setRating(Rating.A)
                 .build();
-        final Zonky z = harmlessZonky(10_000);
+        final Zonky z = harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK);
         when(z.getAvailableLoans((Select) notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
+        final Authenticated a = mockAuthentication(z);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
+        final InvestmentStrategy is = mock(InvestmentStrategy.class);
+        final Supplier<Optional<InvestmentStrategy>> s = () -> Optional.of(is);
+        final InvestingDaemon d = new InvestingDaemon(t -> {
+        }, a, new Investor.Builder(), s, () -> Optional.of(portfolio), Duration.ZERO, Duration.ofSeconds(1));
+        d.run();
+        verify(z).getAvailableLoans((Select) notNull());
+        verify(z).getLoan(ml.getId());
+        verify(is).recommend(any(), any(), any());
+        assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
+    }
+
+    @Test
+    void underBalance() {
+        final Zonky z = harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
         final Authenticated a = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(t -> {
         }, a, new Investor.Builder(), s, () -> Optional.of(portfolio), Duration.ZERO, Duration.ofSeconds(1));
         d.run();
-        verify(z).getAvailableLoans((Select) notNull());
-        verify(z).getLoan(ml.getId());
-        assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
+        verify(z, never()).getAvailableLoans((Select) notNull());
     }
 }

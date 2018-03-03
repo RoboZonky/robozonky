@@ -18,12 +18,10 @@ package com.github.robozonky.api.strategies;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,24 +36,14 @@ public class PortfolioOverview {
 
     private final int czkAvailable, czkInvested;
     private final Map<Rating, Integer> czkInvestedPerRating;
-    private final Map<Rating, BigDecimal> sharesOnInvestment;
 
     private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
         this.czkAvailable = czkAvailable.intValue();
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
         if (this.czkInvested == 0) {
             this.czkInvestedPerRating = Collections.emptyMap();
-            this.sharesOnInvestment = Collections.emptyMap();
         } else {
             this.czkInvestedPerRating = new EnumMap<>(czkInvestedPerRating);
-            this.sharesOnInvestment = Arrays.stream(Rating.values()).collect(Collectors.toMap(
-                    Function.identity(),
-                    r -> {
-                        final BigDecimal invested = BigDecimal.valueOf(this.czkInvested);
-                        final BigDecimal investedPerRating = BigDecimal.valueOf(this.getCzkInvested(r));
-                        return investedPerRating.divide(invested, 4, RoundingMode.HALF_EVEN).stripTrailingZeros();
-                    })
-            );
         }
     }
 
@@ -112,6 +100,13 @@ public class PortfolioOverview {
      * @return Share of the given rating on overall investments.
      */
     public BigDecimal getShareOnInvestment(final Rating r) {
-        return this.sharesOnInvestment.getOrDefault(r, BigDecimal.ZERO);
+        final int investedPerRating = this.getCzkInvested(r);
+        if (investedPerRating == 0) {
+            return BigDecimal.ZERO;
+        }
+        final BigDecimal invested = BigDecimal.valueOf(this.czkInvested);
+        return BigDecimal.valueOf(investedPerRating)
+                .divide(invested, 4, RoundingMode.HALF_EVEN)
+                .stripTrailingZeros();
     }
 }

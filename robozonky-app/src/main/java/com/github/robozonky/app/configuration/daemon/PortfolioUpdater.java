@@ -73,7 +73,7 @@ public class PortfolioUpdater implements Runnable,
         final RemoteBalance balance = RemoteBalance.create(auth, isDryRun);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
         // update loans repaid with every portfolio update
-        updater.registerDependant(new Repayments(isDryRun));
+        updater.registerDependant(new Repayments());
         // update delinquents automatically with every portfolio update
         updater.registerDependant((p, a) -> Delinquents.update(a, p));
         // attempt to sell participations after every portfolio update

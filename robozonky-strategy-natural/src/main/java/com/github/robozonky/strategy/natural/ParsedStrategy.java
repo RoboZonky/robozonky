@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -66,8 +67,10 @@ public class ParsedStrategy {
     public ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
                           final Map<Rating, InvestmentSize> investmentSizes, final FilterSupplier filters) {
         this.defaults = defaults;
-        this.portfolio = portfolio.stream().collect(Collectors.toMap(PortfolioShare::getRating, Function.identity()));
-        this.investmentSizes = investmentSizes;
+        this.portfolio = portfolio.isEmpty() ? Collections.emptyMap() :
+                new EnumMap<>(portfolio.stream().
+                        collect(Collectors.toMap(PortfolioShare::getRating, Function.identity())));
+        this.investmentSizes = investmentSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(investmentSizes);
         this.filters = filters;
         final int shareSum = sumMinimalShares();
         if (shareSum > 100) {

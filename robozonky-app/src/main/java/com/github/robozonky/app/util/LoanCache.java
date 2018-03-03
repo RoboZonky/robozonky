@@ -18,19 +18,19 @@ package com.github.robozonky.app.util;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.util.Scheduler;
+import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,23 +41,22 @@ public class LoanCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
     private static final Duration EVICT_AFTER = Duration.ofHours(1);
     private final Lock updateLock = new ReentrantLock(true);
-    private volatile Map<Integer, Loan> cache;
-    private volatile ConcurrentMap<Integer, Instant> storedOn;
+    private volatile MutableIntObjectMap<Pair<Loan, Instant>> cache;
 
     LoanCache() {
         clean();
+        Scheduler.inBackground().submit(this::evict, Duration.ofMinutes(30)); // schedule automated eviction
+    }
+
+    private static boolean isExpired(final Pair<Loan, Instant> p) {
+        final Instant deadline = Instant.now().minus(EVICT_AFTER);
+        return p.getTwo().isBefore(deadline);
     }
 
     private void evict() {
-        final Instant deadline = Instant.now().minus(EVICT_AFTER);
-        final Set<Integer> loansToEvict = storedOn.entrySet().stream()
-                .filter(e -> e.getValue().isBefore(deadline))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-        runLocked(() -> loansToEvict.forEach(loanId -> {
-            cache.remove(loanId);
-            storedOn.remove(loanId);
-        }));
+        LOGGER.trace("Evicting loans.");
+        runLocked(() -> cache = cache.reject((value, p) -> isExpired(p)));
+        LOGGER.trace("Evicted.");
     }
 
     private void runLocked(final Runnable runnable) {
@@ -69,22 +68,37 @@ public class LoanCache {
         }
     }
 
-    public Optional<Loan> getLoan(final int loanId) {
-        evict();
-        return Optional.ofNullable(cache.get(loanId));
+    private <T> T callLocked(final Supplier<T> runnable) {
+        updateLock.lock();
+        try {
+            return runnable.get();
+        } finally {
+            updateLock.unlock();
+        }
     }
 
-    boolean addLoan(final int loanId, final Loan loan) {
-        runLocked(() -> {
-            cache.put(loanId, loan);
-            storedOn.put(loanId, Instant.now());
-        });
-        return true;
+    public Optional<Loan> getLoan(final int loanId) {
+        return Optional.ofNullable(callLocked(() -> {
+            final Pair<Loan, Instant> result = cache.get(loanId);
+            if (result == null) {
+                LOGGER.trace("Cache miss for loan #{}.", loanId);
+                return null;
+            } else if (isExpired(result)) {
+                LOGGER.trace("Evicting expired loan #{}.", loanId);
+                cache.remove(loanId);
+                return null;
+            } else {
+                return result.getOne();
+            }
+        }));
+    }
+
+    private void addLoan(final int loanId, final Loan loan) {
+        runLocked(() -> cache.put(loanId, Tuples.pair(loan, Instant.now())));
     }
 
     public Loan getLoan(final int loanId, final Zonky api) {
         return getLoan(loanId).orElseGet(() -> {
-            LOGGER.trace("Cache miss for loan #{}.", loanId);
             final Loan l = api.getLoan(loanId);
             addLoan(loanId, l);
             return l;
@@ -102,9 +116,6 @@ public class LoanCache {
     }
 
     public void clean() {
-        runLocked(() -> {
-            cache = new HashMap<>(INITIAL_CACHE_SIZE);
-            storedOn = new ConcurrentHashMap<>(INITIAL_CACHE_SIZE);
-        });
+        runLocked(() -> cache = new IntObjectHashMap<>(INITIAL_CACHE_SIZE));
     }
 }

@@ -45,6 +45,7 @@ import com.github.robozonky.app.Events;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,7 @@ final class Session {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final List<LoanDescriptor> loansStillAvailable;
-    private final Collection<Investment> investmentsMadeNow = new LinkedHashSet<>(0);
+    private final List<Investment> investmentsMadeNow = new FastList<>(0);
     private final Zonky zonky;
     private final Investor investor;
     private final SessionState state;
@@ -74,7 +75,7 @@ final class Session {
         this.loansStillAvailable = marketplace.stream()
                 .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> isSameLoan(l, l2)))
                 .filter(l -> portfolio.getPending().noneMatch(i -> isSameLoan(l, i)))
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(Collectors.toList(), FastList::new));
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
@@ -136,7 +137,7 @@ final class Session {
      * @return Investments made so far during this session. Unmodifiable.
      */
     public List<Investment> getResult() {
-        return Collections.unmodifiableList(new ArrayList<>(investmentsMadeNow));
+        return Collections.unmodifiableList(investmentsMadeNow);
     }
 
     /**

@@ -17,7 +17,6 @@
 package com.github.robozonky.common.remote;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -25,13 +24,15 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
+
 /**
  * Allows to filter Zonky API requests based on the values of individual fields.
  * @see <a href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Zonky API docs.</a>
  */
 public class Select implements Consumer<RoboZonkyFilter> {
 
-    private final Map<String, List<Object>> conditions = new LinkedHashMap<>(0);
+    private final Map<String, List<Object>> conditions = new UnifiedMap<>(0);
 
     private void addObjects(final String field, final String operation, final Object... value) {
         final String key = field + "__" + operation;

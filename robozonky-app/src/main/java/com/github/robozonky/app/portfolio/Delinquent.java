@@ -20,8 +20,9 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Stream;
+
+import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
 /**
  * Represents a loan that, either now or at some point in the past, had at least one overdue instalment.
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
 public final class Delinquent {
 
     private final int loanId;
-    private final SortedMap<LocalDate, Delinquency> delinquencies = new TreeMap<>();
+    private final SortedMap<LocalDate, Delinquency> delinquencies = new TreeSortedMap<>();
 
     /**
      * New delinquent loan with one active delinquent instalment.

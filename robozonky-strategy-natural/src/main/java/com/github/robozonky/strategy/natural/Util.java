@@ -23,17 +23,17 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
 public class Util {
 
     public static Stream<Rating> rankRatingsByDemand(final ParsedStrategy strategy,
                                                      final Map<Rating, BigDecimal> currentShare) {
-        final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeMap<>(Comparator.reverseOrder());
+        final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeSortedMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {
             final int fromStrategy = strategy.getMaximumShare(r);

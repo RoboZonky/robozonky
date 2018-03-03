@@ -50,7 +50,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Portfolio p = new Portfolio(Collections.singletonList(i), mockBalance(z));
         final Authenticated a = mockAuthentication(z);
-        final Repayments r = new Repayments(true);
+        final Repayments r = new Repayments();
         r.accept(p, a);
         assertThat(getNewEvents()).isEmpty();
         // now, portfolio has the same investment marked as paid; event will be triggered

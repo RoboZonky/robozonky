@@ -30,8 +30,7 @@ import com.github.robozonky.util.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>,
-        Collection<Investment>> {
+public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>, Collection<Investment>> {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 

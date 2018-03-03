@@ -19,7 +19,6 @@ package com.github.robozonky.notifications.email;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -38,6 +37,7 @@ import com.github.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +46,9 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final Counter emailsOfThisType;
     private final ListenerSpecificNotificationProperties properties;
-    private final Collection<Consumer<T>> finishers = new LinkedHashSet<>(0);
+    private final Collection<Consumer<T>> finishers = new FastList<>(1);
 
-    public AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
+    protected AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
         this.emailsOfThisType = new Counter(this.getClass().getSimpleName(),
                                             properties.getListenerSpecificHourlyEmailLimit());
@@ -73,7 +73,9 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     }
 
     protected void registerFinisher(final Consumer<T> finisher) {
-        this.finishers.add(finisher);
+        if (!finishers.contains(finisher)) {
+            this.finishers.add(finisher);
+        }
     }
 
     int countFinishers() {

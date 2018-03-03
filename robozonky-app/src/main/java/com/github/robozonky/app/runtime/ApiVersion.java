@@ -19,7 +19,6 @@ package com.github.robozonky.app.runtime;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.StreamSupport;
@@ -27,6 +26,7 @@ import java.util.stream.StreamSupport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.robozonky.internal.api.Defaults;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 /**
  * Represents version of the Zonky API as represented by a remote resource. This doesn't use RESTEasy as it's designed
@@ -48,7 +48,7 @@ class ApiVersion {
         this.commitIdAbbrev = commitIdAbbrev;
         this.buildTime = buildTime;
         this.buildVersion = buildVersion;
-        this.tags = Arrays.asList(tags);
+        this.tags = UnifiedSet.newSetWith(tags);
     }
 
     public static ApiVersion read(final String json) throws IOException {

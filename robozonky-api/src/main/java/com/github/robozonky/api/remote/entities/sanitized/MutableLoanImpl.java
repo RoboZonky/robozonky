@@ -22,12 +22,12 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.BorrowerRelatedInvestmentInfo;
 import com.github.robozonky.api.remote.entities.RawLoan;
+import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 
 final class MutableLoanImpl extends AbstractMutableLoanImpl<LoanBuilder> implements LoanBuilder {
 
@@ -90,7 +90,7 @@ final class MutableLoanImpl extends AbstractMutableLoanImpl<LoanBuilder> impleme
         } else {
             final SortedSet<String> result = Stream.concat(knownBorrowerNicknames.stream(), Stream.of(getNickName()))
                     .filter(Objects::nonNull)
-                    .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
+                    .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSortedSet::new));
             this.knownBorrowerNicknames = Collections.unmodifiableSortedSet(result);
         }
         return this;

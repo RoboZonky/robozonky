@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -36,6 +35,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
-    private final Collection<Investment> investments, investmentsPending = new ArrayList<>(0);
+    private final Collection<Investment> investments, investmentsPending = new FastList<>(0);
     private final RemoteBalance balance;
 
     Portfolio(final RemoteBalance balance) {
@@ -54,7 +54,7 @@ public class Portfolio {
     }
 
     Portfolio(final Collection<Investment> investments, final RemoteBalance balance) {
-        this.investments = new ArrayList<>(investments);
+        this.investments = new FastList<>(investments);
         this.balance = balance;
     }
 

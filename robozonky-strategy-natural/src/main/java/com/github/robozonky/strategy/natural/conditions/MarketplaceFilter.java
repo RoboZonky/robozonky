@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.strategy.natural.Wrapper;
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 /**
  * Implements a complex marketplace filter. This filter accepts an item from the marketplace and, by returning true,
@@ -42,16 +43,16 @@ import com.github.robozonky.strategy.natural.Wrapper;
  */
 public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
 
+    private static AtomicInteger COUNTER = new AtomicInteger(0);
+    private final int id = COUNTER.incrementAndGet();
+    private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
+            butNotWhen = Collections.emptySet();
+
     public static MarketplaceFilter of(final MarketplaceFilterCondition c) {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.when(Collections.singleton(c));
         return f;
     }
-
-    private static AtomicInteger COUNTER = new AtomicInteger(0);
-    private final int id = COUNTER.incrementAndGet();
-    private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
-            butNotWhen = Collections.emptySet();
 
     private static String toString(final Collection<MarketplaceFilterCondition> conditions) {
         return conditions.stream()
@@ -64,7 +65,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return true for filter to return true.
      */
     public void when(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        when = new LinkedHashSet<>(conditions);
+        when = new FastList<>(new LinkedHashSet<>(conditions));
     }
 
     /**
@@ -73,7 +74,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return false for filter to return true.
      */
     public void butNotWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        butNotWhen = new LinkedHashSet<>(conditions);
+        butNotWhen = new FastList<>(new LinkedHashSet<>(conditions));
     }
 
     @Override

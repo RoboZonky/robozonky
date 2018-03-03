@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAmount;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,6 +29,7 @@ import com.github.robozonky.app.configuration.daemon.MarketplaceActivity;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.internal.api.State;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ class Activity implements MarketplaceActivity {
 
     public Activity(final Collection<LoanDescriptor> loans, final TemporalAmount maximumSleepPeriod) {
         this.sleepInterval = maximumSleepPeriod;
-        this.recentLoansDescending = new ArrayList<>(loans);
+        this.recentLoansDescending = new FastList<>(loans);
     }
 
     static OffsetDateTime getLatestMarketplaceAction() {

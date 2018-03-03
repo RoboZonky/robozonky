@@ -17,8 +17,6 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -38,7 +36,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DaemonInvestmentMode.class);
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
-    private final List<DaemonOperation> daemons;
+    private final DaemonOperation[] daemons;
     private final PortfolioUpdater portfolioUpdater;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Authenticated auth,
@@ -47,11 +45,13 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.portfolioUpdater = p;
-        this.daemons = Arrays.asList(new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, p,
-                                                         maximumSleepPeriod, primaryMarketplaceCheckPeriod),
-                                     new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, p,
-                                                          maximumSleepPeriod, secondaryMarketplaceCheckPeriod,
-                                                          builder.isDryRun()));
+        this.daemons = new DaemonOperation[]{
+                new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, p,
+                                    maximumSleepPeriod, primaryMarketplaceCheckPeriod),
+                new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, p,
+                                     maximumSleepPeriod, secondaryMarketplaceCheckPeriod,
+                                     builder.isDryRun())
+        };
     }
 
     private static ThreadGroup newThreadGroup(final String name) {
@@ -68,8 +68,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(portfolioUpdater.getBlockedAmountsUpdater(), oneHour, oneHour);
         // run investing and purchasing daemons
-        IntStream.range(0, daemons.size()).boxed().forEach(daemonId -> {
-            final DaemonOperation d = daemons.get(daemonId);
+        IntStream.range(0, daemons.length).boxed().forEach(daemonId -> {
+            final DaemonOperation d = daemons[daemonId];
             final long initialDelay = daemonId * 250; // quarter second apart
             final Runnable task = new Skippable(d, portfolioUpdater::isUpdating);
             executor.submit(task, d.getRefreshInterval(), Duration.ofMillis(initialDelay));
