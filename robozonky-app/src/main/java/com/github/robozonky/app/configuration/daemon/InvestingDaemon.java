@@ -64,12 +64,12 @@ class InvestingDaemon extends DaemonOperation {
                                     final Duration maximumSleepPeriod) {
             this.core = (portfolio, auth) -> {
                 if (!registered.getAndSet(true)) { // only register the listener once
+                    final Investing i = new Investing(builder, strategy, auth, maximumSleepPeriod);
                     marketplace.registerListener((loans) -> {
                         final Collection<LoanDescriptor> descriptors = loans.stream()
                                 .filter(l -> l.getMyInvestment() == null)
                                 .map(LoanDescriptor::new)
                                 .collect(Collectors.toList());
-                        final Investing i = new Investing(builder, strategy, auth, maximumSleepPeriod);
                         i.apply(portfolio, descriptors);
                     });
                 }
