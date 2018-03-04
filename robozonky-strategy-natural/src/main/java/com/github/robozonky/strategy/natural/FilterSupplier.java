@@ -63,6 +63,7 @@ public class FilterSupplier {
         this.primarySupplier = () -> primaryMarketplaceFilters;
         this.secondarySupplier = () -> secondaryMarketplaceFilters;
         this.sellSupplier = () -> sellFilters;
+        refresh();
     }
 
     FilterSupplier(final DefaultValues defaults, final Collection<MarketplaceFilter> primaryMarketplaceFilters,
