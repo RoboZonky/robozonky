@@ -89,6 +89,7 @@ final class Session {
         boolean invested;
         do {
             invested = strategy.apply(getAvailable(), portfolioOverview)
+                    .filter(r -> portfolioOverview.getCzkAvailable() >= r.amount().intValue())
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -130,16 +131,11 @@ final class Session {
     }
 
     public boolean purchase(final RecommendedParticipation recommendation) {
-        if (portfolioOverview.getCzkAvailable() < recommendation.amount().intValue()) {
-            // should not be allowed by the calling code
-            return false;
-        }
         Events.fire(new PurchaseRequestedEvent(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final boolean purchased = isDryRun || actualPurchase(participation);
         if (purchased) {
-            final Investment i = Investment.fresh(recommendation.descriptor().related(),
-                                                  recommendation.amount());
+            final Investment i = Investment.fresh(recommendation.descriptor().related(), recommendation.amount());
             markSuccessfulPurchase(i);
             Events.fire(new InvestmentPurchasedEvent(i, recommendation.descriptor().related(), portfolioOverview));
         }

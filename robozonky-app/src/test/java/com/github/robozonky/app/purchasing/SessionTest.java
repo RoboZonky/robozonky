@@ -39,6 +39,7 @@ import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 import static org.mockito.Mockito.*;
 
 class SessionTest extends AbstractZonkyLeveragingTest {
@@ -80,12 +81,14 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()),
                                                           true);
-        assertThat(i).isEmpty();
-        assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
-            @Override
-            public boolean matches(final List<? extends Event> events) {
-                return events.stream().noneMatch(e -> e instanceof PurchaseRequestedEvent);
-            }
+        assertSoftly(softly -> {
+            softly.assertThat(i).isEmpty();
+            softly.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
+                @Override
+                public boolean matches(final List<? extends Event> events) {
+                    return events.stream().noneMatch(e -> e instanceof PurchaseRequestedEvent);
+                }
+            });
         });
     }
 
@@ -136,13 +139,12 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         when(p.getLoanId()).thenReturn(l.getId());
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any()))
-                .thenAnswer(i -> {
-                    final Collection<ParticipationDescriptor> participations = i.getArgument(0);
-                    return participations.stream()
-                            .map(ParticipationDescriptor::recommend)
-                            .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
-                });
+        when(s.recommend(any(), any(), any())).thenAnswer(i -> {
+            final Collection<ParticipationDescriptor> participations = i.getArgument(0);
+            return participations.stream()
+                    .map(ParticipationDescriptor::recommend)
+                    .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
+        });
         final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
@@ -153,7 +155,6 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(z),
-                                           argThat((a) -> a.getLoanId() == l.getId()));
+        verify(portfolio).newBlockedAmount(eq(z), argThat((a) -> a.getLoanId() == l.getId()));
     }
 }

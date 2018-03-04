@@ -43,6 +43,7 @@ class LifecycleTest {
     void create() {
         final Lifecycle h = new Lifecycle();
         assertSoftly(softly -> {
+            softly.assertThat(h.getZonkyApiVersion()).isEmpty();
             softly.assertThat(h.getTerminationCause()).isEmpty();
             softly.assertThat(h.getShutdownHooks())
                     .hasSize(2)

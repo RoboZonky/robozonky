@@ -33,7 +33,9 @@ class EventsTest extends AbstractEventLeveragingTest {
         final EventListener<RoboZonkyStartingEvent> listener = mock(EventListener.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> r = () -> Optional.of(listener);
         doThrow(RuntimeException.class).when(listener).handle(any(), any());
-        Events.INSTANCE.loadListeners(RoboZonkyStartingEvent.class, r);
+        final Events.EventSpecific<RoboZonkyStartingEvent> event =
+                Events.INSTANCE.loadListeners(RoboZonkyStartingEvent.class, r);
+        assertThat(event).isNotNull();
         final RoboZonkyStartingEvent e = new RoboZonkyStartingEvent();
         Events.fire(e);
         assertThat(Events.getFired()).contains(e);

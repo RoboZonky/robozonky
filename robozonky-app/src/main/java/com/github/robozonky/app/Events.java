@@ -50,7 +50,7 @@ public enum Events {
     private static final List<Event> EVENTS_FIRED = new FastList<>(0);
     private static SessionInfo SESSION_INFO = null;
 
-    private static class EventSpecific<E extends Event> {
+    static class EventSpecific<E extends Event> {
 
         private final Collection<EventListenerSupplier<E>> listeners = new LinkedHashSet<>(0);
 

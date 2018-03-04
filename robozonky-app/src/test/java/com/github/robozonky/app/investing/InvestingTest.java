@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -109,5 +110,29 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         });
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
+    }
+
+    @Test
+    void someAccepted() {
+        final int loanId = 1;
+        final Loan loan = Loan.custom()
+                .setId(loanId)
+                .setAmount(100_000)
+                .setRating(Rating.D)
+                .setRemainingInvestment(1000)
+                .setMyInvestment(mockMyInvestment())
+                .setDatePublished(OffsetDateTime.now())
+                .build();
+        final LoanDescriptor ld = new LoanDescriptor(loan);
+        final Investor.Builder builder = new Investor.Builder().asDryRun();
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getLoan(eq(loanId))).thenReturn(loan);
+        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
+        final Authenticated auth = mockAuthentication(z);
+        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
+        verify(z, never()).invest(any()); // dry run
+        assertThat(exec.apply(portfolio, Collections.singleton(ld)))
+                .extracting(Investment::getLoanId)
+                .isEqualTo(Collections.singletonList(loanId));
     }
 }
