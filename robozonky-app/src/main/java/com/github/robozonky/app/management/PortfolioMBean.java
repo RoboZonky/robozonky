@@ -25,7 +25,13 @@ public interface PortfolioMBean extends BaseMBean {
 
     int getInvestedAmount();
 
+    int getAmountAtRisk();
+
     Map<String, Integer> getInvestedAmountPerRating();
 
+    Map<String, Integer> getAmountAtRiskPerRating();
+
     Map<String, BigDecimal> getRatingShare();
+
+    Map<String, BigDecimal> getShareAtRiskPerRating();
 }

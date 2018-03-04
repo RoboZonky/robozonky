@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,16 +36,21 @@ import com.github.robozonky.api.remote.enums.Rating;
  */
 public class PortfolioOverview {
 
-    private final int czkAvailable, czkInvested;
-    private final Map<Rating, Integer> czkInvestedPerRating;
+    private final int czkAvailable, czkInvested, czkAtRisk;
+    private final Map<Rating, Integer> czkInvestedPerRating, czkAtRiskPerRating;
 
-    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating) {
+    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating,
+                              final Map<Rating, Integer> czkAtRiskPerRating) {
         this.czkAvailable = czkAvailable.intValue();
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
         if (this.czkInvested == 0) {
             this.czkInvestedPerRating = Collections.emptyMap();
+            this.czkAtRiskPerRating = Collections.emptyMap();
+            this.czkAtRisk = 0;
         } else {
             this.czkInvestedPerRating = new EnumMap<>(czkInvestedPerRating);
+            this.czkAtRisk = PortfolioOverview.sum(czkAtRiskPerRating.values());
+            this.czkAtRiskPerRating = czkAtRisk == 0 ? Collections.emptyMap() : new EnumMap<>(czkAtRiskPerRating);
         }
     }
 
@@ -51,22 +58,37 @@ public class PortfolioOverview {
         return vals.stream().reduce(0, (a, b) -> a + b);
     }
 
+    private static Map<Rating, Integer> splitByRating(final Stream<Investment> stream) {
+        final Collector<Investment, ?, BigDecimal> reducer =
+                Collectors.reducing(BigDecimal.ZERO, Investment::getRemainingPrincipal, BigDecimal::add);
+        final Collector<Investment, ?, Integer> summingBigDecimalToInt =
+                Collectors.collectingAndThen(reducer, BigDecimal::intValue);
+        return stream.collect(Collectors.groupingBy(Investment::getRating, summingBigDecimalToInt));
+    }
+
     /**
-     * Prepare an immutable portfolio overview, based on the provided information.
+     * Prepare an immutable portfolio overview, based on the provided information. There is potentially a lot of
+     * investments, on the order of thousands. Therefore we decide to have them provided as a stream, as opposed to
+     * forcing a collection for them.
      * @param balance Current available balance in the wallet.
-     * @param investments All active investments incl. blocked amounts.
+     * @param investments All active investments incl. blocked amounts. Supplier must return fresh stream every time.
      * @return Never null.
      */
-    public static PortfolioOverview calculate(final BigDecimal balance, final Stream<Investment> investments) {
-        // FIXME replace summing by reduction, to be able to use BigDecimal precision
-        final Map<Rating, Integer> amounts = investments
-                .collect(Collectors.groupingBy(Investment::getRating,
-                                               Collectors.summingInt(i -> i.getRemainingPrincipal().intValue())));
-        return calculate(balance, amounts);
+    public static PortfolioOverview calculate(final BigDecimal balance,
+                                              final Supplier<Stream<Investment>> investments) {
+        final Map<Rating, Integer> amounts = splitByRating(investments.get());
+        final Map<Rating, Integer> atRiskAmount =
+                splitByRating(investments.get().filter(i -> i.getDaysPastDue().orElse(0) > 0));
+        return calculate(balance, amounts, atRiskAmount);
     }
 
     public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts) {
-        return new PortfolioOverview(balance, amounts);
+        return calculate(balance, amounts, Collections.emptyMap());
+    }
+
+    public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts,
+                                              final Map<Rating, Integer> atRiskAmounts) {
+        return new PortfolioOverview(balance, amounts, atRiskAmounts);
     }
 
     /**
@@ -95,6 +117,23 @@ public class PortfolioOverview {
     }
 
     /**
+     * Sum total of all remaining principal where loans are currently overdue.
+     * @return Amount in CZK.
+     */
+    public int getCzkAtRisk() {
+        return this.czkAtRisk;
+    }
+
+    /**
+     * Sum total of all remaining principal where loans in a given rating are currently overdue.
+     * @param r Rating in question.
+     * @return Amount in CZK.
+     */
+    public int getCzkAtRisk(final Rating r) {
+        return this.czkAtRiskPerRating.getOrDefault(r, 0);
+    }
+
+    /**
      * Retrieve the amounts due in a given rating, divided by {@link #getCzkInvested()}.
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
@@ -107,6 +146,22 @@ public class PortfolioOverview {
         final BigDecimal invested = BigDecimal.valueOf(this.czkInvested);
         return BigDecimal.valueOf(investedPerRating)
                 .divide(invested, 4, RoundingMode.HALF_EVEN)
+                .stripTrailingZeros();
+    }
+
+    /**
+     * Retrieve the amounts due in a given rating, divided by {@link #getCzkInvested()}.
+     * @param r Rating in question.
+     * @return Share of the given rating on overall investments.
+     */
+    public BigDecimal getAtRiskShareOnInvestment(final Rating r) {
+        final int investedPerRating = this.getCzkInvested(r);
+        if (investedPerRating == 0) {
+            return BigDecimal.ZERO;
+        }
+        final BigDecimal atRisk = BigDecimal.valueOf(getCzkAtRisk(r));
+        return atRisk
+                .divide(BigDecimal.valueOf(investedPerRating), 4, RoundingMode.HALF_EVEN)
                 .stripTrailingZeros();
     }
 }

@@ -38,10 +38,11 @@ class PortfolioOverviewTest {
     @Test
     void emptyPortfolio() {
         final int balance = 5000;
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Stream.empty());
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Stream::empty);
         assertSoftly(softly -> {
             for (final Rating r : Rating.values()) {
                 softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(o.getAtRiskShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
             }
             softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(o.getCzkInvested()).isEqualTo(0);
@@ -53,12 +54,14 @@ class PortfolioOverviewTest {
         final int balance = 5000;
         final Investment i1 = Investment.fresh(mockLoan(Rating.A), 400);
         final Investment i2 = Investment.fresh(mockLoan(Rating.B), 600);
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Stream.of(i1, i2));
+        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), () -> Stream.of(i1, i2));
         assertSoftly(softly -> {
             softly.assertThat(o.getShareOnInvestment(Rating.A)).isEqualTo(new BigDecimal("0.4"));
             softly.assertThat(o.getShareOnInvestment(Rating.B)).isEqualTo(new BigDecimal("0.6"));
             softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
             softly.assertThat(o.getCzkInvested()).isEqualTo(1000);
+            softly.assertThat(o.getCzkAtRisk()).isEqualTo(0);
+            softly.assertThat(o.getAtRiskShareOnInvestment(Rating.A)).isEqualTo(BigDecimal.ZERO);
         });
     }
 }

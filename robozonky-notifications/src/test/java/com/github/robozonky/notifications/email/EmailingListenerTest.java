@@ -110,7 +110,10 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     private static PortfolioOverview mockPortfolio(final int balance) {
         final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
         when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
+        when(portfolioOverview.getCzkAtRisk()).thenReturn(0);
+        when(portfolioOverview.getCzkAtRisk(any())).thenReturn(0);
         when(portfolioOverview.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
+        when(portfolioOverview.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         return portfolioOverview;
     }
 

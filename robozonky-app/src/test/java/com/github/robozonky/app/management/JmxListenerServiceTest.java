@@ -177,7 +177,7 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     private DynamicTest getParametersForInvestmentMade() {
         final Loan l = mockLoan();
         final Investment i = Investment.fresh((MarketplaceLoan) l, 200);
-        final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.valueOf(1000), Stream.empty());
+        final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.valueOf(1000), Stream::empty);
         final Event evt = new InvestmentMadeEvent(i, l, po);
         final Consumer<SoftAssertions> before = (softly) -> {
             final OperationsMBean mbean = getOperationsMBean();
@@ -211,7 +211,7 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
         final Loan l = mockLoan();
         final Investment i = Investment.fresh((MarketplaceLoan) l, 200);
         final Event evt = new InvestmentPurchasedEvent(i, l, PortfolioOverview.calculate(BigDecimal.valueOf(2000),
-                                                                                         Stream.empty()));
+                                                                                         Stream::empty));
         final Consumer<SoftAssertions> before = (softly) -> {
             final OperationsMBean mbean = getOperationsMBean();
             softly.assertThat(mbean.getPurchasedInvestments()).isEmpty();

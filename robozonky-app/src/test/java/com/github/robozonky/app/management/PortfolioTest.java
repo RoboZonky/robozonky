@@ -36,12 +36,16 @@ class PortfolioTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getCzkAvailable()).thenReturn(1000);
         when(portfolio.getCzkInvested()).thenReturn(10000);
+        when(portfolio.getCzkAtRisk()).thenReturn(0);
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ONE);
+        when(portfolio.getCzkAtRisk(any())).thenReturn(0);
+        when(portfolio.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         when(portfolio.getCzkInvested(any())).thenReturn(1000);
         final Portfolio mbean = new Portfolio();
         final ExecutionStartedEvent evt = new ExecutionStartedEvent(Collections.emptyList(), portfolio);
         mbean.handle(evt);
         assertSoftly(softly -> {
+            softly.assertThat(mbean.getAmountAtRisk()).isEqualTo(0);
             softly.assertThat(mbean.getAvailableBalance()).isEqualTo(portfolio.getCzkAvailable());
             softly.assertThat(mbean.getInvestedAmount()).isEqualTo(portfolio.getCzkInvested());
             softly.assertThat(mbean.getLatestUpdatedDateTime()).isBeforeOrEqualTo(OffsetDateTime.now());
@@ -52,6 +56,8 @@ class PortfolioTest {
             //checks correct values per rating
             Stream.of(ratings).forEach(r -> {
                 softly.assertThat(mbean.getInvestedAmountPerRating()).containsEntry(r, 1000);
+                softly.assertThat(mbean.getShareAtRiskPerRating()).containsEntry(r, BigDecimal.ZERO);
+                softly.assertThat(mbean.getAmountAtRiskPerRating()).containsEntry(r, 0);
                 softly.assertThat(mbean.getRatingShare()).containsEntry(r, BigDecimal.ONE);
             });
         });

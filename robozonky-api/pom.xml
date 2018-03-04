@@ -1173,8 +1173,28 @@
                     "classSimpleName": "RecommendedLoan",
                     "elementKind": "class",
                     "justification": "Renamed to clearly distinguish from the sanitized type."
+                 }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "parameter com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, ===java.util.Collection<com.github.robozonky.api.remote.entities.Investment>===)",
+                    "new": "parameter com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, ===java.util.function.Supplier<java.util.stream.Stream<com.github.robozonky.api.remote.entities.sanitized.Investment>>===)",
+                    "oldType": "java.util.Collection<com.github.robozonky.api.remote.entities.Investment>",
+                    "newType": "java.util.function.Supplier<java.util.stream.Stream<com.github.robozonky.api.remote.entities.sanitized.Investment>>",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "calculate",
+                    "parameterIndex": "1",
+                    "elementKind": "parameter",
+                    "justification": "The input parameter now needs to be reused."
+                 }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, java.util.stream.Stream<com.github.robozonky.api.remote.entities.Investment>)",
+                    "new": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>)",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "calculate",
+                    "elementKind": "method",
+                    "justification": "The input parameter now needs to be reused."
                   }
-
                 ]
               }
             }

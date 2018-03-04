@@ -73,13 +73,28 @@ public class Portfolio implements PortfolioMBean {
     }
 
     @Override
+    public int getAmountAtRisk() {
+        return get(PortfolioOverview::getCzkAtRisk, 0);
+    }
+
+    @Override
     public Map<String, Integer> getInvestedAmountPerRating() {
         return get(r -> get(p -> p.getCzkInvested(r), 0));
     }
 
     @Override
+    public Map<String, Integer> getAmountAtRiskPerRating() {
+        return get(r -> get(p -> p.getCzkAtRisk(r), 0));
+    }
+
+    @Override
     public Map<String, BigDecimal> getRatingShare() {
         return get(r -> get(p -> p.getShareOnInvestment(r), BigDecimal.ZERO));
+    }
+
+    @Override
+    public Map<String, BigDecimal> getShareAtRiskPerRating() {
+        return get(r -> get(p -> p.getAtRiskShareOnInvestment(r), BigDecimal.ZERO));
     }
 
     @Override

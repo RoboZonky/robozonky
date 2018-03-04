@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -190,8 +191,8 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        final Stream<Investment> allInvestment =
-                Stream.concat(getActiveWithPaymentStatus(PaymentStatus.getActive()), getPending());
-        return PortfolioOverview.calculate(getRemoteBalance().get(), allInvestment);
+        final Supplier<Stream<Investment>> investments =
+                () -> Stream.concat(getActiveWithPaymentStatus(PaymentStatus.getActive()), getPending());
+        return PortfolioOverview.calculate(getRemoteBalance().get(), investments);
     }
 }
