@@ -73,7 +73,7 @@ class Util {
         return Collections.unmodifiableMap(new HashMap<String, Object>() {{
             put("absoluteShare", perRating(portfolioOverview::getCzkInvested));
             put("relativeShare", perRating(portfolioOverview::getShareOnInvestment));
-            put("absoluteRisk", perRating(portfolioOverview::getCzkInvested));
+            put("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk));
             put("relativeRisk", perRating(portfolioOverview::getAtRiskShareOnInvestment));
             put("total", portfolioOverview.getCzkInvested());
             put("totalRisk", portfolioOverview.getCzkAtRisk());
