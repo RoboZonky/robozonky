@@ -21,6 +21,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -51,6 +53,12 @@ public class FinancialCalculator {
         put(Rating.C, new BigDecimal("0.04"));
         put(Rating.D, FIVE_PERCENT);
     }};
+    private static final SortedMap<Integer, BigDecimal> FEE_DISCOUNTS = new TreeMap<Integer, BigDecimal>() {{
+        put(150_000, FIVE_PERCENT);
+        put(200_000, TEN_PERCENT);
+        put(500_000, FIFTEEN_PERCENT);
+        put(1_000_000, TWENTY_PERCENT);
+    }};
 
     private static BigDecimal baseFee(final Investment investment) {
         final OffsetDateTime investmentDate = investment.getInvestmentDate().orElse(OffsetDateTime.now());
@@ -67,16 +75,11 @@ public class FinancialCalculator {
      */
     private static BigDecimal feeDiscount(final PortfolioOverview portfolioOverview) {
         final int totalInvested = portfolioOverview.getCzkInvested();
-        if (totalInvested > 999_999) {
-            return TWENTY_PERCENT;
-        } else if (totalInvested > 499_999) {
-            return FIFTEEN_PERCENT;
-        } else if (totalInvested > 199_999) {
-            return TEN_PERCENT;
-        } else if (totalInvested > 149_999) {
-            return FIVE_PERCENT;
-        } else {
+        final SortedMap<Integer, BigDecimal> applicableDiscounts = FEE_DISCOUNTS.headMap(totalInvested + 1);
+        if (applicableDiscounts.isEmpty()) {
             return BigDecimal.ZERO;
+        } else {
+            return applicableDiscounts.get(applicableDiscounts.lastKey());
         }
     }
 

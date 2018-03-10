@@ -19,6 +19,7 @@ package com.github.robozonky.util;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -32,8 +33,11 @@ class SchedulerTest {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
             assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
             final ScheduledFuture<?> f = s.submit(REFRESHABLE);
-            assertThat((Future) f).isNotNull();
-            assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat(Scheduler.inBackground()).isNotNull();
+                softly.assertThat((Future) f).isNotNull();
+                softly.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
+            });
         }
     }
 }

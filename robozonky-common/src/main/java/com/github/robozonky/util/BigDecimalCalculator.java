@@ -28,7 +28,7 @@ public class BigDecimalCalculator {
     }
 
     public static BigDecimal toScale(final BigDecimal number) {
-        return number.setScale(DEFAULT_SCALE, RoundingMode.HALF_EVEN);
+        return toScale(number, DEFAULT_SCALE);
     }
 
     public static BigDecimal divide(final Number numerator, final Number denominator) {
