@@ -16,4 +16,4 @@ install:
 build_script:
   - mvn --batch-mode  -T 1.5C clean install -DskipTests -Dgpg.skip
 test_script:
-  - mvn --batch-mode test integration-test -Dassembly.skipAssembly
+  - mvn --batch-mode install -Dassembly.skipAssembly -Dgpg.skip

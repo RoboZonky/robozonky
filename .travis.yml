@@ -19,4 +19,4 @@ cache:
 install:
   - mvn --batch-mode -T 1.5C clean install -DskipTests -Dgpg.skip
 script:
-  - mvn --batch-mode test integration-test -Dassembly.skipAssembly
+  - mvn --batch-mode install -Dassembly.skipAssembly -Dgpg.skip
