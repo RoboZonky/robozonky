@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.util.LocalhostAddress;
 import com.github.robozonky.util.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +66,6 @@ public class Lifecycle {
     public boolean waitUntilOnline() {
         try {
             livenessCheck.waitUntilTriggered();
-            LocalhostAddress.INSTANCE.run(); // attempt to load the localhost address now that we're online
             return true;
         } catch (final InterruptedException ex) {
             LOGGER.error("Cannot reach Zonky.", ex);

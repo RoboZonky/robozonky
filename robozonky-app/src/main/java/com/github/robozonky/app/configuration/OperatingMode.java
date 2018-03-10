@@ -67,7 +67,7 @@ abstract class OperatingMode implements CommandLineFragment {
         final SecretProvider secretProvider = auth.getSecretProvider();
         final boolean isDryRun = cli.getTweaksFragment().isDryRunEnabled();
         // initialize SessionInfo before the robot potentially sends the first notification
-        Events.initialize(new SessionInfo(secretProvider.getUsername(), isDryRun));
+        Events.initialize(new SessionInfo(secretProvider.getUsername(), cli.getName(), isDryRun));
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secretProvider))

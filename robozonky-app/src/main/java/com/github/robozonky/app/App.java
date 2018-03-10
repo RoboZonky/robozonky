@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.app.configuration.CommandLine;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.management.Management;
@@ -64,17 +65,15 @@ public class App {
     }
 
     private static ReturnCode execute(final InvestmentMode mode) {
-        Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
-        App.SHUTDOWN_HOOKS.register(new Management(LIFECYCLE));
-        App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier());
-        return mode.apply(LIFECYCLE);
-    }
-
-    private static ReturnCode execute(final String... args) {
+        App.SHUTDOWN_HOOKS.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
+        Events.fire(new RoboZonkyStartingEvent());
         try {
-            return CommandLine.parse(LIFECYCLE::resumeToFail, args)
-                    .map(App::execute)
-                    .orElse(ReturnCode.ERROR_SETUP);
+            ensureLiveness();
+            Scheduler.inBackground().submit(new UpdateMonitor(), Duration.ofDays(1));
+            App.SHUTDOWN_HOOKS.register(new Management(LIFECYCLE));
+            final String sessionName = Events.getSessionInfo().flatMap(SessionInfo::getName).orElse(null);
+            App.SHUTDOWN_HOOKS.register(new RoboZonkyStartupNotifier(sessionName));
+            return mode.apply(LIFECYCLE);
         } catch (final Throwable t) {
             LOGGER.error("Caught unexpected exception, terminating daemon.", t);
             return ReturnCode.ERROR_UNEXPECTED;
@@ -94,9 +93,11 @@ public class App {
                          System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
                          System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
                          Runtime.getRuntime().availableProcessors(), Locale.getDefault(), Charset.defaultCharset());
-        ensureLiveness();
-        App.SHUTDOWN_HOOKS.register(() -> Optional.of((r) -> Scheduler.inBackground().close()));
-        Events.fire(new RoboZonkyStartingEvent());
-        App.exit(App.execute(args)); // call the core code
+        final ReturnCode code = configure(args).map(App::execute).orElse(ReturnCode.ERROR_SETUP);
+        App.exit(code); // call the core code
+    }
+
+    private static Optional<InvestmentMode> configure(final String... args) {
+        return CommandLine.parse(LIFECYCLE::resumeToFail, args);
     }
 }

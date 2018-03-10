@@ -17,6 +17,7 @@
 package com.github.robozonky.app;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.ReturnCode;
@@ -31,7 +32,7 @@ class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
 
     @Test
     void properEventsFired() {
-        final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier();
+        final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier(UUID.randomUUID().toString());
         final Optional<Consumer<ShutdownHook.Result>> result = rzsn.get();
         assertThat(result).isPresent();
         assertThat(Events.getFired()).last().isInstanceOf(RoboZonkyInitializedEvent.class);

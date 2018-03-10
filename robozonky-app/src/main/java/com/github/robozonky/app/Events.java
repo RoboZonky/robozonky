@@ -19,6 +19,7 @@ package com.github.robozonky.app;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
@@ -147,6 +148,10 @@ public enum Events {
      */
     public static List<Event> getFired() {
         return Events.EVENTS_FIRED;
+    }
+
+    static Optional<SessionInfo> getSessionInfo() {
+        return Optional.ofNullable(SESSION_INFO);
     }
 
 }

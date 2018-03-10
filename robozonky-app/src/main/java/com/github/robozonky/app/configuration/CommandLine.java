@@ -48,6 +48,8 @@ public class CommandLine {
     private ConfirmationCommandLineFragment confirmationFragment = new ConfirmationCommandLineFragment();
     @Parameter(names = {"-h", "--help"}, help = true, description = "Print usage end exit.")
     private boolean help;
+    @Parameter(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
+    private String name;
 
     private static void terminate(final ParameterException ex) {
         System.out.println(ex.getMessage()); // error will be shown to users on stdout
@@ -121,6 +123,10 @@ public class CommandLine {
                     final Authenticated auth = Authenticated.tokenBased(secrets, duration);
                     return mode.configure(this, auth);
                 });
+    }
+
+    String getName() {
+        return name;
     }
 
     TweaksCommandLineFragment getTweaksFragment() {

@@ -16,18 +16,29 @@
 
 package com.github.robozonky.api.notifications;
 
+import java.util.Optional;
+
 import com.github.robozonky.internal.api.Defaults;
 
 public class SessionInfo {
 
-    private final String userName;
+    private final String userName, name;
     private final boolean isDryRun;
 
     public SessionInfo(final String userName) {
-        this(userName, true);
+        this(userName, null);
     }
 
     public SessionInfo(final String userName, final boolean isDryRun) {
+        this(userName, null, isDryRun);
+    }
+
+    public SessionInfo(final String userName, final String name) {
+        this(userName, name, true);
+    }
+
+    public SessionInfo(final String userName, final String name, final boolean isDryRun) {
+        this.name = name;
         this.userName = userName;
         this.isDryRun = isDryRun;
     }
@@ -42,5 +53,9 @@ public class SessionInfo {
 
     public String getUserAgent() {
         return Defaults.ROBOZONKY_USER_AGENT;
+    }
+
+    public Optional<String> getName() {
+        return Optional.ofNullable(name);
     }
 }

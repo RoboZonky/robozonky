@@ -33,7 +33,6 @@ import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.util.LocalhostAddress;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -58,7 +57,8 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         });
     }
 
-    private static Email createNewEmail(final NotificationProperties properties) throws EmailException {
+    private static Email createNewEmail(final NotificationProperties properties,
+                                        final SessionInfo session) throws EmailException {
         final Email email = new SimpleEmail();
         email.setCharset(Defaults.CHARSET.displayName());
         email.setHostName(properties.getSmtpHostname());
@@ -66,8 +66,8 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         email.setStartTLSRequired(properties.isStartTlsRequired());
         email.setSSLOnConnect(properties.isSslOnConnectRequired());
         email.setAuthentication(properties.getSmtpUsername(), properties.getSmtpPassword());
-        final String localhostAddress = LocalhostAddress.INSTANCE.get().orElse("unknown host");
-        email.setFrom(properties.getSender(), "RoboZonky @ " + localhostAddress);
+        final String sessionName = session.getName().map(n -> "RoboZonky '" + n + "'").orElse("RoboZonky");
+        email.setFrom(properties.getSender(), sessionName);
         email.addTo(properties.getRecipient());
         return email;
     }
@@ -134,7 +134,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
             LOGGER.debug("Will not send e-mail.");
         } else {
             try {
-                final Email email = AbstractEmailingListener.createNewEmail(properties);
+                final Email email = AbstractEmailingListener.createNewEmail(properties, sessionInfo);
                 email.setSubject(this.getSubject(event));
                 email.setMsg(TemplateProcessor.INSTANCE.process(this.getTemplateFileName(),
                                                                 this.getData(event, sessionInfo)));
