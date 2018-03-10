@@ -81,7 +81,7 @@ public class FilterSupplier {
 
     private static Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> unlessSelloff,
                                                             final boolean isSelloff) {
-        if (isSelloff) { // everything must go
+        if (isSelloff) { // accept every sale, reject every investment and participation
             return Collections.singleton(MarketplaceFilter.of(MarketplaceFilterCondition.alwaysAccepting()));
         } else {
             return unlessSelloff.get();
@@ -90,14 +90,17 @@ public class FilterSupplier {
 
     private static Collection<MarketplaceFilter> supplyFilters(final Collection<MarketplaceFilter> filters,
                                                                final long monthsBeforeExit) {
-        final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size());
         if (monthsBeforeExit > -1) { // ignore marketplace items that go over the exit date
-            final MarketplaceFilterCondition c = new LoanTermCondition(monthsBeforeExit + 1);
+            final long filteredTerms = Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
+            final MarketplaceFilterCondition c = new LoanTermCondition(filteredTerms);
             final MarketplaceFilter f = MarketplaceFilter.of(c);
+            final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size());
             result.add(f);
+            result.addAll(filters);
+            return Collections.unmodifiableCollection(result);
+        } else {
+            return Collections.unmodifiableCollection(filters);
         }
-        result.addAll(filters);
-        return Collections.unmodifiableCollection(result);
     }
 
     public boolean isPrimaryMarketplaceEnabled() {

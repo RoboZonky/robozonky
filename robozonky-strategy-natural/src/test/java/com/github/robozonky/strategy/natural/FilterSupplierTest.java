@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.time.LocalDate;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,19 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.SoftAssertions.*;
 
 class FilterSupplierTest {
+
+    @Test
+    void extremeExitDate() { // https://github.com/RoboZonky/robozonky/issues/219
+        final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
+        v.setExitProperties(new ExitProperties(LocalDate.MAX));
+        final FilterSupplier s = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet(),
+                                                    Collections.emptySet());
+        assertSoftly(softly -> {
+            softly.assertThat(s.getPrimaryMarketplaceFilters()).isNotEmpty();
+            softly.assertThat(s.getSecondaryMarketplaceFilters()).isNotEmpty();
+            softly.assertThat(s.getSellFilters()).isEmpty();
+        });
+    }
 
     @Test
     void nullHandling() {
