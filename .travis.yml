@@ -1,8 +1,8 @@
 language: java
 env:
   global:
-    - MAVEN_OPTS="-Xmx2g"
-    - JAVA_OPTS="-Xmx2g"
+    - JAVA_OPTS="-Xmx2g -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+    - MAVEN_OPTS=$JAVA_OPTS
 addons: # make sure we're using the latest Java as Travis default is quite old
   apt:
     packages:

@@ -9,8 +9,8 @@ cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
 install:
   - cmd: SET PATH=%JAVA_HOME%\bin;%PATH%
-  - cmd: SET MAVEN_OPTS=-Xmx2g
-  - cmd: SET JAVA_OPTS=-Xmx2g
+  - cmd: SET "JAVA_OPTS=-Xmx2g -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+  - cmd: SET "MAVEN_OPTS=%JAVA_OPTS%"
   - cmd: mvn --version
   - cmd: java -version
 build_script:
