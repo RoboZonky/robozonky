@@ -15,13 +15,14 @@
   -->
 
 <izpack:userinput version="5.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:izpack="http://izpack.org/schema/userinput" xsi:schemaLocation="http://izpack.org/schema/userinput http://izpack.org/schema/5.0/izpack-userinput-5.0.xsd">
-  <panel id="zonkyUserInput">
+  <panel id="zonkyUserInput" summaryKey="Základní nastavení robota">
     <field type="title" align="left" txt="Nastavení komunikace se Zonky" id="zonky.title"/>
 
     <field type="staticText" align="left" bold="true" txt="Vložte své přihlašovací udaje k Zonky" id="zonky.title"/>
     <field type="divider" />
     <field type="text" variable="zonkyUsername">
-      <spec txt="Uživatelské jméno na Zonky:" id="zonky.username" size="20" set=""/>
+      <spec txt="Uživatelské jméno na Zonky:" id="zonky.username" size="20" set=""
+            summaryKey="Uživatelské jméno na Zonky"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Uživatelské jméno musí mít tvar e-mailové adresy.">
         <param name="pattern" value="[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+"/>
@@ -39,7 +40,7 @@
     <field type="space" />
     <field type="staticText" align="left" bold="true" txt="Nastavení pro pokročilé:" id="robozonky.controls"/>
     <field type="divider" />
-    <field type="check" variable="isZonkoidEnabled">
+    <field type="check" variable="isZonkoidEnabled" summaryKey="Notifikace do aplikace Zonkoid povoleny:">
       <spec txt="Notifikovat do mobilní aplikace Zonkoid." set="false"/>
     </field>
     <field type="check" variable="isEmailEnabled">
@@ -48,7 +49,7 @@
     <field type="check" variable="isJmxEnabled">
       <spec txt="Povolit vzdálenou správu a monitoring přes JMX." set="false"/>
     </field>
-    <field type="check" variable="isDryRun">
+    <field type="check" variable="isDryRun" summaryKey="Zkušební režim zapnut:">
       <spec txt="Zapnout zkušební režim. RoboZonky nebude smět investovat." set="false"/>
     </field>
 
@@ -78,13 +79,13 @@
            txt="Pokračováním bude odeslána zkušební notifikace, běžte si pro telefon."
            id="zonkoid.test"/>
   </panel>
-  <panel id="emailUserInput">
+  <panel id="emailUserInput" summaryKey="Nastavení e-mailových notifikací">
     <field type="title" align="left" txt="Nastavení notifikací do e-mailu" id="email.title"/>
 
     <field type="staticText" align="left" bold="true" txt="Nastavení e-mailového serveru (GMail, Seznam, ...)"
            id="smtp.title"/>
     <field type="divider" />
-    <field type="text" variable="smtpTo">
+    <field type="text" variable="smtpTo" summaryKey="Adresát e-mailových notifikací:">
       <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Adresát není platný.">
@@ -99,7 +100,7 @@
         <pwd txt="Heslo k SMTP:" id="smtp.password" size="20" set=""/>
       </spec>
     </field>
-    <field type="text" variable="smtpHostname">
+    <field type="text" variable="smtpHostname" summaryKey="SMTP server pro odesílání notifikací:">
       <spec txt="Adresa SMTP serveru:" id="smtp.hostname" size="20" set=""/>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Adresa serveru je povinná položka." />
@@ -149,23 +150,23 @@
     <field type="staticText" align="left" bold="true" txt="Pokračováním bude odeslán zkušební e-mail."
            id="email.test"/>
   </panel>
-  <panel id="jmxUserInput">
+  <panel id="jmxUserInput" summaryKey="Nastavení vzdáleného přístupu">
     <field type="title" align="left" txt="Nastavení vzdáleného přístupu k JMX" id="jmx.title"/>
 
     <field type="staticText" align="left" bold="true" txt="Parametry připojení"
            id="jmx.host.title"/>
     <field type="divider" />
-    <field type="text" variable="jmxHostname">
+    <field type="text" variable="jmxHostname" summaryKey="JMX adresa:">
       <spec txt="Vnější adresa zařízení:" id="jmx.hostname" size="20" set="${IP_ADDRESS}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Adresa je povinná položka." />
     </field>
-    <field type="text" variable="jmxPort">
+    <field type="text" variable="jmxPort" summaryKey="JMX port:">
       <spec txt="Port pro JMX:" id="jmxPort" size="20" set="7091"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator"
                  txt="Port musí být číslo." />
     </field>
-    <field type="check" variable="isJmxSecurityEnabled">
+    <field type="check" variable="isJmxSecurityEnabled" summaryKey="Vyžadovat autentizaci:">
       <spec txt="Vyžadovat autentizaci." id="jmxSecurity" size="20" set="false"/>
     </field>
     <field type="space" />
@@ -173,7 +174,7 @@
     <field type="staticText" align="left" bold="true" id="jmx.warning.2"
            txt="Pozor: Nevhodné nastavení může způsobit, že se robot nespustí!" />
   </panel>
-  <panel id="strategyUserInput">
+  <panel id="strategyUserInput" summaryKey="Nastavení investiční strategie">
     <field type="title" align="left" txt="Nastavení investiční strategie" id="strategy.title"/>
 
     <field type="radio" variable="strategyType">
@@ -184,13 +185,14 @@
       </spec>
     </field>
 
-    <field type="divider" />
-    <field type="file" variable="strategy" conditionid="isStrategyByFile">
+    <field type="space"/>
+
+    <field type="file" variable="strategy" conditionid="isStrategyByFile" summaryKey="Strategie ze souboru:">
       <spec txt="Vyberte soubor s investiční strategií:" size="30" />
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Strategie je povinná položka." />
     </field>
-    <field type="text" variable="strategy"  conditionid="isStrategyByUrl">
+    <field type="text" variable="strategy" conditionid="isStrategyByUrl" summaryKey="Strategie z webu:">
       <spec txt="Vložte odkaz na investiční strategii:" size="30" />
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
                  txt="Strategie je povinná položka." />
@@ -198,8 +200,12 @@
 
     <field type="space" />
     <field type="space" />
+
     <field type="staticText" align="left" bold="true"
-           txt="Budete-li pokračovat, RoboZonky bude nainstalován na tento počítač."
-           id="zonkoid.test"/>
+           txt="Strategii si můžete vytvořit na následující webové adrese:"
+           id="strategy.generator.url.1"/>
+    <field type="staticText" align="left" bold="true"
+           txt="https://robozonky.github.io/robozonky/konfigurace-strategie/"
+           id="strategy.generator.url.2"/>
   </panel>
 </izpack:userinput>

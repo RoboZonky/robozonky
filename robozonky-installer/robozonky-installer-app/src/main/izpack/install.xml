@@ -99,6 +99,7 @@
     <panel classname="UserInputPanel" id="strategyUserInput">
       <validator classname="com.github.robozonky.installer.panels.StrategySettingsValidator"/>
     </panel>
+    <panel classname="SummaryPanel"/>
     <panel classname="InstallPanel"/>
     <panel classname="FinishPanel"/>
   </panels>
