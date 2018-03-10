@@ -1,8 +1,8 @@
 language: java
 env:
   global:
-    - MAVEN_OPTS="-Xmx1g"
-    - JAVA_OPTS="-Xmx1g"
+    - MAVEN_OPTS="-Xmx2g"
+    - JAVA_OPTS="-Xmx2g"
 addons: # make sure we're using the latest Java as Travis default is quite old
   apt:
     packages:
@@ -17,6 +17,6 @@ cache:
   directories:
   - $HOME/.m2
 install:
-  - mvn --batch-mode install -DskipTests -Dgpg.skip
+  - mvn --batch-mode clean install -DskipTests -Dgpg.skip
 script:
-  - mvn --batch-mode install -Dgpg.skip
+  - mvn --batch-mode test integration-test
