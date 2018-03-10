@@ -14,6 +14,6 @@ install:
   - cmd: mvn --version
   - cmd: java -version
 build_script:
-  - mvn --batch-mode install -DskipTests
+  - mvn --batch-mode install -DskipTests -Dgpg.skip
 test_script:
-  - mvn --batch-mode install
+  - mvn --batch-mode install -Dgpg.skip

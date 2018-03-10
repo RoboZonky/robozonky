@@ -17,6 +17,6 @@ cache:
   directories:
   - $HOME/.m2
 install:
-  - mvn --batch-mode install -DskipTests
+  - mvn --batch-mode install -DskipTests -Dgpg.skip
 script:
-  - mvn --batch-mode install
+  - mvn --batch-mode install -Dgpg.skip
