@@ -438,8 +438,9 @@
           </dependencies>
           <configuration>
             <skip>${skipTests}</skip>
+            <withHistory>true</withHistory>
+            <maxDependencyDistance>2</maxDependencyDistance>
             <timestampedReports>false</timestampedReports>
-            <detectInlinedCode>true</detectInlinedCode>
             <mutationThreshold>85</mutationThreshold>
             <targetClasses>
               <param>com.github.robozonky.*</param>
