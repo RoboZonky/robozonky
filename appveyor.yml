@@ -5,15 +5,15 @@ environment:
 branches:
   except:
     - gh-pages
+cache:
+  - C:\Users\appveyor\.m2\ -> pom.xml
 install:
   - cmd: SET PATH=%JAVA_HOME%\bin;%PATH%
-  - cmd: SET MAVEN_OPTS=-Xmx4g
-  - cmd: SET JAVA_OPTS=-Xmx4g
+  - cmd: SET MAVEN_OPTS=-Xmx1g
+  - cmd: SET JAVA_OPTS=-Xmx1g
   - cmd: mvn --version
   - cmd: java -version
 build_script:
-  - mvn --batch-mode post-integration-test -DskipTests
+  - mvn --batch-mode install -DskipTests
 test_script:
-  - mvn --batch-mode post-integration-test
-cache:
-  - C:\Users\appveyor\.m2\ -> pom.xml
+  - mvn --batch-mode install
