@@ -441,7 +441,6 @@
           </dependencies>
           <configuration>
             <skip>${skipTests}</skip>
-            <withHistory>true</withHistory>
             <maxDependencyDistance>2</maxDependencyDistance>
             <timestampedReports>false</timestampedReports>
             <mutationThreshold>85</mutationThreshold>
