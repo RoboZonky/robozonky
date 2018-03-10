@@ -48,7 +48,7 @@ class Util {
 
     public static String identifyLoan(final LoanBased event) {
         final Loan loan = event.getLoan();
-        return "č. " + loan.getId() + " (" + loan.getRating() + ", " + loan.getTermInMonths() + " m.)";
+        return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
     }
 
     public static Map<String, Object> getLoanData(final Loan loan) {
