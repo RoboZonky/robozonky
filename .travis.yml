@@ -11,3 +11,6 @@ addons: # make sure we're using the latest Java as Travis default is quite old
     packages:
       - oracle-java8-installer
       - oracle-java9-installer
+cache:
+  directories:
+  - $HOME/.m2

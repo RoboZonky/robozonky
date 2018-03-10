@@ -16,4 +16,4 @@ build_script:
 test_script:
   - mvn --batch-mode post-integration-test
 cache:
-  - C:\Users\appveyor\.m2
+  - C:\Users\appveyor\.m2\ -> pom.xml
