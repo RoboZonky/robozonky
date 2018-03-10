@@ -31,29 +31,36 @@ import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
 public class Util {
 
+    private static final BigDecimal ONE_HUNDRED = BigDecimal.TEN.pow(2);
+
+    private static BigDecimal toDecimalShare(final int integerShare) {
+        return BigDecimal.valueOf(integerShare).divide(ONE_HUNDRED, 4, RoundingMode.HALF_EVEN);
+    }
+
     public static Stream<Rating> rankRatingsByDemand(final ParsedStrategy strategy,
                                                      final Map<Rating, BigDecimal> currentShare) {
         final SortedMap<BigDecimal, EnumSet<Rating>> mostWantedRatings = new TreeSortedMap<>(Comparator.reverseOrder());
         // put the ratings into buckets based on how much we're missing them
         currentShare.forEach((r, currentRatingShare) -> {
-            final int fromStrategy = strategy.getMaximumShare(r);
-            final BigDecimal maximumAllowedShare = BigDecimal.valueOf(fromStrategy)
-                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_EVEN);
+            final BigDecimal maximumAllowedShare = toDecimalShare(strategy.getMaximumShare(r));
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
-            if (undershare.compareTo(BigDecimal.ZERO) <= 0) { // we over-invested into this rating; do not include
-                Decisions.report(logger -> {
-                    logger.debug("Rating {} will be skipped; rating over-invested by {} percentage points.",
-                                 r, undershare.negate());
-                });
+            if (undershare.signum() == -1) { // we over-invested into this rating; do not include
+                final BigDecimal pp = undershare.multiply(ONE_HUNDRED).negate();
+                Decisions.report(logger -> logger.debug("Rating {} over-invested by {} percentage points.", r, pp));
                 return;
             }
-            mostWantedRatings.compute(undershare, (k, v) -> {
+            mostWantedRatings.compute(undershare, (k, v) -> { // rank the rating
                 if (v == null) {
                     return EnumSet.of(r);
                 }
                 v.add(r);
                 return v;
             });
+            final BigDecimal minimumNeededShare = toDecimalShare(strategy.getMinimumShare(r));
+            if (currentRatingShare.compareTo(minimumNeededShare) < 0) { // inform that the rating is under-invested
+                final BigDecimal pp = minimumNeededShare.subtract(currentRatingShare).multiply(ONE_HUNDRED);
+                Decisions.report(logger -> logger.debug("Rating {} under-invested by {} percentage points.", r, pp));
+            }
         });
         return mostWantedRatings.values().stream().flatMap(Collection::stream);
     }
