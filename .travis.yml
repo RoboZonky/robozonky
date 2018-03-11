@@ -21,11 +21,12 @@ env: # split execution per-module so that PITest doesn't cause the build to time
   - MODULE=robozonky-strategy-natural
   - MODULE=robozonky-app
   - MODULE=robozonky-installer
+matrix: # fail all if one fails
+  fast_finish: true
 cache:
   directories:
   - $HOME/.m2
-install:
-  - mvn --batch-mode -T 1.5C clean install -DskipTests -Dgpg.skip
-script:
-  - cd $MODULE
-  - mvn --batch-mode install -Dassembly.skipAssembly -Dgpg.skip
+install: # build all required modules for the given module, no tests
+  - mvn --batch-mode -T 1.5C -pl $MODULE -am clean install -DskipTests -Dgpg.skip
+script: # test the one module
+  - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip

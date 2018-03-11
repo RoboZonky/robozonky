@@ -9,7 +9,7 @@ environment:
     - MODULE: robozonky-strategy-natural
     - MODULE: robozonky-app
     - MODULE: robozonky-installer
-
+    fast_finish: true
 branches:
   except:
     - gh-pages
@@ -30,8 +30,7 @@ install:
   - cmd: SET "MAVEN_OPTS=%JAVA_OPTS%"
   - cmd: mvn --version
   - cmd: java -version
-build_script:
-  - mvn --batch-mode  -T 1.5C clean install -DskipTests -Dgpg.skip
-test_script:
-  - cd %MODULE%
-  - mvn --batch-mode install -Dassembly.skipAssembly -Dgpg.skip
+build_script: # build all required modules for the given module, no tests
+  - mvn --batch-mode -T 1.5C -pl %MODULE% -am clean install -DskipTests -Dgpg.skip
+test_script: # test the one module
+  - mvn --batch-mode -pl %MODULE% install -Dassembly.skipAssembly -Dgpg.skip
