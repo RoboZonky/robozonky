@@ -11,7 +11,7 @@ addons: # make sure we're using the latest Java as Travis default is quite old
 os:
   - linux
 env: # execution per-module so that PITest doesn't timeout the build, most difficult modules first
-  - MODULE=robozonky-installer-app
+  - MODULE=robozonky-installer/robozonky-installer-app
   - MODULE=robozonky-app
   - MODULE=robozonky-notifications
   - MODULE=robozonky-strategy-natural
