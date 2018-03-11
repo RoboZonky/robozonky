@@ -10,35 +10,19 @@ addons: # make sure we're using the latest Java as Travis default is quite old
       - oracle-java9-installer
 os:
   - linux
-matrix: # split execution per-module so that PITest doesn't cause the build to timeout
-  - env: MODULE=robozonky-api
-    jdk: oraclejdk8
-  - env: MODULE=robozonky-api
-    jdk: oraclejdk9
-  - env: MODULE=robozonky-common
-    jdk: oraclejdk8
-  - env: MODULE=robozonky-common
-    jdk: oraclejdk9
-  - env: MODULE=robozonky-integration-zonkoid
-    jdk: oraclejdk8
-  - env: MODULE=robozonky-integration-zonkoid
-    jdk: oraclejdk9
-  - env: MODULE=robozonky-notifications
-    jdk: oraclejdk8
-  - env: MODULE=robozonky-notifications
-    jdk: oraclejdk9
-  - env: MODULE=robozonky-strategy-natural
-    jdk: oraclejdk8
-  - env: MODULE=robozonky-strategy-natural
-    jdk: oraclejdk9
-  - env: MODULE=robozonky-app
-    jdk: oraclejdk8
-  - env: MODULE=robozonky-app
-    jdk: oraclejdk9
-  - env: MODULE=robozonky-installer
-    jdk: oraclejdk8
-  - env: MODULE=robozonky-installer
-    jdk: oraclejdk9
+jdk:
+  - oraclejdk8
+  - oraclejdk9
+env: # split execution per-module so that PITest doesn't cause the build to timeout
+  - MODULE=robozonky-api
+  - MODULE=robozonky-api
+  - MODULE=robozonky-common
+  - MODULE=robozonky-common
+  - MODULE=robozonky-integration-zonkoid
+  - MODULE=robozonky-notifications
+  - MODULE=robozonky-strategy-natural
+  - MODULE=robozonky-app
+  - MODULE=robozonky-installer
 cache:
   directories:
   - $HOME/.m2
