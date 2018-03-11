@@ -441,15 +441,8 @@
           </dependencies>
           <configuration>
             <skip>${skipTests}</skip>
-            <maxDependencyDistance>2</maxDependencyDistance>
             <timestampedReports>false</timestampedReports>
             <mutationThreshold>85</mutationThreshold>
-            <timeoutFactor>1.5</timeoutFactor>
-            <timeoutConstant>1000</timeoutConstant>
-            <jvmArgs> <!-- Speed up -->
-              <value>-XX:+TieredCompilation</value>
-              <value>-XX:TieredStopAtLevel=1</value>
-            </jvmArgs>
             <targetClasses>
               <param>com.github.robozonky.*</param>
             </targetClasses>
