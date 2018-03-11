@@ -8,7 +8,7 @@ branches:
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
 install:
-  - ps: |git
+  - ps: |
       Add-Type -AssemblyName System.IO.Compression.FileSystem
       if (!(Test-Path -Path "C:\maven" )) {
         (new-object System.Net.WebClient).DownloadFile(
