@@ -18,8 +18,9 @@ package com.github.robozonky.app.version;
 
 import java.util.Collections;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
@@ -34,17 +35,22 @@ import static org.mockito.Mockito.*;
 
 class UpdateMonitorTest {
 
-    private ClientAndServer server;
-    private String serverUrl;
+    private static ClientAndServer server;
+    private static String serverUrl;
 
-    @BeforeEach
-    void startServer() {
+    @BeforeAll
+    static void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
         serverUrl = "http://127.0.0.1:" + server.getPort();
     }
 
     @AfterEach
-    void stopServer() {
+    void resetServer() {
+        server.reset();
+    }
+
+    @AfterAll
+    static void stopServer() {
         server.stop();
     }
 
