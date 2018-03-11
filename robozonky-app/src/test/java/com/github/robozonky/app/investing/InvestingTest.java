@@ -52,8 +52,9 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noStrategy() {
+        final int loanId = (int) (Math.random() * 1000); // new ID every time to avoid caches
         final Loan loan = Loan.custom()
-                .setId(1)
+                .setId(loanId)
                 .setAmount(2)
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
@@ -82,7 +83,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noneAccepted() {
-        final int loanId = 1;
+        final int loanId = (int) (Math.random() * 1000); // new ID every time to avoid caches
         final Loan loan = Loan.custom()
                 .setId(loanId)
                 .setAmount(100_000)
@@ -106,7 +107,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void someAccepted() {
-        final int loanId = 1;
+        final int loanId = (int) (Math.random() * 1000); // new ID every time to avoid caches
         final Loan loan = Loan.custom()
                 .setId(loanId)
                 .setAmount(100_000)
