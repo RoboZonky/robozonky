@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.investing;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -29,7 +28,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.remote.entities.RawInvestment;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -52,16 +50,11 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
             () -> Optional.of(NONE_ACCEPTING_STRATEGY),
             ALL_ACCEPTING = () -> Optional.of(ALL_ACCEPTING_STRATEGY);
 
-    private static Zonky mockApi() {
-        final Zonky zonky = mock(Zonky.class);
-        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
-        return zonky;
-    }
-
     @Test
     void noStrategy() {
+        final int loanId = (int) (Math.random() * 1000); // new ID every time to avoid caches
         final Loan loan = Loan.custom()
-                .setId(1)
+                .setId(loanId)
                 .setAmount(2)
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
@@ -90,7 +83,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noneAccepted() {
-        final int loanId = 1;
+        final int loanId = (int) (Math.random() * 1000); // new ID every time to avoid caches
         final Loan loan = Loan.custom()
                 .setId(loanId)
                 .setAmount(100_000)
@@ -100,7 +93,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Investor.Builder builder = new Investor.Builder().asDryRun();
-        final Zonky z = mockApi();
+        final Zonky z = harmlessZonky(9000);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Authenticated auth = mock(Authenticated.class);
@@ -114,13 +107,12 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void someAccepted() {
-        final int loanId = 1;
+        final int loanId = (int) (Math.random() * 1000); // new ID every time to avoid caches
         final Loan loan = Loan.custom()
                 .setId(loanId)
                 .setAmount(100_000)
                 .setRating(Rating.D)
-                .setRemainingInvestment(1000)
-                .setMyInvestment(mockMyInvestment())
+                .setRemainingInvestment(20_000)
                 .setDatePublished(OffsetDateTime.now())
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
@@ -129,9 +121,10 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Authenticated auth = mockAuthentication(z);
-        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
+        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ZERO);
+        final Collection<Investment> result = exec.apply(portfolio, Collections.singleton(ld));
         verify(z, never()).invest(any()); // dry run
-        assertThat(exec.apply(portfolio, Collections.singleton(ld)))
+        assertThat(result)
                 .extracting(Investment::getLoanId)
                 .isEqualTo(Collections.singletonList(loanId));
     }

@@ -1,13 +1,33 @@
-install: true
-script: "MAVEN_OPTS=\"-Xmx512m\" JAVA_OPTS=\"-Xmx512m\" mvn --batch-mode clean post-integration-test"
 language: java
-os:
-  - linux
-jdk:
-  - oraclejdk9
-  - oraclejdk8
+env:
+  global:
+    - JAVA_OPTS=-Xmx2g
+    - MAVEN_OPTS=$JAVA_OPTS
 addons: # make sure we're using the latest Java as Travis default is quite old
   apt:
     packages:
       - oracle-java8-installer
       - oracle-java9-installer
+os:
+  - linux
+env: # execution per-module so that PITest doesn't timeout the build, most difficult modules first
+  - MODULE=robozonky-app
+  - MODULE=robozonky-installer/robozonky-installer-app # make sure installer can be built
+  - MODULE=robozonky-installer/robozonky-installer-panels # run tests in this module
+  - MODULE=robozonky-notifications
+  - MODULE=robozonky-strategy-natural
+  - MODULE=robozonky-integration-zonkoid
+  - MODULE=robozonky-common
+  - MODULE=robozonky-api
+jdk:
+  - oraclejdk8
+  - oraclejdk9
+matrix: # fail all if one fails
+  fast_finish: true
+cache:
+  directories:
+  - $HOME/.m2
+install: # build all required modules for the given module, no tests
+  - mvn --batch-mode -T 1.5C -pl $MODULE -am clean install -DskipTests -Dgpg.skip
+script: # test the one module
+  - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip

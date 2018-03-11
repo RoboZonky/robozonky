@@ -221,7 +221,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>2.13.0</version>
+        <version>2.15.0</version>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
@@ -279,6 +279,7 @@
           </execution>
         </executions>
         <configuration>
+          <skip>${skipTests}</skip>
           <aggregate>true</aggregate>
           <minimumPriority>2</minimumPriority>
           <rulesets>
@@ -303,6 +304,7 @@
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
         <configuration>
+          <skip>${skipTests}</skip>
           <effort>Max</effort>
           <threshold>High</threshold>
         </configuration>
@@ -331,6 +333,7 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
+          <skip>${skipTests}</skip>
           <source>${java.version}</source>
         </configuration>
         <executions>
@@ -419,7 +422,7 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>3.1.0-RC8</version>
+          <version>3.1.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-pmd-plugin</artifactId>
@@ -439,7 +442,6 @@
           <configuration>
             <skip>${skipTests}</skip>
             <timestampedReports>false</timestampedReports>
-            <detectInlinedCode>true</detectInlinedCode>
             <mutationThreshold>85</mutationThreshold>
             <targetClasses>
               <param>com.github.robozonky.*</param>
@@ -456,12 +458,6 @@
               <param>com.github.robozonky.strategy.natural.*Lexer*</param>
               <param>com.github.robozonky.strategy.natural.*Parser*</param>
             </excludedClasses>
-            <avoidCallsTo>
-              <avoidCallsTo>java.util.logging</avoidCallsTo>
-              <avoidCallsTo>org.apache.log4j</avoidCallsTo>
-              <avoidCallsTo>org.slf4j</avoidCallsTo>
-              <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
-            </avoidCallsTo>
           </configuration>
         </plugin>
         <plugin>
@@ -471,7 +467,7 @@
             <dependency>
               <groupId>org.junit.platform</groupId>
               <artifactId>junit-platform-surefire-provider</artifactId>
-              <version>1.0.3</version>
+              <version>1.1.0</version>
             </dependency>
             <dependency>
               <groupId>org.junit.jupiter</groupId>
