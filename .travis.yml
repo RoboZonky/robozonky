@@ -12,15 +12,33 @@ os:
   - linux
 matrix: # split execution per-module so that PITest doesn't cause the build to timeout
   - env: MODULE=robozonky-api
+    jdk: oraclejdk8
+  - env: MODULE=robozonky-api
+    jdk: oraclejdk9
   - env: MODULE=robozonky-common
+    jdk: oraclejdk8
+  - env: MODULE=robozonky-common
+    jdk: oraclejdk9
   - env: MODULE=robozonky-integration-zonkoid
+    jdk: oraclejdk8
+  - env: MODULE=robozonky-integration-zonkoid
+    jdk: oraclejdk9
   - env: MODULE=robozonky-notifications
+    jdk: oraclejdk8
+  - env: MODULE=robozonky-notifications
+    jdk: oraclejdk9
   - env: MODULE=robozonky-strategy-natural
+    jdk: oraclejdk8
+  - env: MODULE=robozonky-strategy-natural
+    jdk: oraclejdk9
   - env: MODULE=robozonky-app
+    jdk: oraclejdk8
+  - env: MODULE=robozonky-app
+    jdk: oraclejdk9
   - env: MODULE=robozonky-installer
-jdk:
-  - oraclejdk9
-  - oraclejdk8
+    jdk: oraclejdk8
+  - env: MODULE=robozonky-installer
+    jdk: oraclejdk9
 cache:
   directories:
   - $HOME/.m2
