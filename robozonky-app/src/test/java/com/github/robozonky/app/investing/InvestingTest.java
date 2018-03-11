@@ -120,7 +120,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Authenticated auth = mockAuthentication(z);
-        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
+        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ZERO);
         final Collection<Investment> result = exec.apply(portfolio, Collections.singleton(ld));
         verify(z, never()).invest(any()); // dry run
         assertThat(result)

@@ -10,17 +10,17 @@ addons: # make sure we're using the latest Java as Travis default is quite old
       - oracle-java9-installer
 os:
   - linux
+env: # execution per-module so that PITest doesn't timeout the build, most difficult modules first
+  - MODULE=robozonky-installer
+  - MODULE=robozonky-app
+  - MODULE=robozonky-notifications
+  - MODULE=robozonky-strategy-natural
+  - MODULE=robozonky-integration-zonkoid
+  - MODULE=robozonky-common
+  - MODULE=robozonky-api
 jdk:
   - oraclejdk8
   - oraclejdk9
-env: # split execution per-module so that PITest doesn't cause the build to timeout
-  - MODULE=robozonky-api
-  - MODULE=robozonky-common
-  - MODULE=robozonky-integration-zonkoid
-  - MODULE=robozonky-notifications
-  - MODULE=robozonky-strategy-natural
-  - MODULE=robozonky-app
-  - MODULE=robozonky-installer
 matrix: # fail all if one fails
   fast_finish: true
 cache:
