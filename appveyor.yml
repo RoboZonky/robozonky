@@ -8,7 +8,7 @@ branches:
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
 install:
-  - ps: |
+  - ps: |git
       Add-Type -AssemblyName System.IO.Compression.FileSystem
       if (!(Test-Path -Path "C:\maven" )) {
         (new-object System.Net.WebClient).DownloadFile(
@@ -17,7 +17,7 @@ install:
         )
         [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
       }
-  - cmd: SET PATH=C:\maven;%JAVA_HOME%\bin;%PATH%
+  - cmd: SET PATH=C:\maven\apache-maven-3.5.3\bin;%JAVA_HOME%\bin;%PATH%
   - cmd: SET "JAVA_OPTS=-Xmx2g -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
   - cmd: SET "MAVEN_OPTS=%JAVA_OPTS%"
   - cmd: mvn --version
