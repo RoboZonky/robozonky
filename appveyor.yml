@@ -8,7 +8,17 @@ branches:
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
 install:
-  - cmd: SET PATH=%JAVA_HOME%\bin;%PATH%
+install:
+  - ps: |
+      Add-Type -AssemblyName System.IO.Compression.FileSystem
+      if (!(Test-Path -Path "C:\maven" )) {
+        (new-object System.Net.WebClient).DownloadFile(
+          'https://www.apache.org/dist/maven/maven-3/3.5.3/binaries/apache-maven-3.5.3-bin.zip',
+          'C:\maven-bin.zip'
+        )
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
+      }
+  - cmd: SET PATH=C:\maven;%JAVA_HOME%\bin;%PATH%
   - cmd: SET "JAVA_OPTS=-Xmx2g -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
   - cmd: SET "MAVEN_OPTS=%JAVA_OPTS%"
   - cmd: mvn --version
