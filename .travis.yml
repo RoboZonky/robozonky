@@ -1,7 +1,7 @@
 language: java
 env:
   global:
-    - JAVA_OPTS="-Xmx2g -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+    - JAVA_OPTS=-Xmx2g
     - MAVEN_OPTS=$JAVA_OPTS
 addons: # make sure we're using the latest Java as Travis default is quite old
   apt:
@@ -10,6 +10,14 @@ addons: # make sure we're using the latest Java as Travis default is quite old
       - oracle-java9-installer
 os:
   - linux
+matrix: # split execution per-module so that PITest doesn't cause the build to timeout
+  - env: MODULE=robozonky-api
+  - env: MODULE=robozonky-common
+  - env: MODULE=robozonky-integration-zonkoid
+  - env: MODULE=robozonky-notifications
+  - env: MODULE=robozonky-strategy-natural
+  - env: MODULE=robozonky-app
+  - env: MODULE=robozonky-installer
 jdk:
   - oraclejdk9
   - oraclejdk8
@@ -19,4 +27,5 @@ cache:
 install:
   - mvn --batch-mode -T 1.5C clean install -DskipTests -Dgpg.skip
 script:
+  - cd $MODULE
   - mvn --batch-mode install -Dassembly.skipAssembly -Dgpg.skip
