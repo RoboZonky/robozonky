@@ -15,8 +15,6 @@ jdk:
   - oraclejdk9
 env: # split execution per-module so that PITest doesn't cause the build to timeout
   - MODULE=robozonky-api
-  - MODULE=robozonky-api
-  - MODULE=robozonky-common
   - MODULE=robozonky-common
   - MODULE=robozonky-integration-zonkoid
   - MODULE=robozonky-notifications

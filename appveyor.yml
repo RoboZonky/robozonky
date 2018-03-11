@@ -1,7 +1,15 @@
 version: '{build}'
 environment:
+  JAVA_HOME: C:\Program Files\Java\jdk9
   matrix:
-    - JAVA_HOME: C:\Program Files\Java\jdk9
+    - MODULE: robozonky-api
+    - MODULE: robozonky-common
+    - MODULE: robozonky-integration-zonkoid
+    - MODULE: robozonky-notifications
+    - MODULE: robozonky-strategy-natural
+    - MODULE: robozonky-app
+    - MODULE: robozonky-installer
+
 branches:
   except:
     - gh-pages
@@ -25,4 +33,5 @@ install:
 build_script:
   - mvn --batch-mode  -T 1.5C clean install -DskipTests -Dgpg.skip
 test_script:
+  - cd %MODULE%
   - mvn --batch-mode install -Dassembly.skipAssembly -Dgpg.skip
