@@ -441,6 +441,7 @@
           </dependencies>
           <configuration>
             <skip>${skipTests}</skip>
+            <verbose>true</verbose>
             <timestampedReports>false</timestampedReports>
             <mutationThreshold>85</mutationThreshold>
             <targetClasses>
