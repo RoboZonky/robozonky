@@ -19,7 +19,6 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -42,45 +41,13 @@ class InvestingDaemon extends DaemonOperation {
      * Will make sure that the endpoint only loads loans that are on the marketplace, and not the entire history.
      */
     private static final Select SELECT = new Select().greaterThan("remainingInvestment", 0);
-    private final BiConsumer<Portfolio, Authenticated> investor;
+    private final Investing investing;
 
     public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
                            final Investor.Builder builder, final Supplier<Optional<InvestmentStrategy>> strategy,
                            final PortfolioSupplier portfolio, final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
-        this.investor = (p, a) -> {
-            // don't query anything unless we have enough money to invest
-            final int balance = p.getRemoteBalance().get().intValue();
-            final int minimum = Defaults.MINIMUM_INVESTMENT_IN_CZK;
-            if (balance < minimum) {
-                LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
-                return;
-            }
-            // query marketplace for investment opportunities
-            final Collection<MarketplaceLoan> loans = a.call(zonky -> zonky.getAvailableLoans(SELECT))
-                    .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
-                    .collect(Collectors.toList());
-            final Collection<LoanDescriptor> descriptors = loans.stream().parallel()
-                    .map(l -> {
-                        /*
-                         * Loan is first retrieved from the authenticated API. This way, we get all available
-                         * information, such as borrower nicknames from other loans made by the same person.
-                         */
-                        final Loan complete = a.call(zonky -> LoanCache.INSTANCE.getLoan(l.getId(), zonky));
-                        /*
-                         * We update the loan within the cache with latest information from the marketplace. This is
-                         * done so that we don't cache stale loan information, such as how much of the loan is remaining
-                         * to be invested.
-                         */
-                        Loan.updateFromMarketplace(complete, l);
-                        return complete;
-                    })
-                    .map(LoanDescriptor::new)
-                    .collect(Collectors.toList());
-            // trigger the strategy
-            final Investing i = new Investing(builder, strategy, a);
-            i.apply(p, descriptors);
-        };
+        this.investing = new Investing(builder, strategy, auth);
     }
 
     @Override
@@ -89,7 +56,36 @@ class InvestingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected BiConsumer<Portfolio, Authenticated> getInvestor() {
-        return investor;
+    protected void execute(final Portfolio portfolio, final Authenticated authenticated) {
+        // don't query anything unless we have enough money to invest
+        final int balance = portfolio.getRemoteBalance().get().intValue();
+        final int minimum = Defaults.MINIMUM_INVESTMENT_IN_CZK;
+        if (balance < minimum) {
+            LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
+            return;
+        }
+        // query marketplace for investment opportunities
+        final Collection<MarketplaceLoan> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
+                .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
+                .collect(Collectors.toList());
+        final Collection<LoanDescriptor> descriptors = loans.stream().parallel()
+                .map(l -> {
+                    /*
+                     * Loan is first retrieved from the authenticated API. This way, we get all available
+                     * information, such as borrower nicknames from other loans made by the same person.
+                     */
+                    final Loan complete = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(l.getId(), zonky));
+                    /*
+                     * We update the loan within the cache with latest information from the marketplace. This is
+                     * done so that we don't cache stale loan information, such as how much of the loan is remaining
+                     * to be invested.
+                     */
+                    Loan.updateFromMarketplace(complete, l);
+                    return complete;
+                })
+                .map(LoanDescriptor::new)
+                .collect(Collectors.toList());
+        // trigger the strategy
+        investing.apply(portfolio, descriptors);
     }
 }

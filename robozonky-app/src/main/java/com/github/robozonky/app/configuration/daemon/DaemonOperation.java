@@ -17,7 +17,6 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
@@ -46,7 +45,7 @@ abstract class DaemonOperation implements Runnable {
 
     protected abstract boolean isEnabled(final Authenticated authenticated);
 
-    protected abstract BiConsumer<Portfolio, Authenticated> getInvestor();
+    protected abstract void execute(final Portfolio portfolio, final Authenticated authenticated);
 
     public Duration getRefreshInterval() {
         return this.refreshInterval;
@@ -59,7 +58,7 @@ abstract class DaemonOperation implements Runnable {
             if (isEnabled(api)) {
                 final Portfolio p = portfolio.get()
                         .orElseThrow(() -> new IllegalStateException("Portfolio not properly initialized."));
-                getInvestor().accept(p, api);
+                execute(p, api);
             } else {
                 LOGGER.info("Access to marketplace disabled by Zonky.");
             }

@@ -66,8 +66,8 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        protected BiConsumer<Portfolio, Authenticated> getInvestor() {
-            return operation;
+        protected void execute(Portfolio portfolio, Authenticated authenticated) {
+            operation.accept(portfolio, authenticated);
         }
     }
 }

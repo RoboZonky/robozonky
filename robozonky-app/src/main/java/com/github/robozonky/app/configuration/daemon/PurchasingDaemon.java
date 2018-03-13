@@ -19,7 +19,6 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -33,19 +32,13 @@ import com.github.robozonky.common.remote.Select;
 
 class PurchasingDaemon extends DaemonOperation {
 
-    private final BiConsumer<Portfolio, Authenticated> investor;
+    private final Purchasing purchasing;
 
     public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
                             final Supplier<Optional<PurchaseStrategy>> strategy, final PortfolioSupplier portfolio,
                             final Duration refreshPeriod, final boolean isDryRun) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
-        this.investor = (folio, api) -> {
-            final long balance = folio.getRemoteBalance().get().longValue();
-            final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
-            final Collection<Participation> p =
-                    api.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
-            new Purchasing(strategy, api, isDryRun).apply(folio, p);
-        };
+        this.purchasing = new Purchasing(strategy, auth, isDryRun);
     }
 
     @Override
@@ -54,7 +47,11 @@ class PurchasingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected BiConsumer<Portfolio, Authenticated> getInvestor() {
-        return investor;
+    protected void execute(final Portfolio portfolio, final Authenticated authenticated) {
+        final long balance = portfolio.getRemoteBalance().get().longValue();
+        final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
+        final Collection<Participation> p =
+                authenticated.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
+        purchasing.apply(portfolio, p);
     }
 }
