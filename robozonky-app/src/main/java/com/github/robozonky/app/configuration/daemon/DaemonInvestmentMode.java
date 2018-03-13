@@ -41,16 +41,14 @@ public class DaemonInvestmentMode implements InvestmentMode {
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Authenticated auth,
                                 final PortfolioUpdater p, final Investor.Builder builder,
-                                final StrategyProvider strategyProvider, final Duration maximumSleepPeriod,
-                                final Duration primaryMarketplaceCheckPeriod,
+                                final StrategyProvider strategyProvider, final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
         this.portfolioUpdater = p;
         this.daemons = new DaemonOperation[]{
                 new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, p,
-                                    maximumSleepPeriod, primaryMarketplaceCheckPeriod),
+                                    primaryMarketplaceCheckPeriod),
                 new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, p,
-                                     maximumSleepPeriod, secondaryMarketplaceCheckPeriod,
-                                     builder.isDryRun())
+                                     secondaryMarketplaceCheckPeriod, builder.isDryRun())
         };
     }
 

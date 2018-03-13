@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.investing;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,7 +57,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .setAmount(2)
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Investing exec = new Investing(null, Optional::empty, null, Duration.ofMinutes(60));
+        final Investing exec = new Investing(null, Optional::empty, null);
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         assertThat(exec.apply(portfolio, Collections.singletonList(ld))).isEmpty();
@@ -77,7 +76,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
             final Function<Zonky, Collection<RawInvestment>> f = invocation.getArgument(0);
             return f.apply(z);
         });
-        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ofMinutes(60));
+        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
     }
 
@@ -101,7 +100,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
             final Function<Zonky, Collection<RawInvestment>> f = invocation.getArgument(0);
             return f.apply(z);
         });
-        final Investing exec = new Investing(builder, NONE_ACCEPTING, auth, Duration.ofMinutes(60));
+        final Investing exec = new Investing(builder, NONE_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
     }
 
@@ -121,11 +120,14 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Authenticated auth = mockAuthentication(z);
-        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth, Duration.ZERO);
+        final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
         final Collection<Investment> result = exec.apply(portfolio, Collections.singleton(ld));
         verify(z, never()).invest(any()); // dry run
         assertThat(result)
                 .extracting(Investment::getLoanId)
                 .isEqualTo(Collections.singletonList(loanId));
+        // re-check; no balance changed, no marketplace changed, nothing should happen
+        assertThat(exec.apply(portfolio, Collections.singleton(ld)))
+                .isEmpty();
     }
 }

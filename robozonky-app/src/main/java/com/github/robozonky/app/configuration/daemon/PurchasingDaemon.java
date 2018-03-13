@@ -37,14 +37,14 @@ class PurchasingDaemon extends DaemonOperation {
 
     public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
                             final Supplier<Optional<PurchaseStrategy>> strategy, final PortfolioSupplier portfolio,
-                            final Duration maximumSleepPeriod, final Duration refreshPeriod, final boolean isDryRun) {
+                            final Duration refreshPeriod, final boolean isDryRun) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
         this.investor = (folio, api) -> {
             final long balance = folio.getRemoteBalance().get().longValue();
             final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
             final Collection<Participation> p =
                     api.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
-            new Purchasing(strategy, api, maximumSleepPeriod, isDryRun).apply(folio, p);
+            new Purchasing(strategy, api, isDryRun).apply(folio, p);
         };
     }
 

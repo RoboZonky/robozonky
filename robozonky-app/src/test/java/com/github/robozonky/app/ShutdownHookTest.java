@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.util;
+package com.github.robozonky.app;
 
 import java.util.Optional;
 
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.ShutdownHook;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

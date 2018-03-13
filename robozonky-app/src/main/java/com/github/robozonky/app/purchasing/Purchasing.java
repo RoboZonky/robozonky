@@ -16,9 +16,9 @@
 
 package com.github.robozonky.app.purchasing;
 
-import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -32,6 +32,8 @@ import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
 import com.github.robozonky.common.remote.Zonky;
+import org.eclipse.collections.api.set.primitive.IntSet;
+import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +43,11 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
 
     private final Authenticated auth;
     private final boolean dryRun;
+    private final AtomicReference<IntSet> lastChecked = new AtomicReference<>(IntHashSet.newSetWith());
 
     public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Authenticated auth,
-                      final TemporalAmount maximumSleepPeriod, final boolean dryRun) {
-        super((l) -> new Activity(l, maximumSleepPeriod), strategy);
+                      final boolean dryRun) {
+        super(strategy);
         this.auth = auth;
         this.dryRun = dryRun;
     }
@@ -54,8 +57,10 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     }
 
     @Override
-    protected int identify(final Participation item) {
-        return item.getId();
+    protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
+        final int[] idsFromMarketplace = marketplace.stream().mapToInt(Participation::getId).toArray();
+        final IntSet presentWhenLastChecked = lastChecked.getAndSet(IntHashSet.newSetWith(idsFromMarketplace));
+        return StrategyExecutor.hasNewIds(presentWhenLastChecked, idsFromMarketplace);
     }
 
     @Override

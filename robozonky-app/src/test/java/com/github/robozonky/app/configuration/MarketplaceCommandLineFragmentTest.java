@@ -38,10 +38,4 @@ class MarketplaceCommandLineFragmentTest {
         assertThat(a).isEqualByComparingTo(Duration.ofSeconds(10));
     }
 
-    @Test
-    void durationForSleeping() {
-        final MarketplaceCommandLineFragment f = new MarketplaceCommandLineFragment();
-        final Duration a = f.getMaximumSleepDuration();
-        assertThat(a).isEqualByComparingTo(Duration.ofMinutes(60));
-    }
 }

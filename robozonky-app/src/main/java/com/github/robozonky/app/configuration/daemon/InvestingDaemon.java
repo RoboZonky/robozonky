@@ -46,8 +46,7 @@ class InvestingDaemon extends DaemonOperation {
 
     public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
                            final Investor.Builder builder, final Supplier<Optional<InvestmentStrategy>> strategy,
-                           final PortfolioSupplier portfolio, final Duration maximumSleepPeriod,
-                           final Duration refreshPeriod) {
+                           final PortfolioSupplier portfolio, final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
         this.investor = (p, a) -> {
             // don't query anything unless we have enough money to invest
@@ -79,7 +78,7 @@ class InvestingDaemon extends DaemonOperation {
                     .map(LoanDescriptor::new)
                     .collect(Collectors.toList());
             // trigger the strategy
-            final Investing i = new Investing(builder, strategy, a, maximumSleepPeriod);
+            final Investing i = new Investing(builder, strategy, a);
             i.apply(p, descriptors);
         };
     }

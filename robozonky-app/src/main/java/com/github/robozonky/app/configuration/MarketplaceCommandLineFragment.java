@@ -19,12 +19,15 @@ package com.github.robozonky.app.configuration;
 import java.time.Duration;
 
 import com.beust.jcommander.Parameter;
+import org.slf4j.LoggerFactory;
 
 class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
 
-    @Parameter(names = {"-z", "--zonk"},
+    private static final int DEFAULT_DURATION = 60;
+
+    @Parameter(names = {"-z", "--zonk"}, hidden = true,
             description = "The longest amount of time in minutes for which Zonky is allowed to sleep.")
-    private int maximumSleepDuration = 60;
+    private int maximumSleepDuration = DEFAULT_DURATION;
 
     @Parameter(names = {"-w", "--wait-primary", "--wait"},
             description = "Number of seconds between consecutive checks of primary marketplace.")
@@ -42,7 +45,13 @@ class MarketplaceCommandLineFragment extends AbstractCommandLineFragment {
         return Duration.ofSeconds(secondaryMarketplaceCheckDelay);
     }
 
+    @Deprecated
     public Duration getMaximumSleepDuration() {
+        if (maximumSleepDuration != DEFAULT_DURATION) {
+            LoggerFactory.getLogger(MarketplaceCommandLineFragment.class)
+                    .info("Setting sleep duration no longer has any effect. Please stop using the '-z' command line " +
+                                  "switch, which will be removed in future versions of RoboZonky.");
+        }
         return Duration.ofMinutes(maximumSleepDuration);
     }
 }

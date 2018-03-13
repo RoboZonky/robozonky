@@ -48,9 +48,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final PortfolioUpdater p = mock(PortfolioUpdater.class);
         try {
             final DaemonInvestmentMode d = new DaemonInvestmentMode(t -> {
-            }, a, p, b, mock(StrategyProvider.class),
-                                                                    Duration.ofMinutes(1), Duration.ofSeconds(1),
-                                                                    Duration.ofSeconds(1));
+            }, a, p, b, mock(StrategyProvider.class), Duration.ofSeconds(1), Duration.ofSeconds(1));
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock

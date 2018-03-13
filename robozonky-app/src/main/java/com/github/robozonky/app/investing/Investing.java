@@ -16,9 +16,10 @@
 
 package com.github.robozonky.app.investing;
 
-import java.time.temporal.TemporalAmount;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -27,22 +28,33 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
+import org.eclipse.collections.api.set.primitive.IntSet;
+import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
     private final Authenticated auth;
     private final Investor.Builder investor;
+    private final AtomicReference<IntSet> actionableWhenLastChecked = new AtomicReference<>(IntHashSet.newSetWith());
 
     public Investing(final Investor.Builder investor, final Supplier<Optional<InvestmentStrategy>> strategy,
-                     final Authenticated auth, final TemporalAmount maximumSleepPeriod) {
-        super((l) -> new Activity(l, maximumSleepPeriod), strategy);
+                     final Authenticated auth) {
+        super(strategy);
         this.auth = auth;
         this.investor = investor;
     }
 
     @Override
-    protected int identify(final LoanDescriptor item) {
-        return item.item().getId();
+    protected boolean hasMarketplaceUpdates(final Collection<LoanDescriptor> marketplace) {
+        final OffsetDateTime now = OffsetDateTime.now();
+        final int[] actionableLoansNow = marketplace.stream()
+                .filter(l -> l.getLoanCaptchaProtectionEndDateTime()
+                        .map(d -> d.isBefore(now))
+                        .orElse(true)
+                ).mapToInt(l -> l.item().getId()).toArray();
+        final IntSet lastCheckedActionableLoans =
+                actionableWhenLastChecked.getAndSet(IntHashSet.newSetWith(actionableLoansNow));
+        return StrategyExecutor.hasNewIds(lastCheckedActionableLoans, actionableLoansNow);
     }
 
     @Override
