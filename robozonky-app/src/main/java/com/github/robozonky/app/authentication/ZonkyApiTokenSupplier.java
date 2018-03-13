@@ -70,7 +70,6 @@ class ZonkyApiTokenSupplier implements Supplier<Optional<ZonkyApiToken>> {
         } else if (token.willExpireIn(refresh)) {
             return refreshToken(token);
         } else {
-            LOGGER.trace("Reusing token.");
             return token;
         }
     }
