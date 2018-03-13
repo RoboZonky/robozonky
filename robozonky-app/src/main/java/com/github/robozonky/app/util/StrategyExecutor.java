@@ -52,6 +52,10 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
         this.strategyProvider = strategy;
     }
 
+    protected boolean isBalanceUnderMinimum(final int currentBalance) {
+        return false;
+    }
+
     /**
      * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
      * marketplace changed since the last time this method was called.
@@ -61,10 +65,13 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
     protected abstract boolean hasMarketplaceUpdates(final Collection<T> marketplace);
 
     private boolean skipStrategyEvaluation(final Portfolio portfolio, final Collection<T> marketplace) {
-        if (marketplaceCheckPending.get()) {
+        final BigDecimal currentBalance = portfolio.getRemoteBalance().get();
+        if (isBalanceUnderMinimum(currentBalance.intValue())) {
+            LOGGER.debug("Asleep due to balance being less than minimum.");
+            return true;
+        } else if (marketplaceCheckPending.get()) {
             return false;
         }
-        final BigDecimal currentBalance = portfolio.getRemoteBalance().get();
         final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
         final boolean balanceChangedMeaningfully = currentBalance.compareTo(lastCheckedBalance) > 0;
         if (balanceChangedMeaningfully) {

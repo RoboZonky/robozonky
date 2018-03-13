@@ -28,6 +28,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
+import com.github.robozonky.internal.api.Defaults;
 import org.eclipse.collections.api.set.primitive.IntSet;
 import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 
@@ -42,6 +43,12 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
         super(strategy);
         this.auth = auth;
         this.investor = investor;
+    }
+
+    @Override
+    protected boolean isBalanceUnderMinimum(final int current) {
+        final int minimum = Defaults.MINIMUM_INVESTMENT_IN_CZK;
+        return current < minimum;
     }
 
     @Override
