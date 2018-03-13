@@ -19,6 +19,7 @@ package com.github.robozonky.app.configuration.daemon;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -50,13 +51,30 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
     }
 
+    @Test
+    void error() {
+        final Authenticated a = mock(Authenticated.class);
+        final BiConsumer<Portfolio, Authenticated> operation = (p, api) -> {
+            throw new Error();
+        };
+        final Consumer<Throwable> shutdown = mock(Consumer.class);
+        final DaemonOperation d = new CustomOperation(a, operation, shutdown);
+        d.run();
+        verify(shutdown).accept(any());
+    }
+
     private static final class CustomOperation extends DaemonOperation {
 
         private final BiConsumer<Portfolio, Authenticated> operation;
 
         CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
-            super((t) -> {
-            }, auth, () -> Optional.of(mock(Portfolio.class)), Duration.ofSeconds(1));
+            this(auth, operation, t -> {
+            });
+        }
+
+        CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation,
+                        final Consumer<Throwable> shutdownHook) {
+            super(shutdownHook, auth, () -> Optional.of(mock(Portfolio.class)), Duration.ofSeconds(1));
             this.operation = operation;
         }
 
@@ -66,7 +84,7 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        protected void execute(Portfolio portfolio, Authenticated authenticated) {
+        protected void execute(final Portfolio portfolio, final Authenticated authenticated) {
             operation.accept(portfolio, authenticated);
         }
     }

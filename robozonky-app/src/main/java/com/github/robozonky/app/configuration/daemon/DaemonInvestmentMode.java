@@ -66,7 +66,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         final Duration oneHour = Duration.ofHours(1);
         executor.submit(portfolioUpdater.getBlockedAmountsUpdater(), oneHour, oneHour);
         // run investing and purchasing daemons
-        IntStream.range(0, daemons.length).boxed().forEach(daemonId -> {
+        IntStream.range(0, daemons.length).forEach(daemonId -> {
             final DaemonOperation d = daemons[daemonId];
             final long initialDelay = daemonId * 250; // quarter second apart
             final Runnable task = new Skippable(d, portfolioUpdater::isUpdating);

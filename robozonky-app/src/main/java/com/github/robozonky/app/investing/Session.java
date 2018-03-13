@@ -96,31 +96,25 @@ final class Session {
                                                 final Zonky api, final Collection<LoanDescriptor> loans,
                                                 final RestrictedInvestmentStrategy strategy) {
         final Session session = new Session(portfolio, new LinkedHashSet<>(loans), investor, api);
-        final int balance = session.getPortfolioOverview().getCzkAvailable();
-        Events.fire(new ExecutionStartedEvent(loans, session.getPortfolioOverview()));
+        final PortfolioOverview portfolioOverview = session.portfolioOverview;
+        final int balance = portfolioOverview.getCzkAvailable();
+        Events.fire(new ExecutionStartedEvent(loans, portfolioOverview));
         if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailable().isEmpty()) {
             session.invest(strategy);
         }
         final Collection<Investment> result = session.getResult();
-        Events.fire(new ExecutionCompletedEvent(result, session.getPortfolioOverview()));
+        // make sure we get fresh portfolio reference here
+        Events.fire(new ExecutionCompletedEvent(result, session.portfolioOverview));
         return Collections.unmodifiableCollection(result);
     }
 
     private void invest(final RestrictedInvestmentStrategy strategy) {
         boolean invested;
         do {
-            invested = strategy.apply(getAvailable(), getPortfolioOverview())
+            invested = strategy.apply(getAvailable(), portfolioOverview)
                     .peek(r -> Events.fire(new LoanRecommendedEvent(r)))
                     .anyMatch(this::invest); // keep trying until investment opportunities are exhausted
         } while (invested);
-    }
-
-    /**
-     * Get information about the portfolio, which is up to date relative to the current point in the session.
-     * @return Portfolio.
-     */
-    public PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview;
     }
 
     /**

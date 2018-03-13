@@ -78,10 +78,10 @@ final class Session {
         if (c.isEmpty()) {
             return Collections.emptyList();
         }
-        Events.fire(new PurchasingStartedEvent(c, session.getPortfolioOverview()));
+        Events.fire(new PurchasingStartedEvent(c, session.portfolioOverview));
         session.purchase(strategy);
         final Collection<Investment> result = session.getResult();
-        Events.fire(new PurchasingCompletedEvent(result, session.getPortfolioOverview()));
+        Events.fire(new PurchasingCompletedEvent(result, session.portfolioOverview));
         return Collections.unmodifiableCollection(result);
     }
 
@@ -93,14 +93,6 @@ final class Session {
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
-    }
-
-    /**
-     * Get information about the portfolio, which is up to date relative to the current point in the session.
-     * @return Portfolio.
-     */
-    public PortfolioOverview getPortfolioOverview() {
-        return portfolioOverview;
     }
 
     /**

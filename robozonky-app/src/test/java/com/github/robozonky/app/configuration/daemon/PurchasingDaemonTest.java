@@ -40,6 +40,6 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
         }, a, s, () -> Optional.of(portfolio), Duration.ZERO, true);
         d.run();
-        verify(a, times(1)).call(notNull());
+        verify(z, times(1)).getAvailableParticipations(any());
     }
 }
