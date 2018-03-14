@@ -22,7 +22,6 @@ import java.util.Objects;
 
 class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
 
-    private static final String SNAPSHOT_ID = "-SNAPSHOT";
     private static final Comparator<RoboZonkyVersion> COMPARATOR = Comparator.comparing(RoboZonkyVersion::getMajor)
             .thenComparing(RoboZonkyVersion::getMinor)
             .thenComparing(RoboZonkyVersion::getMicro);
@@ -43,7 +42,8 @@ class RoboZonkyVersion implements Comparable<RoboZonkyVersion> {
         if (version == null) { // this means we're on a SNAPSHOT, which is assumed to be the latest version
             return new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
         }
-        final String regular = version.replace(SNAPSHOT_ID, "");
+        final int dashIndex = version.indexOf("-");
+        final String regular = dashIndex > 0 ? version.substring(0, dashIndex) : version;
         return Arrays.stream(regular.split("\\Q.\\E"))
                 .mapToInt(Integer::parseInt)
                 .toArray();

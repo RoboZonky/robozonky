@@ -48,6 +48,9 @@ class RoboZonkyVersionTest {
             softly.assertThat(current).isEqualTo(current);
             softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0"));
             softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-SNAPSHOT")); // SNAPSHOTs do not matter
+            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-alpha-1")); // alphas do not matter
+            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-beta-1")); // betas do not matter
+            softly.assertThat(current).isEqualTo(new RoboZonkyVersion("4.1.0-cr-1")); // CRs do not matter
             softly.assertThat(current).isNotEqualTo(null);
             softly.assertThat(current).isNotEqualTo("something");
             softly.assertThat(current).isNotEqualTo(new RoboZonkyVersion("4.1.1"));
