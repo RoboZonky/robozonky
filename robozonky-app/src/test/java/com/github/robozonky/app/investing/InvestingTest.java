@@ -21,12 +21,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -71,11 +69,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         final Investor.Builder builder = new Investor.Builder().asDryRun();
-        final Authenticated auth = mock(Authenticated.class);
-        when(auth.call(isNotNull())).thenAnswer(invocation -> {
-            final Function<Zonky, Collection<RawInvestment>> f = invocation.getArgument(0);
-            return f.apply(z);
-        });
+        final Authenticated auth = mockAuthentication(z);
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
     }
@@ -95,11 +89,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(9000);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
         when(z.getLoan(eq(loanId))).thenReturn(loan);
-        final Authenticated auth = mock(Authenticated.class);
-        when(auth.call(isNotNull())).thenAnswer(invocation -> {
-            final Function<Zonky, Collection<RawInvestment>> f = invocation.getArgument(0);
-            return f.apply(z);
-        });
+        final Authenticated auth = mockAuthentication(z);
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.singleton(ld))).isEmpty();
     }

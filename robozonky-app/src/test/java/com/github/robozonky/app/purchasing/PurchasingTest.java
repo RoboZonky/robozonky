@@ -120,8 +120,6 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.get(3)).isInstanceOf(InvestmentPurchasedEvent.class);
             softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
         });
-        // purchase as marketplace first initialized
-        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
         // no balance change, no marketplace change => don't purchase
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         verify(zonky, never()).purchase(eq(mock)); // nothing changed, so no more purchase

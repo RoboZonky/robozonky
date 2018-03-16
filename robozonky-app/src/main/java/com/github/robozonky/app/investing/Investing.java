@@ -65,6 +65,6 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
         final RestrictedInvestmentStrategy s = new RestrictedInvestmentStrategy(strategy, auth.getRestrictions());
-        return auth.call(zonky -> Session.invest(portfolio, investor.build(zonky), zonky, marketplace, s));
+        return Session.invest(portfolio, investor.build(auth), auth, marketplace, s);
     }
 }

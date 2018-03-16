@@ -42,8 +42,8 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.Events;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
@@ -61,15 +61,15 @@ final class Session {
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final List<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
-    private final Zonky zonky;
+    private final Authenticated authenticated;
     private final Investor investor;
     private final SessionState state;
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
     Session(final Portfolio portfolio, final Set<LoanDescriptor> marketplace, final Investor investor,
-            final Zonky zonky) {
-        this.zonky = zonky;
+            final Authenticated auth) {
+        this.authenticated = auth;
         this.investor = investor;
         this.state = new SessionState(marketplace);
         this.loansStillAvailable = marketplace.stream()
@@ -93,9 +93,9 @@ final class Session {
     }
 
     public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,
-                                                final Zonky api, final Collection<LoanDescriptor> loans,
+                                                final Authenticated auth, final Collection<LoanDescriptor> loans,
                                                 final RestrictedInvestmentStrategy strategy) {
-        final Session session = new Session(portfolio, new LinkedHashSet<>(loans), investor, api);
+        final Session session = new Session(portfolio, new LinkedHashSet<>(loans), investor, auth);
         final PortfolioOverview portfolioOverview = session.portfolioOverview;
         final int balance = portfolioOverview.getCzkAvailable();
         Events.fire(new ExecutionStartedEvent(loans, portfolioOverview));
@@ -195,7 +195,7 @@ final class Session {
         loansStillAvailable.removeIf(l -> isSameLoan(l, i));
         final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getOriginalPrincipal(),
                                                   TransactionCategory.INVESTMENT);
-        portfolio.newBlockedAmount(zonky, b);
+        portfolio.newBlockedAmount(authenticated, b);
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
     }

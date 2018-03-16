@@ -34,6 +34,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Zonky;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -97,8 +98,8 @@ public class Portfolio {
         return isLoanRelated(i, blockedAmount.getLoanId());
     }
 
-    private static Investment toInvestment(final Zonky zonky, final BlockedAmount blockedAmount) {
-        final Loan l = LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky);
+    private static Investment toInvestment(final Authenticated authenticated, final BlockedAmount blockedAmount) {
+        final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky));
         return Investment.fresh(l, blockedAmount.getAmount());
     }
 
@@ -133,14 +134,14 @@ public class Portfolio {
      * <li>RoboZonky makes a new investment or purchase and notifies this class directly.</li>
      * <li>Periodic check of the remote portfolio status reveals a new operation made outside of RoboZonky.</li>
      * </ul>
-     * @param zonky The API used to query the remote server for any extra information about the blocked amount.
+     * @param auth The API used to query the remote server for any extra information about the blocked amount.
      * @param blockedAmount Blocked amount to register.
      */
-    public void newBlockedAmount(final Zonky zonky, final BlockedAmount blockedAmount) {
+    public void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                final Investment newcomer = toInvestment(zonky, blockedAmount);
+                final Investment newcomer = toInvestment(auth, blockedAmount);
                 if (investmentsPending.stream().noneMatch(i -> isLoanRelated(i, blockedAmount))) {
                     investmentsPending.add(newcomer);
                 }
@@ -151,7 +152,7 @@ public class Portfolio {
                         .filter(i -> isLoanRelated(i, blockedAmount))
                         .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
                             final PortfolioOverview po = calculateOverview();
-                            final Loan l = LoanCache.INSTANCE.getLoan(i, zonky);
+                            final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
                             Events.fire(new InvestmentSoldEvent(i, l, po));
                         })
                         .forEach(Investment::markAsSold);

@@ -75,6 +75,6 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
                 })
                 .collect(Collectors.toList());
         final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
-        return auth.call(zonky -> Session.purchase(portfolio, zonky, participations, s, dryRun));
+        return Session.purchase(portfolio, auth, participations, s, dryRun);
     }
 }

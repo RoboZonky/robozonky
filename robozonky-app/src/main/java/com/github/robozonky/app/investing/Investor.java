@@ -25,7 +25,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.common.remote.Zonky;
+import com.github.robozonky.app.authentication.Authenticated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,11 +169,11 @@ public class Investor {
             return isDryRun;
         }
 
-        public Investor build(final Zonky zonky) {
+        public Investor build(final Authenticated auth) {
             final InvestOperation o = isDryRun ? DRY_RUN : recommendedLoan -> {
                 Investor.LOGGER.debug("Executing investment: {}.", recommendedLoan);
                 final Investment i = Investor.convertToInvestment(recommendedLoan);
-                zonky.invest(i);
+                auth.run(zonky -> zonky.invest(i));
                 Investor.LOGGER.debug("Investment succeeded.");
                 return new ZonkyResponse(i.getOriginalPrincipal().intValue());
             };
