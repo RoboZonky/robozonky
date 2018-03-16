@@ -43,15 +43,14 @@ class BlockedAmountsTest extends AbstractZonkyLeveragingTest {
         final BlockedAmounts blockedAmounts = new BlockedAmounts();
         // verify the first two blocked amounts were registered
         blockedAmounts.accept(p, auth);
-        verify(p).newBlockedAmount(eq(zonky), eq(BA1));
-        verify(p).newBlockedAmount(eq(zonky), eq(BA2));
+        verify(p).newBlockedAmount(eq(auth), eq(BA1));
+        verify(p).newBlockedAmount(eq(auth), eq(BA2));
         // verify only the new blocked amount was registered, and that it only happened the first time
         reset(p);
         when(zonky.getBlockedAmounts())
                 .thenAnswer((Answer<Stream<BlockedAmount>>) invocation -> Stream.of(BA1, BA2, BA3));
         blockedAmounts.accept(p, auth);
         blockedAmounts.accept(p, auth);
-        verify(p, times(1))
-                .newBlockedAmount(eq(zonky), eq(BA3));
+        verify(p, times(1)).newBlockedAmount(eq(auth), eq(BA3));
     }
 }

@@ -16,20 +16,21 @@
 
 package com.github.robozonky.app.investing;
 
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class InvestorBuilderTest {
+class InvestorBuilderTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void build() {
         final String username = "user";
         final Investor.Builder b = new Investor.Builder();
         b.asUser(username).asDryRun();
-        final Investor p = b.build(mock(Zonky.class));
+        final Investor p = b.build(mockAuthentication(mock(Zonky.class)));
         assertThat(p.isDryRun()).isTrue();
     }
 }

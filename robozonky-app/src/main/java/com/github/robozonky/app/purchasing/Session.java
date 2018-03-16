@@ -38,8 +38,8 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.Events;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.common.remote.Zonky;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,25 +55,25 @@ final class Session {
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final List<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
-    private final Zonky zonky;
+    private final Authenticated authenticated;
     private final boolean isDryRun;
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
-    Session(final Portfolio portfolio, final Set<ParticipationDescriptor> marketplace, final Zonky zonky,
+    Session(final Portfolio portfolio, final Set<ParticipationDescriptor> marketplace, final Authenticated auth,
             final boolean dryRun) {
-        this.zonky = zonky;
+        this.authenticated = auth;
         this.isDryRun = dryRun;
         this.stillAvailable = new FastList<>(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
 
-    public static Collection<Investment> purchase(final Portfolio portfolio, final Zonky api,
+    public static Collection<Investment> purchase(final Portfolio portfolio, final Authenticated auth,
                                                   final Collection<ParticipationDescriptor> items,
                                                   final RestrictedPurchaseStrategy strategy,
                                                   final boolean dryRun) {
-        final Session session = new Session(portfolio, new LinkedHashSet<>(items), api, dryRun);
+        final Session session = new Session(portfolio, new LinkedHashSet<>(items), auth, dryRun);
         final Collection<ParticipationDescriptor> c = session.getAvailable();
         if (c.isEmpty()) {
             return Collections.emptyList();
@@ -114,7 +114,7 @@ final class Session {
 
     private boolean actualPurchase(final Participation participation) {
         try {
-            zonky.purchase(participation);
+            authenticated.run(zonky -> zonky.purchase(participation));
             return true;
         } catch (final NotFoundException | BadRequestException ex) {
             LOGGER.debug("Zonky 404 during purchasing. Likely someone's beaten us to it.", ex);
@@ -138,7 +138,8 @@ final class Session {
         investmentsMadeNow.add(i);
         final int id = i.getLoanId();
         stillAvailable.removeIf(l -> l.item().getLoanId() == id);
-        portfolio.newBlockedAmount(zonky, new BlockedAmount(id, i.getOriginalPrincipal(), TransactionCategory.SMP_BUY));
+        portfolio.newBlockedAmount(authenticated,
+                                   new BlockedAmount(id, i.getOriginalPrincipal(), TransactionCategory.SMP_BUY));
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
     }

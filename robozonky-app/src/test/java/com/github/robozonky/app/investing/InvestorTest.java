@@ -22,6 +22,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -160,10 +161,10 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     }
 
     private Investor getZonkyProxy(final ProxyType proxyType, final RemoteResponse confirmationResponse,
-                                   final Zonky api) {
+                                   final Authenticated auth) {
         switch (proxyType) {
             case SIMPLE:
-                return new Investor.Builder().build(api);
+                return new Investor.Builder().build(auth);
             case CONFIRMING:
                 final ConfirmationProvider cp = mock(ConfirmationProvider.class);
                 when(cp.getId()).thenReturn("something");
@@ -179,7 +180,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
                     default:
                         throw new IllegalStateException();
                 }
-                return new Investor.Builder().usingConfirmation(cp).build(api);
+                return new Investor.Builder().usingConfirmation(cp).build(auth);
             default:
                 throw new IllegalStateException();
         }
@@ -188,7 +189,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     private void test(final ProxyType proxyType, final ZonkyResponseType responseType, final RecommendedLoan r,
                       final RemoteResponse confirmationResponse, final boolean seenBefore) {
         final Zonky api = mock(Zonky.class);
-        final Investor p = getZonkyProxy(proxyType, confirmationResponse, api);
+        final Investor p = getZonkyProxy(proxyType, confirmationResponse, mockAuthentication(api));
         ZonkyResponse result;
         try {
             result = p.invest(r, seenBefore);

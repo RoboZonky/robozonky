@@ -33,6 +33,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -99,13 +100,14 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200);
         final BlockedAmount ba = new BlockedAmount(l.getId(), BigDecimal.valueOf(l.getAmount()),
                                                    TransactionCategory.SMP_SALE_FEE);
-        final Zonky zonky = harmlessZonky(10_000);
-        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-        final Portfolio portfolio = new Portfolio(Collections.singletonList(i), mockBalance(zonky));
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final Authenticated auth = mockAuthentication(z);
+        final Portfolio portfolio = new Portfolio(Collections.singletonList(i), mockBalance(z));
         assertThat(portfolio.wasOnceSold(l)).isFalse();
         Investment.putOnSmp(i);
         assertThat(portfolio.wasOnceSold(l)).isTrue();
-        portfolio.newBlockedAmount(zonky, ba);
+        portfolio.newBlockedAmount(auth, ba);
         assertSoftly(softly -> {
             softly.assertThat(i.isOnSmp()).isFalse();
             softly.assertThat(i.getStatus()).isEqualTo(InvestmentStatus.SOLD);
@@ -114,7 +116,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         assertThat(events).first().isInstanceOf(InvestmentSoldEvent.class);
         // doing the same thing again shouldn't do anything
         this.readPreexistingEvents();
-        portfolio.newBlockedAmount(zonky, ba);
+        portfolio.newBlockedAmount(auth, ba);
         assertSoftly(softly -> {
             softly.assertThat(i.isOnSmp()).isFalse();
             softly.assertThat(i.getStatus()).isEqualTo(InvestmentStatus.SOLD);

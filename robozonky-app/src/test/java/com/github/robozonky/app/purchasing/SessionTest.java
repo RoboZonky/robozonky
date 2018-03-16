@@ -33,6 +33,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Condition;
@@ -57,8 +58,9 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void empty() {
         final Zonky z = mockZonky();
+        final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.emptyList(), null, true);
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.emptyList(), null, true);
         assertThat(i).isEmpty();
     }
 
@@ -77,8 +79,9 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                 });
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Zonky z = mockZonky();
+        final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()),
                                                           true);
         assertSoftly(softly -> {
@@ -114,16 +117,16 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                 });
         final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()),
                                                           true);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z, never()).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(z),
-                                           argThat((a) -> a.getLoanId() == l.getId()));
+        verify(portfolio).newBlockedAmount(eq(auth), argThat((a) -> a.getLoanId() == l.getId()));
     }
 
     @Test
@@ -147,14 +150,15 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         });
         final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
+        final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, z, Collections.singleton(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()),
                                                           false);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(z), argThat((a) -> a.getLoanId() == l.getId()));
+        verify(portfolio).newBlockedAmount(eq(auth), argThat((a) -> a.getLoanId() == l.getId()));
     }
 }
