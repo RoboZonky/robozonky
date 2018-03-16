@@ -17,39 +17,33 @@
 package com.github.robozonky.app.util;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.portfolio.Portfolio;
-import org.eclipse.collections.api.set.primitive.IntSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Collection<T>, Collection<Investment>> {
 
-    protected static boolean hasNewIds(final IntSet original, final int[] current) {
-        final OptionalInt newUnactionableLoanId = Arrays.stream(current)
-                .filter(i -> !original.contains(i))
-                .findFirst();
-        return newUnactionableLoanId.isPresent();
-    }
-
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
     private final Supplier<Optional<S>> strategyProvider;
     private final AtomicBoolean marketplaceCheckPending = new AtomicBoolean(false);
     private final AtomicReference<BigDecimal> balanceWhenLastChecked = new AtomicReference<>(BigDecimal.ZERO);
 
     protected StrategyExecutor(final Supplier<Optional<S>> strategy) {
         this.strategyProvider = strategy;
+    }
+
+    protected static boolean hasNewIds(final int[] original, final int... current) {
+        return IntStream.of(current).anyMatch(i -> IntStream.of(original).anyMatch(j -> i != j));
     }
 
     protected boolean isBalanceUnderMinimum(final int currentBalance) {
@@ -75,13 +69,13 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
         final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
         final boolean balanceChangedMeaningfully = currentBalance.compareTo(lastCheckedBalance) > 0;
         if (balanceChangedMeaningfully) {
-            LOGGER.debug("Waking up due to a balance change.");
+            LOGGER.debug("Waking up due to a balance increase.");
             return false;
         } else if (hasMarketplaceUpdates(marketplace)) {
             LOGGER.debug("Waking up due to a change in marketplace.");
             return false;
         } else {
-            LOGGER.debug("Asleep as there is nothing going on.");
+            LOGGER.debug("Asleep as there was no change since last checked.");
             return true;
         }
     }

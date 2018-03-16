@@ -31,9 +31,6 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
-import com.github.robozonky.common.remote.Zonky;
-import org.eclipse.collections.api.set.primitive.IntSet;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +40,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
 
     private final Authenticated auth;
     private final boolean dryRun;
-    private final AtomicReference<IntSet> lastChecked = new AtomicReference<>(IntHashSet.newSetWith());
+    private final AtomicReference<int[]> lastChecked = new AtomicReference<>(new int[0]);
 
     public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Authenticated auth,
                       final boolean dryRun) {
@@ -52,34 +49,32 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
         this.dryRun = dryRun;
     }
 
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Zonky zonky) {
-        return new ParticipationDescriptor(p, LoanCache.INSTANCE.getLoan(p.getLoanId(), zonky));
+    private static ParticipationDescriptor toDescriptor(final Participation p, final Authenticated auth) {
+        return new ParticipationDescriptor(p, auth.call(zonky -> LoanCache.INSTANCE.getLoan(p.getLoanId(), zonky)));
     }
 
     @Override
     protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
         final int[] idsFromMarketplace = marketplace.stream().mapToInt(Participation::getId).toArray();
-        final IntSet presentWhenLastChecked = lastChecked.getAndSet(IntHashSet.newSetWith(idsFromMarketplace));
+        final int[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
         return StrategyExecutor.hasNewIds(presentWhenLastChecked, idsFromMarketplace);
     }
 
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
-        return auth.call(zonky -> {
-            final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                    .map(p -> toDescriptor(p, zonky))
-                    .filter(d -> { // never re-purchase what was once sold
-                        final Loan l = d.related();
-                        final boolean wasSoldBefore = portfolio.wasOnceSold(l);
-                        if (wasSoldBefore) {
-                            LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", l.getId());
-                        }
-                        return !wasSoldBefore;
-                    })
-                    .collect(Collectors.toList());
-            final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
-            return Session.purchase(portfolio, zonky, participations, s, dryRun);
-        });
+        final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
+                .map(p -> toDescriptor(p, auth))
+                .filter(d -> { // never re-purchase what was once sold
+                    final Loan l = d.related();
+                    final boolean wasSoldBefore = portfolio.wasOnceSold(l);
+                    if (wasSoldBefore) {
+                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", l.getId());
+                    }
+                    return !wasSoldBefore;
+                })
+                .collect(Collectors.toList());
+        final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
+        return auth.call(zonky -> Session.purchase(portfolio, zonky, participations, s, dryRun));
     }
 }

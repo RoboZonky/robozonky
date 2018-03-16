@@ -68,6 +68,10 @@ class InvestingDaemon extends DaemonOperation {
         final Collection<MarketplaceLoan> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
                 .collect(Collectors.toList());
+        if (loans.isEmpty()) {
+            LOGGER.debug("Asleep as there are no loans available.");
+            return;
+        }
         final Collection<LoanDescriptor> descriptors = loans.stream().parallel()
                 .map(l -> {
                     /*
@@ -85,7 +89,6 @@ class InvestingDaemon extends DaemonOperation {
                 })
                 .map(LoanDescriptor::new)
                 .collect(Collectors.toList());
-        // trigger the strategy
         investing.apply(portfolio, descriptors);
     }
 }
