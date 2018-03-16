@@ -43,7 +43,7 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
     }
 
     protected static boolean hasNewIds(final int[] original, final int... current) {
-        return IntStream.of(current).anyMatch(i -> IntStream.of(original).anyMatch(j -> i != j));
+        return IntStream.of(current).anyMatch(i -> IntStream.of(original).noneMatch(j -> i == j));
     }
 
     protected boolean isBalanceUnderMinimum(final int currentBalance) {
