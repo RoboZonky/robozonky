@@ -38,14 +38,15 @@ public class LoanCache {
 
     public static final LoanCache INSTANCE = new LoanCache();
     private static final int INITIAL_CACHE_SIZE = 20;
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(LoanCache.class);
     private static final Duration EVICT_AFTER = Duration.ofHours(1);
     private final Lock updateLock = new ReentrantLock(true);
     private volatile MutableIntObjectMap<Pair<Loan, Instant>> cache;
 
     LoanCache() {
         clean();
-        Scheduler.inBackground().submit(this::evict, Duration.ofMinutes(30)); // schedule automated eviction
+        final Duration thirtyMinutes = Duration.ofMinutes(30);
+        Scheduler.inBackground().submit(this::evict, thirtyMinutes, thirtyMinutes); // schedule automated eviction
     }
 
     private static boolean isExpired(final Pair<Loan, Instant> p) {
@@ -78,19 +79,13 @@ public class LoanCache {
     }
 
     public Optional<Loan> getLoan(final int loanId) {
-        return Optional.ofNullable(callLocked(() -> {
-            final Pair<Loan, Instant> result = cache.get(loanId);
-            if (result == null) {
-                LOGGER.trace("Cache miss for loan #{}.", loanId);
-                return null;
-            } else if (isExpired(result)) {
-                LOGGER.trace("Evicting expired loan #{}.", loanId);
-                cache.remove(loanId);
-                return null;
-            } else {
-                return result.getOne();
-            }
-        }));
+        final Pair<Loan, Instant> result = callLocked(() -> cache.get(loanId));
+        if (result == null || isExpired(result)) {
+            LOGGER.trace("Cache miss for loan #{}.", loanId);
+            return Optional.empty();
+        } else {
+            return Optional.of(result.getOne());
+        }
     }
 
     private void addLoan(final int loanId, final Loan loan) {
