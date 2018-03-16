@@ -52,6 +52,10 @@ class PurchasingDaemon extends DaemonOperation {
         final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
         final Collection<Participation> p =
                 authenticated.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
-        purchasing.apply(portfolio, p);
+        if (p.isEmpty()) {
+            LOGGER.debug("Asleep as the are no participations available.");
+        } else {
+            purchasing.apply(portfolio, p);
+        }
     }
 }

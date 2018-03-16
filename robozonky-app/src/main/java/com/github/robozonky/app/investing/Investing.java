@@ -29,14 +29,12 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
 import com.github.robozonky.internal.api.Defaults;
-import org.eclipse.collections.api.set.primitive.IntSet;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
     private final Authenticated auth;
     private final Investor.Builder investor;
-    private final AtomicReference<IntSet> actionableWhenLastChecked = new AtomicReference<>(IntHashSet.newSetWith());
+    private final AtomicReference<int[]> actionableWhenLastChecked = new AtomicReference<>(new int[0]);
 
     public Investing(final Investor.Builder investor, final Supplier<Optional<InvestmentStrategy>> strategy,
                      final Authenticated auth) {
@@ -59,8 +57,7 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
                         .map(d -> d.isBefore(now))
                         .orElse(true)
                 ).mapToInt(l -> l.item().getId()).toArray();
-        final IntSet lastCheckedActionableLoans =
-                actionableWhenLastChecked.getAndSet(IntHashSet.newSetWith(actionableLoansNow));
+        final int[] lastCheckedActionableLoans = actionableWhenLastChecked.getAndSet(actionableLoansNow);
         return StrategyExecutor.hasNewIds(lastCheckedActionableLoans, actionableLoansNow);
     }
 
