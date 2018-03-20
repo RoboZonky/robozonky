@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -55,6 +56,13 @@ public interface Investment {
 
     static InvestmentBuilder fresh(final Loan loan, final BigDecimal investedAmount) {
         return new MutableInvestmentImpl(loan, investedAmount);
+    }
+
+    static Investment fresh(final Participation participation, final Loan loan, final BigDecimal amount) {
+        return Investment.fresh(loan, amount)
+                .setId(participation.getInvestmentId())
+                .setRemainingMonths(participation.getRemainingInstalmentCount())
+                .build();
     }
 
     static void fillFrom(final Investment investment, final Loan loan) {
