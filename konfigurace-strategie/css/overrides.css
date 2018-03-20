@@ -1,20 +1,8 @@
-/* Override bootstrap card block to make filters in filter list more compact */
-
-.card-block.smaller-pad {
-  padding: 0.5rem!important;
-}
-
 /* Make text in range slider labels non-selectable */
 
 .rangeSliderValue {
   user-select: none!important;
   -moz-user-select: none!important;
-}
-
-/* Workaround for https://github.com/RoboZonky/natural-strategy-setup/issues/8 */
-
-[id$=Card]:not([style*=overflow]) {
-  height: 100%!important;
 }
 
 /*
