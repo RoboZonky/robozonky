@@ -44,7 +44,7 @@ public class Util {
         currentShare.forEach((r, currentRatingShare) -> {
             final BigDecimal maximumAllowedShare = toDecimalShare(strategy.getMaximumShare(r));
             final BigDecimal undershare = maximumAllowedShare.subtract(currentRatingShare);
-            if (undershare.signum() == -1) { // we over-invested into this rating; do not include
+            if (undershare.signum() < 1) { // we over-invested into this rating; do not include
                 final BigDecimal pp = undershare.multiply(ONE_HUNDRED).negate();
                 Decisions.report(logger -> logger.debug("Rating {} over-invested by {} percentage points.", r, pp));
                 return;
