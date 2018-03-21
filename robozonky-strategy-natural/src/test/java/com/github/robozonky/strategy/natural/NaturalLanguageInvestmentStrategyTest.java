@@ -98,7 +98,7 @@ class NaturalLanguageInvestmentStrategyTest {
         when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
-        final Loan l = mockLoan(2);
+        final Loan l = mockLoan(1000);
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(l)),
                                                            portfolio, new Restrictions());
         assertThat(result).isEmpty();
