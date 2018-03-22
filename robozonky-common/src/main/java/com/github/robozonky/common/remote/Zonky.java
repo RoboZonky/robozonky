@@ -16,9 +16,7 @@
 
 package com.github.robozonky.common.remote;
 
-import java.util.Spliterator;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.EntityCollectionApi;
@@ -38,6 +36,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.internal.api.Settings;
+import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,9 +98,9 @@ public class Zonky {
                                                                              final Select select,
                                                                              final int pageSize,
                                                                              final Sort<T> ordering) {
-        final Paginated<T> p = new PaginatedImpl<>(api, select, ordering, pageSize);
-        final Spliterator<T> s = new EntitySpliterator<>(p);
-        return StreamSupport.stream(s, false);
+        return PagingStreams.streamBuilder(new EntityCollectionPageSource<>(api, select, ordering, pageSize))
+                .pageSize(pageSize)
+                .build();
     }
 
     public void invest(final Investment investment) {
@@ -215,5 +214,4 @@ public class Zonky {
     public void logout() {
         controlApi.execute(ControlApi::logout);
     }
-
 }

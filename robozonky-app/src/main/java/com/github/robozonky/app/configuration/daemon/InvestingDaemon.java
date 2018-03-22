@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -65,14 +64,8 @@ class InvestingDaemon extends DaemonOperation {
             return;
         }
         // query marketplace for investment opportunities
-        final Collection<MarketplaceLoan> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
+        final Collection<LoanDescriptor> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
-                .collect(Collectors.toList());
-        if (loans.isEmpty()) {
-            LOGGER.debug("Asleep as there are no loans available.");
-            return;
-        }
-        final Collection<LoanDescriptor> descriptors = loans.stream().parallel()
                 .map(l -> {
                     /*
                      * Loan is first retrieved from the authenticated API. This way, we get all available
@@ -89,6 +82,10 @@ class InvestingDaemon extends DaemonOperation {
                 })
                 .map(LoanDescriptor::new)
                 .collect(Collectors.toList());
-        investing.apply(portfolio, descriptors);
+        if (loans.isEmpty()) {
+            LOGGER.debug("Asleep as there are no loans available.");
+            return;
+        }
+        investing.apply(portfolio, loans);
     }
 }

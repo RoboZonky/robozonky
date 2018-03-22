@@ -16,26 +16,21 @@
 
 package com.github.robozonky.common.remote;
 
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 final class PaginatedResult<S> {
 
-    private final Collection<S> result;
-    private final int pageNo;
+    private final List<S> result;
     private final int totalSize;
 
-    public PaginatedResult(final Collection<S> result, final int pageNo, final int totalSize) {
+    public PaginatedResult(final List<S> result, final int totalSize) {
         this.result = result;
-        this.pageNo = pageNo;
         this.totalSize = totalSize;
     }
 
-    public Collection<S> getPage() {
-        return result;
-    }
-
-    public int getCurrentPageId() {
-        return pageNo;
+    public List<S> getPage() {
+        return Collections.unmodifiableList(result);
     }
 
     public int getTotalResultCount() {
