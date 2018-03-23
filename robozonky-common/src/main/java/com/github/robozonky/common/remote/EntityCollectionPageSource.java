@@ -45,8 +45,9 @@ class EntityCollectionPageSource<T> implements PageSource<T> {
     public List<T> fetch(final long offset, final long limit, final LongConsumer totalSizeSink) {
         LOGGER.trace("Requested with offset {}, limit {}.", offset, limit);
         final int pageId = offset < 1 ? 0 : (int) (offset / pageSize);
+        // limit is ignored, as the page size determines the page number; offset+limit is not supported by Zonky
         final PaginatedResult<T> result = api.execute(EntityCollectionApi::items, this.select, this.ordering, pageId,
-                                                      (int) limit);
+                                                      pageSize);
         totalSizeSink.accept(result.getTotalResultCount());
         return result.getPage();
     }

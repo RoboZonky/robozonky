@@ -65,6 +65,7 @@ class InvestingDaemon extends DaemonOperation {
         }
         // query marketplace for investment opportunities
         final Collection<LoanDescriptor> loans = authenticated.call(zonky -> zonky.getAvailableLoans(SELECT))
+                .parallel()
                 .filter(l -> !l.getMyInvestment().isPresent()) // re-investing would fail
                 .map(l -> {
                     /*

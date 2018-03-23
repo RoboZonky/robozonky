@@ -68,7 +68,7 @@ public class Portfolio {
      * @return Empty in case there was a remote error.
      */
     public static Portfolio create(final Zonky zonky, final RemoteBalance balance) {
-        final Collection<Investment> online = zonky.getInvestments().collect(Collectors.toList());
+        final Collection<Investment> online = zonky.getInvestments().parallel().collect(Collectors.toList());
         final Portfolio p = new Portfolio(online, balance);
         LOGGER.debug("Loaded {} investments from Zonky.", online.size());
         return p;
