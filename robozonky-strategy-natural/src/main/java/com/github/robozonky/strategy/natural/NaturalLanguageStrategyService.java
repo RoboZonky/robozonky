@@ -27,13 +27,8 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.api.strategies.StrategyService;
 import com.github.robozonky.internal.api.Defaults;
-import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,17 +38,6 @@ public class NaturalLanguageStrategyService implements StrategyService {
     private static final AtomicReference<Map<String, ParsedStrategy>> CACHE =
             new AtomicReference<>(Collections.emptyMap());
 
-    private static final ANTLRErrorListener ERROR_LISTENER = new BaseErrorListener() {
-
-        @Override
-        public void syntaxError(final Recognizer<?, ?> recognizer, final Object offendingSymbol, final int line,
-                                final int charPositionInLine, final String msg, final RecognitionException e) {
-            final String error = "Syntax error at " + line + ":" + charPositionInLine + ", offending symbol "
-                    + offendingSymbol + ", message: " + msg;
-            throw new IllegalStateException(error, e);
-        }
-    };
-
     private static void setCached(final String strategy, final ParsedStrategy parsed) {
         CACHE.set(Collections.singletonMap(strategy, parsed));
         LOGGER.debug("Cached strategy: {}.", parsed);
@@ -61,11 +45,6 @@ public class NaturalLanguageStrategyService implements StrategyService {
 
     private static Optional<ParsedStrategy> getCached(final String strategy) {
         return Optional.ofNullable(CACHE.get().get(strategy));
-    }
-
-    private static <T extends Recognizer<?, ?>> T preventSysOut(final T instance) {
-        instance.removeErrorListeners();
-        return instance;
     }
 
     private synchronized static ParsedStrategy parseOrCached(final String strategy) {
@@ -79,11 +58,7 @@ public class NaturalLanguageStrategyService implements StrategyService {
     }
 
     static ParsedStrategy parseWithAntlr(final CharStream s) {
-        final NaturalLanguageStrategyLexer l = preventSysOut(new NaturalLanguageStrategyLexer(s));
-        final NaturalLanguageStrategyParser p =
-                preventSysOut(new NaturalLanguageStrategyParser(new CommonTokenStream(l)));
-        p.addErrorListener(NaturalLanguageStrategyService.ERROR_LISTENER);
-        return p.primaryExpression().result;
+        return SideEffectFreeParser.apply(s);
     }
 
     private static boolean isSupported(final ParsedStrategy s) {
