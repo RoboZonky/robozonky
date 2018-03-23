@@ -48,14 +48,14 @@ public class PortfolioOverview {
             this.czkAtRiskPerRating = Collections.emptyMap();
             this.czkAtRisk = 0;
         } else {
-            this.czkInvestedPerRating = new EnumMap<>(czkInvestedPerRating);
+            this.czkInvestedPerRating = czkInvestedPerRating;
             this.czkAtRisk = PortfolioOverview.sum(czkAtRiskPerRating.values());
-            this.czkAtRiskPerRating = czkAtRisk == 0 ? Collections.emptyMap() : new EnumMap<>(czkAtRiskPerRating);
+            this.czkAtRiskPerRating = czkAtRisk == 0 ? Collections.emptyMap() : czkAtRiskPerRating;
         }
     }
 
     private static int sum(final Collection<Integer> vals) {
-        return vals.stream().reduce(0, (a, b) -> a + b);
+        return vals.stream().mapToInt(i -> i).sum();
     }
 
     private static Map<Rating, Integer> splitByRating(final Stream<Investment> stream) {
@@ -63,7 +63,8 @@ public class PortfolioOverview {
                 Collectors.reducing(BigDecimal.ZERO, Investment::getRemainingPrincipal, BigDecimal::add);
         final Collector<Investment, ?, Integer> summingBigDecimalToInt =
                 Collectors.collectingAndThen(reducer, BigDecimal::intValue);
-        return stream.collect(Collectors.groupingBy(Investment::getRating, summingBigDecimalToInt));
+        return stream.collect(Collectors.groupingBy(Investment::getRating, () -> new EnumMap<>(Rating.class),
+                                                    summingBigDecimalToInt));
     }
 
     /**
@@ -89,6 +90,10 @@ public class PortfolioOverview {
     public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts,
                                               final Map<Rating, Integer> atRiskAmounts) {
         return new PortfolioOverview(balance, amounts, atRiskAmounts);
+    }
+
+    private static BigDecimal divide(final BigDecimal a, final BigDecimal b) {
+        return a.divide(b, 4, RoundingMode.HALF_EVEN).stripTrailingZeros();
     }
 
     /**
@@ -144,9 +149,7 @@ public class PortfolioOverview {
             return BigDecimal.ZERO;
         }
         final BigDecimal invested = BigDecimal.valueOf(this.czkInvested);
-        return BigDecimal.valueOf(investedPerRating)
-                .divide(invested, 4, RoundingMode.HALF_EVEN)
-                .stripTrailingZeros();
+        return divide(BigDecimal.valueOf(investedPerRating), invested);
     }
 
     /**
@@ -160,8 +163,6 @@ public class PortfolioOverview {
             return BigDecimal.ZERO;
         }
         final BigDecimal atRisk = BigDecimal.valueOf(getCzkAtRisk(r));
-        return atRisk
-                .divide(BigDecimal.valueOf(investedPerRating), 4, RoundingMode.HALF_EVEN)
-                .stripTrailingZeros();
+        return divide(atRisk, BigDecimal.valueOf(investedPerRating));
     }
 }
