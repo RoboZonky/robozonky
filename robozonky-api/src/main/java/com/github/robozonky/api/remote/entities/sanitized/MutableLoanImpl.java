@@ -90,7 +90,7 @@ final class MutableLoanImpl extends AbstractMutableLoanImpl<LoanBuilder> impleme
         } else {
             final SortedSet<String> result = Stream.concat(knownBorrowerNicknames.stream(), Stream.of(getNickName()))
                     .filter(Objects::nonNull)
-                    .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSortedSet::new));
+                    .collect(Collectors.toCollection(TreeSortedSet::new));
             this.knownBorrowerNicknames = Collections.unmodifiableSortedSet(result);
         }
         return this;

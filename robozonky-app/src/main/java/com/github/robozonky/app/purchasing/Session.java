@@ -18,9 +18,9 @@ package com.github.robozonky.app.purchasing;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
@@ -61,20 +61,20 @@ final class Session {
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
-    Session(final Portfolio portfolio, final Set<ParticipationDescriptor> marketplace, final Authenticated auth,
+    Session(final Portfolio portfolio, final Stream<ParticipationDescriptor> marketplace, final Authenticated auth,
             final boolean dryRun) {
         this.authenticated = auth;
         this.isDryRun = dryRun;
-        this.stillAvailable = new FastList<>(marketplace);
+        this.stillAvailable = marketplace.collect(Collectors.toCollection(FastList::new));
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
 
     public static Collection<Investment> purchase(final Portfolio portfolio, final Authenticated auth,
-                                                  final Collection<ParticipationDescriptor> items,
+                                                  final Stream<ParticipationDescriptor> items,
                                                   final RestrictedPurchaseStrategy strategy,
                                                   final boolean dryRun) {
-        final Session session = new Session(portfolio, new LinkedHashSet<>(items), auth, dryRun);
+        final Session session = new Session(portfolio, items, auth, dryRun);
         final Collection<ParticipationDescriptor> c = session.getAvailable();
         if (c.isEmpty()) {
             return Collections.emptyList();

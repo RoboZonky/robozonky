@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,6 +35,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.internal.api.State;
+import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +139,7 @@ enum DelinquencyCategory {
                 })
                 .map(d -> d.getParent().getLoanId());
         final Collection<Integer> storeThese = Stream.concat(keepThese.stream(), addThese)
-                .collect(Collectors.collectingAndThen(Collectors.toSet(), TreeSet::new));
+                .collect(Collectors.toCollection(TreeSortedSet::new));
         state.newBatch().set(fieldName, toIdString(storeThese.stream())).call();
         LOGGER.trace("Update over, stored {}.", storeThese);
         return storeThese;

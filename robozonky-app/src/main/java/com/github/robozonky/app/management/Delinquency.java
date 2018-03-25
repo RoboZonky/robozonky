@@ -22,7 +22,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,6 +29,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.app.portfolio.Delinquent;
 import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.internal.api.Defaults;
+import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
 class Delinquency implements DelinquencyMBean {
 
@@ -65,9 +65,8 @@ class Delinquency implements DelinquencyMBean {
         return source.get()
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .filter(d -> d.getPaymentMissedDate().atStartOfDay(zone).plusDays(days).isBefore(now))
-                .collect(Collectors.collectingAndThen(Collectors.toMap(d -> d.getParent().getLoanId(),
-                                                                       d -> d.getPaymentMissedDate()),
-                                                      TreeMap::new));
+                .collect(Collectors.toMap(d -> d.getParent().getLoanId(), d -> d.getPaymentMissedDate(),
+                                          (a, b) -> a, TreeSortedMap::new));
     }
 
     @Override

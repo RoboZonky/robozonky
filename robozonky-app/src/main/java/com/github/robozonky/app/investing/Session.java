@@ -19,9 +19,7 @@ package com.github.robozonky.app.investing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
@@ -67,15 +65,16 @@ final class Session {
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
-    Session(final Portfolio portfolio, final Set<LoanDescriptor> marketplace, final Investor investor,
+    Session(final Portfolio portfolio, final Collection<LoanDescriptor> marketplace, final Investor investor,
             final Authenticated auth) {
         this.authenticated = auth;
         this.investor = investor;
         this.state = new SessionState(marketplace);
         this.loansStillAvailable = marketplace.stream()
+                .distinct()
                 .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> isSameLoan(l, l2)))
                 .filter(l -> portfolio.getPending().noneMatch(i -> isSameLoan(l, i)))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), FastList::new));
+                .collect(Collectors.toCollection(FastList::new));
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
@@ -95,7 +94,7 @@ final class Session {
     public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,
                                                 final Authenticated auth, final Collection<LoanDescriptor> loans,
                                                 final RestrictedInvestmentStrategy strategy) {
-        final Session session = new Session(portfolio, new LinkedHashSet<>(loans), investor, auth);
+        final Session session = new Session(portfolio, loans, investor, auth);
         final PortfolioOverview portfolioOverview = session.portfolioOverview;
         final int balance = portfolioOverview.getCzkAvailable();
         Events.fire(new ExecutionStartedEvent(loans, portfolioOverview));
