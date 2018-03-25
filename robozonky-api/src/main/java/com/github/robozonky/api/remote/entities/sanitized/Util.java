@@ -19,9 +19,12 @@ package com.github.robozonky.api.remote.entities.sanitized;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 class Util {
 
+    private static final Map<String, BigDecimal> BIGDECIMAL_CACHE = new WeakHashMap<>(0);
     private static final Function<Integer, String> LOAN_URL_SUPPLIER =
             (id) -> "https://app.zonky.cz/#/marketplace/detail/" + id + "/";
     private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
@@ -84,4 +88,18 @@ class Util {
             LOGGER.warn("The following methods on {} returned null: {}.", target, nullReturningGetters);
         }
     }
+
+    /**
+     * Reuses a single instance of {@link BigDecimal} for most common values, saving a lot of memory.
+     * @param original
+     * @return
+     */
+    static BigDecimal cacheBigDecimal(final BigDecimal original) {
+        if (original == null) {
+            return null;
+        }
+        final String s = original.toString();
+        return BIGDECIMAL_CACHE.computeIfAbsent(s, k -> original);
+    }
 }
+

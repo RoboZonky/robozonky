@@ -60,7 +60,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.deadline = original.getDeadline();
         this.id = original.getId();
         this.covered = original.isCovered();
-        this.interestRate = original.getInterestRate();
+        this.interestRate = Util.cacheBigDecimal(original.getInterestRate()); // there's only a handful of these
         this.investmentsCount = original.getInvestmentsCount();
         this.investmentRate = original.getInvestmentRate();
         this.insuranceActive = original.isInsuranceActive();

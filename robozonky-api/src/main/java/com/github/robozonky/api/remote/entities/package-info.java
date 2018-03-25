@@ -16,10 +16,12 @@
 
 @XmlJavaTypeAdapters({
         @XmlJavaTypeAdapter(type = OffsetDateTime.class, value = OffsetDateTimeAdapter.class),
-        @XmlJavaTypeAdapter(type = LocalDate.class, value = LocalDateAdapter.class)
+        @XmlJavaTypeAdapter(type = LocalDate.class, value = LocalDateAdapter.class),
+        @XmlJavaTypeAdapter(type = BigDecimal.class, value = BigDecimalAdapter.class)
 })
 package com.github.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
