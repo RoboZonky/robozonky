@@ -17,9 +17,10 @@
 package com.github.robozonky.common.secrets;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 /**
  * Plain-text secret storage. Should only be used as fallback in case the JDK does not support KeyStores. This is
@@ -29,7 +30,7 @@ final class FallbackSecretProvider implements SecretProvider {
 
     private final String username;
     private final char[] password;
-    private final Map<String, char[]> secrets = new HashMap<>(0);
+    private final Map<String, char[]> secrets = new UnifiedMap<>(0);
 
     public FallbackSecretProvider(final String username, final char... password) {
         this.username = username;

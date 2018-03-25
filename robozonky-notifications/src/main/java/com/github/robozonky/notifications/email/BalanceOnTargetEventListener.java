@@ -16,12 +16,12 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingListener<ExecutionStartedEvent> {
 
@@ -44,7 +44,7 @@ class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingLis
 
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
-        return new HashMap<String, Object>(super.getData(event)) {{
+        return new UnifiedMap<String, Object>(super.getData(event)) {{
             put("targetBalance", targetBalance);
         }};
     }

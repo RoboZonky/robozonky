@@ -18,7 +18,6 @@ package com.github.robozonky.notifications.email;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -37,6 +36,7 @@ import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +108,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     }
 
     protected Map<String, Object> getData(final T event) {
-        final Map<String, Object> result = new HashMap<>(getBaseData(event));
+        final Map<String, Object> result = new UnifiedMap<>(getBaseData(event));
         if (event instanceof Financial) {
             final PortfolioOverview portfolioOverview = ((Financial) event).getPortfolioOverview();
             result.put("portfolio", Util.summarizePortfolioStructure(portfolioOverview));
@@ -117,10 +117,10 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     }
 
     final Map<String, Object> getData(final T event, final SessionInfo sessionInfo) {
-        return Collections.unmodifiableMap(new HashMap<String, Object>(this.getData(event)) {{
+        return Collections.unmodifiableMap(new UnifiedMap<String, Object>(this.getData(event)) {{
             // ratings here need to have a stable iteration order, as it will be used to list them in notifications
             put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
-            put("session", new HashMap<String, Object>() {{
+            put("session", new UnifiedMap<String, Object>() {{
                 put("userName", Util.obfuscateEmailAddress(sessionInfo.getUserName()));
                 put("userAgent", sessionInfo.getUserAgent());
                 put("isDryRun", sessionInfo.isDryRun());

@@ -44,7 +44,6 @@ public class RoboZonkyFilter implements ClientRequestFilter,
 
     // not static, so that filters extending this one get the proper logger class
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final Map<String, String> headersToSet = new UnifiedMap<>(0);
     private final Map<String, Object[]> queryParams = new UnifiedMap<>(0);
     private Map<String, String> responseHeaders = new UnifiedMap<>(0);

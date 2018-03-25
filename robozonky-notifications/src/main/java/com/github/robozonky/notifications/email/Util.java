@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -36,6 +35,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 class Util {
 
@@ -52,7 +52,7 @@ class Util {
     }
 
     public static Map<String, Object> getLoanData(final Loan loan) {
-        return new HashMap<String, Object>() {{
+        return new UnifiedMap<String, Object>() {{
             put("loanId", loan.getId());
             put("loanAmount", loan.getAmount());
             put("loanRating", loan.getRating().getCode());
@@ -70,7 +70,7 @@ class Util {
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
-        return Collections.unmodifiableMap(new HashMap<String, Object>() {{
+        return Collections.unmodifiableMap(new UnifiedMap<String, Object>() {{
             put("absoluteShare", perRating(portfolioOverview::getCzkInvested));
             put("relativeShare", perRating(portfolioOverview::getShareOnInvestment));
             put("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk));

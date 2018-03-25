@@ -21,7 +21,6 @@ import java.io.StringWriter;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
@@ -29,6 +28,7 @@ import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 enum TemplateProcessor {
 
@@ -49,7 +49,7 @@ enum TemplateProcessor {
 
     public String process(final String embeddedTemplate, final Map<String, Object> embeddedData)
             throws IOException, TemplateException {
-        final Map<String, Object> data = new HashMap<String, Object>() {{
+        final Map<String, Object> data = new UnifiedMap<String, Object>() {{
             put("timestamp", Date.from(Instant.now()));
             put("robozonkyUrl", Defaults.ROBOZONKY_URL);
             put("embed", embeddedTemplate);

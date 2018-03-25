@@ -16,10 +16,10 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 class RoboZonkyCrashedEventListener extends AbstractEmailingListener<RoboZonkyCrashedEvent> {
 
@@ -39,7 +39,7 @@ class RoboZonkyCrashedEventListener extends AbstractEmailingListener<RoboZonkyCr
 
     @Override
     protected Map<String, Object> getData(final RoboZonkyCrashedEvent event) {
-        final Map<String, Object> result = new HashMap<String, Object>() {{
+        final Map<String, Object> result = new UnifiedMap<String, Object>() {{
             put("returnCodeName", event.getReturnCode().name());
             put("returnCodeId", event.getReturnCode().getCode());
             put("isCauseKnown", event.getCause().isPresent());
