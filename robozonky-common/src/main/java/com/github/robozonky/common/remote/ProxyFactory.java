@@ -24,6 +24,7 @@ import org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder43;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 final class ProxyFactory {
 
@@ -41,7 +42,11 @@ final class ProxyFactory {
                 .resteasyClientBuilder(builder)
                 .build();
         engine.setFollowRedirects(true);
+        /*
+         * Supply the provider factory singleton, as otherwise RESTEasy would create a new instance every time.
+         */
         return new ResteasyClientBuilder()
+                .providerFactory(ResteasyProviderFactory.getInstance())
                 .httpEngine(engine)
                 .build();
     }
