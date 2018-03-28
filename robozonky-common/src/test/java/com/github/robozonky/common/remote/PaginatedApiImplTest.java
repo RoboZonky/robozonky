@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-class PaginatedApiTest {
+class PaginatedApiImplTest {
 
     @Test
     void checkSort() {

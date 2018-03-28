@@ -30,6 +30,7 @@ import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -137,6 +138,8 @@ public class Delinquents {
                                                               final Collection<Investment> noLongerActive,
                                                               final Function<Integer, Investment> investmentSupplier,
                                                               final Function<Investment, Loan> loanSupplier,
+                                                              final Function<Loan, Collection<Development>>
+                                                                      collectionsSupplier,
                                                               final PortfolioOverview portfolioOverview) {
         final LocalDate now = LocalDate.now();
         // find out loans that are no longer delinquent, either through payment or through default
@@ -151,12 +154,13 @@ public class Delinquents {
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     final Investment inv = investmentSupplier.apply(loanId);
                     final Loan l = loanSupplier.apply(inv);
+                    final Collection<Development> collections = collectionsSupplier.apply(l);
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
                         final PaymentStatus s = inv.getPaymentStatus()
                                 .orElseThrow(() -> new IllegalStateException("Invalid investment " + inv));
                         switch (s) {
                             case PAID_OFF:
-                                Events.fire(new LoanDefaultedEvent(inv, l, since));
+                                Events.fire(new LoanDefaultedEvent(inv, l, since, collections));
                                 break;
                             case PAID:
                                 Events.fire(new LoanRepaidEvent(inv, l, portfolioOverview));
@@ -165,7 +169,7 @@ public class Delinquents {
                                 LOGGER.warn("Unsupported payment status '{}' for loan #{}.", s, l.getId());
                         }
                     } else {
-                        Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since));
+                        Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since, collections));
                     }
                 }).collect(Collectors.toList());
     }
@@ -179,11 +183,13 @@ public class Delinquents {
     static void update(final Collection<Investment> presentlyDelinquent,
                        final Collection<Investment> noLongerActive,
                        final Function<Integer, Investment> investmentSupplier,
-                       final Function<Investment, Loan> loanSupplier, final PortfolioOverview portfolioOverview) {
+                       final Function<Investment, Loan> loanSupplier,
+                       final Function<Loan, Collection<Development>> collectionsSupplier,
+                       final PortfolioOverview portfolioOverview) {
         LOGGER.debug("Updating delinquent loans.");
         final Collection<Delinquent> knownDelinquents = getKnownDelinquents(presentlyDelinquent, noLongerActive,
                                                                             investmentSupplier, loanSupplier,
-                                                                            portfolioOverview);
+                                                                            collectionsSupplier, portfolioOverview);
         // assemble delinquencies past and present
         final Stream<Delinquent> delinquentInThePast = knownDelinquents.stream()
                 .filter(d -> noLongerActive.stream().noneMatch(i -> related(d, i)));
@@ -195,7 +201,8 @@ public class Delinquents {
         final Stream<Delinquent> all = Stream.concat(delinquentInThePast, nowDelinquent).distinct();
         final Collection<Delinquency> result = persistAndReturnActiveDelinquents(all);
         // notify of new delinquencies over all known thresholds
-        Stream.of(DelinquencyCategory.values()).forEach(c -> c.update(result, investmentSupplier, loanSupplier));
+        Stream.of(DelinquencyCategory.values())
+                .forEach(c -> c.update(result, investmentSupplier, loanSupplier, collectionsSupplier));
         LOGGER.trace("Done.");
     }
 
@@ -215,6 +222,7 @@ public class Delinquents {
                getWithPaymentStatus(portfolio, PaymentStatus.getDone()),
                portfolio::lookupOrFail,
                id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)),
+               l -> auth.call(z -> z.getDevelopments(l).collect(Collectors.toList())),
                portfolio.calculateOverview());
     }
 }

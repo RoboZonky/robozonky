@@ -6,4 +6,6 @@ Půjčka s následujícími parametry je v prodlení:
 - Zbývá splátek:               ${data.loanTermRemaining?c} z ${data.loanTerm?c}
 - Po splatnosti od:            ${data.since?date}
 
+<#include "additional-collections-info.ftl">
+
 <#include "additional-loan-info.ftl">

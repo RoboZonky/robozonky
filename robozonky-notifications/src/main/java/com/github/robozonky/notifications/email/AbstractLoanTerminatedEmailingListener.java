@@ -16,41 +16,28 @@
 
 package com.github.robozonky.notifications.email;
 
-import java.time.LocalDate;
 import java.util.Map;
-import java.util.function.Function;
 
+import com.github.robozonky.api.notifications.DelinquencyBased;
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
-abstract class AbstractLoanTerminatedEmailingListener<T extends Event> extends AbstractEmailingListener<T> {
+abstract class AbstractLoanTerminatedEmailingListener<T extends Event & DelinquencyBased> extends
+                                                                                          AbstractEmailingListener<T> {
 
-    private final Function<T, Investment> investmentSupplier;
-    private final Function<T, Loan> loanSupplier;
-    private final Function<T, LocalDate> dateSupplier;
-
-    protected AbstractLoanTerminatedEmailingListener(final Function<T, Investment> investmentSupplier,
-                                                     final Function<T, Loan> loanSupplier,
-                                                     final Function<T, LocalDate> dateSupplier,
-                                                     final ListenerSpecificNotificationProperties properties) {
+    protected AbstractLoanTerminatedEmailingListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
-        this.investmentSupplier = investmentSupplier;
-        this.loanSupplier = loanSupplier;
-        this.dateSupplier = dateSupplier;
-        registerFinisher(event -> DelinquencyTracker.INSTANCE.unsetDelinquent(investmentSupplier.apply(event)));
+        registerFinisher(event -> DelinquencyTracker.INSTANCE.unsetDelinquent(event.getInvestment()));
     }
 
     @Override
     boolean shouldSendEmail(final T event) {
         return super.shouldSendEmail(event) &&
-                DelinquencyTracker.INSTANCE.isDelinquent(investmentSupplier.apply(event));
+                DelinquencyTracker.INSTANCE.isDelinquent(event.getInvestment());
     }
 
     @Override
     protected Map<String, Object> getData(final T event) {
-        final Investment i = investmentSupplier.apply(event);
-        final Loan l = loanSupplier.apply(event);
-        return Util.getDelinquentData(i, l, dateSupplier.apply(event));
+        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
+                                      event.getDelinquentSince());
     }
 }

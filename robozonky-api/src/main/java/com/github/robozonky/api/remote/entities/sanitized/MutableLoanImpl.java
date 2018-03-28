@@ -54,12 +54,6 @@ final class MutableLoanImpl extends AbstractMutableLoanImpl<LoanBuilder> impleme
     }
 
     @Override
-    public Loan build() {
-        Util.reportNulls(this);
-        return this;
-    }
-
-    @Override
     public LoanBuilder setRemainingPrincipalToLoan(final BigDecimal remainingPrincipalToLoan) {
         this.remainingPrincipalToLoan = remainingPrincipalToLoan;
         return this;

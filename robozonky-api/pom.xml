@@ -126,6 +126,69 @@
                     "classSimpleName": "Instalment",
                     "elementKind": "class",
                     "justification": "This class is apparently unused."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanDefaultedEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanDefaultedEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDefaultedEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Added collections information to delinquency events."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDelinquent10DaysOrMoreEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Added collections information to delinquency events."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDelinquent30DaysOrMoreEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Added collections information to delinquency events."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDelinquent60DaysOrMoreEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Added collections information to delinquency events."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDelinquent90DaysOrMoreEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Added collections information to delinquency events."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanNoLongerDelinquentEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Added collections information to delinquency events."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanNowDelinquentEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanNowDelinquentEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanNowDelinquentEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Added collections information to delinquency events."
                   }
                 ]
               }

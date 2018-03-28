@@ -58,6 +58,7 @@ enum TemplateProcessor {
         final Template template = this.config.getTemplate("core.ftl");
         final StringWriter sw = new StringWriter();
         template.process(data, sw);
+        System.out.println(sw.toString().trim());
         return sw.toString().trim();
     }
 

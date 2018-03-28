@@ -16,16 +16,17 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
+import java.time.OffsetDateTime;
 
-final class MutableMarketplaceLoanImpl extends AbstractMutableLoanImpl<MarketplaceLoanBuilder> implements
-                                                                                               MarketplaceLoanBuilder {
+import com.github.robozonky.api.remote.enums.DevelopmentTpe;
 
-    MutableMarketplaceLoanImpl() {
+public interface MutableDevelopment<T extends MutableDevelopment<T>> extends Development {
 
-    }
+    T setType(final DevelopmentTpe type);
 
-    MutableMarketplaceLoanImpl(final RawLoan original) {
-        super(original);
-    }
+    T setPublicNote(final String publicNote);
+
+    T setDateFrom(final OffsetDateTime dateFrom);
+
+    T setDateTo(final OffsetDateTime dateTo);
 }

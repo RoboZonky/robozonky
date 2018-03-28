@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-public interface InvestmentBuilder extends MutableInvestment<InvestmentBuilder> {
+public interface InvestmentBuilder extends MutableInvestment<InvestmentBuilder>,
+                                           Builder<Investment> {
 
-    Investment build();
 }

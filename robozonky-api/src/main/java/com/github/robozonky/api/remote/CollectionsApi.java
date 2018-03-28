@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.api.remote;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
+import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 
-final class MutableMarketplaceLoanImpl extends AbstractMutableLoanImpl<MarketplaceLoanBuilder> implements
-                                                                                               MarketplaceLoanBuilder {
+import com.github.robozonky.api.remote.entities.RawDevelopment;
+import com.github.robozonky.internal.api.Defaults;
 
-    MutableMarketplaceLoanImpl() {
+@Path("/collections")
+@Produces(Defaults.MEDIA_TYPE)
+@Consumes(Defaults.MEDIA_TYPE)
+public interface CollectionsApi {
 
-    }
-
-    MutableMarketplaceLoanImpl(final RawLoan original) {
-        super(original);
-    }
+    @GET
+    @Path("loans/{loanId}/investor-events")
+    List<RawDevelopment> items(@PathParam("loanId") int loanId);
 }

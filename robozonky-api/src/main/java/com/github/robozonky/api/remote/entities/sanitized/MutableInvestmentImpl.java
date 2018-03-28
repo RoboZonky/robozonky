@@ -270,12 +270,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public Investment build() {
-        Util.reportNulls(this);
-        return this;
-    }
-
-    @Override
     public int getLoanId() {
         return loanId;
     }

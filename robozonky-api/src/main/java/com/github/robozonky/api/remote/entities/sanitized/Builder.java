@@ -16,16 +16,10 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
+interface Builder<T> {
 
-final class MutableMarketplaceLoanImpl extends AbstractMutableLoanImpl<MarketplaceLoanBuilder> implements
-                                                                                               MarketplaceLoanBuilder {
-
-    MutableMarketplaceLoanImpl() {
-
-    }
-
-    MutableMarketplaceLoanImpl(final RawLoan original) {
-        super(original);
+    default T build() {
+        Util.reportNulls(this);
+        return (T) this;
     }
 }

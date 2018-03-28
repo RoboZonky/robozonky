@@ -16,16 +16,7 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
+public interface DevelopmentBuilder extends MutableDevelopment<DevelopmentBuilder>,
+                                            Builder<Development> {
 
-final class MutableMarketplaceLoanImpl extends AbstractMutableLoanImpl<MarketplaceLoanBuilder> implements
-                                                                                               MarketplaceLoanBuilder {
-
-    MutableMarketplaceLoanImpl() {
-
-    }
-
-    MutableMarketplaceLoanImpl(final RawLoan original) {
-        super(original);
-    }
 }

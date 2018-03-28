@@ -20,14 +20,15 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.function.Function;
 
+import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.Wallet;
@@ -42,7 +43,7 @@ import static org.mockito.Mockito.*;
 
 class ZonkyTest {
 
-    private <T, S extends EntityCollectionApi<T>> PaginatedApi<T, S> mockApi() {
+    private <T, S> PaginatedApi<T, S> mockApi() {
         final PaginatedApi<T, S> api = mock(PaginatedApi.class);
         final PaginatedResult<T> apiReturn = new PaginatedResult<>(Collections.emptyList(), 0);
         when(api.execute(any(), any(), any(), anyInt(), anyInt())).thenReturn(apiReturn);
@@ -60,16 +61,19 @@ class ZonkyTest {
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
         assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new Zonky(null, la, sa, pa, wa))
+            softly.assertThatThrownBy(() -> new Zonky(null, la, sa, pa, wa, caa))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new Zonky(ca, null, sa, pa, wa))
+            softly.assertThatThrownBy(() -> new Zonky(ca, null, sa, pa, wa, caa))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new Zonky(ca, la, null, pa, wa))
+            softly.assertThatThrownBy(() -> new Zonky(ca, la, null, pa, wa, caa))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new Zonky(ca, la, sa, null, wa))
+            softly.assertThatThrownBy(() -> new Zonky(ca, la, sa, null, wa, caa))
                     .isInstanceOf(IllegalArgumentException.class);
-            softly.assertThatThrownBy(() -> new Zonky(ca, la, sa, pa, null))
+            softly.assertThatThrownBy(() -> new Zonky(ca, la, sa, pa, null, caa))
+                    .isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> new Zonky(ca, la, sa, pa, wa, null))
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
@@ -81,7 +85,8 @@ class ZonkyTest {
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        final Zonky z = new Zonky(ca, la, sa, pa, wa);
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        final Zonky z = new Zonky(ca, la, sa, pa, wa, caa);
         assertSoftly(softly -> {
             softly.assertThat(z.getAvailableLoans()).isEmpty();
             softly.assertThat(z.getAvailableLoans(Sort.unspecified())).isEmpty();
@@ -106,7 +111,8 @@ class ZonkyTest {
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        final Zonky z = new Zonky(ca, la, sa, pa, wa);
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        final Zonky z = new Zonky(ca, la, sa, pa, wa, caa);
         final Loan l = z.getLoan(loanId);
         final Investment i = Investment.fresh((MarketplaceLoan) l, 200);
         z.invest(i);
@@ -125,7 +131,8 @@ class ZonkyTest {
                 .thenReturn(mock(Wallet.class));
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        final Zonky z = new Zonky(ca, la, sa, pa, wa);
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        final Zonky z = new Zonky(ca, la, sa, pa, wa, caa);
         final Wallet w = z.getWallet();
         assertThat(w).isNotNull();
     }
@@ -138,7 +145,8 @@ class ZonkyTest {
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        final Zonky z = new Zonky(ca, la, sa, pa, wa);
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        final Zonky z = new Zonky(ca, la, sa, pa, wa, caa);
         final Participation p = mock(Participation.class);
         when(p.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
         when(p.getId()).thenReturn(1);
@@ -154,7 +162,8 @@ class ZonkyTest {
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        final Zonky z = new Zonky(ca, la, sa, pa, wa);
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        final Zonky z = new Zonky(ca, la, sa, pa, wa, caa);
         final Investment p = Investment.custom()
                 .setRemainingPrincipal(BigDecimal.TEN)
                 .setSmpFee(BigDecimal.ONE)
@@ -172,7 +181,8 @@ class ZonkyTest {
         final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
         final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
         final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
-        final Zonky z = new Zonky(ca, la, sa, pa, wa);
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        final Zonky z = new Zonky(ca, la, sa, pa, wa, caa);
         final Investment i = mock(Investment.class);
         when(i.getId()).thenReturn(1);
         z.cancel(i);

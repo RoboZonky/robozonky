@@ -31,6 +31,7 @@ import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.Events;
@@ -90,8 +91,8 @@ enum DelinquencyCategory {
     }
 
     private static LoanDelinquentEvent getEvent(final LocalDate since, final Investment investment, final Loan loan,
-                                                final int threshold) {
-        return getEventSupplier(threshold).apply(investment, loan, since);
+                                                final int threshold, final Collection<Development> collections) {
+        return getEventSupplier(threshold).apply(investment, loan, since, collections);
     }
 
     private static String getFieldName(final int dayThreshold) {
@@ -118,7 +119,8 @@ enum DelinquencyCategory {
      */
     public Collection<Integer> update(final Collection<Delinquency> active,
                                       final Function<Integer, Investment> investmentSupplier,
-                                      final Function<Investment, Loan> loanSupplier) {
+                                      final Function<Investment, Loan> loanSupplier,
+                                      final Function<Loan, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
         final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
@@ -134,7 +136,8 @@ enum DelinquencyCategory {
                     final int loanId = d.getParent().getLoanId();
                     final Investment i = investmentSupplier.apply(loanId);
                     final Loan l = loanSupplier.apply(i);
-                    final Event e = getEvent(d.getPaymentMissedDate(), i, l, thresholdInDays);
+                    final Event e = getEvent(d.getPaymentMissedDate(), i, l, thresholdInDays,
+                                             collectionsSupplier.apply(l));
                     Events.fire(e);
                 })
                 .map(d -> d.getParent().getLoanId());
@@ -148,7 +151,8 @@ enum DelinquencyCategory {
     @FunctionalInterface
     private interface EventSupplier {
 
-        LoanDelinquentEvent apply(final Investment i, final Loan l, final LocalDate d);
+        LoanDelinquentEvent apply(final Investment i, final Loan l, final LocalDate d,
+                                  final Collection<Development> collections);
     }
 
 }

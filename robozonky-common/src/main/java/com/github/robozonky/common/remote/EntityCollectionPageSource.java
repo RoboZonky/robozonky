@@ -17,25 +17,27 @@
 package com.github.robozonky.common.remote;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.LongConsumer;
 
-import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.rutledgepaulv.pagingstreams.PageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class EntityCollectionPageSource<T> implements PageSource<T> {
+class EntityCollectionPageSource<T, S> implements PageSource<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityCollectionPageSource.class);
 
-    private final PaginatedApi<T, ? extends EntityCollectionApi<T>> api;
+    private final PaginatedApi<T, S> api;
+    private final Function<S, List<T>> function;
     private final Select select;
     private final Sort<T> ordering;
     private final int pageSize;
 
-    public EntityCollectionPageSource(final PaginatedApi<T, ? extends EntityCollectionApi<T>> api, final Select select,
-                                      final Sort<T> ordering, final int pageSize) {
+    public EntityCollectionPageSource(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
+                                      final Select select, final Sort<T> ordering, final int pageSize) {
         this.api = api;
+        this.function = function;
         this.select = select;
         this.ordering = ordering;
         this.pageSize = pageSize;
@@ -46,8 +48,7 @@ class EntityCollectionPageSource<T> implements PageSource<T> {
         LOGGER.trace("Requested with offset {}, limit {}.", offset, limit);
         final int pageId = offset < 1 ? 0 : (int) (offset / pageSize);
         // limit is ignored, as the page size determines the page number; offset+limit is not supported by Zonky
-        final PaginatedResult<T> result = api.execute(EntityCollectionApi::items, this.select, this.ordering, pageId,
-                                                      pageSize);
+        final PaginatedResult<T> result = api.execute(function, this.select, this.ordering, pageId, pageSize);
         totalSizeSink.accept(result.getTotalResultCount());
         return result.getPage();
     }

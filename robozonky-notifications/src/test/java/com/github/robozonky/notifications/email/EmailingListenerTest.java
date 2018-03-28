@@ -56,9 +56,11 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.enums.DevelopmentTpe;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -107,6 +109,22 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         return r.get().get();
     }
 
+    private static Development mockCollectionNoEndDate() {
+        return Development.custom()
+                .setType(DevelopmentTpe.OTHER)
+                .setPublicNote("Some note.")
+                .setDateFrom(OffsetDateTime.now())
+                .build();
+    }
+
+    private static Development mockCollectionNoNote() {
+        return Development.custom()
+                .setType(DevelopmentTpe.OTHER)
+                .setDateFrom(OffsetDateTime.now().minusDays(1))
+                .setDateTo(OffsetDateTime.now())
+                .build();
+    }
+
     private static PortfolioOverview mockPortfolio(final int balance) {
         final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
         when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
@@ -123,20 +141,6 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         // always return a listener that WILL send an e-mail, even though this means shouldSendEmail() is not tested
         doReturn(true).when(e).shouldSendEmail(any());
         return e;
-    }
-
-    private DynamicContainer forListener(final SupportedListener listener, final Event e) {
-        final NotificationProperties p = getNotificationProperties();
-        final AbstractEmailingListener<Event> l = getListener(listener, p);
-        return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
-                dynamicTest("is formally correct", () -> testFormal(l, e, listener)),
-                dynamicTest("is processed correctly", () -> testProcessingWithoutErrors(l, e)),
-                dynamicTest("sends email", () -> {
-                    BalanceTracker.INSTANCE.reset();  // dynamic tests in JUnit don't call before/after methods !!!
-                    testMailSent(l, e);
-                }),
-                dynamicTest("has listener enabled", () -> testListenerEnabled(e))
-        ));
     }
 
     private static void testMailSent(final AbstractEmailingListener<Event> listener,
@@ -170,6 +174,20 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         final EmailListenerService service = new EmailListenerService();
         final EventListenerSupplier<?> supplier = service.findListener(event.getClass());
         assertThat(supplier.get()).isPresent();
+    }
+
+    private DynamicContainer forListener(final SupportedListener listener, final Event e) {
+        final NotificationProperties p = getNotificationProperties();
+        final AbstractEmailingListener<Event> l = getListener(listener, p);
+        return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
+                dynamicTest("is formally correct", () -> testFormal(l, e, listener)),
+                dynamicTest("is processed correctly", () -> testProcessingWithoutErrors(l, e)),
+                dynamicTest("sends email", () -> {
+                    BalanceTracker.INSTANCE.reset();  // dynamic tests in JUnit don't call before/after methods !!!
+                    testMailSent(l, e);
+                }),
+                dynamicTest("has listener enabled", () -> testListenerEnabled(e))
+        ));
     }
 
     @BeforeEach
@@ -246,18 +264,25 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.INVESTMENT_REJECTED,
                             new InvestmentRejectedEvent(recommendation, "random")),
                 forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
-                            new LoanNoLongerDelinquentEvent(i, loan, LocalDate.now())),
-                forListener(SupportedListener.LOAN_DEFAULTED, new LoanDefaultedEvent(i, loan, LocalDate.now())),
+                            new LoanNoLongerDelinquentEvent(i, loan, LocalDate.now(),
+                                                            Collections.singletonList(mockCollectionNoEndDate()))),
+                forListener(SupportedListener.LOAN_DEFAULTED,
+                            new LoanDefaultedEvent(i, loan, LocalDate.now(),
+                                                   Collections.singletonList(mockCollectionNoNote()))),
                 forListener(SupportedListener.LOAN_NOW_DELINQUENT,
-                            new LoanNowDelinquentEvent(i, loan, LocalDate.now())),
+                            new LoanNowDelinquentEvent(i, loan, LocalDate.now(), Collections.emptyList())),
                 forListener(SupportedListener.LOAN_DELINQUENT_10_PLUS,
-                            new LoanDelinquent10DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(11))),
+                            new LoanDelinquent10DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(11),
+                                                                Collections.emptyList())),
                 forListener(SupportedListener.LOAN_DELINQUENT_30_PLUS,
-                            new LoanDelinquent30DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(31))),
+                            new LoanDelinquent30DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(31),
+                                                                Collections.emptyList())),
                 forListener(SupportedListener.LOAN_DELINQUENT_60_PLUS,
-                            new LoanDelinquent60DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(61))),
+                            new LoanDelinquent60DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(61),
+                                                                Collections.emptyList())),
                 forListener(SupportedListener.LOAN_DELINQUENT_90_PLUS,
-                            new LoanDelinquent90DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(91))),
+                            new LoanDelinquent90DaysOrMoreEvent(i, loan, LocalDate.now().minusDays(91),
+                                                                Collections.emptyList())),
                 forListener(SupportedListener.LOAN_REPAID, new LoanRepaidEvent(i, loan, MAX_PORTFOLIO)),
                 forListener(SupportedListener.BALANCE_ON_TARGET,
                             new ExecutionStartedEvent(Collections.emptyList(), MAX_PORTFOLIO)),

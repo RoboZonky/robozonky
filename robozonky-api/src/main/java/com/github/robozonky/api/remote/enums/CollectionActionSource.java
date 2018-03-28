@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.api.remote.enums;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
+public enum CollectionActionSource {
 
-final class MutableMarketplaceLoanImpl extends AbstractMutableLoanImpl<MarketplaceLoanBuilder> implements
-                                                                                               MarketplaceLoanBuilder {
+    AUTOMATION,
+    EMPLOYEE,
+    LEGAL
 
-    MutableMarketplaceLoanImpl() {
-
-    }
-
-    MutableMarketplaceLoanImpl(final RawLoan original) {
-        super(original);
-    }
 }

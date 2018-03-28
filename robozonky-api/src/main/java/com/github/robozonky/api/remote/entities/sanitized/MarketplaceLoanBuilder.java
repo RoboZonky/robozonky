@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-public interface MarketplaceLoanBuilder extends MutableMarketplaceLoan<MarketplaceLoanBuilder> {
+public interface MarketplaceLoanBuilder extends MutableMarketplaceLoan<MarketplaceLoanBuilder>,
+                                                Builder<MarketplaceLoan> {
 
-    MarketplaceLoan build();
 }

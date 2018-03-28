@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.robozonky.api.remote.LoanApi;
@@ -29,6 +30,7 @@ import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -73,9 +75,8 @@ public class ApiProvider implements AutoCloseable {
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
-    protected <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
-                                                                                       final String url,
-                                                                                       final ZonkyApiToken token) {
+    protected <S, T> PaginatedApi<S, T> obtainPaginated(final Class<T> api, final String url,
+                                                        final ZonkyApiToken token) {
         return new PaginatedApi<>(api, url, token, client);
     }
 
@@ -112,7 +113,7 @@ public class ApiProvider implements AutoCloseable {
 
     private Zonky authenticated(final ZonkyApiToken token) {
         return new Zonky(this.control(token), this.marketplace(token), this.secondaryMarketplace(token),
-                         this.portfolio(token), this.wallet(token));
+                         this.portfolio(token), this.wallet(token), this.collections(token));
     }
 
     public void authenticated(final ZonkyApiToken token, final Consumer<Zonky> operation) {
@@ -168,6 +169,15 @@ public class ApiProvider implements AutoCloseable {
         final ControlApi proxy = ProxyFactory.newProxy(client, new AuthenticatedFilter(token), ControlApi.class,
                                                        ApiProvider.ZONKY_URL);
         return new Api<>(proxy);
+    }
+
+    /**
+     * Retrieve user-specific Zonky API which provides information on loan collections.
+     * @param token The Zonky API token, representing an control user.
+     * @return New API instance.
+     */
+    private PaginatedApi<RawDevelopment, CollectionsApi> collections(final ZonkyApiToken token) {
+        return this.obtainPaginated(CollectionsApi.class, ApiProvider.ZONKY_URL, token);
     }
 
     @Override

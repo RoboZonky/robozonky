@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-public interface LoanBuilder extends MutableLoan<LoanBuilder> {
+public interface LoanBuilder extends MutableLoan<LoanBuilder>,
+                                     Builder<Loan> {
 
-    Loan build();
 }

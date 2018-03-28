@@ -17,8 +17,9 @@
 /**
  * Zonky API is notorious for only providing certain field values at certain stages in the
  * {@link com.github.robozonky.api.remote.entities.RawInvestment}/
- * {@link com.github.robozonky.api.remote.entities.RawLoan} lifecycle. The aim of this package is to provide null-safe
- * alternatives for some of the Zonky API entities. {@link java.lang.NullPointerException}s thrown from within this
- * package should be considered bugs in RoboZonky and not some quirks of the Zonky API.
+ * {@link com.github.robozonky.api.remote.entities.RawLoan}/
+ * {@link com.github.robozonky.api.remote.entities.RawDevelopment} lifecycle. The aim of this package is to provide
+ * null-safe alternatives for some of the Zonky API entities. {@link java.lang.NullPointerException}s thrown from within
+ * this package should be considered bugs in RoboZonky and not some quirks of the Zonky API.
  */
 package com.github.robozonky.api.remote.entities.sanitized;

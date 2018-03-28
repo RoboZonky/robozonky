@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.RawLoan;
+import java.time.LocalDate;
+import java.util.Collection;
 
-final class MutableMarketplaceLoanImpl extends AbstractMutableLoanImpl<MarketplaceLoanBuilder> implements
-                                                                                               MarketplaceLoanBuilder {
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 
-    MutableMarketplaceLoanImpl() {
+public interface DelinquencyBased extends InvestmentBased {
 
-    }
+    LocalDate getDelinquentSince();
 
-    MutableMarketplaceLoanImpl(final RawLoan original) {
-        super(original);
-    }
+    Collection<Development> getCollectionActions();
 }

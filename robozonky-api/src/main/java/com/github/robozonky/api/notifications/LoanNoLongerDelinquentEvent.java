@@ -17,29 +17,40 @@
 package com.github.robozonky.api.notifications;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
 
 import com.github.robozonky.api.remote.entities.RawInvestment;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 /**
  * Fired immediately after an {@link RawInvestment} is identified as no longer delinquent.
  */
-public final class LoanNoLongerDelinquentEvent extends Event implements InvestmentBased {
+public final class LoanNoLongerDelinquentEvent extends Event implements DelinquencyBased {
 
     private final Investment investment;
     private final Loan loan;
     private final LocalDate delinquentSince;
+    private final Collection<Development> collectionActions;
 
-    public LoanNoLongerDelinquentEvent(final Investment investment, final Loan loan,
-                                       final LocalDate delinquentSince) {
+    public LoanNoLongerDelinquentEvent(final Investment investment, final Loan loan, final LocalDate delinquentSince,
+                                       final Collection<Development> collectionActions) {
         this.investment = investment;
         this.loan = loan;
         this.delinquentSince = delinquentSince;
+        this.collectionActions = Collections.unmodifiableCollection(collectionActions);
     }
 
+    @Override
     public LocalDate getDelinquentSince() {
         return delinquentSince;
+    }
+
+    @Override
+    public Collection<Development> getCollectionActions() {
+        return collectionActions;
     }
 
     @Override

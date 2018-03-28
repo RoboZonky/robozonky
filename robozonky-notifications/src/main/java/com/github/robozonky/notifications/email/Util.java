@@ -20,7 +20,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.Period;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -44,6 +47,10 @@ class Util {
 
     private static Date toDate(final LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(Defaults.ZONE_ID).toInstant());
+    }
+
+    private static Date toDate(final OffsetDateTime offsetDateTime) {
+        return Date.from(offsetDateTime.toInstant());
     }
 
     public static String identifyLoan(final LoanBased event) {
@@ -101,9 +108,18 @@ class Util {
         return loanData;
     }
 
-    public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan, final LocalDate date) {
+    public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan,
+                                                        final Collection<Development> collections,
+                                                        final LocalDate date) {
         final Map<String, Object> result = getLoanData(i, loan);
         result.put("since", Util.toDate(date));
+        result.put("collections", collections.stream()
+                .map(action -> new UnifiedMap<String, Object>() {{
+                    put("code", action.getType().getCode());
+                    put("note", action.getPublicNote().orElse("Bez dalšího vysvětlení."));
+                    put("startDate", Util.toDate(action.getDateFrom()));
+                    put("endDate", action.getDateTo().map(Util::toDate).orElse(null));
+                }}).collect(Collectors.toList()));
         return result;
     }
 
