@@ -186,6 +186,15 @@ public class Zonky {
     }
 
     /**
+     * Retrieve loans from marketplace via {@link LoanApi}, in a given order.
+     * @param ordering Ordering in which the results should be returned.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<MarketplaceLoan> getAvailableLoans(final Sort<RawLoan> ordering) {
+        return Zonky.getStream(loanApi, LoanApi::items, ordering).map(MarketplaceLoan::sanitized);
+    }
+
+    /**
      * Retrieve loan collections information via {@link CollectionsApi}.
      * @return All items from the remote API, lazy-loaded.
      */
@@ -208,15 +217,6 @@ public class Zonky {
      */
     public Stream<Participation> getAvailableParticipations(final Select select) {
         return Zonky.getStream(participationApi, ParticipationApi::items, select);
-    }
-
-    /**
-     * Retrieve loans from marketplace via {@link LoanApi}, in a given order.
-     * @param ordering Ordering in which the results should be returned.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<MarketplaceLoan> getAvailableLoans(final Sort<RawLoan> ordering) {
-        return Zonky.getStream(loanApi, LoanApi::items, ordering).map(MarketplaceLoan::sanitized);
     }
 
     public Restrictions getRestrictions() {

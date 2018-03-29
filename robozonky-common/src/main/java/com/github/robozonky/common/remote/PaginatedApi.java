@@ -28,21 +28,24 @@ class PaginatedApi<S, T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaginatedApi.class);
 
-    private final AuthenticatedFilter filter;
+    private final ThreadLocal<AuthenticatedFilter> filter;
     private final Class<T> api;
     private final String url;
     private final ResteasyClient client;
 
-    PaginatedApi(final Class<T> api, final String url, final ZonkyApiToken token,
-                 final ResteasyClient client) {
+    PaginatedApi(final Class<T> api, final String url, final ZonkyApiToken token, final ResteasyClient client) {
         this.api = api;
         this.url = url;
-        this.filter = new AuthenticatedFilter(token);
         this.client = client;
+        /*
+         * filters are updated with different parameters in every request. in order to support data retrieval in a
+         * parallel stream, each thread must use its own filter.
+         */
+        this.filter = ThreadLocal.withInitial(() -> new AuthenticatedFilter(token));
     }
 
     public <Q> Q execute(final Function<T, Q> function) {
-        return this.execute(function, new Select(), Sort.unspecified(), filter);
+        return this.execute(function, new Select(), Sort.unspecified(), filter.get());
     }
 
     <Q> Q execute(final Function<T, Q> function, final Select select, final Sort<S> sort,
@@ -59,7 +62,7 @@ class PaginatedApi<S, T> {
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select,
                                       final Sort<S> sort, final int pageNo, final int pageSize) {
-        return this.execute(function, select, sort, pageNo, pageSize, filter);
+        return this.execute(function, select, sort, pageNo, pageSize, filter.get());
     }
 
     PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final Sort<S> sort,
@@ -76,6 +79,6 @@ class PaginatedApi<S, T> {
     }
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final int pageNo, final int pageSize) {
-        return this.execute(function, new Select(), Sort.unspecified(), pageNo, pageSize, filter);
+        return this.execute(function, new Select(), Sort.unspecified(), pageNo, pageSize, filter.get());
     }
 }
