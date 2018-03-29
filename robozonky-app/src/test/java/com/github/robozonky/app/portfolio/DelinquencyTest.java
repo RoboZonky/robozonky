@@ -37,7 +37,7 @@ class DelinquencyTest extends AbstractRoboZonkyTest {
         final ZoneId zone = Defaults.ZONE_ID;
         final LocalDate epoch = OffsetDateTime.ofInstant(Instant.EPOCH, zone).toLocalDate();
         final LocalDate now = OffsetDateTime.now(zone).toLocalDate();
-        final Duration duration = Duration.between(epoch.atStartOfDay(zone), now.atStartOfDay(zone));
+        final Duration duration = Duration.between(epoch.atStartOfDay(), now.atStartOfDay());
         final Delinquency d = new Delinquency(null, epoch);
         assertSoftly(softly -> {
             softly.assertThat(d.getPaymentMissedDate()).isEqualTo(epoch);
@@ -46,7 +46,7 @@ class DelinquencyTest extends AbstractRoboZonkyTest {
             softly.assertThat(d.getDuration()).isLessThanOrEqualTo(duration);
         });
         final LocalDate fixed = now.minusDays(1);
-        final TemporalAmount newDuration = Duration.between(epoch.atStartOfDay(zone), fixed.atStartOfDay(zone));
+        final TemporalAmount newDuration = Duration.between(epoch.atStartOfDay(), fixed.atStartOfDay());
         d.setFixedOn(fixed);
         assertSoftly(softly -> {
             softly.assertThat(d.getFixedOn()).contains(fixed);
@@ -59,7 +59,7 @@ class DelinquencyTest extends AbstractRoboZonkyTest {
         final ZoneId zone = Defaults.ZONE_ID;
         final LocalDate epoch = OffsetDateTime.ofInstant(Instant.EPOCH, zone).toLocalDate();
         final LocalDate fixed = LocalDate.now();
-        final Duration daysUntilFixed = Duration.between(epoch.atStartOfDay(zone), fixed.atStartOfDay(zone));
+        final Duration daysUntilFixed = Duration.between(epoch.atStartOfDay(), fixed.atStartOfDay());
         final Delinquency d = new Delinquency(null, epoch, fixed);
         assertSoftly(softly -> {
             softly.assertThat(d.getPaymentMissedDate()).isEqualTo(epoch);

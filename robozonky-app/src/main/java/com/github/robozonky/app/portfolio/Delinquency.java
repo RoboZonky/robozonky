@@ -18,11 +18,8 @@ package com.github.robozonky.app.portfolio;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Optional;
-
-import com.github.robozonky.internal.api.Defaults;
 
 /**
  * Represents one occasion on which a loan, represented by {@link #getParent()}, was overdue.
@@ -91,11 +88,10 @@ public final class Delinquency {
      * @return How long it took for the loan to be delinquent for this instalment. If active, the end date is
      * calculated as today.
      */
-    public Duration getDuration() {
-        final ZoneId zone = Defaults.ZONE_ID;
+    public Duration getDuration() { // use local date/time as zoned would be vulnerable to daylight savings switching
         return getFixedOn()
-                .map(fixedOn -> Duration.between(paymentMissedDate.atStartOfDay(zone), fixedOn.atStartOfDay(zone)))
-                .orElse(Duration.between(paymentMissedDate.atStartOfDay(zone), LocalDate.now().atStartOfDay(zone)));
+                .map(fixedOn -> Duration.between(paymentMissedDate.atStartOfDay(), fixedOn.atStartOfDay()))
+                .orElse(Duration.between(paymentMissedDate.atStartOfDay(), LocalDate.now().atStartOfDay()));
     }
 
     /**

@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
@@ -36,7 +36,6 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.internal.api.State;
-import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,12 +64,12 @@ enum DelinquencyCategory {
         return actual.compareTo(target) >= 0;
     }
 
-    private static Stream<Integer> fromIdString(final List<String> idString) {
-        return idString.stream().map(String::trim).filter(s -> s.length() > 0).map(Integer::parseInt);
+    private static IntStream fromIdString(final List<String> idString) {
+        return idString.stream().map(String::trim).filter(s -> s.length() > 0).mapToInt(Integer::parseInt);
     }
 
-    private static Stream<String> toIdString(final Stream<Integer> stream) {
-        return stream.distinct().sorted().map(Object::toString);
+    private static Stream<String> toIdString(final int[] ids) {
+        return IntStream.of(ids).mapToObj(Integer::toString);
     }
 
     private static EventSupplier getEventSupplier(final int threshold) {
@@ -117,21 +116,21 @@ enum DelinquencyCategory {
      * @param loanSupplier Retrieves the loan instance for a particular loan ID.
      * @return IDs of loans that are being tracked in this category.
      */
-    public Collection<Integer> update(final Collection<Delinquency> active,
-                                      final Function<Integer, Investment> investmentSupplier,
-                                      final Function<Investment, Loan> loanSupplier,
-                                      final Function<Loan, Collection<Development>> collectionsSupplier) {
+    public int[] update(final Collection<Delinquency> active, final Function<Integer, Investment> investmentSupplier,
+                        final Function<Investment, Loan> loanSupplier,
+                        final Function<Loan, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
         final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
-        final Collection<Integer> keepThese = state.getValues(fieldName)
+        final int[] keepThese = state.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
-                .orElse(Stream.empty())
+                .orElse(IntStream.empty())
                 .filter(id -> active.stream().anyMatch(d -> isLoanRelated(d, id)))
-                .collect(Collectors.toSet());
-        final Stream<Integer> addThese = active.stream()
+                .toArray();
+        LOGGER.trace("Keeping {}.", keepThese);
+        final IntStream addThese = active.stream()
                 .filter(d -> isOverThreshold(d, thresholdInDays))
-                .filter(d -> keepThese.stream().noneMatch(id -> isLoanRelated(d, id)))
+                .filter(d -> IntStream.of(keepThese).noneMatch(id -> isLoanRelated(d, id)))
                 .peek(d -> {
                     final int loanId = d.getParent().getLoanId();
                     final Investment i = investmentSupplier.apply(loanId);
@@ -140,10 +139,9 @@ enum DelinquencyCategory {
                                              collectionsSupplier.apply(l));
                     Events.fire(e);
                 })
-                .map(d -> d.getParent().getLoanId());
-        final Collection<Integer> storeThese = Stream.concat(keepThese.stream(), addThese)
-                .collect(Collectors.toCollection(TreeSortedSet::new));
-        state.newBatch().set(fieldName, toIdString(storeThese.stream())).call();
+                .mapToInt(d -> d.getParent().getLoanId());
+        final int[] storeThese = IntStream.concat(IntStream.of(keepThese), addThese).distinct().sorted().toArray();
+        state.newBatch().set(fieldName, toIdString(storeThese)).call();
         LOGGER.trace("Update over, stored {}.", storeThese);
         return storeThese;
     }
