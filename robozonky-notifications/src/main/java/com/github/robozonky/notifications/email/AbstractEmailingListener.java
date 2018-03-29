@@ -51,9 +51,14 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         this.properties = properties;
         this.emailsOfThisType = new Counter(this.getClass().getSimpleName(),
                                             properties.getListenerSpecificHourlyEmailLimit());
-        this.registerFinisher(evt -> { // increase spam-prevention counters
+        this.registerFinisher(event -> {
+            // increase spam-prevention counters
             emailsOfThisType.increase();
             this.properties.getGlobalCounter().increase();
+            if (event instanceof Financial) { // register balance
+                final int balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
+                BalanceTracker.INSTANCE.setLastKnownBalance(balance);
+            }
         });
     }
 
@@ -72,7 +77,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return email;
     }
 
-    protected void registerFinisher(final Consumer<T> finisher) {
+    protected final void registerFinisher(final Consumer<T> finisher) {
         if (!finishers.contains(finisher)) {
             this.finishers.add(finisher);
         }
@@ -82,7 +87,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return this.finishers.size();
     }
 
-    boolean allowGlobal() {
+    private boolean allowGlobal() {
         return properties.overrideGlobalGag() || properties.getGlobalCounter().allow();
     }
 

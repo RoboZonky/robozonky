@@ -23,12 +23,12 @@ import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
-class BalanceOnTargetEventListener extends AbstractBalanceRegisteringEmailingListener<ExecutionStartedEvent> {
+class BalanceOnTargetEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {
 
     private final int targetBalance;
 
     public BalanceOnTargetEventListener(final ListenerSpecificNotificationProperties properties) {
-        super((ExecutionStartedEvent e) -> e.getPortfolioOverview().getCzkAvailable(), properties);
+        super(properties);
         this.targetBalance = properties.getListenerSpecificIntProperty("targetBalance", 200);
     }
 

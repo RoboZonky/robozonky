@@ -23,12 +23,12 @@ import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.SessionInfo;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
-class BalanceUnderMinimumEventListener extends AbstractBalanceRegisteringEmailingListener<ExecutionStartedEvent> {
+class BalanceUnderMinimumEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {
 
     private final int minimumBalance;
 
     public BalanceUnderMinimumEventListener(final ListenerSpecificNotificationProperties properties) {
-        super((ExecutionStartedEvent e) -> e.getPortfolioOverview().getCzkAvailable(), properties);
+        super(properties);
         this.minimumBalance = properties.getListenerSpecificIntProperty("minimumBalance", 200);
     }
 

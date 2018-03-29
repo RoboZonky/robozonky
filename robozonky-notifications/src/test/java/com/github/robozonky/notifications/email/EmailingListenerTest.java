@@ -32,6 +32,7 @@ import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.robozonky.api.notifications.Financial;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
@@ -92,9 +93,9 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailingListenerTest.class);
     private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
-
     private static final GreenMail EMAIL = new GreenMail(getServerSetup());
     private static final PortfolioOverview MAX_PORTFOLIO = mockPortfolio(Integer.MAX_VALUE);
+    private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
 
     private static ServerSetup getServerSetup() {
         final ServerSetup setup = ServerSetupTest.SMTP;
@@ -145,13 +146,19 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static void testMailSent(final AbstractEmailingListener<Event> listener,
                                      final Event event) throws Exception {
+        BalanceTracker.INSTANCE.reset();  // dynamic tests in JUnit don't call before/after methods !!!
         final int originalMessages = EMAIL.getReceivedMessages().length;
-        listener.handle(event, new SessionInfo("someone@somewhere.net"));
+        listener.handle(event, SESSION_INFO);
         assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
         assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
         assertThat(m.getSubject()).isNotNull().isEqualTo(listener.getSubject(event));
         assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
+        if (event instanceof Financial) { // this event must register the last known balance
+            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent();
+        } else { // and this event carries no such information
+            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+        }
     }
 
     private static void testFormal(final AbstractEmailingListener<Event> listener, final Event event,
@@ -165,8 +172,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     private static void testProcessingWithoutErrors(final AbstractEmailingListener<Event> listener,
                                                     final Event event) throws IOException, TemplateException {
         final String s = TemplateProcessor.INSTANCE.process(listener.getTemplateFileName(),
-                                                            listener.getData(event, new SessionInfo(
-                                                                    "someone@somewhere.net")));
+                                                            listener.getData(event, SESSION_INFO));
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
     }
 
@@ -176,16 +182,13 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         assertThat(supplier.get()).isPresent();
     }
 
-    private DynamicContainer forListener(final SupportedListener listener, final Event e) {
+    private static DynamicContainer forListener(final SupportedListener listener, final Event e) {
         final NotificationProperties p = getNotificationProperties();
         final AbstractEmailingListener<Event> l = getListener(listener, p);
         return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
                 dynamicTest("is formally correct", () -> testFormal(l, e, listener)),
                 dynamicTest("is processed correctly", () -> testProcessingWithoutErrors(l, e)),
-                dynamicTest("sends email", () -> {
-                    BalanceTracker.INSTANCE.reset();  // dynamic tests in JUnit don't call before/after methods !!!
-                    testMailSent(l, e);
-                }),
+                dynamicTest("sends email", () -> testMailSent(l, e)),
                 dynamicTest("has listener enabled", () -> testListenerEnabled(e))
         ));
     }
@@ -197,7 +200,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void testSpamProtectionAvailable() throws IOException {
+    void spamProtectionAvailable() throws IOException {
         this.deleteState(); // for some reason, JUnit 5 doesn't invoke this from the abstract parent
         final Properties props = new Properties();
         props.load(NotificationPropertiesTest.class.getResourceAsStream("notifications-enabled.cfg"));
@@ -209,9 +212,9 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         final TestingEmailingListener l = new TestingEmailingListener(p);
         l.registerFinisher(c);
         assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
-        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
+        l.handle(EVENT, SESSION_INFO);
         assertThat(EMAIL.getReceivedMessages()).hasSize(1);
-        l.handle(EVENT, new SessionInfo("someone@somewhere.net"));
+        l.handle(EVENT, SESSION_INFO);
         // e-mail not re-sent, finisher not called again
         verify(c, times(1)).accept(any());
         assertThat(EMAIL.getReceivedMessages()).hasSize(1);

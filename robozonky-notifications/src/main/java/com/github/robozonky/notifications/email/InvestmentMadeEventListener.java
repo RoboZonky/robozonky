@@ -23,10 +23,10 @@ import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.util.FinancialCalculator;
 
-class InvestmentMadeEventListener extends AbstractBalanceRegisteringEmailingListener<InvestmentMadeEvent> {
+class InvestmentMadeEventListener extends AbstractEmailingListener<InvestmentMadeEvent> {
 
     public InvestmentMadeEventListener(final ListenerSpecificNotificationProperties properties) {
-        super((i) -> i.getPortfolioOverview().getCzkAvailable(), properties);
+        super(properties);
     }
 
     @Override
