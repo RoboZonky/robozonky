@@ -18,6 +18,7 @@ package com.github.robozonky.app.configuration.daemon;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -49,23 +50,20 @@ public class StrategyProvider implements Refreshable.RefreshListener<String> {
         return sp;
     }
 
-    private static void inform(final AtomicReference<?> ref, final String type) {
-        if (ref.get() == null) {
-            LOGGER.info("{} strategy missing, all such operations are disabled.", type);
-        } else {
-            LOGGER.info("{} strategy correctly loaded.", type);
-        }
+    private static <T> void set(final AtomicReference<T> ref, final Supplier<Optional<T>> provider, final String desc) {
+        final T value = ref.updateAndGet(old -> provider.get().orElse(null));
+        final String log = (value == null) ?
+                "{} strategy inactive or missing, disabling all such operations." :
+                "{} strategy correctly loaded.";
+        LOGGER.info(log, desc);
     }
 
     @Override
     public void valueSet(final String newValue) {
         LOGGER.trace("Loading strategies.");
-        toInvest.set(StrategyLoader.toInvest(newValue).orElse(null));
-        inform(toInvest, "Investment");
-        toPurchase.set(StrategyLoader.toPurchase(newValue).orElse(null));
-        inform(toPurchase, "Purchasing");
-        toSell.set(StrategyLoader.toSell(newValue).orElse(null));
-        inform(toSell, "Selling");
+        set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
+        set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
+        set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
         LOGGER.trace("Finished.");
     }
 

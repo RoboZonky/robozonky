@@ -83,10 +83,6 @@ class InvestingDaemon extends DaemonOperation {
                 })
                 .map(LoanDescriptor::new)
                 .collect(Collectors.toList());
-        if (loans.isEmpty()) {
-            LOGGER.debug("Asleep as there are no loans available.");
-            return;
-        }
         investing.apply(portfolio, loans);
     }
 }

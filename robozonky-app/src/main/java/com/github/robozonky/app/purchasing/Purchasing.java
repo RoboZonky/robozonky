@@ -54,6 +54,12 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     }
 
     @Override
+    protected boolean isBalanceUnderMinimum(final int current) { // there is no minimum in purchasing
+        return false;
+    }
+
+
+    @Override
     protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
         final int[] idsFromMarketplace = marketplace.stream().mapToInt(Participation::getId).toArray();
         final int[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);

@@ -18,6 +18,7 @@ package com.github.robozonky.common.remote;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,17 +37,18 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Decorates the request with User-Agent and adds some simple request logging.
- * <p>
- * If ever a filter is needed for JAX-RS communication, this class should serve as the base class for that filter.
+ * <p>If ever a filter is needed for JAX-RS communication, this class should serve as the base class for that filter
+ * .</p>
+ * <p>This class is not thread-safe. Consider using {@link ThreadLocal}.</p>
  */
-public class RoboZonkyFilter implements ClientRequestFilter,
-                                        ClientResponseFilter {
+class RoboZonkyFilter implements ClientRequestFilter,
+                                 ClientResponseFilter {
 
     // not static, so that filters extending this one get the proper logger class
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Map<String, String> headersToSet = new UnifiedMap<>(0);
     private final Map<String, Object[]> queryParams = new UnifiedMap<>(0);
-    private Map<String, String> responseHeaders = new UnifiedMap<>(0);
+    private final Map<String, String> requestHeaders = new UnifiedMap<>(0);
+    private Map<String, String> responseHeaders = Collections.emptyMap();
 
     public RoboZonkyFilter() {
         this.setRequestHeader("User-Agent", Defaults.ROBOZONKY_USER_AGENT);
@@ -74,7 +76,7 @@ public class RoboZonkyFilter implements ClientRequestFilter,
     }
 
     public void setRequestHeader(final String key, final String value) {
-        headersToSet.put(key, value);
+        requestHeaders.put(key, value);
     }
 
     public Optional<String> getLastResponseHeader(final String key) {
@@ -87,7 +89,7 @@ public class RoboZonkyFilter implements ClientRequestFilter,
 
     @Override
     public void filter(final ClientRequestContext clientRequestContext) {
-        headersToSet.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
+        requestHeaders.forEach((k, v) -> clientRequestContext.getHeaders().putSingle(k, v));
         clientRequestContext.setUri(rebuild(clientRequestContext.getUri()));
         this.logger.trace("Request {} {}.", clientRequestContext.getMethod(), clientRequestContext.getUri());
     }

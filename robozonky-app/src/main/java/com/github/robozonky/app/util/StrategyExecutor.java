@@ -46,9 +46,7 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
         return IntStream.of(current).anyMatch(i -> IntStream.of(original).noneMatch(j -> i == j));
     }
 
-    protected boolean isBalanceUnderMinimum(final int currentBalance) {
-        return false;
-    }
+    protected abstract boolean isBalanceUnderMinimum(final int currentBalance);
 
     /**
      * In order to not have to run the strategy over a marketplace and save CPU cycles, we need to know if the
@@ -59,11 +57,16 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
     protected abstract boolean hasMarketplaceUpdates(final Collection<T> marketplace);
 
     private boolean skipStrategyEvaluation(final Portfolio portfolio, final Collection<T> marketplace) {
+        if (marketplace.isEmpty()) {
+            LOGGER.debug("Asleep as the marketplace is empty.");
+            return true;
+        }
         final BigDecimal currentBalance = portfolio.getRemoteBalance().get();
         if (isBalanceUnderMinimum(currentBalance.intValue())) {
             LOGGER.debug("Asleep due to balance being less than minimum.");
             return true;
         } else if (marketplaceCheckPending.get()) {
+            LOGGER.debug("Waking up to finish a pending marketplace check.");
             return false;
         }
         final BigDecimal lastCheckedBalance = balanceWhenLastChecked.getAndSet(currentBalance);
@@ -95,21 +98,20 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
         if (skipStrategyEvaluation(portfolio, marketplace)) {
             return Collections.emptyList();
         }
+        LOGGER.trace("Processing {} items from the marketplace.", marketplace.size());
         /*
          * if the strategy evaluation fails with an exception, store that so that the next time - even if shouldSleep()
          * says to sleep - we will check the marketplace.
          */
         marketplaceCheckPending.set(true);
-        LOGGER.trace("Check flag set.");
         final Collection<Investment> result = execute(portfolio, strategy, marketplace);
         marketplaceCheckPending.set(false);
-        LOGGER.trace("Check flag unset.");
+        LOGGER.trace("Marketplace processing complete.");
         return result;
     }
 
     @Override
     public Collection<Investment> apply(final Portfolio portfolio, final Collection<T> marketplace) {
-        LOGGER.debug("Received {} items from the marketplace.", marketplace.size());
         return strategyProvider.get()
                 .map(strategy -> invest(portfolio, strategy, marketplace))
                 .orElseGet(() -> {

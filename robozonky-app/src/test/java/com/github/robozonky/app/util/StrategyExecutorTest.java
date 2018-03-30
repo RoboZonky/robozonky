@@ -86,10 +86,24 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         verify(mocked, times(2)).execute(eq(p), eq(ALL_ACCEPTING_STRATEGY), eq(marketplace));
     }
 
+    @Test
+    void doesNotInvestOnEmptyMarketplace() {
+        final Zonky zonky = harmlessZonky(10_000);
+        final Portfolio p = Portfolio.create(zonky, mockBalance(zonky));
+        final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting());
+        e.apply(p, Collections.emptyList());
+        verify(e, never()).execute(any(), any(), any());
+    }
+
     private static class AlwaysFreshNeverInvesting extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
         public AlwaysFreshNeverInvesting() {
             super(StrategyExecutorTest.ALL_ACCEPTING);
+        }
+
+        @Override
+        protected boolean isBalanceUnderMinimum(final int currentBalance) {
+            return false;
         }
 
         @Override
