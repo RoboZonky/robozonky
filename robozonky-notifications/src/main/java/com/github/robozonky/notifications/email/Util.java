@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
@@ -114,6 +115,8 @@ class Util {
         final Map<String, Object> result = getLoanData(i, loan);
         result.put("since", Util.toDate(date));
         result.put("collections", collections.stream()
+                .sorted(Comparator.comparing(Development::getDateFrom).reversed())
+                .limit(5)
                 .map(action -> new UnifiedMap<String, Object>() {{
                     put("code", action.getType().getCode());
                     put("note", action.getPublicNote().orElse("Bez dalšího vysvětlení."));

@@ -154,13 +154,12 @@ public class Delinquents {
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     final Investment inv = investmentSupplier.apply(loanId);
                     final Loan l = loanSupplier.apply(inv);
-                    final Collection<Development> collections = collectionsSupplier.apply(l);
                     if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
                         final PaymentStatus s = inv.getPaymentStatus()
                                 .orElseThrow(() -> new IllegalStateException("Invalid investment " + inv));
                         switch (s) {
                             case PAID_OFF:
-                                Events.fire(new LoanDefaultedEvent(inv, l, since, collections));
+                                Events.fire(new LoanDefaultedEvent(inv, l, since, collectionsSupplier.apply(l)));
                                 break;
                             case PAID:
                                 Events.fire(new LoanRepaidEvent(inv, l, portfolioOverview));
@@ -169,7 +168,7 @@ public class Delinquents {
                                 LOGGER.warn("Unsupported payment status '{}' for loan #{}.", s, l.getId());
                         }
                     } else {
-                        Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since, collections));
+                        Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since, collectionsSupplier.apply(l)));
                     }
                 }).collect(Collectors.toList());
     }
