@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.portfolio;
+package com.github.robozonky.app.configuration.daemon;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,8 +24,10 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.portfolio.PortfolioDependant;
 
-public class BlockedAmounts implements PortfolioDependant {
+class BlockedAmounts implements PortfolioDependant {
 
     private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
             new AtomicReference<>(Collections.emptyList());

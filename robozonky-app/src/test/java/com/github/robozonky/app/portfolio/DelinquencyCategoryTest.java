@@ -21,6 +21,7 @@ import java.time.Period;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -42,8 +43,8 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
     private static final Function<Integer, Investment> INVESTMENT_SUPPLIER =
             (id) -> Investment.custom().build();
-    private static final Function<Loan, Collection<Development>> COLLECTIONS_SUPPLIER =
-            (l) -> Collections.emptyList();
+    private static final BiFunction<Loan, LocalDate, Collection<Development>> COLLECTIONS_SUPPLIER =
+            (l, s) -> Collections.emptyList();
 
     private static void testEmpty(final DelinquencyCategory category) {
         assertThat(category.update(Collections.emptyList(), null, null, null)).isEmpty();

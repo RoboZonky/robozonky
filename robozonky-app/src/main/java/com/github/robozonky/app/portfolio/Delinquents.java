@@ -20,7 +20,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -88,7 +90,7 @@ public class Delinquents {
         return d;
     }
 
-    private static boolean related(final Delinquent d, final Investment i) {
+    private static boolean isRelated(final Delinquent d, final Investment i) {
         return d.getLoanId() == i.getLoanId();
     }
 
@@ -134,18 +136,18 @@ public class Delinquents {
         return allPresent;
     }
 
-    private static Collection<Delinquent> getKnownDelinquents(final Collection<Investment> presentlyDelinquent,
-                                                              final Collection<Investment> noLongerActive,
-                                                              final Function<Integer, Investment> investmentSupplier,
-                                                              final Function<Investment, Loan> loanSupplier,
-                                                              final Function<Loan, Collection<Development>>
-                                                                      collectionsSupplier,
-                                                              final PortfolioOverview portfolioOverview) {
+    private static Collection<Delinquent> getKnown(final Collection<Investment> presentlyDelinquent,
+                                                   final Collection<Investment> noLongerActive,
+                                                   final PortfolioOverview portfolioOverview,
+                                                   final Function<Integer, Investment> investmentSupplier,
+                                                   final Function<Investment, Loan> loanSupplier,
+                                                   final BiFunction<Loan, LocalDate, Collection<Development>>
+                                                           collectionsSupplier) {
         final LocalDate now = LocalDate.now();
         // find out loans that are no longer delinquent, either through payment or through default
         return getDelinquents().parallel()
                 .filter(Delinquent::hasActiveDelinquency) // last known state was delinquent
-                .filter(d -> presentlyDelinquent.stream().noneMatch(i -> related(d, i))) // no longer is delinquent
+                .filter(d -> presentlyDelinquent.stream().noneMatch(i -> isRelated(d, i))) // no longer is delinquent
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
                 .map(Delinquency::getParent)
@@ -154,12 +156,12 @@ public class Delinquents {
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     final Investment inv = investmentSupplier.apply(loanId);
                     final Loan l = loanSupplier.apply(inv);
-                    if (noLongerActive.stream().anyMatch(i -> related(d, i))) {
+                    if (noLongerActive.stream().anyMatch(i -> isRelated(d, i))) {
                         final PaymentStatus s = inv.getPaymentStatus()
                                 .orElseThrow(() -> new IllegalStateException("Invalid investment " + inv));
                         switch (s) {
                             case PAID_OFF:
-                                Events.fire(new LoanDefaultedEvent(inv, l, since, collectionsSupplier.apply(l)));
+                                Events.fire(new LoanDefaultedEvent(inv, l, since, collectionsSupplier.apply(l, since)));
                                 break;
                             case PAID:
                                 Events.fire(new LoanRepaidEvent(inv, l, portfolioOverview));
@@ -168,12 +170,13 @@ public class Delinquents {
                                 LOGGER.warn("Unsupported payment status '{}' for loan #{}.", s, l.getId());
                         }
                     } else {
-                        Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since, collectionsSupplier.apply(l)));
+                        Events.fire(
+                                new LoanNoLongerDelinquentEvent(inv, l, since, collectionsSupplier.apply(l, since)));
                     }
                 }).collect(Collectors.toList());
     }
 
-    private static Delinquent createDelinquent(final Investment i) {
+    private static Delinquent create(final Investment i) {
         return i.getNextPaymentDate()
                 .map(date -> new Delinquent(i.getLoanId(), date.toLocalDate()))
                 .orElseThrow(() -> new IllegalStateException("Invalid investment " + i));
@@ -181,26 +184,27 @@ public class Delinquents {
 
     static void update(final Collection<Investment> presentlyDelinquent,
                        final Collection<Investment> noLongerActive,
+                       final PortfolioOverview portfolioOverview,
                        final Function<Integer, Investment> investmentSupplier,
                        final Function<Investment, Loan> loanSupplier,
-                       final Function<Loan, Collection<Development>> collectionsSupplier,
-                       final PortfolioOverview portfolioOverview) {
+                       final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.debug("Updating delinquent loans.");
-        final Collection<Delinquent> knownDelinquents = getKnownDelinquents(presentlyDelinquent, noLongerActive,
-                                                                            investmentSupplier, loanSupplier,
-                                                                            collectionsSupplier, portfolioOverview);
+        final Collection<Delinquent> knownDelinquents = getKnown(presentlyDelinquent, noLongerActive,
+                                                                 portfolioOverview, investmentSupplier, loanSupplier,
+                                                                 collectionsSupplier);
         // assemble delinquencies past and present
         final Stream<Delinquent> delinquentInThePast = knownDelinquents.stream()
-                .filter(d -> noLongerActive.stream().noneMatch(i -> related(d, i)));
+                .filter(d -> noLongerActive.stream().noneMatch(i -> isRelated(d, i)));
         final Stream<Delinquent> nowDelinquent = presentlyDelinquent.stream()
                 .map(i -> knownDelinquents.stream()
-                        .filter(d -> related(d, i))
+                        .filter(d -> isRelated(d, i))
                         .findAny()
-                        .orElse(createDelinquent(i)));
+                        .orElse(create(i)));
         final Stream<Delinquent> all = Stream.concat(delinquentInThePast, nowDelinquent).distinct();
         final Collection<Delinquency> result = persistAndReturnActiveDelinquents(all);
         // notify of new delinquencies over all known thresholds
         Stream.of(DelinquencyCategory.values())
+                .parallel()
                 .forEach(c -> c.update(result, investmentSupplier, loanSupplier, collectionsSupplier));
         LOGGER.trace("Done.");
     }
@@ -219,9 +223,18 @@ public class Delinquents {
     public static void update(final Authenticated auth, final Portfolio portfolio) {
         update(getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
                getWithPaymentStatus(portfolio, PaymentStatus.getDone()),
-               portfolio::lookupOrFail,
+               portfolio.calculateOverview(), portfolio::lookupOrFail,
                id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)),
-               l -> auth.call(z -> z.getDevelopments(l).collect(Collectors.toList())),
-               portfolio.calculateOverview());
+               (l, s) -> getDevelopments(auth, l, s)
+        );
+    }
+
+    private static List<Development> getDevelopments(final Authenticated auth, final Loan loan,
+                                                     final LocalDate delinquentSince) {
+        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
+                .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
+                .collect(Collectors.toList());
+        Collections.reverse(developments);
+        return developments;
     }
 }

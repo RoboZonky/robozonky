@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -98,7 +99,7 @@ enum DelinquencyCategory {
         return "notified" + dayThreshold + "plus";
     }
 
-    private static boolean isLoanRelated(final Delinquency d, final int loanId) {
+    private static boolean isRelated(final Delinquency d, final int loanId) {
         return d.getParent().getLoanId() == loanId;
     }
 
@@ -118,25 +119,25 @@ enum DelinquencyCategory {
      */
     public int[] update(final Collection<Delinquency> active, final Function<Integer, Investment> investmentSupplier,
                         final Function<Investment, Loan> loanSupplier,
-                        final Function<Loan, Collection<Development>> collectionsSupplier) {
+                        final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
         final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
         final int[] keepThese = state.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
                 .orElse(IntStream.empty())
-                .filter(id -> active.stream().anyMatch(d -> isLoanRelated(d, id)))
+                .filter(id -> active.stream().anyMatch(d -> isRelated(d, id)))
                 .toArray();
         LOGGER.trace("Keeping {}.", keepThese);
         final IntStream addThese = active.stream()
                 .filter(d -> isOverThreshold(d, thresholdInDays))
-                .filter(d -> IntStream.of(keepThese).noneMatch(id -> isLoanRelated(d, id)))
+                .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
                 .peek(d -> {
                     final int loanId = d.getParent().getLoanId();
                     final Investment i = investmentSupplier.apply(loanId);
                     final Loan l = loanSupplier.apply(i);
                     final Event e = getEvent(d.getPaymentMissedDate(), i, l, thresholdInDays,
-                                             collectionsSupplier.apply(l));
+                                             collectionsSupplier.apply(l, d.getPaymentMissedDate()));
                     Events.fire(e);
                 })
                 .mapToInt(d -> d.getParent().getLoanId());
