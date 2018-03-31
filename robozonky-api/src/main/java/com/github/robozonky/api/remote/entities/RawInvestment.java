@@ -109,7 +109,6 @@ public class RawInvestment extends BaseInvestment {
         return currentTerm;
     }
 
-    @Deprecated
     @XmlElement
     public boolean isSmpRelated() {
         return smpRelated;
@@ -158,13 +157,11 @@ public class RawInvestment extends BaseInvestment {
         return nickname;
     }
 
-    @Deprecated
     @XmlElement
     public String getFirstName() {
         return firstName;
     }
 
-    @Deprecated
     @XmlElement
     public String getSurname() {
         return surname;
@@ -175,7 +172,6 @@ public class RawInvestment extends BaseInvestment {
         return paymentStatus;
     }
 
-    @Deprecated
     @XmlElement
     public OffsetDateTime getInvestmentDate() {
         return investmentDate;
@@ -191,7 +187,6 @@ public class RawInvestment extends BaseInvestment {
         return nextPaymentDate;
     }
 
-    @Deprecated
     @XmlElement
     public OffsetDateTime getActiveTo() {
         return activeTo;
@@ -207,13 +202,11 @@ public class RawInvestment extends BaseInvestment {
         return paid;
     }
 
-    @Deprecated
     @XmlElement
     public BigDecimal getToPay() {
         return toPay;
     }
 
-    @Deprecated
     @XmlElement
     public BigDecimal getAmountDue() {
         return amountDue;
