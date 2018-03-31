@@ -44,10 +44,6 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-test</artifactId>
       <scope>test</scope>

@@ -141,11 +141,6 @@
           </exclusion>
         </exclusions>
       </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.6</version>
-      </dependency>
       <!-- Email notifications. -->
       <dependency>
         <groupId>org.freemarker</groupId>
@@ -248,6 +243,12 @@
         <groupId>com.github.fge</groupId>
         <artifactId>jackson-coreutils</artifactId>
         <version>1.8</version>
+      </dependency>
+      <dependency> <!-- Mockserver, for whatever reason, includes this in "compile" scope. We don't want that. -->
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>18.0</version>
+        <scope>test</scope>
       </dependency>
       <!-- Logging. -->
       <dependency>
