@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
@@ -46,6 +47,12 @@ public class RawInvestment extends BaseInvestment {
         // for JAXB
     }
 
+    public RawInvestment(final Investment investment, final Loan loan) {
+        this(investment);
+        this.loanName = loan.getName();
+        this.nickname = loan.getNickName();
+    }
+
     public RawInvestment(final Investment investment) {
         super(investment);
         this.paymentStatus = investment.getPaymentStatus().orElse(null);
@@ -56,8 +63,6 @@ public class RawInvestment extends BaseInvestment {
         this.loanTermInMonth = investment.getOriginalTerm();
         this.remainingMonths = investment.getRemainingMonths();
         this.currentTerm = investment.getCurrentTerm();
-        this.loanName = investment.getLoanName();
-        this.nickname = investment.getNickname();
         this.investmentDate = investment.getInvestmentDate().orElse(null);
         this.nextPaymentDate = investment.getNextPaymentDate().orElse(null);
         this.interestRate = investment.getInterestRate();
@@ -72,7 +77,7 @@ public class RawInvestment extends BaseInvestment {
         this.smpFee = investment.getSmpFee().orElse(null);
         this.paidPenalty = investment.getPaidPenalty();
         this.rating = investment.getRating();
-        this.hasCollectionHistory = investment.hasCollectionHistory();
+        this.hasCollectionHistory = false;
     }
 
     @XmlElement

@@ -28,6 +28,11 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
+/**
+ * This class is an adapted version of {@link RawInvestment}, with some computed fields added and others removed. Most
+ * notably, {@link RawInvestment#getLoanName()} (and other similar fields) are removed as they are duplicates of the
+ * same information on the loan and we therefore save memory by not including them.
+ */
 public interface Investment {
 
     static Investment sanitized(final RawInvestment investment) {
@@ -118,10 +123,6 @@ public interface Investment {
 
     int getId();
 
-    String getLoanName();
-
-    String getNickname();
-
     BigDecimal getInterestRate();
 
     Rating getRating();
@@ -202,6 +203,4 @@ public interface Investment {
     boolean isOnSmp();
 
     boolean canBeOffered();
-
-    boolean hasCollectionHistory();
 }

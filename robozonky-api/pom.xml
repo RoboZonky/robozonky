@@ -189,6 +189,78 @@
                     "methodName": "<init>",
                     "elementKind": "constructor",
                     "justification": "Added collections information to delinquency events."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void com.github.robozonky.api.remote.entities.MyInvestment::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment)",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "MyInvestment",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.robozonky.api.remote.entities.sanitized.Investment::getLoanName()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "getLoanName",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.lang.String com.github.robozonky.api.remote.entities.sanitized.Investment::getNickname()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "getNickname",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method boolean com.github.robozonky.api.remote.entities.sanitized.Investment::hasCollectionHistory()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "hasCollectionHistory",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.Photo> com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan::getPhotos()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MarketplaceLoan",
+                    "methodName": "getPhotos",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setHasCollectionHistory(boolean)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableInvestment",
+                    "methodName": "setHasCollectionHistory",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setLoanName(java.lang.String)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableInvestment",
+                    "methodName": "setLoanName",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setNickname(java.lang.String)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableInvestment",
+                    "methodName": "setNickname",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method T com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T>>>::setPhotos(java.util.Collection<com.github.robozonky.api.remote.entities.Photo>)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableMarketplaceLoan",
+                    "methodName": "setPhotos",
+                    "elementKind": "method",
+                    "justification": "Removed in order to not duplicate data and therefore save memory."
                   }
                 ]
               }

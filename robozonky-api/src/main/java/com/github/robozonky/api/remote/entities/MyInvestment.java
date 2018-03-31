@@ -18,8 +18,6 @@ package com.github.robozonky.api.remote.entities;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-
 /**
  * Used to represent a participation in the authenticated bit of the API. Even 
  * though the confusing name, this participation is also used to represent
@@ -41,11 +39,6 @@ public class MyInvestment extends BaseInvestment {
 
     MyInvestment() {
         // for JAXB
-    }
-
-    public MyInvestment(final Investment investment) {
-        super(investment);
-        this.investorNickname = investment.getNickname();
     }
 
     @XmlElement

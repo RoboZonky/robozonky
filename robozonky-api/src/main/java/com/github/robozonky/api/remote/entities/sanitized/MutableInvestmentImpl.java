@@ -32,9 +32,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private int loanId, id, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;
     private OffsetDateTime nextPaymentDate, investmentDate;
-    private boolean canBeOffered, isOnSmp, hasCollectionHistory;
+    private boolean canBeOffered, isOnSmp;
     private Boolean isInWithdrawal;
-    private String loanName, nickname;
     private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
             expectedInterest, paidPenalty, remainingPrincipal, smpFee, smpSoldFor;
     private Rating rating;
@@ -54,8 +53,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.nextPaymentDate = investment.getNextPaymentDate();
         this.canBeOffered = investment.isCanBeOffered();
         this.isOnSmp = investment.isOnSmp();
-        this.loanName = investment.getLoanName();
-        this.nickname = investment.getNickname();
         this.originalPrincipal = Util.cacheBigDecimal(investment.getPurchasePrice()); // likely to be multiples of 200
         this.interestRate = Util.cacheBigDecimal(investment.getInterestRate()); // only a handful of these exist
         this.paidPrincipal = investment.getPaidPrincipal();
@@ -71,7 +68,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInWithdrawal = investment.isInWithdrawal();
         this.status = investment.getStatus();
         this.paymentStatus = investment.getPaymentStatus();
-        this.hasCollectionHistory = investment.hasCollectionHistory();
     }
 
     // TODO should calculate expected interest somehow
@@ -83,8 +79,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.daysPastDue = 0;
         this.canBeOffered = false;
         this.isOnSmp = false;
-        this.loanName = loan.getName();
-        this.nickname = loan.getNickName();
         this.originalPrincipal = Util.cacheBigDecimal(originalPrincipal); // likely to be multiples of 200
         this.interestRate = loan.getInterestRate();
         this.paidPrincipal = BigDecimal.ZERO;
@@ -98,7 +92,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.status = InvestmentStatus.ACTIVE;
         this.paymentStatus = PaymentStatus.NOT_COVERED;
         this.investmentDate = loan.getMyInvestment().map(i -> i.getTimeCreated()).orElse(null);
-        this.hasCollectionHistory = false;
     }
 
     @Override
@@ -116,18 +109,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public InvestmentBuilder setId(final int id) {
         this.id = id;
-        return this;
-    }
-
-    @Override
-    public InvestmentBuilder setLoanName(final String loanName) {
-        this.loanName = loanName;
-        return this;
-    }
-
-    @Override
-    public InvestmentBuilder setNickname(final String nickname) {
-        this.nickname = nickname;
         return this;
     }
 
@@ -264,12 +245,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public InvestmentBuilder setHasCollectionHistory(final boolean hasCollectionHistory) {
-        this.hasCollectionHistory = hasCollectionHistory;
-        return this;
-    }
-
-    @Override
     public int getLoanId() {
         return loanId;
     }
@@ -315,23 +290,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public boolean hasCollectionHistory() {
-        return hasCollectionHistory;
-    }
-
-    @Override
     public boolean isOnSmp() {
         return isOnSmp;
-    }
-
-    @Override
-    public String getLoanName() {
-        return loanName;
-    }
-
-    @Override
-    public String getNickname() {
-        return nickname;
     }
 
     @Override

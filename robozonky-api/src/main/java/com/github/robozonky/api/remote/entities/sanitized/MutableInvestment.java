@@ -31,10 +31,6 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
 
     T setId(int id);
 
-    T setLoanName(String loanName);
-
-    T setNickname(String nickname);
-
     T setInterestRate(BigDecimal interestRate);
 
     T setRating(Rating rating);
@@ -79,5 +75,4 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
 
     T setInWithdrawal(boolean isInWithdrawal);
 
-    T setHasCollectionHistory(boolean hasCollectionHistory);
 }

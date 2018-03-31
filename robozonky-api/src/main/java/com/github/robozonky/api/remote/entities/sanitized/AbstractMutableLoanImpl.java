@@ -19,13 +19,9 @@ package com.github.robozonky.api.remote.entities.sanitized;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.Photo;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -42,7 +38,6 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private BigDecimal interestRate, investmentRate;
     private OffsetDateTime datePublished, deadline;
     private Rating rating;
-    private Collection<Photo> photos;
     private MainIncomeType mainIncomeType;
     private Region region;
     private Purpose purpose;
@@ -80,7 +75,6 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.userId = original.getUserId();
         this.myInvestment = original.getMyInvestment();
         this.url = Util.getUrlSafe(original);
-        setPhotos(original.getPhotos());
     }
 
     @Override
@@ -299,21 +293,6 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     @Override
     public boolean isQuestionsAllowed() {
         return questionsAllowed;
-    }
-
-    @Override
-    public Collection<Photo> getPhotos() {
-        return photos;
-    }
-
-    @Override
-    public T setPhotos(final Collection<Photo> photos) {
-        if (photos == null) {
-            this.photos = Collections.emptyList();
-        } else {
-            this.photos = Collections.unmodifiableCollection(new ArrayList<>(photos));
-        }
-        return (T) this;
     }
 
     @Override
