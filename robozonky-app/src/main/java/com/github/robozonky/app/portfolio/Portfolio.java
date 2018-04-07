@@ -147,14 +147,12 @@ public class Portfolio {
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
                 // before daily update is run, the newly sold participation will show as active
-                getActive()
-                        .filter(i -> isLoanRelated(i, blockedAmount))
-                        .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
-                            final PortfolioOverview po = calculateOverview();
-                            final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
-                            Events.fire(new InvestmentSoldEvent(i, l, po));
-                        })
-                        .forEach(Investment::markAsSold);
+                final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky));
+                final Investment i = lookupOrFail(l, auth);
+                final PortfolioOverview po = calculateOverview();
+                Investment.markAsSold(lookupOrFail(l, auth));
+                // notify of the fact that the participation had been sold on the Zonky web
+                Events.fire(new InvestmentSoldEvent(i, l, po));
                 return;
             default: // no other notable events
                 return;
