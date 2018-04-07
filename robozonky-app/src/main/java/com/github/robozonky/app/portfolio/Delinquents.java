@@ -209,7 +209,6 @@ public class Delinquents {
         final Collection<Delinquency> result = persistAndReturnActiveDelinquents(all);
         // notify of new delinquencies over all known thresholds
         Stream.of(DelinquencyCategory.values())
-                .parallel()
                 .forEach(c -> c.update(result, investmentSupplier, loanSupplier, collectionsSupplier));
         AMOUNTS_AT_RISK.set(atRisk);
         LOGGER.trace("Done, new amounts at risk are {}.", atRisk);

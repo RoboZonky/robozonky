@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
@@ -34,16 +36,19 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.common.remote.Select;
+import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class DelinquentsTest extends AbstractZonkyLeveragingTest {
 
-    private static final Function<Loan, Investment> INVESTMENT_SUPPLIER =
-            (id) -> Investment.custom().build();
     private static final BiFunction<Loan, LocalDate, Collection<Development>> COLLECTIONS_SUPPLIER =
             (l, s) -> Collections.emptyList();
     private final static Random RANDOM = new Random(0);
@@ -52,6 +57,15 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     void empty() {
         assertThat(Delinquents.getDelinquents()).isEmpty();
         assertThat(this.getNewEvents()).isEmpty();
+    }
+
+    @Test
+    void nop() {
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getInvestments((Select) any())).thenAnswer(invocation -> Stream.empty());
+        final Authenticated a = mockAuthentication(z);
+        Delinquents.update(a, Portfolio.create(a, mockBalance(z)));
+        verify(z, atLeastOnce()).getInvestments((Select) any());
     }
 
     @Test
@@ -143,8 +157,11 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         Delinquents.update(Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is defaulted
-        Delinquents.update(Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
+        final BiFunction<Loan, LocalDate, Collection<Development>> f2 = mock(BiFunction.class);
+        when(f2.apply(any(), any())).thenReturn(Collections.emptyList());
+        Delinquents.update(Collections.emptyList(), lif, f, f2);
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
+        verify(f2).apply(any(), any());
     }
 
     @Test
@@ -162,9 +179,11 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Function<Loan, Investment> lif = (loan) -> i;
         // register delinquence
         Delinquents.update(Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
+        assertThat(Delinquents.getAmountsAtRisk()).containsEntry(Rating.D, BigDecimal.valueOf(200));
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is paid
         Delinquents.update(Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
+        assertThat(Delinquents.getAmountsAtRisk()).isEmpty();
         assertThat(this.getNewEvents()).isEmpty();
     }
 
