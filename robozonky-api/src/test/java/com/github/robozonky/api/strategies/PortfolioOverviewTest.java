@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,51 +17,59 @@
 package com.github.robozonky.api.strategies;
 
 import java.math.BigDecimal;
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.Map;
 
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.SoftAssertions.*;
 
 class PortfolioOverviewTest {
 
-    private static MarketplaceLoan mockLoan(final Rating r) {
-        return MarketplaceLoan.custom()
-                .setId(1)
-                .setRating(r)
-                .build();
-    }
-
     @Test
     void emptyPortfolio() {
-        final int balance = 5000;
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), Stream::empty);
-        assertSoftly(softly -> {
+        final BigDecimal balance = BigDecimal.TEN;
+        final PortfolioOverview po = PortfolioOverview.calculate(balance, Statistics.empty(),
+                                                                 Collections.emptyMap(), Collections.emptyMap());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(po.getCzkAvailable()).isEqualTo(balance.intValue());
+            softly.assertThat(po.getCzkInvested()).isEqualTo(0);
+            softly.assertThat(po.getCzkAtRisk()).isEqualTo(0);
             for (final Rating r : Rating.values()) {
-                softly.assertThat(o.getShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
-                softly.assertThat(o.getAtRiskShareOnInvestment(r)).isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(0);
+                softly.assertThat(po.getCzkAtRisk(r)).as(r + " at risk").isEqualTo(0);
+                softly.assertThat(po.getShareOnInvestment(r))
+                        .as(r + " as a share")
+                        .isEqualTo(BigDecimal.ZERO);
+                softly.assertThat(po.getAtRiskShareOnInvestment(r))
+                        .as(r + " at risk as a share")
+                        .isEqualTo(BigDecimal.ZERO);
             }
-            softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
-            softly.assertThat(o.getCzkInvested()).isEqualTo(0);
         });
     }
 
     @Test
-    void somePortfolio() {
-        final int balance = 5000;
-        final Investment i1 = Investment.fresh(mockLoan(Rating.A), 400);
-        final Investment i2 = Investment.fresh(mockLoan(Rating.B), 600);
-        final PortfolioOverview o = PortfolioOverview.calculate(BigDecimal.valueOf(balance), () -> Stream.of(i1, i2));
-        assertSoftly(softly -> {
-            softly.assertThat(o.getShareOnInvestment(Rating.A)).isEqualTo(new BigDecimal("0.4"));
-            softly.assertThat(o.getShareOnInvestment(Rating.B)).isEqualTo(new BigDecimal("0.6"));
-            softly.assertThat(o.getCzkAvailable()).isEqualTo(balance);
-            softly.assertThat(o.getCzkInvested()).isEqualTo(1000);
-            softly.assertThat(o.getCzkAtRisk()).isEqualTo(0);
-            softly.assertThat(o.getAtRiskShareOnInvestment(Rating.A)).isEqualTo(BigDecimal.ZERO);
+    void emptyPortfolioWithAdjustmentsAndRisks() {
+        final BigDecimal adj = BigDecimal.TEN;
+        final Map<Rating, BigDecimal> in = Collections.singletonMap(Rating.D, adj);
+        final PortfolioOverview po = PortfolioOverview.calculate(BigDecimal.ZERO, Statistics.empty(), in, in);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(po.getCzkAvailable()).isEqualTo(0);
+            softly.assertThat(po.getCzkInvested()).isEqualTo(adj.intValue());
+            softly.assertThat(po.getCzkAtRisk()).isEqualTo(adj.intValue());
+            for (final Rating r : Rating.values()) {
+                final int expectedAbsolute = r == Rating.D ? adj.intValue() : 0;
+                final BigDecimal expectedRelative = r == Rating.D ? BigDecimal.ONE : BigDecimal.ZERO;
+                softly.assertThat(po.getCzkInvested(r)).as(r + " invested").isEqualTo(expectedAbsolute);
+                softly.assertThat(po.getCzkAtRisk(r)).as(r + " at risk").isEqualTo(expectedAbsolute);
+                softly.assertThat(po.getShareOnInvestment(r))
+                        .as(r + " as a share")
+                        .isEqualTo(expectedRelative);
+                softly.assertThat(po.getAtRiskShareOnInvestment(r))
+                        .as(r + " at risk as a share")
+                        .isEqualTo(expectedRelative);
+            }
         });
     }
 }

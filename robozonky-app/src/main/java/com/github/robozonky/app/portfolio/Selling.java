@@ -37,6 +37,7 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,16 +76,19 @@ public class Selling implements PortfolioDependant {
             zonky.sell(i);
             LOGGER.trace("Request over.");
         }
-        Investment.putOnSmp(i);
         Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
         return Optional.of(i);
     }
 
     private void sell(final Portfolio portfolio, final SellStrategy strategy, final Authenticated auth) {
-        final PortfolioOverview overview = portfolio.calculateOverview();
-        final Set<InvestmentDescriptor> eligible = portfolio.getActiveForSecondaryMarketplace().parallel()
+        final Select s = new Select()
+                .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
+                .equals("status", "ACTIVE"); // this is how Zonky queries for this
+        final Set<InvestmentDescriptor> eligible = auth.call(zonky -> zonky.getInvestments(s))
+                .parallel()
                 .map(i -> getDescriptor(i, auth))
                 .collect(Collectors.toSet());
+        final PortfolioOverview overview = portfolio.calculateOverview();
         Events.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
                 .peek(r -> Events.fire(new SaleRecommendedEvent(r)))

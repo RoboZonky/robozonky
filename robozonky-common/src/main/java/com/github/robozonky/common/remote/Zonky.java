@@ -17,6 +17,7 @@
 package com.github.robozonky.common.remote;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -34,6 +35,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -164,8 +166,22 @@ public class Zonky {
         return Zonky.getStream(portfolioApi, PortfolioApi::items, ordering).map(Investment::sanitized);
     }
 
+    /**
+     * Retrieve investments from user's portfolio via {@link PortfolioApi}, in a given order.
+     * @param select Rules to filter the selection by.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Investment> getInvestments(final Select select) {
+        return Zonky.getStream(portfolioApi, PortfolioApi::items, select).map(Investment::sanitized);
+    }
+
     public Loan getLoan(final int id) {
         return Loan.sanitized(loanApi.execute(api -> api.item(id)));
+    }
+
+    public Optional<Investment> getInvestment(final int id) {
+        final Select s = new Select().equals("id", id);
+        return getInvestments(s).findFirst();
     }
 
     /**
@@ -221,6 +237,10 @@ public class Zonky {
 
     public Restrictions getRestrictions() {
         return controlApi.execute(ControlApi::restrictions);
+    }
+
+    public Statistics getStatistics() {
+        return portfolioApi.execute(PortfolioApi::item);
     }
 
     public void logout() {

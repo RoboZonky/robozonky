@@ -99,7 +99,7 @@ public class PortfolioUpdater implements Runnable,
     }
 
     private Portfolio runIt() {
-        final Portfolio result = authenticated.call(zonky -> Portfolio.create(zonky, balance));
+        final Portfolio result = Portfolio.create(authenticated, balance);
         final CompletableFuture<Portfolio> combined = dependants.stream()
                 .map(d -> (Function<Portfolio, Portfolio>) folio -> {
                     LOGGER.trace("Running {}.", d);

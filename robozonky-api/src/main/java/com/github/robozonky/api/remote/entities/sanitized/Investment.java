@@ -79,44 +79,6 @@ public interface Investment {
         }
     }
 
-    static void markAsSold(final Investment investment) {
-        if (investment instanceof MutableInvestment) {
-            final MutableInvestment i = (MutableInvestment) investment;
-            i.setOfferable(false)
-                    .setOnSmp(false)
-                    .setStatus(InvestmentStatus.SOLD)
-                    .setPaymentStatus(null);
-        } else {
-            throw new IllegalArgumentException("Invalid investment " + investment);
-        }
-    }
-
-    static void markAsPaid(final Investment investment) {
-        if (investment instanceof MutableInvestment) {
-            final MutableInvestment i = (MutableInvestment) investment;
-            i.setOfferable(false)
-                    .setOnSmp(false)
-                    .setPaymentStatus(PaymentStatus.PAID)
-                    .setDaysPastDue(0)
-                    .setDueInterest(BigDecimal.ZERO)
-                    .setDuePrincipal(BigDecimal.ZERO)
-                    .setPaidPrincipal(i.getOriginalPrincipal())
-                    .setRemainingMonths(0);
-        } else {
-            throw new IllegalArgumentException("Invalid investment " + investment);
-        }
-    }
-
-    static void putOnSmp(final Investment investment) {
-        if (investment instanceof MutableInvestment) {
-            final MutableInvestment i = (MutableInvestment) investment;
-            i.setOfferable(false)
-                    .setOnSmp(true);
-        } else {
-            throw new IllegalArgumentException("Invalid investment " + investment);
-        }
-    }
-
     int getLoanId();
 
     BigDecimal getOriginalPrincipal();

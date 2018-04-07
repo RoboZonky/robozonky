@@ -117,8 +117,8 @@ enum DelinquencyCategory {
      * @param loanSupplier Retrieves the loan instance for a particular loan ID.
      * @return IDs of loans that are being tracked in this category.
      */
-    public int[] update(final Collection<Delinquency> active, final Function<Integer, Investment> investmentSupplier,
-                        final Function<Investment, Loan> loanSupplier,
+    public int[] update(final Collection<Delinquency> active, final Function<Loan, Investment> investmentSupplier,
+                        final Function<Integer, Loan> loanSupplier,
                         final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
         final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
@@ -134,8 +134,8 @@ enum DelinquencyCategory {
                 .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
                 .peek(d -> {
                     final int loanId = d.getParent().getLoanId();
-                    final Investment i = investmentSupplier.apply(loanId);
-                    final Loan l = loanSupplier.apply(i);
+                    final Loan l = loanSupplier.apply(loanId);
+                    final Investment i = investmentSupplier.apply(l);
                     final Event e = getEvent(d.getPaymentMissedDate(), i, l, thresholdInDays,
                                              collectionsSupplier.apply(l, d.getPaymentMissedDate()));
                     Events.fire(e);

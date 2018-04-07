@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -26,20 +27,23 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.internal.api.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Repayments implements PortfolioDependant {
 
-    private static final State.ClassSpecificState STATE = State.forClass(Repayments.class);
-    private static final String STATE_KEY = "activeLastTime";
+    private static final Logger LOGGER = LoggerFactory.getLogger(Repayments.class);
 
-    private static Set<Integer> getActiveLastTime() {
+    private static final State.ClassSpecificState STATE = State.forClass(Repayments.class);
+    private static final String STATE_KEY = "lastChecked", LAST_UPDATE_PROPERTY_NAME = "lastUpdate";
+
+    private static Set<Integer> getRepaidLastTime() {
         return STATE.getValues(STATE_KEY)
                 .orElse(Collections.emptyList())
                 .stream()
@@ -47,29 +51,37 @@ public class Repayments implements PortfolioDependant {
                 .collect(Collectors.toSet());
     }
 
-    private static void setActive(final Collection<Integer> ids) {
+    private static boolean isInitialized() {
+        return STATE.getValue(LAST_UPDATE_PROPERTY_NAME).isPresent();
+    }
+
+    private static void setRepaid(final Collection<Integer> ids) {
         final Stream<String> toStore = ids.stream().map(String::valueOf).sorted();
-        STATE.newBatch().set(STATE_KEY, toStore).call();
+        STATE.newBatch()
+                .set(STATE_KEY, toStore)
+                .set(LAST_UPDATE_PROPERTY_NAME, OffsetDateTime.now().toString())
+                .call();
     }
 
     @Override
     public void accept(final Portfolio portfolio, final Authenticated authenticated) {
-        final PortfolioOverview portfolioOverview = portfolio.calculateOverview();
-        final Collection<Integer> active = getActiveLastTime();
-        // detect and process loans that have been fully repaid, comparing to the last time active loans were checked
-        final Stream<Investment> repaid =
-                portfolio.getActiveWithPaymentStatus(PaymentStatuses.of(PaymentStatus.PAID));
-        repaid.filter(i -> active.contains(i.getLoanId()))
-                .peek(i -> {
-                    final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
-                    final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
-                    Events.fire(e);
-                })
-                .forEach(i -> active.remove(i.getLoanId()));
-        // add all active loans to date
-        portfolio.getActiveWithPaymentStatus(PaymentStatus.getActive())
-                .forEach(i -> active.add(i.getLoanId()));
+        final Select s = new Select()
+                .in("loan.status", "PAID")
+                .equals("status", "ACTIVE"); // this is how Zonky queries for loans fully repaid
+        final Collection<Investment> repaid = authenticated.call(z -> z.getInvestments(s)).collect(Collectors.toList());
+        if (isInitialized()) { // detect and process loans that have been fully repaid, comparing to the last time
+            final Collection<Integer> repaidLastTime = getRepaidLastTime();
+            LOGGER.trace("State: {}.", repaidLastTime);
+            repaid.stream()
+                    .filter(i -> repaidLastTime.stream().noneMatch(loanId -> loanId != i.getLoanId()))
+                    .forEach(i -> {
+                        final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
+                        final PortfolioOverview portfolioOverview = portfolio.calculateOverview();
+                        final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
+                        Events.fire(e);
+                    });
+        }
         // store for future reference
-        setActive(active);
+        setRepaid(repaid.stream().map(Investment::getLoanId).collect(Collectors.toSet()));
     }
 }

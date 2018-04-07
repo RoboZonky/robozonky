@@ -17,6 +17,7 @@
 @XmlJavaTypeAdapters({
         @XmlJavaTypeAdapter(type = OffsetDateTime.class, value = OffsetDateTimeAdapter.class),
         @XmlJavaTypeAdapter(type = LocalDate.class, value = LocalDateAdapter.class),
+        @XmlJavaTypeAdapter(type = YearMonth.class, value = YearMonthAdapter.class),
         @XmlJavaTypeAdapter(type = BigDecimal.class, value = BigDecimalAdapter.class)
 })
 package com.github.robozonky.api.remote.entities;
@@ -24,5 +25,6 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;

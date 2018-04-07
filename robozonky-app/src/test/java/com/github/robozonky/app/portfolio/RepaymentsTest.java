@@ -16,15 +16,17 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -48,13 +50,14 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
         // first, portfolio contains one active investment; no repaid
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Portfolio p = new Portfolio(Collections.singletonList(i), mockBalance(z));
+        when(z.getInvestments((Select) any())).thenReturn(Stream.empty());
+        final Portfolio p = new Portfolio(Statistics.empty(), new int[0], mockBalance(z));
         final Authenticated a = mockAuthentication(z);
         final Repayments r = new Repayments();
         r.accept(p, a);
         assertThat(getNewEvents()).isEmpty();
         // now, portfolio has the same investment marked as paid; event will be triggered
-        Investment.markAsPaid(i);
+        when(z.getInvestments((Select) any())).thenReturn(Stream.of(i));
         r.accept(p, a);
         assertThat(getNewEvents())
                 .first()

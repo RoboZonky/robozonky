@@ -52,7 +52,7 @@ abstract class BaseEntity {
     @JsonAnySetter
     void handleUnknownSetter(final String key, final Object value) {
         if (!hasBeenCalledBefore(key)) {
-            LOGGER.info("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change",
+            LOGGER.info("Trying to set value '{}' to an unknown property '{}'. Indicates an unexpected API change.",
                         value, key);
         }
     }

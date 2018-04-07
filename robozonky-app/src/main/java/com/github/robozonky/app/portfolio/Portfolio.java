@@ -16,91 +16,60 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatuses;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
-import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.api.set.primitive.MutableIntSet;
+import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Internal representation of the user portfolio on Zonky. Refer to {@link #create(Zonky, RemoteBalance)} as the
- * entry point.
- */
 public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
-    private final Collection<Investment> investments, investmentsPending = new FastList<>(0);
+    private final Statistics statistics;
+    private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
+    private final MutableIntSet loansSold, investmentsPending = new IntHashSet(0);
     private final RemoteBalance balance;
 
     Portfolio(final RemoteBalance balance) {
-        this(Collections.emptyList(), balance);
+        this(Statistics.empty(), new int[0], balance);
     }
 
-    Portfolio(final Collection<Investment> investments, final RemoteBalance balance) {
-        this.investments = new FastList<>(investments);
+    Portfolio(final Statistics statistics, final int[] idsOfSoldLoans,
+              final RemoteBalance balance) {
+        this.statistics = statistics;
+        this.loansSold = IntHashSet.newSetWith(idsOfSoldLoans);
         this.balance = balance;
     }
 
     /**
      * Return a new instance of the class, loading information about all investments present and past from the Zonky
      * interface. This operation may take a while, as there may easily be hundreds or thousands of such investments.
-     * @param zonky The API to be used to retrieve the data from Zonky.
+     * @param auth The API to be used to retrieve the data from Zonky.
      * @param balance Tracker for the presently available balance.
      * @return Empty in case there was a remote error.
      */
-    public static Portfolio create(final Zonky zonky, final RemoteBalance balance) {
-        final Collection<Investment> online = zonky.getInvestments().parallel().collect(Collectors.toList());
-        final Portfolio p = new Portfolio(online, balance);
-        LOGGER.debug("Loaded {} investments from Zonky.", online.size());
-        return p;
-    }
-
-    private static <T> Stream<T> getStream(final Collection<T> source, final Function<Stream<T>, Stream<T>> modifier) {
-        if (source == null || source.isEmpty()) {
-            return Stream.empty();
-        } else {
-            return modifier.apply(source.stream());
-        }
-    }
-
-    private static <T> Stream<T> getStream(final Collection<T> source) {
-        return getStream(source, Function.identity());
-    }
-
-    private static boolean isLoanRelated(final Investment i, final int loanId) {
-        return i.getLoanId() == loanId;
-    }
-
-    private static boolean isLoanRelated(final Investment i, final Loan loan) {
-        return isLoanRelated(i, loan.getId());
-    }
-
-    private static boolean isLoanRelated(final Investment i, final BlockedAmount blockedAmount) {
-        return isLoanRelated(i, blockedAmount.getLoanId());
-    }
-
-    private static Investment toInvestment(final Authenticated authenticated, final BlockedAmount blockedAmount) {
-        final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky));
-        return Investment.fresh(l, blockedAmount.getAmount());
+    public static Portfolio create(final Authenticated auth, final RemoteBalance balance) {
+        final int[] sold = auth.call(zonky -> zonky.getInvestments(new Select().equals("status", "SOLD")))
+                .mapToInt(Investment::getLoanId)
+                .distinct()
+                .toArray();
+        return new Portfolio(auth.call(Zonky::getStatistics), sold, balance);
     }
 
     /**
@@ -110,26 +79,22 @@ public class Portfolio {
      * @return True if the loan had been sold at least once before.
      */
     public boolean wasOnceSold(final Loan loan) {
-        // first find the loan in question, then check if it's being sold or was already sold
-        return getStream(investments)
-                .filter(i -> isLoanRelated(i, loan))
-                .anyMatch(i -> i.isOnSmp() || i.getStatus() == InvestmentStatus.SOLD);
+        return loansSold.contains(loan.getId());
     }
 
-    public Optional<Investment> lookup(final int loanId) {
-        return Stream.concat(investments.stream(), investmentsPending.stream())
-                .filter(i -> isLoanRelated(i, loanId))
-                .findFirst();
+    private Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
+        return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
-    public Investment lookupOrFail(final int loanId) {
-        return lookup(loanId).orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loanId));
+    Investment lookupOrFail(final Loan loan, final Authenticated auth) {
+        return lookup(loan, auth)
+                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
 
     /**
      * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}. This can
      * happen in several ways:
-     * <p>
+     *
      * <ul>
      * <li>RoboZonky makes a new investment or purchase and notifies this class directly.</li>
      * <li>Periodic check of the remote portfolio status reveals a new operation made outside of RoboZonky.</li>
@@ -138,53 +103,41 @@ public class Portfolio {
      * @param blockedAmount Blocked amount to register.
      */
     public void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
+        final int loanId = blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                final Investment newcomer = toInvestment(auth, blockedAmount);
-                if (investmentsPending.stream().noneMatch(i -> isLoanRelated(i, blockedAmount))) {
-                    investmentsPending.add(newcomer);
+                if (investmentNotPending(loanId)) {
+                    LOGGER.trace("Registering a new investment to loan #{}.", loanId);
+                    final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                        return start.add(blockedAmount.getAmount());
+                    });
+                    investmentsPending.add(loanId);
                 }
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
-                // before daily update is run, the newly sold participation will show as active
-                getActive()
-                        .filter(i -> isLoanRelated(i, blockedAmount))
-                        .peek(i -> { // notify of the fact that the participation had been sold on the Zonky web
-                            final PortfolioOverview po = calculateOverview();
-                            final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
-                            Events.fire(new InvestmentSoldEvent(i, l, po));
-                        })
-                        .forEach(Investment::markAsSold);
+                final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                if (!wasOnceSold(l)) {
+                    final Investment i = lookupOrFail(l, auth);
+                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                        return start.subtract(i.getRemainingPrincipal());
+                    });
+                    loansSold.add(l.getId());
+                    // notify of the fact that the participation had been sold on the Zonky web
+                    final PortfolioOverview po = calculateOverview();
+                    Events.fire(new InvestmentSoldEvent(i, l, po));
+                }
                 return;
             default: // no other notable events
                 return;
         }
     }
 
-    public Stream<Investment> getActiveWithPaymentStatus(final PaymentStatuses statuses) {
-        return getActive().filter(i -> statuses.getPaymentStatuses().stream()
-                .anyMatch(s -> Objects.equals(s, i.getPaymentStatus().orElse(null))));
-    }
-
-    /**
-     * Get investments that the Zonky server will allow to be sold, which are not already present on the secondary
-     * marketplace.
-     * @return
-     */
-    public Stream<Investment> getActiveForSecondaryMarketplace() {
-        return getActive()
-                .filter(Investment::canBeOffered)
-                .filter(i -> !i.isInWithdrawal().orElse(true))
-                .filter(i -> !i.isOnSmp());
-    }
-
-    public Stream<Investment> getActive() {
-        return getStream(investments, s -> s.filter((Investment i) -> i.getStatus() == InvestmentStatus.ACTIVE));
-    }
-
-    public Stream<Investment> getPending() {
-        return getStream(investmentsPending);
+    public boolean investmentNotPending(final int loanId) {
+        return !investmentsPending.contains(loanId);
     }
 
     public RemoteBalance getRemoteBalance() {
@@ -192,8 +145,7 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        final Supplier<Stream<Investment>> investments =
-                () -> Stream.concat(getActiveWithPaymentStatus(PaymentStatus.getActive()), getPending());
-        return PortfolioOverview.calculate(getRemoteBalance().get(), investments);
+        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, blockedAmountsBalance,
+                                           Delinquents.getAmountsAtRisk());
     }
 }

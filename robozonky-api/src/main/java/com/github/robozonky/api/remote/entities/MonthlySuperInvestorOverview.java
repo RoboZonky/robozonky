@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,46 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.time.YearMonth;
 import javax.xml.bind.annotation.XmlElement;
 
-abstract class BaseOverview extends BaseEntity {
+public class MonthlySuperInvestorOverview extends BaseEntity {
 
-    private int totalInvestment, principalPaid, interestPaid, investmentCount, penaltyPaid;
+    private YearMonth month;
+    private boolean conditionsMet;
+    private int walletAmount, walletRequired, investments, investmentsRequired;
 
-    @XmlElement
-    public int getTotalInvestment() {
-        return totalInvestment;
+    private MonthlySuperInvestorOverview() {
+        // for JAXB
     }
 
     @XmlElement
-    public int getPrincipalPaid() {
-        return principalPaid;
+    public YearMonth getMonth() {
+        return month;
     }
 
     @XmlElement
-    public int getInterestPaid() {
-        return interestPaid;
+    public boolean isConditionsMet() {
+        return conditionsMet;
     }
 
     @XmlElement
-    public int getPenaltyPaid() {
-        return penaltyPaid;
+    public int getWalletAmount() {
+        return walletAmount;
     }
 
     @XmlElement
-    public int getInvestmentCount() {
-        return investmentCount;
+    public int getWalletRequired() {
+        return walletRequired;
+    }
+
+    @XmlElement
+    public int getInvestments() {
+        return investments;
+    }
+
+    @XmlElement
+    public int getInvestmentsRequired() {
+        return investmentsRequired;
     }
 }
