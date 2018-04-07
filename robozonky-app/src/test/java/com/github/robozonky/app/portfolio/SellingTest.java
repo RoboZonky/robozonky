@@ -131,7 +131,6 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.get(4)).isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
-        assertThat(i.isOnSmp()).isTrue();
         verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
     }
 
