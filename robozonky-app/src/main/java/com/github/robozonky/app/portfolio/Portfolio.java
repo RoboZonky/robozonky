@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
@@ -55,17 +56,20 @@ import org.slf4j.LoggerFactory;
 public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
-    private final Collection<Investment> investments, investmentsPending = new FastList<>(0);
+    private final Statistics statistics;
+    private final Collection<Investment> investments;
     private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
-    private final MutableIntSet loansSold;
+    private final MutableIntSet loansSold, investmentsPending = new IntHashSet(0);
     private final RemoteBalance balance;
 
     Portfolio(final RemoteBalance balance) {
-        this(Collections.emptyList(), new int[0], balance);
+        this(Collections.emptyList(), Statistics.empty(), new int[0], balance);
     }
 
-    Portfolio(final Collection<Investment> investments, final int[] idsOfSoldLoans, final RemoteBalance balance) {
+    Portfolio(final Collection<Investment> investments, final Statistics statistics, final int[] idsOfSoldLoans,
+              final RemoteBalance balance) {
         this.investments = new FastList<>(investments);
+        this.statistics = statistics;
         this.loansSold = IntHashSet.newSetWith(idsOfSoldLoans);
         this.balance = balance;
     }
@@ -84,7 +88,7 @@ public class Portfolio {
                 .mapToInt(Investment::getLoanId)
                 .distinct()
                 .toArray();
-        final Portfolio p = new Portfolio(online, sold, balance);
+        final Portfolio p = new Portfolio(online, zonky.getStatistics(), sold, balance);
         LOGGER.debug("Loaded {} investments from Zonky.", online.size());
         return p;
     }
@@ -95,23 +99,6 @@ public class Portfolio {
         } else {
             return modifier.apply(source.stream());
         }
-    }
-
-    private static <T> Stream<T> getStream(final Collection<T> source) {
-        return getStream(source, Function.identity());
-    }
-
-    private static boolean isLoanRelated(final Investment i, final int loanId) {
-        return i.getLoanId() == loanId;
-    }
-
-    private static boolean isLoanRelated(final Investment i, final BlockedAmount blockedAmount) {
-        return isLoanRelated(i, blockedAmount.getLoanId());
-    }
-
-    private static Investment toInvestment(final Authenticated authenticated, final BlockedAmount blockedAmount) {
-        final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky));
-        return Investment.fresh(l, blockedAmount.getAmount());
     }
 
     /**
@@ -145,25 +132,33 @@ public class Portfolio {
      * @param blockedAmount Blocked amount to register.
      */
     public void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
+        final int loanId = blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                final Investment newcomer = toInvestment(auth, blockedAmount);
-                if (investmentsPending.stream().noneMatch(i -> isLoanRelated(i, blockedAmount))) {
-                    investmentsPending.add(newcomer);
+                if (investmentNotPending(loanId)) {
+                    LOGGER.trace("Registering a new investment to loan #{}.", loanId);
+                    final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                        return start.add(blockedAmount.getAmount());
+                    });
+                    investmentsPending.add(loanId);
                 }
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
-                final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky));
-                final Investment i = lookupOrFail(l, auth);
-                blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                    final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                    return start.subtract(i.getRemainingPrincipal());
-                });
-                loansSold.add(l.getId());
-                // notify of the fact that the participation had been sold on the Zonky web
-                final PortfolioOverview po = calculateOverview();
-                Events.fire(new InvestmentSoldEvent(i, l, po));
+                final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                if (!wasOnceSold(l)) {
+                    final Investment i = lookupOrFail(l, auth);
+                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                        return start.subtract(i.getRemainingPrincipal());
+                    });
+                    loansSold.add(l.getId());
+                    // notify of the fact that the participation had been sold on the Zonky web
+                    final PortfolioOverview po = calculateOverview();
+                    Events.fire(new InvestmentSoldEvent(i, l, po));
+                }
                 return;
             default: // no other notable events
                 return;
@@ -179,8 +174,8 @@ public class Portfolio {
         return getStream(investments, s -> s.filter((Investment i) -> i.getStatus() == InvestmentStatus.ACTIVE));
     }
 
-    public Stream<Investment> getPending() {
-        return getStream(investmentsPending);
+    public boolean investmentNotPending(final int loanId) {
+        return !investmentsPending.contains(loanId);
     }
 
     public RemoteBalance getRemoteBalance() {
@@ -188,8 +183,7 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        final Supplier<Stream<Investment>> investments =
-                () -> Stream.concat(getActiveWithPaymentStatus(PaymentStatus.getActive()), getPending());
-        return PortfolioOverview.calculate(getRemoteBalance().get(), investments);
+        final Supplier<Stream<Investment>> investments = () -> getActiveWithPaymentStatus(PaymentStatus.getActive());
+        return PortfolioOverview.calculate(getRemoteBalance().get(), investments, statistics, blockedAmountsBalance);
     }
 }

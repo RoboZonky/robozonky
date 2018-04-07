@@ -27,6 +27,9 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.remote.entities.OverallPortfolio;
+import com.github.robozonky.api.remote.entities.RiskPortfolio;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 
@@ -67,17 +70,12 @@ public class PortfolioOverview {
                                                     summingBigDecimalToInt));
     }
 
-    /**
-     * Prepare an immutable portfolio overview, based on the provided information. There is potentially a lot of
-     * investments, on the order of thousands. Therefore we decide to have them provided as a stream, as opposed to
-     * forcing a collection for them.
-     * @param balance Current available balance in the wallet.
-     * @param investments All active investments incl. blocked amounts. Supplier must return fresh stream every time.
-     * @return Never null.
-     */
     public static PortfolioOverview calculate(final BigDecimal balance,
-                                              final Supplier<Stream<Investment>> investments) {
-        final Map<Rating, Integer> amounts = splitByRating(investments.get());
+                                              final Supplier<Stream<Investment>> investments,
+                                              final Statistics statistics, final Map<Rating, BigDecimal> adjustments) {
+        final Map<Rating, Integer> amounts = statistics.getRiskPortfolio().stream()
+                .collect(Collectors.toMap(RiskPortfolio::getRating, OverallPortfolio::getUnpaid));
+        adjustments.forEach((r, v) -> amounts.put(r, amounts.getOrDefault(r, 0) + v.intValue()));
         final Map<Rating, Integer> atRiskAmount =
                 splitByRating(investments.get().filter(i -> i.getDaysPastDue().orElse(0) > 0));
         return calculate(balance, amounts, atRiskAmount);

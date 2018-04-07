@@ -35,6 +35,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -236,6 +237,10 @@ public class Zonky {
 
     public Restrictions getRestrictions() {
         return controlApi.execute(ControlApi::restrictions);
+    }
+
+    public Statistics getStatistics() {
+        return portfolioApi.execute(PortfolioApi::item);
     }
 
     public void logout() {

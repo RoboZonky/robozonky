@@ -73,7 +73,7 @@ final class Session {
         this.loansStillAvailable = marketplace.stream()
                 .distinct()
                 .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> isSameLoan(l, l2)))
-                .filter(l -> portfolio.getPending().noneMatch(i -> isSameLoan(l, i)))
+                .filter(l -> portfolio.investmentNotPending(l.item().getId()))
                 .collect(Collectors.toCollection(FastList::new));
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
