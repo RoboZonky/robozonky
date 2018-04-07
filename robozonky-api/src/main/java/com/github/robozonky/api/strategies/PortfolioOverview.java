@@ -22,15 +22,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 
 /**
@@ -61,24 +57,15 @@ public class PortfolioOverview {
         return vals.stream().mapToInt(i -> i).sum();
     }
 
-    private static Map<Rating, Integer> splitByRating(final Stream<Investment> stream) {
-        final Collector<Investment, ?, BigDecimal> reducer =
-                Collectors.reducing(BigDecimal.ZERO, Investment::getRemainingPrincipal, BigDecimal::add);
-        final Collector<Investment, ?, Integer> summingBigDecimalToInt =
-                Collectors.collectingAndThen(reducer, BigDecimal::intValue);
-        return stream.collect(Collectors.groupingBy(Investment::getRating, () -> new EnumMap<>(Rating.class),
-                                                    summingBigDecimalToInt));
-    }
-
     public static PortfolioOverview calculate(final BigDecimal balance,
-                                              final Supplier<Stream<Investment>> investments,
-                                              final Statistics statistics, final Map<Rating, BigDecimal> adjustments) {
+                                              final Statistics statistics, final Map<Rating, BigDecimal> adjustments,
+                                              final Map<Rating, BigDecimal> atRisk) {
         final Map<Rating, Integer> amounts = statistics.getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating, OverallPortfolio::getUnpaid));
         adjustments.forEach((r, v) -> amounts.put(r, amounts.getOrDefault(r, 0) + v.intValue()));
-        final Map<Rating, Integer> atRiskAmount =
-                splitByRating(investments.get().filter(i -> i.getDaysPastDue().orElse(0) > 0));
-        return calculate(balance, amounts, atRiskAmount);
+        final Map<Rating, Integer> amountsAtRisk = new EnumMap<>(Rating.class);
+        atRisk.forEach((r, v) -> amountsAtRisk.put(r, v.intValue()));
+        return calculate(balance, amounts, amountsAtRisk);
     }
 
     public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts) {

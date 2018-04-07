@@ -17,7 +17,6 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -97,7 +96,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     void noSaleDueToStrategyForbidding() {
         final Investment i = mockInvestment();
         final Zonky zonky = mockApi();
-        final Portfolio portfolio = new Portfolio(Collections.singleton(i), Statistics.empty(), new int[0],
+        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
                                                   mockBalance(zonky));
         new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
@@ -112,7 +111,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     private void saleMade(final boolean isDryRun) {
         final Investment i = mockInvestment();
         final Zonky zonky = mockApi();
-        final Portfolio portfolio = new Portfolio(Collections.singleton(i), Statistics.empty(), new int[0],
+        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
                                                   mockBalance(zonky));
         new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();

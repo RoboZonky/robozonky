@@ -17,25 +17,15 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
@@ -44,31 +34,24 @@ import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.eclipse.collections.api.set.primitive.MutableIntSet;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Internal representation of the user portfolio on Zonky. Refer to {@link #create(Zonky, RemoteBalance)} as the
- * entry point.
- */
 public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Statistics statistics;
-    private final Collection<Investment> investments;
     private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
     private final MutableIntSet loansSold, investmentsPending = new IntHashSet(0);
     private final RemoteBalance balance;
 
     Portfolio(final RemoteBalance balance) {
-        this(Collections.emptyList(), Statistics.empty(), new int[0], balance);
+        this(Statistics.empty(), new int[0], balance);
     }
 
-    Portfolio(final Collection<Investment> investments, final Statistics statistics, final int[] idsOfSoldLoans,
+    Portfolio(final Statistics statistics, final int[] idsOfSoldLoans,
               final RemoteBalance balance) {
-        this.investments = new FastList<>(investments);
         this.statistics = statistics;
         this.loansSold = IntHashSet.newSetWith(idsOfSoldLoans);
         this.balance = balance;
@@ -82,24 +65,11 @@ public class Portfolio {
      * @return Empty in case there was a remote error.
      */
     public static Portfolio create(final Authenticated auth, final RemoteBalance balance) {
-        final Collection<Investment> online = auth.call(
-                zonky -> zonky.getInvestments().parallel().collect(Collectors.toList()));
-        LOGGER.debug("Loading sold investments from Zonky.");
         final int[] sold = auth.call(zonky -> zonky.getInvestments(new Select().equals("status", "SOLD")))
                 .mapToInt(Investment::getLoanId)
                 .distinct()
                 .toArray();
-        final Portfolio p = new Portfolio(online, auth.call(Zonky::getStatistics), sold, balance);
-        LOGGER.debug("Loaded {} investments from Zonky.", online.size());
-        return p;
-    }
-
-    private static <T> Stream<T> getStream(final Collection<T> source, final Function<Stream<T>, Stream<T>> modifier) {
-        if (source == null || source.isEmpty()) {
-            return Stream.empty();
-        } else {
-            return modifier.apply(source.stream());
-        }
+        return new Portfolio(auth.call(Zonky::getStatistics), sold, balance);
     }
 
     /**
@@ -112,7 +82,7 @@ public class Portfolio {
         return loansSold.contains(loan.getId());
     }
 
-    Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
+    private Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
@@ -166,15 +136,6 @@ public class Portfolio {
         }
     }
 
-    private Stream<Investment> getActiveWithPaymentStatus(final PaymentStatuses statuses) {
-        return getActive().filter(i -> statuses.getPaymentStatuses().stream()
-                .anyMatch(s -> Objects.equals(s, i.getPaymentStatus().orElse(null))));
-    }
-
-    private Stream<Investment> getActive() {
-        return getStream(investments, s -> s.filter((Investment i) -> i.getStatus() == InvestmentStatus.ACTIVE));
-    }
-
     public boolean investmentNotPending(final int loanId) {
         return !investmentsPending.contains(loanId);
     }
@@ -184,7 +145,7 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        final Supplier<Stream<Investment>> investments = () -> getActiveWithPaymentStatus(PaymentStatus.getActive());
-        return PortfolioOverview.calculate(getRemoteBalance().get(), investments, statistics, blockedAmountsBalance);
+        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, blockedAmountsBalance,
+                                           Delinquents.getAmountsAtRisk());
     }
 }

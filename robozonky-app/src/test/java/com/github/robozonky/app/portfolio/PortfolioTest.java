@@ -17,7 +17,6 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 
 import com.github.robozonky.api.notifications.Event;
@@ -54,7 +53,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = new Portfolio(Collections.singletonList(i), Statistics.empty(), new int[0],
+        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
                                                   mockBalance(z));
         assertThat(portfolio.wasOnceSold(l)).isFalse();
         Investment.putOnSmp(i);

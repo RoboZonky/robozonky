@@ -16,12 +16,16 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -35,6 +39,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
@@ -56,6 +61,8 @@ public class Delinquents {
     private static final String LAST_UPDATE_PROPERTY_NAME = "lastUpdate";
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
+    private static final AtomicReference<Map<Rating, BigDecimal>> AMOUNTS_AT_RISK =
+            new AtomicReference<>(Collections.emptyMap());
 
     private Delinquents() {
         // no need for an instance
@@ -104,6 +111,10 @@ public class Delinquents {
         return getState().getValue(LAST_UPDATE_PROPERTY_NAME)
                 .map(OffsetDateTime::parse)
                 .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
+    }
+
+    public static Map<Rating, BigDecimal> getAmountsAtRisk() {
+        return AMOUNTS_AT_RISK.get();
     }
 
     /**
@@ -182,14 +193,17 @@ public class Delinquents {
                        final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.debug("Updating delinquent loans.");
         // find loans that were delinquent last time we checked and are not anymore
-        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(presentlyDelinquent,
-                                                                        investmentSupplier, loanSupplier,
-                                                                        collectionsSupplier);
+        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(presentlyDelinquent, investmentSupplier,
+                                                                        loanSupplier, collectionsSupplier);
         // find loans that are delinquent now, but filter out those sold and/or defaulted
+        final Map<Rating, BigDecimal> atRisk = new EnumMap<>(Rating.class);
         final Stream<Delinquent> nowDelinquent = presentlyDelinquent.stream()
-                .flatMap(i -> i.getNextPaymentDate()
-                        .map(date -> Stream.of(new Delinquent(i.getLoanId(), date.toLocalDate())))
-                        .orElse(Stream.empty()));
+                .filter(i -> i.getNextPaymentDate().isPresent())
+                .peek(i -> atRisk.compute(i.getRating(), (r, old) -> {
+                    final BigDecimal base = (old == null) ? BigDecimal.ZERO : old;
+                    return base.add(i.getRemainingPrincipal());
+                }))
+                .map(i -> new Delinquent(i.getLoanId(), i.getNextPaymentDate().get().toLocalDate()));
         // merge all and store status
         final Stream<Delinquent> all = Stream.concat(noMoreDelinquent, nowDelinquent).distinct();
         final Collection<Delinquency> result = persistAndReturnActiveDelinquents(all);
@@ -197,7 +211,8 @@ public class Delinquents {
         Stream.of(DelinquencyCategory.values())
                 .parallel()
                 .forEach(c -> c.update(result, investmentSupplier, loanSupplier, collectionsSupplier));
-        LOGGER.trace("Done.");
+        AMOUNTS_AT_RISK.set(atRisk);
+        LOGGER.trace("Done, new amounts at risk are {}.", atRisk);
     }
 
     /**
