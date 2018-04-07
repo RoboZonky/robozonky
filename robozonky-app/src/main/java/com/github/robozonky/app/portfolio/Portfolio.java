@@ -164,18 +164,6 @@ public class Portfolio {
                 .anyMatch(s -> Objects.equals(s, i.getPaymentStatus().orElse(null))));
     }
 
-    /**
-     * Get investments that the Zonky server will allow to be sold, which are not already present on the secondary
-     * marketplace.
-     * @return
-     */
-    public Stream<Investment> getActiveForSecondaryMarketplace() {
-        return getActive()
-                .filter(Investment::canBeOffered)
-                .filter(i -> !i.isInWithdrawal().orElse(true))
-                .filter(i -> !i.isOnSmp());
-    }
-
     public Stream<Investment> getActive() {
         return getStream(investments, s -> s.filter((Investment i) -> i.getStatus() == InvestmentStatus.ACTIVE));
     }

@@ -80,17 +80,6 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void getActiveForSecondaryMarketplace() {
-        final Investment i = mockInvestment(true, true);
-        final Investment i2 = mockInvestment(true, false);
-        final Investment i3 = mockInvestment(false, false);
-        final Investment i4 = mockInvestment(false, true);
-        final Investment i5 = mockSold(); // ignored because sold
-        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4, i5), null);
-        assertThat(instance.getActiveForSecondaryMarketplace()).containsExactly(i2);
-    }
-
-    @Test
     void newSale() {
         final Loan l = Loan.custom()
                 .setId(1)

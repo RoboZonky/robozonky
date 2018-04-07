@@ -46,7 +46,7 @@ public class Select implements Consumer<RoboZonkyFilter> {
     }
 
     private void addLongs(final String field, final String operation, final long... value) {
-        final String key = field + "__" + operation;
+        final String key = operation == null ? field : field + "__" + operation;
         conditions.compute(key, (k, v) -> {
             final String val = LongStream.of(value).mapToObj(String::valueOf)
                     .collect(Collectors.joining("\",\"", "[\"", "\"]"));
@@ -57,7 +57,7 @@ public class Select implements Consumer<RoboZonkyFilter> {
     }
 
     private void addObject(final String field, final String operation, final Object value) {
-        final String key = field + "__" + operation;
+        final String key = operation == null ? field : field + "__" + operation;
         conditions.compute(key, (k, v) -> {
             final List<Object> result = (v == null) ? new ArrayList<>(1) : v;
             result.add(value);
@@ -131,6 +131,11 @@ public class Select implements Consumer<RoboZonkyFilter> {
 
     public Select equals(final String field, final Object value) {
         addObject(field, "eq", value);
+        return this;
+    }
+
+    public Select equalsPlain(final String field, final Object value) {
+        addObject(field, null, value);
         return this;
     }
 

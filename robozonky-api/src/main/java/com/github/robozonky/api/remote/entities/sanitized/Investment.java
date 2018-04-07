@@ -108,6 +108,7 @@ public interface Investment {
         }
     }
 
+    // FIXME remove when investments are no longer kept
     static void putOnSmp(final Investment investment) {
         if (investment instanceof MutableInvestment) {
             final MutableInvestment i = (MutableInvestment) investment;
