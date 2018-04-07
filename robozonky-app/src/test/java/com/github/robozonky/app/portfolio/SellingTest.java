@@ -35,8 +35,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
 
@@ -44,7 +44,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.mockito.Mockito.*;
 
-@Disabled("FIXME")
 class SellingTest extends AbstractZonkyLeveragingTest {
 
     private static final SellStrategy ALL_ACCEPTING_STRATEGY =
@@ -60,9 +59,9 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         return zonky;
     }
 
-    private static Investment mockInvestment() {
-        return Investment.custom()
-                .setOriginalTerm(200)
+    private static Investment mockInvestment(final Loan loan) {
+        return Investment.fresh(loan, 200)
+                .setOriginalTerm(1000)
                 .setRemainingPrincipal(BigDecimal.valueOf(100))
                 .setStatus(InvestmentStatus.ACTIVE)
                 .setOnSmp(false)
@@ -94,8 +93,12 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void noSaleDueToStrategyForbidding() {
-        final Investment i = mockInvestment();
-        final Zonky zonky = mockApi();
+        final Loan loan = Loan.custom()
+                .setId(1)
+                .build();
+        final Investment i = mockInvestment(loan);
+        final Zonky zonky = harmlessZonky(10_000);
+        when(zonky.getLoan(eq(1))).thenReturn(loan);
         final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
                                                   mockBalance(zonky));
         new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
@@ -109,10 +112,14 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     }
 
     private void saleMade(final boolean isDryRun) {
-        final Investment i = mockInvestment();
-        final Zonky zonky = mockApi();
-        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
-                                                  mockBalance(zonky));
+        final Loan loan = Loan.custom()
+                .setId(1)
+                .build();
+        final Investment i = mockInvestment(loan);
+        final Zonky zonky = harmlessZonky(10_000);
+        when(zonky.getLoan(eq(1))).thenReturn(loan);
+        when(zonky.getInvestments((Select) any())).thenReturn(Stream.of(i));
+        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0], mockBalance(zonky));
         new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(5);

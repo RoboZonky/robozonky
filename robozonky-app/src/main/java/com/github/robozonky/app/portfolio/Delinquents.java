@@ -169,6 +169,7 @@ public class Delinquents {
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     final Loan l = loanSupplier.apply(loanId);
                     final Investment inv = investmentSupplier.apply(l);
+                    System.out.println(inv);
                     if (isNoLongerActive(inv)) {
                         final PaymentStatus s = inv.getPaymentStatus().get(); // has been verified already
                         switch (s) {

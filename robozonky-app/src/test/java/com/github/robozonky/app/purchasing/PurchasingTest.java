@@ -31,7 +31,6 @@ import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -53,13 +52,12 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
             NONE_ACCEPTING = () -> Optional.of(NONE_ACCEPTING_STRATEGY);
 
     private static Zonky mockApi() {
-        final Zonky zonky = mock(Zonky.class);
+        final Zonky zonky = harmlessZonky(9_000);
         when(zonky.getLoan(anyInt()))
                 .thenAnswer(invocation -> {
                     final int id = invocation.getArgument(0);
                     return Loan.custom().setId(id).setAmount(200).build();
                 });
-        when(zonky.getWallet()).thenReturn(new Wallet(BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
         return zonky;
     }
 

@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
@@ -75,6 +76,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     protected static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
         final MyInvestment m = mock(MyInvestment.class);
+        when(m.getId()).thenReturn(1);
         when(m.getTimeCreated()).thenReturn(creationDate);
         return m;
     }
@@ -112,6 +114,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
         when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
+        when(zonky.getStatistics()).thenReturn(Statistics.empty());
         return zonky;
     }
 

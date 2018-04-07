@@ -25,7 +25,6 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -44,19 +43,9 @@ import static org.mockito.Mockito.*;
 
 class SessionTest extends AbstractZonkyLeveragingTest {
 
-    private static Zonky mockZonky() {
-        return mockZonky(BigDecimal.ZERO);
-    }
-
-    private static Zonky mockZonky(final BigDecimal balance) {
-        final Zonky zonky = mock(Zonky.class);
-        when(zonky.getWallet()).thenReturn(new Wallet(balance, balance));
-        return zonky;
-    }
-
     @Test
     void empty() {
-        final Zonky z = mockZonky();
+        final Zonky z = harmlessZonky(0);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.empty(), null, true);
@@ -77,7 +66,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Zonky z = mockZonky();
+        final Zonky z = harmlessZonky(0);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
@@ -113,7 +102,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                             .map(ParticipationDescriptor::recommend)
                             .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
                 });
-        final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
+        final Zonky z = harmlessZonky(100_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
@@ -145,7 +134,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                     .map(ParticipationDescriptor::recommend)
                     .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
         });
-        final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
+        final Zonky z = harmlessZonky(100_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));

@@ -24,6 +24,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +55,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         }, a, mockBalance(z));
         instance.registerDependant(dependant);
         instance.run();
-        verify(a, times(2)).call(any()); // this is the call to update Portfolio
+        verify(a, atLeast(2)).call(any());
         final Optional<Portfolio> result = instance.get();
         // make sure that the dependants were called with the proper value of Portfolio
         verify(dependant).accept(eq(result.get()), eq(a));
@@ -64,7 +65,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     @Test
     void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
-        doThrow(IllegalStateException.class).when(z).getInvestments(); // will always fail
+        doThrow(IllegalStateException.class).when(z).getInvestments((Select) any()); // will always fail
         final Authenticated a = mockAuthentication(z);
         final Consumer<Throwable> t = mock(Consumer.class);
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, mockBalance(z), Duration.ofSeconds(2));
