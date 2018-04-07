@@ -71,21 +71,21 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Function<Integer, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
-        Delinquents.update(Collections.singleton(i), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.singleton(i), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         assertSoftly(softly -> {
             softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(1);
         });
         assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
         // make sure delinquencies are persisted even when there are none present
-        Delinquents.update(Collections.emptyList(), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         assertSoftly(softly -> {
             softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(2);
         });
         assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanNoLongerDelinquentEvent.class);
         // and when they are no longer active, they're gone for good
-        Delinquents.update(Collections.emptyList(), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         assertThat(Delinquents.getDelinquents()).hasSize(0);
     }
 
@@ -101,7 +101,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Function<Integer, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
-        Delinquents.update(Collections.singleton(i), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.singleton(i), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         assertSoftly(softly -> {
             softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(5); // all 5 delinquency events
@@ -120,10 +120,10 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Function<Integer, Loan> f = (id) -> l;
         // register delinquence
-        Delinquents.update(Collections.singleton(i), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.singleton(i), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is no longer delinquent
-        Delinquents.update(Collections.emptyList(), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
     }
 
@@ -141,10 +141,10 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Function<Integer, Loan> f = (id) -> l;
         // register delinquency
-        Delinquents.update(Collections.singleton(i), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.singleton(i), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is defaulted
-        Delinquents.update(Collections.emptyList(), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
     }
 
@@ -162,10 +162,10 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Function<Integer, Loan> f = (id) -> l;
         // register delinquence
-        Delinquents.update(Collections.singleton(i), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.singleton(i), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is paid
-        Delinquents.update(Collections.emptyList(), po, INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(Collections.emptyList(), INVESTMENT_SUPPLIER, f, COLLECTIONS_SUPPLIER);
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanRepaidEvent.class);
     }
 

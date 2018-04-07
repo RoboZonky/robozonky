@@ -30,13 +30,11 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
@@ -143,7 +141,6 @@ public class Delinquents {
     }
 
     private static Stream<Delinquent> getNoMoreDelinquent(final Collection<Investment> presentlyDelinquent,
-                                                          final PortfolioOverview portfolioOverview,
                                                           final Function<Loan, Investment> investmentSupplier,
                                                           final Function<Integer, Loan> loanSupplier,
                                                           final BiFunction<Loan, LocalDate, Collection<Development>>
@@ -168,7 +165,7 @@ public class Delinquents {
                                 Events.fire(new LoanDefaultedEvent(inv, l, since, collectionsSupplier.apply(l, since)));
                                 break;
                             case PAID:
-                                Events.fire(new LoanRepaidEvent(inv, l, portfolioOverview));
+                                LOGGER.trace("Skipping delinquent loan repaid in full, will be handled by Repayments.");
                                 break;
                             default:
                                 LOGGER.warn("Unsupported payment status '{}' for loan #{}.", s, l.getId());
@@ -180,12 +177,12 @@ public class Delinquents {
                 });
     }
 
-    static void update(final Collection<Investment> presentlyDelinquent, final PortfolioOverview portfolioOverview,
+    static void update(final Collection<Investment> presentlyDelinquent,
                        final Function<Loan, Investment> investmentSupplier, final Function<Integer, Loan> loanSupplier,
                        final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.debug("Updating delinquent loans.");
         // find loans that were delinquent last time we checked and are not anymore
-        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(presentlyDelinquent, portfolioOverview,
+        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(presentlyDelinquent,
                                                                         investmentSupplier, loanSupplier,
                                                                         collectionsSupplier);
         // find loans that are delinquent now, but filter out those sold and/or defaulted
@@ -213,7 +210,7 @@ public class Delinquents {
         final Collection<Investment> delinquentInvestments =
                 auth.call(z -> z.getInvestments(new Select().equals("loan.unpaidLastInst", "true")))
                         .collect(Collectors.toList());
-        update(delinquentInvestments, portfolio.calculateOverview(), l -> portfolio.lookupOrFail(l, auth),
+        update(delinquentInvestments, l -> portfolio.lookupOrFail(l, auth),
                id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)), (l, s) -> getDevelopments(auth, l, s)
         );
     }
