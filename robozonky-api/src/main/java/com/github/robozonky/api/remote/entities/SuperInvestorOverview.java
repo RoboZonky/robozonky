@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,32 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.Collections;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 
-abstract class BaseOverview extends BaseEntity {
+public class SuperInvestorOverview extends BaseEntity {
 
-    private int totalInvestment, principalPaid, interestPaid, investmentCount, penaltyPaid;
+    static SuperInvestorOverview empty() {
+        final SuperInvestorOverview s = new SuperInvestorOverview();
+        s.monthlyOverview = Collections.emptyList();
+        return s;
+    }
 
-    @XmlElement
-    public int getTotalInvestment() {
-        return totalInvestment;
+    private boolean isSuperInvestor;
+    private List<MonthlySuperInvestorOverview> monthlyOverview;
+
+    private SuperInvestorOverview() {
+        // for JAXB
     }
 
     @XmlElement
-    public int getPrincipalPaid() {
-        return principalPaid;
+    public boolean getIsSuperInvestor() {
+        return isSuperInvestor;
     }
 
     @XmlElement
-    public int getInterestPaid() {
-        return interestPaid;
-    }
-
-    @XmlElement
-    public int getPenaltyPaid() {
-        return penaltyPaid;
-    }
-
-    @XmlElement
-    public int getInvestmentCount() {
-        return investmentCount;
+    public List<MonthlySuperInvestorOverview> getMonthlyOverview() {
+        return Collections.unmodifiableList(monthlyOverview);
     }
 }

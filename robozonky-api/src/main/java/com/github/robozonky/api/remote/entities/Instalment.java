@@ -16,34 +16,41 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
-abstract class BaseOverview extends BaseEntity {
+public class Instalment extends BaseEntity {
 
-    private int totalInvestment, principalPaid, interestPaid, investmentCount, penaltyPaid;
+    private BigDecimal instalmentAmount, principalPaid, interestPaid, penaltyPaid;
+    private OffsetDateTime month;
 
-    @XmlElement
-    public int getTotalInvestment() {
-        return totalInvestment;
+    Instalment() {
+        // for JAXB
     }
 
     @XmlElement
-    public int getPrincipalPaid() {
-        return principalPaid;
+    public BigDecimal getInstalmentAmount() {
+        return instalmentAmount;
     }
 
     @XmlElement
-    public int getInterestPaid() {
-        return interestPaid;
-    }
-
-    @XmlElement
-    public int getPenaltyPaid() {
+    public BigDecimal getPenaltyPaid() {
         return penaltyPaid;
     }
 
     @XmlElement
-    public int getInvestmentCount() {
-        return investmentCount;
+    public BigDecimal getPrincipalPaid() {
+        return principalPaid;
+    }
+
+    @XmlElement
+    public BigDecimal getInterestPaid() {
+        return interestPaid;
+    }
+
+    @XmlElement
+    public OffsetDateTime getMonth() {
+        return month;
     }
 }
