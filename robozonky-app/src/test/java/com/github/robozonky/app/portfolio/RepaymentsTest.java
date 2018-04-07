@@ -48,7 +48,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
         // first, portfolio contains one active investment; no repaid
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Portfolio p = new Portfolio(Collections.singletonList(i), mockBalance(z));
+        final Portfolio p = new Portfolio(Collections.singletonList(i), new int[0], mockBalance(z));
         final Authenticated a = mockAuthentication(z);
         final Repayments r = new Repayments();
         r.accept(p, a);

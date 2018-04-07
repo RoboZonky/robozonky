@@ -51,7 +51,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = new Portfolio(Collections.singletonList(i), mockBalance(z));
+        final Portfolio portfolio = new Portfolio(Collections.singletonList(i), new int[0], mockBalance(z));
         assertThat(portfolio.wasOnceSold(l)).isFalse();
         Investment.putOnSmp(i);
         assertThat(portfolio.wasOnceSold(l)).isTrue();

@@ -16,8 +16,11 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,12 +35,16 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatuses;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.util.LoanCache;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
+import org.eclipse.collections.api.set.primitive.MutableIntSet;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +56,17 @@ public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Collection<Investment> investments, investmentsPending = new FastList<>(0);
+    private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
+    private final MutableIntSet loansSold;
     private final RemoteBalance balance;
 
     Portfolio(final RemoteBalance balance) {
-        this(Collections.emptyList(), balance);
+        this(Collections.emptyList(), new int[0], balance);
     }
 
-    Portfolio(final Collection<Investment> investments, final RemoteBalance balance) {
+    Portfolio(final Collection<Investment> investments, final int[] idsOfSoldLoans, final RemoteBalance balance) {
         this.investments = new FastList<>(investments);
+        this.loansSold = IntHashSet.newSetWith(idsOfSoldLoans);
         this.balance = balance;
     }
 
@@ -69,7 +79,12 @@ public class Portfolio {
      */
     public static Portfolio create(final Zonky zonky, final RemoteBalance balance) {
         final Collection<Investment> online = zonky.getInvestments().parallel().collect(Collectors.toList());
-        final Portfolio p = new Portfolio(online, balance);
+        LOGGER.debug("Loading sold investments from Zonky.");
+        final int[] sold = zonky.getInvestments(new Select().equals("status", "SOLD"))
+                .mapToInt(Investment::getLoanId)
+                .distinct()
+                .toArray();
+        final Portfolio p = new Portfolio(online, sold, balance);
         LOGGER.debug("Loaded {} investments from Zonky.", online.size());
         return p;
     }
@@ -90,10 +105,6 @@ public class Portfolio {
         return i.getLoanId() == loanId;
     }
 
-    private static boolean isLoanRelated(final Investment i, final Loan loan) {
-        return isLoanRelated(i, loan.getId());
-    }
-
     private static boolean isLoanRelated(final Investment i, final BlockedAmount blockedAmount) {
         return isLoanRelated(i, blockedAmount.getLoanId());
     }
@@ -110,10 +121,7 @@ public class Portfolio {
      * @return True if the loan had been sold at least once before.
      */
     public boolean wasOnceSold(final Loan loan) {
-        // first find the loan in question, then check if it's being sold or was already sold
-        return getStream(investments)
-                .filter(i -> isLoanRelated(i, loan))
-                .anyMatch(i -> i.isOnSmp() || i.getStatus() == InvestmentStatus.SOLD);
+        return loansSold.contains(loan.getId());
     }
 
     Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
@@ -146,12 +154,15 @@ public class Portfolio {
                 }
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
-                // before daily update is run, the newly sold participation will show as active
                 final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(blockedAmount.getLoanId(), zonky));
                 final Investment i = lookupOrFail(l, auth);
-                final PortfolioOverview po = calculateOverview();
-                Investment.markAsSold(lookupOrFail(l, auth));
+                blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                    final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                    return start.subtract(i.getRemainingPrincipal());
+                });
+                loansSold.add(l.getId());
                 // notify of the fact that the participation had been sold on the Zonky web
+                final PortfolioOverview po = calculateOverview();
                 Events.fire(new InvestmentSoldEvent(i, l, po));
                 return;
             default: // no other notable events

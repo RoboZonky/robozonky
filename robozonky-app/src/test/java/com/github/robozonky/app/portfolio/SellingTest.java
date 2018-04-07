@@ -94,7 +94,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     void noSaleDueToStrategyForbidding() {
         final Investment i = mockInvestment();
         final Zonky zonky = mockApi();
-        final Portfolio portfolio = new Portfolio(Collections.singleton(i), mockBalance(zonky));
+        final Portfolio portfolio = new Portfolio(Collections.singleton(i), new int[0], mockBalance(zonky));
         new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(2);
@@ -108,7 +108,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     private void saleMade(final boolean isDryRun) {
         final Investment i = mockInvestment();
         final Zonky zonky = mockApi();
-        final Portfolio portfolio = new Portfolio(Collections.singleton(i), mockBalance(zonky));
+        final Portfolio portfolio = new Portfolio(Collections.singleton(i), new int[0], mockBalance(zonky));
         new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(5);
