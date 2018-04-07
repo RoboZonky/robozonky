@@ -76,7 +76,6 @@ public class Selling implements PortfolioDependant {
             zonky.sell(i);
             LOGGER.trace("Request over.");
         }
-        Investment.putOnSmp(i);
         Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
         return Optional.of(i);
     }
