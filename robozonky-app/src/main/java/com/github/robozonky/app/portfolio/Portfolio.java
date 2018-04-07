@@ -116,11 +116,11 @@ public class Portfolio {
                 .anyMatch(i -> i.isOnSmp() || i.getStatus() == InvestmentStatus.SOLD);
     }
 
-    public Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
+    Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
-    public Investment lookupOrFail(final Loan loan, final Authenticated auth) {
+    Investment lookupOrFail(final Loan loan, final Authenticated auth) {
         return lookup(loan, auth)
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
@@ -159,12 +159,12 @@ public class Portfolio {
         }
     }
 
-    public Stream<Investment> getActiveWithPaymentStatus(final PaymentStatuses statuses) {
+    private Stream<Investment> getActiveWithPaymentStatus(final PaymentStatuses statuses) {
         return getActive().filter(i -> statuses.getPaymentStatuses().stream()
                 .anyMatch(s -> Objects.equals(s, i.getPaymentStatus().orElse(null))));
     }
 
-    public Stream<Investment> getActive() {
+    private Stream<Investment> getActive() {
         return getStream(investments, s -> s.filter((Investment i) -> i.getStatus() == InvestmentStatus.ACTIVE));
     }
 

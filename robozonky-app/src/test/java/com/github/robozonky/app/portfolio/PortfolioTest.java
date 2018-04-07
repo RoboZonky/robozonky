@@ -17,8 +17,6 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,11 +24,8 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.PaymentStatuses;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -42,42 +37,6 @@ import static org.assertj.core.api.SoftAssertions.*;
 import static org.mockito.Mockito.*;
 
 class PortfolioTest extends AbstractZonkyLeveragingTest {
-
-    private static Investment mockInvestment(final boolean isEligible, final boolean isOnSmp) {
-        return buildInvestment(isEligible, isOnSmp).build();
-    }
-
-    private static InvestmentBuilder buildInvestment(final boolean isEligible, final boolean isOnSmp) {
-        return Investment.custom()
-                .setStatus(InvestmentStatus.ACTIVE)
-                .setOfferable(isEligible)
-                .setOnSmp(isOnSmp)
-                .setInWithdrawal(false);
-    }
-
-    private static Investment mockInvestment(final PaymentStatus paymentStatus) {
-        return buildInvestment(true, false)
-                .setPaymentStatus(paymentStatus)
-                .setNextPaymentDate(OffsetDateTime.now())
-                .build();
-    }
-
-    private static Investment mockSold() {
-        final Investment i = Investment.custom().build();
-        Investment.markAsSold(i);
-        return i;
-    }
-
-    @Test
-    void getActiveWithPaymentStatus() {
-        final Investment i = mockInvestment(PaymentStatus.OK);
-        final Investment i2 = mockInvestment(PaymentStatus.DUE);
-        final Investment i3 = mockInvestment(PaymentStatus.WRITTEN_OFF); // ignored because not interested
-        final Investment i4 = mockSold(); // ignored because sold
-        final Portfolio instance = new Portfolio(Arrays.asList(i, i2, i3, i4), null);
-        final PaymentStatuses p = PaymentStatuses.of(PaymentStatus.OK, PaymentStatus.DUE);
-        assertThat(instance.getActiveWithPaymentStatus(p)).containsExactly(i, i2);
-    }
 
     @Test
     void newSale() {
