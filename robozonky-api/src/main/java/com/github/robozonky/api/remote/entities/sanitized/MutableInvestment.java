@@ -18,7 +18,9 @@ package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 
+import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -74,5 +76,11 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
     T setPaymentStatus(PaymentStatus paymentStatus);
 
     T setInWithdrawal(boolean isInWithdrawal);
+
+    T setInsuranceActive(boolean insuranceActive);
+
+    T setInstalmentsPostponed(boolean instalmentsPostponed);
+
+    T setInsuranceHistory(Collection<InsurancePolicyPeriod> insurancePolicyPeriods);
 
 }

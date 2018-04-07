@@ -182,6 +182,7 @@ jointMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c5=storyCondition { $result = $c5.result; }
     | c6=termCondition { $result = $c6.result; }
     | c8=interestCondition { $result = $c8.result; }
+    | c12=insuranceCondition { $result = $c12.result; }
 ;
 
 primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
@@ -193,6 +194,7 @@ primaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c6=termCondition { $result = $c6.result; }
     | c7=amountCondition { $result = $c7.result; }
     | c8=interestCondition { $result = $c8.result; }
+    | c12=insuranceCondition { $result = $c12.result; }
 ;
 
 secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
@@ -206,4 +208,5 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c9=relativeTermCondition { $result = $c9.result; }
     | c10=elapsedTermCondition { $result = $c10.result; }
     | c11=elapsedRelativeTermCondition { $result = $c11.result; }
+    | c12=insuranceCondition { $result = $c12.result; }
 ;

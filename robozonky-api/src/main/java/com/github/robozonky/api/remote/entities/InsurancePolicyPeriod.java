@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,23 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.time.LocalDate;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.XmlElement;
 
-class LocalDateAdapter extends XmlAdapter<String, LocalDate> {
+public class InsurancePolicyPeriod {
 
-    @Override
-    public LocalDate unmarshal(final String s) {
-        return LocalDate.parse(s);
+    private LocalDate policyPeriodFrom, policyPeriodTo;
+
+    InsurancePolicyPeriod() {
+        // for JAXB
     }
 
-    @Override
-    public String marshal(final LocalDate localDate) {
-        return localDate.toString();
+    @XmlElement
+    public LocalDate getPolicyPeriodFrom() {
+        return policyPeriodFrom;
+    }
+
+    @XmlElement
+    public LocalDate getPolicyPeriodTo() {
+        return policyPeriodTo;
     }
 }

@@ -19,7 +19,9 @@ package com.github.robozonky.api.remote.entities.sanitized;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 
+import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -73,6 +75,8 @@ public interface MutableMarketplaceLoan<T extends MutableMarketplaceLoan<T>> ext
     T setQuestionsAllowed(final boolean isQuestionsAllowed);
 
     T setInsuranceActive(final boolean isInsuranceActive);
+
+    T setInsuranceHistory(final Collection<InsurancePolicyPeriod> insuranceHistory);
 
     T setUserId(final int userId);
 

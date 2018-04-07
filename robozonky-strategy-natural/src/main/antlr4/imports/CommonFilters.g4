@@ -55,6 +55,13 @@ storyCondition returns [MarketplaceFilterCondition result]:
     )
 ;
 
+insuranceCondition returns [MarketplaceFilterCondition result]:
+    'pojištění ' (
+        ( IS { $result = InsuranceCondition.ACTIVE; })
+        | ('není ' { $result = InsuranceCondition.INACTIVE; })
+    ) 'aktivní'
+;
+
 termCondition returns [MarketplaceFilterCondition result]:
     'délka ' (
         (c1 = termConditionRangeOpen { $result = $c1.result; })

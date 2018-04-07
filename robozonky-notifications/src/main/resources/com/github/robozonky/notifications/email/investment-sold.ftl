@@ -5,6 +5,7 @@ Participace s následujícími parametry byla úspěšně prodána:
 - Hodnota participace:         ${data.amountRemaining?string.currency}
 - Doba držení:                 ${data.monthsElapsed?c} měsíců
 - Dosažený výnos*:             ${data.yield?string.currency}
+- Záchranná vesta:             <#if data.insurance>Ano<#else>Ne</#if>.
 
 <#include "additional-loan-info.ftl">
 

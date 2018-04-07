@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -33,15 +34,17 @@ import com.github.robozonky.api.remote.enums.Rating;
 public class RawInvestment extends BaseInvestment {
 
     private PaymentStatus paymentStatus;
-    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal, hasCollectionHistory;
+    private boolean smpRelated, onSmp, canBeOffered, inWithdrawal, hasCollectionHistory, insuranceActive,
+            instalmentPostponement;
     private int legalDpd, loanTermInMonth = 84, currentTerm = 0, remainingMonths = loanTermInMonth - currentTerm;
-    private String loanName, nickname, firstName, surname;
+    private String loanName, nickname, firstName, surname, insuranceStatus;
     private OffsetDateTime investmentDate = OffsetDateTime.now(), nextPaymentDate = investmentDate.plusMonths(1),
             activeTo;
     private BigDecimal interestRate, paid, toPay, amountDue, paidInterest = BigDecimal.ZERO, dueInterest, paidPrincipal,
             duePrincipal, expectedInterest, purchasePrice, remainingPrincipal, smpSoldFor,
             smpFee, paidPenalty = BigDecimal.ZERO;
     private Rating rating;
+    private Collection<InsurancePolicyPeriod> insuranceHistory;
 
     RawInvestment() {
         // for JAXB
@@ -78,6 +81,9 @@ public class RawInvestment extends BaseInvestment {
         this.paidPenalty = investment.getPaidPenalty();
         this.rating = investment.getRating();
         this.hasCollectionHistory = false;
+        this.insuranceActive = investment.isInsuranceActive();
+        this.instalmentPostponement = investment.areInstalmentsPostponed();
+        this.insuranceHistory = investment.getInsuranceHistory();
     }
 
     @XmlElement
@@ -258,6 +264,26 @@ public class RawInvestment extends BaseInvestment {
     @XmlElement
     public BigDecimal getSmpFee() {
         return smpFee;
+    }
+
+    @XmlElement
+    public String getInsuranceStatus() { // TODO figure out details and implement
+        return insuranceStatus;
+    }
+
+    @XmlElement
+    public boolean isInsuranceActive() {
+        return insuranceActive;
+    }
+
+    @XmlElement
+    public boolean isInstalmentPostponement() {
+        return instalmentPostponement;
+    }
+
+    @XmlElement
+    public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
+        return insuranceHistory;
     }
 
     @XmlElement

@@ -18,9 +18,11 @@ package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawInvestment;
@@ -165,4 +167,10 @@ public interface Investment {
     boolean isOnSmp();
 
     boolean canBeOffered();
+
+    boolean isInsuranceActive();
+
+    boolean areInstalmentsPostponed();
+
+    Collection<InsurancePolicyPeriod> getInsuranceHistory();
 }

@@ -334,6 +334,70 @@
                     "methodName": "putOnSmp",
                     "elementKind": "method",
                     "justification": "This code is not useful anymore as investments are no longer persisted."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method boolean com.github.robozonky.api.remote.entities.sanitized.Investment::areInstalmentsPostponed()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "areInstalmentsPostponed",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.InsurancePolicyPeriod> com.github.robozonky.api.remote.entities.sanitized.Investment::getInsuranceHistory()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "getInsuranceHistory",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method boolean com.github.robozonky.api.remote.entities.sanitized.Investment::isInsuranceActive()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "isInsuranceActive",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method java.util.Collection<com.github.robozonky.api.remote.entities.InsurancePolicyPeriod> com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan::getInsuranceHistory()",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MarketplaceLoan",
+                    "methodName": "getInsuranceHistory",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setInstalmentsPostponed(boolean)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableInvestment",
+                    "methodName": "setInstalmentsPostponed",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setInsuranceActive(boolean)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableInvestment",
+                    "methodName": "setInsuranceActive",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableInvestment<T>>>::setInsuranceHistory(java.util.Collection<com.github.robozonky.api.remote.entities.InsurancePolicyPeriod>)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableInvestment",
+                    "methodName": "setInsuranceHistory",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method T com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T extends com.github.robozonky.api.remote.entities.sanitized.MutableMarketplaceLoan<T>>>::setInsuranceHistory(java.util.Collection<com.github.robozonky.api.remote.entities.InsurancePolicyPeriod>)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableMarketplaceLoan",
+                    "methodName": "setInsuranceHistory",
+                    "elementKind": "method",
+                    "justification": "Zonky adds insurance support to the API."
                   }
                 ]
               }

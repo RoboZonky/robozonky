@@ -19,8 +19,11 @@ package com.github.robozonky.api.remote.entities.sanitized;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
+import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -28,6 +31,7 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.api.ToStringBuilder;
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> implements MutableMarketplaceLoan<T> {
 
@@ -43,6 +47,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private Purpose purpose;
     private URL url;
     private MyInvestment myInvestment;
+    private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
 
     AbstractMutableLoanImpl() {
 
@@ -75,6 +80,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
         this.userId = original.getUserId();
         this.myInvestment = original.getMyInvestment();
         this.url = Util.getUrlSafe(original);
+        setInsuranceHistory(original.getInsuranceHistory());
     }
 
     @Override
@@ -350,6 +356,18 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     public T setInsuranceActive(final boolean isInsuranceActive) {
         this.insuranceActive = isInsuranceActive;
         return (T) this;
+    }
+
+    @Override
+    public T setInsuranceHistory(final Collection<InsurancePolicyPeriod> insuranceHistory) {
+        final boolean isEmpty = insuranceHistory == null || insuranceHistory.isEmpty();
+        this.insuranceHistory = isEmpty ? Collections.emptyList() : new FastList<>(insuranceHistory);
+        return (T) this;
+    }
+
+    @Override
+    public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
+        return insuranceHistory;
     }
 
     @Override

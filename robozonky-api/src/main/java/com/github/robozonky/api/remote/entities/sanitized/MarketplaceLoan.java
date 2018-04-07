@@ -19,8 +19,10 @@ package com.github.robozonky.api.remote.entities.sanitized;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
+import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -87,6 +89,8 @@ public interface MarketplaceLoan {
     boolean isQuestionsAllowed();
 
     boolean isInsuranceActive();
+
+    Collection<InsurancePolicyPeriod> getInsuranceHistory();
 
     int getUserId();
 

@@ -18,27 +18,32 @@ package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.ToStringBuilder;
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 final class MutableInvestmentImpl implements InvestmentBuilder {
 
     private int loanId, id, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;
     private OffsetDateTime nextPaymentDate, investmentDate;
-    private boolean canBeOffered, isOnSmp;
+    private boolean canBeOffered, isOnSmp, isInsuranceActive, areInstalmentsPostponed;
     private Boolean isInWithdrawal;
     private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
             expectedInterest, paidPenalty, remainingPrincipal, smpFee, smpSoldFor;
     private Rating rating;
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
+    private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
 
     MutableInvestmentImpl() {
     }
@@ -68,6 +73,9 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInWithdrawal = investment.isInWithdrawal();
         this.status = investment.getStatus();
         this.paymentStatus = investment.getPaymentStatus();
+        this.isInsuranceActive = investment.isInsuranceActive();
+        this.areInstalmentsPostponed = investment.isInstalmentPostponement();
+        setInsuranceHistory(investment.getInsuranceHistory());
     }
 
     // TODO should calculate expected interest somehow
@@ -92,6 +100,9 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.status = InvestmentStatus.ACTIVE;
         this.paymentStatus = PaymentStatus.NOT_COVERED;
         this.investmentDate = loan.getMyInvestment().map(i -> i.getTimeCreated()).orElse(null);
+        this.isInsuranceActive = loan.isInsuranceActive();
+        this.areInstalmentsPostponed = false;
+        this.setInsuranceHistory(loan.getInsuranceHistory());
     }
 
     @Override
@@ -245,6 +256,25 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
+    public InvestmentBuilder setInsuranceActive(final boolean insuranceActive) {
+        this.isInsuranceActive = insuranceActive;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setInstalmentsPostponed(final boolean instalmentsPostponed) {
+        this.areInstalmentsPostponed = instalmentsPostponed;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setInsuranceHistory(final Collection<InsurancePolicyPeriod> insurancePolicyPeriods) {
+        final boolean isEmpty = insurancePolicyPeriods == null || insurancePolicyPeriods.isEmpty();
+        this.insuranceHistory = isEmpty ? Collections.emptyList() : new FastList<>(insurancePolicyPeriods);
+        return this;
+    }
+
+    @Override
     public int getLoanId() {
         return loanId;
     }
@@ -287,6 +317,21 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public boolean canBeOffered() {
         return canBeOffered;
+    }
+
+    @Override
+    public boolean isInsuranceActive() {
+        return isInsuranceActive;
+    }
+
+    @Override
+    public boolean areInstalmentsPostponed() {
+        return areInstalmentsPostponed;
+    }
+
+    @Override
+    public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
+        return Collections.unmodifiableCollection(insuranceHistory);
     }
 
     @Override

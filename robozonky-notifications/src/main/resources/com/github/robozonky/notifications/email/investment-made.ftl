@@ -5,6 +5,7 @@ Půjčka s následujícími parametry byla úspěšně zainvestována:
 - Délka splácení:              ${data.loanTerm?c} měsíců
 - Investovaná částka:          ${data.amountHeld?string.currency}
 - Dosažitelný výnos*:          ${data.yield?string.currency} (${data.relativeYield?string.@interest} p. a.)
+- Záchranná vesta:             <#if data.insurance>Ano<#else>Ne</#if>.
 
 <#include "additional-loan-info.ftl">
 

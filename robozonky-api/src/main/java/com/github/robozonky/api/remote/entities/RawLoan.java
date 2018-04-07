@@ -57,6 +57,7 @@ public class RawLoan extends BaseEntity {
     private MainIncomeType mainIncomeType;
     private Region region;
     private Purpose purpose;
+    private Collection<InsurancePolicyPeriod> insuranceHistory;
 
     protected RawLoan() {
         // for JAXB
@@ -197,6 +198,11 @@ public class RawLoan extends BaseEntity {
     @XmlElement
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    @XmlElement
+    public Collection<InsurancePolicyPeriod> getInsuranceHistory() {
+        return insuranceHistory;
     }
 
     /**

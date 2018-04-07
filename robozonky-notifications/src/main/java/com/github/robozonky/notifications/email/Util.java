@@ -70,6 +70,7 @@ class Util {
             put("loanMainIncomeType", loan.getMainIncomeType());
             put("loanPurpose", loan.getPurpose());
             put("loanName", loan.getName());
+            put("insurance", loan.isInsuranceActive());
         }};
     }
 
@@ -106,6 +107,7 @@ class Util {
         loanData.put("amountHeld", i.getOriginalPrincipal());
         loanData.put("amountPaid", getTotalPaid(i));
         loanData.put("monthsElapsed", getMonthsElapsed(i));
+        loanData.put("postponed", i.areInstalmentsPostponed());
         return loanData;
     }
 
