@@ -58,7 +58,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     void empty() {
         final Zonky z = mockZonky();
         final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.empty(), null, true);
         assertThat(i).isEmpty();
     }
@@ -79,7 +79,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Zonky z = mockZonky();
         final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = Portfolio.create(z, mockBalance(z));
+        final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), true);
         assertSoftly(softly -> {
@@ -116,7 +116,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
+        final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), true);
@@ -148,7 +148,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = mockZonky(BigDecimal.valueOf(100_000));
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = spy(Portfolio.create(z, mockBalance(z)));
+        final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), false);

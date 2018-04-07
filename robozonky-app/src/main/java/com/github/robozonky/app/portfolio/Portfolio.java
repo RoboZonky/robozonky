@@ -77,18 +77,19 @@ public class Portfolio {
     /**
      * Return a new instance of the class, loading information about all investments present and past from the Zonky
      * interface. This operation may take a while, as there may easily be hundreds or thousands of such investments.
-     * @param zonky The API to be used to retrieve the data from Zonky.
+     * @param auth The API to be used to retrieve the data from Zonky.
      * @param balance Tracker for the presently available balance.
      * @return Empty in case there was a remote error.
      */
-    public static Portfolio create(final Zonky zonky, final RemoteBalance balance) {
-        final Collection<Investment> online = zonky.getInvestments().parallel().collect(Collectors.toList());
+    public static Portfolio create(final Authenticated auth, final RemoteBalance balance) {
+        final Collection<Investment> online = auth.call(
+                zonky -> zonky.getInvestments().parallel().collect(Collectors.toList()));
         LOGGER.debug("Loading sold investments from Zonky.");
-        final int[] sold = zonky.getInvestments(new Select().equals("status", "SOLD"))
+        final int[] sold = auth.call(zonky -> zonky.getInvestments(new Select().equals("status", "SOLD")))
                 .mapToInt(Investment::getLoanId)
                 .distinct()
                 .toArray();
-        final Portfolio p = new Portfolio(online, zonky.getStatistics(), sold, balance);
+        final Portfolio p = new Portfolio(online, auth.call(Zonky::getStatistics), sold, balance);
         LOGGER.debug("Loaded {} investments from Zonky.", online.size());
         return p;
     }
