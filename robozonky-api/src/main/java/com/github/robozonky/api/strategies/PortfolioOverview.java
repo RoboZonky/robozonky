@@ -57,8 +57,8 @@ public class PortfolioOverview {
         return vals.stream().mapToInt(i -> i).sum();
     }
 
-    public static PortfolioOverview calculate(final BigDecimal balance,
-                                              final Statistics statistics, final Map<Rating, BigDecimal> adjustments,
+    public static PortfolioOverview calculate(final BigDecimal balance, final Statistics statistics,
+                                              final Map<Rating, BigDecimal> adjustments,
                                               final Map<Rating, BigDecimal> atRisk) {
         final Map<Rating, Integer> amounts = statistics.getRiskPortfolio().stream()
                 .collect(Collectors.toMap(RiskPortfolio::getRating, OverallPortfolio::getUnpaid));
@@ -72,8 +72,8 @@ public class PortfolioOverview {
         return calculate(balance, amounts, Collections.emptyMap());
     }
 
-    public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts,
-                                              final Map<Rating, Integer> atRiskAmounts) {
+    static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts,
+                                       final Map<Rating, Integer> atRiskAmounts) {
         return new PortfolioOverview(balance, amounts, atRiskAmounts);
     }
 

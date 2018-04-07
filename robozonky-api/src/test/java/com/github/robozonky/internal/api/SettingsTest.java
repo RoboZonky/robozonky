@@ -52,17 +52,16 @@ class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(5 * 60));
             softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
                     .matches(new SettingsTest.TemporalPredicate(0));
-            Stream.of(Rating.values()).forEach(r -> {
-                softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
-                        .as(r.toString())
-                        .matches(new SettingsTest.TemporalPredicate(0));
-            });
+            Stream.of(Rating.values())
+                    .forEach(r -> softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
+                            .as(r.toString())
+                            .matches(new TemporalPredicate(0)));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(-1);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
             softly.assertThat(Settings.INSTANCE.getConnectionTimeout())
                     .matches(new SettingsTest.TemporalPredicate(60));
-            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(100);
+            softly.assertThat(Settings.INSTANCE.getDefaultApiPageSize()).isEqualTo(50);
         });
     }
 
@@ -85,10 +84,9 @@ class SettingsTest {
                     .matches(new SettingsTest.TemporalPredicate(1000 * 60));
             softly.assertThat(Settings.INSTANCE.getCaptchaDelay())
                     .matches(new SettingsTest.TemporalPredicate(1000));
-            Stream.of(Rating.values()).forEach(r -> {
-                softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
-                        .matches(new SettingsTest.TemporalPredicate(1000));
-            });
+            Stream.of(Rating.values())
+                    .forEach(r -> softly.assertThat(Settings.INSTANCE.getCaptchaDelay(r))
+                            .matches(new TemporalPredicate(1000)));
             softly.assertThat(Settings.INSTANCE.getDryRunBalanceMinimum()).isEqualTo(1000);
             softly.assertThat(Settings.INSTANCE.getSocketTimeout())
                     .matches(new SettingsTest.TemporalPredicate(1000));
