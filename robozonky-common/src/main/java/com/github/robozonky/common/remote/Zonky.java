@@ -17,6 +17,7 @@
 package com.github.robozonky.common.remote;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -164,8 +165,22 @@ public class Zonky {
         return Zonky.getStream(portfolioApi, PortfolioApi::items, ordering).map(Investment::sanitized);
     }
 
+    /**
+     * Retrieve investments from user's portfolio via {@link PortfolioApi}, in a given order.
+     * @param select Rules to filter the selection by.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Investment> getInvestments(final Select select) {
+        return Zonky.getStream(portfolioApi, PortfolioApi::items, select).map(Investment::sanitized);
+    }
+
     public Loan getLoan(final int id) {
         return Loan.sanitized(loanApi.execute(api -> api.item(id)));
+    }
+
+    public Optional<Investment> getInvestment(final int id) {
+        final Select s = new Select().equals("id", id);
+        return getInvestments(s).findFirst();
     }
 
     /**

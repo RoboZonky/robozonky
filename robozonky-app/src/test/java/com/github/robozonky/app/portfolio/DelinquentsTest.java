@@ -44,7 +44,7 @@ import static org.mockito.Mockito.*;
 
 class DelinquentsTest extends AbstractZonkyLeveragingTest {
 
-    private static final Function<Integer, Investment> INVESTMENT_SUPPLIER =
+    private static final Function<Loan, Investment> INVESTMENT_SUPPLIER =
             (id) -> Investment.custom().build();
     private static final BiFunction<Loan, LocalDate, Collection<Development>> COLLECTIONS_SUPPLIER =
             (l, s) -> Collections.emptyList();
@@ -67,7 +67,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200)
                 .setNextPaymentDate(OffsetDateTime.now().minusDays(1))
                 .build();
-        final Function<Investment, Loan> f = (id) -> l;
+        final Function<Integer, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), po, INVESTMENT_SUPPLIER, f,
                            COLLECTIONS_SUPPLIER);
@@ -100,7 +100,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Investment, Loan> f = (id) -> l;
+        final Function<Integer, Loan> f = (id) -> l;
         // make sure new delinquencies are reported and stored
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), po, INVESTMENT_SUPPLIER, f,
                            COLLECTIONS_SUPPLIER);
@@ -120,7 +120,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Investment, Loan> f = (id) -> l;
+        final Function<Integer, Loan> f = (id) -> l;
         // register delinquence
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), po, INVESTMENT_SUPPLIER, f,
                            COLLECTIONS_SUPPLIER);
@@ -142,7 +142,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .setPaymentStatus(PaymentStatus.PAID_OFF)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Investment, Loan> f = (id) -> l;
+        final Function<Integer, Loan> f = (id) -> l;
         // register delinquency
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), po, INVESTMENT_SUPPLIER, f,
                            COLLECTIONS_SUPPLIER);
@@ -164,7 +164,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .setPaymentStatus(PaymentStatus.PAID)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
-        final Function<Investment, Loan> f = (id) -> l;
+        final Function<Integer, Loan> f = (id) -> l;
         // register delinquence
         Delinquents.update(Collections.singleton(i), Collections.emptyList(), po, INVESTMENT_SUPPLIER, f,
                            COLLECTIONS_SUPPLIER);

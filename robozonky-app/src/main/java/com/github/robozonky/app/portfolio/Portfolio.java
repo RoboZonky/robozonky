@@ -116,20 +116,19 @@ public class Portfolio {
                 .anyMatch(i -> i.isOnSmp() || i.getStatus() == InvestmentStatus.SOLD);
     }
 
-    public Optional<Investment> lookup(final int loanId) {
-        return Stream.concat(investments.stream(), investmentsPending.stream())
-                .filter(i -> isLoanRelated(i, loanId))
-                .findFirst();
+    public Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
+        return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
-    public Investment lookupOrFail(final int loanId) {
-        return lookup(loanId).orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loanId));
+    public Investment lookupOrFail(final Loan loan, final Authenticated auth) {
+        return lookup(loan, auth)
+                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
 
     /**
      * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}. This can
      * happen in several ways:
-     * <p>
+     *
      * <ul>
      * <li>RoboZonky makes a new investment or purchase and notifies this class directly.</li>
      * <li>Periodic check of the remote portfolio status reveals a new operation made outside of RoboZonky.</li>

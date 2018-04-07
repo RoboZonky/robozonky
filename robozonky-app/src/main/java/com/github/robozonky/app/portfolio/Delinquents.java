@@ -139,8 +139,8 @@ public class Delinquents {
     private static Collection<Delinquent> getKnown(final Collection<Investment> presentlyDelinquent,
                                                    final Collection<Investment> noLongerActive,
                                                    final PortfolioOverview portfolioOverview,
-                                                   final Function<Integer, Investment> investmentSupplier,
-                                                   final Function<Investment, Loan> loanSupplier,
+                                                   final Function<Loan, Investment> investmentSupplier,
+                                                   final Function<Integer, Loan> loanSupplier,
                                                    final BiFunction<Loan, LocalDate, Collection<Development>>
                                                            collectionsSupplier) {
         final LocalDate now = LocalDate.now();
@@ -154,8 +154,8 @@ public class Delinquents {
                 .peek(d -> {  // notify
                     final int loanId = d.getLoanId();
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
-                    final Investment inv = investmentSupplier.apply(loanId);
-                    final Loan l = loanSupplier.apply(inv);
+                    final Loan l = loanSupplier.apply(loanId);
+                    final Investment inv = investmentSupplier.apply(l);
                     if (noLongerActive.stream().anyMatch(i -> isRelated(d, i))) {
                         final PaymentStatus s = inv.getPaymentStatus()
                                 .orElseThrow(() -> new IllegalStateException("Invalid investment " + inv));
@@ -182,11 +182,9 @@ public class Delinquents {
                 .orElseThrow(() -> new IllegalStateException("Invalid investment " + i));
     }
 
-    static void update(final Collection<Investment> presentlyDelinquent,
-                       final Collection<Investment> noLongerActive,
-                       final PortfolioOverview portfolioOverview,
-                       final Function<Integer, Investment> investmentSupplier,
-                       final Function<Investment, Loan> loanSupplier,
+    static void update(final Collection<Investment> presentlyDelinquent, final Collection<Investment> noLongerActive,
+                       final PortfolioOverview portfolioOverview, final Function<Loan, Investment> investmentSupplier,
+                       final Function<Integer, Loan> loanSupplier,
                        final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.debug("Updating delinquent loans.");
         final Collection<Delinquent> knownDelinquents = getKnown(presentlyDelinquent, noLongerActive,
@@ -223,7 +221,7 @@ public class Delinquents {
     public static void update(final Authenticated auth, final Portfolio portfolio) {
         update(getWithPaymentStatus(portfolio, PaymentStatus.getDelinquent()),
                getWithPaymentStatus(portfolio, PaymentStatus.getDone()),
-               portfolio.calculateOverview(), portfolio::lookupOrFail,
+               portfolio.calculateOverview(), l -> portfolio.lookupOrFail(l, auth),
                id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)),
                (l, s) -> getDevelopments(auth, l, s)
         );
