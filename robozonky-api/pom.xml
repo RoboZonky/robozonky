@@ -261,6 +261,55 @@
                     "methodName": "setPhotos",
                     "elementKind": "method",
                     "justification": "Removed in order to not duplicate data and therefore save memory."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method com.github.robozonky.api.remote.entities.Statistics com.github.robozonky.api.remote.PortfolioApi::item()",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "PortfolioApi",
+                    "methodName": "item",
+                    "elementKind": "method",
+                    "justification": "RoboZonky now uses the statistics endpoint published by Zonky."
+                  }, {
+                    "code": "java.annotation.added",
+                    "old": "method java.util.List<com.github.robozonky.api.remote.entities.RawInvestment> com.github.robozonky.api.remote.PortfolioApi::items()",
+                    "new": "method java.util.List<com.github.robozonky.api.remote.entities.RawInvestment> com.github.robozonky.api.remote.PortfolioApi::items()",
+                    "annotationType": "javax.ws.rs.Path",
+                    "annotation": "@javax.ws.rs.Path(\"\/users\/me\/investments\")",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "PortfolioApi",
+                    "methodName": "items",
+                    "elementKind": "method",
+                    "justification": "RoboZonky now uses the statistics endpoint published by Zonky."
+                  }, {
+                    "code": "java.annotation.removed",
+                    "old": "interface com.github.robozonky.api.remote.PortfolioApi",
+                    "new": "interface com.github.robozonky.api.remote.PortfolioApi",
+                    "annotationType": "javax.ws.rs.Path",
+                    "annotation": "@javax.ws.rs.Path(\"\/users\/me\/investments\")",
+                    "package": "com.github.robozonky.api.remote",
+                    "classSimpleName": "PortfolioApi",
+                    "elementKind": "interface",
+                    "justification": "RoboZonky now uses the statistics endpoint published by Zonky."
+                  }, {
+                    "code": "java.method.visibilityReduced",
+                    "old": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>)",
+                    "new": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>)",
+                    "oldVisibility": "public",
+                    "newVisibility": "package",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "calculate",
+                    "elementKind": "method",
+                    "justification": "Portfolio overview no longer calculated from live investments."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, java.util.function.Supplier<java.util.stream.Stream<com.github.robozonky.api.remote.entities.sanitized.Investment>>)",
+                    "new": "method com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, com.github.robozonky.api.remote.entities.Statistics, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.math.BigDecimal>, java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.math.BigDecimal>)",
+                    "package": "com.github.robozonky.api.strategies",
+                    "classSimpleName": "PortfolioOverview",
+                    "methodName": "calculate",
+                    "elementKind": "method",
+                    "justification": "Portfolio overview no longer calculated from live investments."
                   }
                 ]
               }
