@@ -310,6 +310,30 @@
                     "methodName": "calculate",
                     "elementKind": "method",
                     "justification": "Portfolio overview no longer calculated from live investments."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void com.github.robozonky.api.remote.entities.sanitized.Investment::markAsPaid(com.github.robozonky.api.remote.entities.sanitized.Investment)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "markAsPaid",
+                    "elementKind": "method",
+                    "justification": "This code is not useful anymore as investments are no longer persisted."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void com.github.robozonky.api.remote.entities.sanitized.Investment::markAsSold(com.github.robozonky.api.remote.entities.sanitized.Investment)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "markAsSold",
+                    "elementKind": "method",
+                    "justification": "This code is not useful anymore as investments are no longer persisted."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method void com.github.robozonky.api.remote.entities.sanitized.Investment::putOnSmp(com.github.robozonky.api.remote.entities.sanitized.Investment)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "putOnSmp",
+                    "elementKind": "method",
+                    "justification": "This code is not useful anymore as investments are no longer persisted."
                   }
                 ]
               }
