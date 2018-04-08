@@ -97,12 +97,12 @@
       <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
-        <version>0.9.5</version>
+        <version>0.10.1</version>
         <dependencies>
           <dependency>
             <groupId>org.revapi</groupId>
             <artifactId>revapi-java</artifactId>
-            <version>0.14.4</version>
+            <version>0.16.0</version>
           </dependency>
         </dependencies>
         <configuration>
