@@ -42,19 +42,12 @@ import org.apache.commons.lang3.SystemUtils;
 
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
-    enum OS {
-        WINDOWS,
-        LINUX,
-        OTHER
-    }
-
-    private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
-    private static InstallData DATA;
-    private OS operatingSystem = OS.OTHER;
     final static char[] KEYSTORE_PASSWORD = UUID.randomUUID().toString().toCharArray();
+    private static final Logger LOGGER = Logger.getLogger(RoboZonkyInstallerListener.class.getSimpleName());
     static File INSTALL_PATH, DIST_PATH, KEYSTORE_FILE, JMX_PROPERTIES_FILE, EMAIL_CONFIG_FILE, SETTINGS_FILE,
             CLI_CONFIG_FILE, LOGBACK_CONFIG_FILE;
-
+    private static InstallData DATA;
+    private OS operatingSystem = OS.OTHER;
     public RoboZonkyInstallerListener() {
         if (SystemUtils.IS_OS_LINUX) {
             operatingSystem = OS.LINUX;
@@ -151,16 +144,20 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     CommandLinePart prepareJmx() {
-        final String coreProperty = "com.sun.management.jmxremote";
-        if (!Boolean.valueOf(Variables.IS_JMX_ENABLED.getValue(DATA))) { // ignore JMX
-            return new CommandLinePart().setProperty(coreProperty, "false");
+        final boolean isJmxEnabled = Boolean.valueOf(Variables.IS_JMX_ENABLED.getValue(DATA));
+        final CommandLinePart clp = new CommandLinePart()
+                .setProperty("com.sun.management.jmxremote", isJmxEnabled ? "true" : "false")
+                // the buffer is effectively a memory leak; we'll reduce its size from 1000 to 10
+                .setProperty("jmx.remote.x.notification.buffer.size", "10");
+        if (!isJmxEnabled) { // ignore JMX
+            return clp;
         }
         // write JMX properties file
-        final String port = Variables.JMX_PORT.getValue(DATA);
         final Properties props = new Properties();
         props.setProperty("com.sun.management.jmxremote.authenticate",
                           Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA));
         props.setProperty("com.sun.management.jmxremote.ssl", "false");
+        final String port = Variables.JMX_PORT.getValue(DATA);
         props.setProperty("com.sun.management.jmxremote.rmi.port", port);
         props.setProperty("com.sun.management.jmxremote.port", port);
         try {
@@ -169,9 +166,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             throw new IllegalStateException("Failed writing JMX configuration.", ex);
         }
         // configure JMX to read the props file
-        return new CommandLinePart()
-                .setProperty(coreProperty, "true")
-                .setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath())
+        return clp.setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath())
                 .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
     }
 
@@ -305,5 +300,11 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             LOGGER.log(Level.SEVERE, "Uncaught exception.", ex);
             throw new IllegalStateException("Uncaught exception.", ex);
         }
+    }
+
+    enum OS {
+        WINDOWS,
+        LINUX,
+        OTHER
     }
 }
