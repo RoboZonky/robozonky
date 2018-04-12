@@ -29,7 +29,11 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 final class ProxyFactory {
 
     public static ResteasyClient newResteasyClient() {
+        /*
+         * Supply the provider factory singleton, as otherwise RESTEasy would create a new instance every time.
+         */
         final ResteasyClientBuilder builder = new ResteasyClientBuilder()
+                .providerFactory(ResteasyProviderFactory.getInstance())
                 .readTimeout(Settings.INSTANCE.getSocketTimeout().get(ChronoUnit.SECONDS), TimeUnit.SECONDS)
                 .connectTimeout(Settings.INSTANCE.getConnectionTimeout().get(ChronoUnit.SECONDS), TimeUnit.SECONDS);
         /*
@@ -42,13 +46,7 @@ final class ProxyFactory {
                 .resteasyClientBuilder(builder)
                 .build();
         engine.setFollowRedirects(true);
-        /*
-         * Supply the provider factory singleton, as otherwise RESTEasy would create a new instance every time.
-         */
-        return new ResteasyClientBuilder()
-                .providerFactory(ResteasyProviderFactory.getInstance())
-                .httpEngine(engine)
-                .build();
+        return builder.httpEngine(engine).build();
     }
 
     public static <T> T newProxy(final ResteasyClient client, final RoboZonkyFilter filter, final Class<T> api,
