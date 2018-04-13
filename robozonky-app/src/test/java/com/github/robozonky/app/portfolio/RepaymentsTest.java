@@ -57,12 +57,16 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
         r.accept(p, a);
         assertThat(getNewEvents()).isEmpty();
         // now, portfolio has the same investment marked as paid; event will be triggered
-        when(z.getInvestments((Select) any())).thenReturn(Stream.of(i));
+        when(z.getInvestments((Select) any())).thenAnswer((invocation) -> Stream.of(i));
         r.accept(p, a);
         assertThat(getNewEvents())
                 .first()
                 .isInstanceOf(LoanRepaidEvent.class);
         // make sure the loan was retrieved from Zonky
         verify(z).getLoan(eq(l.getId()));
+        // and now make sure nothing else was triggered when Zonky response is unchanged
+        this.readPreexistingEvents();
+        r.accept(p, a);
+        assertThat(getNewEvents()).isEmpty();
     }
 }
