@@ -25,7 +25,10 @@ public class Restrictions extends BaseEntity {
 
     private OffsetDateTime requestDate, withdrawalDate;
     private boolean cannotInvest = false, cannotAccessSmp = false;
-    private int maximumInvestmentAmount = Defaults.MINIMAL_MAXIMUM_INVESTMENT_IN_CZK;
+    // TODO implement these instead of using Defaults
+    private int minimumInvestmentAmount = Defaults.MINIMUM_INVESTMENT_IN_CZK,
+            maximumInvestmentAmount = Defaults.MINIMAL_MAXIMUM_INVESTMENT_IN_CZK,
+            investmentStep = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
 
     /**
      * Date of Zonky receiving the investor-initiated contract termination.
@@ -53,6 +56,16 @@ public class Restrictions extends BaseEntity {
     @XmlElement
     public boolean isCannotAccessSmp() {
         return cannotAccessSmp;
+    }
+
+    @XmlElement
+    public int getMinimumInvestmentAmount() {
+        return minimumInvestmentAmount;
+    }
+
+    @XmlElement
+    public int getInvestmentStep() {
+        return investmentStep;
     }
 
     /**
