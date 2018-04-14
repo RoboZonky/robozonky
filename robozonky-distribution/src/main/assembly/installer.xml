@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 The RoboZonky Project
+  ~ Copyright 2018 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
     <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
-  <containerDescriptorHandlers>
+  <containerDescriptorHandlers> <!-- Merge all service providers into the resulting JAR. -->
     <containerDescriptorHandler>
       <handlerName>metaInf-services</handlerName>
     </containerDescriptorHandler>

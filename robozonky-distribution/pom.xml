@@ -28,7 +28,10 @@
   <artifactId>robozonky-distribution</artifactId>
   <packaging>pom</packaging>
 
+  <name>RoboZonky Distribution: User-facing deliverables</name>
+
   <properties>
+    <skipTests>true</skipTests> <!-- There are no tests here. -->
     <!-- Installer variables -->
     <info.appname>RoboZonky</info.appname>
     <info.appversion>${project.version}</info.appversion>
@@ -41,44 +44,46 @@
       <groupId>com.github.robozonky.installer</groupId>
       <artifactId>robozonky-installer-panels</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.github.robozonky</groupId>
-      <artifactId>robozonky-app</artifactId>
-      <classifier>dist</classifier>
-      <type>zip</type>
-    </dependency>
   </dependencies>
 
   <build> <!-- Ordering of plugins here is important; Maven will execute plugins within a phase in the given order. -->
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <attach>false</attach>
-          <descriptors>
-            <!--
-              By default, jar-with-dependencies will overwrite META-INF/services when there's more than 1 for each
-              kind of service. This descriptor will merge them instead.
-            -->
-            <descriptor>src/main/assembly/jar-with-dependencies-merge-services.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
+            <!-- Prepare single JAR with dependencies of installer panels to be used as dependency in IZPack JAR. -->
+            <configuration>
+              <attach>false</attach>
+              <descriptors>
+                <!--
+                  By default, jar-with-dependencies will overwrite META-INF/services when there's more than 1 for each
+                  kind of service. This descriptor will merge them instead.
+                -->
+                <descriptor>src/main/assembly/installer.xml</descriptor>
+              </descriptors>
+            </configuration>
             <id>make-assembly</id>
             <phase>prepare-package</phase>
             <goals>
               <goal>single</goal>
             </goals>
           </execution>
+          <execution>
+            <!-- Prepare compressed distributions of the executable app. -->
+            <configuration>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>src/main/assembly/standard.xml</descriptor>
+              </descriptors>
+            </configuration>
+            <id>package-standard</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
         </executions>
-      </plugin>
-      <plugin> <!-- Disable testing as there are no tests -->
-        <groupId>org.pitest</groupId>
-        <artifactId>pitest-maven</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.izpack</groupId>
@@ -100,30 +105,6 @@
             <goals>
               <goal>izpack</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <configuration>
-          <stripVersion>true</stripVersion>
-          <overWriteReleases>true</overWriteReleases>
-          <overWriteSnapshots>true</overWriteSnapshots>
-          <overWriteIfNewer>true</overWriteIfNewer>
-          <excludeTransitive>true</excludeTransitive>
-          <excludeScope>system</excludeScope>
-        </configuration>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-            </configuration>
           </execution>
         </executions>
       </plugin>

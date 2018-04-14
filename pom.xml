@@ -98,13 +98,6 @@
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-app</artifactId>
-        <version>${project.version}</version>
-        <classifier>dist</classifier>
-        <type>zip</type>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-installer</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -112,12 +105,6 @@
         <groupId>com.github.robozonky.installer</groupId>
         <artifactId>robozonky-installer-panels</artifactId>
         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky.installer</groupId>
-        <artifactId>robozonky-installer-panels</artifactId>
-        <version>${project.version}</version>
-        <classifier>jar-with-dependencies</classifier>
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>
