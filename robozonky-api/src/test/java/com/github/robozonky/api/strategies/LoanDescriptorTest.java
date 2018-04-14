@@ -22,9 +22,7 @@ import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -85,22 +83,21 @@ class LoanDescriptorTest {
     void recommendAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<RecommendedLoan> r = ld.recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
+        final Optional<RecommendedLoan> r = ld.recommend(200);
         assertThat(r).isPresent();
         final RecommendedLoan recommendation = r.get();
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(recommendation.descriptor()).isSameAs(ld);
-        softly.assertThat(recommendation.amount())
-                .isEqualTo(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
-        softly.assertThat(recommendation.isConfirmationRequired()).isFalse();
-        softly.assertAll();
+        assertSoftly(softly -> {
+            softly.assertThat(recommendation.descriptor()).isSameAs(ld);
+            softly.assertThat(recommendation.amount()).isEqualTo(BigDecimal.valueOf(200));
+            softly.assertThat(recommendation.isConfirmationRequired()).isFalse();
+        });
     }
 
     @Test
     void recommendWrongAmount() {
         final Loan mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<RecommendedLoan> r = ld.recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1));
+        final Optional<RecommendedLoan> r = ld.recommend(BigDecimal.valueOf(mockedLoan.getRemainingInvestment() + 1));
         assertThat(r).isEmpty();
     }
 }

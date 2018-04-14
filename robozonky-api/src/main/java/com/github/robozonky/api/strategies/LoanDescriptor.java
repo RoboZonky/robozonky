@@ -27,7 +27,6 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +98,7 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
      * @return Empty if amount is out of bounds.
      */
     public Optional<RecommendedLoan> recommend(final int amount, final boolean confirmationRequired) {
-        if (amount >= Defaults.MINIMUM_INVESTMENT_IN_CZK && amount <= loan.getRemainingInvestment()) {
+        if (amount <= loan.getRemainingInvestment()) {
             return Optional.of(new RecommendedLoan(this, amount, confirmationRequired));
         } else {
             LOGGER.warn("Can not recommend {} CZK with {} CZK remaining in loan #{}.", amount,

@@ -19,16 +19,11 @@ package com.github.robozonky.api.remote.entities;
 import java.time.OffsetDateTime;
 import javax.xml.bind.annotation.XmlElement;
 
-import com.github.robozonky.internal.api.Defaults;
-
 public class Restrictions extends BaseEntity {
 
     private OffsetDateTime requestDate, withdrawalDate;
     private boolean cannotInvest = false, cannotAccessSmp = false;
-    // TODO implement these instead of using Defaults
-    private int minimumInvestmentAmount = Defaults.MINIMUM_INVESTMENT_IN_CZK,
-            maximumInvestmentAmount = Defaults.MINIMAL_MAXIMUM_INVESTMENT_IN_CZK,
-            investmentStep = Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK;
+    private int minimumInvestmentAmount = 200, maximumInvestmentAmount = 5_000, investmentStep = 200;
 
     /**
      * Date of Zonky receiving the investor-initiated contract termination.
