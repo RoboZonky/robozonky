@@ -37,7 +37,7 @@
     <log-file pattern="robozonky-installer.log" append="false" level="ALL" />
   </logging>
 
-  <jar src="robozonky-installer-app-@{info.appversion}-jar-with-dependencies.jar"/>
+  <jar src="robozonky-distribution-@{info.appversion}-jar-with-dependencies.jar"/>
 
   <locale>
     <langpack iso3="ces"/>
@@ -48,7 +48,7 @@
   </guiprefs>
 
   <resources>
-    <res id="LicencePanel.licence" src="../../../LICENSE"/>
+    <res id="LicencePanel.licence" src="../../LICENSE"/>
     <res id="userInputSpec.xml" src="../src/main/izpack/userInputSpec.xml"/>
   </resources>
 

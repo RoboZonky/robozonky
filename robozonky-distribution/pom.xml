@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 The RoboZonky Project
+  ~ Copyright 2018 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,19 +15,17 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>robozonky-installer</artifactId>
+    <artifactId>robozonky</artifactId>
     <groupId>com.github.robozonky</groupId>
     <version>4.6.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.robozonky.installer</groupId>
-  <artifactId>robozonky-installer-app</artifactId>
-  <name>RoboZonky Installer: Distributable</name>
-
-  <!-- Launch IzPack automatically -->
+  <artifactId>robozonky-distribution</artifactId>
   <packaging>pom</packaging>
 
   <properties>
@@ -36,7 +34,6 @@
     <info.appversion>${project.version}</info.appversion>
     <info.appsubpath>robozonky</info.appsubpath>
     <izpack.dir.app>${basedir}/src/main/izpack</izpack.dir.app>
-    <project.automatic.module.name>com.github.robozonky.installer.app</project.automatic.module.name>
   </properties>
 
   <dependencies>
@@ -52,11 +49,10 @@
     </dependency>
   </dependencies>
 
-  <build>
+  <build> <!-- Ordering of plugins here is important; Maven will execute plugins within a phase in the given order. -->
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <attach>false</attach>
           <descriptors>
@@ -92,7 +88,7 @@
           <baseDir>${project.build.directory}</baseDir>
           <installFile>${izpack.dir.app}/install.xml</installFile>
           <mkdirs>true</mkdirs>
-          <classifier>dist</classifier>
+          <classifier>installer</classifier>
           <autoIncludeUrl>false</autoIncludeUrl>
           <autoIncludeDevelopers>true</autoIncludeDevelopers>
           <comprFormat>xz</comprFormat>
@@ -110,7 +106,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.10</version>
         <configuration>
           <stripVersion>true</stripVersion>
           <overWriteReleases>true</overWriteReleases>
@@ -134,4 +129,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>

@@ -27,7 +27,6 @@
   <name>RoboZonky Installer: Parent POM</name>
   <modules>
     <module>robozonky-installer-panels</module>
-    <module>robozonky-installer-app</module>
   </modules>
 
   <!-- Launch IzPack automatically -->
