@@ -42,7 +42,6 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.internal.api.Defaults;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +97,7 @@ final class Session {
         final PortfolioOverview portfolioOverview = session.portfolioOverview;
         final int balance = portfolioOverview.getCzkAvailable();
         Events.fire(new ExecutionStartedEvent(loans, portfolioOverview));
-        if (balance >= Defaults.MINIMUM_INVESTMENT_IN_CZK && !session.getAvailable().isEmpty()) {
+        if (balance >= auth.getRestrictions().getMinimumInvestmentAmount() && !session.getAvailable().isEmpty()) {
             session.invest(strategy);
         }
         final Collection<Investment> result = session.getResult();
