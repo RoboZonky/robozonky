@@ -37,7 +37,7 @@
     <log-file pattern="robozonky-installer.log" append="false" level="ALL" />
   </logging>
 
-  <jar src="@{staging.dir}/tmp/robozonky-installer-panels-jar-with-dependencies.jar" />
+  <jar src="robozonky-installer-app-@{info.appversion}-jar-with-dependencies.jar"/>
 
   <locale>
     <langpack iso3="ces"/>
@@ -48,8 +48,8 @@
   </guiprefs>
 
   <resources>
-    <res id="LicencePanel.licence"  src="@{staging.dir}/../../../../LICENSE" />
-    <res id="userInputSpec.xml"     src="@{staging.dir}/../../src/main/izpack/userInputSpec.xml" />
+    <res id="LicencePanel.licence" src="../../../LICENSE"/>
+    <res id="userInputSpec.xml" src="../src/main/izpack/userInputSpec.xml"/>
   </resources>
 
   <conditions>
@@ -107,7 +107,7 @@
   <packs>
     <pack name="RoboZonky: Binární distribuce" required="yes">
       <description>Jádro investičního robota a základní podpůrné soubory</description>
-      <file src="@{staging.dir}/tmp/robozonky-app-dist.zip"
+      <file src="robozonky-app-dist.zip"
             targetdir="${INSTALL_PATH}/Dist"
             override="true"
             unpack="true" />

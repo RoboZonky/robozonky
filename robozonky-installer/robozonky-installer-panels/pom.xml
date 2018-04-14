@@ -99,28 +99,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <descriptors>
-            <!--
-              By default, jar-with-dependencies will overwrite META-INF/services when there's more than 1 for each
-              kind of service. This descriptor will merge them instead.
-            -->
-            <descriptor>src/main/assembly/jar-with-dependencies-merge-services.xml</descriptor>
-          </descriptors>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
