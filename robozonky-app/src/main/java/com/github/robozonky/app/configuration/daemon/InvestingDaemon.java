@@ -32,7 +32,6 @@ import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
-import com.github.robozonky.internal.api.Defaults;
 
 class InvestingDaemon extends DaemonOperation {
 
@@ -58,7 +57,7 @@ class InvestingDaemon extends DaemonOperation {
     protected void execute(final Portfolio portfolio, final Authenticated authenticated) {
         // don't query anything unless we have enough money to invest
         final int balance = portfolio.getRemoteBalance().get().intValue();
-        final int minimum = Defaults.MINIMUM_INVESTMENT_IN_CZK;
+        final int minimum = authenticated.getRestrictions().getMinimumInvestmentAmount();
         if (balance < minimum) {
             LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, minimum);
             return;

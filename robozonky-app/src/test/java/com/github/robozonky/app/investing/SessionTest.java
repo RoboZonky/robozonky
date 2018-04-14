@@ -46,7 +46,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -140,13 +139,13 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void underBalance() {
         // setup APIs
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
+        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(199);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         // run test
         final Session it = new Session(portfolio, Collections.emptySet(), getInvestor(auth), auth);
         final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
-                .recommend(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
+                .recommend(BigDecimal.valueOf(200));
         final boolean result = it.invest(recommendation.get());
         // verify result
         assertThat(result).isFalse();
@@ -159,7 +158,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
         final Authenticated auth = mockAuthentication(z);
         final RecommendedLoan recommendation =
-                AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(Defaults.MINIMUM_INVESTMENT_IN_CZK).get();
+                AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(200).get();
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Session t = new Session(portfolio, Collections.singleton(recommendation.descriptor()), getInvestor(auth),
                                       auth);

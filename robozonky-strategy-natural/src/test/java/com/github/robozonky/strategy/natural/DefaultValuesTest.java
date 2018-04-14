@@ -17,7 +17,6 @@
 package com.github.robozonky.strategy.natural;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -40,19 +39,9 @@ class DefaultValuesTest {
     void setMinimumBalance() {
         final DefaultPortfolio p = DefaultPortfolio.BALANCED;
         final DefaultValues sut = new DefaultValues(p);
-        assertThat(sut.getMinimumBalance()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+        assertThat(sut.getMinimumBalance()).isEqualTo(0);
         sut.setMinimumBalance(400);
         assertThat(sut.getMinimumBalance()).isEqualTo(400);
-        sut.setMinimumBalance(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-        assertThat(sut.getMinimumBalance()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
-    }
-
-    @Test
-    void setWrongMinimumBalance() {
-        final DefaultPortfolio p = DefaultPortfolio.CONSERVATIVE;
-        final DefaultValues sut = new DefaultValues(p);
-        assertThatThrownBy(() -> sut.setMinimumBalance(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

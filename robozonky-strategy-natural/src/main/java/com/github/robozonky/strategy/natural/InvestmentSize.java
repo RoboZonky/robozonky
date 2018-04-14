@@ -16,14 +16,12 @@
 
 package com.github.robozonky.strategy.natural;
 
-import com.github.robozonky.internal.api.Defaults;
-
 public class InvestmentSize {
 
     private final int minimumInvestmentInCzk, maximumInvestmentInCzk;
 
     public InvestmentSize() {
-        this(Defaults.MAXIMUM_INVESTMENT_IN_CZK);
+        this(20_000); // this is the theoretical maximum allowed by Zonky
     }
 
     public InvestmentSize(final int maximumInvestmentInCzk) {
@@ -33,10 +31,6 @@ public class InvestmentSize {
     public InvestmentSize(final int minimumInvestmentInCzk, final int maximumInvestmentInCzk) {
         this.minimumInvestmentInCzk = Math.min(minimumInvestmentInCzk, maximumInvestmentInCzk);
         this.maximumInvestmentInCzk = Math.max(minimumInvestmentInCzk, maximumInvestmentInCzk);
-        if (this.maximumInvestmentInCzk > Defaults.MAXIMUM_INVESTMENT_IN_CZK) {
-            throw new IllegalStateException("Maximum investment can not be more than "
-                                                    + Defaults.MAXIMUM_INVESTMENT_IN_CZK + " CZK.");
-        }
     }
 
     public int getMinimumInvestmentInCzk() {

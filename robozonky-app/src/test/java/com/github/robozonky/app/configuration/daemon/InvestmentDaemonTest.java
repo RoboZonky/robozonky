@@ -31,7 +31,6 @@ import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -50,7 +49,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
                 .setId(loanId)
                 .setRating(Rating.A)
                 .build();
-        final Zonky z = harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+        final Zonky z = harmlessZonky(200);
         when(z.getAvailableLoans((Select) notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final Authenticated a = mockAuthentication(z);
@@ -68,7 +67,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void underBalance() {
-        final Zonky z = harmlessZonky(Defaults.MINIMUM_INVESTMENT_IN_CZK - 1);
+        final Zonky z = harmlessZonky(199);
         final Authenticated a = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;

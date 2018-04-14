@@ -22,8 +22,6 @@ import java.time.ZoneId;
 import java.util.Locale;
 import javax.ws.rs.core.MediaType;
 
-import com.github.robozonky.api.remote.entities.Restrictions;
-
 /**
  * Carries application constants (such as version) and desired environmental settings (such as charset or locale).
  */
@@ -33,26 +31,6 @@ public final class Defaults {
     public static final Locale LOCALE = Locale.forLanguageTag("cs-CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;
     public static final ZoneId ZONE_ID = ZoneId.of("Europe/Prague");
-    /**
-     * Small investors can only invest this amount into a single loan. Deprecated, see {@link Restrictions}.
-     */
-    @Deprecated
-    public static final int MINIMAL_MAXIMUM_INVESTMENT_IN_CZK = 5_000;
-    /**
-     * Biggest investors can invest this amount into a single loan. Deprecated, see {@link Restrictions}.
-     */
-    @Deprecated
-    public static final int MAXIMUM_INVESTMENT_IN_CZK = 20_000;
-    /**
-     * See Deprecated, see {@link Restrictions}.
-     */
-    @Deprecated
-    public static final int MINIMUM_INVESTMENT_IN_CZK = 200;
-    /**
-     * See Deprecated, see {@link Restrictions}.
-     */
-    @Deprecated
-    public static final int MINIMUM_INVESTMENT_INCREMENT_IN_CZK = 200;
     /**
      * Will be null when running from IDE, Maven Surefire etc.; no JAR information at the time.
      */

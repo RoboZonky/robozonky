@@ -20,9 +20,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.function.BiFunction;
 
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +31,11 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentSizeRecommender.class);
 
     private final ParsedStrategy strategy;
-    private final int maximumInvestmentAmount;
+    private final Restrictions restrictions;
 
-    public InvestmentSizeRecommender(final ParsedStrategy strategy, final int maximumInvestmentAmount) {
+    public InvestmentSizeRecommender(final ParsedStrategy strategy, final Restrictions restrictions) {
         this.strategy = strategy;
-        this.maximumInvestmentAmount = maximumInvestmentAmount;
-    }
-
-    private static int roundToNearestIncrement(final int number) {
-        return roundToNearestIncrement(number, Defaults.MINIMUM_INVESTMENT_INCREMENT_IN_CZK);
+        this.restrictions = restrictions;
     }
 
     private static int roundToNearestIncrement(final int number, final int increment) {
@@ -56,9 +52,11 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
     private int[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan) {
         final Rating rating = loan.getRating();
         final int absoluteMinimum = Math.max(strategy.getMinimumInvestmentSizeInCzk(rating),
-                                             Defaults.MINIMUM_INVESTMENT_IN_CZK);
-        final int minimumRecommendation = roundToNearestIncrement(absoluteMinimum);
-        final int maximumUserRecommendation = roundToNearestIncrement(strategy.getMaximumInvestmentSizeInCzk(rating));
+                                             restrictions.getMinimumInvestmentAmount());
+        final int minimumRecommendation = roundToNearestIncrement(absoluteMinimum, restrictions.getInvestmentStep());
+        final int maximumUserRecommendation = roundToNearestIncrement(strategy.getMaximumInvestmentSizeInCzk(rating),
+                                                                      restrictions.getInvestmentStep());
+        final int maximumInvestmentAmount = restrictions.getMaximumInvestmentAmount();
         if (maximumUserRecommendation > maximumInvestmentAmount) {
             LOGGER.info("Maximum investment amount reduced to {} by Zonky.", maximumInvestmentAmount);
         }
@@ -87,7 +85,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
         LOGGER.debug("Recommended investment range for loan #{} is <{}; {}> CZK.", id, minimumRecommendation,
                      maximumRecommendation);
         // round to nearest lower increment
-        final int loanRemaining = (int) loan.getRemainingInvestment();
+        final int loanRemaining = loan.getRemainingInvestment();
         if (minimumRecommendation > balance) {
             LOGGER.debug("Not recommending loan #{} due to minimum over balance.", id);
             return 0;
@@ -96,7 +94,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, Integer, Integer> {
             return 0;
         }
         final int recommendedAmount = Math.min(balance, Math.min(maximumRecommendation, loanRemaining));
-        final int r = roundToNearestIncrement(recommendedAmount);
+        final int r = roundToNearestIncrement(recommendedAmount, restrictions.getInvestmentStep());
         if (r < minimumRecommendation) {
             LOGGER.debug("Not recommending loan #{} due to recommendation below minimum.", id);
             return 0;

@@ -28,7 +28,6 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
-import com.github.robozonky.internal.api.Defaults;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
@@ -45,8 +44,7 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
 
     @Override
     protected boolean isBalanceUnderMinimum(final int current) {
-        final int minimum = Defaults.MINIMUM_INVESTMENT_IN_CZK;
-        return current < minimum;
+        return current < auth.getRestrictions().getMinimumInvestmentAmount();
     }
 
     @Override

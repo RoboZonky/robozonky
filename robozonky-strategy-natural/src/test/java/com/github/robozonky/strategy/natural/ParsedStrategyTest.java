@@ -29,7 +29,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.junit.jupiter.api.Test;
@@ -59,15 +58,14 @@ class ParsedStrategyTest {
         final DefaultPortfolio portfolio = DefaultPortfolio.PROGRESSIVE;
         final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getMinimumBalance()).isEqualTo(Defaults.MINIMUM_INVESTMENT_IN_CZK);
+            softly.assertThat(strategy.getMinimumBalance()).isEqualTo(0);
             softly.assertThat(strategy.getMaximumInvestmentSizeInCzk()).isEqualTo(Integer.MAX_VALUE);
             softly.assertThat(strategy.getMinimumShare(Rating.A))
                     .isEqualTo(portfolio.getDefaultShare(Rating.A));
             softly.assertThat(strategy.getMaximumShare(Rating.B))
                     .isEqualTo(portfolio.getDefaultShare(Rating.B));
             softly.assertThat(strategy.getMinimumInvestmentSizeInCzk(Rating.C)).isEqualTo(0);
-            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(
-                    Defaults.MAXIMUM_INVESTMENT_IN_CZK);
+            softly.assertThat(strategy.getMaximumInvestmentSizeInCzk(Rating.D)).isEqualTo(20_000);
             softly.assertThat(
                     strategy.needsConfirmation(new LoanDescriptor(mockLoan(2)))).isFalse();
         });
