@@ -31,7 +31,6 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.junit.jupiter.api.Test;
@@ -70,7 +69,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(10_000);
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
                                                            portfolio, new Restrictions());
@@ -83,7 +82,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.singleton(filter));
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(10_000);
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(mockLoan(2))),
                                                            portfolio, new Restrictions());
@@ -95,7 +94,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(10_000);
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         final Loan l = mockLoan(1000);
@@ -109,7 +108,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.PROGRESSIVE, Collections.emptySet());
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(200);
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         final Loan l = mockLoan(100_000);
@@ -122,7 +121,7 @@ class NaturalLanguageInvestmentStrategyTest {
         final RecommendedLoan r = result.get(0);
         assertSoftly(softly -> {
             softly.assertThat(r.descriptor()).isEqualTo(ld);
-            softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(Defaults.MINIMUM_INVESTMENT_IN_CZK));
+            softly.assertThat(r.amount()).isEqualTo(BigDecimal.valueOf(200));
             softly.assertThat(r.isConfirmationRequired()).isFalse();
         });
     }

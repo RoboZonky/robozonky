@@ -20,13 +20,12 @@ import java.time.LocalDate;
 import java.time.Period;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 
 public class DefaultValues {
 
     private final DefaultPortfolio portfolio;
-    private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = Defaults.MINIMUM_INVESTMENT_IN_CZK;
+    private int targetPortfolioSize = Integer.MAX_VALUE, minimumBalance = 0;
     private InvestmentSize investmentSize = new InvestmentSize();
     private DefaultInvestmentShare investmentShare = new DefaultInvestmentShare();
     private ExitProperties exitProperties;
@@ -45,10 +44,6 @@ public class DefaultValues {
     }
 
     public void setMinimumBalance(final int minimumBalance) {
-        if (minimumBalance < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
-            throw new IllegalArgumentException("Minimum balance must be at least "
-                                                       + Defaults.MINIMUM_INVESTMENT_IN_CZK + "CZK.");
-        }
         this.minimumBalance = minimumBalance;
     }
 

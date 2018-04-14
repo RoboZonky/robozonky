@@ -31,7 +31,6 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import org.junit.jupiter.api.Test;
@@ -63,7 +62,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance() - 1);
+        when(portfolio.getCzkAvailable()).thenReturn(0);
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
         assertThat(result).isEmpty();
@@ -76,7 +75,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(10_000);
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk());
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
@@ -91,7 +90,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(v, Collections.emptySet(), Collections.emptyMap(), w);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(10_000);
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         final Stream<RecommendedParticipation> result =
                 s.recommend(Collections.singletonList(mockDescriptor()), portfolio, new Restrictions());
@@ -103,7 +102,7 @@ class NaturalLanguagePurchaseStrategyTest {
         final ParsedStrategy p = new ParsedStrategy(DefaultPortfolio.EMPTY);
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(p.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(10_000);
         when(portfolio.getCzkInvested()).thenReturn(p.getMaximumInvestmentSizeInCzk() - 1);
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         final Participation l = mockParticipation();
@@ -120,14 +119,14 @@ class NaturalLanguagePurchaseStrategyTest {
                                                      new FilterSupplier(v, null, Collections.emptySet()));
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(ps);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        when(portfolio.getCzkAvailable()).thenReturn(ps.getMinimumBalance());
+        when(portfolio.getCzkAvailable()).thenReturn(10_000);
         when(portfolio.getCzkInvested()).thenReturn(ps.getMaximumInvestmentSizeInCzk() - 1);
         when(portfolio.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         final Participation p = spy(mockParticipation());
         doReturn(BigDecimal.valueOf(100000)).when(p).getRemainingPrincipal();  // not recommended due to balance
         doReturn(Rating.A).when(p).getRating();
         final Participation p2 = spy(mockParticipation());
-        final int amount = Defaults.MINIMUM_INVESTMENT_IN_CZK - 1; // check amounts under Zonky investment minimum
+        final int amount = 199; // check amounts under Zonky investment minimum
         doReturn(BigDecimal.valueOf(amount)).when(p2).getRemainingPrincipal();
         doReturn(Rating.A).when(p2).getRating();
         final ParticipationDescriptor pd = mockDescriptor(p2);
