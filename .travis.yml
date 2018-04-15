@@ -12,13 +12,14 @@ os:
   - linux
 env: # execution per-module so that PITest doesn't timeout the build, most difficult modules first
   - MODULE=robozonky-app
-  - MODULE=robozonky-installer/robozonky-installer-app # make sure installer can be built
-  - MODULE=robozonky-installer/robozonky-installer-panels # run tests in this module
+  - MODULE=robozonky-installer
   - MODULE=robozonky-notifications
   - MODULE=robozonky-strategy-natural
   - MODULE=robozonky-integration-zonkoid
   - MODULE=robozonky-common
   - MODULE=robozonky-api
+  - MODULE=robozonky-distribution/robozonky-distribution-full
+  - MODULE=robozonky-distribution/robozonky-distribution-installer
 jdk:
   - oraclejdk8
   - oraclejdk9
