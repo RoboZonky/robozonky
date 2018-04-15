@@ -29,6 +29,8 @@
   <artifactId>robozonky-distribution-full</artifactId>
   <packaging>pom</packaging>
 
+  <name>RoboZonky Distribution: Full binary archive</name>
+
   <dependencies>
     <dependency>
       <groupId>com.github.robozonky</groupId>
