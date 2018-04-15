@@ -22,7 +22,6 @@ import java.util.Objects;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.internal.api.Defaults;
 
 /**
  * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link RawLoan} for investing.
@@ -36,8 +35,6 @@ public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanD
     RecommendedLoan(final LoanDescriptor loanDescriptor, final int amount, final boolean confirmationRequired) {
         if (loanDescriptor == null) {
             throw new IllegalArgumentException("Loan descriptor must not be null.");
-        } else if (amount < Defaults.MINIMUM_INVESTMENT_IN_CZK) {
-            throw new IllegalArgumentException("Recommended amount must be >= minimum allowed Zonky investment.");
         }
         this.loanDescriptor = loanDescriptor;
         this.recommendedInvestmentAmount = amount;
