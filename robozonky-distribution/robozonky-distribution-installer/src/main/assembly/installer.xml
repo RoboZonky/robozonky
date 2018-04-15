@@ -30,10 +30,8 @@
   </containerDescriptorHandlers>
   <dependencySets>
     <dependencySet>
-      <outputDirectory>/</outputDirectory>
-      <useProjectArtifact>true</useProjectArtifact>
+      <includeProjectArtifact>false</includeProjectArtifact>
       <unpack>true</unpack>
-      <scope>runtime</scope>
     </dependencySet>
   </dependencySets>
 </assembly>

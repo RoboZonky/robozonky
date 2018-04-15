@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 The RoboZonky Project
+  ~ Copyright 2018 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,31 +24,76 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>robozonky-installer</artifactId>
-  <name>RoboZonky Installer: Parent POM</name>
-  <modules>
-    <module>robozonky-installer-panels</module>
-  </modules>
 
-  <!-- Launch IzPack automatically -->
-  <packaging>pom</packaging>
+  <name>RoboZonky: Custom panels for the installer</name>
 
   <properties>
-    <version.org.codehaus.izpack>5.1.2</version.org.codehaus.izpack>
+    <project.automatic.module.name>com.github.robozonky.installer</project.automatic.module.name>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.codehaus.izpack</groupId>
-        <artifactId>izpack-api</artifactId>
-        <version>${version.org.codehaus.izpack}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.codehaus.izpack</groupId>
-        <artifactId>izpack-panel</artifactId>
-        <version>${version.org.codehaus.izpack}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-integration-zonkoid</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-notifications</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.izpack</groupId>
+      <artifactId>izpack-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.izpack</groupId>
+      <artifactId>izpack-panel</artifactId>
+    </dependency>
+    <dependency> <!-- So that Logback is included in the Installer JAR -->
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.icegreen</groupId>
+      <artifactId>greenmail</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
 </project>

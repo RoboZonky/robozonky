@@ -71,7 +71,7 @@
 
   <dependencySets>
     <dependencySet>
-      <outputDirectory>bin/lib/</outputDirectory>
+      <outputDirectory>bin/</outputDirectory>
       <useStrictFiltering>true</useStrictFiltering>
       <useProjectArtifact>false</useProjectArtifact>
     </dependencySet>

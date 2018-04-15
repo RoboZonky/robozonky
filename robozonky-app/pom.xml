@@ -115,7 +115,6 @@
             <manifest>
               <mainClass>${mainClass}</mainClass>
               <addClasspath>true</addClasspath>
-              <classpathPrefix>lib/</classpathPrefix>
             </manifest>
           </archive>
         </configuration>
