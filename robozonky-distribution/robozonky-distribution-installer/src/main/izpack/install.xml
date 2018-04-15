@@ -1,0 +1,117 @@
+<!--
+  ~ Copyright 2017 The RoboZonky Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<izpack:installation version="5.0"
+                     xmlns:izpack="http://izpack.org/schema/installation"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://izpack.org/schema/installation http://izpack.org/schema/5.0/izpack-installation-5.0.xsd">
+
+  <info>
+    <appname>RoboZonky</appname>
+    <appversion>@{project.version}</appversion>
+    <appsubpath>robozonky</appsubpath>
+    <url>http://www.robozonky.cz/</url>
+    <javaversion>@{java.version}</javaversion>
+    <uninstaller write="no" />
+  </info>
+
+  <variables>
+    <variable name="TargetPanel.dir.windows" value="C:/RoboZonky/@{project.version}"/>
+    <variable name="TargetPanel.dir.unix" value="$USER_HOME/RoboZonky/@{project.version}"/>
+  </variables>
+
+  <jar src="robozonky-distribution-installer-@{project.version}-jar-with-dependencies.jar"/>
+
+  <locale>
+    <langpack iso3="ces"/>
+  </locale>
+
+  <guiprefs width="900" height="650" resizable="yes">
+    <modifier key="useHeadingPanel" value="yes" />
+  </guiprefs>
+
+  <resources>
+    <res id="LicencePanel.licence" src="../../../LICENSE"/>
+    <res id="userInputSpec.xml" src="../src/main/izpack/userInputSpec.xml"/>
+  </resources>
+
+  <conditions>
+    <condition type="variable" id="enableZonkoidPanel">
+      <name>isZonkoidEnabled</name>
+      <value>true</value>
+    </condition>
+    <condition type="variable" id="enableEmailPanel">
+      <name>isEmailEnabled</name>
+      <value>true</value>
+    </condition>
+    <condition type="variable" id="enableJmxPanel">
+      <name>isJmxEnabled</name>
+      <value>true</value>
+    </condition>
+    <condition type="variable" id="isStrategyByFile">
+      <name>strategyType</name>
+      <value>file</value>
+    </condition>
+    <condition type="variable" id="isStrategyByUrl">
+      <name>strategyType</name>
+      <value>url</value>
+    </condition>
+  </conditions>
+
+  <panels>
+    <panel classname="HelloPanel"/>
+    <panel classname="LicencePanel">
+      <configuration>
+        <param name="console-text-paging" value="true" />
+        <param name="console-text-wordwrap" value="false" />
+      </configuration>
+    </panel>
+    <panel classname="TargetPanel">
+      <validator classname="com.github.robozonky.installer.InstallDirValidator"/>
+    </panel>
+    <panel classname="UserInputPanel" id="zonkyUserInput">
+      <validator classname="com.github.robozonky.installer.ZonkySettingsValidator"/>
+    </panel>
+    <panel classname="UserInputPanel" id="zonkoidUserInput" condition="enableZonkoidPanel">
+      <validator classname="com.github.robozonky.installer.ZonkoidSettingsValidator"/>
+    </panel>
+    <panel classname="UserInputPanel" id="emailUserInput" condition="enableEmailPanel">
+      <validator classname="com.github.robozonky.installer.EmailSettingsValidator"/>
+    </panel>
+    <panel classname="UserInputPanel" id="jmxUserInput" condition="enableJmxPanel" />
+    <panel classname="UserInputPanel" id="strategyUserInput">
+      <validator classname="com.github.robozonky.installer.StrategySettingsValidator"/>
+    </panel>
+    <panel classname="SummaryPanel"/>
+    <panel classname="InstallPanel"/>
+    <panel classname="FinishPanel"/>
+  </panels>
+
+  <packs>
+    <pack name="RoboZonky: Binární distribuce" required="yes">
+      <description>Jádro investičního robota a základní podpůrné soubory</description>
+      <file src="robozonky-distribution-full-@{project.version}.tar.xz"
+            targetdir="${INSTALL_PATH}/Dist"
+            override="true"
+            unpack="true" />
+    </pack>
+  </packs>
+
+  <listeners>
+    <listener classname="com.github.robozonky.installer.RoboZonkyInstallerListener" stage="install"/>
+  </listeners>
+
+</izpack:installation>

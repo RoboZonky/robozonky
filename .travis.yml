@@ -12,8 +12,7 @@ os:
   - linux
 env: # execution per-module so that PITest doesn't timeout the build, most difficult modules first
   - MODULE=robozonky-app
-  - MODULE=robozonky-installer/robozonky-installer-app # make sure installer can be built
-  - MODULE=robozonky-installer/robozonky-installer-panels # run tests in this module
+  - MODULE=robozonky-installer
   - MODULE=robozonky-notifications
   - MODULE=robozonky-strategy-natural
   - MODULE=robozonky-integration-zonkoid
@@ -28,6 +27,6 @@ cache:
   directories:
   - $HOME/.m2
 install: # build all required modules for the given module, no tests
-  - mvn --batch-mode -T 1.5C -pl $MODULE -am clean install -DskipTests -Dgpg.skip
+  - mvn --batch-mode -T 1.5C -pl $MODULE -am install -DskipTests -Dgpg.skip
 script: # test the one module
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip

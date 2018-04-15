@@ -30,6 +30,7 @@
     <module>robozonky-common</module>
     <module>robozonky-strategy-natural</module>
     <module>robozonky-test</module>
+    <module>robozonky-distribution</module>
   </modules>
   <packaging>pom</packaging>
   <name>RoboZonky: Easy automated investing with Zonky</name>
@@ -51,10 +52,11 @@
     <version.org.apache.maven>3.5.2</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
     <surefire.version>2.19.1</surefire.version> <!-- 2.20 doesn't work with JUnit 5 -->
-    <version.org.jboss.resteasy>3.5.0.Final</version.org.jboss.resteasy>
-    <version.org.slf4j>1.7.25</version.org.slf4j>
     <version.org.antlr>4.7.1</version.org.antlr>
+    <version.org.codehaus.izpack>5.1.2</version.org.codehaus.izpack>
+    <version.org.jboss.resteasy>3.5.0.Final</version.org.jboss.resteasy>
     <version.org.junit>5.1.0</version.org.junit>
+    <version.org.slf4j>1.7.25</version.org.slf4j>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -95,27 +97,15 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.robozonky</groupId>
-        <artifactId>robozonky-app</artifactId>
+        <groupId>com.github.robozonky.distribution</groupId>
+        <artifactId>robozonky-distribution-full</artifactId>
         <version>${project.version}</version>
-        <classifier>dist</classifier>
-        <type>zip</type>
+        <type>tar.xz</type>
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>
         <artifactId>robozonky-installer</artifactId>
         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky.installer</groupId>
-        <artifactId>robozonky-installer-panels</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.robozonky.installer</groupId>
-        <artifactId>robozonky-installer-panels</artifactId>
-        <version>${project.version}</version>
-        <classifier>jar-with-dependencies</classifier>
       </dependency>
       <dependency>
         <groupId>com.github.robozonky</groupId>
@@ -185,6 +175,17 @@
         <groupId>javax.activation</groupId>
         <artifactId>activation</artifactId>
         <version>1.1.1</version>
+      </dependency>
+      <!-- Installer -->
+      <dependency>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-api</artifactId>
+        <version>${version.org.codehaus.izpack}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-panel</artifactId>
+        <version>${version.org.codehaus.izpack}</version>
       </dependency>
       <!-- Misc. -->
       <dependency>
@@ -434,6 +435,10 @@
         </plugin>
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
           <version>3.1.0</version>
         </plugin>
         <plugin>
