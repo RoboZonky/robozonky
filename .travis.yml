@@ -18,6 +18,7 @@ env: # execution per-module so that PITest doesn't timeout the build, most diffi
   - MODULE=robozonky-integration-zonkoid
   - MODULE=robozonky-common
   - MODULE=robozonky-api
+  - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
 jdk:
   - oraclejdk8
   - oraclejdk9
@@ -27,6 +28,6 @@ cache:
   directories:
   - $HOME/.m2
 install: # build all required modules for the given module, no tests
-  - mvn --batch-mode -T 1.5C -pl $MODULE -am install -DskipTests -Dgpg.skip
+  - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
 script: # test the one module
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
