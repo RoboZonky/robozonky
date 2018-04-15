@@ -30,7 +30,6 @@
   </containerDescriptorHandlers>
   <dependencySets>
     <dependencySet>
-      <includeProjectArtifact>false</includeProjectArtifact>
       <unpack>true</unpack>
     </dependencySet>
   </dependencySets>
