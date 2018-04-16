@@ -72,7 +72,7 @@ public class ApiProvider implements AutoCloseable {
      * Instantiate an API as a RESTEasy client proxy.
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
-     * @param token Supplies a valid OAuth token to authenticate with.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
@@ -127,7 +127,7 @@ public class ApiProvider implements AutoCloseable {
 
     /**
      * Retrieve user-specific Zonky loan API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
     private PaginatedApi<RawLoan, LoanApi> marketplace(final Supplier<ZonkyApiToken> token) {
@@ -136,7 +136,7 @@ public class ApiProvider implements AutoCloseable {
 
     /**
      * Retrieve user-specific Zonky participation API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
     private PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
@@ -145,7 +145,7 @@ public class ApiProvider implements AutoCloseable {
 
     /**
      * Retrieve user-specific Zonky wallet API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
     private PaginatedApi<BlockedAmount, WalletApi> wallet(final Supplier<ZonkyApiToken> token) {
@@ -154,7 +154,7 @@ public class ApiProvider implements AutoCloseable {
 
     /**
      * Retrieve user-specific Zonky portfolio API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
     private PaginatedApi<RawInvestment, PortfolioApi> portfolio(final Supplier<ZonkyApiToken> token) {
@@ -163,7 +163,7 @@ public class ApiProvider implements AutoCloseable {
 
     /**
      * Retrieve user-specific Zonky control API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
     private Api<ControlApi> control(final Supplier<ZonkyApiToken> token) {
@@ -174,7 +174,7 @@ public class ApiProvider implements AutoCloseable {
 
     /**
      * Retrieve user-specific Zonky API which provides information on loan collections.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
     private PaginatedApi<RawDevelopment, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
