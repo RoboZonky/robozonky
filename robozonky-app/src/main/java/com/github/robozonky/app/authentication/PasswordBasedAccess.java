@@ -17,6 +17,7 @@
 package com.github.robozonky.app.authentication;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
@@ -51,7 +52,8 @@ class PasswordBasedAccess extends AbstractAuthenticated {
 
     @Override
     public <T> T call(final Function<Zonky, T> op) {
-        final ZonkyApiToken token = PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
+        final Supplier<ZonkyApiToken> token =
+                () -> PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
         return apis.authenticated(token, (zonky) -> {
             try {
                 return op.apply(zonky);

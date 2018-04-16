@@ -16,15 +16,26 @@
 
 package com.github.robozonky.common.remote;
 
+import java.util.function.Supplier;
+import javax.ws.rs.client.ClientRequestContext;
+
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
 class AuthenticatedFilter extends RoboZonkyFilter {
 
     private static final char[] EMPTY_TOKEN = new char[0];
+    private final Supplier<ZonkyApiToken> token;
 
-    public AuthenticatedFilter(final ZonkyApiToken token) {
+    public AuthenticatedFilter(final Supplier<ZonkyApiToken> token) {
         // null token = no token
-        final char[] t = token == null ? AuthenticatedFilter.EMPTY_TOKEN : token.getAccessToken();
+        this.token = token;
+    }
+
+    @Override
+    public void filter(ClientRequestContext clientRequestContext) {
+        final ZonkyApiToken supplied = token == null ? null : token.get();
+        final char[] t = supplied == null ? AuthenticatedFilter.EMPTY_TOKEN : supplied.getAccessToken();
         this.setRequestHeader("Authorization", "Bearer " + String.valueOf(t));
+        super.filter(clientRequestContext);
     }
 }

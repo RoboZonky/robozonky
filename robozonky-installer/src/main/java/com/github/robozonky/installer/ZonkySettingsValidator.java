@@ -20,9 +20,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import javax.ws.rs.ServerErrorException;
 
-import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
-import com.github.robozonky.common.remote.Zonky;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
@@ -52,10 +50,13 @@ public class ZonkySettingsValidator extends AbstractValidator {
         final ApiProvider p = apiSupplier.get();
         return p.oauth((oauth) -> {
             try {
-                LOGGER.info("Logging in.");
-                final ZonkyApiToken token = oauth.login(username, password.toCharArray());
-                LOGGER.info("Logging out.");
-                p.authenticated(token, Zonky::logout);
+                p.authenticated(() -> {
+                    LOGGER.info("Logging in.");
+                    return oauth.login(username, password.toCharArray());
+                }, zonky -> {
+                    LOGGER.info("Logging out.");
+                    zonky.logout();
+                });
                 return DataValidator.Status.OK;
             } catch (final ServerErrorException t) {
                 LOGGER.log(Level.SEVERE, "Failed accessing Zonky.", t);

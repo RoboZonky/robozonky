@@ -46,11 +46,10 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
             final Function f = i.getArgument(0);
             return f.apply(oauth);
         });
-        when(api.authenticated(any(ZonkyApiToken.class), any(Function.class)))
-                .then(i -> {
-                    final Function f = i.getArgument(1);
-                    return f.apply(z);
-                });
+        when(api.authenticated(any(), any(Function.class))).then(i -> {
+            final Function f = i.getArgument(1);
+            return f.apply(z);
+        });
         return api;
     }
 

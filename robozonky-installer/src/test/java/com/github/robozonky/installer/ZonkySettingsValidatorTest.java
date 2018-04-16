@@ -19,6 +19,7 @@ package com.github.robozonky.installer;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 
@@ -38,10 +39,6 @@ class ZonkySettingsValidatorTest {
 
     private static final String USERNAME = "someone@somewhere.cz", PASSWORD = UUID.randomUUID().toString();
 
-    private static ZonkyApiToken mockToken(final ZonkyApiToken token) {
-        return token == null ? any() : eq(token);
-    }
-
     private static ApiProvider mockApiProvider(final OAuth oauth, final ZonkyApiToken token, final Zonky zonky) {
         final ApiProvider api = mock(ApiProvider.class);
         when(api.oauth(any(Function.class))).then(i -> {
@@ -49,19 +46,19 @@ class ZonkySettingsValidatorTest {
             return f.apply(oauth);
         });
         doAnswer(i -> {
+            final Supplier t = i.getArgument(0);
+            assertThat(t.get()).isEqualTo(token);
             final Function f = i.getArgument(1);
             return f.apply(zonky);
-        }).when(api).authenticated(mockToken(token), any(Function.class));
+        }).when(api).authenticated(any(), any(Function.class));
         doAnswer(i -> {
+            final Supplier t = i.getArgument(0);
+            assertThat(t.get()).isEqualTo(token);
             final Consumer f = i.getArgument(1);
             f.accept(zonky);
             return null;
-        }).when(api).authenticated(mockToken(token), any(Consumer.class));
+        }).when(api).authenticated(any(), any(Consumer.class));
         return api;
-    }
-
-    static ApiProvider mockApiProvider() {
-        return mockApiProvider(mock(OAuth.class));
     }
 
     private static ApiProvider mockApiProvider(final OAuth oAuth) {

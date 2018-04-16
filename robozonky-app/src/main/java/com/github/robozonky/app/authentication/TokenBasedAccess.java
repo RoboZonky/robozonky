@@ -46,7 +46,7 @@ class TokenBasedAccess extends AbstractAuthenticated {
 
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
-        return apis.authenticated(getToken(), operation);
+        return apis.authenticated(this::getToken, operation);
     }
 
     @Override
