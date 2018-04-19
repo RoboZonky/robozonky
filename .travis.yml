@@ -17,19 +17,7 @@ os:
   - linux
 jdk:
   - oraclejdk9
-      before_script:
-        - jdk_switcher use oraclejdk9
-      addons: # make sure we're using the latest Java as Travis default is quite old
-        apt:
-          packages:
-            - oracle-java9-installer
   - oraclejdk8
-      before_script:
-        - jdk_switcher use oraclejdk8
-      addons: # make sure we're using the latest Java as Travis default is quite old
-        apt:
-          packages:
-            - oracle-java8-installer
 cache:
   directories:
   - $HOME/.m2
@@ -39,3 +27,19 @@ script: # test the one module
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
 matrix: # fail all if one fails
   fast_finish: true
+  include:
+    - jdk: openjdk9
+      os: linux
+      before_script:
+        - jdk_switcher use oraclejdk9
+      addons: # make sure we're using the latest Java as Travis default is quite old
+        apt:
+          packages:
+            - oracle-java9-installer
+    - jdk: openjdk8
+      before_script:
+        - jdk_switcher use oraclejdk8
+      addons: # make sure we're using the latest Java as Travis default is quite old
+        apt:
+          packages:
+            - oracle-java8-installer
