@@ -24,6 +24,19 @@ import javax.xml.bind.annotation.XmlElement;
 
 public class Statistics extends BaseEntity {
 
+    private BigDecimal currentProfitability, expectedProfitability;
+    private CurrentOverview currentOverview;
+    private OverallOverview overallOverview;
+    private OverallPortfolio overallPortfolio;
+    private SuperInvestorOverview superInvestorOverview;
+    private List<RiskPortfolio> riskPortfolio;
+    private List<Instalment> cashFlow;
+    private OffsetDateTime timestamp;
+
+    private Statistics() {
+        // for JAXB
+    }
+
     public static Statistics empty() {
         final Statistics s = new Statistics();
         s.currentProfitability = BigDecimal.ZERO;
@@ -38,17 +51,8 @@ public class Statistics extends BaseEntity {
         return s;
     }
 
-    private BigDecimal currentProfitability, expectedProfitability;
-    private CurrentOverview currentOverview;
-    private OverallOverview overallOverview;
-    private OverallPortfolio overallPortfolio;
-    private SuperInvestorOverview superInvestorOverview;
-    private List<RiskPortfolio> riskPortfolio;
-    private List<Instalment> cashFlow;
-    private OffsetDateTime timestamp;
-
-    private Statistics() {
-        // for JAXB
+    private static <T> List<T> unmodifiableOrEmpty(final List<T> possiblyNull) {
+        return possiblyNull == null ? Collections.emptyList() : Collections.unmodifiableList(possiblyNull);
     }
 
     @XmlElement
@@ -77,8 +81,8 @@ public class Statistics extends BaseEntity {
     }
 
     @XmlElement
-    public List<RiskPortfolio> getRiskPortfolio() {
-        return Collections.unmodifiableList(riskPortfolio);
+    public List<RiskPortfolio> getRiskPortfolio() { // "riskPortfolio" is null for new Zonky users
+        return unmodifiableOrEmpty(riskPortfolio);
     }
 
     @XmlElement
@@ -88,7 +92,7 @@ public class Statistics extends BaseEntity {
 
     @XmlElement
     public List<Instalment> getCashFlow() {
-        return Collections.unmodifiableList(cashFlow);
+        return unmodifiableOrEmpty(cashFlow);
     }
 
     @XmlElement
