@@ -21,25 +21,11 @@ jdk:
 cache:
   directories:
   - $HOME/.m2
+before_install:
+  - sudo apt-get -qq update
 install: # build all required modules for the given module, no tests
   - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
 script: # test the one module
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
 matrix: # fail all if one fails
   fast_finish: true
-  include:
-    - jdk: openjdk9
-      os: linux
-      before_script:
-        - jdk_switcher use oraclejdk9
-      addons: # make sure we're using the latest Java as Travis default is quite old
-        apt:
-          packages:
-            - oracle-java9-installer
-    - jdk: openjdk8
-      before_script:
-        - jdk_switcher use oraclejdk8
-      addons: # make sure we're using the latest Java as Travis default is quite old
-        apt:
-          packages:
-            - oracle-java8-installer
