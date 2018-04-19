@@ -22,7 +22,7 @@ cache:
   directories:
   - $HOME/.m2
 before_install:
-  - sudo apt-get -qq update
+  - sudo apt-get -qq update && apt-get --qq upgrade *java* *jdk*
 install: # build all required modules for the given module, no tests
   - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
 script: # test the one module
