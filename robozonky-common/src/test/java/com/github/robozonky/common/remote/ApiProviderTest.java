@@ -48,7 +48,7 @@ class ApiProviderTest {
     void authenticatedProperlyClosed() {
         final ApiProvider p = spy(new ApiProvider());
         try (final ApiProvider provider = p) {
-            final Zonky result = provider.authenticated(mockToken(), Function.identity());
+            final Zonky result = provider.authenticated(ApiProviderTest::mockToken, Function.identity());
             assertThat(result).isNotNull();
         }
         verify(p).close();

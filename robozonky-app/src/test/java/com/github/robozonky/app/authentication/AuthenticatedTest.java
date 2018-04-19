@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -46,11 +47,12 @@ class AuthenticatedTest extends AbstractZonkyLeveragingTest {
             final Function f = i.getArgument(0);
             return f.apply(oauth);
         });
-        when(api.authenticated(any(ZonkyApiToken.class), any(Function.class)))
-                .then(i -> {
-                    final Function f = i.getArgument(1);
-                    return f.apply(z);
-                });
+        when(api.authenticated(any(), any(Function.class))).then(i -> {
+            final Supplier<ZonkyApiToken> s = i.getArgument(0);
+            s.get();
+            final Function f = i.getArgument(1);
+            return f.apply(z);
+        });
         return api;
     }
 

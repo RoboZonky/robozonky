@@ -49,7 +49,7 @@ class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
     @Override
     protected RoboZonkyFilter getTestedFilter() {
-        return new AuthenticatedFilter(AuthenticatedFilterTest.TOKEN);
+        return new AuthenticatedFilter(() -> AuthenticatedFilterTest.TOKEN);
     }
 
     @Test
@@ -73,7 +73,7 @@ class AuthenticatedFilterTest extends AbstractCommonFilterTest {
         when(ctx2.getEntityStream()).thenReturn(c(token));
         when(ctx2.getStatusInfo()).thenReturn(Response.Status.fromStatusCode(expectedCode));
         when(ctx2.getStatus()).thenReturn(expectedCode);
-        final RoboZonkyFilter filter = new AuthenticatedFilter(token);
+        final RoboZonkyFilter filter = new AuthenticatedFilter(() -> token);
         filter.filter(ctx, ctx2);
         verify(ctx2, times(1)).setStatus(401);
     }

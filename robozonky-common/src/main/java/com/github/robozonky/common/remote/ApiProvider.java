@@ -19,6 +19,7 @@ package com.github.robozonky.common.remote;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.CollectionsApi;
 import com.github.robozonky.api.remote.ControlApi;
@@ -71,12 +72,12 @@ public class ApiProvider implements AutoCloseable {
      * Instantiate an API as a RESTEasy client proxy.
      * @param api RESTEasy endpoint.
      * @param url URL to the web API represented by the endpoint.
-     * @param token OAuth token to authenticate with.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @param <T> API type.
      * @return RESTEasy client proxy for the API, ready to be called.
      */
     protected <S, T> PaginatedApi<S, T> obtainPaginated(final Class<T> api, final String url,
-                                                        final ZonkyApiToken token) {
+                                                        final Supplier<ZonkyApiToken> token) {
         return new PaginatedApi<>(api, url, token, client);
     }
 
@@ -111,61 +112,61 @@ public class ApiProvider implements AutoCloseable {
         return this.marketplace(LoanApi.class, ApiProvider.ZONKY_URL);
     }
 
-    private Zonky authenticated(final ZonkyApiToken token) {
+    private Zonky authenticated(final Supplier<ZonkyApiToken> token) {
         return new Zonky(this.control(token), this.marketplace(token), this.secondaryMarketplace(token),
                          this.portfolio(token), this.wallet(token), this.collections(token));
     }
 
-    public void authenticated(final ZonkyApiToken token, final Consumer<Zonky> operation) {
+    public void authenticated(final Supplier<ZonkyApiToken> token, final Consumer<Zonky> operation) {
         authenticated(token, toFunction(operation));
     }
 
-    public <T> T authenticated(final ZonkyApiToken token, final Function<Zonky, T> operation) {
+    public <T> T authenticated(final Supplier<ZonkyApiToken> token, final Function<Zonky, T> operation) {
         return operation.apply(authenticated(token));
     }
 
     /**
      * Retrieve user-specific Zonky loan API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<RawLoan, LoanApi> marketplace(final ZonkyApiToken token) {
+    private PaginatedApi<RawLoan, LoanApi> marketplace(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(LoanApi.class, ApiProvider.ZONKY_URL, token);
     }
 
     /**
      * Retrieve user-specific Zonky participation API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final ZonkyApiToken token) {
+    private PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(ParticipationApi.class, ApiProvider.ZONKY_URL, token);
     }
 
     /**
      * Retrieve user-specific Zonky wallet API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<BlockedAmount, WalletApi> wallet(final ZonkyApiToken token) {
+    private PaginatedApi<BlockedAmount, WalletApi> wallet(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(WalletApi.class, ApiProvider.ZONKY_URL, token);
     }
 
     /**
      * Retrieve user-specific Zonky portfolio API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<RawInvestment, PortfolioApi> portfolio(final ZonkyApiToken token) {
+    private PaginatedApi<RawInvestment, PortfolioApi> portfolio(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(PortfolioApi.class, ApiProvider.ZONKY_URL, token);
     }
 
     /**
      * Retrieve user-specific Zonky control API which requires authentication.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private Api<ControlApi> control(final ZonkyApiToken token) {
+    private Api<ControlApi> control(final Supplier<ZonkyApiToken> token) {
         final ControlApi proxy = ProxyFactory.newProxy(client, new AuthenticatedFilter(token), ControlApi.class,
                                                        ApiProvider.ZONKY_URL);
         return new Api<>(proxy);
@@ -173,10 +174,10 @@ public class ApiProvider implements AutoCloseable {
 
     /**
      * Retrieve user-specific Zonky API which provides information on loan collections.
-     * @param token The Zonky API token, representing an control user.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    private PaginatedApi<RawDevelopment, CollectionsApi> collections(final ZonkyApiToken token) {
+    private PaginatedApi<RawDevelopment, CollectionsApi> collections(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(CollectionsApi.class, ApiProvider.ZONKY_URL, token);
     }
 

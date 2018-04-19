@@ -18,6 +18,7 @@ package com.github.robozonky.common.remote;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -33,7 +34,8 @@ class PaginatedApi<S, T> {
     private final String url;
     private final ResteasyClient client;
 
-    PaginatedApi(final Class<T> api, final String url, final ZonkyApiToken token, final ResteasyClient client) {
+    PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
+                 final ResteasyClient client) {
         this.api = api;
         this.url = url;
         this.client = client;
