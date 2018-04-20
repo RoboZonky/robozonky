@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -30,6 +30,7 @@ import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,6 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
         return false;
     }
 
-
     @Override
     protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
         final int[] idsFromMarketplace = marketplace.stream().mapToInt(Participation::getId).toArray();
@@ -68,7 +68,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
-        final Stream<ParticipationDescriptor> participations = marketplace.parallelStream()
+        final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
                 .map(p -> toDescriptor(p, auth))
                 .filter(d -> { // never re-purchase what was once sold
                     final int loanId = d.item().getLoanId();
@@ -77,7 +77,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
                         LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
                     }
                     return !wasSoldBefore;
-                });
+                }).collect(Collectors.toCollection(FastList::new));
         final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
         return Session.purchase(portfolio, auth, participations, s, dryRun);
     }

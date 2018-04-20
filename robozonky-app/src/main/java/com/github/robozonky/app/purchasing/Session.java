@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
@@ -39,6 +38,7 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.util.SessionState;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,19 +57,23 @@ final class Session {
     private final Authenticated authenticated;
     private final boolean isDryRun;
     private final Portfolio portfolio;
+    private final SessionState<ParticipationDescriptor> discarded;
     private PortfolioOverview portfolioOverview;
 
-    Session(final Portfolio portfolio, final Stream<ParticipationDescriptor> marketplace, final Authenticated auth,
+    Session(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace, final Authenticated auth,
             final boolean dryRun) {
         this.authenticated = auth;
         this.isDryRun = dryRun;
-        this.stillAvailable = marketplace.collect(Collectors.toCollection(FastList::new));
+        this.discarded = new SessionState<>(marketplace, d -> d.item().getId(), "discardedParticipations");
+        this.stillAvailable = marketplace.stream()
+                .filter(p -> !discarded.contains(p))
+                .collect(Collectors.toCollection(FastList::new));
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
 
     public static Collection<Investment> purchase(final Portfolio portfolio, final Authenticated auth,
-                                                  final Stream<ParticipationDescriptor> items,
+                                                  final Collection<ParticipationDescriptor> items,
                                                   final RestrictedPurchaseStrategy strategy,
                                                   final boolean dryRun) {
         final Session session = new Session(portfolio, items, auth, dryRun);
@@ -89,6 +93,7 @@ final class Session {
         do {
             invested = strategy.apply(getAvailable(), portfolioOverview)
                     .filter(r -> portfolioOverview.getCzkAvailable() >= r.amount().intValue())
+                    .filter(r -> !discarded.contains(r.descriptor()))
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -129,6 +134,7 @@ final class Session {
         if (purchased) {
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);
+            discarded.put(recommendation.descriptor()); // to make dry run work
             Events.fire(new InvestmentPurchasedEvent(i, loan, portfolioOverview));
         }
         return purchased;
@@ -139,7 +145,6 @@ final class Session {
         final int id = i.getLoanId();
         stillAvailable.removeIf(l -> l.item().getLoanId() == id);
         portfolio.updateBlockedAmounts(authenticated);
-        // FIXME fix dry run
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
     }

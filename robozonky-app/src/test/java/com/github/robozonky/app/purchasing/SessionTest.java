@@ -18,6 +18,7 @@ package com.github.robozonky.app.purchasing;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -48,7 +49,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.empty(), null, true);
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.emptyList(), null, true);
         assertThat(i).isEmpty();
     }
 
@@ -69,7 +70,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), true);
         assertSoftly(softly -> {
             softly.assertThat(i).isEmpty();
@@ -107,7 +108,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), true);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
@@ -138,7 +139,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), false);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);

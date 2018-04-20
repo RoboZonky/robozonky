@@ -40,6 +40,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Portfolio;
+import com.github.robozonky.app.util.SessionState;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ final class Session {
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
     private final Authenticated authenticated;
     private final Investor investor;
-    private final SessionState state;
+    private final SessionState<LoanDescriptor> discarded, seen;
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
@@ -66,10 +67,11 @@ final class Session {
             final Authenticated auth) {
         this.authenticated = auth;
         this.investor = investor;
-        this.state = new SessionState(marketplace);
+        this.discarded = new SessionState<>(marketplace, d -> d.item().getId(), "discardedLoans");
+        this.seen = new SessionState<>(marketplace, d -> d.item().getId(), "seenLoans");
         this.loansStillAvailable = marketplace.stream()
                 .distinct()
-                .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> isSameLoan(l, l2)))
+                .filter(l -> !discarded.contains(l))
                 .filter(l -> !l.item().getMyInvestment().isPresent())
                 .collect(Collectors.toCollection(FastList::new));
         this.portfolio = portfolio;
@@ -143,7 +145,7 @@ final class Session {
             return false;
         }
         Events.fire(new InvestmentRequestedEvent(recommendation));
-        final boolean seenBefore = state.getSeenLoans().stream().anyMatch(l -> isSameLoan(l, loanId));
+        final boolean seenBefore = seen.contains(loan);
         final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         Session.LOGGER.debug("Response for loan {}: {}.", loanId, response);
         final String providerId = investor.getConfirmationProviderId().orElse("-");
@@ -197,11 +199,11 @@ final class Session {
 
     private void discard(final LoanDescriptor loan) {
         skip(loan);
-        state.discard(loan);
+        discarded.put(loan);
     }
 
     private void skip(final LoanDescriptor loan) {
         loansStillAvailable.removeIf(l -> isSameLoan(loan, l));
-        state.skip(loan);
+        seen.put(loan);
     }
 }
