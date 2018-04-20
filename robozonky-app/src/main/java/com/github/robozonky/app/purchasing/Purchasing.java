@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -72,10 +71,10 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
         final Stream<ParticipationDescriptor> participations = marketplace.parallelStream()
                 .map(p -> toDescriptor(p, auth))
                 .filter(d -> { // never re-purchase what was once sold
-                    final Loan l = d.related();
-                    final boolean wasSoldBefore = portfolio.wasOnceSold(l);
+                    final int loanId = d.item().getLoanId();
+                    final boolean wasSoldBefore = portfolio.wasOnceSold(loanId);
                     if (wasSoldBefore) {
-                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", l.getId());
+                        LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
                     }
                     return !wasSoldBefore;
                 });

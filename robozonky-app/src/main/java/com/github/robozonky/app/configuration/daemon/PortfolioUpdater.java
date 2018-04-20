@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -44,7 +44,7 @@ public class PortfolioUpdater implements Runnable,
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
     private final Authenticated authenticated;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
-    private final Collection<PortfolioDependant> dependants = new CopyOnWriteArraySet<>();
+    private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final BlockedAmountsUpdater blockedAmountsUpdater;
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
@@ -86,8 +86,10 @@ public class PortfolioUpdater implements Runnable,
     }
 
     public void registerDependant(final PortfolioDependant updater) {
-        LOGGER.debug("Registering dependant: {}.", updater);
-        dependants.add(updater);
+        if (!dependants.contains(updater)) {
+            LOGGER.debug("Registering dependant: {}.", updater);
+            dependants.add(updater);
+        }
     }
 
     Collection<PortfolioDependant> getRegisteredDependants() {

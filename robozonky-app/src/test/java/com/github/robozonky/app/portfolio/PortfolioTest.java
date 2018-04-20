@@ -40,32 +40,32 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void newSale() {
+        final int loanId = 1;
         final Loan l = Loan.custom()
-                .setId(1)
+                .setId(loanId)
                 .setRating(Rating.D)
                 .setAmount(1000)
                 .setMyInvestment(mockMyInvestment())
                 .build();
         final Investment i = Investment.fresh(l, 200)
-                .setId(1)
+                .setId(loanId)
                 .build();
-        final BlockedAmount ba = new BlockedAmount(l.getId(), BigDecimal.valueOf(l.getAmount()),
+        final BlockedAmount ba = new BlockedAmount(loanId, BigDecimal.valueOf(l.getAmount()),
                                                    TransactionCategory.SMP_SALE_FEE);
         final Zonky z = harmlessZonky(10_000);
-        when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        when(z.getInvestment(eq(1))).thenReturn(Optional.of(i));
+        when(z.getLoan(eq(loanId))).thenReturn(l);
+        when(z.getInvestment(eq(loanId))).thenReturn(Optional.of(i));
         final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
-                                                  mockBalance(z));
-        assertThat(portfolio.wasOnceSold(l)).isFalse();
+        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0], mockBalance(z));
+        assertThat(portfolio.wasOnceSold(loanId)).isFalse();
         portfolio.newBlockedAmount(auth, ba);
-        assertThat(portfolio.wasOnceSold(l)).isTrue();
+        assertThat(portfolio.wasOnceSold(loanId)).isTrue();
         final List<Event> events = this.getNewEvents();
         assertThat(events).first().isInstanceOf(InvestmentSoldEvent.class);
         // doing the same thing again shouldn't do anything
         this.readPreexistingEvents();
         portfolio.newBlockedAmount(auth, ba);
-        assertThat(portfolio.wasOnceSold(l)).isTrue();
+        assertThat(portfolio.wasOnceSold(loanId)).isTrue();
         final List<Event> newEvents = this.getNewEvents();
         assertThat(newEvents).isEmpty();
     }

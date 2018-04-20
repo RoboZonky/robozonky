@@ -19,7 +19,7 @@ package com.github.robozonky.app.configuration.daemon;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 
-public class BlockedAmountsUpdater implements Runnable {
+class BlockedAmountsUpdater implements Runnable {
 
     private final Authenticated authenticated;
     private final PortfolioSupplier portfolio;

@@ -85,7 +85,7 @@ class Util {
                     }
                 }).collect(Collectors.toSet());
         if (!nullReturningGetters.isEmpty()) {
-            LOGGER.warn("The following methods on {} returned null: {}.", target, nullReturningGetters);
+            LOGGER.debug("The following methods on {} returned null: {}.", target, nullReturningGetters);
         }
     }
 

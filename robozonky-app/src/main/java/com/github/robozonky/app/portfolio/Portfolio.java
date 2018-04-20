@@ -75,11 +75,11 @@ public class Portfolio {
     /**
      * Whether or not a given loan is, or at any point in time was, placed on the secondary marketplace by the current
      * user and bought by someone else.
-     * @param loan Loan in question.
+     * @param loanId Loan in question.
      * @return True if the loan had been sold at least once before.
      */
-    public boolean wasOnceSold(final Loan loan) {
-        return loansSold.contains(loan.getId());
+    public boolean wasOnceSold(final int loanId) {
+        return loansSold.contains(loanId);
     }
 
     private Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
@@ -103,32 +103,37 @@ public class Portfolio {
      * @param blockedAmount Blocked amount to register.
      */
     public void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
+        LOGGER.debug("Processing blocked amount: #{}.", blockedAmount);
         final int loanId = blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                if (investmentNotPending(loanId)) {
-                    LOGGER.trace("Registering a new investment to loan #{}.", loanId);
-                    final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                        return start.add(blockedAmount.getAmount());
-                    });
-                    investmentsPending.add(loanId);
+                synchronized (this) {
+                    if (investmentNotPending(loanId)) {
+                        final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                        blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                            final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                            return start.add(blockedAmount.getAmount());
+                        });
+                        investmentsPending.add(loanId);
+                        LOGGER.debug("Registered a new investment to loan #{}.", loanId);
+                    }
                 }
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
-                final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                if (!wasOnceSold(l)) {
-                    final Investment i = lookupOrFail(l, auth);
-                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                        return start.subtract(i.getRemainingPrincipal());
-                    });
-                    loansSold.add(l.getId());
-                    // notify of the fact that the participation had been sold on the Zonky web
-                    final PortfolioOverview po = calculateOverview();
-                    Events.fire(new InvestmentSoldEvent(i, l, po));
+                synchronized (this) {
+                    if (!wasOnceSold(loanId)) {
+                        final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                        final Investment i = lookupOrFail(l, auth);
+                        blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                            final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                            return start.subtract(i.getRemainingPrincipal());
+                        });
+                        loansSold.add(l.getId());
+                        // notify of the fact that the participation had been sold on the Zonky web
+                        final PortfolioOverview po = calculateOverview();
+                        Events.fire(new InvestmentSoldEvent(i, l, po));
+                    }
                 }
                 return;
             default: // no other notable events
