@@ -84,38 +84,6 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void properDryRun() {
-        final Loan l = Loan.custom()
-                .setId(1)
-                .setAmount(200)
-                .setRating(Rating.D)
-                .setRemainingInvestment(200)
-                .setMyInvestment(mockMyInvestment())
-                .build();
-        final Participation p = mock(Participation.class);
-        when(p.getLoanId()).thenReturn(l.getId());
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
-        final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any()))
-                .thenAnswer(i -> {
-                    final Collection<ParticipationDescriptor> participations = i.getArgument(0);
-                    return participations.stream()
-                            .map(ParticipationDescriptor::recommend)
-                            .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
-                });
-        final Zonky z = harmlessZonky(100_000);
-        when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
-                                                          new RestrictedPurchaseStrategy(s, new Restrictions()), true);
-        assertThat(i).hasSize(1);
-        assertThat(this.getNewEvents()).hasSize(5);
-        verify(z, never()).purchase(eq(p));
-    }
-
-    @Test
     void properReal() {
         final Loan l = Loan.custom()
                 .setId(1)

@@ -61,9 +61,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(auth), auth);
         assertSoftly(softly -> {
-            softly.assertThat(it.getAvailable())
-                    .isNotSameAs(lds)
-                    .containsExactly(ld);
+            softly.assertThat(it.getAvailable()).containsExactly(ld);
             softly.assertThat(it.getResult()).isEmpty();
         });
     }
