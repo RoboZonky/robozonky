@@ -33,9 +33,7 @@ import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -191,9 +189,7 @@ final class Session {
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> isSameLoan(l, i));
-        final BlockedAmount b = new BlockedAmount(i.getLoanId(), i.getOriginalPrincipal(),
-                                                  TransactionCategory.INVESTMENT);
-        portfolio.newBlockedAmount(authenticated, b);
+        portfolio.updateBlockedAmounts(authenticated); // FIXME dry run
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
     }

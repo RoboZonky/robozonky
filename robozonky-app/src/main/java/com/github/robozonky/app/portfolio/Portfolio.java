@@ -17,9 +17,13 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
@@ -45,6 +49,8 @@ public class Portfolio {
     private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
     private final MutableIntSet loansSold, investmentsPending = new IntHashSet(0);
     private final RemoteBalance balance;
+    private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
+            new AtomicReference<>(Collections.emptyList());
 
     Portfolio(final RemoteBalance balance) {
         this(Statistics.empty(), new int[0], balance);
@@ -91,6 +97,15 @@ public class Portfolio {
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
 
+    public void updateBlockedAmounts(final Authenticated auth) {
+        final Collection<BlockedAmount> presentBlockedAmounts =
+                auth.call(zonky -> zonky.getBlockedAmounts().collect(Collectors.toList()));
+        final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
+        presentBlockedAmounts.stream()
+                .filter(ba -> !previousBlockedAmounts.contains(ba))
+                .forEach(ba -> newBlockedAmount(auth, ba));
+    }
+
     /**
      * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}. This can
      * happen in several ways:
@@ -102,7 +117,7 @@ public class Portfolio {
      * @param auth The API used to query the remote server for any extra information about the blocked amount.
      * @param blockedAmount Blocked amount to register.
      */
-    public void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
+    void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
         LOGGER.debug("Processing blocked amount: #{}.", blockedAmount);
         final int loanId = blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {

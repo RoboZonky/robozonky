@@ -35,10 +35,8 @@ import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.InvestmentRequestedEvent;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -66,33 +64,6 @@ class SessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(it.getAvailable())
                     .isNotSameAs(lds)
                     .containsExactly(ld);
-            softly.assertThat(it.getResult()).isEmpty();
-        });
-    }
-
-    @Test
-    void discardingInvestments() {
-        final int loanId = 1, loanId2 = 2;
-        final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor(loanId);
-        final LoanDescriptor ld2 = AbstractZonkyLeveragingTest.mockLoanDescriptor(loanId2);
-        final Collection<LoanDescriptor> lds = Arrays.asList(ld, ld2, AbstractZonkyLeveragingTest.mockLoanDescriptor());
-        // discard the loan
-        final SessionState sst = new SessionState(lds);
-        sst.discard(ld);
-        // setup APIs
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        when(z.getLoan(eq(loanId2))).thenReturn(ld2.item());
-        final Authenticated auth = mockAuthentication(z);
-        // prepare portfolio that has the other loan as pending
-        final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        portfolio.newBlockedAmount(auth,
-                                   new BlockedAmount(loanId2, BigDecimal.valueOf(200), TransactionCategory.SMP_BUY));
-        // test that the loans are not available
-        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(auth), auth);
-        assertSoftly(softly -> {
-            softly.assertThat(it.getAvailable())
-                    .hasSize(1)
-                    .doesNotContain(ld, ld2);
             softly.assertThat(it.getResult()).isEmpty();
         });
     }
@@ -133,7 +104,6 @@ class SessionTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(newEvents.get(3)).isInstanceOf(InvestmentMadeEvent.class);
             softly.assertThat(newEvents.get(4)).isInstanceOf(ExecutionCompletedEvent.class);
         });
-        verify(portfolio).newBlockedAmount(eq(auth), argThat(a -> a.getLoanId() == loanId));
     }
 
     @Test

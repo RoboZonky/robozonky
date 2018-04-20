@@ -112,7 +112,6 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z, never()).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(auth), argThat((a) -> a.getLoanId() == l.getId()));
     }
 
     @Test
@@ -144,6 +143,5 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(auth), argThat((a) -> a.getLoanId() == l.getId()));
     }
 }

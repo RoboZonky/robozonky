@@ -30,11 +30,9 @@ import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
@@ -140,8 +138,8 @@ final class Session {
         investmentsMadeNow.add(i);
         final int id = i.getLoanId();
         stillAvailable.removeIf(l -> l.item().getLoanId() == id);
-        portfolio.newBlockedAmount(authenticated,
-                                   new BlockedAmount(id, i.getOriginalPrincipal(), TransactionCategory.SMP_BUY));
+        portfolio.updateBlockedAmounts(authenticated);
+        // FIXME fix dry run
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
     }

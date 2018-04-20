@@ -45,7 +45,6 @@ public class PortfolioUpdater implements Runnable,
     private final Authenticated authenticated;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
-    private final BlockedAmountsUpdater blockedAmountsUpdater;
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
     private final Duration retryFor;
@@ -59,8 +58,7 @@ public class PortfolioUpdater implements Runnable,
         this.balance = balance;
         this.retryFor = retryFor;
         // run update of blocked amounts automatically with every portfolio update
-        this.blockedAmountsUpdater = new BlockedAmountsUpdater(authenticated, this);
-        registerDependant(blockedAmountsUpdater.getDependant());
+        registerDependant(Portfolio::updateBlockedAmounts);
     }
 
     PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated,
@@ -82,7 +80,14 @@ public class PortfolioUpdater implements Runnable,
     }
 
     public Runnable getBlockedAmountsUpdater() {
-        return this.blockedAmountsUpdater;
+        return () -> {
+            final Portfolio folio = portfolio.get();
+            if (folio == null) {
+                LOGGER.debug("Won't update blocked amounts on null portfolio.");
+            } else {
+                folio.updateBlockedAmounts(authenticated);
+            }
+        };
     }
 
     public void registerDependant(final PortfolioDependant updater) {
