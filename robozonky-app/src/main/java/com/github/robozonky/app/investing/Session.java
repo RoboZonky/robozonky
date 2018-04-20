@@ -70,7 +70,7 @@ final class Session {
         this.loansStillAvailable = marketplace.stream()
                 .distinct()
                 .filter(l -> state.getDiscardedLoans().stream().noneMatch(l2 -> isSameLoan(l, l2)))
-                .filter(l -> portfolio.investmentNotPending(l.item().getId()))
+                .filter(l -> !l.item().getMyInvestment().isPresent())
                 .collect(Collectors.toCollection(FastList::new));
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
@@ -177,6 +177,7 @@ final class Session {
                 final Investment i = Investment.fresh(recommendation.descriptor().item(),
                                                       confirmedAmount);
                 markSuccessfulInvestment(i);
+                discard(recommendation.descriptor()); // never show again in dry run
                 Events.fire(new InvestmentMadeEvent(i, loan.item(), portfolioOverview));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA
@@ -189,7 +190,7 @@ final class Session {
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
         loansStillAvailable.removeIf(l -> isSameLoan(l, i));
-        portfolio.updateBlockedAmounts(authenticated); // FIXME dry run
+        portfolio.updateBlockedAmounts(authenticated);
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
     }

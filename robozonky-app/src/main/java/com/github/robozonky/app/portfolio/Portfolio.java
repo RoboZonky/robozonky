@@ -47,7 +47,7 @@ public class Portfolio {
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Statistics statistics;
     private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
-    private final MutableIntSet loansSold, investmentsPending = new IntHashSet(0);
+    private final MutableIntSet loansSold;
     private final RemoteBalance balance;
     private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
             new AtomicReference<>(Collections.emptyList());
@@ -120,44 +120,29 @@ public class Portfolio {
     void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
         LOGGER.debug("Processing blocked amount: #{}.", blockedAmount);
         final int loanId = blockedAmount.getLoanId();
+        final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                synchronized (this) {
-                    if (investmentNotPending(loanId)) {
-                        final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                        blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                            final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                            return start.add(blockedAmount.getAmount());
-                        });
-                        investmentsPending.add(loanId);
-                        LOGGER.debug("Registered a new investment to loan #{}.", loanId);
-                    }
-                }
+                blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                    final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                    return start.add(blockedAmount.getAmount());
+                });
+                LOGGER.debug("Registered a new investment to loan #{}.", loanId);
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
-                synchronized (this) {
-                    if (!wasOnceSold(loanId)) {
-                        final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                        final Investment i = lookupOrFail(l, auth);
-                        blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                            final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                            return start.subtract(i.getRemainingPrincipal());
-                        });
-                        loansSold.add(l.getId());
-                        // notify of the fact that the participation had been sold on the Zonky web
-                        final PortfolioOverview po = calculateOverview();
-                        Events.fire(new InvestmentSoldEvent(i, l, po));
-                    }
-                }
+                final Investment i = lookupOrFail(l, auth);
+                blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
+                    final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+                    return start.subtract(i.getRemainingPrincipal());
+                });
+                // notify of the fact that the participation had been sold on the Zonky web
+                final PortfolioOverview po = calculateOverview();
+                Events.fire(new InvestmentSoldEvent(i, l, po));
                 return;
             default: // no other notable events
                 return;
         }
-    }
-
-    public boolean investmentNotPending(final int loanId) {
-        return !investmentsPending.contains(loanId);
     }
 
     public RemoteBalance getRemoteBalance() {
