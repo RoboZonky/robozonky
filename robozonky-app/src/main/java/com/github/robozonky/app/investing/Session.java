@@ -16,11 +16,9 @@
 
 package com.github.robozonky.app.investing;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.notifications.Event;
@@ -55,7 +53,7 @@ import org.slf4j.LoggerFactory;
 final class Session {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
-    private final List<LoanDescriptor> loansStillAvailable;
+    private final Collection<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
     private final Authenticated authenticated;
     private final Investor investor;
@@ -69,25 +67,9 @@ final class Session {
         this.investor = investor;
         this.discarded = new SessionState<>(marketplace, d -> d.item().getId(), "discardedLoans");
         this.seen = new SessionState<>(marketplace, d -> d.item().getId(), "seenLoans");
-        this.loansStillAvailable = marketplace.stream()
-                .distinct()
-                .filter(l -> !discarded.contains(l))
-                .filter(l -> !l.item().getMyInvestment().isPresent())
-                .collect(Collectors.toCollection(FastList::new));
+        this.loansStillAvailable = FastList.newList(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
-    }
-
-    private static boolean isSameLoan(final LoanDescriptor l, final Investment i) {
-        return isSameLoan(l, i.getLoanId());
-    }
-
-    private static boolean isSameLoan(final LoanDescriptor l, final LoanDescriptor l2) {
-        return isSameLoan(l, l2.item().getId());
-    }
-
-    private static boolean isSameLoan(final LoanDescriptor l, final int loanId) {
-        return l.item().getId() == loanId;
     }
 
     public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,
@@ -120,15 +102,16 @@ final class Session {
      * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
-    public Collection<LoanDescriptor> getAvailable() {
-        return Collections.unmodifiableList(new ArrayList<>(loansStillAvailable));
+    Collection<LoanDescriptor> getAvailable() {
+        loansStillAvailable.removeIf(d -> seen.contains(d) || discarded.contains(d));
+        return Collections.unmodifiableCollection(loansStillAvailable);
     }
 
     /**
      * Get investments made during this session.
      * @return Investments made so far during this session. Unmodifiable.
      */
-    public List<Investment> getResult() {
+    List<Investment> getResult() {
         return Collections.unmodifiableList(investmentsMadeNow);
     }
 
@@ -137,7 +120,7 @@ final class Session {
      * @param recommendation Loan to invest into.
      * @return True if investment successful. The investment is reflected in {@link #getResult()}.
      */
-    public boolean invest(final RecommendedLoan recommendation) {
+    boolean invest(final RecommendedLoan recommendation) {
         final LoanDescriptor loan = recommendation.descriptor();
         final int loanId = loan.item().getId();
         if (portfolioOverview.getCzkAvailable() < recommendation.amount().intValue()) {
@@ -179,7 +162,7 @@ final class Session {
                 final Investment i = Investment.fresh(recommendation.descriptor().item(),
                                                       confirmedAmount);
                 markSuccessfulInvestment(i);
-                discard(recommendation.descriptor()); // never show again; for the purposes of dry run
+                discard(recommendation.descriptor()); // never show again
                 Events.fire(new InvestmentMadeEvent(i, loan.item(), portfolioOverview));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA
@@ -191,7 +174,6 @@ final class Session {
 
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
-        loansStillAvailable.removeIf(l -> isSameLoan(l, i));
         portfolio.updateBlockedAmounts(authenticated);
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
@@ -203,7 +185,6 @@ final class Session {
     }
 
     private void skip(final LoanDescriptor loan) {
-        loansStillAvailable.removeIf(l -> isSameLoan(loan, l));
         seen.put(loan);
     }
 }

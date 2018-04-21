@@ -162,7 +162,10 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Session t = new Session(portfolio, Collections.emptySet(), p, auth);
         final boolean result = t.invest(r);
-        assertThat(result).isFalse();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isFalse();
+            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
+        });
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         assertThat(newEvents).hasSize(2);
@@ -186,7 +189,10 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
         final boolean result = t.invest(r);
-        assertThat(result).isFalse();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isFalse();
+            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
+        });
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         assertThat(newEvents).hasSize(2);
@@ -210,7 +216,10 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
         final boolean result = t.invest(r);
-        assertThat(result).isFalse();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isFalse();
+            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
+        });
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         assertThat(newEvents).hasSize(2);
@@ -235,7 +244,10 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
         final boolean result = t.invest(r);
-        assertThat(result).isFalse();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isFalse();
+            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
+        });
         // validate event
         final List<Event> newEvents = this.getNewEvents();
         assertThat(newEvents).hasSize(2);
@@ -260,7 +272,10 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Session t = new Session(portfolio, Collections.emptySet(), p, auth);
         final boolean result = t.invest(r);
-        assertThat(result).isTrue();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            softly.assertThat(t.getAvailable()).doesNotContain(r.descriptor());
+        });
         final List<Investment> investments = t.getResult();
         assertThat(investments).hasSize(1);
         assertThat(investments.get(0).getOriginalPrincipal().intValue()).isEqualTo(amountToInvest);

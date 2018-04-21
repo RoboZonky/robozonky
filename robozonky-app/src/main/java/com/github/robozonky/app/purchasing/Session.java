@@ -19,7 +19,6 @@ package com.github.robozonky.app.purchasing;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
@@ -52,7 +51,7 @@ import org.slf4j.LoggerFactory;
 final class Session {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
-    private final List<ParticipationDescriptor> stillAvailable;
+    private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
     private final Authenticated authenticated;
     private final boolean isDryRun;
@@ -65,9 +64,7 @@ final class Session {
         this.authenticated = auth;
         this.isDryRun = dryRun;
         this.discarded = new SessionState<>(marketplace, d -> d.item().getId(), "discardedParticipations");
-        this.stillAvailable = marketplace.stream()
-                .filter(p -> !discarded.contains(p))
-                .collect(Collectors.toCollection(FastList::new));
+        this.stillAvailable = FastList.newList(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
@@ -93,7 +90,6 @@ final class Session {
         do {
             invested = strategy.apply(getAvailable(), portfolioOverview)
                     .filter(r -> portfolioOverview.getCzkAvailable() >= r.amount().intValue())
-                    .filter(r -> !discarded.contains(r.descriptor()))
                     .peek(r -> Events.fire(new PurchaseRecommendedEvent(r)))
                     .anyMatch(this::purchase); // keep trying until investment opportunities are exhausted
         } while (invested);
@@ -104,15 +100,16 @@ final class Session {
      * minus loans that are already invested into or discarded due to the {@link ConfirmationProvider} mechanism.
      * @return Loans in the marketplace in which the user could potentially invest. Unmodifiable.
      */
-    public Collection<ParticipationDescriptor> getAvailable() {
-        return Collections.unmodifiableList(stillAvailable);
+    Collection<ParticipationDescriptor> getAvailable() {
+        stillAvailable.removeIf(discarded::contains);
+        return Collections.unmodifiableCollection(stillAvailable);
     }
 
     /**
      * Get investments made during this session.
      * @return Investments made so far during this session. Unmodifiable.
      */
-    public List<Investment> getResult() {
+    List<Investment> getResult() {
         return Collections.unmodifiableList(investmentsMadeNow);
     }
 
@@ -126,17 +123,15 @@ final class Session {
         }
     }
 
-    public boolean purchase(final RecommendedParticipation recommendation) {
+    boolean purchase(final RecommendedParticipation recommendation) {
         Events.fire(new PurchaseRequestedEvent(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan loan = recommendation.descriptor().related();
         final boolean purchased = isDryRun || actualPurchase(participation);
         if (purchased) {
-            if (isDryRun) { // don't purchase this one ever again
-                discarded.put(recommendation.descriptor());
-            }
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);
+            discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
             Events.fire(new InvestmentPurchasedEvent(i, loan, portfolioOverview));
         }
         return purchased;
@@ -144,8 +139,6 @@ final class Session {
 
     private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
-        final int id = i.getLoanId();
-        stillAvailable.removeIf(l -> l.item().getLoanId() == id);
         portfolio.updateBlockedAmounts(authenticated);
         portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
         portfolioOverview = portfolio.calculateOverview();
