@@ -38,8 +38,8 @@ import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PortfolioUpdater implements Runnable,
-                                         PortfolioSupplier {
+class PortfolioUpdater implements Runnable,
+                                  PortfolioSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
     private final Authenticated authenticated;
@@ -77,17 +77,6 @@ public class PortfolioUpdater implements Runnable,
         // attempt to sell participations after every portfolio update
         updater.registerDependant(new Selling(sp::getToSell, isDryRun));
         return updater;
-    }
-
-    public Runnable getBlockedAmountsUpdater() {
-        return () -> {
-            final Portfolio folio = portfolio.get();
-            if (folio == null) {
-                LOGGER.debug("Won't update blocked amounts on null portfolio.");
-            } else {
-                folio.updateBlockedAmounts(authenticated);
-            }
-        };
     }
 
     public void registerDependant(final PortfolioDependant updater) {

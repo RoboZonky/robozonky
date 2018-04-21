@@ -45,15 +45,13 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
         final Authenticated a = mockAuthentication(mock(Zonky.class));
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final ExecutorService e = Executors.newFixedThreadPool(1);
-        final PortfolioUpdater p = mock(PortfolioUpdater.class);
         try {
             final DaemonInvestmentMode d = new DaemonInvestmentMode(t -> {
-            }, a, p, b, mock(StrategyProvider.class), Duration.ofSeconds(1), Duration.ofSeconds(1));
+            }, a, b, mock(StrategyProvider.class), Duration.ofSeconds(1), Duration.ofSeconds(1));
             final Future<ReturnCode> f = e.submit(() -> d.apply(lifecycle)); // will block
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
-            verify(p).run();
         } finally {
             e.shutdownNow();
         }

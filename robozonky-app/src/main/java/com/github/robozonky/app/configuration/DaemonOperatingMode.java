@@ -23,7 +23,6 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
-import com.github.robozonky.app.configuration.daemon.PortfolioUpdater;
 import com.github.robozonky.app.configuration.daemon.StrategyProvider;
 import com.github.robozonky.app.investing.Investor;
 
@@ -44,9 +43,8 @@ class DaemonOperatingMode extends OperatingMode {
     protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
                                                          final Investor.Builder builder) {
         final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
-        final PortfolioUpdater u = PortfolioUpdater.create(shutdownCall, auth, sp, builder.isDryRun());
-        final InvestmentMode m = new DaemonInvestmentMode(t -> {
-        }, auth, u, builder, sp, marketplace.getPrimaryMarketplaceCheckDelay(),
+        final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, builder, sp,
+                                                          marketplace.getPrimaryMarketplaceCheckDelay(),
                                                           marketplace.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);
     }
