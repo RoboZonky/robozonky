@@ -72,9 +72,13 @@ class LivenessCheck extends Refreshable<ApiVersion> {
     }
 
     @Override
-    protected String getLatestSource() throws Exception {
+    protected String getLatestSource() {
         try (final InputStream s = new URL(url).openStream()) {
             return IOUtils.readLines(s, Defaults.CHARSET).stream().collect(Collectors.joining(System.lineSeparator()));
+        } catch (final Exception ex) {
+            // don't propagate this exception as it is likely to happen and the calling code would WARN about it
+            LOGGER.debug("Zonky servers are likely unavailable.", ex);
+            return null;
         }
     }
 

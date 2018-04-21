@@ -29,8 +29,8 @@ import com.github.robozonky.internal.api.Defaults;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 /**
- * Represents version of the Zonky API as represented by a remote resource. This doesn't use RESTEasy as it's designed
- * to be run very frequently with minimal resource requirements.
+ * Represents version of the Zonky API as returned by a remote resource. This doesn't use RESTEasy as it's designed to
+ * be run very frequently with minimal resource requirements.
  */
 class ApiVersion {
 
