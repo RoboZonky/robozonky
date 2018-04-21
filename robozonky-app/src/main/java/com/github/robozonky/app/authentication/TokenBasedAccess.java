@@ -17,10 +17,8 @@
 package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javax.ws.rs.ServiceUnavailableException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -29,7 +27,7 @@ import com.github.robozonky.common.secrets.SecretProvider;
 
 class TokenBasedAccess extends AbstractAuthenticated {
 
-    private final Supplier<Optional<ZonkyApiToken>> tokenSupplier;
+    private final Supplier<ZonkyApiToken> tokenSupplier;
     private final SecretProvider secrets;
     private final ApiProvider apis;
 
@@ -39,14 +37,9 @@ class TokenBasedAccess extends AbstractAuthenticated {
         this.tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets, refreshAfter);
     }
 
-    private ZonkyApiToken getToken() {
-        return tokenSupplier.get()
-                .orElseThrow(() -> new ServiceUnavailableException("No API token available, authentication failed."));
-    }
-
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
-        return apis.authenticated(this::getToken, operation);
+        return apis.authenticated(tokenSupplier, operation);
     }
 
     @Override

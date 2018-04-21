@@ -18,10 +18,10 @@ package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
-import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotAuthorizedException;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
@@ -32,13 +32,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Will keep permanent user authentication running in the background.
  */
-class ZonkyApiTokenSupplier implements Supplier<Optional<ZonkyApiToken>> {
+class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
 
+    private final Lock lock = new ReentrantLock(true);
     private final SecretProvider secrets;
     private final ApiProvider apis;
-    private final AtomicReference<ZonkyApiToken> token = new AtomicReference<>();
+    private volatile ZonkyApiToken token = null;
     private final Duration refresh;
 
     public ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
@@ -52,12 +53,7 @@ class ZonkyApiTokenSupplier implements Supplier<Optional<ZonkyApiToken>> {
 
     private ZonkyApiToken refreshToken(final ZonkyApiToken token) {
         LOGGER.info("Authenticating as '{}', refreshing access token.", secrets.getUsername());
-        try {
-            return apis.oauth((oauth) -> oauth.refresh(token));
-        } catch (final BadRequestException ex) { // possibly just an expired token, retry with password
-            LOGGER.debug("Failed refreshing access token, using password.");
-            return getFreshToken();
-        }
+        return apis.oauth((oauth) -> oauth.refresh(token));
     }
 
     private ZonkyApiToken getFreshToken() {
@@ -68,7 +64,12 @@ class ZonkyApiTokenSupplier implements Supplier<Optional<ZonkyApiToken>> {
         if (token.willExpireIn(Duration.ZERO)) {
             return getFreshToken();
         } else if (token.willExpireIn(refresh)) {
-            return refreshToken(token);
+            try {
+                return refreshToken(token);
+            } catch (final Exception ex) {
+                LOGGER.debug("Failed refreshing access token, falling back to password.", ex);
+                return getFreshToken();
+            }
         } else {
             return token;
         }
@@ -78,18 +79,20 @@ class ZonkyApiTokenSupplier implements Supplier<Optional<ZonkyApiToken>> {
      * Synchronized so that the operation on the token is always only happening once and multiple threads therefore
      * cannot cancel out each others' token requests.
      */
-    private synchronized ZonkyApiToken getTokenInAnyWay(final ZonkyApiToken currentToken) {
+    private ZonkyApiToken getTokenInAnyWay(final ZonkyApiToken currentToken) {
         return currentToken == null ? getFreshToken() : refreshTokenIfNecessary(currentToken);
     }
 
     @Override
-    public Optional<ZonkyApiToken> get() {
+    public ZonkyApiToken get() {
+        lock.lock();
         try {
-            final ZonkyApiToken newToken = token.updateAndGet(this::getTokenInAnyWay);
-            return Optional.ofNullable(newToken);
+            token = getTokenInAnyWay(token);
+            return token;
         } catch (final Exception ex) {
-            LOGGER.warn("Authentication failed.", ex);
-            return Optional.empty();
+            throw new NotAuthorizedException(ex);
+        } finally {
+            lock.unlock();
         }
     }
 }

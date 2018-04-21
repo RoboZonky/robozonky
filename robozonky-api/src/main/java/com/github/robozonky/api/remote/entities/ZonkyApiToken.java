@@ -42,20 +42,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ZonkyApiToken extends BaseEntity {
 
-    public static ZonkyApiToken unmarshal(final Reader token) throws JAXBException {
-        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
-        final Unmarshaller u = ctx.createUnmarshaller();
-        return (ZonkyApiToken) u.unmarshal(token);
-    }
-
-    public static String marshal(final ZonkyApiToken token) throws JAXBException {
-        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
-        final Marshaller m = ctx.createMarshaller();
-        final StringWriter w = new StringWriter();
-        m.marshal(token, w);
-        return w.toString();
-    }
-
     @XmlElement(name = "access_token")
     private char[] accessToken;
     @XmlElement(name = "refresh_token")
@@ -97,6 +83,20 @@ public class ZonkyApiToken extends BaseEntity {
         this.type = type;
         this.scope = scope;
         this.obtainedOn = obtainedOn;
+    }
+
+    public static ZonkyApiToken unmarshal(final Reader token) throws JAXBException {
+        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
+        final Unmarshaller u = ctx.createUnmarshaller();
+        return (ZonkyApiToken) u.unmarshal(token);
+    }
+
+    public static String marshal(final ZonkyApiToken token) throws JAXBException {
+        final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiToken.class);
+        final Marshaller m = ctx.createMarshaller();
+        final StringWriter w = new StringWriter();
+        m.marshal(token, w);
+        return w.toString();
     }
 
     public char[] getAccessToken() {
@@ -141,15 +141,13 @@ public class ZonkyApiToken extends BaseEntity {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
         final ZonkyApiToken that = (ZonkyApiToken) o;
         if (Arrays.equals(accessToken, that.accessToken)) {
             if (Arrays.equals(refreshToken, that.refreshToken)) {
-                if (Objects.equals(scope, that.scope)) {
-                    return true;
-                }
+                return Objects.equals(scope, that.scope);
             }
         }
         return false;

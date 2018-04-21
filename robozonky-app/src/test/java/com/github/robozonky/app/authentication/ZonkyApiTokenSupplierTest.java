@@ -19,7 +19,6 @@ package com.github.robozonky.app.authentication;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -66,11 +65,9 @@ class ZonkyApiTokenSupplierTest {
                          eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getStaleToken());
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        final Optional<ZonkyApiToken> token = t.get();
-        assertThat(token).isPresent();
-        final Optional<ZonkyApiToken> token2 = t.get();
-        assertThat(token2).isPresent();
+        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        final ZonkyApiToken token = t.get();
+        final ZonkyApiToken token2 = t.get();
         assertThat(token2).isNotEqualTo(token);
     }
 
@@ -81,11 +78,9 @@ class ZonkyApiTokenSupplierTest {
                          eq(SECRETS.getPassword())))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofMinutes(5)));
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        final Optional<ZonkyApiToken> token = t.get();
-        assertThat(token).isPresent();
-        final Optional<ZonkyApiToken> token2 = t.get();
-        assertThat(token2).isPresent();
+        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        final ZonkyApiToken token = t.get();
+        final ZonkyApiToken token2 = t.get();
         assertThat(token2).isEqualTo(token);
     }
 
@@ -98,11 +93,9 @@ class ZonkyApiTokenSupplierTest {
         when(oAuth.refresh(any()))
                 .thenAnswer(invocation -> getTokenExpiringIn(Duration.ofSeconds(5)));
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ofSeconds(1));
-        final Optional<ZonkyApiToken> token = t.get();
-        assertThat(token).isPresent();
-        final Optional<ZonkyApiToken> token2 = t.get();
-        assertThat(token2).isPresent();
+        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ofSeconds(1));
+        final ZonkyApiToken token = t.get();
+        final ZonkyApiToken token2 = t.get();
         assertThat(token2).isNotEqualTo(token);
     }
 
@@ -115,11 +108,9 @@ class ZonkyApiTokenSupplierTest {
         when(oAuth.refresh(any()))
                 .thenThrow(BadRequestException.class);
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        final Optional<ZonkyApiToken> token = t.get();
-        assertThat(token).isPresent();
-        final Optional<ZonkyApiToken> token2 = t.get();
-        assertThat(token2).isPresent();
+        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        final ZonkyApiToken token = t.get();
+        final ZonkyApiToken token2 = t.get();
         assertThat(token2).isNotEqualTo(token);
     }
 
@@ -132,10 +123,11 @@ class ZonkyApiTokenSupplierTest {
         when(oAuth.refresh(any()))
                 .thenThrow(IllegalStateException.class);
         final ApiProvider api = mockApi(oAuth);
-        final Supplier<Optional<ZonkyApiToken>> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
-        final Optional<ZonkyApiToken> token = t.get();
-        assertThat(token).isPresent();
-        final Optional<ZonkyApiToken> token2 = t.get();
-        assertThat(token2).isEmpty();
+        final Supplier<ZonkyApiToken> t = new ZonkyApiTokenSupplier(api, SECRETS, Duration.ZERO);
+        t.get();
+        verify(oAuth).login(any(), any());
+        t.get();
+        verify(oAuth).refresh(any()); // refresh was called
+        verify(oAuth, times(2)).login(any(), any()); // password-based login was used again
     }
 }
