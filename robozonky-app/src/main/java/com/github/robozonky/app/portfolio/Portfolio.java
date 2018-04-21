@@ -109,6 +109,7 @@ public class Portfolio {
     void addToBlockedAmounts(final Rating rating, final BigDecimal update) {
         blockedAmountsSum.compute(rating, (r, old) -> {
             final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+            LOGGER.debug("Adding {} CZK to {}, having {} CZK blocked already.", update, rating, start);
             return start.add(update);
         });
     }
@@ -126,7 +127,6 @@ public class Portfolio {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
                 addToBlockedAmounts(l.getRating(), blockedAmount.getAmount());
-                LOGGER.debug("Registered a new investment to loan #{}.", loanId);
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
                 final Investment i = lookupOrFail(l, auth);
