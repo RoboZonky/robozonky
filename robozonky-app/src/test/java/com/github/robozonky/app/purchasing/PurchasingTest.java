@@ -110,7 +110,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth, true);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
-        verify(zonky, never()).purchase(eq(mock)); // purchase as balance changed
+        verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {
@@ -120,11 +120,8 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.get(3)).isInstanceOf(InvestmentPurchasedEvent.class);
             softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
         });
-        // purchase as marketplace first initialized
-        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
-        // no balance change, no marketplace change => don't purchase
+        // doing a dry run; the same participation is now ignored
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
-        verify(zonky, never()).purchase(eq(mock)); // nothing changed, so no more purchase
     }
 
     @Test

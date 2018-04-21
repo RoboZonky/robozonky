@@ -45,7 +45,7 @@ class RemoteBalanceImpl implements RemoteBalance,
         provider.run();
         if (isDryRun) {
             latest.accumulateAndGet(change, BigDecimal::add);
-            LOGGER.trace("Locally added {}.", change);
+            LOGGER.debug("Locally added {} CZK.", change);
         }
     }
 
@@ -61,7 +61,7 @@ class RemoteBalanceImpl implements RemoteBalance,
     @Override
     public void valueSet(final BigDecimal newValue) {
         latest.set(newValue);
-        LOGGER.trace("Set to {}.", newValue);
+        LOGGER.debug("Set to {} CZK.", newValue);
     }
 
     @Override
@@ -73,6 +73,6 @@ class RemoteBalanceImpl implements RemoteBalance,
     public void valueChanged(final BigDecimal oldValue, final BigDecimal newValue) {
         final BigDecimal difference = newValue.subtract(oldValue);
         latest.accumulateAndGet(difference, BigDecimal::add);
-        LOGGER.trace("Remotely added {}.", newValue);
+        LOGGER.debug("Remotely added {} CZK.", newValue);
     }
 }

@@ -18,6 +18,7 @@ package com.github.robozonky.app.purchasing;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -48,7 +49,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.empty(), null, true);
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.emptyList(), null, true);
         assertThat(i).isEmpty();
     }
 
@@ -69,7 +70,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), true);
         assertSoftly(softly -> {
             softly.assertThat(i).isEmpty();
@@ -80,39 +81,6 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                 }
             });
         });
-    }
-
-    @Test
-    void properDryRun() {
-        final Loan l = Loan.custom()
-                .setId(1)
-                .setAmount(200)
-                .setRating(Rating.D)
-                .setRemainingInvestment(200)
-                .setMyInvestment(mockMyInvestment())
-                .build();
-        final Participation p = mock(Participation.class);
-        when(p.getLoanId()).thenReturn(l.getId());
-        when(p.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(200));
-        final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any()))
-                .thenAnswer(i -> {
-                    final Collection<ParticipationDescriptor> participations = i.getArgument(0);
-                    return participations.stream()
-                            .map(ParticipationDescriptor::recommend)
-                            .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()));
-                });
-        final Zonky z = harmlessZonky(100_000);
-        when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Authenticated auth = mockAuthentication(z);
-        final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
-                                                          new RestrictedPurchaseStrategy(s, new Restrictions()), true);
-        assertThat(i).hasSize(1);
-        assertThat(this.getNewEvents()).hasSize(5);
-        verify(z, never()).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(auth), argThat((a) -> a.getLoanId() == l.getId()));
     }
 
     @Test
@@ -139,11 +107,10 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Authenticated auth = mockAuthentication(z);
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Stream.of(pd),
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
                                                           new RestrictedPurchaseStrategy(s, new Restrictions()), false);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z).purchase(eq(p));
-        verify(portfolio).newBlockedAmount(eq(auth), argThat((a) -> a.getLoanId() == l.getId()));
     }
 }

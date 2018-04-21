@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -38,14 +38,13 @@ import com.github.robozonky.util.Backoff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PortfolioUpdater implements Runnable,
-                                         PortfolioSupplier {
+class PortfolioUpdater implements Runnable,
+                                  PortfolioSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
     private final Authenticated authenticated;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
-    private final Collection<PortfolioDependant> dependants = new CopyOnWriteArraySet<>();
-    private final BlockedAmountsUpdater blockedAmountsUpdater;
+    private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final AtomicBoolean updating = new AtomicBoolean(true);
     private final Consumer<Throwable> shutdownCall;
     private final Duration retryFor;
@@ -59,8 +58,7 @@ public class PortfolioUpdater implements Runnable,
         this.balance = balance;
         this.retryFor = retryFor;
         // run update of blocked amounts automatically with every portfolio update
-        this.blockedAmountsUpdater = new BlockedAmountsUpdater(authenticated, this);
-        registerDependant(blockedAmountsUpdater.getDependant());
+        registerDependant(Portfolio::updateBlockedAmounts);
     }
 
     PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated,
@@ -81,13 +79,11 @@ public class PortfolioUpdater implements Runnable,
         return updater;
     }
 
-    public Runnable getBlockedAmountsUpdater() {
-        return this.blockedAmountsUpdater;
-    }
-
     public void registerDependant(final PortfolioDependant updater) {
-        LOGGER.debug("Registering dependant: {}.", updater);
-        dependants.add(updater);
+        if (!dependants.contains(updater)) {
+            LOGGER.debug("Registering dependant: {}.", updater);
+            dependants.add(updater);
+        }
     }
 
     Collection<PortfolioDependant> getRegisteredDependants() {

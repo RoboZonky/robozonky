@@ -38,16 +38,18 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
     private final DaemonOperation[] daemons;
     private final PortfolioUpdater portfolioUpdater;
+    private final Runnable blockedAmountsUpdate;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Authenticated auth,
-                                final PortfolioUpdater p, final Investor.Builder builder,
-                                final StrategyProvider strategyProvider, final Duration primaryMarketplaceCheckPeriod,
+                                final Investor.Builder builder, final StrategyProvider strategyProvider,
+                                final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolioUpdater = p;
+        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, auth, strategyProvider, builder.isDryRun());
+        this.blockedAmountsUpdate = () -> portfolioUpdater.get().ifPresent(folio -> folio.updateBlockedAmounts(auth));
         this.daemons = new DaemonOperation[]{
-                new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, p,
+                new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, portfolioUpdater,
                                     primaryMarketplaceCheckPeriod),
-                new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, p,
+                new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, portfolioUpdater,
                                      secondaryMarketplaceCheckPeriod, builder.isDryRun())
         };
     }
@@ -64,7 +66,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         executor.submit(portfolioUpdater, Duration.ofHours(12));
         // also run blocked amounts update every now and then to detect changes made outside of the robot
         final Duration oneHour = Duration.ofHours(1);
-        executor.submit(portfolioUpdater.getBlockedAmountsUpdater(), oneHour, oneHour);
+        executor.submit(blockedAmountsUpdate, oneHour, oneHour);
         // run investing and purchasing daemons
         IntStream.range(0, daemons.length).forEach(daemonId -> {
             final DaemonOperation d = daemons[daemonId];

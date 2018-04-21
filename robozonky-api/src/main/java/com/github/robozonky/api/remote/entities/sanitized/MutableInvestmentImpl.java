@@ -80,6 +80,10 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
 
     // TODO should calculate expected interest somehow
     MutableInvestmentImpl(final MarketplaceLoan loan, final BigDecimal originalPrincipal) {
+        loan.getMyInvestment().ifPresent(i -> {
+            this.id = i.getId();
+            this.investmentDate = i.getTimeCreated();
+        });
         this.loanId = loan.getId();
         this.currentTerm = loan.getTermInMonths();
         this.originalTerm = loan.getTermInMonths();
@@ -99,7 +103,6 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInWithdrawal = false;
         this.status = InvestmentStatus.ACTIVE;
         this.paymentStatus = PaymentStatus.NOT_COVERED;
-        this.investmentDate = loan.getMyInvestment().map(i -> i.getTimeCreated()).orElse(null);
         this.isInsuranceActive = loan.isInsuranceActive();
         this.areInstalmentsPostponed = false;
         this.setInsuranceHistory(loan.getInsuranceHistory());

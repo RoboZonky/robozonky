@@ -17,9 +17,13 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
@@ -42,9 +46,11 @@ public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Statistics statistics;
-    private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
-    private final MutableIntSet loansSold, investmentsPending = new IntHashSet(0);
+    private final Map<Rating, BigDecimal> blockedAmountsSum = new EnumMap<>(Rating.class);
+    private final MutableIntSet loansSold;
     private final RemoteBalance balance;
+    private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
+            new AtomicReference<>(Collections.emptyList());
 
     Portfolio(final RemoteBalance balance) {
         this(Statistics.empty(), new int[0], balance);
@@ -72,17 +78,7 @@ public class Portfolio {
         return new Portfolio(auth.call(Zonky::getStatistics), sold, balance);
     }
 
-    /**
-     * Whether or not a given loan is, or at any point in time was, placed on the secondary marketplace by the current
-     * user and bought by someone else.
-     * @param loan Loan in question.
-     * @return True if the loan had been sold at least once before.
-     */
-    public boolean wasOnceSold(final Loan loan) {
-        return loansSold.contains(loan.getId());
-    }
-
-    private Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
+    private static Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
@@ -92,52 +88,57 @@ public class Portfolio {
     }
 
     /**
-     * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}. This can
-     * happen in several ways:
-     *
-     * <ul>
-     * <li>RoboZonky makes a new investment or purchase and notifies this class directly.</li>
-     * <li>Periodic check of the remote portfolio status reveals a new operation made outside of RoboZonky.</li>
-     * </ul>
+     * Whether or not a given loan is, or at any point in time was, placed on the secondary marketplace by the current
+     * user and bought by someone else.
+     * @param loanId Loan in question.
+     * @return True if the loan had been sold at least once before.
+     */
+    public boolean wasOnceSold(final int loanId) {
+        return loansSold.contains(loanId);
+    }
+
+    public void updateBlockedAmounts(final Authenticated auth) {
+        final Collection<BlockedAmount> presentBlockedAmounts =
+                auth.call(zonky -> zonky.getBlockedAmounts().collect(Collectors.toList()));
+        final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
+        presentBlockedAmounts.stream()
+                .filter(ba -> !previousBlockedAmounts.contains(ba))
+                .forEach(ba -> newBlockedAmount(auth, ba));
+    }
+
+    void addToBlockedAmounts(final Rating rating, final BigDecimal update) {
+        blockedAmountsSum.compute(rating, (r, old) -> {
+            final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+            LOGGER.debug("Adding {} CZK to {}, having {} CZK blocked already.", update, rating, start);
+            return start.add(update);
+        });
+    }
+
+    /**
+     * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}.
      * @param auth The API used to query the remote server for any extra information about the blocked amount.
      * @param blockedAmount Blocked amount to register.
      */
-    public void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
+    void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
+        LOGGER.debug("Processing blocked amount: #{}.", blockedAmount);
         final int loanId = blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                if (investmentNotPending(loanId)) {
-                    LOGGER.trace("Registering a new investment to loan #{}.", loanId);
-                    final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                        return start.add(blockedAmount.getAmount());
-                    });
-                    investmentsPending.add(loanId);
-                }
+                final Loan loan = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                addToBlockedAmounts(loan.getRating(), blockedAmount.getAmount());
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
-                final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                if (!wasOnceSold(l)) {
-                    final Investment i = lookupOrFail(l, auth);
-                    blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                        final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                        return start.subtract(i.getRemainingPrincipal());
-                    });
-                    loansSold.add(l.getId());
-                    // notify of the fact that the participation had been sold on the Zonky web
-                    final PortfolioOverview po = calculateOverview();
-                    Events.fire(new InvestmentSoldEvent(i, l, po));
-                }
+                final Loan loan2 = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                final Investment i = lookupOrFail(loan2, auth);
+                addToBlockedAmounts(loan2.getRating(), i.getRemainingPrincipal().negate());
+                // notify of the fact that the participation had been sold on the Zonky web
+                final PortfolioOverview po = calculateOverview();
+                Events.fire(new InvestmentSoldEvent(i, loan2, po));
                 return;
             default: // no other notable events
                 return;
         }
-    }
-
-    public boolean investmentNotPending(final int loanId) {
-        return !investmentsPending.contains(loanId);
     }
 
     public RemoteBalance getRemoteBalance() {
@@ -145,7 +146,7 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, blockedAmountsBalance,
+        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, blockedAmountsSum,
                                            Delinquents.getAmountsAtRisk());
     }
 }
