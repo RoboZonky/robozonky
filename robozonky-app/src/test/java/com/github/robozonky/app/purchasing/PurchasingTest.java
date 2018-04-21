@@ -17,6 +17,7 @@
 package com.github.robozonky.app.purchasing;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +25,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
+import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
+import com.github.robozonky.api.notifications.PurchaseRequestedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Authenticated;
@@ -81,6 +86,42 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e).first().isInstanceOf(PurchasingStartedEvent.class);
             softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
         });
+    }
+
+    @Test
+    void someAccepted() {
+        final int loanId = 1;
+        final Loan loan = Loan.custom()
+                .setId(loanId)
+                .setAmount(100_000)
+                .setRating(Rating.D)
+                .setRemainingInvestment(1000)
+                .setMyInvestment(mockMyInvestment())
+                .setDatePublished(OffsetDateTime.now())
+                .build();
+        final Zonky zonky = mockApi();
+        when(zonky.getLoan(eq(loanId))).thenReturn(loan);
+        final Participation mock = mock(Participation.class);
+        when(mock.getId()).thenReturn(1);
+        when(mock.getLoanId()).thenReturn(loan.getId());
+        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        when(mock.getRating()).thenReturn(loan.getRating());
+        final Authenticated auth = mockAuthentication(zonky);
+        final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth, true);
+        final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
+        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
+        verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
+        final List<Event> e = this.getNewEvents();
+        assertThat(e).hasSize(5);
+        assertSoftly(softly -> {
+            softly.assertThat(e).first().isInstanceOf(PurchasingStartedEvent.class);
+            softly.assertThat(e.get(1)).isInstanceOf(PurchaseRecommendedEvent.class);
+            softly.assertThat(e.get(2)).isInstanceOf(PurchaseRequestedEvent.class);
+            softly.assertThat(e.get(3)).isInstanceOf(InvestmentPurchasedEvent.class);
+            softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
+        });
+        // doing a dry run; the same participation is now ignored
+        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
     }
 
     @Test
