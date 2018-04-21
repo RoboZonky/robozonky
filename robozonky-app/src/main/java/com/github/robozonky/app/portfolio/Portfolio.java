@@ -122,18 +122,19 @@ public class Portfolio {
     void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
         LOGGER.debug("Processing blocked amount: #{}.", blockedAmount);
         final int loanId = blockedAmount.getLoanId();
-        final Loan l = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                addToBlockedAmounts(l.getRating(), blockedAmount.getAmount());
+                final Loan loan = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                addToBlockedAmounts(loan.getRating(), blockedAmount.getAmount());
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
-                final Investment i = lookupOrFail(l, auth);
-                addToBlockedAmounts(l.getRating(), i.getRemainingPrincipal().negate());
+                final Loan loan2 = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+                final Investment i = lookupOrFail(loan2, auth);
+                addToBlockedAmounts(loan2.getRating(), i.getRemainingPrincipal().negate());
                 // notify of the fact that the participation had been sold on the Zonky web
                 final PortfolioOverview po = calculateOverview();
-                Events.fire(new InvestmentSoldEvent(i, l, po));
+                Events.fire(new InvestmentSoldEvent(i, loan2, po));
                 return;
             default: // no other notable events
                 return;
