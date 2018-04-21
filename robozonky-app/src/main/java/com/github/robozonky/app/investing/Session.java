@@ -179,7 +179,7 @@ final class Session {
                 final Investment i = Investment.fresh(recommendation.descriptor().item(),
                                                       confirmedAmount);
                 markSuccessfulInvestment(i);
-                discard(recommendation.descriptor()); // never show again in dry run
+                discard(recommendation.descriptor()); // never show again; for the purposes of dry run
                 Events.fire(new InvestmentMadeEvent(i, loan.item(), portfolioOverview));
                 return true;
             case SEEN_BEFORE: // still protected by CAPTCHA

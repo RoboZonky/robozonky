@@ -132,9 +132,11 @@ final class Session {
         final Loan loan = recommendation.descriptor().related();
         final boolean purchased = isDryRun || actualPurchase(participation);
         if (purchased) {
+            if (isDryRun) { // don't purchase this one ever again
+                discarded.put(recommendation.descriptor());
+            }
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);
-            discarded.put(recommendation.descriptor()); // to make dry run work
             Events.fire(new InvestmentPurchasedEvent(i, loan, portfolioOverview));
         }
         return purchased;
