@@ -46,7 +46,7 @@ public class Portfolio {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
     private final Statistics statistics;
-    private final Map<Rating, BigDecimal> blockedAmountsBalance = new EnumMap<>(Rating.class);
+    private final Map<Rating, BigDecimal> blockedAmountsSum = new EnumMap<>(Rating.class);
     private final MutableIntSet loansSold;
     private final RemoteBalance balance;
     private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
@@ -78,6 +78,15 @@ public class Portfolio {
         return new Portfolio(auth.call(Zonky::getStatistics), sold, balance);
     }
 
+    private static Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
+        return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
+    }
+
+    Investment lookupOrFail(final Loan loan, final Authenticated auth) {
+        return lookup(loan, auth)
+                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
+    }
+
     /**
      * Whether or not a given loan is, or at any point in time was, placed on the secondary marketplace by the current
      * user and bought by someone else.
@@ -86,15 +95,6 @@ public class Portfolio {
      */
     public boolean wasOnceSold(final int loanId) {
         return loansSold.contains(loanId);
-    }
-
-    private Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
-        return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
-    }
-
-    Investment lookupOrFail(final Loan loan, final Authenticated auth) {
-        return lookup(loan, auth)
-                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
 
     public void updateBlockedAmounts(final Authenticated auth) {
@@ -106,14 +106,15 @@ public class Portfolio {
                 .forEach(ba -> newBlockedAmount(auth, ba));
     }
 
+    void addToBlockedAmounts(final Rating rating, final BigDecimal update) {
+        blockedAmountsSum.compute(rating, (r, old) -> {
+            final BigDecimal start = old == null ? BigDecimal.ZERO : old;
+            return start.add(update);
+        });
+    }
+
     /**
-     * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}. This can
-     * happen in several ways:
-     *
-     * <ul>
-     * <li>RoboZonky makes a new investment or purchase and notifies this class directly.</li>
-     * <li>Periodic check of the remote portfolio status reveals a new operation made outside of RoboZonky.</li>
-     * </ul>
+     * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}.
      * @param auth The API used to query the remote server for any extra information about the blocked amount.
      * @param blockedAmount Blocked amount to register.
      */
@@ -124,18 +125,12 @@ public class Portfolio {
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
             case SMP_BUY: // new participation purchased
-                blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                    final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                    return start.add(blockedAmount.getAmount());
-                });
+                addToBlockedAmounts(l.getRating(), blockedAmount.getAmount());
                 LOGGER.debug("Registered a new investment to loan #{}.", loanId);
                 return;
             case SMP_SALE_FEE: // potential new participation sale detected
                 final Investment i = lookupOrFail(l, auth);
-                blockedAmountsBalance.compute(l.getRating(), (r, old) -> {
-                    final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-                    return start.subtract(i.getRemainingPrincipal());
-                });
+                addToBlockedAmounts(l.getRating(), i.getRemainingPrincipal().negate());
                 // notify of the fact that the participation had been sold on the Zonky web
                 final PortfolioOverview po = calculateOverview();
                 Events.fire(new InvestmentSoldEvent(i, l, po));
@@ -150,7 +145,7 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, blockedAmountsBalance,
+        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, blockedAmountsSum,
                                            Delinquents.getAmountsAtRisk());
     }
 }

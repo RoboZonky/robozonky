@@ -77,12 +77,18 @@ public final class SessionState<T> {
                         .mapToInt(Integer::parseInt)
                         .toArray())
                 .orElse(new int[0]);
+        SessionState.LOGGER.trace("'{}' read {}.", key, result);
         return IntHashSet.newSetWith(result);
     }
 
     private void write(final IntSet items) {
         final Stream<String> result = IntStream.of(items.toArray()).mapToObj(String::valueOf);
         SessionState.STATE.newBatch().set(key, result).call();
+        SessionState.LOGGER.trace("'{}' wrote '{}'.", key, SessionState.STATE.getValue(key).orElse("nothing"));
+    }
+
+    public String getKey() {
+        return key;
     }
 
     /**

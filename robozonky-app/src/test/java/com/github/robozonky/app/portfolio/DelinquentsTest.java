@@ -20,8 +20,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -33,6 +35,7 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.DevelopmentTpe;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -46,6 +49,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
 
 class DelinquentsTest extends AbstractZonkyLeveragingTest {
 
@@ -120,24 +124,59 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         });
     }
 
+    private List<Development> assembleDevelopments(final OffsetDateTime target) {
+        final Development before = Development.custom()
+                .setDateFrom(target.minusDays(2))
+                .setDateTo(target.minusDays(1))
+                .setType(DevelopmentTpe.OTHER)
+                .setPublicNote("Before target date.")
+                .build();
+        final Development after1 = Development.custom()
+                .setDateFrom(target.plusDays(1))
+                .setDateTo(target.plusDays(2))
+                .setType(DevelopmentTpe.OTHER)
+                .setPublicNote("First after target.")
+                .build();
+        final Development after2 = Development.custom()
+                .setDateFrom(target.plusDays(3))
+                .setDateTo(target.plusDays(4))
+                .setType(DevelopmentTpe.OTHER)
+                .setPublicNote("Second after target.")
+                .build();
+        return Arrays.asList(before, after1, after2);
+    }
+
     @Test
     void noLongerDelinquent() {
+        final OffsetDateTime delinquencyStart = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
         final Loan l = Loan.custom()
                 .setId(RANDOM.nextInt(10000))
                 .setRating(Rating.D)
                 .setMyInvestment(mockMyInvestment())
                 .build();
         final Investment i = Investment.fresh(l, 200)
-                .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
+                .setNextPaymentDate(delinquencyStart)
                 .build();
-        final Function<Integer, Loan> f = (id) -> l;
-        final Function<Loan, Investment> lif = (loan) -> i;
+        final Zonky zonky = mock(Zonky.class);
+        when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
+        final Authenticated auth = mockAuthentication(zonky);
+        final Portfolio portfolio = mock(Portfolio.class);
+        when(portfolio.lookupOrFail(eq(l), eq(auth))).thenReturn(i);
         // register delinquence
-        Delinquents.update(Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
+        when(zonky.getInvestments((Select) any())).thenReturn(Stream.of(i));
+        Delinquents.update(auth, portfolio);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is no longer delinquent
-        Delinquents.update(Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
+        when(zonky.getInvestments((Select) any())).thenReturn(Stream.empty());
+        final List<Development> developments = assembleDevelopments(delinquencyStart);
+        when(zonky.getDevelopments(eq(l))).thenReturn(developments.stream());
+        Delinquents.update(auth, portfolio);
+        // event is fired; only includes developments after delinquency occured, in reverse order
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
+        final LoanNoLongerDelinquentEvent e = (LoanNoLongerDelinquentEvent) this.getNewEvents().get(0);
+        assertThat(e.getCollectionActions())
+                .hasSize(2)
+                .first().isEqualTo(developments.get(developments.size() - 1));
     }
 
     @Test

@@ -74,6 +74,7 @@ public class Selling implements PortfolioDependant {
         final Investment i = r.descriptor().item();
         if (isDryRun) {
             LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
+            sold.put(i); // make sure dry run never tries to sell this again in this instance
         } else {
             LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
             zonky.sell(i);
