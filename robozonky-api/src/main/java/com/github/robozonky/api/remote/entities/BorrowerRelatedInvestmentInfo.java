@@ -24,7 +24,8 @@ import javax.xml.bind.annotation.XmlElement;
 public class BorrowerRelatedInvestmentInfo extends BaseEntity {
 
     private BigDecimal totalPrincipalToLoan, remainingPrincipalToLoan, totalPrincipalToBorrower,
-            remainingPrincipalToBorrower;
+            remainingPrincipalToBorrower, totalSoldAmountToLoan;
+    private int activeCountToLoan, soldCountToLoan;
 
     private Collection<String> otherBorrowerNicknames = Collections.emptyList();
 
@@ -64,5 +65,20 @@ public class BorrowerRelatedInvestmentInfo extends BaseEntity {
     @XmlElement
     public BigDecimal getRemainingPrincipalToBorrower() {
         return remainingPrincipalToBorrower;
+    }
+
+    @XmlElement
+    public BigDecimal getTotalSoldAmountToLoan() {
+        return totalSoldAmountToLoan;
+    }
+
+    @XmlElement
+    public int getActiveCountToLoan() {
+        return activeCountToLoan;
+    }
+
+    @XmlElement
+    public int getSoldCountToLoan() {
+        return soldCountToLoan;
     }
 }
