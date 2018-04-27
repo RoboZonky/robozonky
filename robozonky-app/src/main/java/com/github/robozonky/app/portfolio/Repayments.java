@@ -70,14 +70,18 @@ public class Repayments implements PortfolioDependant {
         final Collection<Investment> repaid = authenticated.call(z -> z.getInvestments(s)).collect(Collectors.toList());
         if (isInitialized()) { // detect and process loans that have been fully repaid, comparing to the last time
             final int[] repaidLastTime = getRepaidLastTime().toArray();
-            LOGGER.trace("State: {}.", repaidLastTime);
+            LOGGER.debug("Repaid last time: {}.", repaidLastTime);
+            final PortfolioOverview portfolioOverview = portfolio.calculateOverview();
             repaid.stream()
                     .filter(i -> IntStream.of(repaidLastTime).noneMatch(loanId -> loanId == i.getLoanId()))
                     .forEach(i -> {
-                        final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
-                        final PortfolioOverview portfolioOverview = portfolio.calculateOverview();
-                        final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
-                        Events.fire(e);
+                        try {
+                            final Loan l = authenticated.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
+                            final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
+                            Events.fire(e);
+                        } catch (final Exception ex) { // seen that happen with mysterious loan #41
+                            LOGGER.warn("Found repayment of a non-existent loan #{}, ignoring.", i.getLoanId(), ex);
+                        }
                     });
         }
         // store for future reference
