@@ -55,7 +55,7 @@
     <version.org.antlr>4.7.1</version.org.antlr>
     <version.org.codehaus.izpack>5.1.2</version.org.codehaus.izpack>
     <version.org.jboss.resteasy>3.5.1.Final</version.org.jboss.resteasy>
-    <version.org.junit>5.1.0</version.org.junit>
+    <version.org.junit>5.1.1</version.org.junit>
     <version.org.slf4j>1.7.25</version.org.slf4j>
   </properties>
   <dependencyManagement>
@@ -489,7 +489,7 @@
             <dependency>
               <groupId>org.junit.platform</groupId>
               <artifactId>junit-platform-surefire-provider</artifactId>
-              <version>1.1.0</version>
+              <version>1.1.1</version>
             </dependency>
             <dependency>
               <groupId>org.junit.jupiter</groupId>
