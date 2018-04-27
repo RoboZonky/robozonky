@@ -51,7 +51,7 @@
     <version.org.apache.maven>3.5.2</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
     <surefire.version>2.19.1</surefire.version> <!-- 2.20 doesn't work with JUnit 5 -->
-    <version.org.jboss.resteasy>3.5.0.Final</version.org.jboss.resteasy>
+    <version.org.jboss.resteasy>3.5.1.Final</version.org.jboss.resteasy>
     <version.org.slf4j>1.7.25</version.org.slf4j>
     <version.org.antlr>4.7.1</version.org.antlr>
     <version.org.junit>5.1.0</version.org.junit>
