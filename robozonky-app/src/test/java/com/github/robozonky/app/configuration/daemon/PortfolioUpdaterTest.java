@@ -37,8 +37,8 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     @Test
     void creation() {
         final PortfolioUpdater instance = PortfolioUpdater.create((t) -> {
-                                                                  }, mock(Authenticated.class),
-                                                                  mock(StrategyProvider.class), true);
+                                                                  }, mock(Authenticated.class), Optional::empty,
+                                                                  true);
         assertSoftly(softly -> {
             softly.assertThat(instance.isUpdating()).isTrue(); // by default it's true
             softly.assertThat(instance.getRegisteredDependants()).hasSize(4); // expected contents

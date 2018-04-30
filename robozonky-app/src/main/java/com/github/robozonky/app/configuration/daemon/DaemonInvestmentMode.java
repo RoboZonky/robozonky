@@ -44,7 +44,8 @@ public class DaemonInvestmentMode implements InvestmentMode {
                                 final Investor.Builder builder, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, auth, strategyProvider, builder.isDryRun());
+        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, auth, strategyProvider::getToSell,
+                                                        builder.isDryRun());
         this.blockedAmountsUpdate = () -> portfolioUpdater.get().ifPresent(folio -> folio.updateBlockedAmounts(auth));
         this.daemons = new DaemonOperation[]{
                 new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, portfolioUpdater,

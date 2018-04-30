@@ -64,6 +64,9 @@ public class StrategyProvider implements Refreshable.RefreshListener<String> {
         set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
         set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
         set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
+        if (toInvest.get() == null && toPurchase.get() == null && toSell.get() == null) {
+            LOGGER.warn("No strategies are available. Check log for parser errors.");
+        }
         LOGGER.trace("Finished.");
     }
 

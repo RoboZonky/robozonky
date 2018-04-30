@@ -26,7 +26,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.authentication.Authenticated;
 import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -67,7 +69,7 @@ class PortfolioUpdater implements Runnable,
     }
 
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Authenticated auth,
-                                          final StrategyProvider sp, final boolean isDryRun) {
+                                          final Supplier<Optional<SellStrategy>> sp, final boolean isDryRun) {
         final RemoteBalance balance = RemoteBalance.create(auth, isDryRun);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
         // update loans repaid with every portfolio update
@@ -75,7 +77,7 @@ class PortfolioUpdater implements Runnable,
         // update delinquents automatically with every portfolio update
         updater.registerDependant((p, a) -> Delinquents.update(a, p));
         // attempt to sell participations after every portfolio update
-        updater.registerDependant(new Selling(sp::getToSell, isDryRun));
+        updater.registerDependant(new Selling(sp, isDryRun));
         return updater;
     }
 
