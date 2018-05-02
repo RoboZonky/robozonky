@@ -120,7 +120,7 @@ public class Portfolio {
      * @param blockedAmount Blocked amount to register.
      */
     void newBlockedAmount(final Tenant auth, final BlockedAmount blockedAmount) {
-        LOGGER.debug("Processing blocked amount: #{}.", blockedAmount);
+        LOGGER.debug("Processing blocked amount: {}.", blockedAmount);
         final int loanId = blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {
             case INVESTMENT: // potential new investment detected
