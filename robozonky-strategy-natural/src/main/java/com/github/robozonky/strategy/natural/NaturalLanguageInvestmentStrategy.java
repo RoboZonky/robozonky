@@ -19,6 +19,7 @@ package com.github.robozonky.strategy.natural;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,7 +35,7 @@ import com.github.robozonky.api.strategies.RecommendedLoan;
 
 public class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
-    private static final PrimaryMarketplaceComparator COMPARATOR = new PrimaryMarketplaceComparator();
+    private static final Comparator<LoanDescriptor> COMPARATOR = new PrimaryMarketplaceComparator();
     private final ParsedStrategy strategy;
 
     public NaturalLanguageInvestmentStrategy(final ParsedStrategy p) {

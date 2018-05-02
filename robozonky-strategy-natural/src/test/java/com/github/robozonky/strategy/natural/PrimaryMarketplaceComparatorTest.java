@@ -33,16 +33,35 @@ class PrimaryMarketplaceComparatorTest {
     private final Comparator<LoanDescriptor> c = new PrimaryMarketplaceComparator();
 
     private static Loan mockLoan(final int id, final int amount, final OffsetDateTime published) {
+        return mockLoan(id, amount, published, false);
+    }
+
+    private static Loan mockLoan(final int id, final int amount, final OffsetDateTime published,
+                                 final boolean insured) {
         return Loan.custom()
                 .setId(id)
                 .setAmount(amount)
                 .setDatePublished(published)
                 .setRemainingInvestment(amount)
+                .setInsuranceActive(insured)
                 .build();
     }
 
     @Test
-    void sortByRecency() {
+    void sortByInsurance() {
+        final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+        final Loan l1 = mockLoan(1, 100000, first, true);
+        final Loan l2 = mockLoan(l1.getId() + 1, l1.getAmount(), first, !l1.isInsuranceActive());
+        final LoanDescriptor ld1 = new LoanDescriptor(l1), ld2 = new LoanDescriptor(l2);
+        assertSoftly(softly -> {
+            softly.assertThat(c.compare(ld1, ld2)).isEqualTo(-1);
+            softly.assertThat(c.compare(ld2, ld1)).isEqualTo(1);
+            softly.assertThat(c.compare(ld1, ld1)).isEqualTo(0);
+        });
+    }
+
+    @Test
+    void sortByRecencyIfInsured() {
         final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
         final OffsetDateTime second = first.plus(Duration.ofMillis(1));
         final Loan l1 = mockLoan(1, 100000, first);

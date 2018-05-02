@@ -35,11 +35,7 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 
 public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
-    private static final Comparator<ParticipationDescriptor>
-            BY_TERM = Comparator.comparingInt(p -> p.item().getRemainingInstalmentCount()),
-            BY_RECENCY = Comparator.comparing(p -> p.item().getDeadline()),
-            BY_REMAINING =
-                    Comparator.comparing((ParticipationDescriptor p) -> p.item().getRemainingPrincipal()).reversed();
+    private static final Comparator<ParticipationDescriptor> COMPARATOR = new SecondaryMarketplaceComparator();
     private final ParsedStrategy strategy;
 
     public NaturalLanguagePurchaseStrategy(final ParsedStrategy p) {
@@ -49,15 +45,6 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
     private static Map<Rating, Collection<ParticipationDescriptor>> sortByRating(
             final Stream<ParticipationDescriptor> items) {
         return Collections.unmodifiableMap(items.distinct().collect(Collectors.groupingBy(l -> l.item().getRating())));
-    }
-
-    /**
-     * Pick a loan ordering such that it maximizes the chances the loan is still available on the marketplace when the
-     * investment operation is triggered.
-     * @return Comparator to order the marketplace with.
-     */
-    private static Comparator<ParticipationDescriptor> getLoanComparator() {
-        return BY_TERM.thenComparing(BY_REMAINING).thenComparing(BY_RECENCY);
     }
 
     private int[] getRecommendationBoundaries(final Participation participation) {
@@ -112,7 +99,7 @@ public class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         // recommend amount to invest per strategy
         return Util.rankRatingsByDemand(strategy, relevantPortfolio)
                 .flatMap(rating -> { // prioritize marketplace by their ranking's demand
-                    return splitByRating.get(rating).stream().sorted(getLoanComparator());
+                    return splitByRating.get(rating).stream().sorted(COMPARATOR);
                 })
                 .peek(d -> Decisions.report(logger -> logger.trace("Evaluating {}.", d.item())))
                 .filter(d -> sizeMatchesStrategy(d.item(), portfolio.getCzkAvailable()))

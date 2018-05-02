@@ -23,13 +23,14 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 
 /**
  * Loan ordering such that it maximizes the chances the loan is still available on the marketplace when the investment
- * operation is triggered. In other words, this tries to implement a heuristic of "most popular loans first."
+ * operation is triggered. In other words, this tries to implement a heuristic of "most popular insured loans first."
  */
 class PrimaryMarketplaceComparator implements Comparator<LoanDescriptor> {
 
     private static final Comparator<Loan> MOST_RECENT_FIRST = Comparator.comparing(Loan::getDatePublished).reversed(),
             BIGGEST_FIRST = Comparator.comparing(Loan::getRemainingInvestment).reversed(),
-            FINAL = MOST_RECENT_FIRST.thenComparing(BIGGEST_FIRST);
+            INSURED_FIRST = Comparator.comparing(Loan::isInsuranceActive).reversed(),
+            FINAL = INSURED_FIRST.thenComparing(MOST_RECENT_FIRST).thenComparing(BIGGEST_FIRST);
 
     @Override
     public int compare(final LoanDescriptor loan1, final LoanDescriptor loan2) {
