@@ -30,24 +30,6 @@ enum MBean {
         BaseMBean newImplementation(final Lifecycle lifecycle) {
             return new com.github.robozonky.app.management.Runtime(lifecycle);
         }
-    },
-    OPERATIONS(Operations.class) {
-        @Override
-        BaseMBean newImplementation(final Lifecycle lifecycle) {
-            return new Operations();
-        }
-    },
-    DELINQUENCY(Delinquency.class) {
-        @Override
-        BaseMBean newImplementation(final Lifecycle lifecycle) {
-            return new Delinquency();
-        }
-    },
-    PORTFOLIO(Portfolio.class) {
-        @Override
-        BaseMBean newImplementation(final Lifecycle lifecycle) {
-            return new Portfolio();
-        }
     };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MBean.class);

@@ -24,7 +24,8 @@ class LoanDelinquentEventListener extends AbstractEmailingListener<LoanDelinquen
 
     public LoanDelinquentEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
-        registerFinisher(event -> DelinquencyTracker.INSTANCE.setDelinquent(event.getInvestment()));
+        registerFinisher(
+                (event, sessionInfo) -> DelinquencyTracker.INSTANCE.setDelinquent(sessionInfo, event.getInvestment()));
     }
 
     @Override

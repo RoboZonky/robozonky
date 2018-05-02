@@ -35,7 +35,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
@@ -77,8 +77,8 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = mockApi();
         final Participation mock = mock(Participation.class);
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
-        final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockAuthentication(zonky), true);
-        final Portfolio portfolio = Portfolio.create(mockAuthentication(zonky), mockBalance(zonky));
+        final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockTenant(zonky), true);
+        final Portfolio portfolio = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(2);
@@ -106,7 +106,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getLoanId()).thenReturn(loan.getId());
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         when(mock.getRating()).thenReturn(loan.getRating());
-        final Authenticated auth = mockAuthentication(zonky);
+        final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth, true);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
@@ -127,7 +127,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noItems() {
         final Zonky zonky = mockApi();
-        final Authenticated auth = mockAuthentication(zonky);
+        final Tenant auth = mockTenant(zonky);
         final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth, true);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();

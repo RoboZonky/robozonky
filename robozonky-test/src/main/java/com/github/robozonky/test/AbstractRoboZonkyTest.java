@@ -16,9 +16,7 @@
 
 package com.github.robozonky.test;
 
-import java.io.File;
-
-import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.test.schedulers.TestingSchedulerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -55,7 +53,7 @@ public abstract class AbstractRoboZonkyTest {
     @BeforeEach
     @AfterEach
     protected void deleteState() {
-        final File f = Settings.INSTANCE.getStateFile();
-        AbstractRoboZonkyTest.LOGGER.info("Deleted {}: {}.", f.getAbsolutePath(), f.delete());
+        TenantState.destroyAll();
+        AbstractRoboZonkyTest.LOGGER.info("Destroyed state.");
     }
 }

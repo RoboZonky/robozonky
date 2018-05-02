@@ -30,7 +30,7 @@ class InvestorBuilderTest extends AbstractZonkyLeveragingTest {
         final String username = "user";
         final Investor.Builder b = new Investor.Builder();
         b.asUser(username).asDryRun();
-        final Investor p = b.build(mockAuthentication(mock(Zonky.class)));
+        final Investor p = b.build(mockTenant(mock(Zonky.class)));
         assertThat(p.isDryRun()).isTrue();
     }
 }

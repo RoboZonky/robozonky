@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Select;
@@ -52,7 +52,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(200);
         when(z.getAvailableLoans((Select) notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
         final InvestmentStrategy is = mock(InvestmentStrategy.class);
         final Supplier<Optional<InvestmentStrategy>> s = () -> Optional.of(is);
@@ -68,7 +68,7 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
     @Test
     void underBalance() {
         final Zonky z = harmlessZonky(199);
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(t -> {

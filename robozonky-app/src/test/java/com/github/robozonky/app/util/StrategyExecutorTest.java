@@ -47,7 +47,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void rechecksMarketplaceIfFirstCheckFailed() {
         final Zonky zonky = harmlessZonky(10_000);
-        final Portfolio p = Portfolio.create(mockAuthentication(zonky), mockBalance(zonky));
+        final Portfolio p = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
@@ -69,7 +69,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void rechecksMarketplaceIfBalanceIncreased() {
         final Zonky zonky = harmlessZonky(10_000);
-        final Portfolio p = Portfolio.create(mockAuthentication(zonky), mockBalance(zonky));
+        final Portfolio p = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
         final Loan loan = Loan.custom().build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Collection<LoanDescriptor> marketplace = Collections.singleton(ld);
@@ -89,7 +89,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void doesNotInvestOnEmptyMarketplace() {
         final Zonky zonky = harmlessZonky(10_000);
-        final Portfolio p = Portfolio.create(mockAuthentication(zonky), mockBalance(zonky));
+        final Portfolio p = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy> e = spy(new AlwaysFreshNeverInvesting());
         e.apply(p, Collections.emptyList());
         verify(e, never()).execute(any(), any(), any());

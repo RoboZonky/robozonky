@@ -39,7 +39,7 @@ import com.github.robozonky.api.remote.enums.DevelopmentTpe;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
@@ -59,7 +59,8 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void empty() {
-        assertThat(Delinquents.getDelinquents()).isEmpty();
+        final Tenant t = mockTenant();
+        assertThat(Delinquents.getDelinquents(t)).isEmpty();
         assertThat(this.getNewEvents()).isEmpty();
     }
 
@@ -67,7 +68,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     void nop() {
         final Zonky z = harmlessZonky(10_000);
         when(z.getInvestments((Select) any())).thenAnswer(invocation -> Stream.empty());
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         Delinquents.update(a, Portfolio.create(a, mockBalance(z)));
         verify(z, atLeastOnce()).getInvestments((Select) any());
     }
@@ -86,22 +87,23 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Function<Integer, Loan> f = (id) -> l;
         final Function<Loan, Investment> lif = (loan) -> i;
         // make sure new delinquencies are reported and stored
-        Delinquents.update(Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
+        final Tenant t = mockTenant();
+        Delinquents.update(t, Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
         assertSoftly(softly -> {
-            softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.getDelinquents(t)).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(1);
         });
         assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
         // make sure delinquencies are persisted even when there are none present
-        Delinquents.update(Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(t, Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
         assertSoftly(softly -> {
-            softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.getDelinquents(t)).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(2);
         });
         assertThat(this.getNewEvents().get(1)).isInstanceOf(LoanNoLongerDelinquentEvent.class);
         // and when they are no longer active, they're gone for good
-        Delinquents.update(Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
-        assertThat(Delinquents.getDelinquents()).hasSize(0);
+        Delinquents.update(t, Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
+        assertThat(Delinquents.getDelinquents(t)).hasSize(0);
     }
 
     @Test
@@ -117,9 +119,10 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Function<Integer, Loan> f = (id) -> l;
         final Function<Loan, Investment> lif = (loan) -> i;
         // make sure new delinquencies are reported and stored
-        Delinquents.update(Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
+        final Tenant t = mockTenant();
+        Delinquents.update(t, Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
         assertSoftly(softly -> {
-            softly.assertThat(Delinquents.getDelinquents()).hasSize(1);
+            softly.assertThat(Delinquents.getDelinquents(t)).hasSize(1);
             softly.assertThat(this.getNewEvents()).hasSize(5); // all 5 delinquency events
         });
     }
@@ -159,7 +162,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Zonky zonky = mock(Zonky.class);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-        final Authenticated auth = mockAuthentication(zonky);
+        final Tenant auth = mockTenant(zonky);
         final Portfolio portfolio = mock(Portfolio.class);
         when(portfolio.lookupOrFail(eq(l), eq(auth))).thenReturn(i);
         // register delinquence
@@ -193,12 +196,13 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Function<Integer, Loan> f = (id) -> l;
         final Function<Loan, Investment> lif = (loan) -> i;
         // register delinquency
-        Delinquents.update(Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
+        final Tenant t = mockTenant();
+        Delinquents.update(t, Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is defaulted
         final BiFunction<Loan, LocalDate, Collection<Development>> f2 = mock(BiFunction.class);
         when(f2.apply(any(), any())).thenReturn(Collections.emptyList());
-        Delinquents.update(Collections.emptyList(), lif, f, f2);
+        Delinquents.update(t, Collections.emptyList(), lif, f, f2);
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
         verify(f2).apply(any(), any());
     }
@@ -217,17 +221,19 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Function<Integer, Loan> f = (id) -> l;
         final Function<Loan, Investment> lif = (loan) -> i;
         // register delinquence
-        Delinquents.update(Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
+        final Tenant t = mockTenant();
+        Delinquents.update(t, Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
         assertThat(Delinquents.getAmountsAtRisk()).containsEntry(Rating.D, BigDecimal.valueOf(200));
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is paid
-        Delinquents.update(Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
+        Delinquents.update(t, Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
         assertThat(Delinquents.getAmountsAtRisk()).isEmpty();
         assertThat(this.getNewEvents()).isEmpty();
     }
 
     @Test
     void defaultUpdateTime() {
-        assertThat(Delinquents.getLastUpdateTimestamp()).isBefore(OffsetDateTime.now());
+        final Tenant t = mockTenant();
+        assertThat(Delinquents.getLastUpdateTimestamp(t)).isBefore(OffsetDateTime.now());
     }
 }

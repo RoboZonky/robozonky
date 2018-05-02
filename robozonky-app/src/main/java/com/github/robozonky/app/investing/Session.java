@@ -36,7 +36,7 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.SessionState;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -55,25 +55,26 @@ final class Session {
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final Collection<LoanDescriptor> loansStillAvailable;
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
-    private final Authenticated authenticated;
+    private final Tenant authenticated;
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
     private final Portfolio portfolio;
     private PortfolioOverview portfolioOverview;
 
     Session(final Portfolio portfolio, final Collection<LoanDescriptor> marketplace, final Investor investor,
-            final Authenticated auth) {
-        this.authenticated = auth;
+            final Tenant tenant) {
+        this.authenticated = tenant;
         this.investor = investor;
-        this.discarded = new SessionState<>(marketplace, d -> d.item().getId(), "discardedLoans");
-        this.seen = new SessionState<>(marketplace, d -> d.item().getId(), "seenLoans");
+        this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedLoans");
+        this.seen = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "seenLoans");
         this.loansStillAvailable = FastList.newList(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
 
     public static Collection<Investment> invest(final Portfolio portfolio, final Investor investor,
-                                                final Authenticated auth, final Collection<LoanDescriptor> loans,
+                                                final Tenant auth,
+                                                final Collection<LoanDescriptor> loans,
                                                 final RestrictedInvestmentStrategy strategy) {
         final Session session = new Session(portfolio, loans, investor, auth);
         final PortfolioOverview portfolioOverview = session.portfolioOverview;
@@ -142,7 +143,8 @@ final class Session {
                 }).orElseGet(() -> {
                     // rejected due to no confirmation provider => make available for direct investment later
                     Events.fire(new InvestmentSkippedEvent(recommendation));
-                    Session.LOGGER.debug("Loan #{} protected by CAPTCHA, will check back later.", loanId);
+                    Session.LOGGER.debug(
+                            "Loan #{} protected by CAPTCHA, will check back later.", loanId);
                     skip(loan);
                     return false;
                 });

@@ -29,7 +29,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
@@ -44,7 +44,7 @@ class PortfolioUpdater implements Runnable,
                                   PortfolioSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
-    private final Authenticated authenticated;
+    private final Tenant authenticated;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final AtomicBoolean updating = new AtomicBoolean(true);
@@ -52,7 +52,7 @@ class PortfolioUpdater implements Runnable,
     private final Duration retryFor;
     private final RemoteBalance balance;
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated,
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant authenticated,
                      final RemoteBalance balance,
                      final Duration retryFor) {
         this.shutdownCall = shutdownCall;
@@ -63,12 +63,12 @@ class PortfolioUpdater implements Runnable,
         registerDependant(Portfolio::updateBlockedAmounts);
     }
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Authenticated authenticated,
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant authenticated,
                      final RemoteBalance balance) {
         this(shutdownCall, authenticated, balance, Duration.ofHours(1));
     }
 
-    public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+    public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth,
                                           final Supplier<Optional<SellStrategy>> sp, final boolean isDryRun) {
         final RemoteBalance balance = RemoteBalance.create(auth, isDryRun);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);

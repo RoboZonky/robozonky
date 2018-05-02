@@ -27,7 +27,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,13 +44,13 @@ import static org.mockito.Mockito.*;
 class PortfolioTest extends AbstractZonkyLeveragingTest {
 
     private Zonky zonky;
-    private Authenticated authenticated;
+    private Tenant authenticated;
     private RemoteBalance balance;
 
     @BeforeEach
     void mockZonky() {
         zonky = harmlessZonky(10_000);
-        authenticated = mockAuthentication(zonky);
+        authenticated = mockTenant(zonky);
         balance = mockBalance(zonky);
     }
 

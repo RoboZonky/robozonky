@@ -22,7 +22,7 @@ import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -161,7 +161,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     }
 
     private Investor getZonkyProxy(final ProxyType proxyType, final RemoteResponse confirmationResponse,
-                                   final Authenticated auth) {
+                                   final Tenant auth) {
         switch (proxyType) {
             case SIMPLE:
                 return new Investor.Builder().build(auth);
@@ -189,7 +189,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     private void test(final ProxyType proxyType, final ZonkyResponseType responseType, final RecommendedLoan r,
                       final RemoteResponse confirmationResponse, final boolean seenBefore) {
         final Zonky api = mock(Zonky.class);
-        final Investor p = getZonkyProxy(proxyType, confirmationResponse, mockAuthentication(api));
+        final Investor p = getZonkyProxy(proxyType, confirmationResponse, mockTenant(api));
         ZonkyResponse result;
         try {
             result = p.invest(r, seenBefore);

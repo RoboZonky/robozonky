@@ -19,8 +19,8 @@ package com.github.robozonky.notifications.email;
 import java.util.Map;
 import java.util.OptionalInt;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.SessionInfo;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 class BalanceUnderMinimumEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {
@@ -52,7 +52,7 @@ class BalanceUnderMinimumEventListener extends AbstractEmailingListener<Executio
     @Override
     public void handle(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
         // figure out whether or not the balance is over the threshold
-        final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance();
+        final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance(sessionInfo);
         final int newBalance = event.getPortfolioOverview().getCzkAvailable();
         final boolean balanceNowUnder = newBalance < minimumBalance;
         final boolean wasFineLastTime = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() >= minimumBalance;

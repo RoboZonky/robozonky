@@ -21,21 +21,25 @@ import java.time.OffsetDateTime;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.Wallet;
+import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.RemoteBalance;
 import com.github.robozonky.app.util.LoanCache;
+import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.remote.OAuth;
 import com.github.robozonky.common.remote.Zonky;
-import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,27 +48,23 @@ import static org.mockito.Mockito.*;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
-    private static final class MockedBalance implements RemoteBalance {
-
-        private BigDecimal difference = BigDecimal.ZERO;
-        private final Zonky zonky;
-
-        public MockedBalance(final Zonky zonky) {
-            this.zonky = zonky;
-        }
-
-        @Override
-        public void update(final BigDecimal change) {
-            difference = difference.add(change);
-        }
-
-        @Override
-        public BigDecimal get() {
-            return zonky.getWallet().getAvailableBalance().add(difference);
-        }
-    }
-
     private static final Random RANDOM = new Random(0);
+    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing", true);
+
+    protected static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
+        final ApiProvider api = mock(ApiProvider.class);
+        when(api.oauth(any(Function.class))).then(i -> {
+            final Function f = i.getArgument(0);
+            return f.apply(oauth);
+        });
+        when(api.authenticated(any(), any(Function.class))).then(i -> {
+            final Supplier<ZonkyApiToken> s = i.getArgument(0);
+            s.get();
+            final Function f = i.getArgument(1);
+            return f.apply(z);
+        });
+        return api;
+    }
 
     protected static RemoteBalance mockBalance(final Zonky zonky) {
         return new MockedBalance(zonky);
@@ -112,15 +112,15 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         final Zonky zonky = mock(Zonky.class);
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
+        when(zonky.getRestrictions()).thenReturn(new Restrictions());
         when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
         return zonky;
     }
 
-    protected static Authenticated mockAuthentication(final Zonky zonky) {
-        final Authenticated auth = mock(Authenticated.class);
-        when(auth.getSecretProvider())
-                .thenReturn(SecretProvider.fallback("someone", "password".toCharArray()));
+    protected static Tenant mockTenant(final Zonky zonky) {
+        final Tenant auth = spy(Tenant.class);
+        when(auth.getSessionInfo()).thenReturn(SESSION);
         when(auth.getRestrictions()).thenReturn(new Restrictions());
         doAnswer(invocation -> {
             final Function<Zonky, Object> operation = invocation.getArgument(0);
@@ -134,9 +134,33 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         return auth;
     }
 
+    protected static Tenant mockTenant() {
+        return mockTenant(harmlessZonky(10_000));
+    }
+
     @BeforeEach
     @AfterEach
     public void clearCache() {
         LoanCache.INSTANCE.clean();
+    }
+
+    private static final class MockedBalance implements RemoteBalance {
+
+        private final Zonky zonky;
+        private BigDecimal difference = BigDecimal.ZERO;
+
+        public MockedBalance(final Zonky zonky) {
+            this.zonky = zonky;
+        }
+
+        @Override
+        public void update(final BigDecimal change) {
+            difference = difference.add(change);
+        }
+
+        @Override
+        public BigDecimal get() {
+            return zonky.getWallet().getAvailableBalance().add(difference);
+        }
     }
 }

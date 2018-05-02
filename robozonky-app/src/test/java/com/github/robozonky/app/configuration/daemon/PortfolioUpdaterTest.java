@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Select;
@@ -37,7 +37,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     @Test
     void creation() {
         final PortfolioUpdater instance = PortfolioUpdater.create((t) -> {
-                                                                  }, mock(Authenticated.class), Optional::empty,
+                                                                  }, mock(Tenant.class), Optional::empty,
                                                                   true);
         assertSoftly(softly -> {
             softly.assertThat(instance.isUpdating()).isTrue(); // by default it's true
@@ -48,7 +48,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     @Test
     void updatingDependants() {
         final Zonky z = harmlessZonky(10_000);
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         final PortfolioDependant dependant = mock(PortfolioDependant.class);
         final PortfolioUpdater instance = new PortfolioUpdater((t) -> {
         }, a, mockBalance(z));
@@ -65,7 +65,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
         doThrow(IllegalStateException.class).when(z).getInvestments((Select) any()); // will always fail
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         final Consumer<Throwable> t = mock(Consumer.class);
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, mockBalance(z), Duration.ofSeconds(2));
         instance.run();

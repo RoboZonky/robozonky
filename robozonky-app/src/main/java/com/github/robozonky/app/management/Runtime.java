@@ -18,15 +18,14 @@ package com.github.robozonky.app.management;
 
 import java.time.OffsetDateTime;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.internal.api.Defaults;
 
 class Runtime implements RuntimeMBean {
 
     private final Lifecycle lifecycle;
-    private String zonkyUsername = "";
     private OffsetDateTime lastUpdatedDateTime;
 
     public Runtime(final Lifecycle lifecycle) {
@@ -39,18 +38,12 @@ class Runtime implements RuntimeMBean {
     }
 
     @Override
-    public String getZonkyUsername() {
-        return this.zonkyUsername;
-    }
-
-    @Override
     public String getZonkyApiVersion() {
         return lifecycle.getZonkyApiVersion().orElse("N/A");
     }
 
     void handle(final ExecutionCompletedEvent event, final SessionInfo sessionInfo) {
         this.lastUpdatedDateTime = event.getCreatedOn();
-        this.zonkyUsername = sessionInfo.getUserName();
     }
 
     @Override

@@ -16,9 +16,14 @@
 
 package com.github.robozonky.util;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.github.robozonky.internal.api.Defaults;
 
 public class TextUtil {
 
@@ -29,4 +34,15 @@ public class TextUtil {
                 .sorted()
                 .collect(Collectors.joining(", "));
     }
+
+    public static Optional<String> md5(final String secret) {
+        try {
+            final MessageDigest mdEnc = MessageDigest.getInstance("MD5");
+            mdEnc.update(secret.getBytes(Defaults.CHARSET));
+            return Optional.of(new BigInteger(1, mdEnc.digest()).toString(16));
+        } catch (final Exception ex) {
+            return Optional.empty();
+        }
+    }
+
 }

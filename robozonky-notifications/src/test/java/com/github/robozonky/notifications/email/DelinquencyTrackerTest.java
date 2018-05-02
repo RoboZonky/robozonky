@@ -16,48 +16,27 @@
 
 package com.github.robozonky.notifications.email;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.internal.api.State;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class DelinquencyTrackerTest {
+class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
     private static final MarketplaceLoan LOAN = MarketplaceLoan.custom().setId(1).setAmount(200).build();
     private static final Investment INVESTMENT = Investment.fresh(LOAN, 200).build();
-
-    @AfterEach
-    @BeforeEach
-    void reset() {
-        State.forClass(DelinquencyTracker.class).newBatch(true).call();
-    }
+    private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
 
     @Test
     void standard() {
         final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
-        assertThat(t.isDelinquent(INVESTMENT)).isFalse();
-        assertThat(t.setDelinquent(INVESTMENT)).isTrue();
-        assertThat(t.isDelinquent(INVESTMENT)).isTrue();
-        assertThat(t.unsetDelinquent(INVESTMENT)).isTrue();
-        assertThat(t.isDelinquent(INVESTMENT)).isFalse();
-    }
-
-    @Test
-    void settingSet() {
-        final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
-        assertThat(t.setDelinquent(INVESTMENT)).isTrue();
-        assertThat(t.setDelinquent(INVESTMENT)).isFalse();
-        this.reset();
-        assertThat(t.isDelinquent(INVESTMENT)).isFalse();
-    }
-
-    @Test
-    void unsettingNeverSet() {
-        final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
-        assertThat(t.unsetDelinquent(INVESTMENT)).isFalse();
+        assertThat(t.isDelinquent(SESSION, INVESTMENT)).isFalse();
+        t.setDelinquent(SESSION, INVESTMENT);
+        assertThat(t.isDelinquent(SESSION, INVESTMENT)).isTrue();
+        t.unsetDelinquent(SESSION, INVESTMENT);
+        assertThat(t.isDelinquent(SESSION, INVESTMENT)).isFalse();
     }
 }

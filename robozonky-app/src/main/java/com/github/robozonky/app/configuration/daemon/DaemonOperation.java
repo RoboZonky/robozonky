@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +31,11 @@ abstract class DaemonOperation implements Runnable {
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     private final Duration refreshInterval;
-    private final Authenticated api;
+    private final Tenant api;
     private final PortfolioSupplier portfolio;
     private final Consumer<Throwable> shutdownCall;
 
-    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+    protected DaemonOperation(final Consumer<Throwable> shutdownCall, final Tenant auth,
                               final PortfolioSupplier portfolio, final Duration refreshInterval) {
         this.shutdownCall = shutdownCall;
         this.api = auth;
@@ -43,9 +43,9 @@ abstract class DaemonOperation implements Runnable {
         this.refreshInterval = refreshInterval;
     }
 
-    protected abstract boolean isEnabled(final Authenticated authenticated);
+    protected abstract boolean isEnabled(final Tenant authenticated);
 
-    protected abstract void execute(final Portfolio portfolio, final Authenticated authenticated);
+    protected abstract void execute(final Portfolio portfolio, final Tenant authenticated);
 
     public Duration getRefreshInterval() {
         return this.refreshInterval;

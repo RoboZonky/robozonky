@@ -19,7 +19,8 @@ package com.github.robozonky.notifications.email;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import com.github.robozonky.internal.api.State;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.common.state.TenantState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +30,11 @@ enum BalanceTracker {
 
     static final String BALANCE_KEY = "lastKnownBalance";
     private static final Logger LOGGER = LoggerFactory.getLogger(BalanceTracker.class);
-    private static final State.ClassSpecificState STATE = State.forClass(BalanceTracker.class);
 
-    public OptionalInt getLastKnownBalance() {
-        final Optional<String> lastKnownBalance = BalanceTracker.STATE.getValue(BalanceTracker.BALANCE_KEY);
+    public OptionalInt getLastKnownBalance(final SessionInfo sessionInfo) {
+        final Optional<String> lastKnownBalance = TenantState.of(sessionInfo)
+                .in(BalanceTracker.class)
+                .getValue(BalanceTracker.BALANCE_KEY);
         if (!lastKnownBalance.isPresent()) {
             BalanceTracker.LOGGER.debug("No last known balance.");
             return OptionalInt.empty();
@@ -41,21 +43,19 @@ enum BalanceTracker {
                 return OptionalInt.of(Integer.parseInt(lastKnownBalance.get()));
             } catch (final Exception ex) {
                 BalanceTracker.LOGGER.debug("Failed initializing balance.", ex);
-                this.reset();
                 return OptionalInt.empty();
             }
         }
     }
 
-    public void setLastKnownBalance(final int newBalance) {
-        BalanceTracker.STATE
-                .newBatch()
-                .set(BalanceTracker.BALANCE_KEY, String.valueOf(newBalance))
-                .call();
+    public void setLastKnownBalance(final SessionInfo sessionInfo, final int newBalance) {
+        TenantState.of(sessionInfo)
+                .in(BalanceTracker.class)
+                .reset(b -> b.put(BalanceTracker.BALANCE_KEY, String.valueOf(newBalance)));
     }
 
-    boolean reset() {
-        return BalanceTracker.STATE.newBatch(true).call();
+    void reset(final SessionInfo sessionInfo) {
+        TenantState.of(sessionInfo).in(BalanceTracker.class).reset();
     }
 
 }

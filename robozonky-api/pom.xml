@@ -48,11 +48,6 @@
       <artifactId>resteasy-jackson2-provider</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.ini4j</groupId>
-      <artifactId>ini4j</artifactId>
-      <version>0.5.4</version>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -119,6 +114,26 @@
                   }
                 },
                 "ignore": [
+                  {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "parameter void com.github.robozonky.api.notifications.EventListener<E extends com.github.robozonky.api.notifications.Event>::handle(E, ===com.github.robozonky.api.notifications.SessionInfo===)",
+                    "new": "parameter void com.github.robozonky.api.notifications.EventListener<E extends com.github.robozonky.api.notifications.Event>::handle(E, ===com.github.robozonky.api.SessionInfo===)",
+                    "oldType": "com.github.robozonky.api.notifications.SessionInfo",
+                    "newType": "com.github.robozonky.api.SessionInfo",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "EventListener",
+                    "methodName": "handle",
+                    "parameterIndex": "1",
+                    "elementKind": "parameter",
+                    "justification": "SessionInfo class now a more generic part of the API."
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "class com.github.robozonky.api.notifications.SessionInfo",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "SessionInfo",
+                    "elementKind": "class",
+                    "justification": "SessionInfo class moved to com.github.robozonky.api package."
+                  }
                 ]
               }
             }

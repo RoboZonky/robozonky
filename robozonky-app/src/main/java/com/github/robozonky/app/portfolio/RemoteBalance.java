@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.function.Supplier;
 
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.util.Scheduler;
 
 /**
@@ -28,7 +28,7 @@ import com.github.robozonky.util.Scheduler;
  */
 public interface RemoteBalance extends Supplier<BigDecimal> {
 
-    static RemoteBalance create(final Authenticated auth, final boolean isDryRun) {
+    static RemoteBalance create(final Tenant auth, final boolean isDryRun) {
         final RefreshableBalance b = new RefreshableBalance(auth);
         Scheduler.inBackground().submit(b, Duration.ofMinutes(1));
         return new RemoteBalanceImpl(b, isDryRun);

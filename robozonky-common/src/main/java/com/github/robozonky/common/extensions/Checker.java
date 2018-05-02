@@ -24,12 +24,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.api.confirmations.RequestId;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.common.remote.ApiProvider;
 import org.slf4j.Logger;

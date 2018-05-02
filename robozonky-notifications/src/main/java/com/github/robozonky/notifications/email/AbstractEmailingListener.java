@@ -19,16 +19,16 @@ package com.github.robozonky.notifications.email;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.Financial;
 import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
@@ -45,19 +45,19 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final Counter emailsOfThisType;
     private final ListenerSpecificNotificationProperties properties;
-    private final Collection<Consumer<T>> finishers = new FastList<>(1);
+    private final Collection<BiConsumer<T, SessionInfo>> finishers = new FastList<>(1);
 
     protected AbstractEmailingListener(final ListenerSpecificNotificationProperties properties) {
         this.properties = properties;
         this.emailsOfThisType = new Counter(this.getClass().getSimpleName(),
                                             properties.getListenerSpecificHourlyEmailLimit());
-        this.registerFinisher(event -> {
+        this.registerFinisher((event, sessionInfo) -> {
             // increase spam-prevention counters
-            emailsOfThisType.increase();
-            this.properties.getGlobalCounter().increase();
+            emailsOfThisType.increase(sessionInfo);
+            this.properties.getGlobalCounter().increase(sessionInfo);
             if (event instanceof Financial) { // register balance
                 final int balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
-                BalanceTracker.INSTANCE.setLastKnownBalance(balance);
+                BalanceTracker.INSTANCE.setLastKnownBalance(sessionInfo, balance);
             }
         });
     }
@@ -77,7 +77,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return email;
     }
 
-    protected final void registerFinisher(final Consumer<T> finisher) {
+    protected final void registerFinisher(final BiConsumer<T, SessionInfo> finisher) {
         if (!finishers.contains(finisher)) {
             this.finishers.add(finisher);
         }
@@ -87,12 +87,12 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         return this.finishers.size();
     }
 
-    private boolean allowGlobal() {
-        return properties.overrideGlobalGag() || properties.getGlobalCounter().allow();
+    private boolean allowGlobal(final SessionInfo sessionInfo) {
+        return properties.overrideGlobalGag() || properties.getGlobalCounter().allow(sessionInfo);
     }
 
-    boolean shouldSendEmail(final T event) {
-        return allowGlobal() && this.emailsOfThisType.allow();
+    boolean shouldSendEmail(final T event, final SessionInfo sessionInfo) {
+        return allowGlobal(sessionInfo) && this.emailsOfThisType.allow(sessionInfo);
     }
 
     abstract String getSubject(final T event);
@@ -126,8 +126,8 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
             // ratings here need to have a stable iteration order, as it will be used to list them in notifications
             put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
             put("session", new UnifiedMap<String, Object>() {{
-                put("userName", Util.obfuscateEmailAddress(sessionInfo.getUserName()));
-                put("userAgent", sessionInfo.getUserAgent());
+                put("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername()));
+                put("userAgent", Defaults.ROBOZONKY_USER_AGENT);
                 put("isDryRun", sessionInfo.isDryRun());
             }});
         }});
@@ -135,7 +135,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
 
     @Override
     public void handle(final T event, final SessionInfo sessionInfo) {
-        if (!this.shouldSendEmail(event)) {
+        if (!this.shouldSendEmail(event, sessionInfo)) {
             LOGGER.debug("Will not send e-mail.");
         } else {
             try {
@@ -150,7 +150,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
                 // perform finishers after the e-mail has been sent
                 finishers.forEach(f -> {
                     try {
-                        f.accept(event);
+                        f.accept(event, sessionInfo);
                     } catch (final Exception ex) {
                         LOGGER.trace("Finisher failed.", ex);
                     }

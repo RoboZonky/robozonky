@@ -16,6 +16,8 @@
 
 package com.github.robozonky.api.notifications;
 
+import com.github.robozonky.api.SessionInfo;
+
 /**
  * Implement in user code to allow handling @{@link Event}s. Different listeners for the same event may be executed
  * by different threads and concurrently. If multiple listeners are somehow interconnected, synchronization between

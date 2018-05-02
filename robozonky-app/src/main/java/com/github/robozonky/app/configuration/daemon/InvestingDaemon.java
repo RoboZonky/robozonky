@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investing;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -41,7 +41,7 @@ class InvestingDaemon extends DaemonOperation {
     private static final Select SELECT = new Select().greaterThan("remainingInvestment", 0);
     private final Investing investing;
 
-    public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+    public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
                            final Investor.Builder builder, final Supplier<Optional<InvestmentStrategy>> strategy,
                            final PortfolioSupplier portfolio, final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
@@ -49,12 +49,12 @@ class InvestingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected boolean isEnabled(final Authenticated authenticated) {
+    protected boolean isEnabled(final Tenant authenticated) {
         return !authenticated.getRestrictions().isCannotInvest();
     }
 
     @Override
-    protected void execute(final Portfolio portfolio, final Authenticated authenticated) {
+    protected void execute(final Portfolio portfolio, final Tenant authenticated) {
         // don't query anything unless we have enough money to invest
         final int balance = portfolio.getRemoteBalance().get().intValue();
         final int minimum = authenticated.getRestrictions().getMinimumInvestmentAmount();

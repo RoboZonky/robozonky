@@ -26,17 +26,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
-import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
-import com.github.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SellingCompletedEvent;
-import com.github.robozonky.api.notifications.SellingStartedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,51 +53,12 @@ public class JmxListenerService implements ListenerService {
         }
     }
 
-    private static void callOnOperations(final Consumer<Operations> operation) {
-        final Optional<Object> mbean = getMBean(MBean.OPERATIONS);
-        if (mbean.isPresent()) {
-            operation.accept((Operations) mbean.get());
-        } else {
-            LOGGER.warn("Operations MBean not found.");
-        }
-    }
-
-    private static void callOnPortfolio(final Consumer<Portfolio> operation) {
-        final Optional<Object> mbean = getMBean(MBean.PORTFOLIO);
-        if (mbean.isPresent()) {
-            operation.accept((Portfolio) mbean.get());
-        } else {
-            LOGGER.warn("Operations MBean not found.");
-        }
-    }
-
     private static <T extends Event> EventListener<T> newListener(final Class<T> eventType) {
-        if (Objects.equals(eventType, ExecutionStartedEvent.class)) {
-            return (event, sessionInfo) -> callOnPortfolio(bean -> bean.handle((ExecutionStartedEvent) event));
-        } else if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
+        if (Objects.equals(eventType, ExecutionCompletedEvent.class)) {
             return (event, sessionInfo) -> {
                 final ExecutionCompletedEvent evt = (ExecutionCompletedEvent) event;
                 callOnRuntime(bean -> bean.handle(evt, sessionInfo));
-                callOnPortfolio(bean -> bean.handle(evt));
             };
-        } else if (Objects.equals(eventType, SellingStartedEvent.class)) {
-            return (event, sessionInfo) -> callOnPortfolio(bean -> bean.handle((SellingStartedEvent) event));
-        } else if (Objects.equals(eventType, SellingCompletedEvent.class)) {
-            return (event, sessionInfo) -> callOnPortfolio(bean -> bean.handle((SellingCompletedEvent) event));
-        } else if (Objects.equals(eventType, PurchasingStartedEvent.class)) {
-            return (event, sessionInfo) -> callOnPortfolio(bean -> bean.handle((PurchasingStartedEvent) event));
-        } else if (Objects.equals(eventType, PurchasingCompletedEvent.class)) {
-            return (event, sessionInfo) -> callOnPortfolio(bean -> bean.handle((PurchasingCompletedEvent) event));
-        } else if (Objects.equals(eventType, InvestmentDelegatedEvent.class)) {
-            return (event, sessionInfo) -> callOnOperations(bean -> bean.handle((InvestmentDelegatedEvent) event));
-        } else if (Objects.equals(eventType, InvestmentRejectedEvent.class)) {
-            return (event, sessionInfo) -> callOnOperations(bean -> bean.handle((InvestmentRejectedEvent) event));
-        } else if (Objects.equals(eventType, InvestmentMadeEvent.class)) {
-            return (event, sessionInfo) -> callOnOperations(bean -> bean.handle((InvestmentMadeEvent) event));
-        } else if (Objects.equals(eventType, SaleOfferedEvent.class)) {
-            return (event, sessionInfo) -> callOnOperations(bean -> bean.handle((SaleOfferedEvent) event));
-        } else if (Objects.equals(eventType, InvestmentPurchasedEvent.class)) {
-            return (event, sessionInfo) -> callOnOperations(bean -> bean.handle((InvestmentPurchasedEvent) event));
         } else {
             return null;
         }

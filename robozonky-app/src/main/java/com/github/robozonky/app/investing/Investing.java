@@ -25,18 +25,18 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
-    private final Authenticated auth;
+    private final Tenant auth;
     private final Investor.Builder investor;
     private final AtomicReference<int[]> actionableWhenLastChecked = new AtomicReference<>(new int[0]);
 
     public Investing(final Investor.Builder investor, final Supplier<Optional<InvestmentStrategy>> strategy,
-                     final Authenticated auth) {
+                     final Tenant auth) {
         super(strategy);
         this.auth = auth;
         this.investor = investor;
@@ -63,6 +63,6 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
     protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
         final RestrictedInvestmentStrategy s = new RestrictedInvestmentStrategy(strategy, auth.getRestrictions());
-        return Session.invest(portfolio, investor.build(auth), auth, marketplace, s);
+        return com.github.robozonky.app.investing.Session.invest(portfolio, investor.build(auth), auth, marketplace, s);
     }
 }

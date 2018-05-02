@@ -33,7 +33,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
@@ -70,7 +70,7 @@ public class Portfolio {
      * @param balance Tracker for the presently available balance.
      * @return Empty in case there was a remote error.
      */
-    public static Portfolio create(final Authenticated auth, final RemoteBalance balance) {
+    public static Portfolio create(final Tenant auth, final RemoteBalance balance) {
         final int[] sold = auth.call(zonky -> zonky.getInvestments(new Select().equals("status", "SOLD")))
                 .mapToInt(Investment::getLoanId)
                 .distinct()
@@ -78,11 +78,11 @@ public class Portfolio {
         return new Portfolio(auth.call(Zonky::getStatistics), sold, balance);
     }
 
-    private static Optional<Investment> lookup(final Loan loan, final Authenticated auth) {
+    private static Optional<Investment> lookup(final Loan loan, final Tenant auth) {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
-    Investment lookupOrFail(final Loan loan, final Authenticated auth) {
+    Investment lookupOrFail(final Loan loan, final Tenant auth) {
         return lookup(loan, auth)
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
@@ -97,7 +97,7 @@ public class Portfolio {
         return loansSold.contains(loanId);
     }
 
-    public void updateBlockedAmounts(final Authenticated auth) {
+    public void updateBlockedAmounts(final Tenant auth) {
         final Collection<BlockedAmount> presentBlockedAmounts =
                 auth.call(zonky -> zonky.getBlockedAmounts().collect(Collectors.toList()));
         final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
@@ -119,7 +119,7 @@ public class Portfolio {
      * @param auth The API used to query the remote server for any extra information about the blocked amount.
      * @param blockedAmount Blocked amount to register.
      */
-    void newBlockedAmount(final Authenticated auth, final BlockedAmount blockedAmount) {
+    void newBlockedAmount(final Tenant auth, final BlockedAmount blockedAmount) {
         LOGGER.debug("Processing blocked amount: #{}.", blockedAmount);
         final int loanId = blockedAmount.getLoanId();
         switch (blockedAmount.getCategory()) {

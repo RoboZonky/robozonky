@@ -19,14 +19,15 @@ package com.github.robozonky.notifications.email;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.robozonky.internal.api.State;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.common.state.TenantState;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ final class Counter {
     private final String id;
     private final long maxItems;
     private final TemporalAmount period;
-    private final Set<OffsetDateTime> timestamps;
+    private final Map<SessionInfo, Set<OffsetDateTime>> timestamps = new UnifiedMap<>(0);
 
     public Counter(final String id, final int maxItems) {
         this(id, maxItems, Duration.ofHours(1));
@@ -46,39 +47,42 @@ final class Counter {
         this.id = id;
         this.maxItems = maxItems;
         this.period = period;
-        this.timestamps = new CopyOnWriteArraySet<>(Counter.load(id));
     }
 
-    private static Collection<OffsetDateTime> load(final String id) {
-        return State.forClass(Counter.class).getValues(id)
-                .map(value -> value.stream()
+    private static Set<OffsetDateTime> load(final SessionInfo sessionInfo, final String id) {
+        return TenantState.of(sessionInfo).in(Counter.class).getValues(id)
+                .map(value -> value
                         .map(String::trim)
                         .map(OffsetDateTime::parse)
-                        .collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+                        .collect(Collectors.toCollection(UnifiedSet::new)))
+                .orElse(new UnifiedSet<>(0));
     }
 
-    private boolean store(final String id, final Set<OffsetDateTime> timestamps) {
-        final Stream<String> result = getValidTimestamps().map(OffsetDateTime::toString);
+    private void store(final SessionInfo sessionInfo, final String id, final Set<OffsetDateTime> timestamps) {
+        final Stream<String> result = filterValidTimestamps(timestamps).map(OffsetDateTime::toString);
         LOGGER.trace("Storing timestamps: {}.", timestamps);
-        return State.forClass(Counter.class).newBatch().set(id, result).call();
+        TenantState.of(sessionInfo).in(Counter.class).reset(b -> b.put(id, result));
     }
 
-    private Stream<OffsetDateTime> getValidTimestamps() {
+    private Set<OffsetDateTime> getTimestamps(final SessionInfo sessionInfo) {
+        return timestamps.computeIfAbsent(sessionInfo, sessionInfo1 -> Counter.load(sessionInfo1, id));
+    }
+
+    private Stream<OffsetDateTime> filterValidTimestamps(final Set<OffsetDateTime> timestamps) {
         final OffsetDateTime now = OffsetDateTime.now();
-        return timestamps.stream()
-                .filter(timestamp -> timestamp.plus(period).isAfter(now));
+        return timestamps.stream().filter(timestamp -> timestamp.plus(period).isAfter(now));
     }
 
     /**
      * @return True when the counter increase was properly persisted.
      */
-    public boolean increase() {
-        timestamps.add(OffsetDateTime.now());
-        return store(id, timestamps);
+    public void increase(final SessionInfo sessionInfo) {
+        final Set<OffsetDateTime> timestamps = getTimestamps(sessionInfo);
+        getTimestamps(sessionInfo).add(OffsetDateTime.now());
+        store(sessionInfo, id, timestamps);
     }
 
-    public boolean allow() {
-        return getValidTimestamps().count() < maxItems;
+    public boolean allow(final SessionInfo sessionInfo) {
+        return filterValidTimestamps(getTimestamps(sessionInfo)).count() < maxItems;
     }
 }

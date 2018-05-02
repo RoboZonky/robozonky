@@ -41,7 +41,7 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
@@ -55,11 +55,16 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void constructor() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
         final Collection<LoanDescriptor> lds = Collections.singleton(ld);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session it = new Session(portfolio, new LinkedHashSet<>(lds), getInvestor(auth), auth);
+        final com.github.robozonky.app.investing.Session it = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                             new LinkedHashSet<>(
+                                                                                                                     lds),
+                                                                                                             getInvestor(
+                                                                                                                     auth),
+                                                                                                             auth);
         assertSoftly(softly -> {
             softly.assertThat(it.getAvailable()).containsExactly(ld);
             softly.assertThat(it.getResult()).isEmpty();
@@ -73,7 +78,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         return new RestrictedInvestmentStrategy(s, new Restrictions());
     }
 
-    private Investor getInvestor(final Authenticated auth) {
+    private Investor getInvestor(final Tenant auth) {
         return new Investor.Builder().build(auth);
     }
 
@@ -86,11 +91,13 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptorWithoutCaptcha();
         final int loanId = ld.item().getId();
         when(z.getLoan(eq(loanId))).thenReturn(ld.item());
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Collection<LoanDescriptor> lds = Arrays.asList(ld, AbstractZonkyLeveragingTest.mockLoanDescriptor());
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
-        final Collection<Investment> i = Session.invest(portfolio, getInvestor(auth), auth, lds,
-                                                        mockStrategy(loanId, amount));
+        final Collection<Investment> i = com.github.robozonky.app.investing.Session.invest(portfolio, getInvestor(auth),
+                                                                                           auth, lds,
+                                                                                           mockStrategy(loanId,
+                                                                                                        amount));
         // check that one investment was made
         assertThat(i).hasSize(1);
         final List<Event> newEvents = this.getNewEvents();
@@ -108,10 +115,14 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     void underBalance() {
         // setup APIs
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(199);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         // run test
-        final Session it = new Session(portfolio, Collections.emptySet(), getInvestor(auth), auth);
+        final com.github.robozonky.app.investing.Session it = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                             Collections.emptySet(),
+                                                                                                             getInvestor(
+                                                                                                                     auth),
+                                                                                                             auth);
         final Optional<RecommendedLoan> recommendation = AbstractZonkyLeveragingTest.mockLoanDescriptor()
                 .recommend(BigDecimal.valueOf(200));
         final boolean result = it.invest(recommendation.get());
@@ -124,12 +135,16 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void underAmount() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(0);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final RecommendedLoan recommendation =
                 AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(200).get();
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session t = new Session(portfolio, Collections.singleton(recommendation.descriptor()), getInvestor(auth),
-                                      auth);
+        final com.github.robozonky.app.investing.Session t = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                            Collections.singleton(
+                                                                                                                    recommendation.descriptor()),
+                                                                                                            getInvestor(
+                                                                                                                    auth),
+                                                                                                            auth);
         final boolean result = t.invest(recommendation);
         // verify result
         assertThat(result).isFalse();
@@ -140,27 +155,31 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentFailed() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final RecommendedLoan r = AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(200).get();
         final Exception thrown = new ServiceUnavailableException();
         final Investor p = mock(Investor.class);
         doThrow(thrown).when(p).invest(eq(r), anyBoolean());
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session t = new Session(portfolio, Collections.emptySet(), p, auth);
+        final com.github.robozonky.app.investing.Session t = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                            Collections.emptySet(),
+                                                                                                            p, auth);
         assertThatThrownBy(() -> t.invest(r)).isSameAs(thrown);
     }
 
     @Test
     void investmentRejected() {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final RecommendedLoan r = AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(200).get();
         final Investor p = mock(Investor.class);
         doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session t = new Session(portfolio, Collections.emptySet(), p, auth);
+        final com.github.robozonky.app.investing.Session t = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                            Collections.emptySet(),
+                                                                                                            p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -180,14 +199,17 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final LoanDescriptor ld = AbstractZonkyLeveragingTest.mockLoanDescriptor();
         final RecommendedLoan r = ld.recommend(200).get();
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
+        final com.github.robozonky.app.investing.Session t = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                            new LinkedHashSet<>(
+                                                                                                                    availableLoans),
+                                                                                                            p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -208,13 +230,16 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final RecommendedLoan r = ld.recommend(200, true).get();
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(new ZonkyResponse(ZonkyResponseType.DELEGATED))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
+        final com.github.robozonky.app.investing.Session t = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                            new LinkedHashSet<>(
+                                                                                                                    availableLoans),
+                                                                                                            p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -236,13 +261,16 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Collection<LoanDescriptor> availableLoans = Collections.singletonList(ld);
         // setup APIs
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(10_000);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(new ZonkyResponse(ZonkyResponseType.REJECTED))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.empty()).when(p).getConfirmationProviderId();
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session t = new Session(portfolio, new LinkedHashSet<>(availableLoans), p, auth);
+        final com.github.robozonky.app.investing.Session t = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                            new LinkedHashSet<>(
+                                                                                                                    availableLoans),
+                                                                                                            p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isFalse();
@@ -264,13 +292,15 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final RecommendedLoan r = AbstractZonkyLeveragingTest.mockLoanDescriptor().recommend(amountToInvest).get();
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(oldBalance);
         when(z.getLoan(eq(r.descriptor().item().getId()))).thenReturn(r.descriptor().item());
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Investor p = mock(Investor.class);
         doReturn(new ZonkyResponse(amountToInvest))
                 .when(p).invest(eq(r), anyBoolean());
         doReturn(Optional.of("something")).when(p).getConfirmationProviderId();
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Session t = new Session(portfolio, Collections.emptySet(), p, auth);
+        final com.github.robozonky.app.investing.Session t = new com.github.robozonky.app.investing.Session(portfolio,
+                                                                                                            Collections.emptySet(),
+                                                                                                            p, auth);
         final boolean result = t.invest(r);
         assertSoftly(softly -> {
             softly.assertThat(result).isTrue();

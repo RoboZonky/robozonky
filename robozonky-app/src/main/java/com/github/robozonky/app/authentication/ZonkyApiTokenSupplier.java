@@ -18,8 +18,6 @@ package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import javax.ws.rs.NotAuthorizedException;
 
@@ -35,12 +33,10 @@ import org.slf4j.LoggerFactory;
 class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZonkyApiTokenSupplier.class);
-
-    private final Lock lock = new ReentrantLock(true);
     private final SecretProvider secrets;
     private final ApiProvider apis;
-    private volatile ZonkyApiToken token = null;
     private final Duration refresh;
+    private volatile ZonkyApiToken token = null;
 
     public ZonkyApiTokenSupplier(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
         this.apis = apis;
@@ -51,13 +47,20 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
         refresh = Duration.ofSeconds(refreshSeconds);
     }
 
+    private static ZonkyApiToken login(final ApiProvider apis, final String username, final char... password) {
+        return apis.oauth((oauth) -> {
+            LOGGER.trace("Authenticating as '{}', using password.", username);
+            return oauth.login(username, password);
+        });
+    }
+
     private ZonkyApiToken refreshToken(final ZonkyApiToken token) {
         LOGGER.info("Authenticating as '{}', refreshing access token.", secrets.getUsername());
         return apis.oauth((oauth) -> oauth.refresh(token));
     }
 
     private ZonkyApiToken getFreshToken() {
-        return PasswordBasedAccess.trigger(apis, secrets.getUsername(), secrets.getPassword());
+        return login(apis, secrets.getUsername(), secrets.getPassword());
     }
 
     private ZonkyApiToken refreshTokenIfNecessary(final ZonkyApiToken token) {
@@ -84,15 +87,12 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken> {
     }
 
     @Override
-    public ZonkyApiToken get() {
-        lock.lock();
+    public synchronized ZonkyApiToken get() {
         try {
             token = getTokenInAnyWay(token);
             return token;
         } catch (final Exception ex) {
             throw new NotAuthorizedException(ex);
-        } finally {
-            lock.unlock();
         }
     }
 }

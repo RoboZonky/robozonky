@@ -35,7 +35,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.SessionState;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -53,23 +53,24 @@ final class Session {
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
-    private final Authenticated authenticated;
+    private final Tenant authenticated;
     private final boolean isDryRun;
     private final Portfolio portfolio;
     private final SessionState<ParticipationDescriptor> discarded;
     private PortfolioOverview portfolioOverview;
 
-    Session(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace, final Authenticated auth,
+    Session(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace, final Tenant tenant,
             final boolean dryRun) {
-        this.authenticated = auth;
+        this.authenticated = tenant;
         this.isDryRun = dryRun;
-        this.discarded = new SessionState<>(marketplace, d -> d.item().getId(), "discardedParticipations");
+        this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = FastList.newList(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }
 
-    public static Collection<Investment> purchase(final Portfolio portfolio, final Authenticated auth,
+    public static Collection<Investment> purchase(final Portfolio portfolio,
+                                                  final Tenant auth,
                                                   final Collection<ParticipationDescriptor> items,
                                                   final RestrictedPurchaseStrategy strategy,
                                                   final boolean dryRun) {

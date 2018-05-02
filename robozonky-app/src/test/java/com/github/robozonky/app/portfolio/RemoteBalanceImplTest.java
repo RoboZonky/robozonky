@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Settings;
 import org.assertj.core.api.Assertions;
@@ -37,7 +37,7 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
     void testDryRun() {
         final BigDecimal startingBalance = BigDecimal.valueOf(2_000);
         final Zonky z = harmlessZonky(startingBalance.intValue());
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         final RefreshableBalance rb = new RefreshableBalance(a);
         rb.run();
         final RemoteBalance b = new RemoteBalanceImpl(rb, true);
@@ -65,7 +65,7 @@ class RemoteBalanceImplTest extends AbstractZonkyLeveragingTest {
         System.setProperty(PROPERTY, THOUSAND.toString());
         final BigDecimal startingBalance = BigDecimal.valueOf(1_001);
         final Zonky z = harmlessZonky(startingBalance.intValue());
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         final RefreshableBalance rb = new RefreshableBalance(a);
         rb.run();
         final RemoteBalance b = new RemoteBalanceImpl(rb, true);

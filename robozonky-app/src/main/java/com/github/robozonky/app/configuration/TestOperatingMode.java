@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import com.beust.jcommander.Parameters;
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.extensions.Checker;
@@ -31,15 +31,14 @@ import org.slf4j.LoggerFactory;
 class TestOperatingMode extends OperatingMode {
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Authenticated auth,
-                                                         final Investor.Builder builder) {
+    protected Optional<InvestmentMode> getInvestmentMode(final Tenant auth, final Investor.Builder builder) {
         return Optional.of(new InvestmentMode() {
 
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
             @Override
             public ReturnCode apply(final Lifecycle lifecycle) {
-                final boolean sent = Checker.notifications(auth.getSecretProvider().getUsername());
+                final boolean sent = Checker.notifications(auth.getSessionInfo().getUsername());
                 LOGGER.info("Notification sent: {}.", sent);
                 return builder.getConfirmationUsed().map(c -> builder.getConfirmationRequestUsed()
                         .map(r -> {

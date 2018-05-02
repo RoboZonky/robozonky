@@ -20,7 +20,8 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.test.AbstractRoboZonkyTest;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.authentication.Tenant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,15 +30,16 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.*;
 
 @DisplayName("Session state")
-class SessionStateTest extends AbstractRoboZonkyTest {
+class SessionStateTest extends AbstractZonkyLeveragingTest {
 
     private static final String INITIAL_ID = UUID.randomUUID().toString();
     private static final Loan INITIAL_LOAN = Loan.custom().setId(1).build();
+    private static final Tenant TENANT = mockTenant();
     private SessionState<Loan> state;
 
     @BeforeEach
     void newState() {
-        state = new SessionState<>(Collections.singleton(INITIAL_LOAN), Loan::getId, INITIAL_ID);
+        state = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN), Loan::getId, INITIAL_ID);
         state.put(INITIAL_LOAN);
     }
 
@@ -54,8 +56,8 @@ class SessionStateTest extends AbstractRoboZonkyTest {
         @Test
         @DisplayName("does not interfere with original.")
         void createDifferentAndMakeSureIsEmpty() {
-            final SessionState<Loan> another = new SessionState<>(Collections.singleton(INITIAL_LOAN), Loan::getId,
-                                                                  INITIAL_ID.substring(1));
+            final SessionState<Loan> another = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN),
+                                                                  Loan::getId, INITIAL_ID.substring(1));
             assertThat(another.contains(INITIAL_LOAN)).isFalse();
         }
     }
@@ -67,8 +69,8 @@ class SessionStateTest extends AbstractRoboZonkyTest {
         @Test
         @DisplayName("reads what original stored.")
         void createSameAndMakeSureHasSame() {
-            final SessionState<Loan> another = new SessionState<>(Collections.singleton(INITIAL_LOAN), Loan::getId,
-                                                                  INITIAL_ID);
+            final SessionState<Loan> another = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN),
+                                                                  Loan::getId, INITIAL_ID);
             assertThat(another.contains(INITIAL_LOAN)).isTrue();
         }
     }
@@ -80,7 +82,7 @@ class SessionStateTest extends AbstractRoboZonkyTest {
         @Test
         @DisplayName("does not contain what was stored before.")
         void createSameAndMakeSureIsEmpty() {
-            final SessionState<Loan> another = new SessionState<>(Loan::getId, INITIAL_ID);
+            final SessionState<Loan> another = new SessionState<>(TENANT, Loan::getId, INITIAL_ID);
             assertThat(another.contains(INITIAL_LOAN)).isFalse();
         }
     }

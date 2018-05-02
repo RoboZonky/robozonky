@@ -20,8 +20,6 @@ public interface RuntimeMBean extends BaseMBean {
 
     void stopDaemon();
 
-    String getZonkyUsername();
-
     String getZonkyApiVersion();
 
     String getVersion();

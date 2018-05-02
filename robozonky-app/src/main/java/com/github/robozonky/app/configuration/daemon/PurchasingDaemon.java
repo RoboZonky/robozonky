@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.purchasing.Purchasing;
 import com.github.robozonky.common.remote.Select;
@@ -34,7 +34,7 @@ class PurchasingDaemon extends DaemonOperation {
 
     private final Purchasing purchasing;
 
-    public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+    public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
                             final Supplier<Optional<PurchaseStrategy>> strategy, final PortfolioSupplier portfolio,
                             final Duration refreshPeriod, final boolean isDryRun) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
@@ -42,12 +42,12 @@ class PurchasingDaemon extends DaemonOperation {
     }
 
     @Override
-    protected boolean isEnabled(final Authenticated authenticated) {
+    protected boolean isEnabled(final Tenant authenticated) {
         return !authenticated.getRestrictions().isCannotAccessSmp();
     }
 
     @Override
-    protected void execute(final Portfolio portfolio, final Authenticated authenticated) {
+    protected void execute(final Portfolio portfolio, final Tenant authenticated) {
         final long balance = portfolio.getRemoteBalance().get().longValue();
         final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
         final Collection<Participation> p =

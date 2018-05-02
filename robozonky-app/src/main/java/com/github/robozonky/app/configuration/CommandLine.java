@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.configuration;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -29,8 +28,6 @@ import com.beust.jcommander.ParametersDelegate;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.App;
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.authentication.Authenticated;
-import com.github.robozonky.internal.api.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,11 +115,7 @@ public class CommandLine {
 
     private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
         return SecretProviderFactory.getSecretProvider(authenticationFragment)
-                .flatMap(secrets -> {
-                    final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
-                    final Authenticated auth = Authenticated.tokenBased(secrets, duration);
-                    return mode.configure(this, auth);
-                });
+                .flatMap(secrets -> mode.configure(this, secrets));
     }
 
     String getName() {

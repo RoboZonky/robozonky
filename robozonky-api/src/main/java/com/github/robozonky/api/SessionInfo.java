@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.api;
 
 import java.util.Optional;
 
-import com.github.robozonky.internal.api.Defaults;
-
-public class SessionInfo {
+/**
+ * Uniquely identifies the Zonky user that the application is working on behalf of.
+ */
+public final class SessionInfo {
 
     private final String userName, name;
     private final boolean isDryRun;
@@ -43,18 +44,25 @@ public class SessionInfo {
         this.isDryRun = isDryRun;
     }
 
+    /**
+     * Whether or not the robot is doing a dry run. Dry run means that no portfolio-altering operations will be
+     * performed, even though the robot would still continue doing everything else.
+     * @return True if the robot is doing a dry run.
+     */
     public boolean isDryRun() {
         return isDryRun;
     }
 
-    public String getUserName() {
+    /**
+     * @return Zonky username of the current user.
+     */
+    public String getUsername() {
         return userName;
     }
 
-    public String getUserAgent() {
-        return Defaults.ROBOZONKY_USER_AGENT;
-    }
-
+    /**
+     * @return Name of the robot session currently running, if given.
+     */
     public Optional<String> getName() {
         return Optional.ofNullable(name);
     }

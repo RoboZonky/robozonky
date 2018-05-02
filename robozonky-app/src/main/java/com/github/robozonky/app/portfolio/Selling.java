@@ -35,7 +35,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SessionState;
 import com.github.robozonky.common.remote.Select;
@@ -53,7 +53,6 @@ public class Selling implements PortfolioDependant {
 
     private final Supplier<Optional<SellStrategy>> strategy;
     private final boolean isDryRun;
-    private final SessionState<Investment> sold;
 
     /**
      * @param strategy Will be used to retrieve the strategy when needed.
@@ -61,15 +60,15 @@ public class Selling implements PortfolioDependant {
      */
     public Selling(final Supplier<Optional<SellStrategy>> strategy, final boolean isDryRun) {
         this.strategy = strategy;
-        this.sold = new SessionState<>(Investment::getLoanId, "soldInvestments");
         this.isDryRun = isDryRun;
     }
 
-    private InvestmentDescriptor getDescriptor(final Investment i, final Authenticated auth) {
+    private InvestmentDescriptor getDescriptor(final Investment i, final Tenant auth) {
         return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, zonky)));
     }
 
-    private Optional<Investment> processInvestment(final Zonky zonky, final RecommendedInvestment r) {
+    private Optional<Investment> processSale(final Zonky zonky, final RecommendedInvestment r,
+                                             final SessionState<Investment> sold) {
         Events.fire(new SaleRequestedEvent(r));
         final Investment i = r.descriptor().item();
         if (isDryRun) {
@@ -84,20 +83,21 @@ public class Selling implements PortfolioDependant {
         return Optional.of(i);
     }
 
-    private void sell(final Portfolio portfolio, final SellStrategy strategy, final Authenticated auth) {
+    private void sell(final Portfolio portfolio, final SellStrategy strategy, final Tenant tenant) {
         final Select s = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
-        final Set<InvestmentDescriptor> eligible = auth.call(zonky -> zonky.getInvestments(s))
+        final SessionState<Investment> sold = new SessionState<>(tenant, Investment::getLoanId, "soldInvestments");
+        final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(s))
                 .parallel()
                 .filter(i -> !sold.contains(i)) // to make dry run function properly
-                .map(i -> getDescriptor(i, auth))
+                .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = portfolio.calculateOverview();
         Events.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
                 .peek(r -> Events.fire(new SaleRecommendedEvent(r)))
-                .map(r -> auth.call(zonky -> processInvestment(zonky, r)))
+                .map(r -> tenant.call(zonky -> processSale(zonky, r, sold)))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
         Events.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
@@ -110,7 +110,7 @@ public class Selling implements PortfolioDependant {
      * @param auth Will be used to create remote connections to the Zonky server.
      */
     @Override
-    public void accept(final Portfolio portfolio, final Authenticated auth) {
+    public void accept(final Portfolio portfolio, final Tenant auth) {
         strategy.get().ifPresent(s -> sell(portfolio, s, auth));
     }
 }

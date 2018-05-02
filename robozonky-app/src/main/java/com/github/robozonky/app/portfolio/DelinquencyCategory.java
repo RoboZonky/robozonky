@@ -19,7 +19,6 @@ package com.github.robozonky.app.portfolio;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -36,7 +35,8 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.internal.api.State;
+import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.state.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,8 +65,8 @@ enum DelinquencyCategory {
         return actual.compareTo(target) >= 0;
     }
 
-    private static IntStream fromIdString(final List<String> idString) {
-        return idString.stream().map(String::trim).filter(s -> s.length() > 0).mapToInt(Integer::parseInt);
+    private static IntStream fromIdString(final Stream<String> idString) {
+        return idString.map(String::trim).filter(s -> s.length() > 0).mapToInt(Integer::parseInt);
     }
 
     private static Stream<String> toIdString(final int[] ids) {
@@ -112,16 +112,17 @@ enum DelinquencyCategory {
 
     /**
      * Update internal state trackers and send events if necessary.
+     * @param tenant Session identifier.
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
      * @param investmentSupplier Retrieves the investment instance for a particular loan ID.
      * @param loanSupplier Retrieves the loan instance for a particular loan ID.
      * @return IDs of loans that are being tracked in this category.
      */
-    public int[] update(final Collection<Delinquency> active, final Function<Loan, Investment> investmentSupplier,
-                        final Function<Integer, Loan> loanSupplier,
+    public int[] update(final Tenant tenant, final Collection<Delinquency> active,
+                        final Function<Loan, Investment> investmentSupplier, final Function<Integer, Loan> loanSupplier,
                         final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
-        final State.ClassSpecificState state = State.forClass(DelinquencyCategory.class);
+        final InstanceState<DelinquencyCategory> state = tenant.getState(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
         final int[] keepThese = state.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
@@ -142,7 +143,7 @@ enum DelinquencyCategory {
                 })
                 .mapToInt(d -> d.getParent().getLoanId());
         final int[] storeThese = IntStream.concat(IntStream.of(keepThese), addThese).distinct().sorted().toArray();
-        state.newBatch().set(fieldName, toIdString(storeThese)).call();
+        state.update(b -> b.put(fieldName, toIdString(storeThese)));
         LOGGER.trace("Update over, stored {}.", storeThese);
         return storeThese;
     }

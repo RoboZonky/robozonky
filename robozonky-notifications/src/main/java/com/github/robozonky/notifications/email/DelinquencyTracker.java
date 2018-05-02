@@ -18,9 +18,10 @@ package com.github.robozonky.notifications.email;
 
 import java.time.OffsetDateTime;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.State;
 
 enum DelinquencyTracker {
 
@@ -30,28 +31,29 @@ enum DelinquencyTracker {
         return String.valueOf(investment.getLoanId());
     }
 
-    public boolean setDelinquent(final Investment investment) {
-        if (this.isDelinquent(investment)) {
-            return false;
+    public void setDelinquent(final SessionInfo sessionInfo, final Investment investment) {
+        if (this.isDelinquent(sessionInfo, investment)) {
+            return;
         }
-        return State.forClass(DelinquencyTracker.class)
-                .newBatch()
-                .set(toId(investment), OffsetDateTime.now(Defaults.ZONE_ID).toString())
-                .call();
+        TenantState.of(sessionInfo)
+                .in(DelinquencyTracker.class)
+                .reset(b -> b.put(toId(investment), OffsetDateTime.now(Defaults.ZONE_ID).toString()));
     }
 
-    public boolean unsetDelinquent(final Investment investment) {
-        if (!this.isDelinquent(investment)) {
-            return false;
+    public void unsetDelinquent(final SessionInfo sessionInfo, final Investment investment) {
+        if (!this.isDelinquent(sessionInfo, investment)) {
+            return;
         }
-        return State.forClass(DelinquencyTracker.class)
-                .newBatch()
-                .unset(toId(investment))
-                .call();
+        TenantState.of(sessionInfo)
+                .in(DelinquencyTracker.class)
+                .reset(b -> b.remove(toId(investment)));
     }
 
-    public boolean isDelinquent(final Investment investment) {
-        return State.forClass(DelinquencyTracker.class).getValue(toId(investment)).isPresent();
+    public boolean isDelinquent(final SessionInfo sessionInfo, final Investment investment) {
+        return TenantState.of(sessionInfo)
+                .in(DelinquencyTracker.class)
+                .getValue(toId(investment))
+                .isPresent();
     }
 
 }

@@ -16,16 +16,19 @@
 
 package com.github.robozonky.app.configuration;
 
+import java.time.Duration;
 import java.util.Optional;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
+import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.internal.api.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +37,22 @@ abstract class OperatingMode implements CommandLineFragment {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
+    private static Tenant getAuthenticated(final CommandLine cli, final SecretProvider secrets) {
+        final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
+        final TenantBuilder b = new TenantBuilder();
+        if (cli.getTweaksFragment().isDryRunEnabled()) {
+            b.dryRun();
+        }
+        return b.withSecrets(secrets)
+                .named(cli.getName())
+                .build(duration);
+    }
+
     Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials,
-                                                    final SecretProvider secrets,
                                                     final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
         LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
-        credentials.getToken().ifPresent(t -> secrets.setSecret(svcId, t));
-        return secrets.getSecret(svcId)
+        return credentials.getToken()
                 .map(token -> Optional.of(new Investor.Builder().usingConfirmation(provider, token)))
                 .orElseGet(() -> {
                     LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
@@ -48,38 +60,36 @@ abstract class OperatingMode implements CommandLineFragment {
                 });
     }
 
-    Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials,
-                                                    final SecretProvider secrets) {
+    Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials) {
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
-                .map(provider -> this.getZonkyProxyBuilder(credentials, secrets, provider))
+                .map(provider -> this.getZonkyProxyBuilder(credentials, provider))
                 .orElseGet(() -> {
                     LOGGER.error("Confirmation provider '{}' not found, yet it is required.", svcId);
                     return Optional.empty();
                 });
     }
 
-    protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLine cli,
-                                                                  final Authenticated auth,
+    protected abstract Optional<InvestmentMode> getInvestmentMode(final Tenant auth,
                                                                   final Investor.Builder builder);
 
-    public Optional<InvestmentMode> configure(final CommandLine cli, final Authenticated auth) {
-        final SecretProvider secretProvider = auth.getSecretProvider();
-        final boolean isDryRun = cli.getTweaksFragment().isDryRunEnabled();
+    public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
+        final Tenant auth = getAuthenticated(cli, secrets);
         // initialize SessionInfo before the robot potentially sends the first notification
-        Events.initialize(new SessionInfo(secretProvider.getUsername(), cli.getName(), isDryRun));
+        final SessionInfo s = auth.getSessionInfo();
+        Events.initialize(auth.getSessionInfo());
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
-                .map(value -> new Credentials(value, secretProvider))
-                .map(credentials -> this.getZonkyProxyBuilder(credentials, secretProvider))
+                .map(value -> new Credentials(value, secrets))
+                .map(this::getZonkyProxyBuilder)
                 .orElse(Optional.of(new Investor.Builder()))
                 .map(builder -> {
-                    if (isDryRun) {
+                    if (s.isDryRun()) {
                         LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
                         builder.asDryRun();
                     }
-                    builder.asUser(secretProvider.getUsername());
-                    return this.getInvestmentMode(cli, auth, builder);
+                    builder.asUser(s.getUsername());
+                    return this.getInvestmentMode(auth, builder);
                 }).orElse(Optional.empty());
     }
 

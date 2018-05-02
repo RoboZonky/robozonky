@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.management;
+package com.github.robozonky.common.state;
 
-import java.math.BigDecimal;
-import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-public interface PortfolioMBean extends BaseMBean {
+interface StateStorage {
 
-    int getAvailableBalance();
+    Optional<String> getValue(final String section, final String key);
 
-    int getInvestedAmount();
+    Stream<String> getKeys(final String section);
 
-    int getAmountAtRisk();
+    Stream<String> getSections();
 
-    Map<String, Integer> getInvestedAmountPerRating();
+    void setValue(final String section, final String key, final String value);
 
-    Map<String, Integer> getAmountAtRiskPerRating();
+    void unsetValue(final String section, final String key);
 
-    Map<String, BigDecimal> getRatingShare();
+    void unsetValues(final String section);
 
-    Map<String, BigDecimal> getShareAtRiskPerRating();
+    boolean store();
 }

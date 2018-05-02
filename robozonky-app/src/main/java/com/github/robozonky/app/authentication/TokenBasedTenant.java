@@ -17,24 +17,45 @@
 package com.github.robozonky.app.authentication;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.common.remote.ApiProvider;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.secrets.SecretProvider;
 
-class TokenBasedAccess extends AbstractAuthenticated {
+class TokenBasedTenant implements Tenant {
 
     private final Supplier<ZonkyApiToken> tokenSupplier;
-    private final SecretProvider secrets;
+    private final SessionInfo sessionInfo;
     private final ApiProvider apis;
 
-    TokenBasedAccess(final ApiProvider apis, final SecretProvider secrets, final Duration refreshAfter) {
+    private Instant lastRestrictionsUpdate = Instant.EPOCH;
+    private Restrictions restrictions = null;
+
+    TokenBasedTenant(final ApiProvider apis, final SecretProvider secrets, final String sessionName,
+                     final boolean isDryRun, final Duration refreshAfter) {
         this.apis = apis;
-        this.secrets = secrets;
+        this.sessionInfo = new SessionInfo(secrets.getUsername(), sessionName, isDryRun);
         this.tokenSupplier = new ZonkyApiTokenSupplier(apis, secrets, refreshAfter);
+    }
+
+    @Override
+    public Restrictions getRestrictions() {
+        return getRestrictions(Instant.now());
+    }
+
+    synchronized Restrictions getRestrictions(final Instant now) {
+        final boolean needsUpdate = lastRestrictionsUpdate.plus(Duration.ofMinutes(5)).isBefore(now);
+        if (needsUpdate) {
+            restrictions = call(Zonky::getRestrictions);
+            lastRestrictionsUpdate = now;
+        }
+        return restrictions;
     }
 
     @Override
@@ -43,7 +64,7 @@ class TokenBasedAccess extends AbstractAuthenticated {
     }
 
     @Override
-    public SecretProvider getSecretProvider() {
-        return secrets;
+    public SessionInfo getSessionInfo() {
+        return sessionInfo;
     }
 }

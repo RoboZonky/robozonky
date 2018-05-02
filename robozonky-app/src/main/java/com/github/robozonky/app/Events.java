@@ -24,11 +24,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.api.Settings;
 import org.eclipse.collections.impl.list.mutable.FastList;

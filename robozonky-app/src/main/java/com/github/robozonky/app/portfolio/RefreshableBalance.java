@@ -19,14 +19,14 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.util.Refreshable;
 
 class RefreshableBalance extends Refreshable<BigDecimal> {
 
-    private final Authenticated auth;
+    private final Tenant auth;
 
-    public RefreshableBalance(final Authenticated authenticated) {
+    public RefreshableBalance(final Tenant authenticated) {
         this.auth = authenticated;
     }
 

@@ -41,24 +41,26 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.Events;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
+import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.State;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Historical record of which {@link RawInvestment}s have been delinquent and when. This class updates shared state
- * (implemented via {@link State}) which can then be retrieved through static methods, such as {@link #getDelinquents()}
- * and {@link #getLastUpdateTimestamp()}.
+ * (implemented via {@link TenantState}) which can then be retrieved through static methods, such as
+ * {@link #getDelinquents(Tenant)}
+ * and {@link #getLastUpdateTimestamp(Tenant)}.
  */
 public class Delinquents {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquents.class);
-    private static final String LAST_UPDATE_PROPERTY_NAME = "lastUpdate";
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
     private static final AtomicReference<Map<Rating, BigDecimal>> AMOUNTS_AT_RISK =
@@ -89,7 +91,7 @@ public class Delinquents {
         }
     }
 
-    private static Delinquent add(final int loanId, final List<String> delinquencies) {
+    private static Delinquent add(final int loanId, final Stream<String> delinquencies) {
         final Delinquent d = new Delinquent(loanId);
         delinquencies.forEach(delinquency -> add(d, delinquency));
         return d;
@@ -99,17 +101,16 @@ public class Delinquents {
         return d.getLoanId() == i.getLoanId();
     }
 
-    private static State.ClassSpecificState getState() {
-        return State.forClass(Delinquents.class);
+    private static InstanceState<Delinquents> getState(final Tenant tenant) {
+        return tenant.getState(Delinquents.class);
     }
 
     /**
      * Retrieve the time when the internal state of this class was modified.
      * @return {@link Instant#EPOCH} when no internal state.
      */
-    public static OffsetDateTime getLastUpdateTimestamp() {
-        return getState().getValue(LAST_UPDATE_PROPERTY_NAME)
-                .map(OffsetDateTime::parse)
+    public static OffsetDateTime getLastUpdateTimestamp(final Tenant tenant) {
+        return getState(tenant).getLastUpdated()
                 .orElse(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID));
     }
 
@@ -120,27 +121,26 @@ public class Delinquents {
     /**
      * @return Active loans that are now, or at some point have been, tracked as delinquent.
      */
-    public static Stream<Delinquent> getDelinquents() {
-        final State.ClassSpecificState state = getState();
-        return state.getKeys().stream()
+    public static Stream<Delinquent> getDelinquents(final Tenant tenant) {
+        final InstanceState<Delinquents> state = getState(tenant);
+        return state.getKeys()
                 .filter(StringUtils::isNumeric) // skip any non-loan metadata
                 .map(key -> {
                     final int loanId = Integer.parseInt(key);
-                    final List<String> rawDelinquencies =
+                    final Stream<String> rawDelinquencies =
                             state.getValues(key).orElseThrow(() -> new IllegalStateException("Impossible."));
                     return add(loanId, rawDelinquencies);
                 });
     }
 
-    private static Collection<Delinquency> persistAndReturnActiveDelinquents(final Stream<Delinquent> delinquents) {
+    private static Collection<Delinquency> persistAndReturnActiveDelinquents(final Tenant tenant,
+                                                                             final Stream<Delinquent> items) {
+        final Collection<Delinquent> delinquents = items.collect(Collectors.toCollection(FastList::new));
         LOGGER.trace("Starting delinquency state update.");
-        final State.Batch stateUpdate = getState().newBatch(true)
-                .set(LAST_UPDATE_PROPERTY_NAME, OffsetDateTime.now().toString());
-        final Collection<Delinquency> allPresent = delinquents
-                .peek(d -> stateUpdate.set(String.valueOf(d.getLoanId()), toString(d)))
+        getState(tenant).reset(b -> delinquents.forEach(d -> b.put(String.valueOf(d.getLoanId()), toString(d))));
+        final Collection<Delinquency> allPresent = delinquents.stream()
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        stateUpdate.call(); // persist
         LOGGER.trace("Delinquency state update finished.");
         return allPresent;
     }
@@ -151,14 +151,15 @@ public class Delinquents {
                 .orElse(false);
     }
 
-    private static Stream<Delinquent> getNoMoreDelinquent(final Collection<Investment> presentlyDelinquent,
+    private static Stream<Delinquent> getNoMoreDelinquent(final Tenant tenant,
+                                                          final Collection<Investment> presentlyDelinquent,
                                                           final Function<Loan, Investment> investmentSupplier,
                                                           final Function<Integer, Loan> loanSupplier,
                                                           final BiFunction<Loan, LocalDate, Collection<Development>>
                                                                   collectionsSupplier) {
         final LocalDate now = LocalDate.now();
         // find out loans that are no longer delinquent, either through payment or through default
-        return getDelinquents().parallel()
+        return getDelinquents(tenant).parallel()
                 .filter(Delinquent::hasActiveDelinquency) // last known state was delinquent
                 .filter(d -> presentlyDelinquent.stream().noneMatch(i -> isRelated(d, i))) // no longer is delinquent
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
@@ -188,12 +189,12 @@ public class Delinquents {
                 });
     }
 
-    static void update(final Collection<Investment> presentlyDelinquent,
+    static void update(final Tenant tenant, final Collection<Investment> presentlyDelinquent,
                        final Function<Loan, Investment> investmentSupplier, final Function<Integer, Loan> loanSupplier,
                        final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.debug("Updating delinquent loans.");
         // find loans that were delinquent last time we checked and are not anymore
-        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(presentlyDelinquent, investmentSupplier,
+        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(tenant, presentlyDelinquent, investmentSupplier,
                                                                         loanSupplier, collectionsSupplier);
         // find loans that are delinquent now, but filter out those sold and/or defaulted
         final Map<Rating, BigDecimal> atRisk = new EnumMap<>(Rating.class);
@@ -206,10 +207,10 @@ public class Delinquents {
                 .map(i -> new Delinquent(i.getLoanId(), i.getNextPaymentDate().get().toLocalDate()));
         // merge all and store status
         final Stream<Delinquent> all = Stream.concat(noMoreDelinquent, nowDelinquent).distinct();
-        final Collection<Delinquency> result = persistAndReturnActiveDelinquents(all);
+        final Collection<Delinquency> result = persistAndReturnActiveDelinquents(tenant, all);
         // notify of new delinquencies over all known thresholds
         Stream.of(DelinquencyCategory.values())
-                .forEach(c -> c.update(result, investmentSupplier, loanSupplier, collectionsSupplier));
+                .forEach(c -> c.update(tenant, result, investmentSupplier, loanSupplier, collectionsSupplier));
         AMOUNTS_AT_RISK.set(atRisk);
         LOGGER.trace("Done, new amounts at risk are {}.", atRisk);
     }
@@ -217,19 +218,19 @@ public class Delinquents {
     /**
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
-     * @param auth The API that will be used to retrieve the loan instances.
+     * @param tenant The API that will be used to retrieve the loan instances.
      * @param portfolio Holds information about investments.
      */
-    public static void update(final Authenticated auth, final Portfolio portfolio) {
+    public static void update(final Tenant tenant, final Portfolio portfolio) {
         final Collection<Investment> delinquentInvestments =
-                auth.call(z -> z.getInvestments(new Select().equals("loan.unpaidLastInst", "true")))
+                tenant.call(z -> z.getInvestments(new Select().equals("loan.unpaidLastInst", "true")))
                         .collect(Collectors.toList());
-        update(delinquentInvestments, l -> portfolio.lookupOrFail(l, auth),
-               id -> auth.call(z -> LoanCache.INSTANCE.getLoan(id, z)), (l, s) -> getDevelopments(auth, l, s)
+        update(tenant, delinquentInvestments, l -> portfolio.lookupOrFail(l, tenant),
+               id -> tenant.call(z -> LoanCache.INSTANCE.getLoan(id, z)), (l, s) -> getDevelopments(tenant, l, s)
         );
     }
 
-    private static List<Development> getDevelopments(final Authenticated auth, final Loan loan,
+    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
                                                      final LocalDate delinquentSince) {
         final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
                 .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))

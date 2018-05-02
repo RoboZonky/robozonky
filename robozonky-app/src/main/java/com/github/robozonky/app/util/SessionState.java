@@ -22,7 +22,8 @@ import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.github.robozonky.internal.api.State;
+import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.state.InstanceState;
 import org.eclipse.collections.api.set.primitive.IntSet;
 import org.eclipse.collections.api.set.primitive.MutableIntSet;
 import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
@@ -41,29 +42,33 @@ import org.slf4j.LoggerFactory;
 public final class SessionState<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);
-    private static final State.ClassSpecificState STATE = State.forClass(SessionState.class);
     private final MutableIntSet items;
     private final ToIntFunction<T> idSupplier;
     private final String key;
+    private final InstanceState<SessionState> state;
 
     /**
      * Create an empty instance.
+     * @param tenant Session identifier.
      * @param idSupplier Supplies ID of the element to be stored, which will be used as a traditional primary key.
      * @param key Name of this collection elements. Different instances with the same value operate on the same
      * underlying storage.
      */
-    public SessionState(final ToIntFunction<T> idSupplier, final String key) {
-        this(Collections.emptyList(), idSupplier, key);
+    public SessionState(final Tenant tenant, final ToIntFunction<T> idSupplier, final String key) {
+        this(tenant, Collections.emptyList(), idSupplier, key);
     }
 
     /**
      * Create an instance, potentially retaining some elements from the underlying storage.
+     * @param tenant Session identifier.
      * @param retain Elements to retain.
      * @param idSupplier Supplies ID of the element to be stored, which will be used as a traditional primary key.
      * @param key Name of this collection elements. Different instances with the same value operate on the same
      * underlying storage.
      */
-    public SessionState(final Collection<T> retain, final ToIntFunction<T> idSupplier, final String key) {
+    public SessionState(final Tenant tenant, final Collection<T> retain, final ToIntFunction<T> idSupplier,
+                        final String key) {
+        this.state = tenant.getState(SessionState.class);
         this.key = key;
         this.idSupplier = idSupplier;
         this.items = read();
@@ -72,10 +77,8 @@ public final class SessionState<T> {
     }
 
     private MutableIntSet read() {
-        final int[] result = SessionState.STATE.getValues(key)
-                .map(s -> s.stream()
-                        .mapToInt(Integer::parseInt)
-                        .toArray())
+        final int[] result = state.getValues(key)
+                .map(s -> s.mapToInt(Integer::parseInt).toArray())
                 .orElse(new int[0]);
         SessionState.LOGGER.trace("'{}' read {}.", key, result);
         return IntHashSet.newSetWith(result);
@@ -83,8 +86,8 @@ public final class SessionState<T> {
 
     private void write(final IntSet items) {
         final Stream<String> result = IntStream.of(items.toArray()).mapToObj(String::valueOf);
-        SessionState.STATE.newBatch().set(key, result).call();
-        SessionState.LOGGER.trace("'{}' wrote '{}'.", key, SessionState.STATE.getValue(key).orElse("nothing"));
+        state.update(b -> b.put(key, result));
+        SessionState.LOGGER.trace("'{}' wrote '{}'.", key, state.getValue(key).orElse("nothing"));
     }
 
     public String getKey() {

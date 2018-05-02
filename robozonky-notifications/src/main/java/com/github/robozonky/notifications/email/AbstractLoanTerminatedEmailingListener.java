@@ -18,6 +18,7 @@ package com.github.robozonky.notifications.email;
 
 import java.util.Map;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.DelinquencyBased;
 import com.github.robozonky.api.notifications.Event;
 
@@ -26,13 +27,14 @@ abstract class AbstractLoanTerminatedEmailingListener<T extends Event & Delinque
 
     protected AbstractLoanTerminatedEmailingListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
-        registerFinisher(event -> DelinquencyTracker.INSTANCE.unsetDelinquent(event.getInvestment()));
+        registerFinisher((event, sessionInfo) -> DelinquencyTracker.INSTANCE.unsetDelinquent(sessionInfo,
+                                                                                             event.getInvestment()));
     }
 
     @Override
-    boolean shouldSendEmail(final T event) {
-        return super.shouldSendEmail(event) &&
-                DelinquencyTracker.INSTANCE.isDelinquent(event.getInvestment());
+    boolean shouldSendEmail(final T event, final SessionInfo sessionInfo) {
+        return super.shouldSendEmail(event, sessionInfo) &&
+                DelinquencyTracker.INSTANCE.isDelinquent(sessionInfo, event.getInvestment());
     }
 
     @Override

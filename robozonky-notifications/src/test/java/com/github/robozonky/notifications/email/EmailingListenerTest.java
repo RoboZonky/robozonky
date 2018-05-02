@@ -24,11 +24,12 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import javax.mail.internet.MimeMessage;
 
 import com.github.robozonky.api.ReturnCode;
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
@@ -56,7 +57,6 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -140,25 +140,8 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
                                                                final NotificationProperties p) {
         final AbstractEmailingListener<Event> e = spy((AbstractEmailingListener<Event>) s.getListener(p));
         // always return a listener that WILL send an e-mail, even though this means shouldSendEmail() is not tested
-        doReturn(true).when(e).shouldSendEmail(any());
+        doReturn(true).when(e).shouldSendEmail(any(), eq(SESSION_INFO));
         return e;
-    }
-
-    private static void testMailSent(final AbstractEmailingListener<Event> listener,
-                                     final Event event) throws Exception {
-        BalanceTracker.INSTANCE.reset();  // dynamic tests in JUnit don't call before/after methods !!!
-        final int originalMessages = EMAIL.getReceivedMessages().length;
-        listener.handle(event, SESSION_INFO);
-        assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
-        final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
-        assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
-        assertThat(m.getSubject()).isNotNull().isEqualTo(listener.getSubject(event));
-        assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
-        if (event instanceof Financial) { // this event must register the last known balance
-            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent();
-        } else { // and this event carries no such information
-            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
-        }
     }
 
     private static void testFormal(final AbstractEmailingListener<Event> listener, final Event event,
@@ -182,7 +165,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         assertThat(supplier.get()).isPresent();
     }
 
-    private static DynamicContainer forListener(final SupportedListener listener, final Event e) {
+    private DynamicContainer forListener(final SupportedListener listener, final Event e) {
         final NotificationProperties p = getNotificationProperties();
         final AbstractEmailingListener<Event> l = getListener(listener, p);
         return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
@@ -193,6 +176,22 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         ));
     }
 
+    private void testMailSent(final AbstractEmailingListener<Event> listener, final Event event) throws Exception {
+        BalanceTracker.INSTANCE.reset(SESSION_INFO);
+        final int originalMessages = EMAIL.getReceivedMessages().length;
+        listener.handle(event, SESSION_INFO);
+        assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
+        final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
+        assertThat(m.getContentType()).contains(Defaults.CHARSET.displayName());
+        assertThat(m.getSubject()).isNotNull().isEqualTo(listener.getSubject(event));
+        assertThat(m.getFrom()[0].toString()).contains("user@seznam.cz");
+        if (event instanceof Financial) { // this event must register the last known balance
+            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION_INFO)).isPresent();
+        } else { // and this event carries no such information
+            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION_INFO)).isEmpty();
+        }
+    }
+
     @BeforeEach
     void setProperty() {
         System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
@@ -201,14 +200,13 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     @Test
     void spamProtectionAvailable() throws IOException {
-        this.deleteState(); // for some reason, JUnit 5 doesn't invoke this from the abstract parent
         final Properties props = new Properties();
         props.load(NotificationPropertiesTest.class.getResourceAsStream("notifications-enabled.cfg"));
         props.setProperty("hourlyMaxEmails", String.valueOf(1)); // spam protection
         final ListenerSpecificNotificationProperties p =
                 new ListenerSpecificNotificationProperties(SupportedListener.TESTING,
                                                            new NotificationProperties(props));
-        final Consumer<RoboZonkyTestingEvent> c = mock(Consumer.class);
+        final BiConsumer<RoboZonkyTestingEvent, SessionInfo> c = mock(BiConsumer.class);
         final TestingEmailingListener l = new TestingEmailingListener(p);
         l.registerFinisher(c);
         assertThat(l.countFinishers()).isEqualTo(2); // both spam protection and custom finisher available
@@ -216,8 +214,15 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         assertThat(EMAIL.getReceivedMessages()).hasSize(1);
         l.handle(EVENT, SESSION_INFO);
         // e-mail not re-sent, finisher not called again
-        verify(c, times(1)).accept(any());
+        verify(c, times(1)).accept(any(), eq(SESSION_INFO));
         assertThat(EMAIL.getReceivedMessages()).hasSize(1);
+    }
+
+    @BeforeEach
+    @AfterEach
+    @Override
+    protected void deleteState() { // JUnit 5 won't invoke this from an abstract class
+        super.deleteState();
     }
 
     @BeforeEach

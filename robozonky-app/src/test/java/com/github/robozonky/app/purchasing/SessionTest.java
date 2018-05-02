@@ -32,7 +32,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.assertj.core.api.Condition;
@@ -47,9 +47,11 @@ class SessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void empty() {
         final Zonky z = harmlessZonky(0);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.emptyList(), null, true);
+        final Collection<Investment> i = com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth,
+                                                                                              Collections.emptyList(),
+                                                                                              null, true);
         assertThat(i).isEmpty();
     }
 
@@ -68,10 +70,14 @@ class SessionTest extends AbstractZonkyLeveragingTest {
                 });
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
         final Zonky z = harmlessZonky(0);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
-                                                          new RestrictedPurchaseStrategy(s, new Restrictions()), true);
+        final Collection<Investment> i = com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth,
+                                                                                              Collections.singleton(pd),
+                                                                                              new RestrictedPurchaseStrategy(
+                                                                                                      s,
+                                                                                                      new Restrictions()),
+                                                                                              true);
         assertSoftly(softly -> {
             softly.assertThat(i).isEmpty();
             softly.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
@@ -104,11 +110,15 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         });
         final Zonky z = harmlessZonky(100_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Authenticated auth = mockAuthentication(z);
+        final Tenant auth = mockTenant(z);
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
-                                                          new RestrictedPurchaseStrategy(s, new Restrictions()), false);
+        final Collection<Investment> i = com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth,
+                                                                                              Collections.singleton(pd),
+                                                                                              new RestrictedPurchaseStrategy(
+                                                                                                      s,
+                                                                                                      new Restrictions()),
+                                                                                              false);
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z).purchase(eq(p));

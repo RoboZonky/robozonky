@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import com.github.robozonky.api.ReturnCode;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
@@ -40,7 +40,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final PortfolioUpdater portfolioUpdater;
     private final Runnable blockedAmountsUpdate;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Authenticated auth,
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant auth,
                                 final Investor.Builder builder, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {

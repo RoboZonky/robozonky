@@ -18,7 +18,9 @@ package com.github.robozonky.notifications.email;
 
 import java.util.UUID;
 
-import com.github.robozonky.internal.api.State;
+import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
@@ -26,27 +28,26 @@ import static org.assertj.core.api.Assertions.*;
 
 class BalanceTrackerTest extends AbstractRoboZonkyTest {
 
+    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+
     @Test
     void lifecycle() {
-        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION)).isEmpty();
         // store new value
         final int newBalance = 200;
-        BalanceTracker.INSTANCE.setLastKnownBalance(newBalance);
-        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newBalance);
+        BalanceTracker.INSTANCE.setLastKnownBalance(SESSION, newBalance);
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION)).isPresent().hasValue(newBalance);
         // overwrite value
         final int newerBalance = 100;
-        BalanceTracker.INSTANCE.setLastKnownBalance(newerBalance);
-        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isPresent().hasValue(newerBalance);
-        assertThat(State.forClass(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY)).isPresent();
-        // reset value
-        assertThat(BalanceTracker.INSTANCE.reset()).isTrue();
-        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+        BalanceTracker.INSTANCE.setLastKnownBalance(SESSION, newerBalance);
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION)).isPresent().hasValue(newerBalance);
+        assertThat(TenantState.of(SESSION).in(BalanceTracker.class).getValue(BalanceTracker.BALANCE_KEY)).isPresent();
     }
 
     @Test
     void wrongData() {
-        final State.ClassSpecificState state = State.forClass(BalanceTracker.class);
-        state.newBatch().set(BalanceTracker.BALANCE_KEY, UUID.randomUUID().toString()).call();
-        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance()).isEmpty();
+        final InstanceState<BalanceTracker> state = TenantState.of(SESSION).in(BalanceTracker.class);
+        state.reset(b -> b.put(BalanceTracker.BALANCE_KEY, UUID.randomUUID().toString()));
+        assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION)).isEmpty();
     }
 }

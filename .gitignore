@@ -11,6 +11,6 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 /logback.xml
-**/robozonky.state
+**/robozonky*.state
 **/robozonky.keystore
 robozonky.cli

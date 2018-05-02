@@ -25,7 +25,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         when(z.getInvestments((Select) any())).thenReturn(Stream.empty());
         final Portfolio p = new Portfolio(Statistics.empty(), new int[0], mockBalance(z));
-        final Authenticated a = mockAuthentication(z);
+        final Tenant a = mockTenant(z);
         final Repayments r = new Repayments();
         r.accept(p, a);
         assertThat(getNewEvents()).isEmpty();

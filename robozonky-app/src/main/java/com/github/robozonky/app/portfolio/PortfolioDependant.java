@@ -18,12 +18,12 @@ package com.github.robozonky.app.portfolio;
 
 import java.util.function.BiConsumer;
 
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 
 /**
  * Represents code to be executed after a successful portfolio update, administered from within this package.
  */
 @FunctionalInterface
-public interface PortfolioDependant extends BiConsumer<Portfolio, Authenticated> {
+public interface PortfolioDependant extends BiConsumer<Portfolio, Tenant> {
 
 }

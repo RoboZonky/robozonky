@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,7 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void exceptional() {
-        final Authenticated a = mock(Authenticated.class);
+        final Tenant a = mock(Tenant.class);
         doThrow(IllegalStateException.class).when(a).run(any());
         final DaemonOperation d = new CustomOperation(a, null);
         d.run();
@@ -43,8 +43,8 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void standard() {
-        final Authenticated a = mock(Authenticated.class);
-        final BiConsumer<Portfolio, Authenticated> operation = mock(BiConsumer.class);
+        final Tenant a = mock(Tenant.class);
+        final BiConsumer<Portfolio, Tenant> operation = mock(BiConsumer.class);
         final DaemonOperation d = new CustomOperation(a, operation);
         d.run();
         verify(operation).accept(any(), eq(a));
@@ -53,8 +53,8 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void error() {
-        final Authenticated a = mock(Authenticated.class);
-        final BiConsumer<Portfolio, Authenticated> operation = (p, api) -> {
+        final Tenant a = mock(Tenant.class);
+        final BiConsumer<Portfolio, Tenant> operation = (p, api) -> {
             throw new Error();
         };
         final Consumer<Throwable> shutdown = mock(Consumer.class);
@@ -65,26 +65,26 @@ class DaemonOperationTest extends AbstractZonkyLeveragingTest {
 
     private static final class CustomOperation extends DaemonOperation {
 
-        private final BiConsumer<Portfolio, Authenticated> operation;
+        private final BiConsumer<Portfolio, Tenant> operation;
 
-        CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation) {
+        CustomOperation(final Tenant auth, final BiConsumer<Portfolio, Tenant> operation) {
             this(auth, operation, t -> {
             });
         }
 
-        CustomOperation(final Authenticated auth, final BiConsumer<Portfolio, Authenticated> operation,
+        CustomOperation(final Tenant auth, final BiConsumer<Portfolio, Tenant> operation,
                         final Consumer<Throwable> shutdownHook) {
             super(shutdownHook, auth, () -> Optional.of(mock(Portfolio.class)), Duration.ofSeconds(1));
             this.operation = operation;
         }
 
         @Override
-        protected boolean isEnabled(final Authenticated authenticated) {
+        protected boolean isEnabled(final Tenant authenticated) {
             return true;
         }
 
         @Override
-        protected void execute(final Portfolio portfolio, final Authenticated authenticated) {
+        protected void execute(final Portfolio portfolio, final Tenant authenticated) {
             operation.accept(portfolio, authenticated);
         }
     }

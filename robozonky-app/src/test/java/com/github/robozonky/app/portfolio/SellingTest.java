@@ -81,7 +81,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     void noSaleDueToNoData() { // no data is inserted into portfolio, therefore nothing happens
         final Zonky zonky = mockApi();
         final Portfolio portfolio = new Portfolio(mockBalance(zonky));
-        new Selling(ALL_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
+        new Selling(ALL_ACCEPTING, true).accept(portfolio, mockTenant(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
@@ -101,7 +101,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
                                                   mockBalance(zonky));
-        new Selling(NONE_ACCEPTING, true).accept(portfolio, mockAuthentication(zonky));
+        new Selling(NONE_ACCEPTING, true).accept(portfolio, mockTenant(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(2);
         assertSoftly(softly -> {
@@ -120,7 +120,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         when(zonky.getInvestments((Select) any())).thenReturn(Stream.of(i));
         final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0], mockBalance(zonky));
-        new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockAuthentication(zonky));
+        new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockTenant(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {

@@ -19,6 +19,7 @@ package com.github.robozonky.notifications.email;
 import java.time.Duration;
 import java.util.UUID;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
@@ -26,19 +27,21 @@ import static org.assertj.core.api.Assertions.*;
 
 class CounterTest extends AbstractRoboZonkyTest {
 
+    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
+
     @Test
     void testTiming() throws InterruptedException {
         final int seconds = 1;
         final Counter c = new Counter(UUID.randomUUID().toString(), 1, Duration.ofSeconds(seconds));
-        assertThat(c.allow()).isTrue();
-        assertThat(c.increase()).isTrue();
-        assertThat(c.allow()).isFalse();
+        assertThat(c.allow(SESSION)).isTrue();
+        c.increase(SESSION);
+        assertThat(c.allow(SESSION)).isFalse();
         int millis = 0;
         boolean isAllowed = false;
         while (millis < seconds * 5 * 1000) { // spend the absolute minimum time waiting
             Thread.sleep(1);
             millis += 1;
-            isAllowed = c.allow();
+            isAllowed = c.allow(SESSION);
             if (isAllowed) {
                 break;
             }

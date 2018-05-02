@@ -26,7 +26,7 @@ import java.util.concurrent.TimeoutException;
 import com.github.robozonky.api.ReturnCode;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.ShutdownHook;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.common.remote.Zonky;
@@ -42,7 +42,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void get() throws Exception {
-        final Authenticated a = mockAuthentication(mock(Zonky.class));
+        final Tenant a = mockTenant(mock(Zonky.class));
         final Investor.Builder b = new Investor.Builder().asDryRun();
         final ExecutorService e = Executors.newFixedThreadPool(1);
         try {

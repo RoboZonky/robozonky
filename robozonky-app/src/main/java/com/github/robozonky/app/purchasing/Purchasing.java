@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
@@ -38,18 +38,18 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
-    private final Authenticated auth;
+    private final Tenant auth;
     private final boolean dryRun;
     private final AtomicReference<int[]> lastChecked = new AtomicReference<>(new int[0]);
 
-    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Authenticated auth,
+    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth,
                       final boolean dryRun) {
         super(strategy);
         this.auth = auth;
         this.dryRun = dryRun;
     }
 
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Authenticated auth) {
+    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
         return new ParticipationDescriptor(p, auth.call(zonky -> LoanCache.INSTANCE.getLoan(p.getLoanId(), zonky)));
     }
 
@@ -79,6 +79,6 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
                     return !wasSoldBefore;
                 }).collect(Collectors.toCollection(FastList::new));
         final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
-        return Session.purchase(portfolio, auth, participations, s, dryRun);
+        return com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth, participations, s, dryRun);
     }
 }

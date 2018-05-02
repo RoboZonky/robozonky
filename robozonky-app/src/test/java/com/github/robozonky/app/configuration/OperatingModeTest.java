@@ -19,7 +19,7 @@ package com.github.robozonky.app.configuration;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.github.robozonky.app.authentication.Authenticated;
+import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
 import com.github.robozonky.common.secrets.SecretProvider;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.mockito.Mockito.*;
 
-class OperatingModeTest {
+class OperatingModeTest extends AbstractZonkyLeveragingTest {
 
     private static final String SERVICE = "zonkoid", SERVICE_TOKEN = "123456";
 
@@ -39,13 +39,12 @@ class OperatingModeTest {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(f);
         final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
-        final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE + ":" + SERVICE_TOKEN;
         when(cli.getConfirmationFragment()).thenReturn(fragment);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
-        final Optional<InvestmentMode> config = mode.configure(cli, auth);
+        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertSoftly(softly -> {
             softly.assertThat(config).containsInstanceOf(DaemonInvestmentMode.class);
             softly.assertThat(secretProvider.getSecret(SERVICE)).contains(SERVICE_TOKEN.toCharArray());
@@ -57,13 +56,12 @@ class OperatingModeTest {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
         final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
-        final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = UUID.randomUUID().toString();
         when(cli.getConfirmationFragment()).thenReturn(fragment);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
-        final Optional<InvestmentMode> config = mode.configure(cli, auth);
+        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertThat(config).isEmpty();
         assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
     }
@@ -73,13 +71,12 @@ class OperatingModeTest {
         final CommandLine cli = mock(CommandLine.class);
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
         final SecretProvider secretProvider = SecretProvider.fallback("user", "pass".toCharArray());
-        final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final ConfirmationCommandLineFragment fragment = new ConfirmationCommandLineFragment();
         fragment.confirmationCredentials = SERVICE;
         when(cli.getConfirmationFragment()).thenReturn(fragment);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
-        final Optional<InvestmentMode> config = mode.configure(cli, auth);
+        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertThat(config).isEmpty();
         assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
     }
@@ -90,10 +87,9 @@ class OperatingModeTest {
         when(cli.getTweaksFragment()).thenReturn(mock(TweaksCommandLineFragment.class));
         when(cli.getConfirmationFragment()).thenReturn(mock(ConfirmationCommandLineFragment.class));
         final SecretProvider secretProvider = SecretProvider.fallback("user", new char[0]);
-        final Authenticated auth = Authenticated.passwordBased(secretProvider);
         final OperatingMode mode = new DaemonOperatingMode(t -> {
         });
-        final Optional<InvestmentMode> config = mode.configure(cli, auth);
+        final Optional<InvestmentMode> config = mode.configure(cli, secretProvider);
         assertThat(config).isPresent();
         assertThat(secretProvider.getSecret(SERVICE)).isEmpty();
     }
