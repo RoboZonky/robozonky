@@ -151,6 +151,26 @@
                     "methodName": "<init>",
                     "elementKind": "constructor",
                     "justification": "Since Zonky 0.92, blocked amounts are uniquely identified by IDs."
+                  }, {
+                    "code": "java.method.nowFinal",
+                    "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "new": "method java.lang.String com.github.robozonky.api.remote.entities.BaseEntity::toString() @ com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "oldModifiers": "public",
+                    "newModifiers": "public final",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "InsurancePolicyPeriod",
+                    "methodName": "toString",
+                    "elementKind": "method",
+                    "justification": "InsurancePolicyPeriod now inherits from BaseEntity, as does every other entity."
+                  }, {
+                    "code": "java.class.nonFinalClassInheritsFromNewClass",
+                    "old": "class com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "new": "class com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "superClass": "com.github.robozonky.api.remote.entities.BaseEntity",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "InsurancePolicyPeriod",
+                    "elementKind": "class",
+                    "justification": "InsurancePolicyPeriod now inherits from BaseEntity, as does every other entity."
                   }
                 ]
               }
