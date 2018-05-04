@@ -18,6 +18,7 @@ package com.github.robozonky.util;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -79,6 +80,11 @@ public class Scheduler implements AutoCloseable {
                                                                      delayInBetween.toNanos(), TimeUnit.NANOSECONDS);
         this.submitted.add(toSchedule);
         return f;
+    }
+
+    public Future<?> run(final Runnable toRun) {
+        Scheduler.LOGGER.debug("Submitting {} immediately.", toRun);
+        return executor.submit(toRun);
     }
 
     public boolean isSubmitted(final Runnable refreshable) {
