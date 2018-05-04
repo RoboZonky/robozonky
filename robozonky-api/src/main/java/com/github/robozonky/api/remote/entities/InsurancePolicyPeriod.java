@@ -19,7 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.time.LocalDate;
 import javax.xml.bind.annotation.XmlElement;
 
-public class InsurancePolicyPeriod {
+public class InsurancePolicyPeriod extends BaseEntity {
 
     private LocalDate policyPeriodFrom, policyPeriodTo;
 
