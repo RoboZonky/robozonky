@@ -76,8 +76,8 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
                 .build();
         private final Investment i = Investment.fresh(l, 1000)
                 .build();
-        private final BlockedAmount investment = new BlockedAmount(l.getId(), i.getOriginalPrincipal()),
-                smpSale = new BlockedAmount(l.getId(), i.getOriginalPrincipal(), TransactionCategory.SMP_SALE_FEE);
+        private final BlockedAmount investment = new BlockedAmount(1, l.getId(), i.getOriginalPrincipal()),
+                smpSale = new BlockedAmount(2, l.getId(), i.getOriginalPrincipal(), TransactionCategory.SMP_SALE_FEE);
         private Portfolio portfolio;
 
         @BeforeEach
