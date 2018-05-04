@@ -53,7 +53,7 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
             assertThatThrownBy(() -> f.get(1, TimeUnit.SECONDS)).isInstanceOf(TimeoutException.class);
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
-            verify(p).run();
+            verify(p, atLeastOnce()).run();
         } finally {
             e.shutdownNow();
         }

@@ -18,6 +18,7 @@ package com.github.robozonky.util;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +57,10 @@ public class Scheduler implements AutoCloseable {
 
     public static Scheduler inBackground() {
         return BACKGROUND_SCHEDULER;
+    }
+
+    public Future<?> run(final Runnable toRun) {
+        return executor.submit(toRun);
     }
 
     public ScheduledFuture<?> submit(final Runnable toSchedule) {
