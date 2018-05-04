@@ -133,6 +133,24 @@
                     "classSimpleName": "SessionInfo",
                     "elementKind": "class",
                     "justification": "SessionInfo class moved to com.github.robozonky.api package."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(int, java.math.BigDecimal, com.github.robozonky.api.remote.enums.TransactionCategory)",
+                    "new": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(int, int, java.math.BigDecimal, com.github.robozonky.api.remote.enums.TransactionCategory)",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "BlockedAmount",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Since Zonky 0.92, blocked amounts are uniquely identified by IDs."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(java.math.BigDecimal)",
+                    "new": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(int, int, java.math.BigDecimal)",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "BlockedAmount",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Since Zonky 0.92, blocked amounts are uniquely identified by IDs."
                   }
                 ]
               }
