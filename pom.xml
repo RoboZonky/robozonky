@@ -350,7 +350,6 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-          <skip>${skipTests}</skip>
           <source>${java.version}</source>
         </configuration>
         <executions>
