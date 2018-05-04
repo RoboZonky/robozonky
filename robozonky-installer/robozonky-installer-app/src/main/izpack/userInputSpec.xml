@@ -25,7 +25,7 @@
             summaryKey="Uživatelské jméno na Zonky"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Uživatelské jméno musí mít tvar e-mailové adresy.">
-        <param name="pattern" value="[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+"/>
+        <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
       </validator>
     </field>
     <field type="password" variable="zonkyPassword">
@@ -89,7 +89,7 @@
       <spec txt="Adresát:" id="smtp.to" size="20" set="${zonkyUsername}"/>
       <validator class="com.izforge.izpack.panels.userinput.validator.RegularExpressionValidator"
                  txt="Adresát není platný.">
-        <param name="pattern" value="[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+"/>
+        <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
       </validator>
     </field>
     <field type="text" variable="smtpUsername">
