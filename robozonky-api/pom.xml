@@ -171,6 +171,17 @@
                     "classSimpleName": "InsurancePolicyPeriod",
                     "elementKind": "class",
                     "justification": "InsurancePolicyPeriod now inherits from BaseEntity, as does every other entity."
+                  }, {
+                    "code": "java.annotation.removed",
+                    "old": "method int java.lang.Object::hashCode() @ com.github.robozonky.api.remote.entities.Transaction",
+                    "new": "method int com.github.robozonky.api.remote.entities.Transaction::hashCode()",
+                    "annotationType": "jdk.internal.HotSpotIntrinsicCandidate",
+                    "annotation": "@jdk.internal.HotSpotIntrinsicCandidate",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "Transaction",
+                    "methodName": "hashCode",
+                    "elementKind": "method",
+                    "justification": "Transaction now has its own equals() and hashCode()."
                   }
                 ]
               }
