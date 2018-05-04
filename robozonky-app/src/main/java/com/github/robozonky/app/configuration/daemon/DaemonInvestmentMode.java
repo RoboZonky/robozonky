@@ -38,19 +38,19 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
     private final DaemonOperation[] daemons;
     private final PortfolioUpdater portfolioUpdater;
-    private final Runnable blockedAmountsUpdate;
+    private final Runnable transactionsUpdate;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant auth,
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant,
                                 final Investor.Builder builder, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, auth, strategyProvider::getToSell,
+        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell,
                                                         builder.isDryRun());
-        this.blockedAmountsUpdate = () -> portfolioUpdater.get().ifPresent(folio -> folio.updateBlockedAmounts(auth));
+        this.transactionsUpdate = () -> portfolioUpdater.get().ifPresent(folio -> folio.updateTransactions(tenant));
         this.daemons = new DaemonOperation[]{
-                new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, portfolioUpdater,
+                new InvestingDaemon(shutdownCall, tenant, builder, strategyProvider::getToInvest, portfolioUpdater,
                                     primaryMarketplaceCheckPeriod),
-                new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, portfolioUpdater,
+                new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolioUpdater,
                                      secondaryMarketplaceCheckPeriod, builder.isDryRun())
         };
     }
@@ -65,9 +65,9 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private void executeDaemons(final Scheduler executor) {
         // run portfolio update twice a day
         executor.submit(portfolioUpdater, Duration.ofHours(12));
-        // also run blocked amounts update every now and then to detect changes made outside of the robot
+        // also run transactions update every now and then to detect changes made outside of the robot
         final Duration oneHour = Duration.ofHours(1);
-        executor.submit(blockedAmountsUpdate, oneHour, oneHour);
+        executor.submit(transactionsUpdate, oneHour, oneHour);
         // run investing and purchasing daemons
         IntStream.range(0, daemons.length).forEach(daemonId -> {
             final DaemonOperation d = daemons[daemonId];

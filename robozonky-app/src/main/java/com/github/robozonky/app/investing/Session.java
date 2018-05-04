@@ -176,8 +176,7 @@ final class Session {
 
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.updateBlockedAmounts(authenticated);
-        portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
+        portfolio.simulateInvestment(authenticated, i.getLoanId(), i.getOriginalPrincipal());
         portfolioOverview = portfolio.calculateOverview();
     }
 

@@ -140,8 +140,7 @@ final class Session {
 
     private void markSuccessfulPurchase(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.updateBlockedAmounts(authenticated);
-        portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
+        portfolio.simulatePurchase(authenticated, i.getLoanId(), i.getRemainingPrincipal());
         portfolioOverview = portfolio.calculateOverview();
     }
 }

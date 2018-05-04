@@ -17,20 +17,14 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
@@ -44,42 +38,52 @@ import org.slf4j.LoggerFactory;
 
 public class Portfolio {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
+
     private final Statistics statistics;
-    private final Map<Rating, BigDecimal> blockedAmountsSum = new EnumMap<>(Rating.class);
     private final MutableIntSet loansSold;
     private final RemoteBalance balance;
-    private final AtomicReference<Collection<BlockedAmount>> blockedAmounts =
-            new AtomicReference<>(Collections.emptyList());
+    private final TransactionLog transactions;
 
     Portfolio(final RemoteBalance balance) {
-        this(Statistics.empty(), new int[0], balance);
+        this(Statistics.empty(), new TransactionLog(), new int[0], balance);
     }
 
-    Portfolio(final Statistics statistics, final int[] idsOfSoldLoans,
+    Portfolio(final Statistics statistics, final TransactionLog transactions, final int[] idsOfSoldLoans,
               final RemoteBalance balance) {
+        final Collection<Synthetic> survivors = transactions.getSynthetics();
+        LOGGER.debug("Survived synthetic transactions: {}", survivors);
+        LOGGER.debug("Sold loans: {}", Arrays.toString(idsOfSoldLoans));
+        this.transactions = new TransactionLog(survivors);
         this.statistics = statistics;
         this.loansSold = IntHashSet.newSetWith(idsOfSoldLoans);
         this.balance = balance;
     }
 
-    /**
-     * Return a new instance of the class, loading information about all investments present and past from the Zonky
-     * interface. This operation may take a while, as there may easily be hundreds or thousands of such investments.
-     * @param auth The API to be used to retrieve the data from Zonky.
-     * @param balance Tracker for the presently available balance.
-     * @return Empty in case there was a remote error.
-     */
-    public static Portfolio create(final Tenant auth, final RemoteBalance balance) {
-        final int[] sold = auth.call(zonky -> zonky.getInvestments(new Select().equals("status", "SOLD")))
+    private static int[] getSoldLoans(final Tenant tenant) {
+        return tenant.call(zonky -> zonky.getInvestments(new Select().equals("status", "SOLD")))
                 .mapToInt(Investment::getLoanId)
                 .distinct()
                 .toArray();
-        return new Portfolio(auth.call(Zonky::getStatistics), sold, balance);
+    }
+
+    /**
+     * Return a new instance of the class, loading information about all investments present and past from the Zonky
+     * interface. This operation may take a while, as there may easily be hundreds or thousands of such investments.
+     * @param tenant The API to be used to retrieve the data from Zonky.
+     * @param balance Tracker for the presently available balance.
+     * @return Empty in case there was a remote error.
+     */
+    public static Portfolio create(final Tenant tenant, final RemoteBalance balance) {
+        return new Portfolio(tenant.call(Zonky::getStatistics), new TransactionLog(), getSoldLoans(tenant), balance);
     }
 
     private static Optional<Investment> lookup(final Loan loan, final Tenant auth) {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
+    }
+
+    public Portfolio reloadFromZonky(final Tenant tenant, final RemoteBalance balance) {
+        return new Portfolio(tenant.call(Zonky::getStatistics), transactions, getSoldLoans(tenant), balance);
     }
 
     Investment lookupOrFail(final Loan loan, final Tenant auth) {
@@ -97,48 +101,28 @@ public class Portfolio {
         return loansSold.contains(loanId);
     }
 
-    public void updateBlockedAmounts(final Tenant auth) {
-        final Collection<BlockedAmount> presentBlockedAmounts =
-                auth.call(zonky -> zonky.getBlockedAmounts().collect(Collectors.toList()));
-        final Collection<BlockedAmount> previousBlockedAmounts = blockedAmounts.getAndSet(presentBlockedAmounts);
-        presentBlockedAmounts.stream()
-                .filter(ba -> !previousBlockedAmounts.contains(ba))
-                .forEach(ba -> newBlockedAmount(auth, ba));
-    }
-
-    void addToBlockedAmounts(final Rating rating, final BigDecimal update) {
-        blockedAmountsSum.compute(rating, (r, old) -> {
-            final BigDecimal start = old == null ? BigDecimal.ZERO : old;
-            LOGGER.debug("Adding {} CZK to {}, having {} CZK blocked already.", update, rating, start);
-            return start.add(update);
-        });
-    }
-
-    /**
-     * Update the internal representation of the remote portfolio by introducing a new {@link BlockedAmount}.
-     * @param auth The API used to query the remote server for any extra information about the blocked amount.
-     * @param blockedAmount Blocked amount to register.
-     */
-    void newBlockedAmount(final Tenant auth, final BlockedAmount blockedAmount) {
-        LOGGER.debug("Processing blocked amount: {}.", blockedAmount);
-        final int loanId = blockedAmount.getLoanId();
-        switch (blockedAmount.getCategory()) {
-            case INVESTMENT: // potential new investment detected
-            case SMP_BUY: // new participation purchased
-                final Loan loan = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                addToBlockedAmounts(loan.getRating(), blockedAmount.getAmount());
-                return;
-            case SMP_SALE_FEE: // potential new participation sale detected
-                final Loan loan2 = auth.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                final Investment i = lookupOrFail(loan2, auth);
-                addToBlockedAmounts(loan2.getRating(), i.getRemainingPrincipal().negate());
-                // notify of the fact that the participation had been sold on the Zonky web
-                final PortfolioOverview po = calculateOverview();
-                Events.fire(new InvestmentSoldEvent(i, loan2, po));
-                return;
-            default: // no other notable events
-                return;
+    public void updateTransactions(final Tenant tenant) {
+        final int[] idsOfNewlySoldLoans = transactions.update(statistics, tenant);
+        for (final int loanId : idsOfNewlySoldLoans) { // notify of loans that were just detected as sold
+            final Loan loan2 = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+            final Investment i = lookupOrFail(loan2, tenant);
+            final PortfolioOverview po = calculateOverview();
+            Events.fire(new InvestmentSoldEvent(i, loan2, po));
         }
+        loansSold.addAll(idsOfNewlySoldLoans);
+    }
+
+    private void simulateOperation(final Tenant tenant, final int loanId, final BigDecimal amount) {
+        transactions.addNewSynthetic(tenant, loanId, amount);
+        balance.update(amount.negate());
+    }
+
+    public void simulateInvestment(final Tenant tenant, final int loanId, final BigDecimal amount) {
+        simulateOperation(tenant, loanId, amount);
+    }
+
+    public void simulatePurchase(final Tenant tenant, final int loanId, final BigDecimal amount) {
+        simulateOperation(tenant, loanId, amount);
     }
 
     public RemoteBalance getRemoteBalance() {
@@ -146,7 +130,7 @@ public class Portfolio {
     }
 
     public PortfolioOverview calculateOverview() {
-        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, blockedAmountsSum,
+        return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, transactions.getAdjustments(),
                                            Delinquents.getAmountsAtRisk());
     }
 }

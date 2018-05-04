@@ -44,7 +44,7 @@ class PortfolioUpdater implements Runnable,
                                   PortfolioSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortfolioUpdater.class);
-    private final Tenant authenticated;
+    private final Tenant tenant;
     private final AtomicReference<Portfolio> portfolio = new AtomicReference<>();
     private final Collection<PortfolioDependant> dependants = new CopyOnWriteArrayList<>();
     private final AtomicBoolean updating = new AtomicBoolean(true);
@@ -52,20 +52,20 @@ class PortfolioUpdater implements Runnable,
     private final Duration retryFor;
     private final RemoteBalance balance;
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant authenticated,
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
                      final RemoteBalance balance,
                      final Duration retryFor) {
         this.shutdownCall = shutdownCall;
-        this.authenticated = authenticated;
+        this.tenant = tenant;
         this.balance = balance;
         this.retryFor = retryFor;
-        // run update of blocked amounts automatically with every portfolio update
-        registerDependant(Portfolio::updateBlockedAmounts);
+        // run update of transactions automatically with every portfolio update
+        registerDependant(Portfolio::updateTransactions);
     }
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant authenticated,
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
                      final RemoteBalance balance) {
-        this(shutdownCall, authenticated, balance, Duration.ofHours(1));
+        this(shutdownCall, tenant, balance, Duration.ofHours(1));
     }
 
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth,
@@ -96,12 +96,12 @@ class PortfolioUpdater implements Runnable,
         return updating.get();
     }
 
-    private Portfolio runIt() {
-        final Portfolio result = Portfolio.create(authenticated, balance);
+    private Portfolio runIt(final Portfolio old) {
+        final Portfolio result = old == null ? Portfolio.create(tenant, balance) : old.reloadFromZonky(tenant, balance);
         final CompletableFuture<Portfolio> combined = dependants.stream()
                 .map(d -> (Function<Portfolio, Portfolio>) folio -> {
                     LOGGER.trace("Running {}.", d);
-                    d.accept(folio, authenticated);
+                    d.accept(folio, tenant);
                     LOGGER.trace("Finished {}.", d);
                     return folio;
                 })
@@ -119,7 +119,8 @@ class PortfolioUpdater implements Runnable,
     public void run() {
         LOGGER.info("Pausing RoboZonky in order to update internal data structures.");
         updating.set(true);
-        final Backoff<Portfolio> backoff = Backoff.exponential(this::runIt, Duration.ofSeconds(1), retryFor);
+        final Backoff<Portfolio> backoff = Backoff.exponential(() -> runIt(portfolio.get()), Duration.ofSeconds(1),
+                                                               retryFor);
         final Optional<Portfolio> p = backoff.get();
         if (p.isPresent()) {
             portfolio.set(p.get());

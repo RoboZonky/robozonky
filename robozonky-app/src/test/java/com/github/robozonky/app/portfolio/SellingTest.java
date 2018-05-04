@@ -99,7 +99,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Investment i = mockInvestment(loan);
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
-        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0],
+        final Portfolio portfolio = new Portfolio(Statistics.empty(), new TransactionLog(), new int[0],
                                                   mockBalance(zonky));
         new Selling(NONE_ACCEPTING, true).accept(portfolio, mockTenant(zonky));
         final List<Event> e = getNewEvents();
@@ -119,7 +119,8 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(1))).thenReturn(loan);
         when(zonky.getInvestments((Select) any())).thenReturn(Stream.of(i));
-        final Portfolio portfolio = new Portfolio(Statistics.empty(), new int[0], mockBalance(zonky));
+        final Portfolio portfolio = new Portfolio(Statistics.empty(), new TransactionLog(), new int[0],
+                                                  mockBalance(zonky));
         new Selling(ALL_ACCEPTING, isDryRun).accept(portfolio, mockTenant(zonky));
         final List<Event> e = getNewEvents();
         assertThat(e).hasSize(5);
