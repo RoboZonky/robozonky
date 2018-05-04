@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 public class BlockedAmount extends BaseEntity {
 
     private BigDecimal amount, discount;
-    private int loanId;
+    private int id, loanId;
     private TransactionCategory category;
     private String loanName;
     private OffsetDateTime dateStart;
@@ -48,6 +48,11 @@ public class BlockedAmount extends BaseEntity {
 
     private BlockedAmount() {
         // for JAXB
+    }
+
+    @XmlElement
+    public int getId() {
+        return id;
     }
 
     @XmlElement
