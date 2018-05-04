@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
+import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -36,6 +37,7 @@ import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.Wallet;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -59,15 +61,17 @@ public class Zonky {
     private final PaginatedApi<Participation, ParticipationApi> participationApi;
     private final PaginatedApi<RawInvestment, PortfolioApi> portfolioApi;
     private final PaginatedApi<BlockedAmount, WalletApi> walletApi;
+    private final PaginatedApi<Transaction, TransactionApi> transactions;
     private final PaginatedApi<RawDevelopment, CollectionsApi> collectionsApi;
 
     Zonky(final Api<ControlApi> control, final PaginatedApi<RawLoan, LoanApi> loans,
           final PaginatedApi<Participation, ParticipationApi> participations,
           final PaginatedApi<RawInvestment, PortfolioApi> portfolio,
           final PaginatedApi<BlockedAmount, WalletApi> wallet,
+          final PaginatedApi<Transaction, TransactionApi> transactions,
           final PaginatedApi<RawDevelopment, CollectionsApi> collections) {
         if (control == null || loans == null || participations == null || portfolio == null || wallet == null ||
-                collections == null) {
+                transactions == null || collections == null) {
             throw new IllegalArgumentException("No API may be null.");
         }
         this.controlApi = control;
@@ -75,6 +79,7 @@ public class Zonky {
         this.participationApi = participations;
         this.portfolioApi = portfolio;
         this.walletApi = wallet;
+        this.transactions = transactions;
         this.collectionsApi = collections;
     }
 
@@ -208,6 +213,32 @@ public class Zonky {
      */
     public Stream<MarketplaceLoan> getAvailableLoans(final Sort<RawLoan> ordering) {
         return Zonky.getStream(loanApi, LoanApi::items, ordering).map(MarketplaceLoan::sanitized);
+    }
+
+    /**
+     * Retrieve all transactions from the wallet via {@link TransactionApi}.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Transaction> getTransactions() {
+        return Zonky.getStream(transactions, TransactionApi::items);
+    }
+
+    /**
+     * Retrieve transactions from the wallet via {@link TransactionApi}.
+     * @param select Rules to filter the selection by.
+     * @return All items from the remote API, lazy-loaded, filtered.
+     */
+    public Stream<Transaction> getTransactions(final Select select) {
+        return Zonky.getStream(transactions, TransactionApi::items, select);
+    }
+
+    /**
+     * Retrieve transactions from the wallet via {@link TransactionApi}, in a given order.
+     * @param ordering Ordering in which the results should be returned.
+     * @return All items from the remote API, lazy-loaded.
+     */
+    public Stream<Transaction> getTransactions(final Sort<Transaction> ordering) {
+        return Zonky.getStream(transactions, TransactionApi::items, ordering);
     }
 
     /**
