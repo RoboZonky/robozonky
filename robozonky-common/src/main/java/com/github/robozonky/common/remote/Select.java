@@ -16,6 +16,9 @@
 
 package com.github.robozonky.common.remote;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +70,14 @@ public class Select implements Consumer<RoboZonkyFilter> {
 
     private void addLong(final String field, final String operation, final long value) {
         addObject(field, operation, String.valueOf(value));
+    }
+
+    private void addLocalDate(final String field, final String operation, final LocalDate value) {
+        addObject(field, operation, DateTimeFormatter.ISO_DATE.format(value));
+    }
+
+    private void addOffsetDateTime(final String field, final String operation, final OffsetDateTime value) {
+        addObject(field, operation, DateTimeFormatter.ISO_DATE_TIME.format(value));
     }
 
     public Select contains(final String field, final String value) {
@@ -149,8 +160,28 @@ public class Select implements Consumer<RoboZonkyFilter> {
         return this;
     }
 
+    public Select greaterThan(final String field, final LocalDate value) {
+        addLocalDate(field, "gt", value);
+        return this;
+    }
+
+    public Select greaterThan(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "gt", value);
+        return this;
+    }
+
     public Select greaterThanOrEquals(final String field, final long value) {
         addLong(field, "gte", value);
+        return this;
+    }
+
+    public Select greaterThanOrEquals(final String field, final LocalDate value) {
+        addLocalDate(field, "gte", value);
+        return this;
+    }
+
+    public Select greaterThanOrEquals(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "gte", value);
         return this;
     }
 
@@ -164,8 +195,28 @@ public class Select implements Consumer<RoboZonkyFilter> {
         return this;
     }
 
+    public Select lessThan(final String field, final LocalDate value) {
+        addLocalDate(field, "lt", value);
+        return this;
+    }
+
+    public Select lessThan(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "lt", value);
+        return this;
+    }
+
     public Select lessThanOrEquals(final String field, final long value) {
         addLong(field, "lte", value);
+        return this;
+    }
+
+    public Select lessThanOrEquals(final String field, final LocalDate value) {
+        addLocalDate(field, "lte", value);
+        return this;
+    }
+
+    public Select lessThanOrEquals(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "lte", value);
         return this;
     }
 

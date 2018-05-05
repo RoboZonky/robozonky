@@ -19,7 +19,6 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -145,8 +144,7 @@ class TransactionLog {
         final LocalDate lastZonkyUpdate = statistics.getTimestamp().toLocalDate();
         // read all transactions that happened after last Zonky refresh
         final Select onlyAfterZonkyUpdate = new Select()
-                .equalsPlain("transaction.transactionDate__gte",
-                             DateTimeFormatter.ISO_DATE.format(lastZonkyUpdate));
+                .greaterThanOrEquals("transaction.transactionDate", lastZonkyUpdate);
         final IntSet newlySold = IntHashSet.newSetWith();
         tenant.call(zonky -> zonky.getTransactions(onlyAfterZonkyUpdate))
                 .filter(t -> TRANSACTION_CATEGORIES.contains(t.getCategory()))
