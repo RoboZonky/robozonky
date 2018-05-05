@@ -35,7 +35,11 @@ import org.eclipse.collections.impl.map.mutable.UnifiedMap;
  */
 public class Select implements Consumer<RoboZonkyFilter> {
 
-    private final Map<String, List<Object>> conditions = new UnifiedMap<>(0);
+    public static Select unrestricted() {
+        return new Select();
+    }
+
+    private final Map<String, List<Object>> conditions = UnifiedMap.newMap(0);
 
     private void addObjects(final String field, final String operation, final Object... value) {
         final String key = field + "__" + operation;
@@ -77,7 +81,7 @@ public class Select implements Consumer<RoboZonkyFilter> {
     }
 
     private void addOffsetDateTime(final String field, final String operation, final OffsetDateTime value) {
-        addObject(field, operation, DateTimeFormatter.ISO_DATE_TIME.format(value));
+        addObject(field, operation, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(value));
     }
 
     public Select contains(final String field, final String value) {

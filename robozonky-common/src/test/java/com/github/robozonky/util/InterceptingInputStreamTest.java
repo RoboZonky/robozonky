@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.github.robozonky.internal.api.Defaults;
 import org.apache.commons.io.IOUtils;
@@ -40,4 +42,18 @@ class InterceptingInputStreamTest {
             assertThat(IOUtils.toString(s2, Defaults.CHARSET)).isEqualTo(contents);
         }
     }
+
+    @Test
+    void tooLong() throws IOException {
+        final int maxLength = 1024;
+        final int uuidLength = UUID.randomUUID().toString().length();
+        final String contents = IntStream.range(0, (maxLength / uuidLength) + 2)
+                .mapToObj(i -> UUID.randomUUID().toString())
+                .collect(Collectors.joining());
+        final InputStream s = new ByteArrayInputStream(contents.getBytes());
+        try (final InterceptingInputStream s2 = new InterceptingInputStream(s)) {
+            assertThat(s2.getContents()).endsWith("...more...");
+        }
+    }
 }
+

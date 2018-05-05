@@ -24,6 +24,7 @@ import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
+import com.github.robozonky.util.StreamUtil;
 
 public interface Tenant {
 
@@ -42,10 +43,7 @@ public interface Tenant {
      * in response to stale auth token issues.
      */
     default void run(final Consumer<Zonky> operation) {
-        call(z -> {
-            operation.accept(z);
-            return z;
-        });
+        call(StreamUtil.toFunction(operation));
     }
 
     Restrictions getRestrictions();

@@ -84,32 +84,22 @@ public class Zonky {
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function) {
-        return Zonky.getStream(api, function, Sort.unspecified());
+        return Zonky.getStream(api, function, Settings.INSTANCE.getDefaultApiPageSize());
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                              final Sort<T> ordering) {
-        return Zonky.getStream(api, function, Settings.INSTANCE.getDefaultApiPageSize(), ordering);
-    }
-
-    private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                              final int pageSize, final Sort<T> ordering) {
-        return getStream(api, function, new Select(), pageSize, ordering);
+                                              final int pageSize) {
+        return getStream(api, function, new Select(), pageSize);
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
                                               final Select select) {
-        return Zonky.getStream(api, function, select, Sort.unspecified());
+        return Zonky.getStream(api, function, select, Settings.INSTANCE.getDefaultApiPageSize());
     }
 
     private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                              final Select select, final Sort<T> ordering) {
-        return Zonky.getStream(api, function, select, Settings.INSTANCE.getDefaultApiPageSize(), ordering);
-    }
-
-    private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                              final Select select, final int pageSize, final Sort<T> ordering) {
-        return PagingStreams.streamBuilder(new EntityCollectionPageSource<>(api, function, select, ordering, pageSize))
+                                              final Select select, final int pageSize) {
+        return PagingStreams.streamBuilder(new EntityCollectionPageSource<>(api, function, select, pageSize))
                 .pageSize(pageSize)
                 .build();
     }
@@ -155,23 +145,6 @@ public class Zonky {
     }
 
     /**
-     * Retrieve investments from user's portfolio via {@link PortfolioApi}.
-     * @return All items from the remote API, lazy-loaded. Does not include investments represented by blocked amounts.
-     */
-    public Stream<Investment> getInvestments() {
-        return getInvestments(Sort.unspecified());
-    }
-
-    /**
-     * Retrieve investments from user's portfolio via {@link PortfolioApi}, in a given order.
-     * @param ordering Ordering in which the results should be returned.
-     * @return All items from the remote API, lazy-loaded. Does not include investments represented by blocked amounts.
-     */
-    public Stream<Investment> getInvestments(final Sort<RawInvestment> ordering) {
-        return Zonky.getStream(portfolioApi, PortfolioApi::items, ordering).map(Investment::sanitized);
-    }
-
-    /**
      * Retrieve investments from user's portfolio via {@link PortfolioApi}, in a given order.
      * @param select Rules to filter the selection by.
      * @return All items from the remote API, lazy-loaded.
@@ -191,36 +164,11 @@ public class Zonky {
 
     /**
      * Retrieve loans from marketplace via {@link LoanApi}.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<MarketplaceLoan> getAvailableLoans() {
-        return Zonky.getStream(loanApi, LoanApi::items).map(MarketplaceLoan::sanitized);
-    }
-
-    /**
-     * Retrieve loans from marketplace via {@link LoanApi}.
      * @param select Rules to filter the selection by.
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<MarketplaceLoan> getAvailableLoans(final Select select) {
         return Zonky.getStream(loanApi, LoanApi::items, select).map(MarketplaceLoan::sanitized);
-    }
-
-    /**
-     * Retrieve loans from marketplace via {@link LoanApi}, in a given order.
-     * @param ordering Ordering in which the results should be returned.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<MarketplaceLoan> getAvailableLoans(final Sort<RawLoan> ordering) {
-        return Zonky.getStream(loanApi, LoanApi::items, ordering).map(MarketplaceLoan::sanitized);
-    }
-
-    /**
-     * Retrieve all transactions from the wallet via {@link TransactionApi}.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<Transaction> getTransactions() {
-        return Zonky.getStream(transactions, TransactionApi::items);
     }
 
     /**
@@ -233,28 +181,11 @@ public class Zonky {
     }
 
     /**
-     * Retrieve transactions from the wallet via {@link TransactionApi}, in a given order.
-     * @param ordering Ordering in which the results should be returned.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<Transaction> getTransactions(final Sort<Transaction> ordering) {
-        return Zonky.getStream(transactions, TransactionApi::items, ordering);
-    }
-
-    /**
      * Retrieve loan collections information via {@link CollectionsApi}.
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Development> getDevelopments(final Loan loan) {
         return Zonky.getStream(collectionsApi, a -> a.items(loan.getId())).map(Development::sanitized);
-    }
-
-    /**
-     * Retrieve participations from secondary marketplace via {@link ParticipationApi}.
-     * @return All items from the remote API, lazy-loaded.
-     */
-    public Stream<Participation> getAvailableParticipations() {
-        return Zonky.getStream(participationApi, ParticipationApi::items);
     }
 
     /**

@@ -16,6 +16,13 @@
 
 package com.github.robozonky.common.remote;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import com.github.robozonky.internal.api.Defaults;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -134,6 +141,94 @@ class SelectTest {
     }
 
     @Test
+    void ltDate() {
+        final String fieldName = "field";
+        final LocalDate value = LocalDate.of(1, 2, 3);
+        final Select select = new Select().lessThan(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__lt"), eq("0001-02-03"));
+    }
+
+    @Test
+    void lteDate() {
+        final String fieldName = "field";
+        final LocalDate value = LocalDate.of(1, 2, 3);
+        final Select select = new Select().lessThanOrEquals(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__lte"), eq("0001-02-03"));
+    }
+
+    @Test
+    void gtDate() {
+        final String fieldName = "field";
+        final LocalDate value = LocalDate.of(1, 2, 3);
+        final Select select = new Select().greaterThan(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__gt"), eq("0001-02-03"));
+    }
+
+    @Test
+    void gteDate() {
+        final String fieldName = "field";
+        final LocalDate value = LocalDate.of(1, 2, 3);
+        final Select select = new Select().greaterThanOrEquals(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__gte"), eq("0001-02-03"));
+    }
+
+    @Test
+    void ltDateTime() {
+        final String fieldName = "field";
+        final LocalDate date = LocalDate.of(2000, 01, 02);
+        final LocalTime time = LocalTime.of(4, 5, 6);
+        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final Select select = new Select().lessThan(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__lt"), eq("2000-01-02T04:05:06+01:00"));
+    }
+
+    @Test
+    void lteDateTime() {
+        final String fieldName = "field";
+        final LocalDate date = LocalDate.of(2000, 01, 02);
+        final LocalTime time = LocalTime.of(4, 5, 6);
+        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final Select select = new Select().lessThanOrEquals(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__lte"), eq("2000-01-02T04:05:06+01:00"));
+    }
+
+    @Test
+    void gtDateTime() {
+        final String fieldName = "field";
+        final LocalDate date = LocalDate.of(2000, 01, 02);
+        final LocalTime time = LocalTime.of(4, 5, 6);
+        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final Select select = new Select().greaterThan(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__gt"), eq("2000-01-02T04:05:06+01:00"));
+    }
+
+    @Test
+    void gteDateTime() {
+        final String fieldName = "field";
+        final LocalDate date = LocalDate.of(2000, 01, 02);
+        final LocalTime time = LocalTime.of(4, 5, 6);
+        final OffsetDateTime value = LocalDateTime.of(date, time).atZone(Defaults.ZONE_ID).toOffsetDateTime();
+        final Select select = new Select().greaterThanOrEquals(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName + "__gte"), eq("2000-01-02T04:05:06+01:00"));
+    }
+
+    @Test
     void lteornull() {
         final String fieldName = "field";
         final long value = Long.MAX_VALUE;
@@ -211,6 +306,16 @@ class SelectTest {
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
         select.accept(filter);
         verify(filter).setQueryParam(eq(fieldName + "__eq"), eq(value));
+    }
+
+    @Test
+    void equalsPlain() {
+        final String fieldName = UUID.randomUUID().toString();
+        final String value = "value";
+        final Select select = Select.unrestricted().equalsPlain(fieldName, value);
+        final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
+        select.accept(filter);
+        verify(filter).setQueryParam(eq(fieldName), eq(value));
     }
 
     @Test

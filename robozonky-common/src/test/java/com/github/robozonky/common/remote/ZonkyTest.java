@@ -48,7 +48,7 @@ class ZonkyTest {
     private <T, S> PaginatedApi<T, S> mockApi() {
         final PaginatedApi<T, S> api = mock(PaginatedApi.class);
         final PaginatedResult<T> apiReturn = new PaginatedResult<>(Collections.emptyList(), 0);
-        when(api.execute(any(), any(), any(), anyInt(), anyInt())).thenReturn(apiReturn);
+        when(api.execute(any(), any(), anyInt(), anyInt())).thenReturn(apiReturn);
         return api;
     }
 
@@ -98,15 +98,36 @@ class ZonkyTest {
     }
 
     @Test
-    void streams() {
+    void loan() {
+        final ControlApi control = mock(ControlApi.class);
+        final Api<ControlApi> ca = mockApi(control);
+        final PaginatedApi<RawLoan, LoanApi> la = mockApi();
+        final int loanId = 1;
+        final RawLoan loan = mock(RawLoan.class);
+        when(loan.getId()).thenReturn(loanId);
+        when(loan.getAmount()).thenReturn(200.0);
+        when(loan.getRemainingInvestment()).thenReturn(200.0);
+        when(la.execute((Function<LoanApi, RawLoan>) any())).thenReturn(loan);
+        final PaginatedApi<Transaction, TransactionApi> ta = mockApi();
+        final PaginatedApi<BlockedAmount, WalletApi> wa = mockApi();
+        final PaginatedApi<RawInvestment, PortfolioApi> pa = mockApi();
+        final PaginatedApi<Participation, ParticipationApi> sa = mockApi();
+        final PaginatedApi<RawDevelopment, CollectionsApi> caa = mockApi();
+        final Zonky z = new Zonky(ca, la, sa, pa, wa, ta, caa);
+        assertThat(z.getLoan(loanId).getId()).isEqualTo(loanId);
+    }
+
+    @Test
+    void getters() {
         final Zonky z = mockZonky();
         assertSoftly(softly -> {
-            softly.assertThat(z.getAvailableLoans()).isEmpty();
-            softly.assertThat(z.getAvailableLoans(Sort.unspecified())).isEmpty();
+            softly.assertThat(z.getAvailableLoans(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getBlockedAmounts()).isEmpty();
-            softly.assertThat(z.getInvestments()).isEmpty();
-            softly.assertThat(z.getInvestments(Sort.unspecified())).isEmpty();
-            softly.assertThat(z.getAvailableParticipations()).isEmpty();
+            softly.assertThat(z.getInvestments(Select.unrestricted())).isEmpty();
+            softly.assertThat(z.getInvestment(1)).isEmpty();
+            softly.assertThat(z.getAvailableParticipations(Select.unrestricted())).isEmpty();
+            softly.assertThat(z.getTransactions(Select.unrestricted())).isEmpty();
+            softly.assertThat(z.getDevelopments(Loan.custom().build())).isEmpty();
         });
     }
 

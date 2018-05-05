@@ -31,15 +31,13 @@ class EntityCollectionPageSource<T, S> implements PageSource<T> {
     private final PaginatedApi<T, S> api;
     private final Function<S, List<T>> function;
     private final Select select;
-    private final Sort<T> ordering;
     private final int pageSize;
 
     public EntityCollectionPageSource(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
-                                      final Select select, final Sort<T> ordering, final int pageSize) {
+                                      final Select select, final int pageSize) {
         this.api = api;
         this.function = function;
         this.select = select;
-        this.ordering = ordering;
         this.pageSize = pageSize;
     }
 
@@ -48,7 +46,7 @@ class EntityCollectionPageSource<T, S> implements PageSource<T> {
         LOGGER.trace("Requested with offset {}, limit {}.", offset, limit);
         final int pageId = offset < 1 ? 0 : (int) (offset / pageSize);
         // limit is ignored, as the page size determines the page number; offset+limit is not supported by Zonky
-        final PaginatedResult<T> result = api.execute(function, this.select, this.ordering, pageId, pageSize);
+        final PaginatedResult<T> result = api.execute(function, this.select, pageId, pageSize);
         totalSizeSink.accept(result.getTotalResultCount());
         return result.getPage();
     }

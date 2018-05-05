@@ -18,10 +18,20 @@ package com.github.robozonky.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.stream.IntStream;
 
 public class NumberUtil {
+
+    private NumberUtil() {
+        // no instances
+    }
 
     public static double toCurrency(final BigDecimal amount) {
         return amount.setScale(2, RoundingMode.HALF_EVEN).doubleValue();
     }
+
+    public static boolean hasAdditions(final int[] original, final int... current) {
+        return IntStream.of(current).anyMatch(i -> IntStream.of(original).noneMatch(j -> i == j));
+    }
+
 }

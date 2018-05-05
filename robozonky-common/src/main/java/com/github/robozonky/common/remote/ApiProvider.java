@@ -37,6 +37,7 @@ import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.util.StreamUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,6 @@ public class ApiProvider implements AutoCloseable {
 
     ApiProvider(final ResteasyClient client) {
         this.client = client;
-    }
-
-    private static <X> Function<X, Void> toFunction(final Consumer<X> f) {
-        return (x) -> {
-            f.accept(x);
-            return null;
-        };
     }
 
     /**
@@ -120,7 +114,7 @@ public class ApiProvider implements AutoCloseable {
     }
 
     public void authenticated(final Supplier<ZonkyApiToken> token, final Consumer<Zonky> operation) {
-        authenticated(token, toFunction(operation));
+        authenticated(token, StreamUtil.toFunction(operation));
     }
 
     public <T> T authenticated(final Supplier<ZonkyApiToken> token, final Function<Zonky, T> operation) {
