@@ -82,13 +82,13 @@ public class Portfolio {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
-    public Portfolio reloadFromZonky(final Tenant tenant, final RemoteBalance balance) {
-        return new Portfolio(tenant.call(Zonky::getStatistics), transactions, getSoldLoans(tenant), balance);
-    }
-
-    Investment lookupOrFail(final Loan loan, final Tenant auth) {
+    static Investment lookupOrFail(final Loan loan, final Tenant auth) {
         return lookup(loan, auth)
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
+    }
+
+    public Portfolio reloadFromZonky(final Tenant tenant, final RemoteBalance balance) {
+        return new Portfolio(tenant.call(Zonky::getStatistics), transactions, getSoldLoans(tenant), balance);
     }
 
     /**
@@ -104,10 +104,10 @@ public class Portfolio {
     public void updateTransactions(final Tenant tenant) {
         final int[] idsOfNewlySoldLoans = transactions.update(statistics, tenant);
         for (final int loanId : idsOfNewlySoldLoans) { // notify of loans that were just detected as sold
-            final Loan loan2 = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-            final Investment i = lookupOrFail(loan2, tenant);
+            final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
+            final Investment i = lookupOrFail(l, tenant);
             final PortfolioOverview po = calculateOverview();
-            Events.fire(new InvestmentSoldEvent(i, loan2, po));
+            Events.fire(new InvestmentSoldEvent(i, l, po));
         }
         loansSold.addAll(idsOfNewlySoldLoans);
     }

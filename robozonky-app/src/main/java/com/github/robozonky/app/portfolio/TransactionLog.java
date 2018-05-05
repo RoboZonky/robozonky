@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -69,7 +68,7 @@ class TransactionLog {
         if (s.getLoanId() != t.getLoanId()) {
             return false;
         } else {
-            return Objects.equals(s.getAmount().stripTrailingZeros(), t.getAmount().stripTrailingZeros());
+            return s.getAmount().compareTo(t.getAmount()) == 0;
         }
     }
 
@@ -77,7 +76,7 @@ class TransactionLog {
         if (s.getLoanId() != ba.getLoanId()) {
             return false;
         } else {
-            return Objects.equals(s.getAmount().stripTrailingZeros(), ba.getAmount().stripTrailingZeros());
+            return s.getAmount().compareTo(ba.getAmount()) == 0;
         }
     }
 
@@ -85,7 +84,7 @@ class TransactionLog {
         return tenant.call(z -> z.getLoan(loanId).getRating());
     }
 
-    Collection<Synthetic> getSynthetics() {
+    public Collection<Synthetic> getSynthetics() {
         return Collections.unmodifiableCollection(synthetics);
     }
 
@@ -102,12 +101,43 @@ class TransactionLog {
         return Collections.unmodifiableMap(adjustments);
     }
 
-    synchronized void addNewSynthetic(final Tenant tenant, final int loanId, final BigDecimal amount) {
+    public synchronized void addNewSynthetic(final Tenant tenant, final int loanId, final BigDecimal amount) {
         final Synthetic s = new Synthetic(loanId, amount, OffsetDateTime.now());
         LOGGER.debug("Adding new synthetic transaction: {}.", s);
         synthetics.add(s);
         updateRatingShare(tenant, s::getLoanId, s::getAmount);
         LOGGER.debug("New adjustments: {}.", adjustments);
+    }
+
+    private boolean processTransaction(final Tenant tenant, final Transaction t) {
+        final boolean isInward = t.getOrientation() == TransactionOrientation.IN;
+        final Collection<Transaction> transactions = isInward ? transactionsIn : transactionsOut;
+        final Collection<Synthetic> synthetics = isInward ? Collections.emptyList() : this.synthetics;
+        final boolean unseenTransaction = transactions.add(t);
+        if (!unseenTransaction) { // already processed this; don't do anything
+            return false;
+        }
+        final boolean hadCorrespondingSynthetic = synthetics.removeIf(s -> equals(s, t));
+        if (hadCorrespondingSynthetic) {  // transaction added, synthetic removed, no change overall
+            return false;
+        }
+        LOGGER.debug("There was no corresponding synthetic, updating rating shares.");
+        updateRatingShare(tenant, t::getLoanId,
+                          isInward ? () -> t.getAmount().negate() : t::getAmount);
+        return (t.getCategory() == TransactionCategory.SMP_SELL); // SMP_SELL means something was sold
+    }
+
+    private void processBlockedAmount(final Tenant tenant, final BlockedAmount ba) {
+        final boolean unseenBlockedAmount = blockedAmounts.add(ba);
+        if (!unseenBlockedAmount) { // already processed this; don't do anything
+            return;
+        }
+        final boolean hadCorrespondingSynthetic = synthetics.removeIf(s -> equals(s, ba));
+        if (hadCorrespondingSynthetic) { // blockation added, synthetic removed, no change overall
+            return;
+        }
+        LOGGER.debug("There was no corresponding synthetic, updating rating shares.");
+        updateRatingShare(tenant, ba::getLoanId, ba::getAmount);
     }
 
     public synchronized int[] update(final Statistics statistics, final Tenant tenant) {
@@ -121,29 +151,19 @@ class TransactionLog {
         tenant.call(zonky -> zonky.getTransactions(onlyAfterZonkyUpdate))
                 .filter(t -> TRANSACTION_CATEGORIES.contains(t.getCategory()))
                 .forEach(t -> {
-                    final boolean isInward = t.getOrientation() == TransactionOrientation.IN;
-                    final Collection<Transaction> transactions = isInward ? transactionsIn : transactionsOut;
-                    final Collection<Synthetic> synthetics = isInward ? Collections.emptyList() : this.synthetics;
-                    final boolean added = transactions.add(t);
-                    if (added) {
-                        if (t.getCategory() == TransactionCategory.SMP_SELL) {
-                            ((IntHashSet) newlySold).add(t.getLoanId());
-                        }
-                        LOGGER.debug("New transaction: {}.", t);
-                        updateRatingShare(tenant, t::getLoanId, isInward ? () -> t.getAmount().negate() : t::getAmount);
-                        synthetics.removeIf(s -> equals(s, t));
+                    LOGGER.debug("Processing transaction: {}.", t);
+                    final boolean wasSold = processTransaction(tenant, t);
+                    if (wasSold) {
+                        LOGGER.debug("Transaction marked as a newly sold participation.");
+                        ((IntHashSet) newlySold).add(t.getLoanId());
                     }
                 });
         // read all blocked amounts that are known to us
         tenant.call(Zonky::getBlockedAmounts)
                 .filter(ba -> BLOCKED_AMOUNT_CATEGORIES.contains(ba.getCategory()))
                 .forEach(ba -> {
-                    final boolean added = blockedAmounts.add(ba);
-                    if (added) {
-                        LOGGER.debug("New blocked amount: {}.", ba);
-                        updateRatingShare(tenant, ba::getLoanId, ba::getAmount);
-                        synthetics.removeIf(s -> equals(s, ba));
-                    }
+                    LOGGER.debug("Processing blocked amount: {}.", ba);
+                    processBlockedAmount(tenant, ba);
                 });
         LOGGER.debug("New adjustments: {}.", adjustments);
         return newlySold.toArray();
