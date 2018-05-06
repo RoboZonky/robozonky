@@ -160,17 +160,17 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Investment i = Investment.fresh(l, 200)
                 .setNextPaymentDate(delinquencyStart)
                 .build();
-        final Zonky zonky = mock(Zonky.class);
+        final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         final Tenant auth = mockTenant(zonky);
         final Portfolio portfolio = mock(Portfolio.class);
         when(portfolio.lookupOrFail(eq(l), eq(auth))).thenReturn(i);
         // register delinquence
-        when(zonky.getInvestments((Select) any())).thenReturn(Stream.of(i));
+        when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         Delinquents.update(auth, portfolio);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is no longer delinquent
-        when(zonky.getInvestments((Select) any())).thenReturn(Stream.empty());
+        when(zonky.getInvestments(any())).thenReturn(Stream.empty());
         final List<Development> developments = assembleDevelopments(delinquencyStart);
         when(zonky.getDevelopments(eq(l))).thenReturn(developments.stream());
         Delinquents.update(auth, portfolio);

@@ -38,7 +38,7 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
         final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
         final PurchasingDaemon d = new PurchasingDaemon(t -> {
-        }, a, s, () -> Optional.of(portfolio), Duration.ZERO, true);
+        }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
         d.run();
         verify(z, times(1)).getAvailableParticipations(any());
     }

@@ -132,10 +132,10 @@ final class Session {
         final boolean seenBefore = seen.contains(loan);
         final ZonkyResponse response = investor.invest(recommendation, seenBefore);
         Session.LOGGER.debug("Response for loan {}: {}.", loanId, response);
-        final String providerId = investor.getConfirmationProviderId().orElse("-");
+        final String providerId = investor.getConfirmationProvider().map(ConfirmationProvider::getId).orElse("-");
         switch (response.getType()) {
             case REJECTED:
-                return investor.getConfirmationProviderId().map(c -> {
+                return investor.getConfirmationProvider().map(c -> {
                     Events.fire(new InvestmentRejectedEvent(recommendation, providerId));
                     // rejected through a confirmation provider => forget
                     discard(loan);
@@ -176,8 +176,7 @@ final class Session {
 
     private void markSuccessfulInvestment(final Investment i) {
         investmentsMadeNow.add(i);
-        portfolio.updateBlockedAmounts(authenticated);
-        portfolio.getRemoteBalance().update(i.getOriginalPrincipal().negate());
+        portfolio.simulateInvestment(authenticated, i.getLoanId(), i.getOriginalPrincipal());
         portfolioOverview = portfolio.calculateOverview();
     }
 

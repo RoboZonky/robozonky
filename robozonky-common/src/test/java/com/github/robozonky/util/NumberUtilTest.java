@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 class NumberUtilTest {
 
@@ -30,5 +31,15 @@ class NumberUtilTest {
         assertThat(result).isEqualTo(0.55);
         final double result2 = NumberUtil.toCurrency(new BigDecimal("0.556"));
         assertThat(result2).isEqualTo(0.56);
+    }
+
+    @Test
+    void hasAdditions() {
+        final int[] original = new int[]{1};
+        final int[] updated = new int[]{1, 2};
+        assertSoftly(softly -> {
+            softly.assertThat(NumberUtil.hasAdditions(original, updated)).isTrue();
+            softly.assertThat(NumberUtil.hasAdditions(original, original)).isFalse();
+        });
     }
 }

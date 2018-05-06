@@ -49,9 +49,7 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth,
-                                                                                              Collections.emptyList(),
-                                                                                              null, true);
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.emptyList(), null);
         assertThat(i).isEmpty();
     }
 
@@ -72,12 +70,8 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(0);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Collection<Investment> i = com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth,
-                                                                                              Collections.singleton(pd),
-                                                                                              new RestrictedPurchaseStrategy(
-                                                                                                      s,
-                                                                                                      new Restrictions()),
-                                                                                              true);
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
+                                                          new RestrictedPurchaseStrategy(s, new Restrictions()));
         assertSoftly(softly -> {
             softly.assertThat(i).isEmpty();
             softly.assertThat(this.getNewEvents()).has(new Condition<List<? extends Event>>() {
@@ -110,15 +104,11 @@ class SessionTest extends AbstractZonkyLeveragingTest {
         });
         final Zonky z = harmlessZonky(100_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Tenant auth = mockTenant(z);
+        final Tenant auth = mockTenant(z, false);
         final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(z)));
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
-        final Collection<Investment> i = com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth,
-                                                                                              Collections.singleton(pd),
-                                                                                              new RestrictedPurchaseStrategy(
-                                                                                                      s,
-                                                                                                      new Restrictions()),
-                                                                                              false);
+        final Collection<Investment> i = Session.purchase(portfolio, auth, Collections.singleton(pd),
+                                                          new RestrictedPurchaseStrategy(s, new Restrictions()));
         assertThat(i).hasSize(1);
         assertThat(this.getNewEvents()).hasSize(5);
         verify(z).purchase(eq(p));

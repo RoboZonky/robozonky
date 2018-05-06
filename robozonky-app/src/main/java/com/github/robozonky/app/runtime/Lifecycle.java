@@ -64,6 +64,14 @@ public class Lifecycle {
      * @return True if now online, false if interrupted.
      */
     public boolean waitUntilOnline() {
+        return waitUntilOnline(livenessCheck);
+    }
+
+    /**
+     * Will block until RoboZonky is back online.
+     * @return True if now online, false if interrupted.
+     */
+    static boolean waitUntilOnline(final MainControl livenessCheck) {
         try {
             livenessCheck.waitUntilTriggered();
             return true;

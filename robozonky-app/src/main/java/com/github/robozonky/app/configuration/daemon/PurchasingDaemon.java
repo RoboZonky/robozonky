@@ -36,9 +36,9 @@ class PurchasingDaemon extends DaemonOperation {
 
     public PurchasingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
                             final Supplier<Optional<PurchaseStrategy>> strategy, final PortfolioSupplier portfolio,
-                            final Duration refreshPeriod, final boolean isDryRun) {
+                            final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
-        this.purchasing = new Purchasing(strategy, auth, isDryRun);
+        this.purchasing = new Purchasing(strategy, auth);
     }
 
     @Override

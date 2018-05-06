@@ -16,8 +16,11 @@
 
 package com.github.robozonky.util;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +32,7 @@ class SchedulerTest {
     private static final Refreshable<String> REFRESHABLE = Refreshable.createImmutable("");
 
     @Test
-    void lifecycle() {
+    void submit() {
         try (final Scheduler s = Schedulers.INSTANCE.create()) {
             assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
             final ScheduledFuture<?> f = s.submit(REFRESHABLE);
@@ -38,6 +41,18 @@ class SchedulerTest {
                 softly.assertThat((Future) f).isNotNull();
                 softly.assertThat(s.isSubmitted(REFRESHABLE)).isTrue();
             });
+        }
+    }
+
+    @Test
+    void run() throws InterruptedException, ExecutionException, TimeoutException {
+        try (final Scheduler s = Schedulers.INSTANCE.create()) {
+            final Future<?> f = s.run(REFRESHABLE);
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat((Future) f).isNotNull();
+                softly.assertThat(s.isSubmitted(REFRESHABLE)).isFalse();
+            });
+            f.get(1, TimeUnit.MINUTES); // make sure it was executed
         }
     }
 }

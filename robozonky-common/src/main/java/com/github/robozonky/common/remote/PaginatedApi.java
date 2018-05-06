@@ -47,13 +47,11 @@ class PaginatedApi<S, T> {
     }
 
     public <Q> Q execute(final Function<T, Q> function) {
-        return this.execute(function, new Select(), Sort.unspecified(), filter.get());
+        return this.execute(function, new Select(), filter.get());
     }
 
-    <Q> Q execute(final Function<T, Q> function, final Select select, final Sort<S> sort,
-                  final RoboZonkyFilter filter) {
+    <Q> Q execute(final Function<T, Q> function, final Select select, final RoboZonkyFilter filter) {
         select.accept(filter);
-        sort.apply(filter);
         return execute(function, filter);
     }
 
@@ -62,25 +60,21 @@ class PaginatedApi<S, T> {
         return function.apply(proxy);
     }
 
-    public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select,
-                                      final Sort<S> sort, final int pageNo, final int pageSize) {
-        return this.execute(function, select, sort, pageNo, pageSize, filter.get());
+    public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
+                                      final int pageSize) {
+        return this.execute(function, select, pageNo, pageSize, filter.get());
     }
 
-    PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final Sort<S> sort,
-                               final int pageNo, final int pageSize, final RoboZonkyFilter filter) {
+    PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
+                               final int pageSize, final RoboZonkyFilter filter) {
         filter.setRequestHeader("X-Page", String.valueOf(pageNo));
         filter.setRequestHeader("X-Size", String.valueOf(pageSize));
         LOGGER.trace("Will request page #{} of size {}.", pageNo, pageSize);
-        final List<S> result = this.execute(function, select, sort, filter);
+        final List<S> result = this.execute(function, select, filter);
         final int totalSize = filter.getLastResponseHeader("X-Total")
                 .map(Integer::parseInt)
-                .orElse(-1);
-        LOGGER.trace("Total size of {} reported.", totalSize);
+                .orElse(0);
+        LOGGER.trace("Has {} results in total.", totalSize);
         return new PaginatedResult<>(result, totalSize);
-    }
-
-    public PaginatedResult<S> execute(final Function<T, List<S>> function, final int pageNo, final int pageSize) {
-        return this.execute(function, new Select(), Sort.unspecified(), pageNo, pageSize, filter.get());
     }
 }

@@ -29,7 +29,6 @@ import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
-import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,8 +41,8 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void get() throws Exception {
-        final Tenant a = mockTenant(mock(Zonky.class));
-        final Investor.Builder b = new Investor.Builder().asDryRun();
+        final Tenant a = mockTenant(harmlessZonky(10_000), true);
+        final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         try {
             final DaemonInvestmentMode d = new DaemonInvestmentMode(t -> {

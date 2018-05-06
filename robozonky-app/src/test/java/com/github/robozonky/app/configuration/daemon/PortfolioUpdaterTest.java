@@ -24,7 +24,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
-import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -37,8 +36,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     @Test
     void creation() {
         final PortfolioUpdater instance = PortfolioUpdater.create((t) -> {
-                                                                  }, mock(Tenant.class), Optional::empty,
-                                                                  true);
+        }, mockTenant(), Optional::empty);
         assertSoftly(softly -> {
             softly.assertThat(instance.isUpdating()).isTrue(); // by default it's true
             softly.assertThat(instance.getRegisteredDependants()).hasSize(4); // expected contents
@@ -54,7 +52,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
         }, a, mockBalance(z));
         instance.registerDependant(dependant);
         instance.run();
-        verify(a, atLeast(2)).call(any());
+        verify(a, atLeast(1)).call(any());
         final Optional<Portfolio> result = instance.get();
         // make sure that the dependants were called with the proper value of Portfolio
         verify(dependant).accept(eq(result.get()), eq(a));
@@ -64,7 +62,7 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     @Test
     void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
-        doThrow(IllegalStateException.class).when(z).getInvestments((Select) any()); // will always fail
+        doThrow(IllegalStateException.class).when(z).getStatistics(); // make backoff fail
         final Tenant a = mockTenant(z);
         final Consumer<Throwable> t = mock(Consumer.class);
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, mockBalance(z), Duration.ofSeconds(2));

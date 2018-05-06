@@ -18,11 +18,16 @@ package com.github.robozonky.util;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 class StreamUtilTest {
 
@@ -31,5 +36,14 @@ class StreamUtilTest {
         final Collection<String> c = Collections.emptyList();
         final Stream<String> s = StreamUtil.toStream(c);
         assertThat(s.isParallel()).isFalse();
+    }
+
+    @Test
+    void toFunction() {
+        final String tested = UUID.randomUUID().toString();
+        final Consumer<String> c = mock(Consumer.class);
+        final Function<String, String> f = StreamUtil.toFunction(c);
+        assertThat(f.apply(tested)).isEqualTo(tested);
+        verify(c).accept(eq(tested));
     }
 }

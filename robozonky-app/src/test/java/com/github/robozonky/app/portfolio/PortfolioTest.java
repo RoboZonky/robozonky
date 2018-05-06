@@ -16,102 +16,87 @@
 
 package com.github.robozonky.app.portfolio;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
-import com.github.robozonky.api.remote.entities.BlockedAmount;
-import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.sanitized.LoanBuilder;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.api.remote.enums.TransactionOrientation;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.eq;
+import static org.assertj.core.api.SoftAssertions.*;
 import static org.mockito.Mockito.*;
 
-@DisplayName("A portfolio")
 class PortfolioTest extends AbstractZonkyLeveragingTest {
 
-    private Zonky zonky;
-    private Tenant authenticated;
-    private RemoteBalance balance;
+    private static final Random RANDOM = new Random();
 
-    @BeforeEach
-    void mockZonky() {
-        zonky = harmlessZonky(10_000);
-        authenticated = mockTenant(zonky);
-        balance = mockBalance(zonky);
+    private static MyInvestment mockInvestment(final int loanId, final BigDecimal amount) {
+        final MyInvestment i = mock(MyInvestment.class);
+        when(i.getId()).thenReturn(RANDOM.nextInt());
+        when(i.getLoanId()).thenReturn(loanId);
+        when(i.getAmount()).thenReturn(amount);
+        return i;
     }
 
     @Test
-    @DisplayName("is created.")
-    void create() {
-        when(zonky.getInvestments((Select) any())).then((i) -> Stream.empty());
-        when(zonky.getStatistics()).thenReturn(Statistics.empty());
-        final Portfolio p = Portfolio.create(authenticated, balance);
-        assertThat(p).isNotNull();
-        verify(zonky).getStatistics();
-        verify(zonky).getInvestments((Select) any());
-    }
-
-    @Nested
-    @DisplayName("when created with blocked amounts")
-    class HasBlockedAmountsTest extends AbstractZonkyLeveragingTest {
-
-        private final Loan l = Loan.custom()
-                .setId(1)
-                .setRating(Rating.D)
-                .setMyInvestment(mockMyInvestment())
-                .build();
-        private final Investment i = Investment.fresh(l, 1000)
-                .build();
-        private final BlockedAmount investment = new BlockedAmount(l.getId(), i.getOriginalPrincipal()),
-                smpSale = new BlockedAmount(l.getId(), i.getOriginalPrincipal(), TransactionCategory.SMP_SALE_FEE);
-        private Portfolio portfolio;
-
-        @BeforeEach
-        void newInstance() {
-            portfolio = spy(Portfolio.create(authenticated, balance));
-            when(zonky.getBlockedAmounts()).thenAnswer((i) -> Stream.of(investment, smpSale));
-            when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
-            when(zonky.getInvestment(eq(l.getId()))).thenReturn(Optional.of(i));
-            portfolio.updateBlockedAmounts(authenticated); // new blocked amounts must be processed
-        }
-
-        @Test
-        @DisplayName("properly marks them as seen.")
-        void caches() {
-            verify(portfolio, times(2)).newBlockedAmount(eq(authenticated), any());
-            portfolio.updateBlockedAmounts(authenticated); // no new blocked amount = no new processing
-            verify(portfolio, times(2)).newBlockedAmount(eq(authenticated), any());
-        }
-
-        @Test
-        @DisplayName("triggers event on SMP sale.")
-        void triggersSmpSaleEvent() {
-            verify(portfolio, times(1)).newBlockedAmount(eq(authenticated), eq(smpSale));
-            verify(portfolio).addToBlockedAmounts(eq(l.getRating()), eq(smpSale.getAmount().negate()));
-            assertThat(getNewEvents())
-                    .hasSize(1)
-                    .first().isInstanceOf(InvestmentSoldEvent.class);
-        }
-
-        @Test
-        @DisplayName("updates balance on new investment.")
-        void triggersBalanceUpdateOnNewInvestment() {
-            verify(portfolio, times(1)).newBlockedAmount(eq(authenticated), eq(investment));
-            verify(portfolio).addToBlockedAmounts(eq(l.getRating()), eq(investment.getAmount()));
-        }
+    void calculateOverview() {
+        final BigDecimal investmentSize = BigDecimal.TEN;
+        final LoanBuilder l1 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.C);
+        final LoanBuilder l2 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.B);
+        final LoanBuilder l3 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.A);
+        final Transaction sold = new Transaction(l2, investmentSize, TransactionCategory.SMP_SELL,
+                                                 TransactionOrientation.IN);
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getTransactions(any())).thenReturn(Stream.of(sold));
+        when(z.getBlockedAmounts()).thenReturn(Stream.empty());
+        Stream.of(l1, l2, l3).forEach(l -> {
+            final Investment i = Investment.fresh(l, investmentSize).build();
+            final MyInvestment m = mockInvestment(l.getId(), i.getRemainingPrincipal());
+            l.setMyInvestment(m);
+            when(z.getLoan(eq(l.getId()))).thenReturn(l.build());
+            when(z.getInvestment(eq(m.getId()))).thenReturn(Optional.of(i));
+        });
+        final Tenant t = mockTenant(z);
+        final RemoteBalance b = mockBalance(z);
+        final Portfolio p = Portfolio.create(t, b);
+        // the test starts here
+        final PortfolioOverview o = p.calculateOverview();
+        assertSoftly(softly -> { // initial portfolio is empty
+            softly.assertThat(o.getCzkAvailable()).isEqualTo(10_000);
+            softly.assertThat(o.getCzkInvested(Rating.C)).isEqualTo(0);
+            softly.assertThat(o.getCzkInvested(Rating.B)).isEqualTo(0);
+            softly.assertThat(o.getCzkInvested(Rating.A)).isEqualTo(0);
+        });
+        p.simulateInvestment(t, l3.getId(), investmentSize);
+        p.simulatePurchase(t, l1.getId(), investmentSize);
+        p.updateTransactions(t);
+        final PortfolioOverview o2 = p.calculateOverview();
+        assertSoftly(softly -> {
+            // balance minus two investments; sales are not tracked here, it will come in with RemoteBalance
+            softly.assertThat(o2.getCzkAvailable()).isEqualTo(9980);
+            // check ratings for expenses
+            softly.assertThat(o2.getCzkInvested(Rating.C)).isEqualTo(investmentSize.intValue());
+            softly.assertThat(o2.getCzkInvested(Rating.A)).isEqualTo(investmentSize.intValue());
+            // and the rating for incomes
+            softly.assertThat(o2.getCzkInvested(Rating.B)).isEqualTo(investmentSize.negate().intValue());
+        });
+        List<Event> events = this.getNewEvents();
+        assertThat(events).first().isInstanceOf(InvestmentSoldEvent.class);
     }
 }

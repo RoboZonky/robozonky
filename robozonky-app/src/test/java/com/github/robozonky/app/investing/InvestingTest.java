@@ -69,7 +69,7 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky(1000);
         final Tenant auth = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
-        final Investor.Builder builder = new Investor.Builder().asDryRun();
+        final Investor builder = Investor.build(auth);
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
     }
@@ -85,9 +85,9 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .setDatePublished(OffsetDateTime.now())
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky z = harmlessZonky(9000);
         final Tenant auth = mockTenant(z);
+        final Investor builder = Investor.build(auth);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Investing exec = new Investing(builder, NONE_ACCEPTING, auth);
@@ -105,10 +105,10 @@ class InvestingTest extends AbstractZonkyLeveragingTest {
                 .setDatePublished(OffsetDateTime.now())
                 .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Investor.Builder builder = new Investor.Builder().asDryRun();
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(loanId))).thenReturn(loan);
         final Tenant auth = mockTenant(z);
+        final Investor builder = Investor.build(auth);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(z));
         final Investing exec = new Investing(builder, ALL_ACCEPTING, auth);
         final Collection<Investment> result = exec.apply(portfolio, Collections.singleton(ld));

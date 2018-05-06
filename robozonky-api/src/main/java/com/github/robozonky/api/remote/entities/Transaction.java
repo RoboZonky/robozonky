@@ -18,12 +18,13 @@ package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 
-// FIXME implement transaction API
 public class Transaction extends BaseEntity {
 
     private BigDecimal amount;
@@ -34,6 +35,18 @@ public class Transaction extends BaseEntity {
     private int loanId;
     private String loanName;
     private String nickName;
+
+    public Transaction(final Loan loan, final BigDecimal amount, final TransactionCategory category,
+                       final TransactionOrientation orientation) {
+        this.amount = amount;
+        this.category = category;
+        this.orientation = orientation;
+        this.transactionDate = OffsetDateTime.now();
+        this.customMessage = "";
+        this.loanId = loan.getId();
+        this.loanName = loan.getName();
+        this.nickName = loan.getNickName();
+    }
 
     private Transaction() {
         // for JAXB
@@ -77,5 +90,25 @@ public class Transaction extends BaseEntity {
     @XmlElement
     public String getNickName() {
         return nickName;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final Transaction that = (Transaction) o;
+        return loanId == that.loanId &&
+                category == that.category &&
+                orientation == that.orientation &&
+                Objects.equals(transactionDate, that.transactionDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(category, orientation, transactionDate, loanId);
     }
 }

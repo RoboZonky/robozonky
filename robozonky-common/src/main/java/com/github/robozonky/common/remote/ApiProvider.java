@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.EntityCollectionApi;
 import com.github.robozonky.api.remote.LoanApi;
 import com.github.robozonky.api.remote.ParticipationApi;
 import com.github.robozonky.api.remote.PortfolioApi;
+import com.github.robozonky.api.remote.TransactionApi;
 import com.github.robozonky.api.remote.WalletApi;
 import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.BlockedAmount;
@@ -34,7 +35,9 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.RawLoan;
+import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.util.StreamUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,13 +62,6 @@ public class ApiProvider implements AutoCloseable {
 
     ApiProvider(final ResteasyClient client) {
         this.client = client;
-    }
-
-    private static <X> Function<X, Void> toFunction(final Consumer<X> f) {
-        return (x) -> {
-            f.accept(x);
-            return null;
-        };
     }
 
     /**
@@ -114,11 +110,11 @@ public class ApiProvider implements AutoCloseable {
 
     private Zonky authenticated(final Supplier<ZonkyApiToken> token) {
         return new Zonky(this.control(token), this.marketplace(token), this.secondaryMarketplace(token),
-                         this.portfolio(token), this.wallet(token), this.collections(token));
+                         this.portfolio(token), this.wallet(token), this.transaction(token), this.collections(token));
     }
 
     public void authenticated(final Supplier<ZonkyApiToken> token, final Consumer<Zonky> operation) {
-        authenticated(token, toFunction(operation));
+        authenticated(token, StreamUtil.toFunction(operation));
     }
 
     public <T> T authenticated(final Supplier<ZonkyApiToken> token, final Function<Zonky, T> operation) {
@@ -150,6 +146,15 @@ public class ApiProvider implements AutoCloseable {
      */
     private PaginatedApi<BlockedAmount, WalletApi> wallet(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(WalletApi.class, ApiProvider.ZONKY_URL, token);
+    }
+
+    /**
+     * Retrieve user-specific Zonky transactions API which requires authentication.
+     * @param token Supplier of a valid Zonky API token, always representing the active user.
+     * @return New API instance.
+     */
+    private PaginatedApi<Transaction, TransactionApi> transaction(final Supplier<ZonkyApiToken> token) {
+        return this.obtainPaginated(TransactionApi.class, ApiProvider.ZONKY_URL, token);
     }
 
     /**

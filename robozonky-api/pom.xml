@@ -133,6 +133,55 @@
                     "classSimpleName": "SessionInfo",
                     "elementKind": "class",
                     "justification": "SessionInfo class moved to com.github.robozonky.api package."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(int, java.math.BigDecimal, com.github.robozonky.api.remote.enums.TransactionCategory)",
+                    "new": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(int, int, java.math.BigDecimal, com.github.robozonky.api.remote.enums.TransactionCategory)",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "BlockedAmount",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Since Zonky 0.92, blocked amounts are uniquely identified by IDs."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(java.math.BigDecimal)",
+                    "new": "method void com.github.robozonky.api.remote.entities.BlockedAmount::<init>(int, int, java.math.BigDecimal)",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "BlockedAmount",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Since Zonky 0.92, blocked amounts are uniquely identified by IDs."
+                  }, {
+                    "code": "java.method.nowFinal",
+                    "old": "method java.lang.String java.lang.Object::toString() @ com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "new": "method java.lang.String com.github.robozonky.api.remote.entities.BaseEntity::toString() @ com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "oldModifiers": "public",
+                    "newModifiers": "public final",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "InsurancePolicyPeriod",
+                    "methodName": "toString",
+                    "elementKind": "method",
+                    "justification": "InsurancePolicyPeriod now inherits from BaseEntity, as does every other entity."
+                  }, {
+                    "code": "java.class.nonFinalClassInheritsFromNewClass",
+                    "old": "class com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "new": "class com.github.robozonky.api.remote.entities.InsurancePolicyPeriod",
+                    "superClass": "com.github.robozonky.api.remote.entities.BaseEntity",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "InsurancePolicyPeriod",
+                    "elementKind": "class",
+                    "justification": "InsurancePolicyPeriod now inherits from BaseEntity, as does every other entity."
+                  }, {
+                    "code": "java.annotation.removed",
+                    "old": "method int java.lang.Object::hashCode() @ com.github.robozonky.api.remote.entities.Transaction",
+                    "new": "method int com.github.robozonky.api.remote.entities.Transaction::hashCode()",
+                    "annotationType": "jdk.internal.HotSpotIntrinsicCandidate",
+                    "annotation": "@jdk.internal.HotSpotIntrinsicCandidate",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "Transaction",
+                    "methodName": "hashCode",
+                    "elementKind": "method",
+                    "justification": "Transaction now has its own equals() and hashCode()."
                   }
                 ]
               }

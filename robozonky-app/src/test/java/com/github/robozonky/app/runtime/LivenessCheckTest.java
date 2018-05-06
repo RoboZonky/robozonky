@@ -68,16 +68,12 @@ class LivenessCheckTest {
         l.run();
         assertThat(l.get()).isPresent();
         assertThat(l.get().get().getBuildVersion()).isEqualTo("0.77.0");
-        Schedulers.INSTANCE.resume(); // reset
-    }
-
-    @Test
-    void wrongResponse() {
+        // now make the server fail and re-check that the instance was updated
         server
+                .reset()
                 .when(request())
                 .respond(response()
                                  .withStatusCode(500));
-        final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
         assertThat(l.get()).isEmpty();
     }
@@ -103,6 +99,5 @@ class LivenessCheckTest {
         final LivenessCheck l = new LivenessCheck("http://" + serverUrl);
         l.run();
         assertThat(l.get()).isEmpty();
-        Schedulers.INSTANCE.resume(); // reset
     }
 }

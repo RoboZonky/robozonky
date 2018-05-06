@@ -16,9 +16,13 @@
 
 package com.github.robozonky.common.remote;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -32,7 +36,11 @@ import org.eclipse.collections.impl.map.mutable.UnifiedMap;
  */
 public class Select implements Consumer<RoboZonkyFilter> {
 
-    private final Map<String, List<Object>> conditions = new UnifiedMap<>(0);
+    private final Map<String, List<Object>> conditions = UnifiedMap.newMap(0);
+
+    public static Select unrestricted() {
+        return new Select();
+    }
 
     private void addObjects(final String field, final String operation, final Object... value) {
         final String key = field + "__" + operation;
@@ -67,6 +75,14 @@ public class Select implements Consumer<RoboZonkyFilter> {
 
     private void addLong(final String field, final String operation, final long value) {
         addObject(field, operation, String.valueOf(value));
+    }
+
+    private void addLocalDate(final String field, final String operation, final LocalDate value) {
+        addObject(field, operation, DateTimeFormatter.ISO_DATE.format(value));
+    }
+
+    private void addOffsetDateTime(final String field, final String operation, final OffsetDateTime value) {
+        addObject(field, operation, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(value));
     }
 
     public Select contains(final String field, final String value) {
@@ -149,8 +165,28 @@ public class Select implements Consumer<RoboZonkyFilter> {
         return this;
     }
 
+    public Select greaterThan(final String field, final LocalDate value) {
+        addLocalDate(field, "gt", value);
+        return this;
+    }
+
+    public Select greaterThan(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "gt", value);
+        return this;
+    }
+
     public Select greaterThanOrEquals(final String field, final long value) {
         addLong(field, "gte", value);
+        return this;
+    }
+
+    public Select greaterThanOrEquals(final String field, final LocalDate value) {
+        addLocalDate(field, "gte", value);
+        return this;
+    }
+
+    public Select greaterThanOrEquals(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "gte", value);
         return this;
     }
 
@@ -164,8 +200,28 @@ public class Select implements Consumer<RoboZonkyFilter> {
         return this;
     }
 
+    public Select lessThan(final String field, final LocalDate value) {
+        addLocalDate(field, "lt", value);
+        return this;
+    }
+
+    public Select lessThan(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "lt", value);
+        return this;
+    }
+
     public Select lessThanOrEquals(final String field, final long value) {
         addLong(field, "lte", value);
+        return this;
+    }
+
+    public Select lessThanOrEquals(final String field, final LocalDate value) {
+        addLocalDate(field, "lte", value);
+        return this;
+    }
+
+    public Select lessThanOrEquals(final String field, final OffsetDateTime value) {
+        addOffsetDateTime(field, "lte", value);
         return this;
     }
 
@@ -179,5 +235,23 @@ public class Select implements Consumer<RoboZonkyFilter> {
         conditions.forEach((k, v) -> v.forEach(r -> {
             roboZonkyFilter.setQueryParam(k, r);
         }));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final Select select = (Select) o;
+        return Objects.equals(conditions, select.conditions);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(conditions);
     }
 }

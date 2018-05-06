@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.common.remote;
+package com.github.robozonky.api.remote;
 
-import com.github.robozonky.api.remote.entities.RawInvestment;
+import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 
-public enum InvestmentField implements Field<RawInvestment> {
+import com.github.robozonky.api.remote.entities.Transaction;
+import com.github.robozonky.internal.api.Defaults;
 
-    ID("id"),
-    TIME_CREATED("timeCreated"),
-    LOAN_STATUS("loan.status");
+@Produces(Defaults.MEDIA_TYPE)
+@Consumes(Defaults.MEDIA_TYPE)
+public interface TransactionApi extends EntityCollectionApi<Transaction> {
 
-    private final String id;
-
-    InvestmentField(final String id) {
-        this.id = id;
-    }
-
-    public String id() {
-        return this.id;
-    }
-
+    @GET
+    @Path("/users/me/wallet/transactions")
+    List<Transaction> items();
 }

@@ -35,6 +35,10 @@ public class FileUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
+    private FileUtil() {
+        // no instances
+    }
+
     public static Optional<File> findFolder(final String folderName) {
         try {
             return Files.walk(new File(System.getProperty("user.dir")).toPath())

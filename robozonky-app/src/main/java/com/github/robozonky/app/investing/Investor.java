@@ -17,7 +17,7 @@
 package com.github.robozonky.app.investing;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -57,8 +57,32 @@ public class Investor {
         return Investment.fresh(r.descriptor().item(), amount);
     }
 
-    public Optional<String> getConfirmationProviderId() {
-        return (this.provider == null) ? Optional.empty() : Optional.of(this.provider.getId());
+    public static Investor build(final Tenant auth) {
+        return build(auth, null);
+    }
+
+    public static Investor build(final Tenant auth, final ConfirmationProvider provider, final char... password) {
+        final InvestOperation o = auth.getSessionInfo().isDryRun() ? DRY_RUN : recommendedLoan -> {
+            Investor.LOGGER.debug("Executing investment: {}.", recommendedLoan);
+            final Investment i = Investor.convertToInvestment(recommendedLoan);
+            auth.run(zonky -> zonky.invest(i));
+            Investor.LOGGER.debug("Investment succeeded.");
+            return new ZonkyResponse(i.getOriginalPrincipal().intValue());
+        };
+        if (provider == null) {
+            return new Investor(o);
+        } else {
+            final RequestId r = new RequestId(auth.getSessionInfo().getUsername(), password);
+            return new Investor(r, provider, o);
+        }
+    }
+
+    public Optional<RequestId> getRequestId() {
+        return Optional.ofNullable(requestId);
+    }
+
+    public Optional<ConfirmationProvider> getConfirmationProvider() {
+        return Optional.ofNullable(provider);
     }
 
     public ZonkyResponse invest(final RecommendedLoan r, final boolean alreadySeenBefore) {
@@ -112,7 +136,7 @@ public class Investor {
     }
 
     public boolean isDryRun() {
-        return investOperation == DRY_RUN;
+        return Objects.equals(investOperation, DRY_RUN);
     }
 
     private ZonkyResponse delegateOrReject(final RecommendedLoan r) {
@@ -132,54 +156,5 @@ public class Investor {
     @FunctionalInterface
     private interface InvestOperation extends Function<RecommendedLoan, ZonkyResponse> {
 
-    }
-
-    public static class Builder {
-
-        private String username = "";
-        private boolean isDryRun = false;
-        private ConfirmationProvider provider;
-        private char[] password;
-
-        public Investor.Builder usingConfirmation(final ConfirmationProvider provider, final char... password) {
-            this.provider = provider;
-            this.password = Arrays.copyOf(password, password.length);
-            return this;
-        }
-
-        public Optional<ConfirmationProvider> getConfirmationUsed() {
-            return Optional.ofNullable(provider);
-        }
-
-        public Optional<RequestId> getConfirmationRequestUsed() {
-            return this.getConfirmationUsed().map(c -> new RequestId(username, password));
-        }
-
-        public Investor.Builder asUser(final String username) {
-            this.username = username;
-            return this;
-        }
-
-        public Investor.Builder asDryRun() {
-            this.isDryRun = true;
-            return this;
-        }
-
-        public boolean isDryRun() {
-            return isDryRun;
-        }
-
-        public Investor build(final Tenant auth) {
-            final InvestOperation o = isDryRun ? DRY_RUN : recommendedLoan -> {
-                Investor.LOGGER.debug("Executing investment: {}.", recommendedLoan);
-                final Investment i = Investor.convertToInvestment(recommendedLoan);
-                auth.run(zonky -> zonky.invest(i));
-                Investor.LOGGER.debug("Investment succeeded.");
-                return new ZonkyResponse(i.getOriginalPrincipal().intValue());
-            };
-            return this.getConfirmationRequestUsed()
-                    .map(r -> new Investor(r, provider, o))
-                    .orElse(new Investor(o));
-        }
     }
 }

@@ -17,6 +17,8 @@
 package com.github.robozonky.app.configuration.daemon;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -26,6 +28,7 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.InvestmentMode;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.runtime.Lifecycle;
+import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.util.RoboZonkyThreadFactory;
 import com.github.robozonky.util.Scheduler;
 import com.github.robozonky.util.Schedulers;
@@ -38,20 +41,19 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private static final ThreadFactory THREAD_FACTORY = new RoboZonkyThreadFactory(newThreadGroup("rzDaemon"));
     private final DaemonOperation[] daemons;
     private final PortfolioUpdater portfolioUpdater;
-    private final Runnable blockedAmountsUpdate;
+    private final Runnable transactionsUpdate;
 
-    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                                final Investor.Builder builder, final StrategyProvider strategyProvider,
+    public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant,
+                                final Investor investor, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, auth, strategyProvider::getToSell,
-                                                        builder.isDryRun());
-        this.blockedAmountsUpdate = () -> portfolioUpdater.get().ifPresent(folio -> folio.updateBlockedAmounts(auth));
+        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
+        this.transactionsUpdate = () -> portfolioUpdater.get().ifPresent(folio -> folio.updateTransactions(tenant));
         this.daemons = new DaemonOperation[]{
-                new InvestingDaemon(shutdownCall, auth, builder, strategyProvider::getToInvest, portfolioUpdater,
+                new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest, portfolioUpdater,
                                     primaryMarketplaceCheckPeriod),
-                new PurchasingDaemon(shutdownCall, auth, strategyProvider::getToPurchase, portfolioUpdater,
-                                     secondaryMarketplaceCheckPeriod, builder.isDryRun())
+                new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolioUpdater,
+                                     secondaryMarketplaceCheckPeriod)
         };
     }
 
@@ -62,12 +64,20 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return threadGroup;
     }
 
+    static Duration getUntilNext4am() {
+        final ZonedDateTime now = Instant.now().atZone(Defaults.ZONE_ID);
+        final ZonedDateTime fourAm = now.withHour(4).withMinute(0).withSecond(0).withNano(0);
+        final ZonedDateTime nextFourAm = fourAm.isBefore(now) ? fourAm.plusDays(1) : fourAm;
+        return Duration.between(now, nextFourAm).abs();
+    }
+
     private void executeDaemons(final Scheduler executor) {
-        // run portfolio update twice a day
-        executor.submit(portfolioUpdater, Duration.ofHours(12));
-        // also run blocked amounts update every now and then to detect changes made outside of the robot
+        executor.run(portfolioUpdater); // first run the update
+        // then schedule a refresh once per day, after the Zonky refresh
+        executor.submit(portfolioUpdater, Duration.ofDays(1), getUntilNext4am());
+        // also run transactions update every now and then to detect changes made outside of the robot
         final Duration oneHour = Duration.ofHours(1);
-        executor.submit(blockedAmountsUpdate, oneHour, oneHour);
+        executor.submit(transactionsUpdate, oneHour, oneHour);
         // run investing and purchasing daemons
         IntStream.range(0, daemons.length).forEach(daemonId -> {
             final DaemonOperation d = daemons[daemonId];

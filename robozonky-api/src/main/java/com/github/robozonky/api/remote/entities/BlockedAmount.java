@@ -19,11 +19,14 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.Random;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 
 public class BlockedAmount extends BaseEntity {
+
+    private static final Random RANDOM = new Random();
 
     private BigDecimal amount, discount;
     private int id, loanId;
@@ -32,14 +35,16 @@ public class BlockedAmount extends BaseEntity {
     private OffsetDateTime dateStart;
 
     public BlockedAmount(final BigDecimal loanAmount) {
-        this(0, loanAmount, TransactionCategory.INVESTMENT_FEE);
+        this(0, loanAmount);
     }
 
     public BlockedAmount(final int loanId, final BigDecimal loanAmount) {
         this(loanId, loanAmount, TransactionCategory.INVESTMENT);
     }
 
-    public BlockedAmount(final int loanId, final BigDecimal loanAmount, final TransactionCategory category) {
+    public BlockedAmount(final int loanId, final BigDecimal loanAmount,
+                         final TransactionCategory category) {
+        this.id = RANDOM.nextInt(1_000_000_000);
         this.loanId = loanId;
         this.amount = loanAmount;
         this.category = category;
@@ -85,13 +90,6 @@ public class BlockedAmount extends BaseEntity {
         return dateStart;
     }
 
-    /**
-     * There is no way how a blocked amount with the same loan, same amount and the same category could be a different
-     * blocked amount. We do not include start date, as that is artificial when the blocked amount instance is created
-     * during local investing operations.
-     * @param o
-     * @return
-     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -101,14 +99,11 @@ public class BlockedAmount extends BaseEntity {
             return false;
         }
         final BlockedAmount that = (BlockedAmount) o;
-        return loanId == that.loanId &&
-                Objects.equals(amount, that.amount) &&
-                category == that.category;
+        return id == that.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(amount, loanId, category);
+        return Objects.hash(id);
     }
-
 }

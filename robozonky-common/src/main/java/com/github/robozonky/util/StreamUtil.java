@@ -16,12 +16,25 @@
 
 package com.github.robozonky.util;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class StreamUtil {
 
+    private StreamUtil() {
+        // no instances
+    }
+
     public static <T> Stream<T> toStream(final Iterable<T> loader) {
         return StreamSupport.stream(loader.spliterator(), false);
+    }
+
+    public static <X> Function<X, X> toFunction(final Consumer<X> f) {
+        return (x) -> {
+            f.accept(x);
+            return x;
+        };
     }
 }

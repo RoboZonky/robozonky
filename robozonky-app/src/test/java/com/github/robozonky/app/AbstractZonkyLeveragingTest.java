@@ -49,7 +49,9 @@ import static org.mockito.Mockito.*;
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
-    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing", true);
+    private static final SessionInfo SESSION = new SessionInfo("someone@robozonky.cz", "Testing",
+                                                               false),
+            SESSION_DRY = new SessionInfo("someone@robozonky.cz", "Testing", true);
 
     protected static ApiProvider mockApiProvider(final OAuth oauth, final Zonky z) {
         final ApiProvider api = mock(ApiProvider.class);
@@ -113,14 +115,18 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         final BigDecimal balance = BigDecimal.valueOf(availableBalance);
         when(zonky.getWallet()).thenReturn(new Wallet(1, 2, balance, balance));
         when(zonky.getRestrictions()).thenReturn(new Restrictions());
-        when(zonky.getBlockedAmounts()).thenReturn(Stream.empty());
+        when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
         return zonky;
     }
 
     protected static Tenant mockTenant(final Zonky zonky) {
+        return mockTenant(zonky, true);
+    }
+
+    protected static Tenant mockTenant(final Zonky zonky, final boolean isDryRun) {
         final Tenant auth = spy(Tenant.class);
-        when(auth.getSessionInfo()).thenReturn(SESSION);
+        when(auth.getSessionInfo()).thenReturn(isDryRun ? SESSION_DRY : SESSION);
         when(auth.getRestrictions()).thenReturn(new Restrictions());
         doAnswer(invocation -> {
             final Function<Zonky, Object> operation = invocation.getArgument(0);

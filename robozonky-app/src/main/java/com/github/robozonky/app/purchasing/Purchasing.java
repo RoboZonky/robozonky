@@ -30,6 +30,7 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
+import com.github.robozonky.util.NumberUtil;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +40,11 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     private static final Logger LOGGER = LoggerFactory.getLogger(Purchasing.class);
 
     private final Tenant auth;
-    private final boolean dryRun;
     private final AtomicReference<int[]> lastChecked = new AtomicReference<>(new int[0]);
 
-    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth,
-                      final boolean dryRun) {
+    public Purchasing(final Supplier<Optional<PurchaseStrategy>> strategy, final Tenant auth) {
         super(strategy);
         this.auth = auth;
-        this.dryRun = dryRun;
     }
 
     private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
@@ -62,7 +60,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     protected boolean hasMarketplaceUpdates(final Collection<Participation> marketplace) {
         final int[] idsFromMarketplace = marketplace.stream().mapToInt(Participation::getId).toArray();
         final int[] presentWhenLastChecked = lastChecked.getAndSet(idsFromMarketplace);
-        return StrategyExecutor.hasNewIds(presentWhenLastChecked, idsFromMarketplace);
+        return NumberUtil.hasAdditions(presentWhenLastChecked, idsFromMarketplace);
     }
 
     @Override
@@ -79,6 +77,6 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
                     return !wasSoldBefore;
                 }).collect(Collectors.toCollection(FastList::new));
         final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
-        return com.github.robozonky.app.purchasing.Session.purchase(portfolio, auth, participations, s, dryRun);
+        return Session.purchase(portfolio, auth, participations, s);
     }
 }

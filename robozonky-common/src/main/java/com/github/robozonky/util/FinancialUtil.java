@@ -29,6 +29,10 @@ import static com.github.robozonky.util.BigDecimalCalculator.times;
  */
 class FinancialUtil {
 
+    private FinancialUtil() {
+        // no instances
+    }
+
     /**
      * Emulates Excel/Calc's PMT(interest_rate, number_payments, PV, FV, Type)
      * function, which calculates the mortgage or annuity payment / yield per

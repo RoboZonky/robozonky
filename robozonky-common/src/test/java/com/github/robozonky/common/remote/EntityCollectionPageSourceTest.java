@@ -32,7 +32,6 @@ import static org.mockito.Mockito.*;
 class EntityCollectionPageSourceTest {
 
     private static final Select SELECT = new Select();
-    private static final Sort ORDERING = Sort.unspecified();
     private static final Function<Object, List<Integer>> FUNCTION = o -> IntStream.range(0, 1000)
             .boxed()
             .collect(Collectors.toList());
@@ -43,10 +42,9 @@ class EntityCollectionPageSourceTest {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(0, PAGE_SIZE);
         final PaginatedApi<Integer, Object> api = mock(PaginatedApi.class);
-        when(api.execute(eq(FUNCTION), eq(SELECT), eq(ORDERING), eq(0), eq(PAGE_SIZE)))
+        when(api.execute(eq(FUNCTION), eq(SELECT), eq(0), eq(PAGE_SIZE)))
                 .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
-        final PageSource<Integer> source = new EntityCollectionPageSource<Integer, Object>(api, FUNCTION, SELECT,
-                                                                                           ORDERING, PAGE_SIZE);
+        final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);
         final LongConsumer consumer = mock(LongConsumer.class);
         final List<Integer> result = source.fetch(0, 1, consumer);
         assertThat(result).containsExactly(subpage.toArray(new Integer[PAGE_SIZE]));
@@ -58,10 +56,9 @@ class EntityCollectionPageSourceTest {
         final List<Integer> allResults = FUNCTION.apply(null);
         final List<Integer> subpage = allResults.subList(PAGE_SIZE, 2 * PAGE_SIZE);
         final PaginatedApi<Integer, Object> api = mock(PaginatedApi.class);
-        when(api.execute(eq(FUNCTION), eq(SELECT), eq(ORDERING), eq(1), eq(PAGE_SIZE)))
+        when(api.execute(eq(FUNCTION), eq(SELECT), eq(1), eq(PAGE_SIZE)))
                 .thenReturn(new PaginatedResult<>(subpage, allResults.size()));
-        final PageSource<Integer> source = new EntityCollectionPageSource<Integer, Object>(api, FUNCTION, SELECT,
-                                                                                           ORDERING, PAGE_SIZE);
+        final PageSource<Integer> source = new EntityCollectionPageSource<>(api, FUNCTION, SELECT, PAGE_SIZE);
         final LongConsumer consumer = mock(LongConsumer.class);
         final List<Integer> result = source.fetch(PAGE_SIZE, 1, consumer);
         assertThat(result).containsExactly(subpage.toArray(new Integer[PAGE_SIZE]));

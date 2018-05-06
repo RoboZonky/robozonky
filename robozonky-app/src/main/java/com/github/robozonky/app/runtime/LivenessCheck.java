@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.runtime;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
@@ -78,7 +77,7 @@ class LivenessCheck extends Refreshable<ApiVersion> {
         } catch (final Exception ex) {
             // don't propagate this exception as it is likely to happen and the calling code would WARN about it
             LOGGER.debug("Zonky servers are likely unavailable.", ex);
-            return null;
+            return ""; // will fail during transform()
         }
     }
 
@@ -87,7 +86,7 @@ class LivenessCheck extends Refreshable<ApiVersion> {
         try {
             final ApiVersion version = ApiVersion.read(source);
             return Optional.of(version);
-        } catch (final IOException ex) {
+        } catch (final Exception ex) {
             LOGGER.warn("Failed parsing Zonky version info.", ex);
             return Optional.empty();
         }

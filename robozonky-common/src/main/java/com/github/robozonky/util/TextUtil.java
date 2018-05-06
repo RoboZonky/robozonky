@@ -27,6 +27,10 @@ import com.github.robozonky.internal.api.Defaults;
 
 public class TextUtil {
 
+    private TextUtil() {
+        // no instances
+    }
+
     public static <T> String toString(final Collection<T> items, final Function<T, String> converter) {
         return items.stream()
                 .map(converter)
