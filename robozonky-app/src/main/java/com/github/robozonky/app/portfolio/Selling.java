@@ -39,12 +39,11 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SessionState;
 import com.github.robozonky.common.remote.Select;
-import com.github.robozonky.common.remote.Zonky;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implements selling of {@link RawInvestment}s on the secondary marketplace. Use {@link #Selling(Supplier, boolean)} as
+ * Implements selling of {@link RawInvestment}s on the secondary marketplace. Use {@link #Selling(Supplier)} as
  * entry point.
  */
 public class Selling implements PortfolioDependant {
@@ -52,31 +51,28 @@ public class Selling implements PortfolioDependant {
     private static final Logger LOGGER = LoggerFactory.getLogger(Selling.class);
 
     private final Supplier<Optional<SellStrategy>> strategy;
-    private final boolean isDryRun;
 
     /**
      * @param strategy Will be used to retrieve the strategy when needed.
-     * @param isDryRun Whether or not to actually perform the remote selling operation or to just pretend.
      */
-    public Selling(final Supplier<Optional<SellStrategy>> strategy, final boolean isDryRun) {
+    public Selling(final Supplier<Optional<SellStrategy>> strategy) {
         this.strategy = strategy;
-        this.isDryRun = isDryRun;
     }
 
     private InvestmentDescriptor getDescriptor(final Investment i, final Tenant auth) {
         return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, zonky)));
     }
 
-    private Optional<Investment> processSale(final Zonky zonky, final RecommendedInvestment r,
+    private Optional<Investment> processSale(final Tenant tenant, final RecommendedInvestment r,
                                              final SessionState<Investment> sold) {
         Events.fire(new SaleRequestedEvent(r));
         final Investment i = r.descriptor().item();
-        if (isDryRun) {
+        if (tenant.getSessionInfo().isDryRun()) {
             LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
             sold.put(i); // make sure dry run never tries to sell this again in this instance
         } else {
             LOGGER.debug("Sending sell request for loan #{}.", i.getLoanId());
-            zonky.sell(i);
+            tenant.run(z -> z.sell(i));
             LOGGER.trace("Request over.");
         }
         Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
@@ -97,7 +93,7 @@ public class Selling implements PortfolioDependant {
         Events.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
                 .peek(r -> Events.fire(new SaleRecommendedEvent(r)))
-                .map(r -> tenant.call(zonky -> processSale(zonky, r, sold)))
+                .map(r -> processSale(tenant, r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
         Events.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
@@ -105,7 +101,7 @@ public class Selling implements PortfolioDependant {
 
     /**
      * Execute the strategy on a given portfolio. Won't do anything if the supplier in
-     * {@link #Selling(Supplier, boolean)} returns and empty {@link Optional}.
+     * {@link #Selling(Supplier)} returns and empty {@link Optional}.
      * @param portfolio Portfolio of investments to choose from.
      * @param auth Will be used to create remote connections to the Zonky server.
      */

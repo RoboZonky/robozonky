@@ -40,9 +40,9 @@ class DaemonOperatingMode extends OperatingMode {
     }
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final Tenant auth, final Investor.Builder builder) {
+    protected Optional<InvestmentMode> getInvestmentMode(final Tenant auth, final Investor investor) {
         final StrategyProvider sp = StrategyProvider.createFor(strategy.getStrategyLocation());
-        final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, builder, sp,
+        final InvestmentMode m = new DaemonInvestmentMode(shutdownCall, auth, investor, sp,
                                                           marketplace.getPrimaryMarketplaceCheckDelay(),
                                                           marketplace.getSecondaryMarketplaceCheckDelay());
         return Optional.of(m);

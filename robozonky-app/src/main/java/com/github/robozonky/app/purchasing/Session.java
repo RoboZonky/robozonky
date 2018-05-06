@@ -54,15 +54,12 @@ final class Session {
     private final Collection<ParticipationDescriptor> stillAvailable;
     private final List<Investment> investmentsMadeNow = new FastList<>(0);
     private final Tenant authenticated;
-    private final boolean isDryRun;
     private final Portfolio portfolio;
     private final SessionState<ParticipationDescriptor> discarded;
     private PortfolioOverview portfolioOverview;
 
-    Session(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace, final Tenant tenant,
-            final boolean dryRun) {
+    Session(final Portfolio portfolio, final Collection<ParticipationDescriptor> marketplace, final Tenant tenant) {
         this.authenticated = tenant;
-        this.isDryRun = dryRun;
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedParticipations");
         this.stillAvailable = FastList.newList(marketplace);
         this.portfolio = portfolio;
@@ -72,9 +69,8 @@ final class Session {
     public static Collection<Investment> purchase(final Portfolio portfolio,
                                                   final Tenant auth,
                                                   final Collection<ParticipationDescriptor> items,
-                                                  final RestrictedPurchaseStrategy strategy,
-                                                  final boolean dryRun) {
-        final Session session = new Session(portfolio, items, auth, dryRun);
+                                                  final RestrictedPurchaseStrategy strategy) {
+        final Session session = new Session(portfolio, items, auth);
         final Collection<ParticipationDescriptor> c = session.getAvailable();
         if (c.isEmpty()) {
             return Collections.emptyList();
@@ -128,7 +124,7 @@ final class Session {
         Events.fire(new PurchaseRequestedEvent(recommendation));
         final Participation participation = recommendation.descriptor().item();
         final Loan loan = recommendation.descriptor().related();
-        final boolean purchased = isDryRun || actualPurchase(participation);
+        final boolean purchased = authenticated.getSessionInfo().isDryRun() || actualPurchase(participation);
         if (purchased) {
             final Investment i = Investment.fresh(participation, loan, recommendation.amount());
             markSuccessfulPurchase(i);

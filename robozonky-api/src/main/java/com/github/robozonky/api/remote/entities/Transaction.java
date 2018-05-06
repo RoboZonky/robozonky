@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 
@@ -34,6 +35,18 @@ public class Transaction extends BaseEntity {
     private int loanId;
     private String loanName;
     private String nickName;
+
+    public Transaction(final Loan loan, final BigDecimal amount, final TransactionCategory category,
+                       final TransactionOrientation orientation) {
+        this.amount = amount;
+        this.category = category;
+        this.orientation = orientation;
+        this.transactionDate = OffsetDateTime.now();
+        this.customMessage = "";
+        this.loanId = loan.getId();
+        this.loanName = loan.getName();
+        this.nickName = loan.getNickName();
+    }
 
     private Transaction() {
         // for JAXB

@@ -44,17 +44,16 @@ public class DaemonInvestmentMode implements InvestmentMode {
     private final Runnable transactionsUpdate;
 
     public DaemonInvestmentMode(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                                final Investor.Builder builder, final StrategyProvider strategyProvider,
+                                final Investor investor, final StrategyProvider strategyProvider,
                                 final Duration primaryMarketplaceCheckPeriod,
                                 final Duration secondaryMarketplaceCheckPeriod) {
-        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell,
-                                                        builder.isDryRun());
+        this.portfolioUpdater = PortfolioUpdater.create(shutdownCall, tenant, strategyProvider::getToSell);
         this.transactionsUpdate = () -> portfolioUpdater.get().ifPresent(folio -> folio.updateTransactions(tenant));
         this.daemons = new DaemonOperation[]{
-                new InvestingDaemon(shutdownCall, tenant, builder, strategyProvider::getToInvest, portfolioUpdater,
+                new InvestingDaemon(shutdownCall, tenant, investor, strategyProvider::getToInvest, portfolioUpdater,
                                     primaryMarketplaceCheckPeriod),
                 new PurchasingDaemon(shutdownCall, tenant, strategyProvider::getToPurchase, portfolioUpdater,
-                                     secondaryMarketplaceCheckPeriod, builder.isDryRun())
+                                     secondaryMarketplaceCheckPeriod)
         };
     }
 
@@ -65,7 +64,7 @@ public class DaemonInvestmentMode implements InvestmentMode {
         return threadGroup;
     }
 
-    private Duration getUntilNext4am() {
+    static Duration getUntilNext4am() {
         final ZonedDateTime now = Instant.now().atZone(Defaults.ZONE_ID);
         final ZonedDateTime fourAm = now.withHour(4).withMinute(0).withSecond(0).withNano(0);
         final ZonedDateTime nextFourAm = fourAm.isBefore(now) ? fourAm.plusDays(1) : fourAm;

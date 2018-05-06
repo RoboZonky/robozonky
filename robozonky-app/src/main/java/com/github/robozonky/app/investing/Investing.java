@@ -28,14 +28,15 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.StrategyExecutor;
+import com.github.robozonky.util.NumberUtil;
 
 public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrategy> {
 
     private final Tenant auth;
-    private final Investor.Builder investor;
+    private final Investor investor;
     private final AtomicReference<int[]> actionableWhenLastChecked = new AtomicReference<>(new int[0]);
 
-    public Investing(final Investor.Builder investor, final Supplier<Optional<InvestmentStrategy>> strategy,
+    public Investing(final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
                      final Tenant auth) {
         super(strategy);
         this.auth = auth;
@@ -56,13 +57,13 @@ public class Investing extends StrategyExecutor<LoanDescriptor, InvestmentStrate
                         .orElse(true)
                 ).mapToInt(l -> l.item().getId()).toArray();
         final int[] lastCheckedActionableLoans = actionableWhenLastChecked.getAndSet(actionableLoansNow);
-        return StrategyExecutor.hasNewIds(lastCheckedActionableLoans, actionableLoansNow);
+        return NumberUtil.hasAdditions(lastCheckedActionableLoans, actionableLoansNow);
     }
 
     @Override
     protected Collection<Investment> execute(final Portfolio portfolio, final InvestmentStrategy strategy,
                                              final Collection<LoanDescriptor> marketplace) {
         final RestrictedInvestmentStrategy s = new RestrictedInvestmentStrategy(strategy, auth.getRestrictions());
-        return com.github.robozonky.app.investing.Session.invest(portfolio, investor.build(auth), auth, marketplace, s);
+        return Session.invest(portfolio, investor, auth, marketplace, s);
     }
 }

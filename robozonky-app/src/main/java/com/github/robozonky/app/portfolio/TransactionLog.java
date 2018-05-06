@@ -18,7 +18,6 @@ package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +44,6 @@ import org.slf4j.LoggerFactory;
 class TransactionLog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionLog.class);
-
     private static final Collection<TransactionCategory> TRANSACTION_CATEGORIES =
             Arrays.asList(TransactionCategory.SMP_BUY, TransactionCategory.SMP_SELL), BLOCKED_AMOUNT_CATEGORIES =
             Arrays.asList(TransactionCategory.INVESTMENT);
@@ -59,24 +57,9 @@ class TransactionLog {
 
     }
 
-    public TransactionLog(final Collection<Synthetic> survivingSynthetics) {
-        synthetics.addAll(survivingSynthetics);
-    }
-
-    private static boolean equals(final Synthetic s, final Transaction t) {
-        if (s.getLoanId() != t.getLoanId()) {
-            return false;
-        } else {
-            return s.getAmount().compareTo(t.getAmount()) == 0;
-        }
-    }
-
-    private static boolean equals(final Synthetic s, final BlockedAmount ba) {
-        if (s.getLoanId() != ba.getLoanId()) {
-            return false;
-        } else {
-            return s.getAmount().compareTo(ba.getAmount()) == 0;
-        }
+    public TransactionLog(final Tenant tenant, final Collection<Synthetic> survivingSynthetics) {
+        LOGGER.debug("Survived synthetic transactions: {}", survivingSynthetics);
+        survivingSynthetics.forEach(s -> addNewSynthetic(tenant, s.getLoanId(), s.getAmount()));
     }
 
     private static Rating getLoanRating(final Tenant tenant, final int loanId) {
@@ -101,7 +84,7 @@ class TransactionLog {
     }
 
     public synchronized void addNewSynthetic(final Tenant tenant, final int loanId, final BigDecimal amount) {
-        final Synthetic s = new Synthetic(loanId, amount, OffsetDateTime.now());
+        final Synthetic s = new Synthetic(loanId, amount);
         LOGGER.debug("Adding new synthetic transaction: {}.", s);
         synthetics.add(s);
         updateRatingShare(tenant, s::getLoanId, s::getAmount);
@@ -116,7 +99,7 @@ class TransactionLog {
         if (!unseenTransaction) { // already processed this; don't do anything
             return false;
         }
-        final boolean hadCorrespondingSynthetic = synthetics.removeIf(s -> equals(s, t));
+        final boolean hadCorrespondingSynthetic = synthetics.removeIf(s -> Synthetic.equals(s, t));
         if (hadCorrespondingSynthetic) {  // transaction added, synthetic removed, no change overall
             return false;
         }
@@ -131,7 +114,7 @@ class TransactionLog {
         if (!unseenBlockedAmount) { // already processed this; don't do anything
             return;
         }
-        final boolean hadCorrespondingSynthetic = synthetics.removeIf(s -> equals(s, ba));
+        final boolean hadCorrespondingSynthetic = synthetics.removeIf(s -> Synthetic.equals(s, ba));
         if (hadCorrespondingSynthetic) { // blockation added, synthetic removed, no change overall
             return;
         }

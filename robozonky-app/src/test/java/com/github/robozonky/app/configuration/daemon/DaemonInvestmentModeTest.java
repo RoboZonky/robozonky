@@ -41,8 +41,8 @@ class DaemonInvestmentModeTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void get() throws Exception {
-        final Tenant a = mockTenant(harmlessZonky(10_000));
-        final Investor.Builder b = new Investor.Builder().asDryRun();
+        final Tenant a = mockTenant(harmlessZonky(10_000), true);
+        final Investor b = Investor.build(a);
         final ExecutorService e = Executors.newFixedThreadPool(1);
         try {
             final DaemonInvestmentMode d = new DaemonInvestmentMode(t -> {

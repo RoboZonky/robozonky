@@ -90,10 +90,6 @@ public final class SessionState<T> {
         SessionState.LOGGER.trace("'{}' wrote '{}'.", key, state.getValue(key).orElse("nothing"));
     }
 
-    public String getKey() {
-        return key;
-    }
-
     /**
      * Immediately writes the item to the underlying storage.
      * @param item

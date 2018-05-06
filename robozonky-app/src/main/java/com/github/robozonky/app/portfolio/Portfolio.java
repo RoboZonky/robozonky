@@ -46,16 +46,21 @@ public class Portfolio {
     private final TransactionLog transactions;
 
     Portfolio(final RemoteBalance balance) {
-        this(Statistics.empty(), new TransactionLog(), new int[0], balance);
+        this(Statistics.empty(), balance);
     }
 
-    Portfolio(final Statistics statistics, final TransactionLog transactions, final int[] idsOfSoldLoans,
-              final RemoteBalance balance) {
-        final Collection<Synthetic> survivors = transactions.getSynthetics();
-        LOGGER.debug("Survived synthetic transactions: {}", survivors);
-        LOGGER.debug("Sold loans: {}", Arrays.toString(idsOfSoldLoans));
-        this.transactions = new TransactionLog(survivors);
+    Portfolio(final Statistics statistics, final RemoteBalance balance) {
+        this.transactions = new TransactionLog();
         this.statistics = statistics;
+        this.loansSold = IntHashSet.newSetWith();
+        this.balance = balance;
+    }
+
+    Portfolio(final Tenant tenant, final Collection<Synthetic> synthetics, final int[] idsOfSoldLoans,
+              final RemoteBalance balance) {
+        LOGGER.debug("Sold loans: {}", Arrays.toString(idsOfSoldLoans));
+        this.transactions = new TransactionLog(tenant, synthetics);
+        this.statistics = tenant.call(Zonky::getStatistics);
         this.loansSold = IntHashSet.newSetWith(idsOfSoldLoans);
         this.balance = balance;
     }
@@ -75,20 +80,20 @@ public class Portfolio {
      * @return Empty in case there was a remote error.
      */
     public static Portfolio create(final Tenant tenant, final RemoteBalance balance) {
-        return new Portfolio(tenant.call(Zonky::getStatistics), new TransactionLog(), getSoldLoans(tenant), balance);
+        return new Portfolio(tenant.call(Zonky::getStatistics), balance);
     }
 
     private static Optional<Investment> lookup(final Loan loan, final Tenant auth) {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
-    static Investment lookupOrFail(final Loan loan, final Tenant auth) {
+    Investment lookupOrFail(final Loan loan, final Tenant auth) {
         return lookup(loan, auth)
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
 
     public Portfolio reloadFromZonky(final Tenant tenant, final RemoteBalance balance) {
-        return new Portfolio(tenant.call(Zonky::getStatistics), transactions, getSoldLoans(tenant), balance);
+        return new Portfolio(tenant, transactions.getSynthetics(), getSoldLoans(tenant), balance);
     }
 
     /**

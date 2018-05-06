@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 class TestOperatingMode extends OperatingMode {
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final Tenant auth, final Investor.Builder builder) {
+    protected Optional<InvestmentMode> getInvestmentMode(final Tenant auth, final Investor investor) {
         return Optional.of(new InvestmentMode() {
 
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -40,7 +40,7 @@ class TestOperatingMode extends OperatingMode {
             public ReturnCode apply(final Lifecycle lifecycle) {
                 final boolean sent = Checker.notifications(auth.getSessionInfo().getUsername());
                 LOGGER.info("Notification sent: {}.", sent);
-                return builder.getConfirmationUsed().map(c -> builder.getConfirmationRequestUsed()
+                return investor.getConfirmationProvider().map(c -> investor.getRequestId()
                         .map(r -> {
                             LOGGER.info("Confirmation received: {}.",
                                         Checker.confirmations(c, r.getUserId(), r.getPassword()));

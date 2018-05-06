@@ -19,11 +19,14 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.Random;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 
 public class BlockedAmount extends BaseEntity {
+
+    private static final Random RANDOM = new Random();
 
     private BigDecimal amount, discount;
     private int id, loanId;
@@ -31,17 +34,17 @@ public class BlockedAmount extends BaseEntity {
     private String loanName;
     private OffsetDateTime dateStart;
 
-    public BlockedAmount(final int id, final BigDecimal loanAmount) {
-        this(id, 0, loanAmount, TransactionCategory.INVESTMENT_FEE);
+    public BlockedAmount(final BigDecimal loanAmount) {
+        this(0, loanAmount);
     }
 
-    public BlockedAmount(final int id, final int loanId, final BigDecimal loanAmount) {
-        this(id, loanId, loanAmount, TransactionCategory.INVESTMENT);
+    public BlockedAmount(final int loanId, final BigDecimal loanAmount) {
+        this(loanId, loanAmount, TransactionCategory.INVESTMENT);
     }
 
-    public BlockedAmount(final int id, final int loanId, final BigDecimal loanAmount,
+    public BlockedAmount(final int loanId, final BigDecimal loanAmount,
                          final TransactionCategory category) {
-        this.id = id;
+        this.id = RANDOM.nextInt(1_000_000_000);
         this.loanId = loanId;
         this.amount = loanAmount;
         this.category = category;
@@ -101,7 +104,6 @@ public class BlockedAmount extends BaseEntity {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id);
     }
 }

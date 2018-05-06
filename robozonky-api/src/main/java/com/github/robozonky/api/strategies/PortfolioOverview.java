@@ -150,4 +150,15 @@ public class PortfolioOverview {
         final BigDecimal atRisk = BigDecimal.valueOf(getCzkAtRisk(r));
         return divide(atRisk, BigDecimal.valueOf(investedPerRating));
     }
+
+    @Override
+    public String toString() {
+        return "PortfolioOverview{" +
+                "czkAtRisk=" + czkAtRisk +
+                ", czkAtRiskPerRating=" + czkAtRiskPerRating +
+                ", czkAvailable=" + czkAvailable +
+                ", czkInvested=" + czkInvested +
+                ", czkInvestedPerRating=" + czkInvestedPerRating +
+                '}';
+    }
 }

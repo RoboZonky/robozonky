@@ -52,32 +52,30 @@ class PortfolioUpdater implements Runnable,
     private final Duration retryFor;
     private final RemoteBalance balance;
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                     final RemoteBalance balance,
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant, final RemoteBalance balance,
                      final Duration retryFor) {
         this.shutdownCall = shutdownCall;
         this.tenant = tenant;
         this.balance = balance;
         this.retryFor = retryFor;
-        // run update of transactions automatically with every portfolio update
-        registerDependant(Portfolio::updateTransactions);
     }
 
-    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant,
-                     final RemoteBalance balance) {
+    PortfolioUpdater(final Consumer<Throwable> shutdownCall, final Tenant tenant, final RemoteBalance balance) {
         this(shutdownCall, tenant, balance, Duration.ofHours(1));
     }
 
     public static PortfolioUpdater create(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                                          final Supplier<Optional<SellStrategy>> sp, final boolean isDryRun) {
-        final RemoteBalance balance = RemoteBalance.create(auth, isDryRun);
+                                          final Supplier<Optional<SellStrategy>> sp) {
+        final RemoteBalance balance = RemoteBalance.create(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
         // update loans repaid with every portfolio update
         updater.registerDependant(new Repayments());
         // update delinquents automatically with every portfolio update
         updater.registerDependant((p, a) -> Delinquents.update(a, p));
         // attempt to sell participations after every portfolio update
-        updater.registerDependant(new Selling(sp, isDryRun));
+        updater.registerDependant(new Selling(sp));
+        // update portfolio with unprocessed transactions coming from Zonky
+        updater.registerDependant(Portfolio::updateTransactions);
         return updater;
     }
 

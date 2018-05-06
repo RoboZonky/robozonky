@@ -17,17 +17,31 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.Objects;
+
+import com.github.robozonky.api.remote.entities.BlockedAmount;
+import com.github.robozonky.api.remote.entities.Transaction;
 
 class Synthetic {
 
     private final int loanId;
     private final BigDecimal amount;
 
-    public Synthetic(final int loanId, final BigDecimal amount, final OffsetDateTime timestamp) {
+    public Synthetic(final int loanId, final BigDecimal amount) {
         this.loanId = loanId;
         this.amount = amount;
+    }
+
+    public static boolean equals(final Synthetic s, final Transaction t) {
+        if (s.getLoanId() != t.getLoanId()) {
+            return false;
+        } else {
+            return s.getAmount().compareTo(t.getAmount()) == 0;
+        }
+    }
+
+    public static boolean equals(final Synthetic s, final BlockedAmount ba) {
+        return s.getLoanId() == ba.getLoanId() && s.getAmount().compareTo(ba.getAmount()) == 0;
     }
 
     public int getLoanId() {

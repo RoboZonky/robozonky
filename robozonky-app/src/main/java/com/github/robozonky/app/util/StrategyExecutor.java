@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -40,10 +39,6 @@ public abstract class StrategyExecutor<T, S> implements BiFunction<Portfolio, Co
 
     protected StrategyExecutor(final Supplier<Optional<S>> strategy) {
         this.strategyProvider = strategy;
-    }
-
-    protected static boolean hasNewIds(final int[] original, final int... current) {
-        return IntStream.of(current).anyMatch(i -> IntStream.of(original).noneMatch(j -> i == j));
     }
 
     protected abstract boolean isBalanceUnderMinimum(final int currentBalance);

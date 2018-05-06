@@ -37,10 +37,11 @@ abstract class OperatingMode implements CommandLineFragment {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private static Tenant getAuthenticated(final CommandLine cli, final SecretProvider secrets) {
+    private Tenant getAuthenticated(final CommandLine cli, final SecretProvider secrets) {
         final Duration duration = Settings.INSTANCE.getTokenRefreshPeriod();
         final TenantBuilder b = new TenantBuilder();
         if (cli.getTweaksFragment().isDryRunEnabled()) {
+            LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
             b.dryRun();
         }
         return b.withSecrets(secrets)
@@ -48,22 +49,22 @@ abstract class OperatingMode implements CommandLineFragment {
                 .build(duration);
     }
 
-    Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials,
-                                                    final ConfirmationProvider provider) {
+    Optional<Investor> getZonkyProxyBuilder(final Tenant tenant, final Credentials credentials,
+                                            final ConfirmationProvider provider) {
         final String svcId = credentials.getToolId();
         LOGGER.debug("Confirmation provider '{}' will be using '{}'.", svcId, provider.getClass());
         return credentials.getToken()
-                .map(token -> Optional.of(new Investor.Builder().usingConfirmation(provider, token)))
+                .map(token -> Optional.of(Investor.build(tenant, provider, token)))
                 .orElseGet(() -> {
                     LOGGER.error("Password not provided for confirmation service '{}'.", svcId);
                     return Optional.empty();
                 });
     }
 
-    Optional<Investor.Builder> getZonkyProxyBuilder(final Credentials credentials) {
+    Optional<Investor> getZonkyProxyBuilder(final Tenant tenant, final Credentials credentials) {
         final String svcId = credentials.getToolId();
         return ConfirmationProviderLoader.load(svcId)
-                .map(provider -> this.getZonkyProxyBuilder(credentials, provider))
+                .map(provider -> this.getZonkyProxyBuilder(tenant, credentials, provider))
                 .orElseGet(() -> {
                     LOGGER.error("Confirmation provider '{}' not found, yet it is required.", svcId);
                     return Optional.empty();
@@ -71,26 +72,20 @@ abstract class OperatingMode implements CommandLineFragment {
     }
 
     protected abstract Optional<InvestmentMode> getInvestmentMode(final Tenant auth,
-                                                                  final Investor.Builder builder);
+                                                                  final Investor investor);
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
-        final Tenant auth = getAuthenticated(cli, secrets);
+        final Tenant tenant = getAuthenticated(cli, secrets);
         // initialize SessionInfo before the robot potentially sends the first notification
-        final SessionInfo s = auth.getSessionInfo();
-        Events.initialize(auth.getSessionInfo());
+        final SessionInfo s = tenant.getSessionInfo();
+        Events.initialize(tenant.getSessionInfo());
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))
-                .map(this::getZonkyProxyBuilder)
-                .orElse(Optional.of(new Investor.Builder()))
-                .map(builder -> {
-                    if (s.isDryRun()) {
-                        LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
-                        builder.asDryRun();
-                    }
-                    builder.asUser(s.getUsername());
-                    return this.getInvestmentMode(auth, builder);
-                }).orElse(Optional.empty());
+                .map(c -> this.getZonkyProxyBuilder(tenant, c))
+                .orElse(Optional.of(Investor.build(tenant)))
+                .map(i -> this.getInvestmentMode(tenant, i))
+                .orElse(Optional.empty());
     }
 
     public String toString() {

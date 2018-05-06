@@ -19,7 +19,6 @@ package com.github.robozonky.app.portfolio;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
@@ -50,8 +49,8 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
         // first, portfolio contains one active investment; no repaid
         final Zonky z = harmlessZonky(10_000);
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        when(z.getInvestments((Select) any())).thenReturn(Stream.empty());
-        final Portfolio p = new Portfolio(Statistics.empty(), new TransactionLog(), new int[0], mockBalance(z));
+        when(z.getInvestments(any())).thenReturn(Stream.empty());
+        final Portfolio p = new Portfolio(mockBalance(z));
         final Tenant a = mockTenant(z);
         final Repayments r = new Repayments();
         r.accept(p, a);

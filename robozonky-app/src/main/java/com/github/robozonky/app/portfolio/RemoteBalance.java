@@ -28,10 +28,10 @@ import com.github.robozonky.util.Scheduler;
  */
 public interface RemoteBalance extends Supplier<BigDecimal> {
 
-    static RemoteBalance create(final Tenant auth, final boolean isDryRun) {
+    static RemoteBalance create(final Tenant auth) {
         final RefreshableBalance b = new RefreshableBalance(auth);
         Scheduler.inBackground().submit(b, Duration.ofMinutes(1));
-        return new RemoteBalanceImpl(b, isDryRun);
+        return new RemoteBalanceImpl(b, auth.getSessionInfo().isDryRun());
     }
 
     /**

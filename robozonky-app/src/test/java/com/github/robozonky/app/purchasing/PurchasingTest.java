@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.ws.rs.BadRequestException;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
@@ -64,7 +65,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
     @Test
     void noStrategy() {
         final Participation mock = mock(Participation.class);
-        final Purchasing exec = new Purchasing(Optional::empty, null, true);
+        final Purchasing exec = new Purchasing(Optional::empty, null);
         final Portfolio portfolio = mock(Portfolio.class);
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         // check events
@@ -77,7 +78,7 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = mockApi();
         final Participation mock = mock(Participation.class);
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
-        final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockTenant(zonky), true);
+        final Purchasing exec = new Purchasing(NONE_ACCEPTING, mockTenant(zonky));
         final Portfolio portfolio = Portfolio.create(mockTenant(zonky), mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
         final List<Event> e = this.getNewEvents();
@@ -107,10 +108,11 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
         when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
         when(mock.getRating()).thenReturn(loan.getRating());
         final Tenant auth = mockTenant(zonky);
-        final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth, true);
-        final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
+        final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
+        final Portfolio portfolio = spy(Portfolio.create(auth, mockBalance(zonky)));
         assertThat(exec.apply(portfolio, Collections.singleton(mock))).isNotEmpty();
         verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
+        verify(portfolio).simulatePurchase(auth, loanId, mock.getRemainingPrincipal());
         final List<Event> e = this.getNewEvents();
         assertThat(e).hasSize(5);
         assertSoftly(softly -> {
@@ -125,10 +127,44 @@ class PurchasingTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
+    void tryPurchaseButZonkyFail() {
+        final int loanId = 1;
+        final Loan loan = Loan.custom()
+                .setId(loanId)
+                .setAmount(100_000)
+                .setRating(Rating.D)
+                .setRemainingInvestment(1000)
+                .setMyInvestment(mockMyInvestment())
+                .setDatePublished(OffsetDateTime.now())
+                .build();
+        final Zonky zonky = mockApi();
+        when(zonky.getLoan(eq(loanId))).thenReturn(loan);
+        doThrow(BadRequestException.class).when(zonky).purchase(any());
+        final Participation mock = mock(Participation.class);
+        when(mock.getId()).thenReturn(1);
+        when(mock.getLoanId()).thenReturn(loan.getId());
+        when(mock.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(250));
+        when(mock.getRating()).thenReturn(loan.getRating());
+        final Tenant auth = mockTenant(zonky, false);
+        final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
+        final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
+        assertThat(exec.apply(portfolio, Collections.singleton(mock))).isEmpty();
+        verify(zonky).purchase(eq(mock)); // make sure purchase was called
+        final List<Event> e = this.getNewEvents();
+        assertThat(e).hasSize(4);
+        assertSoftly(softly -> { // make sure the purchase was not executed
+            softly.assertThat(e).first().isInstanceOf(PurchasingStartedEvent.class);
+            softly.assertThat(e.get(1)).isInstanceOf(PurchaseRecommendedEvent.class);
+            softly.assertThat(e.get(2)).isInstanceOf(PurchaseRequestedEvent.class);
+            softly.assertThat(e).last().isInstanceOf(PurchasingCompletedEvent.class);
+        });
+    }
+
+    @Test
     void noItems() {
         final Zonky zonky = mockApi();
         final Tenant auth = mockTenant(zonky);
-        final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth, true);
+        final Purchasing exec = new Purchasing(ALL_ACCEPTING, auth);
         final Portfolio portfolio = Portfolio.create(auth, mockBalance(zonky));
         assertThat(exec.apply(portfolio, Collections.emptyList())).isEmpty();
         final List<Event> e = this.getNewEvents();

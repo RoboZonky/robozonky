@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -35,11 +36,11 @@ import org.eclipse.collections.impl.map.mutable.UnifiedMap;
  */
 public class Select implements Consumer<RoboZonkyFilter> {
 
+    private final Map<String, List<Object>> conditions = UnifiedMap.newMap(0);
+
     public static Select unrestricted() {
         return new Select();
     }
-
-    private final Map<String, List<Object>> conditions = UnifiedMap.newMap(0);
 
     private void addObjects(final String field, final String operation, final Object... value) {
         final String key = field + "__" + operation;
@@ -234,5 +235,23 @@ public class Select implements Consumer<RoboZonkyFilter> {
         conditions.forEach((k, v) -> v.forEach(r -> {
             roboZonkyFilter.setQueryParam(k, r);
         }));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final Select select = (Select) o;
+        return Objects.equals(conditions, select.conditions);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(conditions);
     }
 }

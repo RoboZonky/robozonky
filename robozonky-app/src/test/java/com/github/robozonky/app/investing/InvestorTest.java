@@ -164,7 +164,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
                                    final Tenant auth) {
         switch (proxyType) {
             case SIMPLE:
-                return new Investor.Builder().build(auth);
+                return Investor.build(auth);
             case CONFIRMING:
                 final ConfirmationProvider cp = mock(ConfirmationProvider.class);
                 when(cp.getId()).thenReturn("something");
@@ -180,7 +180,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
                     default:
                         throw new IllegalStateException();
                 }
-                return new Investor.Builder().usingConfirmation(cp).build(auth);
+                return Investor.build(auth, cp);
             default:
                 throw new IllegalStateException();
         }
@@ -189,7 +189,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     private void test(final ProxyType proxyType, final ZonkyResponseType responseType, final RecommendedLoan r,
                       final RemoteResponse confirmationResponse, final boolean seenBefore) {
         final Zonky api = mock(Zonky.class);
-        final Investor p = getZonkyProxy(proxyType, confirmationResponse, mockTenant(api));
+        final Investor p = getZonkyProxy(proxyType, confirmationResponse, mockTenant(api, false));
         ZonkyResponse result;
         try {
             result = p.invest(r, seenBefore);
@@ -201,9 +201,9 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         }
         assertSoftly(softly -> {
             if (proxyType == InvestorTest.ProxyType.CONFIRMING) {
-                softly.assertThat(p.getConfirmationProviderId()).isPresent();
+                softly.assertThat(p.getConfirmationProvider()).isPresent();
             } else {
-                softly.assertThat(p.getConfirmationProviderId()).isEmpty();
+                softly.assertThat(p.getConfirmationProvider()).isEmpty();
             }
             if (responseType == ZonkyResponseType.DELEGATED && seenBefore) {
                 softly.assertThat(result.getType()).isEqualTo(ZonkyResponseType.SEEN_BEFORE);

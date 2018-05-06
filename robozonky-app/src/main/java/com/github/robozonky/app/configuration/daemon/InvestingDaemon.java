@@ -42,10 +42,10 @@ class InvestingDaemon extends DaemonOperation {
     private final Investing investing;
 
     public InvestingDaemon(final Consumer<Throwable> shutdownCall, final Tenant auth,
-                           final Investor.Builder builder, final Supplier<Optional<InvestmentStrategy>> strategy,
+                           final Investor investor, final Supplier<Optional<InvestmentStrategy>> strategy,
                            final PortfolioSupplier portfolio, final Duration refreshPeriod) {
         super(shutdownCall, auth, portfolio, refreshPeriod);
-        this.investing = new Investing(builder, strategy, auth);
+        this.investing = new Investing(investor, strategy, auth);
     }
 
     @Override

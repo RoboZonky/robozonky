@@ -29,7 +29,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -50,16 +49,16 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
                 .setRating(Rating.A)
                 .build();
         final Zonky z = harmlessZonky(200);
-        when(z.getAvailableLoans((Select) notNull())).thenReturn(Stream.of(ml));
+        when(z.getAvailableLoans(notNull())).thenReturn(Stream.of(ml));
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final Tenant a = mockTenant(z);
         final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
         final InvestmentStrategy is = mock(InvestmentStrategy.class);
         final Supplier<Optional<InvestmentStrategy>> s = () -> Optional.of(is);
         final InvestingDaemon d = new InvestingDaemon(t -> {
-        }, a, new Investor.Builder(), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));
+        }, a, Investor.build(a), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));
         d.run();
-        verify(z).getAvailableLoans((Select) notNull());
+        verify(z).getAvailableLoans(notNull());
         verify(z).getLoan(ml.getId());
         verify(is).recommend(any(), any(), any());
         assertThat(d.getRefreshInterval()).isEqualByComparingTo(Duration.ofSeconds(1));
@@ -72,8 +71,8 @@ class InvestmentDaemonTest extends AbstractZonkyLeveragingTest {
         final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
         final Supplier<Optional<InvestmentStrategy>> s = Optional::empty;
         final InvestingDaemon d = new InvestingDaemon(t -> {
-        }, a, new Investor.Builder(), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));
+        }, a, Investor.build(a), s, () -> Optional.of(portfolio), Duration.ofSeconds(1));
         d.run();
-        verify(z, never()).getAvailableLoans((Select) notNull());
+        verify(z, never()).getAvailableLoans(notNull());
     }
 }
