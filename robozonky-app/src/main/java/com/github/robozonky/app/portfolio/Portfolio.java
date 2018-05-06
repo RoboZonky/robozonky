@@ -36,6 +36,10 @@ import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Fresh instances are created using {@link #create(Tenant, RemoteBalance)}. Daily Zonky morning updates should be
+ * performed using {@link #reloadFromZonky(Tenant, RemoteBalance)}.
+ */
 public class Portfolio {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);

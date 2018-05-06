@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
@@ -41,6 +42,25 @@ import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Zonky update their portfolio data once per day at 3am. This means that {@link Statistics} will only ever be
+ * up-to-date at that point in time and any operations performed after will not be reflrected in the rating shares of
+ * {@link PortfolioOverview}.
+ * <p>
+ * Since it is absolutely imperative for the robot to have up-to-date statistics, this class will load
+ * {@link Transaction}s and {@link BlockedAmount}s from Zonky to re-create statistics based on the latest available
+ * information. Call {@link #update(Statistics, Tenant)} to put the instance into the most up-to-date state.
+ * <p>
+ * Portfolio-altering robot operations, such as investing or purchasing, need to call
+ * {@link #addNewSynthetic(Tenant, int, BigDecimal)} to let the robot know to update the rating shares etc. This will
+ * add a new {@link Synthetic} instance to the internal tracker, which may later be replaced by an actual
+ * {@link Transaction} or {@link BlockedAmount} when {@link #update(Statistics, Tenant)} is called.
+ * <p>
+ * {@link Synthetic}s are also important for dry runs and as such, they need to be able to survive between multiple
+ * subsequent instances of {@link TransactionLog}. This is accomplished using
+ * {@link #TransactionLog(Tenant, Collection)}. If you're creating a fresh transaction log, using
+ * {@link #TransactionLog()} will suffice.
+ */
 class TransactionLog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionLog.class);
@@ -79,6 +99,10 @@ class TransactionLog {
         });
     }
 
+    /**
+     * Represents the difference in rating shares, compared to the last time Zonky system update was performed.
+     * @return
+     */
     public synchronized Map<Rating, BigDecimal> getAdjustments() {
         return Collections.unmodifiableMap(adjustments);
     }
