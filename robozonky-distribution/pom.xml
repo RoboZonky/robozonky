@@ -31,7 +31,6 @@
   <name>RoboZonky Distribution: User-facing deliverables</name>
   <modules>
     <module>robozonky-distribution-full</module>
-    <module>robozonky-distribution-installer</module>
   </modules>
 
 </project>

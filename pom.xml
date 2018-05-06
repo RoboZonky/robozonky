@@ -517,6 +517,20 @@
       </plugins>
     </pluginManagement>
   </build>
+  <profiles>
+    <profile> <!-- Installer won't be built in Docker, where it is not needed and takes a lot of time -->
+      <id>build-installer</id>
+      <activation>
+        <property>
+          <name>!docker</name>
+        </property>
+      </activation>
+      <modules>
+        <module>robozonky-distribution/robozonky-distribution-installer</module>
+      </modules>
+    </profile>
+  </profiles>
+
 
   <scm>
     <url>git@github.com:RoboZonky/robozonky.git</url>
