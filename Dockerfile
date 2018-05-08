@@ -1,19 +1,41 @@
-FROM perlur/centos-base
+# Requires support for multi-stage builds, available in Docker 17.05 or later
+# First build RoboZonky and unpack into the install directory...
+FROM fedora:latest AS builder
+ENV SOURCE_DIRECTORY=/usr/src/robozonky \
+    BINARY_DIRECTORY=/tmp/robozonky
+COPY . $SOURCE_DIRECTORY
+WORKDIR $SOURCE_DIRECTORY
+RUN dnf -y install maven xz \
+    && mvn clean install -Dgpg.skip -DskipTests -Ddocker \
+    && ROBOZONKY_VERSION=$(mvn -q \
+            -Dexec.executable="echo" \
+            -Dexec.args='${project.version}' \
+            --non-recursive \
+            org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+        ) \
+    && ROBOZONKY_TAR_XZ=robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-$ROBOZONKY_VERSION.tar.xz \
+    && mkdir -vp $BINARY_DIRECTORY \
+    && tar -C $BINARY_DIRECTORY -xvf $ROBOZONKY_TAR_XZ
 
-ENV SERVICE_NAME "RoboZonky"
-ENV ROBOZONKY_VERSION "4.4.0-SNAPSHOT"
-
-COPY . /usr/src/robozonky
-WORKDIR /usr/src/robozonky
-
-RUN yum install -y maven bzip2
-RUN ["mvn", "-X", "clean", "install", "-Dgpg.skip"]
-# RUN mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\['
-RUN mkdir -p /opt/RoboZonky && tar -xvf /usr/src/robozonky/robozonky-app/target/robozonky-app-${ROBOZONKY_VERSION}-dist.tar.bz2 -C /opt/RoboZonky
-WORKDIR /opt/RoboZonky
-# Remove RoboZonky source code, image is too large when we keep the source code
-RUN rm -rf /usr/src/robozonky
-
-VOLUME /etc/RoboZonky/
-#ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["/opt/RoboZonky/robozonky.sh", "-c /etc/RoboZonky/robozonky-strategy.cfg"]
+# ... then restart from a minimal image, copy built binary from previous stage and install latest JRE
+FROM fedora:latest
+LABEL maintainer="The RoboZonky Project (www.robozonky.cz)"
+ENV INSTALL_DIRECTORY=/opt/robozonky \
+     CONFIG_DIRECTORY=/etc/robozonky
+COPY --from=builder /tmp/robozonky $INSTALL_DIRECTORY
+WORKDIR /var/robozonky
+RUN dnf -y install java-openjdk-headless \
+    && dnf clean all \
+    && alternatives --set java  $(alternatives --display java |grep java-openjdk|grep -Eo '^[^ ]+') \
+    && java -version
+EXPOSE 7091
+ENTRYPOINT JAVA_OPTS="$JAVA_OPTS -Xmx32m -Xss256k \
+    -Drobozonky.properties.file=$CONFIG_DIRECTORY/robozonky.properties \
+    -Dlogback.configurationFile=$CONFIG_DIRECTORY/logback.xml \
+    -Dcom.sun.management.jmxremote \
+    -Dcom.sun.management.jmxremote.port=7091 \
+    -Dcom.sun.management.jmxremote.ssl=false \
+    -Dcom.sun.management.jmxremote.authenticate=false \
+    -Djmx.remote.x.notification.buffer.size=50" \
+    $INSTALL_DIRECTORY/robozonky.sh \
+    @$CONFIG_DIRECTORY/robozonky.cli
