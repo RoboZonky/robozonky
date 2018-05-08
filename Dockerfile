@@ -21,10 +21,9 @@ RUN dnf -y install maven xz \
 FROM fedora:latest
 LABEL maintainer="The RoboZonky Project (www.robozonky.cz)"
 ENV INSTALL_DIRECTORY=/opt/robozonky \
-    WORKING_DIRECTORY=/var/robozonky \
      CONFIG_DIRECTORY=/etc/robozonky
 COPY --from=builder /tmp/robozonky $INSTALL_DIRECTORY
-WORKDIR $WORKING_DIRECTORY
+WORKDIR /var/robozonky
 RUN dnf -y install java-openjdk-headless \
     && dnf clean all \
     && alternatives --set java  $(alternatives --display java |grep java-openjdk|grep -Eo '^[^ ]+') \
