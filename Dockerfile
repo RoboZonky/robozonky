@@ -29,7 +29,7 @@ RUN dnf -y install java-openjdk-headless \
     && alternatives --set java  $(alternatives --display java |grep java-openjdk|grep -Eo '^[^ ]+') \
     && java -version
 EXPOSE 7091
-ENTRYPOINT JAVA_OPTS="$JAVA_OPTS -Xmx32m -Xss256k \
+ENTRYPOINT JAVA_OPTS="$JAVA_OPTS \
     -Drobozonky.properties.file=$CONFIG_DIRECTORY/robozonky.properties \
     -Dlogback.configurationFile=$CONFIG_DIRECTORY/logback.xml \
     -Dcom.sun.management.jmxremote \
