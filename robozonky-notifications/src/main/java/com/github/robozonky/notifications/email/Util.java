@@ -86,6 +86,7 @@ class Util {
             put("relativeRisk", perRating(portfolioOverview::getAtRiskShareOnInvestment));
             put("total", portfolioOverview.getCzkInvested());
             put("totalRisk", portfolioOverview.getCzkAtRisk());
+            put("totalShare", portfolioOverview.getShareAtRisk());
             put("balance", portfolioOverview.getCzkAvailable());
         }});
     }

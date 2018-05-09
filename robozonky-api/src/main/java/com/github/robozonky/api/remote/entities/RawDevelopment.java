@@ -19,7 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.notifications.Event;
-import com.github.robozonky.api.remote.enums.DevelopmentTpe;
+import com.github.robozonky.api.remote.enums.DevelopmentType;
 
 /**
  * Represents a notification of collections department operating on delinquent loans. Obvious name for this class would
@@ -29,13 +29,13 @@ import com.github.robozonky.api.remote.enums.DevelopmentTpe;
  */
 public class RawDevelopment extends BaseEntity {
 
-    private DevelopmentTpe businessCode;
+    private DevelopmentType businessCode;
     private String publicNote;
     private Object metadata;
     private DateDescriptor dateFrom, dateTo;
 
     @XmlElement
-    public DevelopmentTpe getBusinessCode() {
+    public DevelopmentType getBusinessCode() {
         return businessCode;
     }
 

@@ -35,7 +35,7 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.api.remote.enums.DevelopmentTpe;
+import com.github.robozonky.api.remote.enums.DevelopmentType;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
@@ -131,19 +131,19 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Development before = Development.custom()
                 .setDateFrom(target.minusDays(2))
                 .setDateTo(target.minusDays(1))
-                .setType(DevelopmentTpe.OTHER)
+                .setType(DevelopmentType.OTHER)
                 .setPublicNote("Before target date.")
                 .build();
         final Development after1 = Development.custom()
                 .setDateFrom(target.plusDays(1))
                 .setDateTo(target.plusDays(2))
-                .setType(DevelopmentTpe.OTHER)
+                .setType(DevelopmentType.OTHER)
                 .setPublicNote("First after target.")
                 .build();
         final Development after2 = Development.custom()
                 .setDateFrom(target.plusDays(3))
                 .setDateTo(target.plusDays(4))
-                .setType(DevelopmentTpe.OTHER)
+                .setType(DevelopmentType.OTHER)
                 .setPublicNote("Second after target.")
                 .build();
         return Arrays.asList(before, after1, after2);

@@ -45,7 +45,7 @@ class BaseEnumTest {
                 .map(value -> dynamicTest("bidirectional " + value.getClass().getSimpleName() + '.' + value,
                                           () -> bidirectionality(value, converter)));
         final Stream<DynamicTest> t2 =
-                Stream.of(dynamicTest("wrong " + clz.getSimpleName(), () -> wrong(Purpose::findByCode)));
+                Stream.of(dynamicTest("wrong " + clz.getSimpleName(), () -> wrong(converter)));
         return Stream.concat(t, t2);
     }
 
@@ -56,6 +56,6 @@ class BaseEnumTest {
                                                         MainIncomeType::findByCode);
         final Stream<DynamicTest> rating = code(Rating.class, Rating.values(), Rating::findByCode);
         final Stream<DynamicTest> region = code(Region.class, Region.values(), Region::findByCode);
-        return Stream.concat(Stream.concat(purpose, mainIncomeType), Stream.concat(rating, region));
+        return Stream.of(purpose, mainIncomeType, rating, region).flatMap(s -> s);
     }
 }

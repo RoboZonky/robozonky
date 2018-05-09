@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities.sanitized;
+package com.github.robozonky.api;
 
-import java.time.OffsetDateTime;
+import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.remote.enums.DevelopmentType;
+import static org.assertj.core.api.SoftAssertions.*;
 
-public interface MutableDevelopment<T extends MutableDevelopment<T>> extends Development {
+class SessionInfoTest {
 
-    T setType(final DevelopmentType type);
-
-    T setPublicNote(final String publicNote);
-
-    T setDateFrom(final OffsetDateTime dateFrom);
-
-    T setDateTo(final OffsetDateTime dateTo);
+    @Test
+    void constructor() {
+        final SessionInfo s = new SessionInfo("someone@somewhere.cz");
+        assertSoftly(softly -> {
+            softly.assertThat(s.getUsername()).isEqualTo("someone@somewhere.cz");
+            softly.assertThat(s.isDryRun()).isTrue();
+            softly.assertThat(s.getName()).isEmpty();
+        });
+    }
 }

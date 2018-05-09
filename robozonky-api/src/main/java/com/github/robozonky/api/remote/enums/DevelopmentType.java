@@ -30,8 +30,8 @@ import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 /**
  * Retrieved from Zonky developers via e-mail on March 27, 2018.
  */
-@JsonDeserialize(using = DevelopmentTpe.CollectionActionTypeDeserializer.class)
-public enum DevelopmentTpe implements BaseEnum {
+@JsonDeserialize(using = DevelopmentType.CollectionActionTypeDeserializer.class)
+public enum DevelopmentType implements BaseEnum {
     LOAN_DELAY_BORROWER(CollectionActionSource.AUTOMATION, "Prodlení", "AUTO_LOAN_DELAY_BORROWER"),
     LOAN_OVERDUE_INST_PENALTY_WARNING(CollectionActionSource.AUTOMATION, "Hrozba pokuty",
                                       "AUTO_LOAN_OVERDUE_INST_PENALTY_WARNING"),
@@ -105,7 +105,7 @@ public enum DevelopmentTpe implements BaseEnum {
     private final String code;
     private final Set<String> ids;
 
-    DevelopmentTpe(final CollectionActionSource source, final String code, final String... internalId) {
+    DevelopmentType(final CollectionActionSource source, final String code, final String... internalId) {
         this.source = source;
         this.code = code;
         this.ids = Collections.unmodifiableSet(UnifiedSet.newSetWith(internalId));
@@ -124,13 +124,13 @@ public enum DevelopmentTpe implements BaseEnum {
         return ids;
     }
 
-    static class CollectionActionTypeDeserializer extends JsonDeserializer<DevelopmentTpe> {
+    static class CollectionActionTypeDeserializer extends JsonDeserializer<DevelopmentType> {
 
         @Override
-        public DevelopmentTpe deserialize(final JsonParser jsonParser,
-                                          final DeserializationContext ctxt) throws IOException {
+        public DevelopmentType deserialize(final JsonParser jsonParser,
+                                           final DeserializationContext ctxt) throws IOException {
             final String id = jsonParser.getText();
-            return Stream.of(DevelopmentTpe.values())
+            return Stream.of(DevelopmentType.values())
                     .filter(t -> t.getIds().contains(id))
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("Unknown enum value: " + id));

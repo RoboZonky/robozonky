@@ -81,6 +81,14 @@ public class PortfolioOverview {
         return a.divide(b, 4, RoundingMode.HALF_EVEN).stripTrailingZeros();
     }
 
+    private static BigDecimal divide(final BigDecimal a, final int b) {
+        return divide(a, BigDecimal.valueOf(b));
+    }
+
+    private static BigDecimal divide(final int a, final int b) {
+        return divide(BigDecimal.valueOf(a), b);
+    }
+
     /**
      * Available balance in the wallet.
      * @return Amount in CZK.
@@ -115,6 +123,17 @@ public class PortfolioOverview {
     }
 
     /**
+     * How much is at risk out of the entire portfolio, in relative terms.
+     * @return Percentage.
+     */
+    public BigDecimal getShareAtRisk() {
+        if (czkInvested == 0) { // protected against division by zero
+            return BigDecimal.ZERO;
+        }
+        return divide(czkAtRisk, czkInvested);
+    }
+
+    /**
      * Sum total of all remaining principal where loans in a given rating are currently overdue.
      * @param r Rating in question.
      * @return Amount in CZK.
@@ -129,12 +148,11 @@ public class PortfolioOverview {
      * @return Share of the given rating on overall investments.
      */
     public BigDecimal getShareOnInvestment(final Rating r) {
-        final int investedPerRating = this.getCzkInvested(r);
-        if (investedPerRating == 0) {
+        if (czkInvested == 0) { // protected against division by zero
             return BigDecimal.ZERO;
         }
-        final BigDecimal invested = BigDecimal.valueOf(this.czkInvested);
-        return divide(BigDecimal.valueOf(investedPerRating), invested);
+        final int investedPerRating = this.getCzkInvested(r);
+        return divide(investedPerRating, czkInvested);
     }
 
     /**
@@ -144,11 +162,10 @@ public class PortfolioOverview {
      */
     public BigDecimal getAtRiskShareOnInvestment(final Rating r) {
         final int investedPerRating = this.getCzkInvested(r);
-        if (investedPerRating == 0) {
+        if (investedPerRating == 0) { // protected against division by zero
             return BigDecimal.ZERO;
         }
-        final BigDecimal atRisk = BigDecimal.valueOf(getCzkAtRisk(r));
-        return divide(atRisk, BigDecimal.valueOf(investedPerRating));
+        return divide(getCzkAtRisk(r), investedPerRating);
     }
 
     @Override

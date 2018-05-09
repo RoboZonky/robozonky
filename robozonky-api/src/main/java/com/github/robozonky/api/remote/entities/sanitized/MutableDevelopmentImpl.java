@@ -21,13 +21,13 @@ import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.DateDescriptor;
 import com.github.robozonky.api.remote.entities.RawDevelopment;
-import com.github.robozonky.api.remote.enums.DevelopmentTpe;
+import com.github.robozonky.api.remote.enums.DevelopmentType;
 import com.github.robozonky.internal.api.ToStringBuilder;
 
 final class MutableDevelopmentImpl implements DevelopmentBuilder {
 
     private String publicNote;
-    private DevelopmentTpe type;
+    private DevelopmentType type;
     private OffsetDateTime dateFrom, dateTo;
 
     MutableDevelopmentImpl() {
@@ -44,7 +44,7 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
     }
 
     @Override
-    public DevelopmentBuilder setType(final DevelopmentTpe type) {
+    public DevelopmentBuilder setType(final DevelopmentType type) {
         this.type = type;
         return this;
     }
@@ -68,7 +68,7 @@ final class MutableDevelopmentImpl implements DevelopmentBuilder {
     }
 
     @Override
-    public DevelopmentTpe getType() {
+    public DevelopmentType getType() {
         return type;
     }
 

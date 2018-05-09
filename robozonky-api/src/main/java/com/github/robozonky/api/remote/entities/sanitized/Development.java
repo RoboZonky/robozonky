@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.RawDevelopment;
-import com.github.robozonky.api.remote.enums.DevelopmentTpe;
+import com.github.robozonky.api.remote.enums.DevelopmentType;
 
 public interface Development {
 
@@ -36,7 +36,7 @@ public interface Development {
         return new MutableDevelopmentImpl(original);
     }
 
-    DevelopmentTpe getType();
+    DevelopmentType getType();
 
     Optional<String> getPublicNote();
 

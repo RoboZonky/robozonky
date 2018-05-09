@@ -61,7 +61,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.enums.DevelopmentTpe;
+import com.github.robozonky.api.remote.enums.DevelopmentType;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -112,7 +112,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static Development mockCollectionNoEndDate() {
         return Development.custom()
-                .setType(DevelopmentTpe.OTHER)
+                .setType(DevelopmentType.OTHER)
                 .setPublicNote("Some note.")
                 .setDateFrom(OffsetDateTime.now())
                 .build();
@@ -120,7 +120,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
 
     private static Development mockCollectionNoNote() {
         return Development.custom()
-                .setType(DevelopmentTpe.OTHER)
+                .setType(DevelopmentType.OTHER)
                 .setDateFrom(OffsetDateTime.now().minusDays(1))
                 .setDateTo(OffsetDateTime.now())
                 .build();
@@ -130,6 +130,7 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
         final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
         when(portfolioOverview.getCzkAvailable()).thenReturn(balance);
         when(portfolioOverview.getCzkAtRisk()).thenReturn(0);
+        when(portfolioOverview.getShareAtRisk()).thenReturn(BigDecimal.ZERO);
         when(portfolioOverview.getCzkAtRisk(any())).thenReturn(0);
         when(portfolioOverview.getShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);
         when(portfolioOverview.getAtRiskShareOnInvestment(any())).thenReturn(BigDecimal.ZERO);

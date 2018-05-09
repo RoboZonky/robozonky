@@ -182,6 +182,47 @@
                     "methodName": "hashCode",
                     "elementKind": "method",
                     "justification": "Transaction now has its own equals() and hashCode()."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method com.github.robozonky.api.remote.enums.DevelopmentTpe com.github.robozonky.api.remote.entities.RawDevelopment::getBusinessCode()",
+                    "new": "method com.github.robozonky.api.remote.enums.DevelopmentType com.github.robozonky.api.remote.entities.RawDevelopment::getBusinessCode()",
+                    "oldType": "com.github.robozonky.api.remote.enums.DevelopmentTpe",
+                    "newType": "com.github.robozonky.api.remote.enums.DevelopmentType",
+                    "package": "com.github.robozonky.api.remote.entities",
+                    "classSimpleName": "RawDevelopment",
+                    "methodName": "getBusinessCode",
+                    "elementKind": "method",
+                    "justification": "DevelopmentTpe renamed to DevelopmentType to fix the typo"
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method com.github.robozonky.api.remote.enums.DevelopmentTpe com.github.robozonky.api.remote.entities.sanitized.Development::getType()",
+                    "new": "method com.github.robozonky.api.remote.enums.DevelopmentType com.github.robozonky.api.remote.entities.sanitized.Development::getType()",
+                    "oldType": "com.github.robozonky.api.remote.enums.DevelopmentTpe",
+                    "newType": "com.github.robozonky.api.remote.enums.DevelopmentType",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Development",
+                    "methodName": "getType",
+                    "elementKind": "method",
+                    "justification": "DevelopmentTpe renamed to DevelopmentType to fix the typo"
+                  }, {
+                    "code": "java.method.parameterTypeChanged",
+                    "old": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T>>>::setType(===com.github.robozonky.api.remote.enums.DevelopmentTpe===)",
+                    "new": "parameter T com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T extends com.github.robozonky.api.remote.entities.sanitized.MutableDevelopment<T>>>::setType(===com.github.robozonky.api.remote.enums.DevelopmentType===)",
+                    "oldType": "com.github.robozonky.api.remote.enums.DevelopmentTpe",
+                    "newType": "com.github.robozonky.api.remote.enums.DevelopmentType",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "MutableDevelopment",
+                    "methodName": "setType",
+                    "parameterIndex": "0",
+                    "elementKind": "parameter",
+                    "justification": "DevelopmentTpe renamed to DevelopmentType to fix the typo"
+                  }, {
+                    "code": "java.class.removed",
+                    "old": "enum com.github.robozonky.api.remote.enums.DevelopmentTpe",
+                    "package": "com.github.robozonky.api.remote.enums",
+                    "classSimpleName": "DevelopmentTpe",
+                    "elementKind": "enum",
+                    "justification": "DevelopmentTpe renamed to DevelopmentType to fix the typo"
                   }
                 ]
               }
