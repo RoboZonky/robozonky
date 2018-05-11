@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import java.time.temporal.TemporalAmount;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -47,7 +47,7 @@ public enum Rating implements BaseEnum {
                 .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
     }
 
-    public TemporalAmount getCaptchaDelay() {
+    public Duration getCaptchaDelay() {
         return Settings.INSTANCE.getCaptchaDelay(this);
     }
 

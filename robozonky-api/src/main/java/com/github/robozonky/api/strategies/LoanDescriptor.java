@@ -17,9 +17,9 @@
 package com.github.robozonky.api.strategies;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -48,7 +48,7 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
      * @return Present if loan protected by CAPTCHA, otherwise empty.
      */
     public Optional<OffsetDateTime> getLoanCaptchaProtectionEndDateTime() {
-        final TemporalAmount captchaDelay = loan.getRating().getCaptchaDelay();
+        final Duration captchaDelay = loan.getRating().getCaptchaDelay();
         if (captchaDelay.get(ChronoUnit.SECONDS) == 0) {
             return Optional.empty();
         } else {

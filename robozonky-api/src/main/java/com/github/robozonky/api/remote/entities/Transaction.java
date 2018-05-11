@@ -27,17 +27,23 @@ import com.github.robozonky.api.remote.enums.TransactionOrientation;
 
 public class Transaction extends BaseEntity {
 
-    private BigDecimal amount;
+    private BigDecimal amount, discount;
     private TransactionCategory category;
     private TransactionOrientation orientation;
     private OffsetDateTime transactionDate;
     private String customMessage;
-    private int loanId;
+    private int id, loanId;
     private String loanName;
     private String nickName;
 
     public Transaction(final Loan loan, final BigDecimal amount, final TransactionCategory category,
                        final TransactionOrientation orientation) {
+        this(0, loan, amount, category, orientation);
+    }
+
+    public Transaction(final int id, final Loan loan, final BigDecimal amount, final TransactionCategory category,
+                       final TransactionOrientation orientation) {
+        this.id = 0;
         this.amount = amount;
         this.category = category;
         this.orientation = orientation;
@@ -46,6 +52,7 @@ public class Transaction extends BaseEntity {
         this.loanId = loan.getId();
         this.loanName = loan.getName();
         this.nickName = loan.getNickName();
+        this.discount = BigDecimal.ZERO;
     }
 
     private Transaction() {
@@ -92,6 +99,16 @@ public class Transaction extends BaseEntity {
         return nickName;
     }
 
+    @XmlElement
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    @XmlElement
+    public int getId() {
+        return id;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -101,14 +118,11 @@ public class Transaction extends BaseEntity {
             return false;
         }
         final Transaction that = (Transaction) o;
-        return loanId == that.loanId &&
-                category == that.category &&
-                orientation == that.orientation &&
-                Objects.equals(transactionDate, that.transactionDate);
+        return id == that.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(category, orientation, transactionDate, loanId);
+        return Objects.hash(id);
     }
 }
