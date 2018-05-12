@@ -43,7 +43,7 @@ public class Transaction extends BaseEntity {
 
     public Transaction(final int id, final Loan loan, final BigDecimal amount, final TransactionCategory category,
                        final TransactionOrientation orientation) {
-        this.id = 0;
+        this.id = id;
         this.amount = amount;
         this.category = category;
         this.orientation = orientation;
