@@ -90,8 +90,7 @@
         <configuration>
           <baseDir>${project.build.directory}</baseDir>
           <installFile>${basedir}/src/main/izpack/install.xml</installFile>
-          <mkdirs>true</mkdirs>
-          <enableOverrideArtifact>true</enableOverrideArtifact>
+          <classifier>full</classifier>
           <autoIncludeUrl>false</autoIncludeUrl>
           <autoIncludeDevelopers>true</autoIncludeDevelopers>
           <comprFormat>xz</comprFormat>
