@@ -45,4 +45,9 @@ public interface InstanceState<T> extends StateReader {
             // do not add any content
         });
     }
+
+    default boolean isInitialized() {
+        return getLastUpdated().isPresent();
+    }
+
 }

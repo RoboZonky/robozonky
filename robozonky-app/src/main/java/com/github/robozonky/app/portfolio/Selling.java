@@ -80,11 +80,11 @@ public class Selling implements PortfolioDependant {
     }
 
     private void sell(final Portfolio portfolio, final SellStrategy strategy, final Tenant tenant) {
-        final Select s = new Select()
+        final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
         final SessionState<Investment> sold = new SessionState<>(tenant, Investment::getLoanId, "soldInvestments");
-        final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(s))
+        final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .parallel()
                 .filter(i -> !sold.contains(i)) // to make dry run function properly
                 .map(i -> getDescriptor(i, tenant))

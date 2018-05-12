@@ -251,7 +251,13 @@ public class Select implements Consumer<RoboZonkyFilter> {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(conditions);
+    }
+
+    @Override
+    public String toString() {
+        return "Select{" +
+                "conditions=" + conditions +
+                '}';
     }
 }

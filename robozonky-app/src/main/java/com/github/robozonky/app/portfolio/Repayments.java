@@ -16,69 +16,58 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import java.time.LocalDate;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.TransactionCategory;
+import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.common.state.TenantState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Repayments implements PortfolioDependant {
+public final class Repayments implements PortfolioDependant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Repayments.class);
 
-    private static final String STATE_KEY = "lastChecked";
-
-    private static IntStream getRepaidLastTime(final InstanceState<Repayments> state) {
-        return state.getValues(STATE_KEY)
-                .orElse(Stream.empty())
-                .mapToInt(Integer::parseInt);
-    }
-
-    private static boolean isInitialized(final InstanceState<Repayments> state) {
-        return state.getLastUpdated().isPresent();
-    }
-
-    private static void setRepaid(final IntStream ids, final InstanceState<Repayments> state) {
-        final Stream<String> toStore = ids.sorted().mapToObj(Integer::toString);
-        state.update(b -> b.put(STATE_KEY, toStore));
-    }
-
     @Override
     public void accept(final Portfolio portfolio, final Tenant tenant) {
-        final Select s = new Select()
-                .in("loan.status", "PAID")
-                .equals("status", "ACTIVE"); // this is how Zonky queries for loans fully repaid
-        final Collection<Investment> repaid = tenant.call(z -> z.getInvestments(s)).collect(Collectors.toList());
-        final InstanceState<Repayments> state = tenant.getState(Repayments.class);
-        if (isInitialized(state)) { // detect and process loans that have been fully repaid, comparing to the last time
-            final int[] repaidLastTime = getRepaidLastTime(state).toArray();
-            LOGGER.debug("Repaid last time: {}.", repaidLastTime);
+        final InstanceState<Repayments> state = TenantState.of(tenant.getSessionInfo()).in(Repayments.class);
+        if (state.isInitialized()) {
             final PortfolioOverview portfolioOverview = portfolio.calculateOverview();
-            repaid.stream()
-                    .filter(i -> IntStream.of(repaidLastTime).noneMatch(loanId -> loanId == i.getLoanId()))
-                    .forEach(i -> {
-                        try {
-                            final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(i, zonky));
+            // Zonky payment processing happens at the end of each day, payments are dated to the beginning of that day
+            final LocalDate lastZonkyUpdate = portfolio.getStatistics().getTimestamp().toLocalDate();
+            final LocalDate lastRepaymentUpdate = state.getLastUpdated().get().toLocalDate();
+            // read all payment notifications that happened since last checked
+            final Select sinceLastChecked = new Select()
+                    .lessThan("transaction.transactionDate", lastZonkyUpdate)
+                    .greaterThanOrEquals("transaction.transactionDate", lastRepaymentUpdate);
+            tenant.call(z -> z.getTransactions(sinceLastChecked))
+                    .parallel()
+                    .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
+                    .filter(t -> t.getOrientation() == TransactionOrientation.IN)
+                    .forEach(t -> {
+                        LOGGER.debug("Processing transaction: {}.", t);
+                        final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(t.getLoanId(), zonky));
+                        final Investment i = portfolio.lookupOrFail(l, tenant);
+                        i.getPaymentStatus().ifPresent(s -> {
+                            if (s != PaymentStatus.PAID) {
+                                return;
+                            }
                             final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
                             Events.fire(e);
-                        } catch (final Exception ex) { // seen that happen with mysterious loan #41
-                            LOGGER.warn("Found repayment of a non-existent loan #{}, ignoring.", i.getLoanId(), ex);
-                        }
+                        });
                     });
         }
-        // store for future reference
-        setRepaid(repaid.stream().mapToInt(Investment::getLoanId), state);
+        state.reset(); // initialize state with today's update date
     }
 }

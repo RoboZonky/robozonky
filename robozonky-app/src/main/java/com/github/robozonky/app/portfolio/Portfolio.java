@@ -134,6 +134,10 @@ public class Portfolio {
         simulateOperation(tenant, loanId, amount);
     }
 
+    Statistics getStatistics() {
+        return statistics;
+    }
+
     public RemoteBalance getRemoteBalance() {
         return balance;
     }
