@@ -223,6 +223,17 @@
                     "classSimpleName": "DevelopmentTpe",
                     "elementKind": "enum",
                     "justification": "DevelopmentTpe renamed to DevelopmentType to fix the typo"
+                  }, {
+                    "code": "java.method.returnTypeChangedCovariantly",
+                    "old": "method java.time.temporal.TemporalAmount com.github.robozonky.api.remote.enums.Rating::getCaptchaDelay()",
+                    "new": "method java.time.Duration com.github.robozonky.api.remote.enums.Rating::getCaptchaDelay()",
+                    "oldType": "java.time.temporal.TemporalAmount",
+                    "newType": "java.time.Duration",
+                    "package": "com.github.robozonky.api.remote.enums",
+                    "classSimpleName": "Rating",
+                    "methodName": "getCaptchaDelay",
+                    "elementKind": "method",
+                    "justification": "TemporalAmount is not recommended for public use."
                   }
                 ]
               }
