@@ -82,18 +82,18 @@ class TransactionLogTest extends AbstractZonkyLeveragingTest {
     @Test
     void processingTransactions() {
         final Loan l0 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.D).build();
-        final Transaction boughtPreviously = new Transaction(l0, BigDecimal.TEN, TransactionCategory.SMP_BUY,
+        final Transaction boughtPreviously = new Transaction(1, l0, BigDecimal.TEN, TransactionCategory.SMP_BUY,
                                                              TransactionOrientation.OUT);
+        final Synthetic preexisting = new Synthetic(l0.getId(), boughtPreviously.getAmount());
         final Loan l1 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.C).build();
-        final Transaction bought = new Transaction(l1, BigDecimal.TEN, TransactionCategory.SMP_BUY,
+        final Transaction bought = new Transaction(2, l1, BigDecimal.TEN, TransactionCategory.SMP_BUY,
                                                    TransactionOrientation.OUT);
         final Loan l2 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.B).build();
-        final Transaction sold = new Transaction(l2, BigDecimal.TEN, TransactionCategory.SMP_SELL,
+        final Transaction sold = new Transaction(3, l2, BigDecimal.TEN, TransactionCategory.SMP_SELL,
                                                  TransactionOrientation.IN);
         final Loan l3 = Loan.custom().setId(RANDOM.nextInt()).setRating(Rating.A).build();
-        final Transaction ignoredCategory = new Transaction(l3, BigDecimal.TEN, TransactionCategory.INVESTMENT,
+        final Transaction ignoredCategory = new Transaction(4, l3, BigDecimal.TEN, TransactionCategory.INVESTMENT,
                                                             TransactionOrientation.IN);
-        final Synthetic preexisting = new Synthetic(l0.getId(), boughtPreviously.getAmount());
         final Statistics statistics = Statistics.empty();
         final OffsetDateTime timestamp = statistics.getTimestamp();
         final Zonky z = harmlessZonky(10_000);
