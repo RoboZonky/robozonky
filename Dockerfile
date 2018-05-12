@@ -6,7 +6,7 @@ ENV SOURCE_DIRECTORY=/usr/src/robozonky \
 COPY . $SOURCE_DIRECTORY
 WORKDIR $SOURCE_DIRECTORY
 RUN dnf -y install maven xz \
-    && mvn clean install -Dgpg.skip -DskipTests -Ddocker \
+    && mvn clean install -B -Dgpg.skip -DskipTests -Ddocker \
     && ROBOZONKY_VERSION=$(mvn -q \
             -Dexec.executable="echo" \
             -Dexec.args='${project.version}' \
