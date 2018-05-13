@@ -18,7 +18,7 @@ package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.Participation;
 
-public interface ParticipationBased extends LoanBased {
+public interface ParticipationBased {
 
     Participation getParticipation();
 }

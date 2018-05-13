@@ -17,7 +17,6 @@
 package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
@@ -27,24 +26,16 @@ public final class InvestmentPurchasedEvent extends Event implements InvestmentB
                                                                      Financial {
 
     private final Investment investment;
-    private final Loan loan;
     private final PortfolioOverview portfolioOverview;
 
-    public InvestmentPurchasedEvent(final Investment investment, final Loan loan,
-                                    final PortfolioOverview portfolio) {
+    public InvestmentPurchasedEvent(final Investment investment, final PortfolioOverview portfolio) {
         this.investment = investment;
-        this.loan = loan;
         this.portfolioOverview = portfolio;
     }
 
     @Override
     public Investment getInvestment() {
         return this.investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return this.loan;
     }
 
     @Override

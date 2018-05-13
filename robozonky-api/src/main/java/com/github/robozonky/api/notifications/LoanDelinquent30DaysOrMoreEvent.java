@@ -21,12 +21,11 @@ import java.util.Collection;
 
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 public final class LoanDelinquent30DaysOrMoreEvent extends LoanDelinquentEvent {
 
-    public LoanDelinquent30DaysOrMoreEvent(final Investment investment, final Loan loan, final LocalDate since,
+    public LoanDelinquent30DaysOrMoreEvent(final Investment investment, final LocalDate since,
                                            final Collection<Development> collectionActions) {
-        super(investment, loan, since, 30, collectionActions);
+        super(investment, since, 30, collectionActions);
     }
 }

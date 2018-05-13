@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 
 /**
@@ -30,25 +29,14 @@ import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
 public final class InvestmentDescriptor implements Descriptor<RecommendedInvestment, InvestmentDescriptor, Investment> {
 
     private final Investment investment;
-    private final Loan related;
 
-    InvestmentDescriptor(final Investment investment) { // for testing purposes only
-        this(investment, null);
-    }
-
-    public InvestmentDescriptor(final Investment investment, final Loan related) {
+    InvestmentDescriptor(final Investment investment) {
         this.investment = investment;
-        this.related = related;
     }
 
     @Override
     public Investment item() {
         return investment;
-    }
-
-    @Override
-    public Loan related() {
-        return related;
     }
 
     private BigDecimal getRemainingPrincipal() {

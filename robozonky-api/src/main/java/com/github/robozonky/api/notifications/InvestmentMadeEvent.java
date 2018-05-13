@@ -24,6 +24,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
  * Fired immediately after an investment was submitted to the API.
  */
 public final class InvestmentMadeEvent extends Event implements InvestmentBased,
+                                                                LoanBased,
                                                                 Financial {
 
     private final Investment investment;

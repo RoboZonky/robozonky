@@ -18,7 +18,7 @@ package com.github.robozonky.api.notifications;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 
-public interface InvestmentBased extends LoanBased {
+public interface InvestmentBased {
 
     Investment getInvestment();
 }

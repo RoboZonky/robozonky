@@ -21,7 +21,6 @@ import java.math.BigDecimal;
 import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.SellRequest;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 
 /**
@@ -32,18 +31,11 @@ public final class PurchaseRequestedEvent extends Event implements Participation
                                                                    Recommending {
 
     private final Participation participation;
-    private final Loan loan;
     private final BigDecimal recommendation;
 
     public PurchaseRequestedEvent(final RecommendedParticipation recommendation) {
         this.participation = recommendation.descriptor().item();
-        this.loan = recommendation.descriptor().related();
         this.recommendation = recommendation.amount();
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
     }
 
     @Override
