@@ -36,7 +36,6 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SessionState;
 import com.github.robozonky.common.remote.Select;
 import org.slf4j.Logger;
@@ -59,10 +58,6 @@ public class Selling implements PortfolioDependant {
         this.strategy = strategy;
     }
 
-    private InvestmentDescriptor getDescriptor(final Investment i, final Tenant auth) {
-        return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, zonky)));
-    }
-
     private Optional<Investment> processSale(final Tenant tenant, final RecommendedInvestment r,
                                              final SessionState<Investment> sold) {
         Events.fire(new SaleRequestedEvent(r));
@@ -75,7 +70,7 @@ public class Selling implements PortfolioDependant {
             tenant.run(z -> z.sell(i));
             LOGGER.trace("Request over.");
         }
-        Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
+        Events.fire(new SaleOfferedEvent(i));
         return Optional.of(i);
     }
 
@@ -87,7 +82,7 @@ public class Selling implements PortfolioDependant {
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .parallel()
                 .filter(i -> !sold.contains(i)) // to make dry run function properly
-                .map(i -> getDescriptor(i, tenant))
+                .map(InvestmentDescriptor::new)
                 .collect(Collectors.toSet());
         final PortfolioOverview overview = portfolio.calculateOverview();
         Events.fire(new SellingStartedEvent(eligible, overview));

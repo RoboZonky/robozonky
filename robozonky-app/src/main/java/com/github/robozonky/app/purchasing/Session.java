@@ -30,7 +30,6 @@ import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
@@ -123,13 +122,12 @@ final class Session {
     boolean purchase(final RecommendedParticipation recommendation) {
         Events.fire(new PurchaseRequestedEvent(recommendation));
         final Participation participation = recommendation.descriptor().item();
-        final Loan loan = recommendation.descriptor().related();
         final boolean purchased = authenticated.getSessionInfo().isDryRun() || actualPurchase(participation);
         if (purchased) {
-            final Investment i = Investment.fresh(participation, loan, recommendation.amount());
+            final Investment i = Investment.fresh(participation, recommendation.amount());
             markSuccessfulPurchase(i);
             discarded.put(recommendation.descriptor()); // don't purchase this one again in dry run
-            Events.fire(new InvestmentPurchasedEvent(i, loan, portfolioOverview));
+            Events.fire(new InvestmentPurchasedEvent(i, portfolioOverview));
         }
         return purchased;
     }

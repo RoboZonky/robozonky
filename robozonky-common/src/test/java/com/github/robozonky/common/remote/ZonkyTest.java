@@ -127,7 +127,7 @@ class ZonkyTest {
             softly.assertThat(z.getInvestment(1)).isEmpty();
             softly.assertThat(z.getAvailableParticipations(Select.unrestricted())).isEmpty();
             softly.assertThat(z.getTransactions(Select.unrestricted())).isEmpty();
-            softly.assertThat(z.getDevelopments(Loan.custom().build())).isEmpty();
+            softly.assertThat(z.getDevelopments(1)).isEmpty();
         });
     }
 

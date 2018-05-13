@@ -136,7 +136,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
             assertThat(events).hasSize(1)
                     .first().isInstanceOf(LoanRepaidEvent.class);
             final LoanRepaidEvent e = (LoanRepaidEvent) events.get(0);
-            assertThat(e.getLoan()).isEqualTo(l4);
+            assertThat(e.getInvestment().getLoanId()).isEqualTo(l4.getId());
         }
     }
 }

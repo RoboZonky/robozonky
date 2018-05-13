@@ -63,10 +63,15 @@ public interface Investment {
         return new MutableInvestmentImpl(loan, investedAmount);
     }
 
-    static Investment fresh(final Participation participation, final Loan loan, final BigDecimal amount) {
-        return Investment.fresh(loan, amount)
+    // this doesn't really work
+    @Deprecated
+    static Investment fresh(final Participation participation, final BigDecimal amount) {
+        return Investment.custom()
                 .setId(participation.getInvestmentId())
+                .setLoanId(participation.getLoanId())
+                .setLoanName(participation.getLoanName())
                 .setRemainingMonths(participation.getRemainingInstalmentCount())
+                .setRemainingPrincipal(amount)
                 .build();
     }
 

@@ -33,7 +33,6 @@ import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.state.InstanceState;
@@ -90,9 +89,9 @@ enum DelinquencyCategory {
         }
     }
 
-    private static LoanDelinquentEvent getEvent(final LocalDate since, final Investment investment, final Loan loan,
-                                                final int threshold, final Collection<Development> collections) {
-        return getEventSupplier(threshold).apply(investment, loan, since, collections);
+    private static LoanDelinquentEvent getEvent(final LocalDate since, final Investment investment, final int threshold,
+                                                final Collection<Development> collections) {
+        return getEventSupplier(threshold).apply(investment, since, collections);
     }
 
     private static String getFieldName(final int dayThreshold) {
@@ -115,12 +114,12 @@ enum DelinquencyCategory {
      * @param tenant Session identifier.
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
      * @param investmentSupplier Retrieves the investment instance for a particular loan ID.
-     * @param loanSupplier Retrieves the loan instance for a particular loan ID.
+     * @param collectionsSupplier Retrieves collections history for a particular loan ID.
      * @return IDs of loans that are being tracked in this category.
      */
     public int[] update(final Tenant tenant, final Collection<Delinquency> active,
-                        final Function<Loan, Investment> investmentSupplier, final Function<Integer, Loan> loanSupplier,
-                        final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
+                        final Function<Integer, Investment> investmentSupplier,
+                        final BiFunction<Integer, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
         final InstanceState<DelinquencyCategory> state = tenant.getState(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
@@ -135,10 +134,9 @@ enum DelinquencyCategory {
                 .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
                 .peek(d -> {
                     final int loanId = d.getParent().getLoanId();
-                    final Loan l = loanSupplier.apply(loanId);
-                    final Investment i = investmentSupplier.apply(l);
-                    final Event e = getEvent(d.getPaymentMissedDate(), i, l, thresholdInDays,
-                                             collectionsSupplier.apply(l, d.getPaymentMissedDate()));
+                    final Investment i = investmentSupplier.apply(loanId);
+                    final Event e = getEvent(d.getPaymentMissedDate(), i, thresholdInDays,
+                                             collectionsSupplier.apply(loanId, d.getPaymentMissedDate()));
                     Events.fire(e);
                 })
                 .mapToInt(d -> d.getParent().getLoanId());
@@ -151,8 +149,7 @@ enum DelinquencyCategory {
     @FunctionalInterface
     private interface EventSupplier {
 
-        LoanDelinquentEvent apply(final Investment i, final Loan l, final LocalDate d,
-                                  final Collection<Development> collections);
+        LoanDelinquentEvent apply(final Investment i, final LocalDate d, final Collection<Development> collections);
     }
 
 }
