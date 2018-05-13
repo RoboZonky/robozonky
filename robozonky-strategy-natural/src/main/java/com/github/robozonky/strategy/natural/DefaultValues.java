@@ -98,7 +98,7 @@ public class DefaultValues {
     }
 
     public boolean needsConfirmation(final Loan loan) {
-        return confirmationCondition.test(new Wrapper(loan));
+        return confirmationCondition.test(new LoanBasedWrapper(loan));
     }
 
     public void setConfirmationCondition(final MarketplaceFilterCondition confirmationCondition) {

@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.strategy.natural.LoanBasedWrapper;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,7 @@ class MarketplaceFilterConditionImplTest {
     @Test
     void doubleNegation() {
         final MarketplaceFilterCondition negated = CONDITION.negate();
-        assertThat(negated.test(new Wrapper(Loan.custom().build()))).isFalse();
+        assertThat(negated.test(new LoanBasedWrapper(Loan.custom().build()))).isFalse();
         final MarketplaceFilterCondition doubleNegated = negated.negate();
         assertThat(doubleNegated).isSameAs(CONDITION);
     }

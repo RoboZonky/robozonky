@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.strategy.natural.LoanBasedWrapper;
 import com.github.robozonky.strategy.natural.Wrapper;
 
 class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Rating> {
@@ -30,7 +31,7 @@ class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTe
     @Override
     public Wrapper getMocked() {
         final Loan loan = Loan.custom().setRating(this.getTriggerItem()).build();
-        return new Wrapper(loan);
+        return new LoanBasedWrapper(loan);
     }
 
     @Override

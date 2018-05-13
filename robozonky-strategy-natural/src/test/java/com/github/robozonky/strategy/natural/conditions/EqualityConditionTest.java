@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.strategy.natural.LoanBasedWrapper;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -45,7 +46,7 @@ class EqualityConditionTest {
 
     private static Wrapper mockLoan(final Rating r) {
         final Loan loan = Loan.custom().setRating(r).build();
-        return new Wrapper(loan);
+        return new LoanBasedWrapper(loan);
     }
 
     private static void testBetterThan(final Rating current, final Rating r) {

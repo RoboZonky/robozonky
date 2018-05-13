@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -40,11 +39,7 @@ class NaturalLanguageSellStrategyTest {
     }
 
     private InvestmentDescriptor mockDescriptor(final Investment investment) {
-        final Loan l = Loan.custom()
-                .setId(1)
-                .setAmount(100_000)
-                .build();
-        return new InvestmentDescriptor(investment, l);
+        return new InvestmentDescriptor(investment);
     }
 
     private final Investment mockInvestment() {
