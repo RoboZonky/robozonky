@@ -18,7 +18,9 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Optional;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 
 class NegatingCondition extends MarketplaceFilterConditionImpl {
 
@@ -38,7 +40,17 @@ class NegatingCondition extends MarketplaceFilterConditionImpl {
     }
 
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final LoanWrapper item) {
+        return !toNegate.test(item);
+    }
+
+    @Override
+    public boolean test(final ParticipationWrapper item) {
+        return !toNegate.test(item);
+    }
+
+    @Override
+    public boolean test(final InvestmentWrapper item) {
         return !toNegate.test(item);
     }
 }

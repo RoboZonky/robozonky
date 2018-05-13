@@ -23,6 +23,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import com.github.robozonky.strategy.natural.conditions.ExitStrategyLoanTermCondition;
 import com.github.robozonky.strategy.natural.conditions.LoanTermCondition;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
@@ -89,10 +90,12 @@ public class FilterSupplier {
     }
 
     private static Collection<MarketplaceFilter> supplyFilters(final Collection<MarketplaceFilter> filters,
-                                                               final long monthsBeforeExit) {
+                                                               final long monthsBeforeExit,
+                                                               final boolean isPrimaryMarketplace) {
         if (monthsBeforeExit > -1) { // ignore marketplace items that go over the exit date
             final long filteredTerms = Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
-            final MarketplaceFilterCondition c = new LoanTermCondition(filteredTerms);
+            final MarketplaceFilterCondition c = isPrimaryMarketplace ?
+                    new ExitStrategyLoanTermCondition(filteredTerms) : new LoanTermCondition(filteredTerms);
             final MarketplaceFilter f = MarketplaceFilter.of(c);
             final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size());
             result.add(f);
@@ -113,7 +116,7 @@ public class FilterSupplier {
 
     private Collection<MarketplaceFilter> refreshPrimaryMarketplaceFilters() {
         if (isPrimaryMarketplaceEnabled()) {
-            return getFilters(() -> supplyFilters(primarySupplier.get(), defaults.getMonthsBeforeExit()),
+            return getFilters(() -> supplyFilters(primarySupplier.get(), defaults.getMonthsBeforeExit(), true),
                               defaults.isSelloffStarted());
         } else {
             return Collections.emptyList();
@@ -122,7 +125,7 @@ public class FilterSupplier {
 
     private Collection<MarketplaceFilter> refreshSecondaryMarketplaceFilters() {
         if (isSecondaryMarketplaceEnabled()) {
-            return getFilters(() -> supplyFilters(secondarySupplier.get(), defaults.getMonthsBeforeExit()),
+            return getFilters(() -> supplyFilters(secondarySupplier.get(), defaults.getMonthsBeforeExit(), false),
                               defaults.isSelloffStarted());
         } else {
             return Collections.emptyList();

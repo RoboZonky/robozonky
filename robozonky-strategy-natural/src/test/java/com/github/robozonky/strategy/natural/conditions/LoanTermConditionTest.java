@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -43,7 +43,7 @@ class LoanTermConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
+        final ParticipationWrapper l = mock(ParticipationWrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         assertThat(condition.test(l)).isTrue();
@@ -51,7 +51,7 @@ class LoanTermConditionTest {
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final ParticipationWrapper l = mock(ParticipationWrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(0);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
@@ -59,7 +59,7 @@ class LoanTermConditionTest {
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final ParticipationWrapper l = mock(ParticipationWrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(2);
         final LoanTermCondition condition = new LoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();

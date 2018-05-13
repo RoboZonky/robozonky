@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -47,7 +47,7 @@ class ElapsedLoanTermConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
+        final InvestmentWrapper l = mock(InvestmentWrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
@@ -56,7 +56,7 @@ class ElapsedLoanTermConditionTest {
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final InvestmentWrapper l = mock(InvestmentWrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(0);
         final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
@@ -64,7 +64,7 @@ class ElapsedLoanTermConditionTest {
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final InvestmentWrapper l = mock(InvestmentWrapper.class);
         when(l.getRemainingTermInMonths()).thenReturn(2);
         final MarketplaceFilterCondition condition = new ElapsedLoanTermCondition(1, 1);
         assertThat(condition.test(l)).isFalse();

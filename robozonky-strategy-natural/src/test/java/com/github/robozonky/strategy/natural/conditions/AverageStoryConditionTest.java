@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ class AverageStoryConditionTest {
 
     @Test
     void longerNotOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final LoanWrapper l = mock(LoanWrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.LONG_STORY_THRESHOLD + 1, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new AverageStoryCondition().test(l)).isFalse();
@@ -35,7 +35,7 @@ class AverageStoryConditionTest {
 
     @Test
     void leftBoundOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final LoanWrapper l = mock(LoanWrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD + 1, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new AverageStoryCondition().test(l)).isTrue();
@@ -43,7 +43,7 @@ class AverageStoryConditionTest {
 
     @Test
     void rightBoundOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final LoanWrapper l = mock(LoanWrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.LONG_STORY_THRESHOLD, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new AverageStoryCondition().test(l)).isTrue();
@@ -51,7 +51,7 @@ class AverageStoryConditionTest {
 
     @Test
     void shorterNotOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final LoanWrapper l = mock(LoanWrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD - 1, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new AverageStoryCondition().test(l)).isFalse();

@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -47,7 +47,7 @@ class RelativeLoanTermConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
+        final InvestmentWrapper l = mock(InvestmentWrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(0, 100);
@@ -56,7 +56,7 @@ class RelativeLoanTermConditionTest {
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final InvestmentWrapper l = mock(InvestmentWrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(0);
         final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(1, 100);
@@ -65,7 +65,7 @@ class RelativeLoanTermConditionTest {
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final InvestmentWrapper l = mock(InvestmentWrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final RelativeLoanTermCondition condition = new RelativeLoanTermCondition(0, 20);

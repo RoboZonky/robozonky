@@ -16,12 +16,12 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 
 public class LoanAmountCondition extends AbstractRangeCondition {
 
     public LoanAmountCondition(final int fromInclusive, final int toInclusive) {
-        super(Wrapper::getOriginalAmount, fromInclusive, toInclusive);
+        super(fromInclusive, toInclusive);
         if (fromInclusive < 0 || toInclusive < 0) {
             throw new IllegalArgumentException("Either values need to be 0 or more.");
         }
@@ -29,5 +29,10 @@ public class LoanAmountCondition extends AbstractRangeCondition {
 
     public LoanAmountCondition(final int fromInclusive) {
         this(fromInclusive, Integer.MAX_VALUE);
+    }
+
+    @Override
+    protected Number retrieve(final LoanWrapper wrapper) {
+        return wrapper.getOriginalAmount();
     }
 }

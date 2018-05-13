@@ -19,72 +19,56 @@ package com.github.robozonky.strategy.natural;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
 
-public class LoanBasedWrapper implements Wrapper {
+public class ParticipationWrapper implements Wrapper {
 
-    private final Loan loan;
+    private final Participation participation;
     private final String identifier;
 
-    public LoanBasedWrapper(final Loan loan) {
-        this.loan = loan;
-        this.identifier = "Loan #" + loan.getId();
-    }
-
-    public boolean isInsuranceActive() {
-        return loan.isInsuranceActive();
+    public ParticipationWrapper(final Participation participation) {
+        this.participation = participation;
+        this.identifier = "Loan #" + participation.getLoanId() + " (participation #" + participation.getId() + ")";
     }
 
     public int getLoanId() {
-        return loan.getId();
-    }
-
-    public Region getRegion() {
-        return loan.getRegion();
-    }
-
-    public String getStory() {
-        return loan.getStory();
+        return participation.getLoanId();
     }
 
     public MainIncomeType getMainIncomeType() {
-        return loan.getMainIncomeType();
+        return participation.getIncomeType();
     }
 
+    @Override
     public BigDecimal getInterestRate() {
-        return loan.getInterestRate();
+        return participation.getInterestRate();
     }
 
     public Purpose getPurpose() {
-        return loan.getPurpose();
+        return participation.getPurpose();
     }
 
     public Rating getRating() {
-        return loan.getRating();
+        return participation.getRating();
     }
 
+    @Override
     public int getOriginalTermInMonths() {
-        return loan.getTermInMonths();
+        return participation.getOriginalInstalmentCount();
     }
 
-    @Deprecated
     public int getRemainingTermInMonths() {
-        return loan.getTermInMonths();
+        return participation.getRemainingInstalmentCount();
     }
 
-    public int getOriginalAmount() {
-        return loan.getAmount();
-    }
-
-    @Deprecated
     public BigDecimal getRemainingAmount() {
-        throw new IllegalStateException("Cannot request remaining amount here.");
+        return participation.getRemainingPrincipal();
     }
 
+    @Override
     public String getIdentifier() {
         return identifier;
     }
@@ -97,7 +81,7 @@ public class LoanBasedWrapper implements Wrapper {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final LoanBasedWrapper wrapper = (LoanBasedWrapper) o;
+        final ParticipationWrapper wrapper = (ParticipationWrapper) o;
         return Objects.equals(identifier, wrapper.identifier);
     }
 

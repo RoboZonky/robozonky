@@ -20,17 +20,14 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
 
-public class InvestmentBasedWrapper implements Wrapper {
+public class InvestmentWrapper implements Wrapper {
 
     private final Investment investment;
     private final String identifier;
 
-    public InvestmentBasedWrapper(final Investment investment) {
+    public InvestmentWrapper(final Investment investment) {
         this.investment = investment;
         this.identifier = "Loan #" + investment.getLoanId() + " (investment #" + investment.getId() + ")";
     }
@@ -43,34 +40,16 @@ public class InvestmentBasedWrapper implements Wrapper {
         return investment.getLoanId();
     }
 
-    @Deprecated
-    public Region getRegion() {
-        return null;
-    }
-
-    @Deprecated
-    public String getStory() {
-        return null;
-    }
-
-    @Deprecated
-    public MainIncomeType getMainIncomeType() {
-        return null;
-    }
-
+    @Override
     public BigDecimal getInterestRate() {
         return investment.getInterestRate();
-    }
-
-    @Deprecated
-    public Purpose getPurpose() {
-        return null;
     }
 
     public Rating getRating() {
         return investment.getRating();
     }
 
+    @Override
     public int getOriginalTermInMonths() {
         return investment.getOriginalTerm();
     }
@@ -87,6 +66,7 @@ public class InvestmentBasedWrapper implements Wrapper {
         return investment.getRemainingPrincipal();
     }
 
+    @Override
     public String getIdentifier() {
         return identifier;
     }
@@ -99,7 +79,7 @@ public class InvestmentBasedWrapper implements Wrapper {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final InvestmentBasedWrapper wrapper = (InvestmentBasedWrapper) o;
+        final InvestmentWrapper wrapper = (InvestmentWrapper) o;
         return Objects.equals(identifier, wrapper.identifier);
     }
 

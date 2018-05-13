@@ -17,11 +17,18 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 
 public class BorrowerIncomeCondition extends AbstractEnumeratedCondition<MainIncomeType> {
 
-    public BorrowerIncomeCondition() {
-        super(Wrapper::getMainIncomeType);
+    @Override
+    protected MainIncomeType retrieve(final LoanWrapper wrapper) {
+        return wrapper.getMainIncomeType();
+    }
+
+    @Override
+    protected MainIncomeType retrieve(final ParticipationWrapper wrapper) {
+        return wrapper.getMainIncomeType();
     }
 }

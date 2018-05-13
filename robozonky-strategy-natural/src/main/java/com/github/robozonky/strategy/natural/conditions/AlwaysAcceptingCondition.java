@@ -31,7 +31,7 @@ enum AlwaysAcceptingCondition implements MarketplaceFilterCondition {
     }
 
     @Override
-    public boolean test(final Wrapper item) {
+    public boolean test(final Wrapper wrapper) {
         return true;
     }
 

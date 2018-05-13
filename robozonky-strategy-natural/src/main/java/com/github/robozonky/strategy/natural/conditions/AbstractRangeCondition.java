@@ -17,27 +17,54 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Optional;
-import java.util.function.Function;
 
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 import com.github.robozonky.strategy.natural.Wrapper;
 
 abstract class AbstractRangeCondition extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
-    private final RangeCondition<Wrapper> rangeCondition;
+    private final Number minInclusive, maxInclusive;
 
-    protected AbstractRangeCondition(final Function<Wrapper, Number> targetAccessor, final Number minValueInclusive,
-                                     final Number maxValueInclusive) {
-        this.rangeCondition = new RangeCondition<>(targetAccessor, minValueInclusive, maxValueInclusive);
+    protected AbstractRangeCondition(final Number minValueInclusive, final Number maxValueInclusive) {
+        this.minInclusive = minValueInclusive;
+        this.maxInclusive = maxValueInclusive;
+    }
+
+    protected Number retrieve(final Wrapper wrapper) {
+        throw new UnsupportedOperationException(wrapper.toString());
+    }
+
+    protected Number retrieve(final InvestmentWrapper wrapper) {
+        return retrieve((Wrapper) wrapper);
+    }
+
+    protected Number retrieve(final ParticipationWrapper wrapper) {
+        return retrieve((Wrapper) wrapper);
+    }
+
+    protected Number retrieve(final LoanWrapper wrapper) {
+        return retrieve((Wrapper) wrapper);
     }
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of(
-                "Range: <" + rangeCondition.getMinInclusive() + "; " + rangeCondition.getMaxInclusive() + ">.");
+        return Optional.of("Range: <" + minInclusive + "; " + maxInclusive + ">.");
     }
 
     @Override
-    public boolean test(final Wrapper item) {
-        return rangeCondition.test(item);
+    public boolean test(final LoanWrapper item) {
+        return new RangeCondition<LoanWrapper>(this::retrieve, minInclusive, maxInclusive).test(item);
+    }
+
+    @Override
+    public boolean test(final InvestmentWrapper item) {
+        return new RangeCondition<InvestmentWrapper>(this::retrieve, minInclusive, maxInclusive).test(item);
+    }
+
+    @Override
+    public boolean test(final ParticipationWrapper item) {
+        return new RangeCondition<ParticipationWrapper>(this::retrieve, minInclusive, maxInclusive).test(item);
     }
 }

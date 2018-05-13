@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
+import java.util.function.Predicate;
 
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.strategy.natural.Wrapper;
 
-public interface Wrapper {
+interface ConditionSpec<T, W extends Wrapper> extends Predicate<W> {
 
-    String getIdentifier();
+    AbstractEnumeratedCondition<T> newImplementation();
 
-    Rating getRating();
+    W getMocked();
 
-    BigDecimal getInterestRate();
+    T getTriggerItem();
 
-    int getOriginalTermInMonths();
-
+    T getNotTriggerItem();
 }

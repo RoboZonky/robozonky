@@ -18,7 +18,8 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Optional;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 
 public class InsuranceCondition extends MarketplaceFilterConditionImpl {
 
@@ -36,7 +37,12 @@ public class InsuranceCondition extends MarketplaceFilterConditionImpl {
     }
 
     @Override
-    public boolean test(final Wrapper wrapper) {
+    public boolean test(final LoanWrapper wrapper) {
+        return wrapper.isInsuranceActive() == expected;
+    }
+
+    @Override
+    public boolean test(final InvestmentWrapper wrapper) {
         return wrapper.isInsuranceActive() == expected;
     }
 }

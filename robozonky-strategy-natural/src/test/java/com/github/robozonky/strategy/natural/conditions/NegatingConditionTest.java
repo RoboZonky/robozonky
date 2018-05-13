@@ -17,7 +17,7 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.strategy.natural.LoanBasedWrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -28,13 +28,13 @@ class NegatingConditionTest {
     void negatingTrue() {
         final MarketplaceFilterCondition c = MarketplaceFilterCondition.alwaysAccepting();
         final NegatingCondition nc = new NegatingCondition(c);
-        assertThat(nc.test(new LoanBasedWrapper(Loan.custom().build()))).isFalse();
+        assertThat(nc.test(new LoanWrapper(Loan.custom().build()))).isFalse();
     }
 
     @Test
     void negatingFalse() {
         final MarketplaceFilterCondition c = MarketplaceFilterCondition.neverAccepting();
         final NegatingCondition nc = new NegatingCondition(c);
-        assertThat(nc.test(new LoanBasedWrapper(Loan.custom().build()))).isTrue();
+        assertThat(nc.test(new LoanWrapper(Loan.custom().build()))).isTrue();
     }
 }

@@ -19,6 +19,9 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 import com.github.robozonky.strategy.natural.Wrapper;
 
 /**
@@ -40,7 +43,28 @@ public interface MarketplaceFilterCondition extends Predicate<Wrapper> {
      */
     Optional<String> getDescription();
 
-    boolean test(final Wrapper item);
+    default boolean test(final LoanWrapper item) {
+        return test((Wrapper) item);
+    }
 
-    MarketplaceFilterCondition negate();
+    default boolean test(final ParticipationWrapper item) {
+        return test((Wrapper) item);
+    }
+
+    default boolean test(final InvestmentWrapper item) {
+        return test((Wrapper) item);
+    }
+
+    @Override
+    default boolean test(final Wrapper item) {
+        throw new UnsupportedOperationException(item + " in " + this);
+    }
+
+    default MarketplaceFilterCondition negate() {
+        if (this instanceof NegatingCondition) {
+            return ((NegatingCondition) this).getToNegate();
+        } else {
+            return new NegatingCondition(this);
+        }
+    }
 }

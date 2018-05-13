@@ -80,11 +80,25 @@ public class ParsedStrategy {
         }
     }
 
-    private static boolean matchesFilter(final Wrapper item, final Collection<MarketplaceFilter> filters,
+    private static boolean matchesFilter(final LoanWrapper item, final Collection<MarketplaceFilter> filters,
                                          final String logMessage) {
-        return filters.stream()
-                .filter(f -> f.test(item))
-                .peek(f -> Decisions.report(logger -> logger.debug(logMessage, item.getIdentifier(), f)))
+        return matchesFilter(filters.stream().filter(f -> f.test(item)), item.getIdentifier(), logMessage);
+    }
+
+    private static boolean matchesFilter(final ParticipationWrapper item, final Collection<MarketplaceFilter> filters,
+                                         final String logMessage) {
+        return matchesFilter(filters.stream().filter(f -> f.test(item)), item.getIdentifier(), logMessage);
+    }
+
+    private static boolean matchesFilter(final InvestmentWrapper item, final Collection<MarketplaceFilter> filters) {
+        return matchesFilter(filters.stream().filter(f -> f.test(item)), item.getIdentifier(),
+                             "{} to be sold as it matched sell filter {}.");
+    }
+
+    private static boolean matchesFilter(final Stream<MarketplaceFilter> filters, final String wrapperId,
+                                         final String logMessage) {
+        return filters
+                .peek(f -> Decisions.report(logger -> logger.debug(logMessage, wrapperId, f)))
                 .findFirst()
                 .isPresent();
     }
@@ -154,12 +168,12 @@ public class ParsedStrategy {
             return Stream.empty();
         }
         return items.stream().filter(i -> {
-            final Wrapper w = new LoanBasedWrapper(i.item());
-            return !matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
-                                  "{} to be ignored as it matched primary marketplace filter {}.");
-        }).filter(i -> {
-            final Wrapper w = new LoanBasedWrapper(i.item());
-            return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
+            final LoanWrapper w = new LoanWrapper(i.item());
+            final boolean primary = matchesFilter(w, filters.getPrimaryMarketplaceFilters(),
+                                                  "{} to be ignored as it matched primary marketplace filter {}.");
+            final boolean secondary = primary || matchesFilter(w, filters.getSellFilters(),
+                                                               "{} to be ignored as it matched sell filter {}.");
+            return !secondary;
         });
     }
 
@@ -169,12 +183,12 @@ public class ParsedStrategy {
             return Stream.empty();
         }
         return items.stream().filter(i -> {
-            final Wrapper w = new ParticipationBasedWrapper(i.item());
-            return !matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
-                                  "{} to be ignored as it matched secondary marketplace filter {}.");
-        }).filter(i -> {
-            final Wrapper w = new ParticipationBasedWrapper(i.item());
-            return !matchesFilter(w, filters.getSellFilters(), "{} to be ignored as it matched sell filter {}.");
+            final ParticipationWrapper w = new ParticipationWrapper(i.item());
+            final boolean primary = matchesFilter(w, filters.getSecondaryMarketplaceFilters(),
+                                                  "{} to be ignored as it matched secondary marketplace filter {}.");
+            final boolean secondary = primary || matchesFilter(w, filters.getSellFilters(),
+                                                               "{} to be ignored as it matched sell filter {}.");
+            return !secondary;
         });
     }
 
@@ -192,8 +206,8 @@ public class ParsedStrategy {
 
     public Stream<InvestmentDescriptor> getApplicableInvestments(final Collection<InvestmentDescriptor> items) {
         return items.stream().filter(i -> {
-            final Wrapper w = new InvestmentBasedWrapper(i.item());
-            return matchesFilter(w, filters.getSellFilters(), "{} to be sold as it matched sell filter {}.");
+            final InvestmentWrapper w = new InvestmentWrapper(i.item());
+            return matchesFilter(w, filters.getSellFilters());
         });
     }
 

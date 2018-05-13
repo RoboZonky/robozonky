@@ -17,11 +17,18 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 
 public class LoanPurposeCondition extends AbstractEnumeratedCondition<Purpose> {
 
-    public LoanPurposeCondition() {
-        super(Wrapper::getPurpose);
+    @Override
+    protected Purpose retrieve(final LoanWrapper wrapper) {
+        return wrapper.getPurpose();
+    }
+
+    @Override
+    protected Purpose retrieve(final ParticipationWrapper wrapper) {
+        return wrapper.getPurpose();
     }
 }

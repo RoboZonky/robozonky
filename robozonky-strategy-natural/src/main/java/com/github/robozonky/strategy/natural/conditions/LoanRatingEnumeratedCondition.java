@@ -21,7 +21,8 @@ import com.github.robozonky.strategy.natural.Wrapper;
 
 public class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Rating> {
 
-    public LoanRatingEnumeratedCondition() {
-        super(Wrapper::getRating);
+    @Override
+    protected Rating retrieve(final Wrapper wrapper) {
+        return wrapper.getRating();
     }
 }

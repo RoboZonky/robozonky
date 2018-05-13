@@ -18,20 +18,22 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.strategy.natural.LoanBasedWrapper;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 
-class LoanPurposeConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Purpose> {
+class LoanPurposeConditionSpec implements ConditionSpec<Purpose, LoanWrapper> {
+
+    private AbstractEnumeratedCondition<Purpose> impl;
 
     @Override
-    public AbstractEnumeratedCondition<Purpose> getImplementation() {
-        return new LoanPurposeCondition();
+    public AbstractEnumeratedCondition<Purpose> newImplementation() {
+        this.impl = new LoanPurposeCondition();
+        return impl;
     }
 
     @Override
-    public Wrapper getMocked() {
+    public LoanWrapper getMocked() {
         final Loan loan = Loan.custom().setPurpose(this.getTriggerItem()).build();
-        return new LoanBasedWrapper(loan);
+        return new LoanWrapper(loan);
     }
 
     @Override
@@ -42,5 +44,10 @@ class LoanPurposeConditionSpec implements AbstractEnumeratedConditionTest.Condit
     @Override
     public Purpose getNotTriggerItem() {
         return Purpose.CESTOVANI;
+    }
+
+    @Override
+    public boolean test(final LoanWrapper wrapper) {
+        return impl.test(wrapper);
     }
 }

@@ -35,13 +35,11 @@ class WrapperTest {
                 .build();
         final int invested = 200;
         final Investment investment = Investment.fresh((MarketplaceLoan) loan, invested).build();
-        final Wrapper w = new InvestmentBasedWrapper(investment);
+        final InvestmentWrapper w = new InvestmentWrapper(investment);
         assertSoftly(softly -> {
             softly.assertThat(w.getLoanId()).isEqualTo(loan.getId());
-            softly.assertThat(w.getStory()).isEqualTo(loan.getStory());
-            softly.assertThat(w.getRegion()).isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating()).isEqualTo(loan.getRating());
-            softly.assertThat(w.getOriginalAmount()).isEqualTo(loan.getAmount());
+            softly.assertThat(w.getOriginalAmount()).isEqualTo(invested);
             softly.assertThat(w.getInterestRate()).isEqualTo(loan.getInterestRate());
             softly.assertThat(w.getRemainingTermInMonths()).isEqualTo(investment.getRemainingMonths());
             softly.assertThat(w.getRemainingAmount()).isEqualTo(BigDecimal.valueOf(invested));
@@ -55,13 +53,13 @@ class WrapperTest {
                 .setId(1)
                 .setAmount(2)
                 .build();
-        final Wrapper w = new LoanBasedWrapper(loan);
+        final Wrapper w = new LoanWrapper(loan);
         assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w);
             softly.assertThat(w).isNotEqualTo(null);
             softly.assertThat(w).isNotEqualTo("");
         });
-        final Wrapper w2 = new LoanBasedWrapper(loan);
+        final Wrapper w2 = new LoanWrapper(loan);
         assertSoftly(softly -> {
             softly.assertThat(w).isEqualTo(w2);
             softly.assertThat(w2).isEqualTo(w);

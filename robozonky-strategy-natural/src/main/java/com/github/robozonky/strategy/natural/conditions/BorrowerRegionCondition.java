@@ -17,11 +17,12 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 
 public class BorrowerRegionCondition extends AbstractEnumeratedCondition<Region> {
 
-    public BorrowerRegionCondition() {
-        super(Wrapper::getRegion);
+    @Override
+    protected Region retrieve(final LoanWrapper wrapper) {
+        return wrapper.getRegion();
     }
 }

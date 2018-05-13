@@ -18,19 +18,16 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Function;
 
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
-    private final Function<Wrapper, T> fieldRetriever;
     private final Collection<T> possibleValues = new UnifiedSet<>(0);
-
-    protected AbstractEnumeratedCondition(final Function<Wrapper, T> fieldRetriever) {
-        this.fieldRetriever = fieldRetriever;
-    }
 
     public void add(final T item) {
         this.possibleValues.add(item);
@@ -40,13 +37,39 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl impl
         items.forEach(this::add);
     }
 
+    protected T retrieve(final Wrapper wrapper) {
+        throw new UnsupportedOperationException();
+    }
+
+    protected T retrieve(final InvestmentWrapper wrapper) {
+        return retrieve((Wrapper) wrapper);
+    }
+
+    protected T retrieve(final ParticipationWrapper wrapper) {
+        return retrieve((Wrapper) wrapper);
+    }
+
+    protected T retrieve(final LoanWrapper wrapper) {
+        return retrieve((Wrapper) wrapper);
+    }
+
     @Override
     public Optional<String> getDescription() {
         return Optional.of("Possible values: " + possibleValues + '.');
     }
 
     @Override
-    public boolean test(final Wrapper item) {
-        return new EnumeratedCondition<>(fieldRetriever, possibleValues).test(item);
+    public boolean test(final LoanWrapper item) {
+        return new EnumeratedCondition<LoanWrapper, T>(this::retrieve, possibleValues).test(item);
+    }
+
+    @Override
+    public boolean test(final ParticipationWrapper item) {
+        return new EnumeratedCondition<ParticipationWrapper, T>(this::retrieve, possibleValues).test(item);
+    }
+
+    @Override
+    public boolean test(final InvestmentWrapper item) {
+        return new EnumeratedCondition<InvestmentWrapper, T>(this::retrieve, possibleValues).test(item);
     }
 }

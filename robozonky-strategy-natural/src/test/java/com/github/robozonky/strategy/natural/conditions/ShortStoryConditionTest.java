@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ class ShortStoryConditionTest {
 
     @Test
     void longerNotOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final LoanWrapper l = mock(LoanWrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD + 1, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new ShortStoryCondition().test(l)).isFalse();
@@ -35,7 +35,7 @@ class ShortStoryConditionTest {
 
     @Test
     void shorterOk() {
-        final Wrapper l = mock(Wrapper.class);
+        final LoanWrapper l = mock(LoanWrapper.class);
         final String story = StringUtils.leftPad("", AbstractStoryCondition.SHORT_STORY_THRESHOLD, '*');
         when(l.getStory()).thenReturn(story);
         assertThat(new ShortStoryCondition().test(l)).isTrue();

@@ -16,7 +16,8 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 
 public class LoanTermCondition extends AbstractRangeCondition {
 
@@ -30,12 +31,22 @@ public class LoanTermCondition extends AbstractRangeCondition {
     }
 
     public LoanTermCondition(final long fromInclusive, final long toInclusive) {
-        super(Wrapper::getRemainingTermInMonths, fromInclusive, toInclusive);
+        super(fromInclusive, toInclusive);
         LoanTermCondition.assertIsInRange(fromInclusive);
         LoanTermCondition.assertIsInRange(toInclusive);
     }
 
     public LoanTermCondition(final long fromInclusive) {
         this(fromInclusive, LoanTermCondition.MAX_TERM);
+    }
+
+    @Override
+    protected Number retrieve(final InvestmentWrapper wrapper) {
+        return wrapper.getRemainingTermInMonths();
+    }
+
+    @Override
+    protected Number retrieve(final ParticipationWrapper wrapper) {
+        return wrapper.getRemainingTermInMonths();
     }
 }
