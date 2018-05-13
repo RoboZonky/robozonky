@@ -83,7 +83,6 @@ public class ParticipationBasedWrapper implements Wrapper {
         return -1;
     }
 
-    @Deprecated
     public BigDecimal getRemainingAmount() {
         return participation.getRemainingPrincipal();
     }

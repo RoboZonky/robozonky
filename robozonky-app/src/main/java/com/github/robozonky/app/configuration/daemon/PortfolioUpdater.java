@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.portfolio.Delinquents;
+import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.portfolio.RemoteBalance;
@@ -71,7 +71,7 @@ class PortfolioUpdater implements Runnable,
         // update loans repaid with every portfolio update
         updater.registerDependant(new Repayments());
         // update delinquents automatically with every portfolio update
-        updater.registerDependant((p, a) -> Delinquents.update(a, p));
+        updater.registerDependant((p, a) -> Delinquencies.update(a));
         // attempt to sell participations after every portfolio update
         updater.registerDependant(new Selling(sp));
         // update portfolio with unprocessed transactions coming from Zonky

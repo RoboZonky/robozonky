@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * Keeps active delinquencies over a given threshold. When a new delinquency over a particular threshold arrives, an
  * event is sent. When a delinquency is no longer among active, it is silently removed.
  */
-enum DelinquencyCategory {
+enum DelinquencySeverity {
 
     NEW(0),
     MILD(10),
@@ -51,10 +50,10 @@ enum DelinquencyCategory {
     CRITICAL(60),
     HOPELESS(90);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencyCategory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DelinquencySeverity.class);
     private final int thresholdInDays;
 
-    DelinquencyCategory(final int thresholdInDays) {
+    DelinquencySeverity(final int thresholdInDays) {
         this.thresholdInDays = thresholdInDays;
     }
 
@@ -98,8 +97,8 @@ enum DelinquencyCategory {
         return "notified" + dayThreshold + "plus";
     }
 
-    private static boolean isRelated(final Delinquency d, final int loanId) {
-        return d.getParent().getLoanId() == loanId;
+    private static boolean isRelated(final Delinquency d, final int investmentId) {
+        return d.getParent().getInvestmentId() == investmentId;
     }
 
     /**
@@ -113,18 +112,16 @@ enum DelinquencyCategory {
      * Update internal state trackers and send events if necessary.
      * @param tenant Session identifier.
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
-     * @param investmentSupplier Retrieves the investment instance for a particular loan ID.
      * @param collectionsSupplier Retrieves collections history for a particular loan ID.
      * @return IDs of loans that are being tracked in this category.
      */
     public int[] update(final Tenant tenant, final Collection<Delinquency> active,
-                        final Function<Integer, Investment> investmentSupplier,
                         final BiFunction<Integer, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
-        final InstanceState<DelinquencyCategory> state = tenant.getState(DelinquencyCategory.class);
+        final InstanceState<DelinquencySeverity> state = tenant.getState(DelinquencySeverity.class);
         final String fieldName = getFieldName(thresholdInDays);
         final int[] keepThese = state.getValues(fieldName)
-                .map(DelinquencyCategory::fromIdString)
+                .map(DelinquencySeverity::fromIdString)
                 .orElse(IntStream.empty())
                 .filter(id -> active.stream().anyMatch(d -> isRelated(d, id)))
                 .toArray();
@@ -133,13 +130,14 @@ enum DelinquencyCategory {
                 .filter(d -> isOverThreshold(d, thresholdInDays))
                 .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
                 .peek(d -> {
-                    final int loanId = d.getParent().getLoanId();
-                    final Investment i = investmentSupplier.apply(loanId);
+                    final int id = d.getParent().getInvestmentId();
+                    final Investment i = tenant.call(z -> z.getInvestment(id))
+                            .orElseThrow(() -> new IllegalStateException("Investment #" + id + " not found."));
                     final Event e = getEvent(d.getPaymentMissedDate(), i, thresholdInDays,
-                                             collectionsSupplier.apply(loanId, d.getPaymentMissedDate()));
+                                             collectionsSupplier.apply(id, d.getPaymentMissedDate()));
                     Events.fire(e);
                 })
-                .mapToInt(d -> d.getParent().getLoanId());
+                .mapToInt(d -> d.getParent().getInvestmentId());
         final int[] storeThese = IntStream.concat(IntStream.of(keepThese), addThese).distinct().sorted().toArray();
         state.update(b -> b.put(fieldName, toIdString(storeThese)));
         LOGGER.trace("Update over, stored {}.", storeThese);

@@ -85,12 +85,14 @@ public class Portfolio {
         return new Portfolio(tenant.call(Zonky::getStatistics), balance);
     }
 
+    @Deprecated
     private static Optional<Investment> lookup(final int loanId, final Tenant tenant) {
         final Select s = new Select()
                 .equals("loanId", loanId);
         return tenant.call(z -> z.getInvestments(s)).findFirst();
     }
 
+    @Deprecated
     Investment lookupOrFail(final int loanId, final Tenant auth) {
         return lookup(loanId, auth)
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loanId));
@@ -143,6 +145,6 @@ public class Portfolio {
 
     public PortfolioOverview calculateOverview() {
         return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, transactions.getAdjustments(),
-                                           Delinquents.getAmountsAtRisk());
+                                           Delinquencies.getAmountsAtRisk());
     }
 }

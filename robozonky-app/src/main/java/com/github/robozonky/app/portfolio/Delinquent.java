@@ -25,36 +25,36 @@ import java.util.stream.Stream;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
 /**
- * Represents a loan that, either now or at some point in the past, had at least one overdue instalment.
+ * Represents an investment that, either now or at some point in the past, had at least one overdue instalment.
  */
 public final class Delinquent {
 
-    private final int loanId;
+    private final int investmentId;
     private final SortedMap<LocalDate, Delinquency> delinquencies = new TreeSortedMap<>();
 
     /**
-     * New delinquent loan with one active delinquent instalment.
-     * @param loanId ID of the loan in question.
+     * New delinquent investment with one active delinquent instalment.
+     * @param investmentId ID of the delinquent investment.
      * @param since The day that an instalment was first noticed overdue.
      */
-    public Delinquent(final int loanId, final LocalDate since) {
-        this.loanId = loanId;
+    public Delinquent(final int investmentId, final LocalDate since) {
+        this.investmentId = investmentId;
         this.delinquencies.put(since, new Delinquency(this, since));
     }
 
     /**
-     * New delinquent loan with no delinquent instalments.
-     * @param loanId ID of the loan in question.
+     * New delinquent investment with no delinquent instalments.
+     * @param investmentId ID of the delinquent investment.
      */
-    public Delinquent(final int loanId) {
-        this.loanId = loanId;
+    public Delinquent(final int investmentId) {
+        this.investmentId = investmentId;
     }
 
     /**
-     * @return ID of the delinquent loan.
+     * @return ID of the delinquent investment.
      */
-    public int getLoanId() {
-        return loanId;
+    public int getInvestmentId() {
+        return investmentId;
     }
 
     /**
@@ -122,7 +122,7 @@ public final class Delinquent {
     /**
      * See {@link Object#equals(Object)}.
      * @param o Another delinquent loan.
-     * @return Delinquent loans are considered equal when their {@link #getLoanId()}s are equal.
+     * @return Delinquent loans are considered equal when their {@link #getInvestmentId()}s are equal.
      */
     @Override
     public boolean equals(final Object o) {
@@ -133,18 +133,18 @@ public final class Delinquent {
             return false;
         }
         final Delinquent that = (Delinquent) o;
-        return loanId == that.loanId;
+        return investmentId == that.investmentId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(loanId);
+        return Objects.hash(investmentId);
     }
 
     @Override
     public String toString() {
         return "Delinquent{" +
-                "loanId=" + loanId +
+                "investmentId=" + investmentId +
                 ", delinquencies=" + delinquencies +
                 '}';
     }
