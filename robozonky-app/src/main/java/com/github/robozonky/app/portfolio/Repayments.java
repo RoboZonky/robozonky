@@ -21,14 +21,12 @@ import java.time.LocalDate;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
@@ -57,13 +55,12 @@ public final class Repayments implements PortfolioDependant {
                     .filter(t -> t.getOrientation() == TransactionOrientation.IN)
                     .forEach(t -> {
                         LOGGER.debug("Processing transaction: {}.", t);
-                        final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(t.getLoanId(), zonky));
-                        final Investment i = portfolio.lookupOrFail(l, tenant);
+                        final Investment i = portfolio.lookupOrFail(t.getLoanId(), tenant);
                         i.getPaymentStatus().ifPresent(s -> {
                             if (s != PaymentStatus.PAID) {
                                 return;
                             }
-                            final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
+                            final Event e = new LoanRepaidEvent(i, portfolioOverview);
                             Events.fire(e);
                         });
                     });

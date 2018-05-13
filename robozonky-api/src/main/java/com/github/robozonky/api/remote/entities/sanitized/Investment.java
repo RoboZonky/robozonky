@@ -31,9 +31,7 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
 /**
- * This class is an adapted version of {@link RawInvestment}, with some computed fields added and others removed. Most
- * notably, {@link RawInvestment#getLoanName()} (and other similar fields) are removed as they are duplicates of the
- * same information on the loan and we therefore save memory by not including them.
+ * This class is an adapted version of {@link RawInvestment}, with some computed fields added and others removed.
  */
 public interface Investment {
 
@@ -65,10 +63,15 @@ public interface Investment {
         return new MutableInvestmentImpl(loan, investedAmount);
     }
 
-    static Investment fresh(final Participation participation, final Loan loan, final BigDecimal amount) {
-        return Investment.fresh(loan, amount)
+    // this doesn't really work
+    @Deprecated
+    static Investment fresh(final Participation participation, final BigDecimal amount) {
+        return Investment.custom()
                 .setId(participation.getInvestmentId())
+                .setLoanId(participation.getLoanId())
+                .setLoanName(participation.getLoanName())
                 .setRemainingMonths(participation.getRemainingInstalmentCount())
+                .setRemainingPrincipal(amount)
                 .build();
     }
 
@@ -151,6 +154,10 @@ public interface Investment {
     Optional<OffsetDateTime> getNextPaymentDate();
 
     Optional<BigDecimal> getSmpSoldFor();
+
+    String getLoanName();
+
+    String getNickname();
 
     InvestmentStatus getStatus();
 

@@ -39,7 +39,6 @@ abstract class AbstractLoanTerminatedEmailingListener<T extends Event & Delinque
 
     @Override
     protected Map<String, Object> getData(final T event) {
-        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
-                                      event.getDelinquentSince());
+        return Util.getDelinquentData(event.getInvestment(), event.getCollectionActions(), event.getDelinquentSince());
     }
 }

@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -46,11 +45,7 @@ class NaturalLanguagePurchaseStrategyTest {
     }
 
     private static ParticipationDescriptor mockDescriptor(final Participation participation) {
-        final Loan l = Loan.custom()
-                .setId(1)
-                .setAmount(100_000)
-                .build();
-        return new ParticipationDescriptor(participation, l);
+        return new ParticipationDescriptor(participation);
     }
 
     private static Participation mockParticipation() {

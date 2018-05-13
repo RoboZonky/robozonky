@@ -28,10 +28,10 @@ class DelinquentTest {
     @Test
     void withActiveDelinquency() {
         final LocalDate since = LocalDate.now();
-        final int loanId = 1;
-        final Delinquent d = new Delinquent(loanId, since);
+        final int id = 1;
+        final Delinquent d = new Delinquent(id, since);
         assertSoftly(softly -> {
-            softly.assertThat(d.getLoanId()).isEqualTo(loanId);
+            softly.assertThat(d.getInvestmentId()).isEqualTo(id);
             softly.assertThat(d.getActiveDelinquency()).isPresent();
             softly.assertThat(d.hasActiveDelinquency()).isTrue();
             softly.assertThat(d.getDelinquencies()).hasSize(1);
@@ -84,12 +84,12 @@ class DelinquentTest {
             softly.assertThat(d).isEqualTo(d);
             softly.assertThat(d).isNotEqualTo(null);
         });
-        final Delinquent d2 = new Delinquent(d.getLoanId());
+        final Delinquent d2 = new Delinquent(d.getInvestmentId());
         assertSoftly(softly -> {
             softly.assertThat(d).isEqualTo(d2);
             softly.assertThat(d2).isEqualTo(d);
         });
-        final Delinquent d3 = new Delinquent(d.getLoanId() + 1);
+        final Delinquent d3 = new Delinquent(d.getInvestmentId() + 1);
         assertSoftly(softly -> {
             softly.assertThat(d).isNotEqualTo(d3);
             softly.assertThat(d3).isNotEqualTo(d);

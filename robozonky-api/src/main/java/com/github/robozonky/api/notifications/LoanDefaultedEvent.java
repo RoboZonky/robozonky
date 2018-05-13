@@ -22,19 +22,16 @@ import java.util.Collections;
 
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 public final class LoanDefaultedEvent extends Event implements DelinquencyBased {
 
     private final Investment investment;
-    private final Loan loan;
     private final LocalDate delinquentSince;
     private final Collection<Development> collectionActions;
 
-    public LoanDefaultedEvent(final Investment investment, final Loan loan, final LocalDate delinquentSince,
+    public LoanDefaultedEvent(final Investment investment, final LocalDate delinquentSince,
                               final Collection<Development> collectionActions) {
         this.investment = investment;
-        this.loan = loan;
         this.delinquentSince = delinquentSince;
         this.collectionActions = Collections.unmodifiableCollection(collectionActions);
     }
@@ -42,11 +39,6 @@ public final class LoanDefaultedEvent extends Event implements DelinquencyBased 
     @Override
     public Investment getInvestment() {
         return investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
     }
 
     @Override

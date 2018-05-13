@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
+import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.util.FinancialCalculator;
 
@@ -32,7 +33,8 @@ class InvestmentMadeEventListener extends AbstractEmailingListener<InvestmentMad
     @Override
     String getSubject(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
-        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
+        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka "
+                + Util.identifyLoan((LoanBased) event);
     }
 
     @Override

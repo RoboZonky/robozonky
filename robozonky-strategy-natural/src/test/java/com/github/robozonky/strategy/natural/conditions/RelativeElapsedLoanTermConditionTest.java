@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -47,7 +47,7 @@ class RelativeElapsedLoanTermConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
+        final ParticipationWrapper l = mock(ParticipationWrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(0, 100);
@@ -56,7 +56,7 @@ class RelativeElapsedLoanTermConditionTest {
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final ParticipationWrapper l = mock(ParticipationWrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(0);
         final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(1, 100);
@@ -65,7 +65,7 @@ class RelativeElapsedLoanTermConditionTest {
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
+        final ParticipationWrapper l = mock(ParticipationWrapper.class);
         when(l.getOriginalTermInMonths()).thenReturn(2);
         when(l.getRemainingTermInMonths()).thenReturn(1);
         final MarketplaceFilterCondition condition = new RelativeElapsedLoanTermCondition(0, 20);

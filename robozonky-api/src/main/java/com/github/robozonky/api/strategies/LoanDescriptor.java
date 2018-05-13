@@ -85,11 +85,6 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
         return loan;
     }
 
-    @Override
-    public Loan related() {
-        return loan;
-    }
-
     /**
      * Convert the descriptor into an actual investment recommendation. This will be executed by the
      * {@link InvestmentStrategy}.

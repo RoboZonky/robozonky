@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.function.Predicate;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 
 class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
 
@@ -33,7 +33,7 @@ class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
     }
 
     @Override
-    public boolean test(final Wrapper loan) {
+    public boolean test(final LoanWrapper loan) {
         final String story = loan.getStory();
         final boolean isStoryProvided = (story == null);
         return storyLength.test(isStoryProvided ? "" : loan.getStory().trim());

@@ -24,11 +24,9 @@ import java.util.Optional;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.eclipse.collections.api.set.primitive.MutableIntSet;
@@ -87,13 +85,17 @@ public class Portfolio {
         return new Portfolio(tenant.call(Zonky::getStatistics), balance);
     }
 
-    private static Optional<Investment> lookup(final Loan loan, final Tenant auth) {
-        return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
+    @Deprecated
+    private static Optional<Investment> lookup(final int loanId, final Tenant tenant) {
+        final Select s = new Select()
+                .equals("loanId", loanId);
+        return tenant.call(z -> z.getInvestments(s)).findFirst();
     }
 
-    Investment lookupOrFail(final Loan loan, final Tenant auth) {
-        return lookup(loan, auth)
-                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
+    @Deprecated
+    Investment lookupOrFail(final int loanId, final Tenant auth) {
+        return lookup(loanId, auth)
+                .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loanId));
     }
 
     public Portfolio reloadFromZonky(final Tenant tenant, final RemoteBalance balance) {
@@ -113,10 +115,9 @@ public class Portfolio {
     public void updateTransactions(final Tenant tenant) {
         final int[] idsOfNewlySoldLoans = transactions.update(statistics, tenant);
         for (final int loanId : idsOfNewlySoldLoans) { // notify of loans that were just detected as sold
-            final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-            final Investment i = lookupOrFail(l, tenant);
+            final Investment i = lookupOrFail(loanId, tenant);
             final PortfolioOverview po = calculateOverview();
-            Events.fire(new InvestmentSoldEvent(i, l, po));
+            Events.fire(new InvestmentSoldEvent(i, po));
         }
         loansSold.addAll(idsOfNewlySoldLoans);
     }
@@ -144,6 +145,6 @@ public class Portfolio {
 
     public PortfolioOverview calculateOverview() {
         return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, transactions.getAdjustments(),
-                                           Delinquents.getAmountsAtRisk());
+                                           Delinquencies.getAmountsAtRisk());
     }
 }

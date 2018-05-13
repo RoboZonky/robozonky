@@ -17,20 +17,25 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.strategy.natural.Wrapper;
-import org.mockito.Mockito;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 
-class BorrowerRegionConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Region> {
+import static org.mockito.Mockito.*;
+
+class BorrowerRegionConditionSpec implements ConditionSpec<Region, LoanWrapper> {
+
+    private AbstractEnumeratedCondition<Region> impl;
 
     @Override
-    public AbstractEnumeratedCondition<Region> getImplementation() {
-        return new BorrowerRegionCondition();
+    public AbstractEnumeratedCondition<Region> newImplementation() {
+        this.impl = new BorrowerRegionCondition();
+        return impl;
     }
 
+
     @Override
-    public Wrapper getMocked() {
-        final Wrapper w = Mockito.mock(Wrapper.class);
-        Mockito.when(w.getRegion()).thenReturn(this.getTriggerItem());
+    public LoanWrapper getMocked() {
+        final LoanWrapper w = mock(LoanWrapper.class);
+        when(w.getRegion()).thenReturn(this.getTriggerItem());
         return w;
     }
 
@@ -42,5 +47,10 @@ class BorrowerRegionConditionSpec implements AbstractEnumeratedConditionTest.Con
     @Override
     public Region getNotTriggerItem() {
         return Region.JIHOMORAVSKY;
+    }
+
+    @Override
+    public boolean test(final LoanWrapper wrapper) {
+        return impl.test(wrapper);
     }
 }

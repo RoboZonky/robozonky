@@ -42,12 +42,17 @@ public class LoanInterestRateCondition extends AbstractRangeCondition {
     }
 
     public LoanInterestRateCondition(final BigDecimal fromInclusive, final BigDecimal toInclusive) {
-        super(Wrapper::getInterestRate, fromInclusive, toInclusive);
+        super(fromInclusive, toInclusive);
         LoanInterestRateCondition.assertIsInRange(fromInclusive);
         LoanInterestRateCondition.assertIsInRange(toInclusive);
     }
 
     public LoanInterestRateCondition(final BigDecimal fromInclusive) {
         this(fromInclusive, LoanInterestRateCondition.MAX_RATE);
+    }
+
+    @Override
+    protected Number retrieve(final Wrapper wrapper) {
+        return wrapper.getInterestRate();
     }
 }

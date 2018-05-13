@@ -16,6 +16,9 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
+
 public class ElapsedLoanTermCondition extends AbstractRangeCondition {
 
     private static final int MIN_TERM = 0, MAX_TERM = 84;
@@ -29,12 +32,22 @@ public class ElapsedLoanTermCondition extends AbstractRangeCondition {
     }
 
     public ElapsedLoanTermCondition(final int fromInclusive, final int toInclusive) {
-        super(w -> w.getOriginalTermInMonths() - w.getRemainingTermInMonths(), fromInclusive, toInclusive);
+        super(fromInclusive, toInclusive);
         ElapsedLoanTermCondition.assertIsInRange(fromInclusive);
         ElapsedLoanTermCondition.assertIsInRange(toInclusive);
     }
 
     public ElapsedLoanTermCondition(final int fromInclusive) {
         this(fromInclusive, ElapsedLoanTermCondition.MAX_TERM);
+    }
+
+    @Override
+    protected Number retrieve(final InvestmentWrapper wrapper) {
+        return wrapper.getOriginalTermInMonths() - wrapper.getRemainingTermInMonths();
+    }
+
+    @Override
+    protected Number retrieve(final ParticipationWrapper wrapper) {
+        return wrapper.getOriginalTermInMonths() - wrapper.getRemainingTermInMonths();
     }
 }

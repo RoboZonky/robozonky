@@ -50,7 +50,7 @@ class ParsedStrategyTest {
     private static ParticipationDescriptor mockParticipationDescriptor(final Loan loan) {
         final Participation p = mock(Participation.class);
         doReturn(loan.getTermInMonths()).when(p).getRemainingInstalmentCount();
-        return new ParticipationDescriptor(p, loan);
+        return new ParticipationDescriptor(p);
     }
 
     @Test
@@ -83,7 +83,7 @@ class ParsedStrategyTest {
         final LoanDescriptor ld = new LoanDescriptor(l);
         final ParticipationDescriptor pd = mockParticipationDescriptor(l);
         final Investment i = Investment.fresh((MarketplaceLoan) l, 200);
-        final InvestmentDescriptor id = new InvestmentDescriptor(i, l);
+        final InvestmentDescriptor id = new InvestmentDescriptor(i);
         assertSoftly(softly -> {
             softly.assertThat(strategy.getApplicableLoans(Collections.singleton(ld))).isEmpty();
             softly.assertThat(strategy.getApplicableParticipations(Collections.singleton(pd))).isEmpty();
@@ -112,9 +112,9 @@ class ParsedStrategyTest {
         final ParticipationDescriptor pdOver = mockParticipationDescriptor(loanOver);
         final ParticipationDescriptor pdUnder = mockParticipationDescriptor(loanUnder);
         final Investment iUnder = Investment.fresh((MarketplaceLoan) loanUnder, 200);
-        final InvestmentDescriptor idUnder = new InvestmentDescriptor(iUnder, loanUnder);
+        final InvestmentDescriptor idUnder = new InvestmentDescriptor(iUnder);
         final Investment iOver = Investment.fresh((MarketplaceLoan) loanOver, 200);
-        final InvestmentDescriptor idOver = new InvestmentDescriptor(iOver, loanOver);
+        final InvestmentDescriptor idOver = new InvestmentDescriptor(iOver);
         assertSoftly(softly -> {
             softly.assertThat(strategy.getApplicableLoans(Arrays.asList(ldOver, ldUnder))).containsOnly(ldUnder);
             softly.assertThat(strategy.getApplicableParticipations(Arrays.asList(pdOver, pdUnder)))
@@ -133,8 +133,7 @@ class ParsedStrategyTest {
         final LoanDescriptor ld = new LoanDescriptor(loan);
         assertThat(strategy.getApplicableLoans(Collections.singletonList(ld))).contains(ld);
         // now add a filter and see no loans applicable
-        final MarketplaceFilter f = mock(MarketplaceFilter.class);
-        when(f.test(eq(new Wrapper(loan)))).thenReturn(true);
+        final MarketplaceFilter f = MarketplaceFilter.alwaysAccepting();
         final ParsedStrategy strategy2 = new ParsedStrategy(portfolio, Collections.singleton(f));
         assertThat(strategy2.getApplicableLoans(Collections.singletonList(ld))).isEmpty();
     }
@@ -176,7 +175,7 @@ class ParsedStrategyTest {
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(ps.getApplicableLoans(Collections.singleton(ld))).isEmpty();
         final Participation p = mock(Participation.class);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, l);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(p);
         assertThat(ps.getApplicableParticipations(Collections.singleton(pd))).isEmpty();
     }
 }

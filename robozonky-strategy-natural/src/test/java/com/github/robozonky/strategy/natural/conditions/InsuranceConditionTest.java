@@ -17,7 +17,7 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.SoftAssertions.*;
@@ -29,10 +29,10 @@ class InsuranceConditionTest {
         final Loan loan = Loan.custom()
                 .setInsuranceActive(true)
                 .build();
-        final Wrapper wrap = new Wrapper(loan);
+        final LoanWrapper wrap = new LoanWrapper(loan);
         assertSoftly(softly -> {
-            softly.assertThat(InsuranceCondition.ACTIVE).accepts(wrap);
-            softly.assertThat(InsuranceCondition.INACTIVE).rejects(wrap);
+            softly.assertThat(InsuranceCondition.ACTIVE.test(wrap)).isTrue();
+            softly.assertThat(InsuranceCondition.INACTIVE.test(wrap)).isFalse();
         });
     }
 }

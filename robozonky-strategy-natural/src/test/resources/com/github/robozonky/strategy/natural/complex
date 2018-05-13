@@ -64,7 +64,7 @@ Ignorovat úvěr, kde: kraj klienta je Ústecký nebo Moravskoslezský; pojišt�
 # Ve filtrech pro sekundární trh se nelze dotazovat na zbývající výši úvěru.
 # Délka úvěru je v případě sekundárního trhu ta právě zbývající, nikoliv původní v době uzavření smlouvy.
 Ignorovat participaci, kde: délka přesahuje 36 měsíců.
-(Ale ne když: pojištění je aktivní.)
+(Ale ne když: úrok přesahuje 10,0 % p.a.)
 
 # Náhradou slova "úvěr" nebo "participaci" za "vše" se bude filtr vztahovat shodně na primární i sekundární trh.
 # Většina filtrů lze tedy napsat tak, aby platila zároveň pro primární i sekundární trh.

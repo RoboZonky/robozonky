@@ -37,12 +37,4 @@ abstract class MarketplaceFilterConditionImpl implements MarketplaceFilterCondit
         return this.getClass().getSimpleName() + " (" + description + ")";
     }
 
-    @Override
-    public MarketplaceFilterCondition negate() {
-        if (this instanceof NegatingCondition) {
-            return ((NegatingCondition) this).getToNegate();
-        } else {
-            return new NegatingCondition(this);
-        }
-    }
 }

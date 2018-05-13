@@ -28,7 +28,6 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
-import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
 import com.github.robozonky.util.NumberUtil;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -47,8 +46,8 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
         this.auth = auth;
     }
 
-    private static ParticipationDescriptor toDescriptor(final Participation p, final Tenant auth) {
-        return new ParticipationDescriptor(p, auth.call(zonky -> LoanCache.INSTANCE.getLoan(p.getLoanId(), zonky)));
+    private static ParticipationDescriptor toDescriptor(final Participation p) {
+        return new ParticipationDescriptor(p);
     }
 
     @Override
@@ -67,7 +66,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
     protected Collection<Investment> execute(final Portfolio portfolio, final PurchaseStrategy strategy,
                                              final Collection<Participation> marketplace) {
         final Collection<ParticipationDescriptor> participations = marketplace.parallelStream()
-                .map(p -> toDescriptor(p, auth))
+                .map(Purchasing::toDescriptor)
                 .filter(d -> { // never re-purchase what was once sold
                     final int loanId = d.item().getLoanId();
                     final boolean wasSoldBefore = portfolio.wasOnceSold(loanId);

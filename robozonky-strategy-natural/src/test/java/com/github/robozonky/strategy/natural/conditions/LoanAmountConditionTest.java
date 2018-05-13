@@ -16,14 +16,20 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.strategy.natural.LoanWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
 
 class LoanAmountConditionTest {
+
+    private static LoanWrapper mockWrapper(final int originalAmount) {
+        return new LoanWrapper(Loan.custom()
+                                       .setAmount(originalAmount)
+                                       .build());
+    }
 
     @Test
     void leftBoundWrong() {
@@ -39,24 +45,21 @@ class LoanAmountConditionTest {
 
     @Test
     void boundaryCorrect() {
-        final Wrapper l = mock(Wrapper.class);
-        when(l.getOriginalAmount()).thenReturn(0);
+        final LoanWrapper l = mockWrapper(0);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(0, 0);
         assertThat(condition.test(l)).isTrue();
     }
 
     @Test
     void leftOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
-        when(l.getOriginalAmount()).thenReturn(0);
+        final LoanWrapper l = mockWrapper(0);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
     }
 
     @Test
     void rightOutOfBounds() {
-        final Wrapper l = mock(Wrapper.class);
-        when(l.getOriginalAmount()).thenReturn(2);
+        final LoanWrapper l = mockWrapper(2);
         final MarketplaceFilterConditionImpl condition = new LoanAmountCondition(1, 1);
         assertThat(condition.test(l)).isFalse();
     }

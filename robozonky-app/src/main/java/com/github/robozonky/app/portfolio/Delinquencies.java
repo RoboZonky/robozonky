@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,12 +36,10 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
@@ -55,18 +52,17 @@ import org.slf4j.LoggerFactory;
 /**
  * Historical record of which {@link RawInvestment}s have been delinquent and when. This class updates shared state
  * (implemented via {@link TenantState}) which can then be retrieved through static methods, such as
- * {@link #getDelinquents(Tenant)}
- * and {@link #getLastUpdateTimestamp(Tenant)}.
+ * {@link #getDelinquents(Tenant)} and {@link #getLastUpdateTimestamp(Tenant)}.
  */
-public class Delinquents {
+public class Delinquencies {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Delinquents.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Delinquencies.class);
     private static final String TIME_SEPARATOR = ":::";
     private static final Pattern TIME_SPLITTER = Pattern.compile("\\Q" + TIME_SEPARATOR + "\\E");
     private static final AtomicReference<Map<Rating, BigDecimal>> AMOUNTS_AT_RISK =
             new AtomicReference<>(Collections.emptyMap());
 
-    private Delinquents() {
+    private Delinquencies() {
         // no need for an instance
     }
 
@@ -77,7 +73,7 @@ public class Delinquents {
     }
 
     private static Stream<String> toString(final Delinquent d) {
-        return d.getDelinquencies().map(Delinquents::toString);
+        return d.getDelinquencies().map(Delinquencies::toString);
     }
 
     private static void add(final Delinquent d, final String delinquency) {
@@ -97,12 +93,8 @@ public class Delinquents {
         return d;
     }
 
-    private static boolean isRelated(final Delinquent d, final Investment i) {
-        return d.getLoanId() == i.getLoanId();
-    }
-
-    private static InstanceState<Delinquents> getState(final Tenant tenant) {
-        return tenant.getState(Delinquents.class);
+    private static InstanceState<Delinquencies> getState(final Tenant tenant) {
+        return tenant.getState(Delinquencies.class);
     }
 
     /**
@@ -122,7 +114,7 @@ public class Delinquents {
      * @return Active loans that are now, or at some point have been, tracked as delinquent.
      */
     public static Stream<Delinquent> getDelinquents(final Tenant tenant) {
-        final InstanceState<Delinquents> state = getState(tenant);
+        final InstanceState<Delinquencies> state = getState(tenant);
         return state.getKeys()
                 .filter(StringUtils::isNumeric) // skip any non-loan metadata
                 .map(key -> {
@@ -137,7 +129,7 @@ public class Delinquents {
                                                                              final Stream<Delinquent> items) {
         final Collection<Delinquent> delinquents = items.collect(Collectors.toCollection(FastList::new));
         LOGGER.trace("Starting delinquency state update.");
-        getState(tenant).reset(b -> delinquents.forEach(d -> b.put(String.valueOf(d.getLoanId()), toString(d))));
+        getState(tenant).reset(b -> delinquents.forEach(d -> b.put(String.valueOf(d.getInvestmentId()), toString(d))));
         final Collection<Delinquency> allPresent = delinquents.stream()
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
@@ -153,49 +145,45 @@ public class Delinquents {
 
     private static Stream<Delinquent> getNoMoreDelinquent(final Tenant tenant,
                                                           final Collection<Investment> presentlyDelinquent,
-                                                          final Function<Loan, Investment> investmentSupplier,
-                                                          final Function<Integer, Loan> loanSupplier,
-                                                          final BiFunction<Loan, LocalDate, Collection<Development>>
+                                                          final BiFunction<Integer, LocalDate, Collection<Development>>
                                                                   collectionsSupplier) {
         final LocalDate now = LocalDate.now();
         // find out loans that are no longer delinquent, either through payment or through default
         return getDelinquents(tenant).parallel()
                 .filter(Delinquent::hasActiveDelinquency) // last known state was delinquent
-                .filter(d -> presentlyDelinquent.stream().noneMatch(i -> isRelated(d, i))) // no longer is delinquent
+                .filter(d -> presentlyDelinquent.stream().noneMatch(i -> i.getId() == d.getInvestmentId())) // no longer
                 .flatMap(d -> d.getActiveDelinquency().map(Stream::of).orElse(Stream.empty()))
                 .peek(d -> d.setFixedOn(now.minusDays(1))) // end the delinquency
                 .map(Delinquency::getParent)
                 .peek(d -> {  // notify
-                    final int loanId = d.getLoanId();
+                    final int id = d.getInvestmentId();
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
-                    final Loan l = loanSupplier.apply(loanId);
-                    final Investment inv = investmentSupplier.apply(l);
+                    final Investment inv = tenant.call(z -> z.getInvestment(id))
+                            .orElseThrow(() -> new IllegalStateException("Investment #" + id + " not found."));
                     if (isNoLongerActive(inv)) {
                         final PaymentStatus s = inv.getPaymentStatus().get(); // has been verified already
                         switch (s) {
                             case PAID_OFF:
-                                Events.fire(new LoanDefaultedEvent(inv, l, since, collectionsSupplier.apply(l, since)));
+                                Events.fire(new LoanDefaultedEvent(inv, since, collectionsSupplier.apply(id, since)));
                                 break;
                             case PAID:
-                                LOGGER.trace("Skipping delinquent loan repaid in full, will be handled by Repayments.");
+                                LOGGER.trace("Skipping investment repaid in full, will be handled elsewhere.");
                                 break;
                             default:
-                                LOGGER.warn("Unsupported payment status '{}' for loan #{}.", s, l.getId());
+                                LOGGER.warn("Unsupported payment status '{}' for investment #{}.", s, id);
                         }
                     } else {
-                        Events.fire(
-                                new LoanNoLongerDelinquentEvent(inv, l, since, collectionsSupplier.apply(l, since)));
+                        Events.fire(new LoanNoLongerDelinquentEvent(inv, since, collectionsSupplier.apply(id, since)));
                     }
                 });
     }
 
     static void update(final Tenant tenant, final Collection<Investment> presentlyDelinquent,
-                       final Function<Loan, Investment> investmentSupplier, final Function<Integer, Loan> loanSupplier,
-                       final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
+                       final BiFunction<Integer, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.debug("Updating delinquent loans.");
         // find loans that were delinquent last time we checked and are not anymore
-        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(tenant, presentlyDelinquent, investmentSupplier,
-                                                                        loanSupplier, collectionsSupplier);
+        final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(tenant, presentlyDelinquent,
+                                                                        collectionsSupplier);
         // find loans that are delinquent now, but filter out those sold and/or defaulted
         final Map<Rating, BigDecimal> atRisk = new EnumMap<>(Rating.class);
         final Stream<Delinquent> nowDelinquent = presentlyDelinquent.stream()
@@ -209,8 +197,8 @@ public class Delinquents {
         final Stream<Delinquent> all = Stream.concat(noMoreDelinquent, nowDelinquent).distinct();
         final Collection<Delinquency> result = persistAndReturnActiveDelinquents(tenant, all);
         // notify of new delinquencies over all known thresholds
-        Stream.of(DelinquencyCategory.values())
-                .forEach(c -> c.update(tenant, result, investmentSupplier, loanSupplier, collectionsSupplier));
+        Stream.of(DelinquencySeverity.values())
+                .forEach(c -> c.update(tenant, result, collectionsSupplier));
         AMOUNTS_AT_RISK.set(atRisk);
         LOGGER.trace("Done, new amounts at risk are {}.", atRisk);
     }
@@ -219,20 +207,17 @@ public class Delinquents {
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
      * @param tenant The API that will be used to retrieve the loan instances.
-     * @param portfolio Holds information about investments.
      */
-    public static void update(final Tenant tenant, final Portfolio portfolio) {
+    public static void update(final Tenant tenant) {
         final Collection<Investment> delinquentInvestments =
                 tenant.call(z -> z.getInvestments(new Select().equals("loan.unpaidLastInst", "true")))
                         .collect(Collectors.toList());
-        update(tenant, delinquentInvestments, l -> portfolio.lookupOrFail(l, tenant),
-               id -> tenant.call(z -> LoanCache.INSTANCE.getLoan(id, z)), (l, s) -> getDevelopments(tenant, l, s)
-        );
+        update(tenant, delinquentInvestments, (l, s) -> getDevelopments(tenant, l, s));
     }
 
-    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
+    private static List<Development> getDevelopments(final Tenant auth, final int loanId,
                                                      final LocalDate delinquentSince) {
-        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
+        final List<Development> developments = auth.call(z -> z.getDevelopments(loanId))
                 .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
                 .collect(Collectors.toList());
         Collections.reverse(developments);

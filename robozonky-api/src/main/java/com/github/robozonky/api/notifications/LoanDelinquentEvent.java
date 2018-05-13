@@ -23,7 +23,6 @@ import java.util.Collections;
 import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
-import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
 /**
  * Fired immediately after an {@link RawInvestment} is identified as delinquent.
@@ -31,15 +30,13 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 public abstract class LoanDelinquentEvent extends Event implements DelinquencyBased {
 
     private final Investment investment;
-    private final Loan loan;
     private final LocalDate since;
     private final int thresholdInDays;
     private final Collection<Development> collectionActions;
 
-    LoanDelinquentEvent(final Investment investment, final Loan loan, final LocalDate since, final int thresholdInDays,
+    LoanDelinquentEvent(final Investment investment, final LocalDate since, final int thresholdInDays,
                         final Collection<Development> collectionActions) {
         this.investment = investment;
-        this.loan = loan;
         this.since = since;
         this.thresholdInDays = thresholdInDays;
         this.collectionActions = Collections.unmodifiableCollection(collectionActions);
@@ -48,11 +45,6 @@ public abstract class LoanDelinquentEvent extends Event implements DelinquencyBa
     @Override
     public Investment getInvestment() {
         return investment;
-    }
-
-    @Override
-    public Loan getLoan() {
-        return loan;
     }
 
     public int getThresholdInDays() {

@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.api.remote.entities.Participation;
+import java.util.function.Predicate;
 
-public interface ParticipationBased {
+import com.github.robozonky.strategy.natural.Wrapper;
 
-    Participation getParticipation();
+interface ConditionSpec<T, W extends Wrapper> extends Predicate<W> {
+
+    AbstractEnumeratedCondition<T> newImplementation();
+
+    W getMocked();
+
+    T getTriggerItem();
+
+    T getNotTriggerItem();
 }

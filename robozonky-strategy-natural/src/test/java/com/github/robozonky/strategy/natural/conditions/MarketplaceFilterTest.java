@@ -20,7 +20,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Supplier;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.sanitized.Loan;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -34,34 +37,42 @@ class MarketplaceFilterTest {
     @Test
     void noConditions() {
         final MarketplaceFilterConditionImpl f = new MarketplaceFilter();
-        assertThat(f.test(mock(Wrapper.class))).isTrue();
+        assertThat(f.test(mockLoanWrapper())).isTrue();
     }
 
     @Test
     void oneMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.when(Collections.singletonList(MATCHING.get()));
-        assertThat(f.test(mock(Wrapper.class))).isTrue();
+        assertThat(f.test(mockLoanWrapper())).isTrue();
     }
 
     @Test
     void notAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.when(Arrays.asList(MATCHING.get(), NOT_MATCHING.get(), MATCHING.get()));
-        assertThat(f.test(mock(Wrapper.class))).isFalse();
+        assertThat(f.test(mockLoanWrapper())).isFalse();
+    }
+
+    private ParticipationWrapper mockParticipationWrapper() {
+        return new ParticipationWrapper(mock(Participation.class));
+    }
+
+    private LoanWrapper mockLoanWrapper() {
+        return new LoanWrapper(mock(Loan.class));
     }
 
     @Test
     void secondaryOneNotMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.butNotWhen(Collections.singleton(NOT_MATCHING.get()));
-        assertThat(f.test(mock(Wrapper.class))).isTrue();
+        assertThat(f.test(mockParticipationWrapper())).isTrue();
     }
 
     @Test
     void secondaryAllMatching() {
         final MarketplaceFilter f = new MarketplaceFilter();
         f.butNotWhen(Arrays.asList(MATCHING.get(), MATCHING.get()));
-        assertThat(f.test(mock(Wrapper.class))).isFalse();
+        assertThat(f.test(mockParticipationWrapper())).isFalse();
     }
 }

@@ -44,12 +44,15 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
+    private String loanName, nickName;
 
     MutableInvestmentImpl() {
     }
 
     MutableInvestmentImpl(final RawInvestment investment) {
         this.loanId = investment.getLoanId();
+        this.loanName = investment.getLoanName();
+        this.nickName = investment.getNickname();
         this.id = investment.getId();
         this.currentTerm = investment.getCurrentTerm();
         this.originalTerm = investment.getLoanTermInMonth();
@@ -111,6 +114,18 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public InvestmentBuilder setLoanId(final int loanId) {
         this.loanId = loanId;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setLoanName(final String loanName) {
+        this.loanName = loanName;
+        return this;
+    }
+
+    @Override
+    public InvestmentBuilder setNickname(final String nickname) {
+        this.nickName = nickname;
         return this;
     }
 
@@ -399,6 +414,16 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public Optional<BigDecimal> getSmpSoldFor() {
         return Optional.ofNullable(smpSoldFor);
+    }
+
+    @Override
+    public String getLoanName() {
+        return loanName;
+    }
+
+    @Override
+    public String getNickname() {
+        return nickName;
     }
 
     @Override

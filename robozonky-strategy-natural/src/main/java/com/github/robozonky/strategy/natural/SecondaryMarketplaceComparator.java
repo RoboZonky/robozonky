@@ -32,9 +32,7 @@ class SecondaryMarketplaceComparator implements Comparator<ParticipationDescript
             BY_RECENCY = Comparator.comparing(p -> p.item().getDeadline()),
             BY_REMAINING =
                     Comparator.comparing((ParticipationDescriptor p) -> p.item().getRemainingPrincipal()).reversed(),
-            BY_INSURANCE = Comparator.comparing(
-                    (ParticipationDescriptor p) -> p.related().isInsuranceActive()).reversed(),
-            FINAL = BY_INSURANCE.thenComparing(BY_TERM).thenComparing(BY_REMAINING).thenComparing(BY_RECENCY);
+            FINAL = BY_TERM.thenComparing(BY_REMAINING).thenComparing(BY_RECENCY);
 
     @Override
     public int compare(final ParticipationDescriptor p1, final ParticipationDescriptor p2) {

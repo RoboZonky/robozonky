@@ -103,7 +103,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         if (event instanceof LoanBased) {
             if (event instanceof InvestmentBased) {
                 final InvestmentBased e = (InvestmentBased) event;
-                return Util.getLoanData(e.getInvestment(), e.getLoan());
+                return Util.getLoanData(e.getInvestment());
             } else {
                 final LoanBased e = (LoanBased) event;
                 return Util.getLoanData(e.getLoan());

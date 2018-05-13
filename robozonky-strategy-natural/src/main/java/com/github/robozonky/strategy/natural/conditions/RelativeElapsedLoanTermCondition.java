@@ -16,18 +16,38 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 
 public class RelativeElapsedLoanTermCondition extends AbstractRelativeRangeCondition {
 
     private static final int MAX = 100;
 
     public RelativeElapsedLoanTermCondition(final int fromInclusive, final int toInclusive) {
-        super(w -> w.getOriginalTermInMonths() - w.getRemainingTermInMonths(), Wrapper::getRemainingTermInMonths,
-              fromInclusive, toInclusive);
+        super(fromInclusive, toInclusive);
     }
 
     public RelativeElapsedLoanTermCondition(final int fromInclusive) {
         this(fromInclusive, MAX);
+    }
+
+    @Override
+    protected Number accessSum(final InvestmentWrapper wrapper) {
+        return wrapper.getOriginalTermInMonths() - wrapper.getRemainingTermInMonths();
+    }
+
+    @Override
+    protected Number accessSum(final ParticipationWrapper wrapper) {
+        return wrapper.getOriginalTermInMonths() - wrapper.getRemainingTermInMonths();
+    }
+
+    @Override
+    protected Number accessTarget(final InvestmentWrapper wrapper) {
+        return wrapper.getRemainingTermInMonths();
+    }
+
+    @Override
+    protected Number accessTarget(final ParticipationWrapper wrapper) {
+        return wrapper.getRemainingTermInMonths();
     }
 }

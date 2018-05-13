@@ -24,6 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.github.robozonky.strategy.natural.InvestmentWrapper;
+import com.github.robozonky.strategy.natural.LoanWrapper;
+import com.github.robozonky.strategy.natural.ParticipationWrapper;
 import com.github.robozonky.strategy.natural.Wrapper;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
@@ -47,6 +50,14 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
     private final int id = COUNTER.incrementAndGet();
     private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
             butNotWhen = Collections.emptySet();
+
+    public static MarketplaceFilter alwaysAccepting() {
+        return of(MarketplaceFilterCondition.alwaysAccepting());
+    }
+
+    public static MarketplaceFilter neverAccepting() {
+        return of(MarketplaceFilterCondition.neverAccepting());
+    }
 
     public static MarketplaceFilter of(final MarketplaceFilterCondition c) {
         final MarketplaceFilter f = new MarketplaceFilter();
@@ -82,14 +93,38 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
         return Optional.of("#" + id + ": [" + toString(when) + "] but not [" + toString(butNotWhen) + "].");
     }
 
+    private boolean test(final Predicate<MarketplaceFilterCondition> f) {
+        return when.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
+    }
+
     /**
      * Whether or not the item matches the complex condition.
      * @param item Item in question.
      * @return True when all {@link #when} true AND 1+ {@link #butNotWhen} false.
      */
     @Override
-    public boolean test(final Wrapper item) {
-        final Predicate<MarketplaceFilterCondition> f = c -> c.test(item);
-        return when.stream().allMatch(f) && (butNotWhen.isEmpty() || !butNotWhen.stream().allMatch(f));
+    public boolean test(final LoanWrapper item) {
+        return test(c -> c.test(item)); // make sure we call the correct test() overload on MarketplaceFilterCondition
     }
+
+    /**
+     * Whether or not the item matches the complex condition.
+     * @param item Item in question.
+     * @return True when all {@link #when} true AND 1+ {@link #butNotWhen} false.
+     */
+    @Override
+    public boolean test(final InvestmentWrapper item) {
+        return test(c -> c.test(item)); // make sure we call the correct test() overload on MarketplaceFilterCondition
+    }
+
+    /**
+     * Whether or not the item matches the complex condition.
+     * @param item Item in question.
+     * @return True when all {@link #when} true AND 1+ {@link #butNotWhen} false.
+     */
+    @Override
+    public boolean test(final ParticipationWrapper item) {
+        return test(c -> c.test(item)); // make sure we call the correct test() overload on MarketplaceFilterCondition
+    }
+
 }
