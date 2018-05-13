@@ -29,6 +29,10 @@ public interface MutableInvestment<T extends MutableInvestment<T>> extends Inves
 
     T setLoanId(int loanId);
 
+    T setLoanName(String loanName);
+
+    T setNickname(String nickname);
+
     T setAmountInvested(BigDecimal amountInvested);
 
     T setId(int id);

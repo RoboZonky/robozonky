@@ -30,7 +30,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
 
     private final Investment investment;
 
-    InvestmentDescriptor(final Investment investment) {
+    public InvestmentDescriptor(final Investment investment) {
         this.investment = investment;
     }
 

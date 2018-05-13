@@ -54,18 +54,16 @@ public class ParticipationBasedWrapper implements Wrapper {
         return null;
     }
 
-    @Deprecated
     public MainIncomeType getMainIncomeType() {
-        return null;
+        return participation.getIncomeType();
     }
 
     public BigDecimal getInterestRate() {
         return participation.getInterestRate();
     }
 
-    @Deprecated
     public Purpose getPurpose() {
-        return null;
+        return participation.getPurpose();
     }
 
     public Rating getRating() {

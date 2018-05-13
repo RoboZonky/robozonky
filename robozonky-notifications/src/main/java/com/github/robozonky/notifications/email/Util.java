@@ -32,7 +32,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.ParticipationBased;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -57,6 +59,17 @@ class Util {
     public static String identifyLoan(final LoanBased event) {
         final Loan loan = event.getLoan();
         return "č. " + loan.getId() + " (" + loan.getRating().getCode() + ", " + loan.getTermInMonths() + " m.)";
+    }
+
+    public static String identifyLoan(final InvestmentBased event) {
+        return "č. " + event.getInvestment().getLoanId() + " (" + event.getInvestment().getRating().getCode() + ", "
+                + event.getInvestment().getOriginalTerm() + " m.)";
+    }
+
+    public static String identifyLoan(final ParticipationBased event) { // FIXME switch to remaining instalments?
+        return "č. " + event.getParticipation().getLoanId() + " (" + event.getParticipation().getRating().getCode() +
+                ", "
+                + event.getParticipation().getOriginalInstalmentCount() + " m.)";
     }
 
     public static Map<String, Object> getLoanData(final Loan loan) {
@@ -101,21 +114,27 @@ class Util {
                 .orElse((long) (i.getOriginalTerm() - i.getCurrentTerm() + 1));
     }
 
-    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
-        final Map<String, Object> loanData = getLoanData(l);
-        loanData.put("loanTermRemaining", i.getRemainingMonths());
-        loanData.put("amountRemaining", i.getRemainingPrincipal());
-        loanData.put("amountHeld", i.getOriginalPrincipal());
-        loanData.put("amountPaid", getTotalPaid(i));
-        loanData.put("monthsElapsed", getMonthsElapsed(i));
-        loanData.put("postponed", i.areInstalmentsPostponed());
-        return loanData;
+    public static Map<String, Object> getLoanData(final Investment investment) {
+        return new UnifiedMap<String, Object>() {
+            {
+                put("loanId", investment.getId());
+                put("loanRating", investment.getRating().getCode());
+                put("loanTerm", investment.getOriginalTerm());
+                put("loanName", investment.getLoanName());
+                put("insurance", investment.isInsuranceActive());
+                put("loanTermRemaining", investment.getRemainingMonths());
+                put("amountRemaining", investment.getRemainingPrincipal());
+                put("amountHeld", investment.getOriginalPrincipal());
+                put("amountPaid", getTotalPaid(investment));
+                put("monthsElapsed", getMonthsElapsed(investment));
+                put("postponed", investment.areInstalmentsPostponed());
+            }
+        };
     }
 
-    public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan,
-                                                        final Collection<Development> collections,
+    public static Map<String, Object> getDelinquentData(final Investment i, final Collection<Development> collections,
                                                         final LocalDate date) {
-        final Map<String, Object> result = getLoanData(i, loan);
+        final Map<String, Object> result = getLoanData(i);
         result.put("since", Util.toDate(date));
         result.put("collections", collections.stream()
                 .sorted(Comparator.comparing(Development::getDateFrom).reversed())
