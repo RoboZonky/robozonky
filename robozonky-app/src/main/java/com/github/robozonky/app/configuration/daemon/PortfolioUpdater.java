@@ -68,18 +68,18 @@ class PortfolioUpdater implements Runnable,
                                           final Supplier<Optional<SellStrategy>> sp) {
         final RemoteBalance balance = RemoteBalance.create(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
-        // update loans repaid with every portfolio update
-        updater.registerDependant(new Repayments());
-        // update delinquents automatically with every portfolio update
+        // update delinquents automatically with every portfolio update; important to be first as it brings risk data
         updater.registerDependant((p, a) -> Delinquents.update(a, p));
-        // attempt to sell participations after every portfolio update
+        // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
+        // update loans repaid
+        updater.registerDependant(new Repayments());
         // update portfolio with unprocessed transactions coming from Zonky
         updater.registerDependant(Portfolio::updateTransactions);
         return updater;
     }
 
-    public void registerDependant(final PortfolioDependant updater) {
+    void registerDependant(final PortfolioDependant updater) {
         if (!dependants.contains(updater)) {
             LOGGER.debug("Registering dependant: {}.", updater);
             dependants.add(updater);
