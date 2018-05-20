@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Delinquents;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -69,7 +70,7 @@ class PortfolioUpdater implements Runnable,
         final RemoteBalance balance = RemoteBalance.create(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
-        updater.registerDependant((p, a) -> Delinquents.update(a, p));
+        updater.registerDependant((p, a) -> Delinquents.update(a));
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
         // update loans repaid
@@ -95,6 +96,7 @@ class PortfolioUpdater implements Runnable,
     }
 
     private Portfolio runIt(final Portfolio old) {
+        Events.INSTANCE.pause(); // start queueing events
         final Portfolio result = old == null ? Portfolio.create(tenant, balance) : old.reloadFromZonky(tenant, balance);
         final CompletableFuture<Portfolio> combined = dependants.stream()
                 .map(d -> (Function<Portfolio, Portfolio>) folio -> {
@@ -109,7 +111,10 @@ class PortfolioUpdater implements Runnable,
         try {
             return combined.get();
         } catch (final Throwable t) {
+            Events.INSTANCE.clear(); // don't send any events queued during the failed update; prevents double sends
             throw new IllegalStateException("Portfolio update failed.", t);
+        } finally {
+            Events.INSTANCE.resume(); // stop queueing events, send out queued events if any
         }
     }
 
