@@ -17,6 +17,7 @@
 package com.github.robozonky.app.portfolio;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
@@ -58,12 +59,17 @@ public final class Repayments implements PortfolioDependant {
                     .forEach(t -> {
                         LOGGER.debug("Processing transaction: {}.", t);
                         final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(t.getLoanId(), zonky));
-                        final Investment i = portfolio.lookupOrFail(l, tenant);
-                        i.getPaymentStatus().ifPresent(s -> {
+                        final Optional<Investment> i = Portfolio.lookup(l, tenant);
+                        if (!i.isPresent()) {
+                            LOGGER.debug("Investment for loan #{} not found, probably sold since.", l.getId());
+                            return;
+                        }
+                        final Investment actual = i.get();
+                        actual.getPaymentStatus().ifPresent(s -> {
                             if (s != PaymentStatus.PAID) {
                                 return;
                             }
-                            final Event e = new LoanRepaidEvent(i, l, portfolioOverview);
+                            final Event e = new LoanRepaidEvent(actual, l, portfolioOverview);
                             Events.fire(e);
                         });
                     });

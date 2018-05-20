@@ -219,13 +219,13 @@ public class Delinquents {
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
      * @param tenant The API that will be used to retrieve the loan instances.
-     * @param portfolio Holds information about investments.
+     *
      */
-    public static void update(final Tenant tenant, final Portfolio portfolio) {
+    public static void update(final Tenant tenant) {
         final Collection<Investment> delinquentInvestments =
                 tenant.call(z -> z.getInvestments(new Select().equals("loan.unpaidLastInst", "true")))
                         .collect(Collectors.toList());
-        update(tenant, delinquentInvestments, l -> portfolio.lookupOrFail(l, tenant),
+        update(tenant, delinquentInvestments, l -> Portfolio.lookupOrFail(l, tenant),
                id -> tenant.call(z -> LoanCache.INSTANCE.getLoan(id, z)), (l, s) -> getDevelopments(tenant, l, s)
         );
     }

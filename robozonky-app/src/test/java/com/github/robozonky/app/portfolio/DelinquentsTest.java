@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
+import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -69,7 +71,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky(10_000);
         when(z.getInvestments((Select) any())).thenAnswer(invocation -> Stream.empty());
         final Tenant a = mockTenant(z);
-        Delinquents.update(a, Portfolio.create(a, mockBalance(z)));
+        Delinquents.update(a);
         verify(z, atLeastOnce()).getInvestments((Select) any());
     }
 
@@ -152,28 +154,29 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     @Test
     void noLongerDelinquent() {
         final OffsetDateTime delinquencyStart = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+        final MyInvestment my = mockMyInvestment();
         final Loan l = Loan.custom()
                 .setId(RANDOM.nextInt(10000))
                 .setRating(Rating.D)
-                .setMyInvestment(mockMyInvestment())
+                .setMyInvestment(my)
                 .build();
         final Investment i = Investment.fresh(l, 200)
+                .setId(my.getId())
                 .setNextPaymentDate(delinquencyStart)
                 .build();
         final Zonky zonky = harmlessZonky(10_000);
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
+        when(zonky.getInvestment(eq(my.getId()))).thenReturn(Optional.of(i));
         final Tenant auth = mockTenant(zonky);
-        final Portfolio portfolio = mock(Portfolio.class);
-        when(portfolio.lookupOrFail(eq(l), eq(auth))).thenReturn(i);
         // register delinquence
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
-        Delinquents.update(auth, portfolio);
+        Delinquents.update(auth);
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is no longer delinquent
         when(zonky.getInvestments(any())).thenReturn(Stream.empty());
         final List<Development> developments = assembleDevelopments(delinquencyStart);
         when(zonky.getDevelopments(eq(l))).thenReturn(developments.stream());
-        Delinquents.update(auth, portfolio);
+        Delinquents.update(auth);
         // event is fired; only includes developments after delinquency occured, in reverse order
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanNoLongerDelinquentEvent.class);
         final LoanNoLongerDelinquentEvent e = (LoanNoLongerDelinquentEvent) this.getNewEvents().get(0);

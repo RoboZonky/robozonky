@@ -87,11 +87,11 @@ public class Portfolio {
         return new Portfolio(tenant.call(Zonky::getStatistics), balance);
     }
 
-    private static Optional<Investment> lookup(final Loan loan, final Tenant auth) {
+    static Optional<Investment> lookup(final Loan loan, final Tenant auth) {
         return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
     }
 
-    Investment lookupOrFail(final Loan loan, final Tenant auth) {
+    static Investment lookupOrFail(final Loan loan, final Tenant auth) {
         return lookup(loan, auth)
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
