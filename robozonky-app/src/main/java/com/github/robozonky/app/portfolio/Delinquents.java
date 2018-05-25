@@ -145,9 +145,9 @@ public class Delinquents {
         return allPresent;
     }
 
-    private static boolean isNoLongerActive(final Investment investment) {
+    private static boolean expectingPayments(final Investment investment) {
         return investment.getPaymentStatus()
-                .map(s -> PaymentStatus.getDone().getPaymentStatuses().contains(s))
+                .map(s -> !PaymentStatus.getDone().getPaymentStatuses().contains(s))
                 .orElse(false);
     }
 
@@ -170,21 +170,16 @@ public class Delinquents {
                     final LocalDate since = d.getLatestDelinquency().get().getPaymentMissedDate();
                     final Loan l = loanSupplier.apply(loanId);
                     final Investment inv = investmentSupplier.apply(l);
-                    if (isNoLongerActive(inv)) {
+                    if (expectingPayments(inv)) {
                         final PaymentStatus s = inv.getPaymentStatus().get(); // has been verified already
-                        switch (s) {
-                            case PAID_OFF:
-                                Events.fire(new LoanDefaultedEvent(inv, l, since, collectionsSupplier.apply(l, since)));
-                                break;
-                            case PAID:
-                                LOGGER.trace("Skipping delinquent loan repaid in full, will be handled by Repayments.");
-                                break;
-                            default:
-                                LOGGER.warn("Unsupported payment status '{}' for loan #{}.", s, l.getId());
+                        final Collection<Development> collections = collectionsSupplier.apply(l, since);
+                        if (s == PaymentStatus.PAID_OFF) {
+                            Events.fire(new LoanDefaultedEvent(inv, l, since, collections));
+                        } else {
+                            Events.fire(new LoanNoLongerDelinquentEvent(inv, l, since, collections));
                         }
                     } else {
-                        Events.fire(
-                                new LoanNoLongerDelinquentEvent(inv, l, since, collectionsSupplier.apply(l, since)));
+                        LOGGER.debug("Loan #{} (investment #{}) no longer active.", loanId, inv.getId());
                     }
                 });
     }
@@ -196,14 +191,23 @@ public class Delinquents {
         // find loans that were delinquent last time we checked and are not anymore
         final Stream<Delinquent> noMoreDelinquent = getNoMoreDelinquent(tenant, presentlyDelinquent, investmentSupplier,
                                                                         loanSupplier, collectionsSupplier);
-        // find loans that are delinquent now, but filter out those sold and/or defaulted
         final Map<Rating, BigDecimal> atRisk = new EnumMap<>(Rating.class);
-        final Stream<Delinquent> nowDelinquent = presentlyDelinquent.stream()
-                .filter(i -> i.getNextPaymentDate().isPresent())
-                .peek(i -> atRisk.compute(i.getRating(), (r, old) -> {
+        final Stream<Delinquent> nowDelinquent = presentlyDelinquent.stream() // first filter out sold, paid off etc.
+                .filter(Delinquents::expectingPayments)
+                .peek(i -> atRisk.compute(i.getRating(), (r, old) -> { // count how much money is at risk
+                    final BigDecimal principalNotYetReturned = i.getRemainingPrincipal()
+                            .subtract(i.getPaidInterest())
+                            .subtract(i.getPaidPenalty());
                     final BigDecimal base = (old == null) ? BigDecimal.ZERO : old;
-                    return base.add(i.getRemainingPrincipal());
+                    if (principalNotYetReturned.compareTo(BigDecimal.ZERO) > 0) {
+                        LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.", principalNotYetReturned,
+                                     i.getLoanId(), i.getId());
+                        return base.add(principalNotYetReturned);
+                    } else {
+                        return base;
+                    }
                 }))
+                .filter(i -> i.getNextPaymentDate().isPresent()) // filter out those defaulted
                 .map(i -> new Delinquent(i.getLoanId(), i.getNextPaymentDate().get().toLocalDate()));
         // merge all and store status
         final Stream<Delinquent> all = Stream.concat(noMoreDelinquent, nowDelinquent).distinct();
@@ -219,7 +223,6 @@ public class Delinquents {
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
      * @param tenant The API that will be used to retrieve the loan instances.
-     *
      */
     public static void update(final Tenant tenant) {
         final Collection<Investment> delinquentInvestments =

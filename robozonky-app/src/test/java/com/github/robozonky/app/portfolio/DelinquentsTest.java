@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -84,6 +83,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .setMyInvestment(mockMyInvestment())
                 .build();
         final Investment i = Investment.fresh(l, 200)
+                .setPaymentStatus(PaymentStatus.DUE)
                 .setNextPaymentDate(OffsetDateTime.now().minusDays(1))
                 .build();
         final Function<Integer, Loan> f = (id) -> l;
@@ -116,6 +116,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .setMyInvestment(mockMyInvestment())
                 .build();
         final Investment i = Investment.fresh(l, 200)
+                .setPaymentStatus(PaymentStatus.DUE)
                 .setNextPaymentDate(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID))
                 .build();
         final Function<Integer, Loan> f = (id) -> l;
@@ -152,7 +153,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void noLongerDelinquent() {
+    void noLongerDelinquentThroughRepayment() {
         final OffsetDateTime delinquencyStart = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
         final MyInvestment my = mockMyInvestment();
         final Loan l = Loan.custom()
@@ -162,6 +163,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
                 .build();
         final Investment i = Investment.fresh(l, 200)
                 .setId(my.getId())
+                .setPaymentStatus(PaymentStatus.DUE)
                 .setNextPaymentDate(delinquencyStart)
                 .build();
         final Zonky zonky = harmlessZonky(10_000);
@@ -186,7 +188,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
     }
 
     @Test
-    void defaulted() {
+    void noLongerDelinquentThroughDefault() {
         final Loan l = Loan.custom()
                 .setId(RANDOM.nextInt(10000))
                 .setRating(Rating.D)
@@ -226,7 +228,7 @@ class DelinquentsTest extends AbstractZonkyLeveragingTest {
         // register delinquence
         final Tenant t = mockTenant();
         Delinquents.update(t, Collections.singleton(i), lif, f, COLLECTIONS_SUPPLIER);
-        assertThat(Delinquents.getAmountsAtRisk()).containsEntry(Rating.D, BigDecimal.valueOf(200));
+        assertThat(Delinquents.getAmountsAtRisk()).isEmpty();
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is paid
         Delinquents.update(t, Collections.emptyList(), lif, f, COLLECTIONS_SUPPLIER);
