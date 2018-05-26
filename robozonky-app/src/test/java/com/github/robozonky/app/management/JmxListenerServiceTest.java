@@ -92,7 +92,9 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     private <T extends Event> void handleEvent(final T event) {
         final JmxListenerService service = new JmxListenerService();
-        final EventListenerSupplier<T> r = service.findListener((Class<T>) event.getClass());
+        final EventListenerSupplier<T> r = service.findListeners((Class<T>) event.getClass())
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No event listener found."));
         final EventListener<T> listener = r.get().get();
         listener.handle(event, new SessionInfo(USERNAME));
     }
@@ -100,7 +102,9 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     @Test
     void setInvalid() {
         final JmxListenerService service = new JmxListenerService();
-        final EventListenerSupplier<RoboZonkyEndingEvent> r = service.findListener(RoboZonkyEndingEvent.class);
+        final EventListenerSupplier<RoboZonkyEndingEvent> r = service.findListeners(RoboZonkyEndingEvent.class)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No event listener found."));
         assertThat(r).isNull();
     }
 }

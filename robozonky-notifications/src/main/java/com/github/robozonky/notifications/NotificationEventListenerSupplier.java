@@ -1,0 +1,99 @@
+/*
+ * Copyright 2018 The RoboZonky Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.robozonky.notifications;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
+
+import com.github.robozonky.api.notifications.Event;
+import com.github.robozonky.api.notifications.EventListener;
+import com.github.robozonky.util.Refreshable;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+class NotificationEventListenerSupplier<T extends Event> implements Refreshable.RefreshListener<ConfigStorage> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationEventListenerSupplier.class);
+
+    private final Class<T> eventType;
+    private final AtomicReference<Map<Target, EventListener<T>>> value = new AtomicReference<>(UnifiedMap.newMap(0));
+
+    public NotificationEventListenerSupplier(final Class<T> eventType) {
+        this.eventType = eventType;
+    }
+
+    private static AbstractTargetHandler getTargetHandler(final ConfigStorage configStorage, final Target target) {
+        switch (target) {
+            case EMAIL:
+                return new EmailHandler(configStorage);
+            default:
+                throw new IllegalArgumentException("Unsupported target: " + target);
+        }
+    }
+
+    public Optional<EventListener<T>> get(final Target target) {
+        return Optional.ofNullable(value.get().get(target));
+    }
+
+    @Override
+    public void valueSet(final ConfigStorage newValue) {
+        final Map<Target, EventListener<T>> result = UnifiedMap.newMap(0);
+        for (final Target target : Target.values()) {
+            final AbstractTargetHandler handler = getTargetHandler(newValue, target);
+            if (!handler.isEnabled()) {
+                LOGGER.debug("Notifications for {} disabled in settings.", target);
+                continue;
+            }
+            final Optional<EventListener<T>> maybe = findListener(handler);
+            maybe.ifPresent(listener -> result.put(target, listener));
+        }
+        value.set(result);
+    }
+
+    private Optional<EventListener<T>> findListener(final AbstractTargetHandler handler) {
+        final EventListener<T> result = Stream.of(SupportedListener.values())
+                .filter(l -> Objects.equals(eventType, l.getEventType()))
+                .peek(l -> LOGGER.trace("Found listener: {}.", l))
+                .filter(handler::isEnabled)
+                .peek(l -> LOGGER.trace("Will call listener: {}.", l))
+                .findFirst()
+                .map(l -> (EventListener<T>) l.getListener(handler))
+                .orElse(null);
+        return Optional.ofNullable(result);
+    }
+
+    @Override
+    public void valueUnset(final ConfigStorage oldValue) {
+        value.set(null);
+    }
+
+    @Override
+    public void valueChanged(final ConfigStorage oldValue, final ConfigStorage newValue) {
+        valueSet(newValue);
+    }
+
+    @Override
+    public String toString() {
+        return "EventListenerSupplier{" +
+                "eventType=" + eventType +
+                '}';
+    }
+}

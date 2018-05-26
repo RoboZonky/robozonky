@@ -38,7 +38,7 @@ public final class ListenerServiceLoader {
                                                                  final Iterable<ListenerService> loader) {
         return StreamUtil.toStream(loader)
                 .peek(s -> ListenerServiceLoader.LOGGER.debug("Processing '{}'.", s.getClass()))
-                .map(s -> s.findListener(eventType))
+                .flatMap(s -> s.findListeners(eventType))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }

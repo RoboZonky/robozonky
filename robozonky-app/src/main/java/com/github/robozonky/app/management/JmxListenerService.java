@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
@@ -65,11 +66,11 @@ public class JmxListenerService implements ListenerService {
     }
 
     @Override
-    public <T extends Event> EventListenerSupplier<T> findListener(final Class<T> eventType) {
+    public <T extends Event> Stream<EventListenerSupplier<T>> findListeners(final Class<T> eventType) {
         final EventListener<T> listener = JmxListenerService.newListener(eventType);
         if (listener == null) {
             return null;
         }
-        return () -> Optional.of(listener);
+        return Stream.of(() -> Optional.of(listener));
     }
 }

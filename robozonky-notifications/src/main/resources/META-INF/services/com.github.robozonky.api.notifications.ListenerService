@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-com.github.robozonky.notifications.email.EmailListenerService
+com.github.robozonky.notifications.NotificationListenerService

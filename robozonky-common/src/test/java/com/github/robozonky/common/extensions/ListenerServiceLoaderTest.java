@@ -39,10 +39,10 @@ class ListenerServiceLoaderTest {
         final EventListener<RoboZonkyStartingEvent> l = mock(EventListener.class);
         final ListenerService s1 = mock(ListenerService.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> returned = () -> Optional.of(l);
-        doReturn(returned).when(s1).findListener(eq(e.getClass()));
+        doReturn(returned).when(s1).findListeners(eq(e.getClass()));
         final ListenerService s2 = mock(ListenerService.class);
         doReturn((EventListenerSupplier<RoboZonkyStartingEvent>) Optional::empty)
-                .when(s2).findListener(eq(e.getClass()));
+                .when(s2).findListeners(eq(e.getClass()));
         final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2).iterator();
         final List<EventListenerSupplier<RoboZonkyStartingEvent>> r =
                 ListenerServiceLoader.load(RoboZonkyStartingEvent.class, s);
