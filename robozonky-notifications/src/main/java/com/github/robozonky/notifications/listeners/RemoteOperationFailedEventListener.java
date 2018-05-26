@@ -22,7 +22,6 @@ import java.util.Map;
 import com.github.robozonky.api.notifications.RemoteOperationFailedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 
 public class RemoteOperationFailedEventListener extends AbstractListener<RemoteOperationFailedEvent> {
 
@@ -42,6 +41,6 @@ public class RemoteOperationFailedEventListener extends AbstractListener<RemoteO
 
     @Override
     protected Map<String, Object> getData(final RemoteOperationFailedEvent event) {
-        return Collections.singletonMap("cause", TemplateUtil.stackTraceToString(event.getCause()));
+        return Collections.singletonMap("cause", Util.stackTraceToString(event.getCause()));
     }
 }

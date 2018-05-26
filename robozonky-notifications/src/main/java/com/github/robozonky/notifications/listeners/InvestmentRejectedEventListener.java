@@ -21,7 +21,6 @@ import java.util.Map;
 import com.github.robozonky.api.notifications.InvestmentRejectedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 
 public class InvestmentRejectedEventListener extends AbstractListener<InvestmentRejectedEvent> {
 
@@ -32,7 +31,7 @@ public class InvestmentRejectedEventListener extends AbstractListener<Investment
     @Override
     String getSubject(final InvestmentRejectedEvent event) {
         return "Investice zamítnuta - " + event.getRecommendation().intValue() + ",- Kč, " + "půjčka "
-                + TemplateUtil.identifyLoan(event);
+                + Util.identifyLoan(event);
     }
 
     @Override

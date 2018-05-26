@@ -23,7 +23,6 @@ import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 import com.github.robozonky.util.FinancialCalculator;
 
 public class InvestmentSoldEventListener extends AbstractListener<InvestmentSoldEvent> {
@@ -36,7 +35,7 @@ public class InvestmentSoldEventListener extends AbstractListener<InvestmentSold
     String getSubject(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
         final BigDecimal remaining = i.getRemainingPrincipal();
-        return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + TemplateUtil.identifyLoan(event);
+        return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override

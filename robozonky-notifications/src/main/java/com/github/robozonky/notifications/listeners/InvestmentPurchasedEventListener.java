@@ -23,7 +23,6 @@ import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 import com.github.robozonky.util.FinancialCalculator;
 
 public class InvestmentPurchasedEventListener extends AbstractListener<InvestmentPurchasedEvent> {
@@ -34,7 +33,7 @@ public class InvestmentPurchasedEventListener extends AbstractListener<Investmen
 
     @Override
     String getSubject(final InvestmentPurchasedEvent event) {
-        return "Zakoupena participace k půjčce " + TemplateUtil.identifyLoan(event);
+        return "Zakoupena participace k půjčce " + Util.identifyLoan(event);
     }
 
     @Override

@@ -23,8 +23,6 @@ import com.github.robozonky.api.notifications.DelinquencyBased;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.DelinquencyTracker;
-import com.github.robozonky.notifications.util.TemplateUtil;
 
 abstract class AbstractLoanTerminatedListener<T extends Event & DelinquencyBased> extends
                                                                                   AbstractListener<T> {
@@ -43,7 +41,7 @@ abstract class AbstractLoanTerminatedListener<T extends Event & DelinquencyBased
 
     @Override
     protected Map<String, Object> getData(final T event) {
-        return TemplateUtil.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
-                                              event.getDelinquentSince());
+        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
+                                      event.getDelinquentSince());
     }
 }

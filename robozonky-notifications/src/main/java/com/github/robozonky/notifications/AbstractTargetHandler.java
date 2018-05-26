@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.OptionalInt;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.notifications.util.Counter;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

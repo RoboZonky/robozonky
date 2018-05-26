@@ -21,7 +21,6 @@ import java.util.Map;
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 
 public class InvestmentSkippedEventListener extends AbstractListener<InvestmentSkippedEvent> {
 
@@ -31,7 +30,7 @@ public class InvestmentSkippedEventListener extends AbstractListener<InvestmentS
 
     @Override
     String getSubject(final InvestmentSkippedEvent event) {
-        return "Půjčka " + TemplateUtil.identifyLoan(event) + " dočasně přeskočena";
+        return "Půjčka " + Util.identifyLoan(event) + " dočasně přeskočena";
     }
 
     @Override

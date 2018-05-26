@@ -35,8 +35,6 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
-import com.github.robozonky.notifications.util.BalanceTracker;
-import com.github.robozonky.notifications.util.TemplateUtil;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
@@ -78,10 +76,10 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         if (event instanceof LoanBased) {
             if (event instanceof InvestmentBased) {
                 final InvestmentBased e = (InvestmentBased) event;
-                return TemplateUtil.getLoanData(e.getInvestment(), e.getLoan());
+                return Util.getLoanData(e.getInvestment(), e.getLoan());
             } else {
                 final LoanBased e = (LoanBased) event;
-                return TemplateUtil.getLoanData(e.getLoan());
+                return Util.getLoanData(e.getLoan());
             }
         }
         return Collections.emptyMap();
@@ -91,7 +89,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         final Map<String, Object> result = new UnifiedMap<>(getBaseData(event));
         if (event instanceof Financial) {
             final PortfolioOverview portfolioOverview = ((Financial) event).getPortfolioOverview();
-            result.put("portfolio", TemplateUtil.summarizePortfolioStructure(portfolioOverview));
+            result.put("portfolio", Util.summarizePortfolioStructure(portfolioOverview));
         }
         return result;
     }
@@ -101,7 +99,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
             // ratings here need to have a stable iteration order, as it will be used to list them in notifications
             put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
             put("session", new UnifiedMap<String, Object>() {{
-                put("userName", TemplateUtil.obfuscateEmailAddress(sessionInfo.getUsername()));
+                put("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername()));
                 put("userAgent", Defaults.ROBOZONKY_USER_AGENT);
                 put("isDryRun", sessionInfo.isDryRun());
             }});

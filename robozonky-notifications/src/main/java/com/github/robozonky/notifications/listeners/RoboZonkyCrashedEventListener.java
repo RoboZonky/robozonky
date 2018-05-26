@@ -21,7 +21,6 @@ import java.util.Map;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 public class RoboZonkyCrashedEventListener extends AbstractListener<RoboZonkyCrashedEvent> {
@@ -47,7 +46,7 @@ public class RoboZonkyCrashedEventListener extends AbstractListener<RoboZonkyCra
             put("returnCodeId", event.getReturnCode().getCode());
             put("isCauseKnown", event.getCause().isPresent());
         }};
-        event.getCause().ifPresent(cause -> result.put("cause", TemplateUtil.stackTraceToString(cause)));
+        event.getCause().ifPresent(cause -> result.put("cause", Util.stackTraceToString(cause)));
         return result;
     }
 }

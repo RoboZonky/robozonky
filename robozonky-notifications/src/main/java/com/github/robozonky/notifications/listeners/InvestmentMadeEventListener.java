@@ -23,7 +23,6 @@ import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 import com.github.robozonky.util.FinancialCalculator;
 
 public class InvestmentMadeEventListener extends AbstractListener<InvestmentMadeEvent> {
@@ -35,8 +34,7 @@ public class InvestmentMadeEventListener extends AbstractListener<InvestmentMade
     @Override
     String getSubject(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
-        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + TemplateUtil.identifyLoan(
-                event);
+        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 
     @Override

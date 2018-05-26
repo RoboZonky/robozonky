@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.util;
+package com.github.robozonky.notifications.listeners;
 
 import java.time.OffsetDateTime;
 
@@ -23,7 +23,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.api.Defaults;
 
-public enum DelinquencyTracker {
+enum DelinquencyTracker {
 
     INSTANCE; // fast thread-safe singleton
 

@@ -22,7 +22,6 @@ import java.util.Map;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonFailedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.TemplateUtil;
 
 public class RoboZonkyDaemonFailedEventListener extends AbstractListener<RoboZonkyDaemonFailedEvent> {
 
@@ -42,6 +41,6 @@ public class RoboZonkyDaemonFailedEventListener extends AbstractListener<RoboZon
 
     @Override
     protected Map<String, Object> getData(final RoboZonkyDaemonFailedEvent event) {
-        return Collections.singletonMap("cause", TemplateUtil.stackTraceToString(event.getCause()));
+        return Collections.singletonMap("cause", Util.stackTraceToString(event.getCause()));
     }
 }

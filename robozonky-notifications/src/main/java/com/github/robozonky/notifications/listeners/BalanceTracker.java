@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.util;
+package com.github.robozonky.notifications.listeners;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -24,7 +24,7 @@ import com.github.robozonky.common.state.TenantState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public enum BalanceTracker {
+enum BalanceTracker {
 
     INSTANCE; // fast thread-safe singleton
 

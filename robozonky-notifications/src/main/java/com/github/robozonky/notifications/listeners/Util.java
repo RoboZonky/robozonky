@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.util;
+package com.github.robozonky.notifications.listeners;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -41,7 +41,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
-public class TemplateUtil {
+class Util {
 
     private static final String AT = "@";
     private static final Pattern COMPILE = Pattern.compile("\\Q" + AT + "\\E");
@@ -116,15 +116,16 @@ public class TemplateUtil {
                                                         final Collection<Development> collections,
                                                         final LocalDate date) {
         final Map<String, Object> result = getLoanData(i, loan);
-        result.put("since", TemplateUtil.toDate(date));
+        result.put("since", Util.toDate(date));
         result.put("collections", collections.stream()
                 .sorted(Comparator.comparing(Development::getDateFrom).reversed())
                 .limit(5)
                 .map(action -> new UnifiedMap<String, Object>() {{
                     put("code", action.getType().getCode());
                     put("note", action.getPublicNote().orElse("Bez dalšího vysvětlení."));
-                    put("startDate", TemplateUtil.toDate(action.getDateFrom()));
-                    put("endDate", action.getDateTo().map(TemplateUtil::toDate).orElse(null));
+                    put("startDate", Util.toDate(action.getDateFrom()));
+                    put("endDate", action.getDateTo().map(
+                            Util::toDate).orElse(null));
                 }}).collect(Collectors.toList()));
         return result;
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.util;
+package com.github.robozonky.notifications;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -31,7 +31,7 @@ import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Counter {
+final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
     private final String id;

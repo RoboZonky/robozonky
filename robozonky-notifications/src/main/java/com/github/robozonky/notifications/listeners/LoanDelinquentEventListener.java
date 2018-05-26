@@ -21,8 +21,6 @@ import java.util.Map;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.DelinquencyTracker;
-import com.github.robozonky.notifications.util.TemplateUtil;
 
 public class LoanDelinquentEventListener extends AbstractListener<LoanDelinquentEvent> {
 
@@ -36,9 +34,9 @@ public class LoanDelinquentEventListener extends AbstractListener<LoanDelinquent
     String getSubject(final LoanDelinquentEvent event) {
         final int threshold = event.getThresholdInDays();
         if (threshold == 0) {
-            return "Půjčka " + TemplateUtil.identifyLoan(event) + " je nově v prodlení";
+            return "Půjčka " + Util.identifyLoan(event) + " je nově v prodlení";
         } else {
-            return "Půjčka " + TemplateUtil.identifyLoan(event) + " je " + threshold + " dní v prodlení";
+            return "Půjčka " + Util.identifyLoan(event) + " je " + threshold + " dní v prodlení";
         }
     }
 
@@ -49,7 +47,7 @@ public class LoanDelinquentEventListener extends AbstractListener<LoanDelinquent
 
     @Override
     protected Map<String, Object> getData(final LoanDelinquentEvent event) {
-        return TemplateUtil.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
-                                              event.getDelinquentSince());
+        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
+                                      event.getDelinquentSince());
     }
 }

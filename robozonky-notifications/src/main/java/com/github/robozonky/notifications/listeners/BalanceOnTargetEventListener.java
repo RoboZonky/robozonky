@@ -23,7 +23,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import com.github.robozonky.notifications.util.BalanceTracker;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStartedEvent> {
