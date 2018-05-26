@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractTargetHandler {
 
     private static final String HOURLY_LIMIT = "hourlyMaxEmails";
-    protected final ConfigStorage config;
+    final ConfigStorage config;
     protected final Target target;
     private final Logger LOGGER = LoggerFactory.getLogger(AbstractTargetHandler.class);
     private final Counter notifications;
@@ -75,11 +75,11 @@ public abstract class AbstractTargetHandler {
                                                                                   getHourlyLimit(key)));
     }
 
-    public boolean isEnabled() {
+    boolean isEnabled() {
         return config.readBoolean(target, "enabled", false);
     }
 
-    public boolean isEnabled(final SupportedListener listener) {
+    boolean isEnabled(final SupportedListener listener) {
         if (listener == SupportedListener.TESTING) {
             return true;
         } else {

@@ -53,17 +53,12 @@ public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStar
     }
 
     @Override
-    public void handle(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
-        // figure out whether or not the balance is over the threshold
+    boolean shouldNotify(ExecutionStartedEvent event, SessionInfo sessionInfo) {
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance(sessionInfo);
         final int newBalance = event.getPortfolioOverview().getCzkAvailable();
         final boolean balanceNowExceeded = newBalance > targetBalance;
         final boolean wasFineLastTime = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() < targetBalance;
-        if (balanceNowExceeded && wasFineLastTime) {
-            // and continue with event-processing, possibly eventually sending the e-mail
-            super.handle(event, sessionInfo);
-        } else {
-            LOGGER.debug("Will not send e-mail.");
-        }
+        return (balanceNowExceeded && wasFineLastTime);
     }
+
 }

@@ -58,7 +58,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         });
     }
 
-    protected final void registerFinisher(final BiConsumer<T, SessionInfo> finisher) {
+    final void registerFinisher(final BiConsumer<T, SessionInfo> finisher) {
         if (!finishers.contains(finisher)) {
             this.finishers.add(finisher);
         }
@@ -107,7 +107,7 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     }
 
     @Override
-    public void handle(final T event, final SessionInfo sessionInfo) {
+    final public void handle(final T event, final SessionInfo sessionInfo) {
         if (!this.shouldNotify(event, sessionInfo)) {
             LOGGER.debug("Will not notify.");
         } else {
