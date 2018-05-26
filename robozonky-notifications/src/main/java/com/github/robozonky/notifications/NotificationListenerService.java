@@ -26,7 +26,7 @@ import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.Scheduler;
 
-public class NotificationListenerService implements ListenerService {
+public final class NotificationListenerService implements ListenerService {
 
     private static final RefreshableConfigStorage PROPERTIES = new RefreshableConfigStorage();
     private static final AtomicBoolean IS_INITIALIZED = new AtomicBoolean(false);

@@ -29,7 +29,7 @@ import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class NotificationEventListenerSupplier<T extends Event> implements Refreshable.RefreshListener<ConfigStorage> {
+final class NotificationEventListenerSupplier<T extends Event> implements Refreshable.RefreshListener<ConfigStorage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationEventListenerSupplier.class);
 
