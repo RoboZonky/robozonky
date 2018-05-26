@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractTargetHandler {
 
     private static final String HOURLY_LIMIT = "hourlyMaxEmails";
-    final ConfigStorage config;
     protected final Target target;
+    final ConfigStorage config;
     private final Logger LOGGER = LoggerFactory.getLogger(AbstractTargetHandler.class);
     private final Counter notifications;
     private final Map<SupportedListener, Counter> specificNotifications = UnifiedMap.newMap(0);
@@ -58,11 +58,13 @@ public abstract class AbstractTargetHandler {
     }
 
     private boolean allowGlobal(final SupportedListener listener, final SessionInfo sessionInfo) {
-        return listener.overrideGlobalGag() || notifications.allow(sessionInfo);
+        final boolean override = listener.overrideGlobalGag();
+        return override || notifications.allow(sessionInfo);
     }
 
     private boolean shouldNotify(final SupportedListener listener, final SessionInfo sessionInfo) {
-        return allowGlobal(listener, sessionInfo) && getSpecificCounter(listener).allow(sessionInfo);
+        final boolean global = allowGlobal(listener, sessionInfo);
+        return global && getSpecificCounter(listener).allow(sessionInfo);
     }
 
     private int getHourlyLimit() {
@@ -88,10 +90,11 @@ public abstract class AbstractTargetHandler {
         }
     }
 
-    public final void send(final SupportedListener listener, final SessionInfo sessionInfo, final String subject,
-                           final String message) throws Exception {
+    public void send(final SupportedListener listener, final SessionInfo sessionInfo, final String subject,
+                     final String message) throws Exception {
         if (!shouldNotify(listener, sessionInfo)) {
             LOGGER.debug("Will not notify.");
+            return;
         }
         actuallySend(sessionInfo, subject, message);
         getSpecificCounter(listener).increase(sessionInfo);

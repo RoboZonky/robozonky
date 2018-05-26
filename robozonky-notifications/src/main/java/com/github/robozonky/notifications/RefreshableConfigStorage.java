@@ -30,7 +30,7 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.Refreshable;
 
-final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
+public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
 
     public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
     public static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");

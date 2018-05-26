@@ -111,10 +111,19 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         if (!this.shouldNotify(event, sessionInfo)) {
             LOGGER.debug("Will not notify.");
         } else {
+            LOGGER.debug("Notifying {}.", event);
             try {
                 final String message = TemplateProcessor.INSTANCE.process(this.getTemplateFileName(),
                                                                           this.getData(event, sessionInfo));
                 handler.send(listener, sessionInfo, getSubject(event), message);
+                // perform finishers after the e-mail has been sent
+                finishers.forEach(f -> {
+                    try {
+                        f.accept(event, sessionInfo);
+                    } catch (final Exception ex) {
+                        LOGGER.trace("Finisher failed.", ex);
+                    }
+                });
             } catch (final Exception ex) {
                 throw new RuntimeException("Failed processing event.", ex);
             }

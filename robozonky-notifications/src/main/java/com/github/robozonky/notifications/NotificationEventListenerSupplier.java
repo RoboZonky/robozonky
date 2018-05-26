@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,7 +35,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationEventListenerSupplier.class);
 
     private final Class<T> eventType;
-    private final AtomicReference<Map<Target, EventListener<T>>> value = new AtomicReference<>(UnifiedMap.newMap(0));
+    private final AtomicReference<Map<Target, EventListener<T>>> value = new AtomicReference<>(Collections.emptyMap());
 
     public NotificationEventListenerSupplier(final Class<T> eventType) {
         this.eventType = eventType;
@@ -82,7 +83,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
 
     @Override
     public void valueUnset(final ConfigStorage oldValue) {
-        value.set(null);
+        value.set(Collections.emptyMap());
     }
 
     @Override

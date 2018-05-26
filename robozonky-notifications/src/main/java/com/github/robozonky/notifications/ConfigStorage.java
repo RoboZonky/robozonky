@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
 
-final class ConfigStorage {
+public class ConfigStorage {
 
     private final Properties storage;
 

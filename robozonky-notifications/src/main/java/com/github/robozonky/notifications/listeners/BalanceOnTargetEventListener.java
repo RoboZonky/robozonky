@@ -53,7 +53,7 @@ public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStar
     }
 
     @Override
-    boolean shouldNotify(ExecutionStartedEvent event, SessionInfo sessionInfo) {
+    boolean shouldNotify(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance(sessionInfo);
         final int newBalance = event.getPortfolioOverview().getCzkAvailable();
         final boolean balanceNowExceeded = newBalance > targetBalance;
