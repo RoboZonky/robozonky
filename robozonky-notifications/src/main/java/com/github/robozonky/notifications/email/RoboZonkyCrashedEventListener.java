@@ -19,6 +19,8 @@ package com.github.robozonky.notifications.email;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 class RoboZonkyCrashedEventListener extends AbstractEmailingListener<RoboZonkyCrashedEvent> {
@@ -44,7 +46,7 @@ class RoboZonkyCrashedEventListener extends AbstractEmailingListener<RoboZonkyCr
             put("returnCodeId", event.getReturnCode().getCode());
             put("isCauseKnown", event.getCause().isPresent());
         }};
-        event.getCause().ifPresent(cause -> result.put("cause", Util.stackTraceToString(cause)));
+        event.getCause().ifPresent(cause -> result.put("cause", TemplateUtil.stackTraceToString(cause)));
         return result;
     }
 }

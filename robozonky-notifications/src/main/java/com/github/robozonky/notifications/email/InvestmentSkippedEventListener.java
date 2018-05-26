@@ -19,6 +19,8 @@ package com.github.robozonky.notifications.email;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentSkippedEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 
 class InvestmentSkippedEventListener extends AbstractEmailingListener<InvestmentSkippedEvent> {
 
@@ -28,7 +30,7 @@ class InvestmentSkippedEventListener extends AbstractEmailingListener<Investment
 
     @Override
     String getSubject(final InvestmentSkippedEvent event) {
-        return "Půjčka " + Util.identifyLoan(event) + " dočasně přeskočena";
+        return "Půjčka " + TemplateUtil.identifyLoan(event) + " dočasně přeskočena";
     }
 
     @Override

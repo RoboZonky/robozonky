@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.email;
+package com.github.robozonky.notifications.templates;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -24,13 +24,14 @@ import java.util.Date;
 import java.util.Map;
 
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.notifications.templates.plaintext.PlainTextTemplate;
 import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
-enum TemplateProcessor {
+public enum TemplateProcessor {
 
     INSTANCE;
 
@@ -41,7 +42,7 @@ enum TemplateProcessor {
         final Map<String, TemplateNumberFormatFactory> customNumberFormats =
                 Collections.singletonMap("interest", InterestNumberFormatFactory.INSTANCE);
         cfg.setCustomNumberFormats(customNumberFormats);
-        cfg.setClassForTemplateLoading(TemplateProcessor.class, "");
+        cfg.setClassForTemplateLoading(PlainTextTemplate.class, "");
         cfg.setLogTemplateExceptions(false);
         cfg.setDefaultEncoding(Defaults.CHARSET.displayName());
         return cfg;

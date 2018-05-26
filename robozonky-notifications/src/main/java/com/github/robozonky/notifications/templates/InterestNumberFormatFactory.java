@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.email;
+package com.github.robozonky.notifications.templates;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;

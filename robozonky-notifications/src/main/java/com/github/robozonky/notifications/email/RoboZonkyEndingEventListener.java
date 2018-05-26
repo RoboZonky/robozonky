@@ -17,6 +17,7 @@
 package com.github.robozonky.notifications.email;
 
 import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
 
 class RoboZonkyEndingEventListener extends AbstractEmailingListener<RoboZonkyEndingEvent> {
 

@@ -21,6 +21,8 @@ import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 import com.github.robozonky.util.FinancialCalculator;
 
 class InvestmentMadeEventListener extends AbstractEmailingListener<InvestmentMadeEvent> {
@@ -32,7 +34,8 @@ class InvestmentMadeEventListener extends AbstractEmailingListener<InvestmentMad
     @Override
     String getSubject(final InvestmentMadeEvent event) {
         final Investment i = event.getInvestment();
-        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
+        return "Nová investice - " + i.getOriginalPrincipal().intValue() + ",- Kč, půjčka " + TemplateUtil.identifyLoan(
+                event);
     }
 
     @Override

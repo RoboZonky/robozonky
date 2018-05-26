@@ -21,6 +21,8 @@ import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 import com.github.robozonky.util.FinancialCalculator;
 
 class InvestmentSoldEventListener extends AbstractEmailingListener<InvestmentSoldEvent> {
@@ -33,7 +35,7 @@ class InvestmentSoldEventListener extends AbstractEmailingListener<InvestmentSol
     String getSubject(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
         final BigDecimal remaining = i.getRemainingPrincipal();
-        return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
+        return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + TemplateUtil.identifyLoan(event);
     }
 
     @Override

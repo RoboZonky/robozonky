@@ -17,6 +17,8 @@
 package com.github.robozonky.notifications.email;
 
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 
 class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent> {
 
@@ -26,7 +28,7 @@ class SaleOfferedEventListener extends AbstractEmailingListener<SaleOfferedEvent
 
     @Override
     String getSubject(final SaleOfferedEvent event) {
-        return "Participace k půjčce " + Util.identifyLoan(event) + " nabídnuta k prodeji";
+        return "Participace k půjčce " + TemplateUtil.identifyLoan(event) + " nabídnuta k prodeji";
     }
 
     @Override

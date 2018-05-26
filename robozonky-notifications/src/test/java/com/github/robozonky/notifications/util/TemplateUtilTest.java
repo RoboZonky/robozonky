@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.email;
+package com.github.robozonky.notifications.util;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class UtilTest {
+class TemplateUtilTest {
 
     @Test
     void emailObfuscation() {
-        assertThat(Util.obfuscateEmailAddress("someone@somewhere.net")).isEqualTo("s...e@s...t");
-        assertThat(Util.obfuscateEmailAddress("ab@cd")).isEqualTo("a...b@c...d");
+        assertThat(TemplateUtil.obfuscateEmailAddress("someone@somewhere.net")).isEqualTo("s...e@s...t");
+        assertThat(TemplateUtil.obfuscateEmailAddress("ab@cd")).isEqualTo("a...b@c...d");
         // too short to obfuscate
-        assertThat(Util.obfuscateEmailAddress("a@b")).isEqualTo("a@b");
+        assertThat(TemplateUtil.obfuscateEmailAddress("a@b")).isEqualTo("a@b");
     }
 
     @Test
     void stackTrace() {
-        final String result = Util.stackTraceToString(new IllegalStateException());
+        final String result = TemplateUtil.stackTraceToString(new IllegalStateException());
         assertThat(result).contains("IllegalStateException");
     }
 }

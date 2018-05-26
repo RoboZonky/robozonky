@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.email;
+package com.github.robozonky.notifications.configuration;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -34,9 +34,9 @@ import com.github.robozonky.util.Refreshable;
 public class RefreshableNotificationProperties extends Refreshable<NotificationProperties> {
 
     public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
-    static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
+    public static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
 
-    RefreshableNotificationProperties() {
+    public RefreshableNotificationProperties() {
         /*
          * force the code to have a value right away. this is done to ensure that even the event listeners initialized
          * immediately after this call have notification properties available - otherwise initial emails of the platform

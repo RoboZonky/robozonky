@@ -22,6 +22,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.internal.api.Settings;
+import com.github.robozonky.notifications.configuration.RefreshableNotificationProperties;
 import com.github.robozonky.util.Scheduler;
 
 public final class EmailListenerService implements ListenerService {

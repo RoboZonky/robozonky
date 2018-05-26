@@ -42,9 +42,11 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.configuration.NotificationProperties;
 import org.apache.commons.lang3.StringUtils;
 
-enum SupportedListener {
+public enum SupportedListener {
 
     INVESTMENT_MADE {
         @Override
@@ -359,7 +361,7 @@ enum SupportedListener {
      * Return ID of the listener. If listeners have the same ID, it means they share one namespace in configuration.
      * @return ID of the listener which will be used as namespace in the config file.
      */
-    String getLabel() {
+    public String getLabel() {
         final String className = this.getEventType().getSimpleName();
         final String decapitalized = StringUtils.uncapitalize(className);
         // this works because Event subclasses must be named (Something)Event; check Event().

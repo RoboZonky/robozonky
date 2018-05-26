@@ -20,6 +20,8 @@ import java.util.Map;
 
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 import com.github.robozonky.util.FinancialCalculator;
 
 public class LoanRepaidEventListener extends AbstractEmailingListener<LoanRepaidEvent> {
@@ -30,7 +32,7 @@ public class LoanRepaidEventListener extends AbstractEmailingListener<LoanRepaid
 
     @Override
     String getSubject(final LoanRepaidEvent event) {
-        return "Půjčka " + Util.identifyLoan(event) + " byla splacena";
+        return "Půjčka " + TemplateUtil.identifyLoan(event) + " byla splacena";
     }
 
     @Override

@@ -33,7 +33,7 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.notifications.email.RefreshableNotificationProperties;
+import com.github.robozonky.notifications.configuration.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;

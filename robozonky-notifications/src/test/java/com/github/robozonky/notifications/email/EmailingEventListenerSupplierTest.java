@@ -19,6 +19,7 @@ package com.github.robozonky.notifications.email;
 import java.util.Properties;
 
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
+import com.github.robozonky.notifications.configuration.NotificationProperties;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

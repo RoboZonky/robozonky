@@ -17,6 +17,8 @@
 package com.github.robozonky.notifications.email;
 
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 
 class LoanNoLongerDelinquentEventListener extends AbstractLoanTerminatedEmailingListener<LoanNoLongerDelinquentEvent> {
 
@@ -26,7 +28,7 @@ class LoanNoLongerDelinquentEventListener extends AbstractLoanTerminatedEmailing
 
     @Override
     String getSubject(final LoanNoLongerDelinquentEvent event) {
-        return "Půjčka " + Util.identifyLoan(event) + " již není v prodlení";
+        return "Půjčka " + TemplateUtil.identifyLoan(event) + " již není v prodlení";
     }
 
     @Override

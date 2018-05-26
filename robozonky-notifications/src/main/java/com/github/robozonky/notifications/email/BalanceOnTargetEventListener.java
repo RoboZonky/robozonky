@@ -21,6 +21,8 @@ import java.util.OptionalInt;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.BalanceTracker;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 class BalanceOnTargetEventListener extends AbstractEmailingListener<ExecutionStartedEvent> {

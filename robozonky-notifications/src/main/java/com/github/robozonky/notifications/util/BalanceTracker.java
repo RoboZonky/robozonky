@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.email;
+package com.github.robozonky.notifications.util;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -24,7 +24,7 @@ import com.github.robozonky.common.state.TenantState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-enum BalanceTracker {
+public enum BalanceTracker {
 
     INSTANCE; // fast thread-safe singleton
 
@@ -54,7 +54,7 @@ enum BalanceTracker {
                 .reset(b -> b.put(BalanceTracker.BALANCE_KEY, String.valueOf(newBalance)));
     }
 
-    void reset(final SessionInfo sessionInfo) {
+    public void reset(final SessionInfo sessionInfo) {
         TenantState.of(sessionInfo).in(BalanceTracker.class).reset();
     }
 

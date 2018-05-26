@@ -70,6 +70,11 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.configuration.NotificationProperties;
+import com.github.robozonky.notifications.configuration.RefreshableNotificationProperties;
+import com.github.robozonky.notifications.templates.TemplateProcessor;
+import com.github.robozonky.notifications.util.BalanceTracker;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.util.Refreshable;
 import com.icegreen.greenmail.util.GreenMail;
@@ -196,13 +201,13 @@ class EmailingListenerTest extends AbstractRoboZonkyTest {
     @BeforeEach
     void setProperty() {
         System.setProperty(RefreshableNotificationProperties.CONFIG_FILE_LOCATION_PROPERTY,
-                           NotificationPropertiesTest.class.getResource("notifications-enabled.cfg").toString());
+                           NotificationProperties.class.getResource("notifications-enabled.cfg").toString());
     }
 
     @Test
     void spamProtectionAvailable() throws IOException {
         final Properties props = new Properties();
-        props.load(NotificationPropertiesTest.class.getResourceAsStream("notifications-enabled.cfg"));
+        props.load(NotificationProperties.class.getResourceAsStream("notifications-enabled.cfg"));
         props.setProperty("hourlyMaxEmails", String.valueOf(1)); // spam protection
         final ListenerSpecificNotificationProperties p =
                 new ListenerSpecificNotificationProperties(SupportedListener.TESTING,

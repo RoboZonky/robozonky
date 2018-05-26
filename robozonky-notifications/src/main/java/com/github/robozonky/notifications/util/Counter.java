@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.email;
+package com.github.robozonky.notifications.util;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -31,7 +31,7 @@ import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class Counter {
+public final class Counter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Counter.class);
     private final String id;
@@ -73,9 +73,6 @@ final class Counter {
         return timestamps.stream().filter(timestamp -> timestamp.plus(period).isAfter(now));
     }
 
-    /**
-     * @return True when the counter increase was properly persisted.
-     */
     public void increase(final SessionInfo sessionInfo) {
         final Set<OffsetDateTime> timestamps = getTimestamps(sessionInfo);
         getTimestamps(sessionInfo).add(OffsetDateTime.now());

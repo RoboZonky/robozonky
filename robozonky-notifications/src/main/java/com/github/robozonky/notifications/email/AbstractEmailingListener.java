@@ -32,6 +32,12 @@ import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.configuration.NotificationProperties;
+import com.github.robozonky.notifications.templates.TemplateProcessor;
+import com.github.robozonky.notifications.util.BalanceTracker;
+import com.github.robozonky.notifications.util.Counter;
+import com.github.robozonky.notifications.util.TemplateUtil;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -103,10 +109,10 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         if (event instanceof LoanBased) {
             if (event instanceof InvestmentBased) {
                 final InvestmentBased e = (InvestmentBased) event;
-                return Util.getLoanData(e.getInvestment(), e.getLoan());
+                return TemplateUtil.getLoanData(e.getInvestment(), e.getLoan());
             } else {
                 final LoanBased e = (LoanBased) event;
-                return Util.getLoanData(e.getLoan());
+                return TemplateUtil.getLoanData(e.getLoan());
             }
         }
         return Collections.emptyMap();
@@ -116,7 +122,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
         final Map<String, Object> result = new UnifiedMap<>(getBaseData(event));
         if (event instanceof Financial) {
             final PortfolioOverview portfolioOverview = ((Financial) event).getPortfolioOverview();
-            result.put("portfolio", Util.summarizePortfolioStructure(portfolioOverview));
+            result.put("portfolio", TemplateUtil.summarizePortfolioStructure(portfolioOverview));
         }
         return result;
     }
@@ -126,7 +132,7 @@ abstract class AbstractEmailingListener<T extends Event> implements EventListene
             // ratings here need to have a stable iteration order, as it will be used to list them in notifications
             put("ratings", Stream.of(Rating.values()).collect(Collectors.toList()));
             put("session", new UnifiedMap<String, Object>() {{
-                put("userName", Util.obfuscateEmailAddress(sessionInfo.getUsername()));
+                put("userName", TemplateUtil.obfuscateEmailAddress(sessionInfo.getUsername()));
                 put("userAgent", Defaults.ROBOZONKY_USER_AGENT);
                 put("isDryRun", sessionInfo.isDryRun());
             }});

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.notifications.email;
+package com.github.robozonky.notifications.configuration;
 
 import java.util.OptionalInt;
 
-class ListenerSpecificNotificationProperties extends NotificationProperties {
+import com.github.robozonky.notifications.email.SupportedListener;
+
+public class ListenerSpecificNotificationProperties extends NotificationProperties {
 
     private final SupportedListener listener;
 

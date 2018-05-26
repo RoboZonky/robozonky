@@ -21,7 +21,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import com.github.robozonky.common.extensions.Checker;
-import com.github.robozonky.notifications.email.RefreshableNotificationProperties;
+import com.github.robozonky.notifications.configuration.RefreshableNotificationProperties;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 

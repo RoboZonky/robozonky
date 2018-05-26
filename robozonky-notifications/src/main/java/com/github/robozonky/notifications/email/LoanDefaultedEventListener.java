@@ -17,6 +17,8 @@
 package com.github.robozonky.notifications.email;
 
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 
 class LoanDefaultedEventListener extends AbstractLoanTerminatedEmailingListener<LoanDefaultedEvent> {
 
@@ -26,7 +28,7 @@ class LoanDefaultedEventListener extends AbstractLoanTerminatedEmailingListener<
 
     @Override
     String getSubject(final LoanDefaultedEvent event) {
-        return "Půjčka " + Util.identifyLoan(event) + " byla zesplatněna";
+        return "Půjčka " + TemplateUtil.identifyLoan(event) + " byla zesplatněna";
     }
 
     @Override

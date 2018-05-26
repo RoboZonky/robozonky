@@ -19,6 +19,8 @@ package com.github.robozonky.notifications.email;
 import java.util.Map;
 
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
+import com.github.robozonky.notifications.configuration.ListenerSpecificNotificationProperties;
+import com.github.robozonky.notifications.util.TemplateUtil;
 
 class InvestmentDelegatedEventListener extends AbstractEmailingListener<InvestmentDelegatedEvent> {
 
@@ -29,7 +31,7 @@ class InvestmentDelegatedEventListener extends AbstractEmailingListener<Investme
     @Override
     String getSubject(final InvestmentDelegatedEvent event) {
         return "Investice delegována - " + event.getRecommendation().intValue() + ",- Kč, " + "půjčka "
-                + Util.identifyLoan(event);
+                + TemplateUtil.identifyLoan(event);
     }
 
     @Override
