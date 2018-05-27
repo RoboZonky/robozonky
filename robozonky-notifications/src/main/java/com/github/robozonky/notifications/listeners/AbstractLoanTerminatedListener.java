@@ -29,14 +29,14 @@ abstract class AbstractLoanTerminatedListener<T extends Event & DelinquencyBased
 
     protected AbstractLoanTerminatedListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
-        registerFinisher((event, sessionInfo) -> DelinquencyTracker.INSTANCE.unsetDelinquent(sessionInfo,
-                                                                                             event.getInvestment()));
+        registerFinisher((event, sessionInfo) -> delinquencyTracker.unsetDelinquent(sessionInfo,
+                                                                                    event.getInvestment()));
     }
 
     @Override
     boolean shouldNotify(final T event, final SessionInfo sessionInfo) {
-        return super.shouldNotify(event, sessionInfo) &&
-                DelinquencyTracker.INSTANCE.isDelinquent(sessionInfo, event.getInvestment());
+        return super.shouldNotify(event, sessionInfo) && delinquencyTracker.isDelinquent(sessionInfo,
+                                                                                         event.getInvestment());
     }
 
     @Override

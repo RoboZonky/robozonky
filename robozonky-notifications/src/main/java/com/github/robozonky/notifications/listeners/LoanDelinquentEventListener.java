@@ -27,7 +27,7 @@ public class LoanDelinquentEventListener extends AbstractListener<LoanDelinquent
     public LoanDelinquentEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
         registerFinisher(
-                (event, sessionInfo) -> DelinquencyTracker.INSTANCE.setDelinquent(sessionInfo, event.getInvestment()));
+                (event, sessionInfo) -> delinquencyTracker.setDelinquent(sessionInfo, event.getInvestment()));
     }
 
     @Override

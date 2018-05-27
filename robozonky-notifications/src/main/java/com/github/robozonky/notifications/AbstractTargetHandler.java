@@ -44,6 +44,10 @@ public abstract class AbstractTargetHandler {
         return listener.getLabel() + "." + property;
     }
 
+    public Target getTarget() {
+        return target;
+    }
+
     private int getHourlyLimit(final SupportedListener listener) {
         return this.getListenerSpecificIntProperty(listener, HOURLY_LIMIT, Integer.MAX_VALUE);
     }

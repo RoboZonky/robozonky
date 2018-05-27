@@ -21,20 +21,24 @@ import java.util.OptionalInt;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.state.TenantState;
+import com.github.robozonky.notifications.Target;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-enum BalanceTracker {
+class BalanceTracker {
 
-    INSTANCE; // fast thread-safe singleton
-
-    static final String BALANCE_KEY = "lastKnownBalance";
     private static final Logger LOGGER = LoggerFactory.getLogger(BalanceTracker.class);
+
+    private final Target target;
+
+    public BalanceTracker(final Target target) {
+        this.target = target;
+    }
 
     public OptionalInt getLastKnownBalance(final SessionInfo sessionInfo) {
         final Optional<String> lastKnownBalance = TenantState.of(sessionInfo)
                 .in(BalanceTracker.class)
-                .getValue(BalanceTracker.BALANCE_KEY);
+                .getValue(target.getId());
         if (!lastKnownBalance.isPresent()) {
             BalanceTracker.LOGGER.debug("No last known balance.");
             return OptionalInt.empty();
@@ -51,10 +55,10 @@ enum BalanceTracker {
     public void setLastKnownBalance(final SessionInfo sessionInfo, final int newBalance) {
         TenantState.of(sessionInfo)
                 .in(BalanceTracker.class)
-                .reset(b -> b.put(BalanceTracker.BALANCE_KEY, String.valueOf(newBalance)));
+                .reset(b -> b.put(target.getId(), String.valueOf(newBalance)));
     }
 
-    public void reset(final SessionInfo sessionInfo) {
+    public static void reset(final SessionInfo sessionInfo) {
         TenantState.of(sessionInfo).in(BalanceTracker.class).reset();
     }
 

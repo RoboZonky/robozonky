@@ -46,14 +46,18 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
     private final Collection<BiConsumer<T, SessionInfo>> finishers = new FastList<>(1);
     private final AbstractTargetHandler handler;
     private final SupportedListener listener;
+    protected final BalanceTracker balanceTracker;
+    protected final DelinquencyTracker delinquencyTracker;
 
     protected AbstractListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         this.listener = listener;
         this.handler = handler;
+        this.balanceTracker = new BalanceTracker(handler.getTarget());
+        this.delinquencyTracker = new DelinquencyTracker(handler.getTarget());
         this.registerFinisher((event, sessionInfo) -> {
             if (event instanceof Financial) { // register balance
                 final int balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
-                BalanceTracker.INSTANCE.setLastKnownBalance(sessionInfo, balance);
+                balanceTracker.setLastKnownBalance(sessionInfo, balance);
             }
         });
     }

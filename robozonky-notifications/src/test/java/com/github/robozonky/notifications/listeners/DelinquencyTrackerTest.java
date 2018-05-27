@@ -19,6 +19,7 @@ package com.github.robozonky.notifications.listeners;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
     @Test
     void standard() {
-        final DelinquencyTracker t = DelinquencyTracker.INSTANCE;
+        final DelinquencyTracker t = new DelinquencyTracker(Target.EMAIL);
         assertThat(t.isDelinquent(SESSION, INVESTMENT)).isFalse();
         t.setDelinquent(SESSION, INVESTMENT);
         assertThat(t.isDelinquent(SESSION, INVESTMENT)).isTrue();

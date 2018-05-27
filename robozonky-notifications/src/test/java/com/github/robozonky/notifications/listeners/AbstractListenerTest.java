@@ -30,7 +30,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
-import com.github.robozonky.api.notifications.Financial;
 import com.github.robozonky.api.notifications.InvestmentDelegatedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
@@ -165,14 +164,9 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private void testTriggered(final AbstractTargetHandler h, final AbstractListener<Event> listener,
                                final Event event) throws Exception {
-        BalanceTracker.INSTANCE.reset(SESSION_INFO);
+        BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
         verify(h, times(1)).actuallySend(notNull(), notNull(), notNull());
-        if (event instanceof Financial) { // this event must register the last known balance
-            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION_INFO)).isPresent();
-        } else { // and this event carries no such information
-            assertThat(BalanceTracker.INSTANCE.getLastKnownBalance(SESSION_INFO)).isEmpty();
-        }
     }
 
     @BeforeEach

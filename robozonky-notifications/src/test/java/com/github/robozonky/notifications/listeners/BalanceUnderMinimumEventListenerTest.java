@@ -24,6 +24,7 @@ import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
+import com.github.robozonky.notifications.Target;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +38,7 @@ class BalanceUnderMinimumEventListenerTest extends AbstractRoboZonkyTest {
     void check() throws Exception {
         final AbstractTargetHandler h = mock(AbstractTargetHandler.class);
         doNothing().when(h).send(any(), any(), any(), any());
+        when(h.getTarget()).thenReturn(Target.EMAIL);
         when(h.getListenerSpecificIntProperty(eq(SupportedListener.BALANCE_UNDER_MINIMUM), eq("minimumBalance"),
                                               anyInt()))
                 .thenAnswer(i -> i.getArgument(2));

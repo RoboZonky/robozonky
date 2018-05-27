@@ -22,13 +22,18 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.api.Defaults;
+import com.github.robozonky.notifications.Target;
 
-enum DelinquencyTracker {
+class DelinquencyTracker {
 
-    INSTANCE; // fast thread-safe singleton
+    private final Target target;
 
-    private static String toId(final Investment investment) {
-        return String.valueOf(investment.getLoanId());
+    public DelinquencyTracker(final Target target) {
+        this.target = target;
+    }
+
+    private String toId(final Investment investment) {
+        return target.getId() + "-" + String.valueOf(investment.getLoanId());
     }
 
     public void setDelinquent(final SessionInfo sessionInfo, final Investment investment) {
@@ -55,5 +60,4 @@ enum DelinquencyTracker {
                 .getValue(toId(investment))
                 .isPresent();
     }
-
 }

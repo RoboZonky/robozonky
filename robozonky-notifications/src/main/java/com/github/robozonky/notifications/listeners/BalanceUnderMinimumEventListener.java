@@ -54,7 +54,7 @@ public class BalanceUnderMinimumEventListener extends AbstractListener<Execution
 
     @Override
     boolean shouldNotify(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
-        final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance(sessionInfo);
+        final OptionalInt lastKnownBalance = balanceTracker.getLastKnownBalance(sessionInfo);
         final int newBalance = event.getPortfolioOverview().getCzkAvailable();
         LOGGER.debug("Last known balance: {}, minimum: {}, new: {}.", lastKnownBalance, minimumBalance, newBalance);
         final boolean balanceNowUnder = newBalance < minimumBalance;
