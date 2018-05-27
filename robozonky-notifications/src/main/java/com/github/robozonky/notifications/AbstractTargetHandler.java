@@ -34,7 +34,7 @@ public abstract class AbstractTargetHandler {
     private final Counter notifications;
     private final Map<SupportedListener, Counter> specificNotifications = UnifiedMap.newMap(0);
 
-    public AbstractTargetHandler(final ConfigStorage config, final Target target) {
+    protected AbstractTargetHandler(final ConfigStorage config, final Target target) {
         this.config = config;
         this.target = target;
         this.notifications = new Counter("global", getHourlyLimit(), Duration.ofHours(1));

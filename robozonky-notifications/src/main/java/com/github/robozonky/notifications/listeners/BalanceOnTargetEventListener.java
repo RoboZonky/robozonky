@@ -56,6 +56,7 @@ public class BalanceOnTargetEventListener extends AbstractListener<ExecutionStar
     boolean shouldNotify(final ExecutionStartedEvent event, final SessionInfo sessionInfo) {
         final OptionalInt lastKnownBalance = BalanceTracker.INSTANCE.getLastKnownBalance(sessionInfo);
         final int newBalance = event.getPortfolioOverview().getCzkAvailable();
+        LOGGER.debug("Last known balance: {}, target: {}, new: {}.", lastKnownBalance, targetBalance, newBalance);
         final boolean balanceNowExceeded = newBalance > targetBalance;
         final boolean wasFineLastTime = !lastKnownBalance.isPresent() || lastKnownBalance.getAsInt() < targetBalance;
         return (balanceNowExceeded && wasFineLastTime);
