@@ -114,63 +114,6 @@
                   }
                 },
                 "ignore": [
-                  {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method int com.github.robozonky.api.remote.entities.OverallPortfolio::getDue()",
-                    "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.OverallPortfolio::getDue()",
-                    "oldType": "int",
-                    "newType": "java.math.BigDecimal",
-                    "package": "com.github.robozonky.api.remote.entities",
-                    "classSimpleName": "OverallPortfolio",
-                    "methodName": "getDue",
-                    "elementKind": "method",
-                    "justification": "Portfolio supports decimal precision."
-                  }, {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method int com.github.robozonky.api.remote.entities.OverallPortfolio::getPaid()",
-                    "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.OverallPortfolio::getPaid()",
-                    "oldType": "int",
-                    "newType": "java.math.BigDecimal",
-                    "package": "com.github.robozonky.api.remote.entities",
-                    "classSimpleName": "OverallPortfolio",
-                    "methodName": "getPaid",
-                    "elementKind": "method",
-                    "justification": "Portfolio supports decimal precision."
-                  }, {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method int com.github.robozonky.api.remote.entities.OverallPortfolio::getUnpaid()",
-                    "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.OverallPortfolio::getUnpaid()",
-                    "oldType": "int",
-                    "newType": "java.math.BigDecimal",
-                    "package": "com.github.robozonky.api.remote.entities",
-                    "classSimpleName": "OverallPortfolio",
-                    "methodName": "getUnpaid",
-                    "elementKind": "method",
-                    "justification": "Portfolio supports decimal precision."
-                  }, {
-                    "code": "java.method.returnTypeChanged",
-                    "old": "method int com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
-                    "new": "method java.math.BigDecimal com.github.robozonky.api.remote.entities.RiskPortfolio::getTotalAmount()",
-                    "oldType": "int",
-                    "newType": "java.math.BigDecimal",
-                    "package": "com.github.robozonky.api.remote.entities",
-                    "classSimpleName": "RiskPortfolio",
-                    "methodName": "getTotalAmount",
-                    "elementKind": "method",
-                    "justification": "Portfolio supports decimal precision."
-                  }, {
-                    "code": "java.method.parameterTypeParameterChanged",
-                    "old": "parameter com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, ===java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>===)",
-                    "new": "parameter com.github.robozonky.api.strategies.PortfolioOverview com.github.robozonky.api.strategies.PortfolioOverview::calculate(java.math.BigDecimal, ===java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.math.BigDecimal>===)",
-                    "oldType": "java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.lang.Integer>",
-                    "newType": "java.util.Map<com.github.robozonky.api.remote.enums.Rating, java.math.BigDecimal>",
-                    "package": "com.github.robozonky.api.strategies",
-                    "classSimpleName": "PortfolioOverview",
-                    "methodName": "calculate",
-                    "parameterIndex": "1",
-                    "elementKind": "parameter",
-                    "justification": "Portfolio supports decimal precision."
-                  }
                 ]
               }
             }
