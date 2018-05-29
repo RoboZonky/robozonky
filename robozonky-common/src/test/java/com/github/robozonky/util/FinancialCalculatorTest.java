@@ -43,8 +43,8 @@ class FinancialCalculatorTest {
 
     private static PortfolioOverview getPortfolioOverview(final int total) {
         final int amountPerRating = total / Rating.values().length;
-        final Map<Rating, Integer> shares = Arrays.stream(Rating.values())
-                .collect(Collectors.toMap(Function.identity(), r -> amountPerRating));
+        final Map<Rating, BigDecimal> shares = Arrays.stream(Rating.values())
+                .collect(Collectors.toMap(Function.identity(), r -> BigDecimal.valueOf(amountPerRating)));
         return PortfolioOverview.calculate(BigDecimal.valueOf(1000), shares);
     }
 

@@ -16,13 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.Rating;
 
 public class RiskPortfolio extends OverallPortfolio {
 
-    private int totalAmount;
+    private BigDecimal totalAmount;
     private Rating rating;
 
     RiskPortfolio() {
@@ -32,11 +33,11 @@ public class RiskPortfolio extends OverallPortfolio {
     public RiskPortfolio(final Rating rating, final int paid, final int unpaid, final int due) {
         super(paid, unpaid, due);
         this.rating = rating;
-        this.totalAmount = paid + unpaid + due;
+        this.totalAmount = BigDecimal.valueOf(paid + unpaid + due);
     }
 
     @XmlElement
-    public int getTotalAmount() {
+    public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
