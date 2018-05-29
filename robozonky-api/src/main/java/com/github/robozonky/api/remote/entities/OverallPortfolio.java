@@ -16,34 +16,35 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
 
 public class OverallPortfolio extends BaseEntity {
 
-    private int unpaid, paid, due;
+    private BigDecimal unpaid, paid, due;
 
     OverallPortfolio() {
         // for JAXB
     }
 
-    public OverallPortfolio(int paid, int unpaid, int due) {
-        this.unpaid = unpaid;
-        this.paid = paid;
-        this.due = due;
+    public OverallPortfolio(final int paid, final int unpaid, final int due) {
+        this.unpaid = BigDecimal.valueOf(unpaid);
+        this.paid = BigDecimal.valueOf(paid);
+        this.due = BigDecimal.valueOf(due);
     }
 
     @XmlElement
-    public int getUnpaid() {
+    public BigDecimal getUnpaid() {
         return unpaid;
     }
 
     @XmlElement
-    public int getPaid() {
+    public BigDecimal getPaid() {
         return paid;
     }
 
     @XmlElement
-    public int getDue() {
+    public BigDecimal getDue() {
         return due;
     }
 }

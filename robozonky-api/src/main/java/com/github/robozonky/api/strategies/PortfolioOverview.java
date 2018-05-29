@@ -24,7 +24,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.github.robozonky.api.remote.entities.OverallPortfolio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -36,10 +35,10 @@ import com.github.robozonky.api.remote.enums.Rating;
 public class PortfolioOverview {
 
     private final int czkAvailable, czkInvested, czkAtRisk;
-    private final Map<Rating, Integer> czkInvestedPerRating, czkAtRiskPerRating;
+    private final Map<Rating, BigDecimal> czkInvestedPerRating, czkAtRiskPerRating;
 
-    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, Integer> czkInvestedPerRating,
-                              final Map<Rating, Integer> czkAtRiskPerRating) {
+    private PortfolioOverview(final BigDecimal czkAvailable, final Map<Rating, BigDecimal> czkInvestedPerRating,
+                              final Map<Rating, BigDecimal> czkAtRiskPerRating) {
         this.czkAvailable = czkAvailable.intValue();
         this.czkInvested = PortfolioOverview.sum(czkInvestedPerRating.values());
         if (this.czkInvested == 0) {
@@ -53,27 +52,31 @@ public class PortfolioOverview {
         }
     }
 
-    private static int sum(final Collection<Integer> vals) {
-        return vals.stream().mapToInt(i -> i).sum();
+    private static int sum(final Collection<BigDecimal> vals) {
+        return vals.stream().reduce(BigDecimal.ZERO, BigDecimal::add).intValue();
+    }
+
+    private static BigDecimal sum(final RiskPortfolio portfolio) {
+        return portfolio.getDue().add(portfolio.getUnpaid());
     }
 
     public static PortfolioOverview calculate(final BigDecimal balance, final Statistics statistics,
                                               final Map<Rating, BigDecimal> adjustments,
                                               final Map<Rating, BigDecimal> atRisk) {
-        final Map<Rating, Integer> amounts = statistics.getRiskPortfolio().stream()
-                .collect(Collectors.toMap(RiskPortfolio::getRating, OverallPortfolio::getUnpaid));
-        adjustments.forEach((r, v) -> amounts.put(r, amounts.getOrDefault(r, 0) + v.intValue()));
-        final Map<Rating, Integer> amountsAtRisk = new EnumMap<>(Rating.class);
-        atRisk.forEach((r, v) -> amountsAtRisk.put(r, v.intValue()));
+        final Map<Rating, BigDecimal> amounts = statistics.getRiskPortfolio().stream()
+                .collect(Collectors.toMap(RiskPortfolio::getRating, PortfolioOverview::sum));
+        adjustments.forEach((r, v) -> amounts.put(r, amounts.getOrDefault(r, BigDecimal.ZERO).add(v)));
+        final Map<Rating, BigDecimal> amountsAtRisk = new EnumMap<>(Rating.class);
+        atRisk.forEach(amountsAtRisk::put);
         return calculate(balance, amounts, amountsAtRisk);
     }
 
-    public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts) {
+    public static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, BigDecimal> amounts) {
         return calculate(balance, amounts, Collections.emptyMap());
     }
 
-    static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, Integer> amounts,
-                                       final Map<Rating, Integer> atRiskAmounts) {
+    static PortfolioOverview calculate(final BigDecimal balance, final Map<Rating, BigDecimal> amounts,
+                                       final Map<Rating, BigDecimal> atRiskAmounts) {
         return new PortfolioOverview(balance, amounts, atRiskAmounts);
     }
 
@@ -111,7 +114,7 @@ public class PortfolioOverview {
      * @return Amount in CZK.
      */
     public int getCzkInvested(final Rating r) {
-        return this.czkInvestedPerRating.getOrDefault(r, 0);
+        return this.czkInvestedPerRating.getOrDefault(r, BigDecimal.ZERO).intValue();
     }
 
     /**
@@ -139,7 +142,7 @@ public class PortfolioOverview {
      * @return Amount in CZK.
      */
     public int getCzkAtRisk(final Rating r) {
-        return this.czkAtRiskPerRating.getOrDefault(r, 0);
+        return this.czkAtRiskPerRating.getOrDefault(r, BigDecimal.ZERO).intValue();
     }
 
     /**
