@@ -20,7 +20,7 @@ import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
-public class LoanDefaultedEventListener extends AbstractLoanTerminatedListener<LoanDefaultedEvent> {
+public class LoanDefaultedEventListener extends AbstractListener<LoanDefaultedEvent> {
 
     public LoanDefaultedEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);

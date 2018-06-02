@@ -147,6 +147,7 @@ class TransactionLog {
     }
 
     public synchronized int[] update(final Statistics statistics, final Tenant tenant) {
+        LOGGER.debug("Pre-update adjustments: {}.", adjustments);
         // all new transactions have the date at the beginning of the day when the timestamp was taken
         final LocalDate lastZonkyUpdate = statistics.getTimestamp().toLocalDate();
         // read all transactions that happened after last Zonky refresh
@@ -170,7 +171,7 @@ class TransactionLog {
                     LOGGER.debug("Processing blocked amount: {}.", ba);
                     processBlockedAmount(tenant, ba);
                 });
-        LOGGER.debug("New adjustments: {}.", adjustments);
+        LOGGER.debug("Post-update adjustments: {}.", adjustments);
         return newlySold.toArray();
     }
 }
