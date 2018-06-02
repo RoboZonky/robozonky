@@ -49,6 +49,10 @@ class PurchasingDaemon extends DaemonOperation {
     @Override
     protected void execute(final Portfolio portfolio, final Tenant authenticated) {
         final long balance = portfolio.getRemoteBalance().get().longValue();
+        if (balance < 0) {
+            LOGGER.debug("Asleep as there is not enough available balance. ({} < {})", balance, 0);
+            return;
+        }
         final Select s = new Select().lessThanOrEquals("remainingPrincipal", balance);
         final Collection<Participation> p =
                 authenticated.call(zonky -> zonky.getAvailableParticipations(s).collect(Collectors.toList()));
