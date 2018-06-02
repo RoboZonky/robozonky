@@ -47,37 +47,37 @@ class Util {
 
     public static Properties configureEmailNotifications(final InstallData data) {
         final Properties p = new Properties();
-        p.setProperty("enabled", "true");
-        p.setProperty("to", Variables.SMTP_TO.getValue(data));
-        p.setProperty("smtp.username", Variables.SMTP_USERNAME.getValue(data));
-        p.setProperty("smtp.password", Variables.SMTP_PASSWORD.getValue(data));
-        p.setProperty("smtp.hostname", Variables.SMTP_HOSTNAME.getValue(data));
-        p.setProperty("smtp.port", toInt(Variables.SMTP_PORT.getValue(data)));
-        p.setProperty("smtp.requiresStartTLS", toBoolean(Variables.SMTP_IS_TLS.getValue(data)));
-        p.setProperty("smtp.requiresSslOnConnect", toBoolean(Variables.SMTP_IS_SSL.getValue(data)));
+        p.setProperty("email.enabled", "true");
+        p.setProperty("email.to", Variables.SMTP_TO.getValue(data));
+        p.setProperty("email.smtp.username", Variables.SMTP_USERNAME.getValue(data));
+        p.setProperty("email.smtp.password", Variables.SMTP_PASSWORD.getValue(data));
+        p.setProperty("email.smtp.hostname", Variables.SMTP_HOSTNAME.getValue(data));
+        p.setProperty("email.smtp.port", toInt(Variables.SMTP_PORT.getValue(data)));
+        p.setProperty("email.smtp.requiresStartTLS", toBoolean(Variables.SMTP_IS_TLS.getValue(data)));
+        p.setProperty("email.smtp.requiresSslOnConnect", toBoolean(Variables.SMTP_IS_SSL.getValue(data)));
         final String isInvestmentEmailEnabled = toBoolean(Variables.EMAIL_IS_INVESTMENT.getValue(data));
-        p.setProperty("investmentSkipped.enabled", isInvestmentEmailEnabled);
-        p.setProperty("investmentPurchased.enabled", isInvestmentEmailEnabled);
-        p.setProperty("investmentRejected.enabled", isInvestmentEmailEnabled);
-        p.setProperty("investmentMade.enabled", isInvestmentEmailEnabled);
-        p.setProperty("investmentSold.enabled", isInvestmentEmailEnabled);
-        p.setProperty("investmentDelegated.enabled", isInvestmentEmailEnabled);
-        p.setProperty("saleOffered.enabled", isInvestmentEmailEnabled);
-        p.setProperty("loanRepaid.enabled", isInvestmentEmailEnabled);
-        p.setProperty("loanNowDelinquent.enabled", "false"); // by default, let's prevent people from panicking
-        p.setProperty("loanNoLongerDelinquent.enabled",
+        p.setProperty("email.investmentSkipped.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.investmentPurchased.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.investmentRejected.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.investmentMade.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.investmentSold.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.investmentDelegated.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.saleOffered.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.loanRepaid.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.loanNowDelinquent.enabled", "false"); // by default, let's prevent people from panicking
+        p.setProperty("email.loanNoLongerDelinquent.enabled",
                       toBoolean(Variables.EMAIL_IS_LOAN_NOT_DELINQUENT.getValue(data)));
-        p.setProperty("loanDelinquent10DaysOrMore.enabled",
+        p.setProperty("email.loanDelinquent10DaysOrMore.enabled",
                       toBoolean(Variables.EMAIL_IS_LOAN_DELINQUENT_10_PLUS.getValue(data)));
-        p.setProperty("loanDefaulted.enabled",
+        p.setProperty("email.loanDefaulted.enabled",
                       toBoolean(Variables.EMAIL_IS_LOAN_DEFAULTED.getValue(data)));
-        p.setProperty("balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
-        p.setProperty("balanceTracker.targetBalance", "200");
-        p.setProperty("roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));
-        p.setProperty("roboZonkyCrashed.enabled", toBoolean(Variables.EMAIL_IS_CRITICAL_FAILURE.getValue(data)));
-        p.setProperty("roboZonkyUpdateDetected.enabled", "true");
-        p.setProperty("roboZonkyUpdateDetected.maxHourlyEmails", "1");
-        p.setProperty("hourlyMaxEmails", "20");
+        p.setProperty("email.balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
+        p.setProperty("email.balanceTracker.targetBalance", "200");
+        p.setProperty("email.roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));
+        p.setProperty("email.roboZonkyCrashed.enabled", toBoolean(Variables.EMAIL_IS_CRITICAL_FAILURE.getValue(data)));
+        p.setProperty("email.roboZonkyUpdateDetected.enabled", "true");
+        p.setProperty("email.roboZonkyUpdateDetected.maxHourlyEmails", "1");
+        p.setProperty("email.hourlyMaxEmails", "20");
         return p;
     }
 

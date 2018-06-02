@@ -17,6 +17,7 @@
 package com.github.robozonky.common.state;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.robozonky.api.SessionInfo;
@@ -35,6 +36,10 @@ public final class TenantState {
 
     public static TenantState of(final SessionInfo session) {
         return Holder.of(session);
+    }
+
+    public static Collection<String> getKnownTenants() {
+        return Holder.getKnownTenants();
     }
 
     private static File getFile(final String username) {

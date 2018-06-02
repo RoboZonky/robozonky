@@ -69,7 +69,7 @@ public class JmxListenerService implements ListenerService {
     public <T extends Event> Stream<EventListenerSupplier<T>> findListeners(final Class<T> eventType) {
         final EventListener<T> listener = JmxListenerService.newListener(eventType);
         if (listener == null) {
-            return null;
+            return Stream.empty();
         }
         return Stream.of(() -> Optional.of(listener));
     }

@@ -33,7 +33,6 @@ import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
 import com.github.robozonky.internal.api.Settings;
-import com.github.robozonky.notifications.RefreshableConfigStorage;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
@@ -124,8 +123,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         final Properties p = Util.configureEmailNotifications(DATA);
         try {
             Util.writeOutProperties(p, EMAIL_CONFIG_FILE);
-            final String property = RefreshableConfigStorage.CONFIG_FILE_LOCATION_PROPERTY;
-            return new CommandLinePart().setProperty(property, EMAIL_CONFIG_FILE.toURI().toURL().toExternalForm());
+            return new CommandLinePart().setOption("-i", EMAIL_CONFIG_FILE.toURI().toURL().toExternalForm());
         } catch (final Exception ex) {
             throw new IllegalStateException("Failed writing e-mail configuration.", ex);
         }

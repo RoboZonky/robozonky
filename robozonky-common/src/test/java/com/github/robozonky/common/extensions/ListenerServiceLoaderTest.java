@@ -19,6 +19,7 @@ package com.github.robozonky.common.extensions;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
@@ -28,8 +29,10 @@ import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 
 class ListenerServiceLoaderTest {
 
@@ -39,9 +42,9 @@ class ListenerServiceLoaderTest {
         final EventListener<RoboZonkyStartingEvent> l = mock(EventListener.class);
         final ListenerService s1 = mock(ListenerService.class);
         final EventListenerSupplier<RoboZonkyStartingEvent> returned = () -> Optional.of(l);
-        doReturn(returned).when(s1).findListeners(eq(e.getClass()));
+        doAnswer(i -> Stream.of(returned)).when(s1).findListeners(eq(e.getClass()));
         final ListenerService s2 = mock(ListenerService.class);
-        doReturn((EventListenerSupplier<RoboZonkyStartingEvent>) Optional::empty)
+        doAnswer(i -> Stream.of((EventListenerSupplier<RoboZonkyStartingEvent>) Optional::empty))
                 .when(s2).findListeners(eq(e.getClass()));
         final Iterable<ListenerService> s = () -> Arrays.asList(s1, s2).iterator();
         final List<EventListenerSupplier<RoboZonkyStartingEvent>> r =

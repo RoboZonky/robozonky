@@ -21,9 +21,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
 
 class TenantStateTest {
 
@@ -38,12 +38,14 @@ class TenantStateTest {
     @Test
     void correctInstanceManagement() {
         final TenantState ts = TenantState.of(SESSION);
+        assertThat(TenantState.getKnownTenants()).containsOnly(SESSION.getUsername());
         final TenantState ts2 = TenantState.of(new SessionInfo(SESSION.getUsername()));
         TenantState.destroyAll();
         assertSoftly(softly -> {
-            assertThat(ts).isSameAs(ts2);
+            softly.assertThat(ts).isSameAs(ts2);
             softly.assertThat(ts.isDestroyed()).isTrue();
             softly.assertThat(ts2.isDestroyed()).isTrue();
+            softly.assertThat(TenantState.getKnownTenants()).isEmpty();
         });
         final TenantState ts3 = TenantState.of(SESSION);
         ts3.destroy();

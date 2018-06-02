@@ -18,6 +18,8 @@ package com.github.robozonky.notifications.listeners;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -65,11 +67,11 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.ConfigStorage;
 import com.github.robozonky.notifications.NotificationListenerService;
-import com.github.robozonky.notifications.RefreshableConfigStorage;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.Target;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
@@ -82,12 +84,17 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
@@ -170,9 +177,10 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     }
 
     @BeforeEach
-    void setProperty() {
-        System.setProperty(RefreshableConfigStorage.CONFIG_FILE_LOCATION_PROPERTY,
-                           AbstractListenerTest.class.getResource("notifications-enabled.cfg").toString());
+    void configureNotifications() throws URISyntaxException, MalformedURLException {
+        ListenerServiceLoader.registerNotificationConfiguration(SESSION_INFO,
+                                                                AbstractListenerTest.class.getResource(
+                                                                        "notifications-enabled.cfg").toURI().toURL());
     }
 
     AbstractTargetHandler getHandler(final ConfigStorage storage) {

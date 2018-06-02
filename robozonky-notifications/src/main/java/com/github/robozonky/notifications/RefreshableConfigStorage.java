@@ -18,7 +18,6 @@ package com.github.robozonky.notifications;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,15 +26,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.internal.api.Defaults;
-import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.Refreshable;
 
 public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
 
-    public static final String CONFIG_FILE_LOCATION_PROPERTY = "robozonky.notifications.email.config.file";
-    public static final File DEFAULT_CONFIG_FILE_LOCATION = new File("robozonky-notifications-email.cfg");
+    private final URL source;
 
-    public RefreshableConfigStorage() {
+    public RefreshableConfigStorage(final URL source) {
+        this.source = source;
         /*
          * force the code to have a value right away. this is done to ensure that even the event listeners initialized
          * immediately after this call have notification properties available - otherwise initial emails of the platform
@@ -63,26 +61,11 @@ public final class RefreshableConfigStorage extends Refreshable<ConfigStorage> {
 
     @Override
     protected String getLatestSource() {
-        final String source =
-                Settings.INSTANCE.get(
-                        RefreshableConfigStorage.CONFIG_FILE_LOCATION_PROPERTY, (String) null);
-        if (source != null) { // attempt to read from the URL specified by the property
-            // will read user-provided config file and log a warning if missing, since the user actually requested it
-            LOGGER.debug("Reading notification configuration from '{}'.", source);
-            try {
-                return RefreshableConfigStorage.readUrl(new URL(source));
-            } catch (final IOException ex) { // fall back to the property file
-                LOGGER.warn("Failed reading configuration from '{}' due to '{}'.", source, ex.getMessage());
-            }
-        }
-        // will read the default source file and silently ignore if missing, as this config is purely optional
-        final File defaultConfigFile = RefreshableConfigStorage.DEFAULT_CONFIG_FILE_LOCATION;
-        LOGGER.debug("Read config file '{}'.", defaultConfigFile.getAbsolutePath());
+        LOGGER.debug("Reading notification configuration from '{}'.", source);
         try {
-            final URL u = defaultConfigFile.toURI().toURL();
-            return RefreshableConfigStorage.readUrl(u);
+            return RefreshableConfigStorage.readUrl(source);
         } catch (final IOException ex) {
-            LOGGER.debug("Failed reading configuration file '{}' due to '{}'.", defaultConfigFile, ex.getMessage());
+            LOGGER.warn("Failed reading notification configuration from '{}' due to '{}'.", source, ex.getMessage());
             return null;
         }
     }

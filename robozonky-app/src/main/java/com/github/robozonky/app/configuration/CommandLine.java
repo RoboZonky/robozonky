@@ -16,6 +16,9 @@
 
 package com.github.robozonky.app.configuration;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -45,6 +48,8 @@ public class CommandLine {
     private ConfirmationCommandLineFragment confirmationFragment = new ConfirmationCommandLineFragment();
     @Parameter(names = {"-h", "--help"}, help = true, description = "Print usage end exit.")
     private boolean help;
+    @Parameter(names = {"-i", "--inform"}, description = "Configure RoboZonky notifications from a given location.")
+    private String notificationConfigLocation;
     @Parameter(names = {"-n", "--name"}, description = "Name of this RoboZonky session.")
     private String name;
 
@@ -116,6 +121,24 @@ public class CommandLine {
     private Optional<InvestmentMode> newApplicationConfiguration(final OperatingMode mode) {
         return SecretProviderFactory.getSecretProvider(authenticationFragment)
                 .flatMap(secrets -> mode.configure(this, secrets));
+    }
+
+    Optional<URL> getNotificationConfigLocation() {
+        if (notificationConfigLocation == null) {
+            LOGGER.debug("No notification configuration for tenant.");
+            return Optional.empty();
+        }
+        try {
+            final URL url = new URL(notificationConfigLocation);
+            return Optional.of(url);
+        } catch (final MalformedURLException ex) {
+            final File f = new File(notificationConfigLocation);
+            try {
+                return Optional.of(f.getAbsoluteFile().toURI().toURL());
+            } catch (final MalformedURLException ex2) {
+                throw new ParameterException("Incorrect format for notification configuration location.");
+            }
+        }
     }
 
     String getName() {
