@@ -18,7 +18,7 @@ package com.github.robozonky.notifications.email;
 
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 
-class LoanDefaultedEventListener extends AbstractLoanTerminatedEmailingListener<LoanDefaultedEvent> {
+class LoanDefaultedEventListener extends AbstractEmailingListener<LoanDefaultedEvent> {
 
     public LoanDefaultedEventListener(final ListenerSpecificNotificationProperties properties) {
         super(properties);
