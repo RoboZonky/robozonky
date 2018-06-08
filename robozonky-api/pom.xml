@@ -130,6 +130,56 @@
                     "methodName": "findListeners",
                     "elementKind": "method",
                     "justification": "Notification providers may now provide more than 1 listener."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanDefaultedEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanDefaultedEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDefaultedEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Defaults and repayments no longer carry delinquency information."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development> com.github.robozonky.api.notifications.LoanDefaultedEvent::getCollectionActions()",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDefaultedEvent",
+                    "methodName": "getCollectionActions",
+                    "elementKind": "method",
+                    "justification": "Defaults and repayments no longer carry delinquency information."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.time.LocalDate com.github.robozonky.api.notifications.LoanDefaultedEvent::getDelinquentSince()",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanDefaultedEvent",
+                    "methodName": "getDelinquentSince",
+                    "elementKind": "method",
+                    "justification": "Defaults and repayments no longer carry delinquency information."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method void com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan, java.time.LocalDate, java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development>)",
+                    "new": "method void com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent::<init>(com.github.robozonky.api.remote.entities.sanitized.Investment, com.github.robozonky.api.remote.entities.sanitized.Loan)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanNoLongerDelinquentEvent",
+                    "methodName": "<init>",
+                    "elementKind": "constructor",
+                    "justification": "Defaults and repayments no longer carry delinquency information."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.sanitized.Development> com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent::getCollectionActions()",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanNoLongerDelinquentEvent",
+                    "methodName": "getCollectionActions",
+                    "elementKind": "method",
+                    "justification": "Defaults and repayments no longer carry delinquency information."
+                  }, {
+                    "code": "java.method.removed",
+                    "old": "method java.time.LocalDate com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent::getDelinquentSince()",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "LoanNoLongerDelinquentEvent",
+                    "methodName": "getDelinquentSince",
+                    "elementKind": "method",
+                    "justification": "Defaults and repayments no longer carry delinquency information."
                   }
                 ]
               }
