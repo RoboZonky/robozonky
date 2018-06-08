@@ -31,15 +31,18 @@ import org.slf4j.LoggerFactory;
 class TestOperatingMode extends OperatingMode {
 
     @Override
-    protected Optional<InvestmentMode> getInvestmentMode(final Tenant auth, final Investor investor) {
+    protected Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
+                                                         final Investor investor) {
         return Optional.of(new InvestmentMode() {
 
             private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
             @Override
             public ReturnCode apply(final Lifecycle lifecycle) {
-                final boolean sent = Checker.notifications(auth.getSessionInfo().getUsername());
-                LOGGER.info("Notification sent: {}.", sent);
+                cli.getNotificationConfigLocation().ifPresent(cfg -> {
+                    final boolean sent = Checker.notifications(auth.getSessionInfo().getUsername(), cfg);
+                    LOGGER.info("Notification sent: {}.", sent);
+                });
                 return investor.getConfirmationProvider().map(c -> investor.getRequestId()
                         .map(r -> {
                             LOGGER.info("Confirmation received: {}.",

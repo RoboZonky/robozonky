@@ -16,6 +16,8 @@
 
 package com.github.robozonky.common.extensions;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -25,14 +27,30 @@ import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.remote.entities.RawLoan;
 import com.github.robozonky.common.remote.ApiProvider;
+import com.github.robozonky.common.state.TenantState;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class CheckerTest {
 
     private static final char[] SECRET = new char[0];
+
+    private static ApiProvider mockApiThatReturnsOneLoan() {
+        final RawLoan l = mock(RawLoan.class);
+        final ApiProvider provider = mock(ApiProvider.class);
+        doReturn(Collections.singletonList(l)).when(provider).marketplace();
+        return provider;
+    }
 
     @Test
     void confirmationsMarketplaceFail() {
@@ -50,13 +68,6 @@ class CheckerTest {
         final boolean result =
                 Checker.confirmations(mock(ConfirmationProvider.class), "", SECRET, () -> provider);
         assertThat(result).isFalse();
-    }
-
-    private static ApiProvider mockApiThatReturnsOneLoan() {
-        final RawLoan l = mock(RawLoan.class);
-        final ApiProvider provider = mock(ApiProvider.class);
-        doReturn(Collections.singletonList(l)).when(provider).marketplace();
-        return provider;
     }
 
     @Test
@@ -92,8 +103,14 @@ class CheckerTest {
     }
 
     @Test
-    void notificationsEmptyByDefault() {
-        assertThat(Checker.notifications("")).isFalse();
+    void notificationsEmptyByDefault() throws MalformedURLException {
+        assertThat(Checker.notifications("", new URL("file:///something"))).isFalse();
+    }
+
+    @BeforeEach
+    @AfterEach
+    void destroyState() {
+        TenantState.destroyAll();
     }
 
     @Test

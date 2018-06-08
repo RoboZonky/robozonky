@@ -114,6 +114,23 @@
                   }
                 },
                 "ignore": [
+                  {
+                    "code": "java.method.removed",
+                    "old": "method <T extends com.github.robozonky.api.notifications.Event> com.github.robozonky.api.notifications.EventListenerSupplier<T> com.github.robozonky.api.notifications.ListenerService::findListener(java.lang.Class<T>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "ListenerService",
+                    "methodName": "findListener",
+                    "elementKind": "method",
+                    "justification": "Notification providers may now provide more than 1 listener."
+                  }, {
+                    "code": "java.method.addedToInterface",
+                    "new": "method <T extends com.github.robozonky.api.notifications.Event> java.util.stream.Stream<com.github.robozonky.api.notifications.EventListenerSupplier<T>> com.github.robozonky.api.notifications.ListenerService::findListeners(java.lang.Class<T>)",
+                    "package": "com.github.robozonky.api.notifications",
+                    "classSimpleName": "ListenerService",
+                    "methodName": "findListeners",
+                    "elementKind": "method",
+                    "justification": "Notification providers may now provide more than 1 listener."
+                  }
                 ]
               }
             }

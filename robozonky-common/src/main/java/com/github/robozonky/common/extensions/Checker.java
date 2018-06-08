@@ -16,6 +16,7 @@
 
 package com.github.robozonky.common.extensions;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -76,7 +77,8 @@ public class Checker {
                 .orElse(false);
     }
 
-    public static boolean notifications(final String username) {
+    public static boolean notifications(final String username, final URL configurationLocation) {
+        ListenerServiceLoader.registerNotificationConfiguration(username, configurationLocation);
         return Checker.notifications(username, ListenerServiceLoader.load(RoboZonkyTestingEvent.class));
     }
 

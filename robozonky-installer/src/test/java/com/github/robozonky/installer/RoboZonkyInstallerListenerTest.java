@@ -32,8 +32,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
@@ -134,7 +139,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         final CommandLinePart clp = new RoboZonkyInstallerListener().prepareEmailConfiguration();
         // test
         assertSoftly(softly -> {
-            softly.assertThat(clp.getProperties()).isNotEmpty();
+            softly.assertThat(clp.getOptions()).containsOnlyKeys("-i");
             softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE).canRead();
         });
     }

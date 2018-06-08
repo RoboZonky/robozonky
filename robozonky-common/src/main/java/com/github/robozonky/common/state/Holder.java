@@ -17,12 +17,15 @@
 package com.github.robozonky.common.state;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.api.Settings;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 final class Holder {
 
@@ -40,6 +43,10 @@ final class Holder {
 
     public static TenantState of(final SessionInfo session) {
         return of(session, PARENT);
+    }
+
+    public static synchronized Collection<String> getKnownTenants() {
+        return Collections.unmodifiableSet(UnifiedSet.newSet(TENANT_STATE_MAP.keySet()));
     }
 
     static synchronized TenantState of(final SessionInfo session, final StateStorage underlying) {

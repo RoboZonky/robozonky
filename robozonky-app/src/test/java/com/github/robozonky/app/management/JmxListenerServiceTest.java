@@ -27,7 +27,7 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
-import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.app.ShutdownHook;
 import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
@@ -38,10 +38,10 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
@@ -92,7 +92,9 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
 
     private <T extends Event> void handleEvent(final T event) {
         final JmxListenerService service = new JmxListenerService();
-        final EventListenerSupplier<T> r = service.findListener((Class<T>) event.getClass());
+        final EventListenerSupplier<T> r = service.findListeners((Class<T>) event.getClass())
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No event listener found."));
         final EventListener<T> listener = r.get().get();
         listener.handle(event, new SessionInfo(USERNAME));
     }
@@ -100,7 +102,8 @@ class JmxListenerServiceTest extends AbstractRoboZonkyTest {
     @Test
     void setInvalid() {
         final JmxListenerService service = new JmxListenerService();
-        final EventListenerSupplier<RoboZonkyEndingEvent> r = service.findListener(RoboZonkyEndingEvent.class);
-        assertThat(r).isNull();
+        final Optional<EventListenerSupplier<RoboZonkyTestingEvent>> r =
+                service.findListeners(RoboZonkyTestingEvent.class).findFirst();
+        assertThat(r).isEmpty();
     }
 }

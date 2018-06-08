@@ -19,13 +19,13 @@ package com.github.robozonky.app.configuration;
 import java.time.Duration;
 import java.util.Optional;
 
-import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.confirmations.ConfirmationProvider;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.authentication.TenantBuilder;
 import com.github.robozonky.app.investing.Investor;
 import com.github.robozonky.common.extensions.ConfirmationProviderLoader;
+import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.secrets.Credentials;
 import com.github.robozonky.common.secrets.SecretProvider;
 import com.github.robozonky.internal.api.Settings;
@@ -71,20 +71,22 @@ abstract class OperatingMode implements CommandLineFragment {
                 });
     }
 
-    protected abstract Optional<InvestmentMode> getInvestmentMode(final Tenant auth,
+    protected abstract Optional<InvestmentMode> getInvestmentMode(final CommandLine cli, final Tenant auth,
                                                                   final Investor investor);
 
     public Optional<InvestmentMode> configure(final CommandLine cli, final SecretProvider secrets) {
         final Tenant tenant = getAuthenticated(cli, secrets);
+        cli.getNotificationConfigLocation()
+                .ifPresent(location -> ListenerServiceLoader.registerNotificationConfiguration(tenant.getSessionInfo(),
+                                                                                               location));
         // initialize SessionInfo before the robot potentially sends the first notification
-        final SessionInfo s = tenant.getSessionInfo();
         Events.initialize(tenant.getSessionInfo());
         // and now initialize the chosen mode of operation
         return cli.getConfirmationFragment().getConfirmationCredentials()
                 .map(value -> new Credentials(value, secrets))
                 .map(c -> this.getZonkyProxyBuilder(tenant, c))
                 .orElse(Optional.of(Investor.build(tenant)))
-                .map(i -> this.getInvestmentMode(tenant, i))
+                .map(i -> this.getInvestmentMode(cli, tenant, i))
                 .orElse(Optional.empty());
     }
 
