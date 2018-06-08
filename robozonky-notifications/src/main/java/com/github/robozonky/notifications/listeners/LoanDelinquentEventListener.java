@@ -18,6 +18,7 @@ package com.github.robozonky.notifications.listeners;
 
 import java.util.Map;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
@@ -26,8 +27,12 @@ public class LoanDelinquentEventListener extends AbstractListener<LoanDelinquent
 
     public LoanDelinquentEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
-        registerFinisher(
-                (event, sessionInfo) -> delinquencyTracker.setDelinquent(sessionInfo, event.getInvestment()));
+    }
+
+    @Override
+    protected void finish(final LoanDelinquentEvent event, final SessionInfo sessionInfo) {
+        super.finish(event, sessionInfo);
+        delinquencyTracker.setDelinquent(sessionInfo, event.getInvestment());
     }
 
     @Override

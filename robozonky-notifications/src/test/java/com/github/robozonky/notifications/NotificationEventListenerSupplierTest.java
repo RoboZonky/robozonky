@@ -24,8 +24,8 @@ import com.github.robozonky.notifications.listeners.RoboZonkyCrashedEventListene
 import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
 
 class NotificationEventListenerSupplierTest {
 
@@ -43,21 +43,21 @@ class NotificationEventListenerSupplierTest {
     void lifecycle() throws IOException {
         final NotificationEventListenerSupplier<RoboZonkyCrashedEvent> s =
                 new NotificationEventListenerSupplier<>(RoboZonkyCrashedEvent.class);
-        assertThat(s.get(Target.EMAIL)).isEmpty();
+        assertThat(s.apply(Target.EMAIL)).isEmpty();
         // the listener is enabled here
         final ConfigStorage p =
                 mockProperties(RoboZonkyCrashedEventListener.class.getResourceAsStream("notifications-enabled.cfg"));
         s.valueSet(p);
-        assertThat(s.get(Target.EMAIL)).isPresent();
+        assertThat(s.apply(Target.EMAIL)).isPresent();
         // disabled here
         final ConfigStorage p2 = mockProperties();
         s.valueChanged(p, p2);
-        assertThat(s.get(Target.EMAIL)).isEmpty();
+        assertThat(s.apply(Target.EMAIL)).isEmpty();
         // and re-enabled
         s.valueChanged(p2, p);
-        assertThat(s.get(Target.EMAIL)).isPresent();
+        assertThat(s.apply(Target.EMAIL)).isPresent();
         s.valueUnset(p);
-        assertThat(s.get(Target.EMAIL)).isEmpty();
+        assertThat(s.apply(Target.EMAIL)).isEmpty();
     }
 
     @Test
@@ -66,6 +66,6 @@ class NotificationEventListenerSupplierTest {
                 new NotificationEventListenerSupplier<>(RoboZonkyCrashedEvent.class);
         final ConfigStorage p = mockProperties();
         s.valueSet(p);
-        assertThat(s.get(Target.EMAIL)).isEmpty();
+        assertThat(s.apply(Target.EMAIL)).isEmpty();
     }
 }

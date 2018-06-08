@@ -24,7 +24,6 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.ReturnCode;
@@ -203,9 +202,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         final ConfigStorage cs =
                 ConfigStorage.create(getClass().getResourceAsStream("notifications-enabled-spamless.cfg"));
         final AbstractTargetHandler p = getHandler(cs);
-        final BiConsumer<RoboZonkyTestingEvent, SessionInfo> c = mock(BiConsumer.class);
         final TestingEmailingListener l = new TestingEmailingListener(p);
-        l.registerFinisher(c);
         l.handle(EVENT, SESSION_INFO);
         verify(p, times(1)).actuallySend(notNull(), notNull(), notNull());
         l.handle(EVENT, SESSION_INFO);

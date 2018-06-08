@@ -20,7 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -39,44 +38,51 @@ public final class NotificationListenerService implements ListenerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationListenerService.class);
 
-    private static final Map<String, RefreshableConfigStorage> PROPERTIES = UnifiedMap.newMap(0);
-    private static final AtomicBoolean IS_INITIALIZED = new AtomicBoolean(false);
+    private final Map<String, RefreshableConfigStorage> CONFIGURATIONS = UnifiedMap.newMap(0);
 
-    static void initialize(final String username, final String configLocation) {
+    Optional<RefreshableConfigStorage> readConfig(final String configLocation) {
         try {
             final URL config = new URL(configLocation);
-            LOGGER.debug("Initializing notifications for tenant '{}' from {}.", username, config);
-            final RefreshableConfigStorage props = new RefreshableConfigStorage(config);
-            Scheduler.inBackground().submit(props, Settings.INSTANCE.getRemoteResourceRefreshInterval());
-            PROPERTIES.put(username, props);
+            return Optional.of(new RefreshableConfigStorage(config));
         } catch (final MalformedURLException ex) {
-            LOGGER.warn("Wrong notification configuration location for tenant '{}'.", username, ex);
+            LOGGER.warn("Wrong notification configuration location.", ex);
+            return Optional.empty();
         }
     }
 
-    static void initialize() {
-        TenantState.getKnownTenants().stream()
+    synchronized Optional<RefreshableConfigStorage> getTenantConfigurations(final SessionInfo sessionInfo) {
+        final String username = sessionInfo.getUsername();
+        if (!CONFIGURATIONS.containsKey(username)) { // already initialized
+            final Optional<String> value = ListenerServiceLoader.getNotificationConfiguration(sessionInfo);
+            if (!value.isPresent()) {
+                LOGGER.debug("Not enabling notifications for tenant '{}'.", username);
+                return Optional.empty();
+            }
+            final String config = value.get();
+            LOGGER.debug("Initializing notifications for tenant '{}' from {}.", username, config);
+            readConfig(config).ifPresent(props -> CONFIGURATIONS.put(username, props));
+        }
+        return Optional.ofNullable(CONFIGURATIONS.get(username));
+    }
+
+    Stream<RefreshableConfigStorage> getTenantConfigurations() {
+        return TenantState.getKnownTenants().stream()
                 .map(SessionInfo::new)
-                .forEach(sessionInfo -> {
-                    final Optional<String> value = ListenerServiceLoader.getNotificationConfiguration(sessionInfo);
-                    final String username = sessionInfo.getUsername();
-                    if (value.isPresent()) {
-                        initialize(username, value.get());
-                    } else {
-                        LOGGER.debug("Not enabling notifications for tenant '{}'.", username);
-                    }
-                });
+                .map(this::getTenantConfigurations)
+                .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
+                .peek(c -> Scheduler.inBackground().submit(c, Settings.INSTANCE.getRemoteResourceRefreshInterval()));
     }
 
     @Override
     public <T extends Event> Stream<EventListenerSupplier<T>> findListeners(final Class<T> eventType) {
-        if (!IS_INITIALIZED.getAndSet(true)) {
-            initialize();
-        }
         final NotificationEventListenerSupplier<T> l = new NotificationEventListenerSupplier<>(eventType);
-        PROPERTIES.values().forEach(v -> v.registerListener(l));
-        return Stream.of(Target.values())
-                .map(l::get)
-                .map(e -> () -> e);
+        final long tenants = getTenantConfigurations()
+                .peek(config -> config.registerListener(l))
+                .count();
+        if (tenants > 0) {
+            return Stream.of(Target.values()).map(e -> () -> l.apply(e));
+        } else {
+            return Stream.empty();
+        }
     }
 }

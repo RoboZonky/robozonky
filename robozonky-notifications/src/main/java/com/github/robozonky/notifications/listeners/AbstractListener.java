@@ -16,10 +16,8 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,7 +33,6 @@ import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.templates.TemplateProcessor;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,28 +40,28 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractListener<T extends Event> implements EventListener<T> {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final Collection<BiConsumer<T, SessionInfo>> finishers = new FastList<>(1);
-    private final AbstractTargetHandler handler;
-    private final SupportedListener listener;
     protected final BalanceTracker balanceTracker;
     protected final DelinquencyTracker delinquencyTracker;
+    private final AbstractTargetHandler handler;
+    private final SupportedListener listener;
 
     protected AbstractListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         this.listener = listener;
         this.handler = handler;
         this.balanceTracker = new BalanceTracker(handler.getTarget());
         this.delinquencyTracker = new DelinquencyTracker(handler.getTarget());
-        this.registerFinisher((event, sessionInfo) -> {
-            if (event instanceof Financial) { // register balance
-                final int balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
-                balanceTracker.setLastKnownBalance(sessionInfo, balance);
-            }
-        });
     }
 
-    final void registerFinisher(final BiConsumer<T, SessionInfo> finisher) {
-        if (!finishers.contains(finisher)) {
-            this.finishers.add(finisher);
+    /**
+     * Override to run custom code after {@link #handle(Event, SessionInfo)} has finished processing. Always call
+     * {@link AbstractListener#finish(Event, SessionInfo)} in your override.
+     * @param event
+     * @param sessionInfo
+     */
+    protected void finish(final T event, final SessionInfo sessionInfo) {
+        if (event instanceof Financial) { // register balance
+            final int balance = ((Financial) event).getPortfolioOverview().getCzkAvailable();
+            balanceTracker.setLastKnownBalance(sessionInfo, balance);
         }
     }
 
@@ -124,13 +121,11 @@ abstract class AbstractListener<T extends Event> implements EventListener<T> {
         } catch (final Exception ex) {
             throw new IllegalStateException("Event processing failed.", ex);
         } finally {
-            finishers.forEach(f -> {
-                try {
-                    f.accept(event, sessionInfo);
-                } catch (final Exception ex) {
-                    LOGGER.trace("Finisher failed.", ex);
-                }
-            });
+            try {
+                finish(event, sessionInfo);
+            } catch (final Exception ex) {
+                LOGGER.trace("Finisher failed.", ex);
+            }
         }
     }
 }

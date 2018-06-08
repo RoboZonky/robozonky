@@ -16,14 +16,35 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.util.Map;
+
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 
-public class LoanNoLongerDelinquentEventListener extends AbstractLoanTerminatedListener<LoanNoLongerDelinquentEvent> {
+public class LoanNoLongerDelinquentEventListener extends AbstractListener<LoanNoLongerDelinquentEvent> {
 
     public LoanNoLongerDelinquentEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
+    }
+
+    @Override
+    protected void finish(final LoanNoLongerDelinquentEvent event, final SessionInfo sessionInfo) {
+        super.finish(event, sessionInfo);
+        delinquencyTracker.unsetDelinquent(sessionInfo, event.getInvestment());
+    }
+
+    @Override
+    boolean shouldNotify(final LoanNoLongerDelinquentEvent event, final SessionInfo sessionInfo) {
+        return super.shouldNotify(event, sessionInfo) && delinquencyTracker.isDelinquent(sessionInfo,
+                                                                                         event.getInvestment());
+    }
+
+    @Override
+    protected Map<String, Object> getData(final LoanNoLongerDelinquentEvent event) {
+        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getCollectionActions(),
+                                      event.getDelinquentSince());
     }
 
     @Override

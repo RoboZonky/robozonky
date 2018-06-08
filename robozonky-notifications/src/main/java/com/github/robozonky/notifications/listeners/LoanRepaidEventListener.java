@@ -18,6 +18,7 @@ package com.github.robozonky.notifications.listeners;
 
 import java.util.Map;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.notifications.AbstractTargetHandler;
@@ -28,6 +29,12 @@ public class LoanRepaidEventListener extends AbstractListener<LoanRepaidEvent> {
 
     public LoanRepaidEventListener(final SupportedListener listener, final AbstractTargetHandler handler) {
         super(listener, handler);
+    }
+
+    @Override
+    protected void finish(final LoanRepaidEvent event, final SessionInfo sessionInfo) {
+        super.finish(event, sessionInfo);
+        delinquencyTracker.unsetDelinquent(sessionInfo, event.getInvestment());
     }
 
     @Override

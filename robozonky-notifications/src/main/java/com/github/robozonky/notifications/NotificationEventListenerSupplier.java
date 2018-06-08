@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
@@ -30,7 +31,8 @@ import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class NotificationEventListenerSupplier<T extends Event> implements Refreshable.RefreshListener<ConfigStorage> {
+final class NotificationEventListenerSupplier<T extends Event> implements Refreshable.RefreshListener<ConfigStorage>,
+                                                                          Function<Target, Optional<EventListener<T>>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationEventListenerSupplier.class);
 
@@ -50,7 +52,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
         }
     }
 
-    public Optional<EventListener<T>> get(final Target target) {
+    public Optional<EventListener<T>> apply(final Target target) {
         return Optional.ofNullable(value.get().get(target));
     }
 

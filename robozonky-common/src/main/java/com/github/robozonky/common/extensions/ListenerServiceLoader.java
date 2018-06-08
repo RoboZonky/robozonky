@@ -68,10 +68,21 @@ public final class ListenerServiceLoader {
      * @param configurationLocation Location of notification configuration.
      */
     public static void registerNotificationConfiguration(final SessionInfo session, final URL configurationLocation) {
+        registerNotificationConfiguration(session, configurationLocation.toExternalForm());
+    }
+
+    /**
+     * Make sure the location for notifications configuration is stored for a given tenant. This is to work around the
+     * fact that there is no way how to pass properties to robozonky-notifications, due to them being service-loaded.
+     * @param session Tenant in question.
+     * @param configurationLocation Location of notification configuration.
+     */
+    public static void registerNotificationConfiguration(final SessionInfo session,
+                                                         final String configurationLocation) {
         LOGGER.debug("Tenant '{}' notification configuration: '{}'.", session.getUsername(), configurationLocation);
         TenantState.of(session)
                 .in(ListenerService.class)
-                .update(state -> state.put(CONFIG_LOCATION_PROPERTY, configurationLocation.toExternalForm()));
+                .update(state -> state.put(CONFIG_LOCATION_PROPERTY, configurationLocation));
     }
 
     static <T extends Event> List<EventListenerSupplier<T>> load(final Class<T> eventType,
