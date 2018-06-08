@@ -123,19 +123,10 @@
            id="notifications.title"/>
     <field type="divider" />
     <field type="check" variable="isInvestmentNotificationEnabled">
-      <spec txt="Investice zpracována." set="false"/>
+      <spec txt="Nové investice a zdraví existujících." set="false"/>
     </field>
     <field type="check" variable="isBalanceOver200NotificationEnabled">
       <spec txt="Zůstatek v peněžence přesáhl 200,- Kč." set="false"/>
-    </field>
-    <field type="check" variable="isLoanDelinquent10PlusEnabled">
-      <spec txt="Půjčka je více než 10 dní v prodlení." set="true"/>
-    </field>
-    <field type="check" variable="isLoanDefaultedEnabled">
-      <spec txt="Půjčka byla zesplatněna." set="true"/>
-    </field>
-    <field type="check" variable="isLoanNoLongerDelinquentEnabled">
-      <spec txt="Půjčka již není v prodlení." set="true"/>
     </field>
     <field type="check" variable="isFailureNotificationEnabled">
       <spec txt="Chyba RoboZonky, robot pravděpodobně pokračuje." set="false"/>
