@@ -30,6 +30,7 @@ import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
@@ -52,6 +53,7 @@ import com.github.robozonky.notifications.listeners.InvestmentSkippedEventListen
 import com.github.robozonky.notifications.listeners.InvestmentSoldEventListener;
 import com.github.robozonky.notifications.listeners.LoanDefaultedEventListener;
 import com.github.robozonky.notifications.listeners.LoanDelinquentEventListener;
+import com.github.robozonky.notifications.listeners.LoanLostEventListener;
 import com.github.robozonky.notifications.listeners.LoanNoLongerDelinquentEventListener;
 import com.github.robozonky.notifications.listeners.LoanRepaidEventListener;
 import com.github.robozonky.notifications.listeners.RemoteOperationFailedEventListener;
@@ -219,6 +221,17 @@ public enum SupportedListener {
         @Override
         public Class<? extends Event> getEventType() {
             return LoanDefaultedEvent.class;
+        }
+    },
+    LOAN_LOST {
+        @Override
+        public EventListener<? extends Event> getListener(final AbstractTargetHandler targetHandler) {
+            return new LoanLostEventListener(this, targetHandler);
+        }
+
+        @Override
+        public Class<? extends Event> getEventType() {
+            return LoanLostEvent.class;
         }
     },
     LOAN_REPAID {
