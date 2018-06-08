@@ -24,14 +24,12 @@ import java.util.stream.Stream;
 final class InstanceStateImpl<T> implements InstanceState<T> {
 
     private final String sectionName;
-    private final StateStorage underlying, current;
+    private final StateStorage current;
     private final TenantState parent;
 
-    public InstanceStateImpl(final TenantState parent, final String sectionName, final StateStorage current,
-                             final StateStorage underlying) {
+    public InstanceStateImpl(final TenantState parent, final String sectionName, final StateStorage current) {
         this.parent = parent;
         this.sectionName = sectionName;
-        this.underlying = underlying;
         this.current = current;
     }
 
@@ -66,10 +64,6 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
         return current;
     }
 
-    StateStorage getUnderlyingStorage() {
-        return underlying;
-    }
-
     @Override
     public Optional<String> getValue(final String key) {
         parent.assertNotDestroyed();
@@ -77,15 +71,14 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
         if (currentVal.isPresent()) {
             return currentVal;
         } else {
-            return underlying.getValue(sectionName, key);
+            return Optional.empty();
         }
     }
 
     @Override
     public Stream<String> getKeys() {
         parent.assertNotDestroyed();
-        return Stream.of(current, underlying)
-                .flatMap(s -> s.getKeys(sectionName))
+        return current.getKeys(sectionName)
                 .filter(s -> !Objects.equals(s, StateReader.LAST_UPDATED_KEY));
     }
 }

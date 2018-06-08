@@ -51,7 +51,7 @@ final class Holder {
 
     static synchronized TenantState of(final SessionInfo session, final StateStorage underlying) {
         return TENANT_STATE_MAP.computeIfAbsent(identify(session),
-                                                tenantName -> new TenantState(tenantName, underlying));
+                                                tenantName -> new TenantState(tenantName));
     }
 
     static synchronized void destroy(final TenantState tenantState) {
