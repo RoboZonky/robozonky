@@ -18,6 +18,7 @@ package com.github.robozonky.app.portfolio;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -37,6 +38,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.state.InstanceState;
+import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +63,8 @@ enum DelinquencyCategory {
 
     private static boolean isOverThreshold(final Investment d, final int threshold) {
         final Duration target = Duration.ofDays(threshold);
-        final LocalDate since = getPaymentMissedDate(d);
-        final Duration actual = Duration.between(since, LocalDate.now()).abs();
+        final OffsetDateTime since = getPaymentMissedDate(d).atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime();
+        final Duration actual = Duration.between(since, OffsetDateTime.now()).abs();
         return actual.compareTo(target) >= 0;
     }
 
