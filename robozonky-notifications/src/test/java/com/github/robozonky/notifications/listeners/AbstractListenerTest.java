@@ -182,7 +182,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                                                                         "notifications-enabled.cfg").toURI().toURL());
     }
 
-    AbstractTargetHandler getHandler(final ConfigStorage storage) {
+    static AbstractTargetHandler getHandler(final ConfigStorage storage) {
         final AbstractTargetHandler p = new AbstractTargetHandler(storage, Target.EMAIL) {
             @Override
             public void actuallySend(final SessionInfo sessionInfo, final String subject, final String message) {
@@ -192,8 +192,9 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         return spy(p);
     }
 
-    AbstractTargetHandler getHandler() throws IOException {
-        final ConfigStorage cs = ConfigStorage.create(getClass().getResourceAsStream("notifications-enabled.cfg"));
+    static AbstractTargetHandler getHandler() throws IOException {
+        final ConfigStorage cs =
+                ConfigStorage.create(AbstractListenerTest.class.getResourceAsStream("notifications-enabled.cfg"));
         return getHandler(cs);
     }
 
