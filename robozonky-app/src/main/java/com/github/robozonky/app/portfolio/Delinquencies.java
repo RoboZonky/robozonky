@@ -96,6 +96,9 @@ public class Delinquencies {
                 case WRITTEN_OFF: // investment is lost for good
                     Events.fire(new LoanLostEvent(investment, loan));
                     return;
+                case PAID:
+                    LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.", id);
+                    return;
                 default:
                     Events.fire(new LoanNoLongerDelinquentEvent(investment, loan));
                     return;
