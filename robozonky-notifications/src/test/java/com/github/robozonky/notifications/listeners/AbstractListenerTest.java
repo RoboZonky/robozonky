@@ -157,6 +157,16 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         assertThat(supplier).isNotEmpty();
     }
 
+    static AbstractTargetHandler getHandler(final ConfigStorage storage) {
+        return spy(new TestingTargetHandler(storage));
+    }
+
+    static AbstractTargetHandler getHandler() throws IOException {
+        final ConfigStorage cs =
+                ConfigStorage.create(AbstractListenerTest.class.getResourceAsStream("notifications-enabled.cfg"));
+        return getHandler(cs);
+    }
+
     private DynamicContainer forListener(final SupportedListener listener, final Event e) throws IOException {
         final AbstractTargetHandler p = getHandler();
         final AbstractListener<Event> l = getListener(listener, p);
@@ -180,22 +190,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         ListenerServiceLoader.registerNotificationConfiguration(SESSION_INFO,
                                                                 AbstractListenerTest.class.getResource(
                                                                         "notifications-enabled.cfg").toURI().toURL());
-    }
-
-    static AbstractTargetHandler getHandler(final ConfigStorage storage) {
-        final AbstractTargetHandler p = new AbstractTargetHandler(storage, Target.EMAIL) {
-            @Override
-            public void actuallySend(final SessionInfo sessionInfo, final String subject, final String message) {
-
-            }
-        };
-        return spy(p);
-    }
-
-    static AbstractTargetHandler getHandler() throws IOException {
-        final ConfigStorage cs =
-                ConfigStorage.create(AbstractListenerTest.class.getResourceAsStream("notifications-enabled.cfg"));
-        return getHandler(cs);
     }
 
     @Test
@@ -287,6 +281,19 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                             new InvestmentPurchasedEvent(i, loan, MAX_PORTFOLIO)),
                 forListener(SupportedListener.SALE_OFFERED, new SaleOfferedEvent(i, loan))
         );
+    }
+
+    private static class TestingTargetHandler extends AbstractTargetHandler {
+
+        public TestingTargetHandler(final ConfigStorage storage) {
+            super(storage, Target.EMAIL);
+        }
+
+        @Override
+        public void actuallySend(SessionInfo sessionInfo, String subject,
+                                 String message) throws Exception {
+
+        }
     }
 
     private static final class TestingEmailingListener extends AbstractListener<RoboZonkyTestingEvent> {
