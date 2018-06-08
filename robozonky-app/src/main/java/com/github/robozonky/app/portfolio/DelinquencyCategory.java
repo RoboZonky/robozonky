@@ -59,9 +59,10 @@ enum DelinquencyCategory {
         this.thresholdInDays = thresholdInDays;
     }
 
-    private static boolean isOverThreshold(final Delinquency d, final int threshold) {
+    private static boolean isOverThreshold(final Investment d, final int threshold) {
         final Duration target = Duration.ofDays(threshold);
-        final Duration actual = d.getDuration();
+        final LocalDate since = getPaymentMissedDate(d);
+        final Duration actual = Duration.between(since, LocalDate.now()).abs();
         return actual.compareTo(target) >= 0;
     }
 
@@ -99,8 +100,14 @@ enum DelinquencyCategory {
         return "notified" + dayThreshold + "plus";
     }
 
-    private static boolean isRelated(final Delinquency d, final int loanId) {
-        return d.getParent().getLoanId() == loanId;
+    private static boolean isRelated(final Investment i, final int loanId) {
+        return i.getLoanId() == loanId;
+    }
+
+    private static LocalDate getPaymentMissedDate(final Investment i) {
+        return i.getNextPaymentDate()
+                .orElseThrow(() -> new IllegalStateException("Unexpected missing date: " + i.getId()))
+                .toLocalDate();
     }
 
     /**
@@ -114,12 +121,11 @@ enum DelinquencyCategory {
      * Update internal state trackers and send events if necessary.
      * @param tenant Session identifier.
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
-     * @param investmentSupplier Retrieves the investment instance for a particular loan ID.
      * @param loanSupplier Retrieves the loan instance for a particular loan ID.
      * @return IDs of loans that are being tracked in this category.
      */
-    public int[] update(final Tenant tenant, final Collection<Delinquency> active,
-                        final Function<Loan, Investment> investmentSupplier, final Function<Integer, Loan> loanSupplier,
+    public int[] update(final Tenant tenant, final Collection<Investment> active,
+                        final Function<Integer, Loan> loanSupplier,
                         final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
         LOGGER.trace("Updating {}.", this);
         final InstanceState<DelinquencyCategory> state = tenant.getState(DelinquencyCategory.class);
@@ -134,14 +140,13 @@ enum DelinquencyCategory {
                 .filter(d -> isOverThreshold(d, thresholdInDays))
                 .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
                 .peek(d -> {
-                    final int loanId = d.getParent().getLoanId();
+                    final int loanId = d.getLoanId();
                     final Loan l = loanSupplier.apply(loanId);
-                    final Investment i = investmentSupplier.apply(l);
-                    final Event e = getEvent(d.getPaymentMissedDate(), i, l, thresholdInDays,
-                                             collectionsSupplier.apply(l, d.getPaymentMissedDate()));
+                    final LocalDate since = getPaymentMissedDate(d);
+                    final Event e = getEvent(since, d, l, thresholdInDays, collectionsSupplier.apply(l, since));
                     Events.fire(e);
                 })
-                .mapToInt(d -> d.getParent().getLoanId());
+                .mapToInt(Investment::getLoanId);
         final int[] storeThese = IntStream.concat(IntStream.of(keepThese), addThese).distinct().sorted().toArray();
         state.update(b -> b.put(fieldName, toIdString(storeThese)));
         LOGGER.trace("Update over, stored {}.", storeThese);

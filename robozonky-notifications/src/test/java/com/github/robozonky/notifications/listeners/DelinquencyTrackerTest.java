@@ -87,8 +87,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
                 new LoanDelinquentEventListener(SupportedListener.LOAN_DELINQUENT_10_PLUS, h);
         final EventListener<LoanNoLongerDelinquentEvent> l2 =
                 new LoanNoLongerDelinquentEventListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT, h);
-        final LoanNoLongerDelinquentEvent evt =
-                new LoanNoLongerDelinquentEvent(INVESTMENT, LOAN, LocalDate.now(), Collections.emptyList());
+        final LoanNoLongerDelinquentEvent evt = new LoanNoLongerDelinquentEvent(INVESTMENT, LOAN);
         l2.handle(evt, SESSION);
         verify(h, never()).actuallySend(any(), any(), any()); // not delinquent before, not sending
         l.handle(new LoanDelinquent10DaysOrMoreEvent(INVESTMENT, LOAN, LocalDate.now(), Collections.emptyList()),
