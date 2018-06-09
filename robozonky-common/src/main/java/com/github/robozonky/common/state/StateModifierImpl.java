@@ -26,22 +26,19 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 final class StateModifierImpl<T> implements StateModifier<T>,
                                             Callable<Boolean> {
 
-    private final Collection<BiConsumer<StateStorage, String>> actions = new FastList<>(0),
-            consistency = new FastList<>(0);
+    private final Collection<BiConsumer<StateStorage, String>> actions = new FastList<>(0);
     private final InstanceStateImpl<T> state;
 
     public StateModifierImpl(final InstanceStateImpl<T> state, final boolean fresh) {
         this.state = state;
         if (fresh) { // first action is to reset the class-specific state
             actions.add(StateStorage::unsetValues);
-            consistency.add(StateStorage::unsetValues);
         }
     }
 
     @Override
     public StateModifier<T> put(final String key, final String value) {
         actions.add((state, section) -> state.setValue(section, key, value));
-        consistency.add((state, section) -> state.unsetValue(section, key)); // remove this from backup, as it's in main
         return this;
     }
 
@@ -49,7 +46,6 @@ final class StateModifierImpl<T> implements StateModifier<T>,
     public StateModifier<T> remove(final String key) {
         final BiConsumer<StateStorage, String> action = (state, section) -> state.unsetValue(section, key);
         actions.add(action);
-        consistency.add(action); // also remove the item from backup, otherwise parent still sees it there and retrieves
         return this;
     }
 
@@ -59,12 +55,6 @@ final class StateModifierImpl<T> implements StateModifier<T>,
         final StateStorage backend = state.getStorage();
         actions.forEach(a -> a.accept(backend, sectionName));
         backend.setValue(sectionName, StateReader.LAST_UPDATED_KEY, OffsetDateTime.now().toString());
-        if (backend.store()) { // perform changes to backup if necessary
-            final StateStorage underlying = state.getUnderlyingStorage();
-            consistency.forEach(a -> a.accept(underlying, sectionName));
-            return underlying.store();
-        } else {
-            return false;
-        }
+        return backend.store();
     }
 }

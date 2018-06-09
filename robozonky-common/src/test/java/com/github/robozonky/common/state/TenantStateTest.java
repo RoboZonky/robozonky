@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.mock;
 
 class TenantStateTest {
 
@@ -64,7 +63,7 @@ class TenantStateTest {
 
     @Test
     void destroysProperly() {
-        final TenantState s = new TenantState("someone@robozonky.cz", mock(StateStorage.class));
+        final TenantState s = new TenantState("someone@robozonky.cz");
         final InstanceState<TenantStateTest> cats = s.in(TenantStateTest.class);
         assertThat(cats).isNotNull();
         cats.reset(); // will succeed
