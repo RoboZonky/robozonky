@@ -101,7 +101,7 @@
   </panels>
 
   <packs>
-    <pack name="RoboZonky: Binární distribuce" required="yes">
+    <pack id="main" name="Main" required="yes">
       <description>Jádro investičního robota a základní podpůrné soubory</description>
       <file src="robozonky-distribution-full-@{project.version}.tar.xz"
             targetdir="${INSTALL_PATH}/Dist"
