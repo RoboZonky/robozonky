@@ -227,7 +227,9 @@ public class Delinquents {
      */
     public static void update(final Tenant tenant, final Portfolio portfolio) {
         final Collection<Investment> delinquentInvestments =
-                tenant.call(z -> z.getInvestments(new Select().equals("loan.unpaidLastInst", "true")))
+                tenant.call(z -> z.getInvestments(new Select()
+                                                          .equals("loan.unpaidLastInst", "true")
+                                                          .equals("status", "ACTIVE")))
                         .collect(Collectors.toList());
         update(tenant, delinquentInvestments, l -> portfolio.lookupOrFail(l, tenant),
                id -> tenant.call(z -> LoanCache.INSTANCE.getLoan(id, z)), (l, s) -> getDevelopments(tenant, l, s)
