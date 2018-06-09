@@ -144,6 +144,6 @@ public class Portfolio {
 
     public PortfolioOverview calculateOverview() {
         return PortfolioOverview.calculate(getRemoteBalance().get(), statistics, transactions.getAdjustments(),
-                                           Delinquents.getAmountsAtRisk());
+                                           Delinquencies.getAmountsAtRisk());
     }
 }

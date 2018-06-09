@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.portfolio.Delinquents;
+import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.app.portfolio.RemoteBalance;
@@ -70,7 +70,7 @@ class PortfolioUpdater implements Runnable,
         final RemoteBalance balance = RemoteBalance.create(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
-        updater.registerDependant((p, a) -> Delinquents.update(a));
+        updater.registerDependant((p, a) -> Delinquencies.update(a));
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
         // update loans repaid

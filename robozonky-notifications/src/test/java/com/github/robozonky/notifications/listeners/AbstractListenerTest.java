@@ -42,6 +42,7 @@ import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
@@ -54,11 +55,9 @@ import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
-import com.github.robozonky.api.remote.enums.DevelopmentType;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -100,22 +99,6 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
     private static final RoboZonkyTestingEvent EVENT = new RoboZonkyTestingEvent();
     private static final PortfolioOverview MAX_PORTFOLIO = mockPortfolio(Integer.MAX_VALUE);
     private static final SessionInfo SESSION_INFO = new SessionInfo("someone@somewhere.net");
-
-    private static Development mockCollectionNoEndDate() {
-        return Development.custom()
-                .setType(DevelopmentType.OTHER)
-                .setPublicNote("Some note.")
-                .setDateFrom(OffsetDateTime.now())
-                .build();
-    }
-
-    private static Development mockCollectionNoNote() {
-        return Development.custom()
-                .setType(DevelopmentType.OTHER)
-                .setDateFrom(OffsetDateTime.now().minusDays(1))
-                .setDateTo(OffsetDateTime.now())
-                .build();
-    }
 
     private static PortfolioOverview mockPortfolio(final int balance) {
         final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
@@ -242,11 +225,11 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
                 forListener(SupportedListener.INVESTMENT_REJECTED,
                             new InvestmentRejectedEvent(recommendation, "random")),
                 forListener(SupportedListener.LOAN_NO_LONGER_DELINQUENT,
-                            new LoanNoLongerDelinquentEvent(i, loan, LocalDate.now(),
-                                                            Collections.singletonList(mockCollectionNoEndDate()))),
+                            new LoanNoLongerDelinquentEvent(i, loan)),
                 forListener(SupportedListener.LOAN_DEFAULTED,
-                            new LoanDefaultedEvent(i, loan, LocalDate.now(),
-                                                   Collections.singletonList(mockCollectionNoNote()))),
+                            new LoanDefaultedEvent(i, loan)),
+                forListener(SupportedListener.LOAN_LOST,
+                            new LoanLostEvent(i, loan)),
                 forListener(SupportedListener.LOAN_NOW_DELINQUENT,
                             new LoanNowDelinquentEvent(i, loan, LocalDate.now(), Collections.emptyList())),
                 forListener(SupportedListener.LOAN_DELINQUENT_10_PLUS,

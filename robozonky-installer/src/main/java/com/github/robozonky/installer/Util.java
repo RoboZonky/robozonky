@@ -56,21 +56,14 @@ class Util {
         p.setProperty("email.smtp.requiresStartTLS", toBoolean(Variables.SMTP_IS_TLS.getValue(data)));
         p.setProperty("email.smtp.requiresSslOnConnect", toBoolean(Variables.SMTP_IS_SSL.getValue(data)));
         final String isInvestmentEmailEnabled = toBoolean(Variables.EMAIL_IS_INVESTMENT.getValue(data));
-        p.setProperty("email.investmentSkipped.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.investmentPurchased.enabled", isInvestmentEmailEnabled);
-        p.setProperty("email.investmentRejected.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.investmentMade.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.investmentSold.enabled", isInvestmentEmailEnabled);
-        p.setProperty("email.investmentDelegated.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.saleOffered.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.loanRepaid.enabled", isInvestmentEmailEnabled);
-        p.setProperty("email.loanNowDelinquent.enabled", "false"); // by default, let's prevent people from panicking
-        p.setProperty("email.loanNoLongerDelinquent.enabled",
-                      toBoolean(Variables.EMAIL_IS_LOAN_NOT_DELINQUENT.getValue(data)));
-        p.setProperty("email.loanDelinquent10DaysOrMore.enabled",
-                      toBoolean(Variables.EMAIL_IS_LOAN_DELINQUENT_10_PLUS.getValue(data)));
-        p.setProperty("email.loanDefaulted.enabled",
-                      toBoolean(Variables.EMAIL_IS_LOAN_DEFAULTED.getValue(data)));
+        p.setProperty("email.loanLost.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.loanDefaulted.enabled", isInvestmentEmailEnabled);
+        p.setProperty("email.loanNoLongerDelinquent.enabled", isInvestmentEmailEnabled);
         p.setProperty("email.balanceTracker.enabled", toBoolean(Variables.EMAIL_IS_BALANCE_OVER_200.getValue(data)));
         p.setProperty("email.balanceTracker.targetBalance", "200");
         p.setProperty("email.roboZonkyDaemonFailed.enabled", toBoolean(Variables.EMAIL_IS_FAILURE.getValue(data)));

@@ -18,11 +18,13 @@ package com.github.robozonky.app.configuration;
 
 import java.util.Optional;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.app.configuration.daemon.DaemonInvestmentMode;
+import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CommandLineTest extends AbstractRoboZonkyTest {
 
@@ -36,11 +38,13 @@ class CommandLineTest extends AbstractRoboZonkyTest {
 
     @Test
     void validDaemonCli() {
+        final String username = "someone@somewhere.cz";
         // will fail since inside AuthenticationCommandLineFragment, -u and -g are exclusive
         final Optional<InvestmentMode> cfg = CommandLine.parse((t) -> {
-                                                               }, "-u", "someone", "-p", "password",
-                                                               "daemon", "-s", "somewhere");
+                                                               }, "-u", username, "-p", "password",
+                                                               "-i", "somewhere.txt", "daemon", "-s", "somewhere");
         assertThat(cfg).isPresent().containsInstanceOf(DaemonInvestmentMode.class);
+        assertThat(ListenerServiceLoader.getNotificationConfiguration(new SessionInfo(username))).isNotEmpty();
     }
 
     @Test

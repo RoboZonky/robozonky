@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2018 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@ package com.github.robozonky.api.notifications;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 
-public final class LoanDefaultedEvent extends Event implements InvestmentBased {
+/**
+ * Fired when the application detects that Zonky marked a particular investment as lost. The remaining principal will
+ * never be retrieved.
+ */
+public final class LoanLostEvent extends Event implements InvestmentBased {
 
     private final Investment investment;
     private final Loan loan;
 
-    public LoanDefaultedEvent(final Investment investment, final Loan loan) {
+    public LoanLostEvent(final Investment investment, final Loan loan) {
         this.investment = investment;
         this.loan = loan;
     }
@@ -38,5 +42,4 @@ public final class LoanDefaultedEvent extends Event implements InvestmentBased {
     public Loan getLoan() {
         return loan;
     }
-
 }

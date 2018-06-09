@@ -21,10 +21,15 @@ import java.util.Optional;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class EventsTest extends AbstractEventLeveragingTest {
 
@@ -40,5 +45,27 @@ class EventsTest extends AbstractEventLeveragingTest {
         Events.fire(e);
         assertThat(Events.getFired()).contains(e);
         verify(listener).handle(eq(e), any());
+    }
+
+    @Test
+    void pausing() {
+        Events.INSTANCE.pause();
+        Events.fire(new RoboZonkyTestingEvent());
+        assertThat(getNewEvents()).isEmpty();
+        Events.INSTANCE.resume();
+        assertThat(getNewEvents())
+                .first()
+                .isInstanceOf(RoboZonkyTestingEvent.class);
+    }
+
+    @Test
+    void clearing() {
+        Events.INSTANCE.pause();
+        Events.fire(new RoboZonkyTestingEvent());
+        assertThat(getNewEvents()).isEmpty();
+        Events.INSTANCE.clear();
+        Events.INSTANCE.resume();
+        assertThat(getNewEvents())
+                .isEmpty();
     }
 }

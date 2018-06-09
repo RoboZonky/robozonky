@@ -21,8 +21,6 @@ import com.izforge.izpack.api.data.InstallData;
 enum Variables {
 
     EMAIL_IS_LOAN_DELINQUENT_10_PLUS("isLoanDelinquent10PlusEnabled"),
-    EMAIL_IS_LOAN_DEFAULTED("isLoanDefaultedEnabled"),
-    EMAIL_IS_LOAN_NOT_DELINQUENT("isLoanNoLongerDelinquentEnabled"),
     EMAIL_IS_INVESTMENT("isInvestmentNotificationEnabled"),
     EMAIL_IS_BALANCE_OVER_200("isBalanceOver200NotificationEnabled"),
     EMAIL_IS_FAILURE("isFailureNotificationEnabled"),
