@@ -25,14 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.remote.entities.RawInvestment;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
@@ -44,14 +42,17 @@ import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.common.state.TenantState;
+import com.github.robozonky.util.BigDecimalCalculator;
 import org.eclipse.collections.api.set.primitive.IntSet;
 import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Historical record of which {@link RawInvestment}s have been delinquent and when.
- */
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.toList;
+
 public class Delinquencies {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Delinquencies.class);
@@ -70,8 +71,8 @@ public class Delinquencies {
 
     private static Stream<String> toIds(final Stream<Investment> investments) {
         return investments.mapToInt(Investment::getId)
-                .sorted()
                 .distinct()
+                .sorted()
                 .mapToObj(Integer::toString);
     }
 
@@ -79,31 +80,33 @@ public class Delinquencies {
         return IntHashSet.newSetWith(investments.toArray());
     }
 
+    private static void processNoLongerDelinquent(final Tenant tenant, final int investmentId) {
+        final Optional<Investment> inv = tenant.call(z -> z.getInvestment(investmentId));
+        if (!inv.isPresent()) {
+            LOGGER.warn("Investment not found while it really should have been: #{}.", investmentId);
+            return;
+        }
+        final Investment investment = inv.get();
+        if (!investment.getPaymentStatus().isPresent()) {
+            LOGGER.warn("Payment status for investment not found while it really should have been: #{}.", investmentId);
+            return;
+        }
+        final Loan loan = tenant.call(z -> LoanCache.INSTANCE.getLoan(investment.getLoanId(), z));
+        switch (investment.getPaymentStatus().get()) {
+            case WRITTEN_OFF: // investment is lost for good
+                Events.fire(new LoanLostEvent(investment, loan));
+                return;
+            case PAID:
+                LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.", investmentId);
+                return;
+            default:
+                Events.fire(new LoanNoLongerDelinquentEvent(investment, loan));
+                return;
+        }
+    }
+
     private static void processNoLongerDelinquent(final Tenant tenant, final IntSet investmentIds) {
-        investmentIds.forEach(id -> {
-            final Optional<Investment> inv = tenant.call(z -> z.getInvestment(id));
-            if (!inv.isPresent()) {
-                LOGGER.warn("Investment not found while it really should have been: #{}.", id);
-                return;
-            }
-            final Investment investment = inv.get();
-            if (!investment.getPaymentStatus().isPresent()) {
-                LOGGER.warn("Payment status for investment not found while it really should have been: #{}.", id);
-                return;
-            }
-            final Loan loan = tenant.call(z -> LoanCache.INSTANCE.getLoan(investment.getLoanId(), z));
-            switch (investment.getPaymentStatus().get()) {
-                case WRITTEN_OFF: // investment is lost for good
-                    Events.fire(new LoanLostEvent(investment, loan));
-                    return;
-                case PAID:
-                    LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.", id);
-                    return;
-                default:
-                    Events.fire(new LoanNoLongerDelinquentEvent(investment, loan));
-                    return;
-            }
-        });
+        investmentIds.forEach(id -> processNoLongerDelinquent(tenant, id));
     }
 
     private static void processNewDefaults(final Tenant tenant, final Collection<Investment> investments) {
@@ -124,12 +127,12 @@ public class Delinquencies {
                        final IntSet knownDefaulted) {
         final Collection<Investment> newDefaults = onlyDefaulted(nowDelinquent)
                 .filter(i -> !knownDefaulted.contains(i.getId()))
-                .collect(Collectors.toList());
+                .collect(toList());
         processNewDefaults(tenant, newDefaults);
         final Collection<Investment> stillDelinquent = nowDelinquent.stream()
                 .filter(i -> !newDefaults.contains(i))
                 .filter(i -> !knownDefaulted.contains(i.getId()))
-                .collect(Collectors.toList());
+                .collect(toList());
         processNonDefaultDelinquents(tenant, stillDelinquent);
         final IntSet noLongerDelinquent =
                 knownDelinquents.reject(d -> nowDelinquent.stream().anyMatch(i -> i.getId() == d));
@@ -144,8 +147,10 @@ public class Delinquencies {
     public static void update(final Tenant tenant) {
         LOGGER.debug("Updating delinquent loans.");
         final Collection<Investment> delinquentInvestments =
-                tenant.call(z -> z.getInvestments(new Select().equals("loan.unpaidLastInst", "true")))
-                        .collect(Collectors.toList());
+                tenant.call(z -> z.getInvestments(new Select()
+                                                          .equals("loan.unpaidLastInst", "true")
+                                                          .equals("status", "ACTIVE")))
+                        .collect(toList());
         final InstanceState<Delinquencies> state = TenantState.of(tenant.getSessionInfo())
                 .in(Delinquencies.class);
         final Optional<IntStream> delinquents = state.getValues(DELINQUENT_KEY)
@@ -157,32 +162,27 @@ public class Delinquencies {
             update(tenant, delinquentInvestments, toIdSet(delinquents.get()), toIdSet(defaulted));
         }
         // store current state
-        final Stream<String> allDelinquent = toIds(delinquentInvestments.stream());
-        final Stream<String> onlyDefaulted = toIds(onlyDefaulted(delinquentInvestments));
         state.update(b -> {
-            b.put(DELINQUENT_KEY, allDelinquent);
-            b.put(DEFAULTED_KEY, onlyDefaulted);
+            b.put(DELINQUENT_KEY, toIds(delinquentInvestments.stream()));
+            b.put(DEFAULTED_KEY, toIds(onlyDefaulted(delinquentInvestments)));
         });
         // update amounts at risk
-        final Map<Rating, BigDecimal> atRisk = new EnumMap<>(Rating.class);
-        delinquentInvestments.forEach(i -> atRisk.compute(i.getRating(), (r, old) -> {
-            final BigDecimal principalNotYetReturned = i.getRemainingPrincipal()
-                    .subtract(i.getPaidInterest())
-                    .subtract(i.getPaidPenalty());
-            final BigDecimal base = (old == null) ? BigDecimal.ZERO : old;
-            if (principalNotYetReturned.compareTo(BigDecimal.ZERO) > 0) {
-                LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.", principalNotYetReturned,
-                             i.getLoanId(), i.getId());
-                return base.add(principalNotYetReturned);
-            } else {
-                return base;
-            }
-        }));
+        final Map<Rating, BigDecimal> atRisk = delinquentInvestments.stream()
+                .collect(groupingBy(Investment::getRating,
+                                    () -> new EnumMap<>(Rating.class),
+                                    mapping(i -> {
+                                        final BigDecimal principalNotYetReturned = i.getRemainingPrincipal()
+                                                .subtract(i.getPaidInterest())
+                                                .subtract(i.getPaidPenalty());
+                                        LOGGER.debug("Delinquent: {} CZK in loan #{}, investment #{}.",
+                                                     principalNotYetReturned, i.getLoanId(), i.getId());
+                                        return principalNotYetReturned.max(BigDecimal.ZERO);
+                                    }, reducing(BigDecimal.ZERO, BigDecimalCalculator::plus))));
         AMOUNTS_AT_RISK.set(atRisk);
-        LOGGER.trace("Done, new amounts at risk are {}.", atRisk);
+        LOGGER.debug("Done, new amounts at risk are {}.", atRisk);
     }
 
-    public static Map<Rating, BigDecimal> getAmountsAtRisk() {
+    static Map<Rating, BigDecimal> getAmountsAtRisk() {
         return Delinquencies.AMOUNTS_AT_RISK.get();
     }
 
@@ -190,7 +190,7 @@ public class Delinquencies {
                                                      final LocalDate delinquentSince) {
         final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
                 .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
-                .collect(Collectors.toList());
+                .collect(toList());
         Collections.reverse(developments);
         return developments;
     }
