@@ -35,7 +35,7 @@ public class Participation extends BaseEntity {
     private String loanName;
     private Purpose purpose;
     private Rating rating;
-    private boolean willExceedLoanInvestmentLimit;
+    private boolean willExceedLoanInvestmentLimit, insuranceActive;
     private Object loanInvestments;
 
     @XmlElement
@@ -111,6 +111,11 @@ public class Participation extends BaseEntity {
     @XmlElement
     public boolean isWillExceedLoanInvestmentLimit() {
         return willExceedLoanInvestmentLimit;
+    }
+
+    @XmlElement
+    public boolean isInsuranceActive() {
+        return insuranceActive;
     }
 
     @XmlElement
