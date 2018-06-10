@@ -16,14 +16,23 @@
 
 package com.github.robozonky.app.portfolio;
 
-import java.util.function.Consumer;
-
 import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 
-/**
- * Represents code to be executed after a successful portfolio update, administered from within this package.
- */
-@FunctionalInterface
-public interface PortfolioDependant extends Consumer<TransactionalPortfolio> {
+final class TransactionalPortfolioDependant implements PortfolioDependant {
 
+    private final PortfolioDependant parent;
+
+    private TransactionalPortfolioDependant(final PortfolioDependant repayments) {
+        this.parent = repayments;
+    }
+
+    @Override
+    public void accept(final TransactionalPortfolio transactionalPortfolio) {
+        parent.accept(transactionalPortfolio);
+        transactionalPortfolio.run();
+    }
+
+    public static PortfolioDependant create(final PortfolioDependant repayments) {
+        return new TransactionalPortfolioDependant(repayments);
+    }
 }

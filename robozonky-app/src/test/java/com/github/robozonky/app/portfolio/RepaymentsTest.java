@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,11 +40,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class RepaymentsTest extends AbstractZonkyLeveragingTest {
 
@@ -51,13 +55,14 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
     private final RemoteBalance balance = mockBalance(zonky);
     private final Tenant tenant = mockTenant(zonky);
     private final Portfolio portfolio = Portfolio.create(tenant, balance);
+    private final TransactionalPortfolio transactional = new TransactionalPortfolio(portfolio, tenant);
 
     @Test
     void onlyChecksAfterInitialized() {
-        final Repayments r = new Repayments();
-        r.accept(portfolio, tenant);
+        final PortfolioDependant r = TransactionalPortfolioDependant.create(new Repayments());
+        r.accept(transactional);
         verify(zonky, never()).getTransactions(any());
-        r.accept(portfolio, tenant);
+        r.accept(transactional);
         verify(zonky).getTransactions(any());
     }
 
@@ -65,12 +70,12 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
     @DisplayName("After initialization")
     class Initialized {
 
-        private final Repayments r = new Repayments();
+        private final PortfolioDependant r = TransactionalPortfolioDependant.create(new Repayments());
         private final LocalDate lastUpdate = LocalDate.now();
 
         @BeforeEach
         void initialize() {
-            r.accept(portfolio, tenant);
+            r.accept(transactional);
         }
 
         @Test
@@ -79,7 +84,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
             final Select s = new Select()
                     .lessThan("transaction.transactionDate", portfolio.getStatistics().getTimestamp().toLocalDate())
                     .greaterThanOrEquals("transaction.transactionDate", lastUpdate);
-            r.accept(portfolio, tenant);
+            r.accept(transactional);
             verify(zonky).getTransactions(eq(s));
         }
 
@@ -101,7 +106,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
                     .thenReturn(Optional.of(Investment.custom()
                                                     .setLoanId(l3.getId())
                                                     .build()));
-            r.accept(portfolio, tenant);
+            r.accept(transactional);
             verify(zonky, never()).getLoan(eq(l1.getId()));
             verify(zonky, never()).getLoan(eq(l2.getId()));
             verify(zonky).getLoan(eq(l3.getId()));
@@ -131,7 +136,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
                                                     .setPaymentStatus(PaymentStatus.PAID)
                                                     .build()));
             // this is the test
-            r.accept(portfolio, tenant);
+            r.accept(transactional);
             final List<Event> events = getNewEvents();
             assertThat(events).hasSize(1)
                     .first().isInstanceOf(LoanRepaidEvent.class);

@@ -20,16 +20,18 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
-import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.portfolio.PortfolioDependant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.verify;
 
 class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
 
@@ -47,29 +49,33 @@ class PortfolioUpdaterTest extends AbstractZonkyLeveragingTest {
     void updatingDependants() {
         final Zonky z = harmlessZonky(10_000);
         final Tenant a = mockTenant(z);
-        final PortfolioDependant dependant = mock(PortfolioDependant.class);
+        final PortfolioDependant dependant = tp -> tp.fire(new RoboZonkyTestingEvent());
         final PortfolioUpdater instance = new PortfolioUpdater((t) -> {
         }, a, mockBalance(z));
         instance.registerDependant(dependant);
         instance.run();
-        verify(a, atLeast(1)).call(any());
-        final Optional<Portfolio> result = instance.get();
         // make sure that the dependants were called with the proper value of Portfolio
-        verify(dependant).accept(eq(result.get()), eq(a));
+        assertThat(getNewEvents()).first().isInstanceOf(RoboZonkyTestingEvent.class);
         assertThat(instance.isUpdating()).isFalse(); // it's false when update finished
     }
 
     @Test
     void backoffFailed() {
         final Zonky z = harmlessZonky(10_000);
-        doThrow(IllegalStateException.class).when(z).getStatistics(); // make backoff fail
         final Tenant a = mockTenant(z);
         final Consumer<Throwable> t = mock(Consumer.class);
         final PortfolioUpdater instance = new PortfolioUpdater(t, a, mockBalance(z), Duration.ofSeconds(2));
+        instance.registerDependant(tp -> { // fire event
+            tp.fire(new RoboZonkyTestingEvent());
+        });
+        instance.registerDependant(tp -> { // fail
+            throw new IllegalStateException("Testing exception");
+        });
         instance.run();
         assertSoftly(softly -> {
             softly.assertThat(instance.get()).isEmpty();
             softly.assertThat(instance.isUpdating()).isTrue();
+            softly.assertThat(getNewEvents()).isEmpty();
         });
         verify(t).accept(notNull());
     }

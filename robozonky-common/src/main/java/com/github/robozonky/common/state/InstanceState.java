@@ -25,20 +25,22 @@ import java.util.function.Consumer;
 public interface InstanceState<T> extends StateReader {
 
     /**
-     * Perform updates to state using a given modifier. Will only actually be performed after the modifier finishes.
+     * Perform updates to state using a given modifier. Not guaranteed to happen immediately, {@link #getValue(String)}
+     * may still reflect the state at instantiation.
      * @param modifier Modifier to use.
      */
     void update(Consumer<StateModifier<T>> modifier);
 
     /**
-     * Perform updates to state using a given setter, deleting all pre-existing state information. Will only actually
-     * be performed after the setter finishes.
+     * Perform updates to state using a given setter, deleting all pre-existing state information. Not guaranteed to
+     * happen immediately, {@link #getValue(String)} may still reflect the state at instantiation.
      * @param setter Modifier to use.
      */
     void reset(Consumer<StateModifier<T>> setter);
 
     /**
-     * Delete all pre-existing information kept here.
+     * Delete all pre-existing information kept here. Not guaranteed to happen immediately, {@link #getValue(String)}
+     * may still reflect the state at instantiation.
      */
     default void reset() {
         reset(b -> {

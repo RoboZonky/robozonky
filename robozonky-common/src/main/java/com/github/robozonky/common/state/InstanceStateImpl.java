@@ -81,4 +81,11 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
         return current.getKeys(sectionName)
                 .filter(s -> !Objects.equals(s, StateReader.LAST_UPDATED_KEY));
     }
+
+    @Override
+    public String toString() {
+        return "InstanceStateImpl{" +
+                "sectionName='" + sectionName + '\'' +
+                '}';
+    }
 }

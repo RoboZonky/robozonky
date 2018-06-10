@@ -19,20 +19,18 @@ package com.github.robozonky.app.portfolio;
 import java.time.LocalDate;
 import java.time.OffsetTime;
 import java.time.Period;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
@@ -40,15 +38,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
 
-    private static final BiFunction<Loan, LocalDate, Collection<Development>> COLLECTIONS_SUPPLIER =
-            (l, s) -> Collections.emptyList();
-    private static final Tenant TENANT = mockTenant();
-
-    private static void testEmpty(final DelinquencyCategory category) {
-        assertThat(category.update(TENANT, Collections.emptyList(), null, null)).isEmpty();
+    private void testEmpty(final DelinquencyCategory category) {
+        final TransactionalPortfolio portfolio = new TransactionalPortfolio(null, mockTenant());
+        assertThat(category.update(portfolio, Collections.emptyList())).isEmpty();
     }
 
     private void reinit() { // JUnit 5 doesn't execute before/after methods for dynamic tests
@@ -60,24 +57,28 @@ class DelinquencyCategoryTest extends AbstractZonkyLeveragingTest {
         this.reinit();
         final int loanId = 1;
         final Loan loan = Loan.custom().setId(loanId).setAmount(200).build();
-        final Function<Integer, Loan> f = (i) -> loan;
         // store a delinquent loan
         final Investment i = Investment.fresh(loan, 200)
                 .setNextPaymentDate(LocalDate.now().minus(minimumMatchingDuration).atTime(OffsetTime.now()))
                 .build();
-        assertThat(category.update(TENANT, Collections.singleton(i), f, COLLECTIONS_SUPPLIER))
+        final Zonky z = harmlessZonky(10_000);
+        when(z.getLoan(eq(loanId))).thenReturn(loan);
+        final Tenant t = mockTenant(z);
+        final TransactionalPortfolio portfolio = new TransactionalPortfolio(null, t);
+        assertThat(category.update(portfolio, Collections.singleton(i)))
                 .containsExactly(loanId);
+        portfolio.run(); // finish the transaction
         final List<Event> events = this.getNewEvents();
         assertSoftly(softly -> {
             softly.assertThat(events).hasSize(1);
             softly.assertThat(events).first().isInstanceOf(LoanDelinquentEvent.class);
         });
         // attempt to store it again, making sure no event is fired
-        assertThat(category.update(TENANT, Collections.singleton(i), f, COLLECTIONS_SUPPLIER))
+        assertThat(category.update(portfolio, Collections.singleton(i)))
                 .containsExactly(loanId);
         assertThat(this.getNewEvents()).isEqualTo(events);
         // now update with no delinquents, making sure nothing is returned
-        assertThat(category.update(TENANT, Collections.emptyList(), f, COLLECTIONS_SUPPLIER))
+        assertThat(category.update(portfolio, Collections.emptyList()))
                 .isEmpty();
         assertThat(this.getNewEvents()).isEqualTo(events);
     }

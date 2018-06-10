@@ -34,8 +34,8 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.SessionState;
 import com.github.robozonky.common.remote.Select;
@@ -63,9 +63,10 @@ public class Selling implements PortfolioDependant {
         return auth.call(zonky -> new InvestmentDescriptor(i, LoanCache.INSTANCE.getLoan(i, zonky)));
     }
 
-    private Optional<Investment> processSale(final Tenant tenant, final RecommendedInvestment r,
-                                             final SessionState<Investment> sold) {
-        Events.fire(new SaleRequestedEvent(r));
+    private Optional<Investment> processSale(final TransactionalPortfolio transactionalPortfolio,
+                                             final RecommendedInvestment r, final SessionState<Investment> sold) {
+        final Tenant tenant = transactionalPortfolio.getTenant();
+        transactionalPortfolio.fire(new SaleRequestedEvent(r));
         final Investment i = r.descriptor().item();
         if (tenant.getSessionInfo().isDryRun()) {
             LOGGER.debug("Not sending sell request for loan #{} due to dry run.", i.getLoanId());
@@ -75,38 +76,39 @@ public class Selling implements PortfolioDependant {
             tenant.run(z -> z.sell(i));
             LOGGER.trace("Request over.");
         }
-        Events.fire(new SaleOfferedEvent(i, r.descriptor().related()));
+        transactionalPortfolio.fire(new SaleOfferedEvent(i, r.descriptor().related()));
         return Optional.of(i);
     }
 
-    private void sell(final Portfolio portfolio, final SellStrategy strategy, final Tenant tenant) {
+    private void sell(final TransactionalPortfolio transactionalPortfolio, final SellStrategy strategy) {
         final Select sellable = new Select()
                 .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
                 .equals("status", "ACTIVE"); // this is how Zonky queries for this
+        final Tenant tenant = transactionalPortfolio.getTenant();
         final SessionState<Investment> sold = new SessionState<>(tenant, Investment::getLoanId, "soldInvestments");
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
                 .parallel()
                 .filter(i -> !sold.contains(i)) // to make dry run function properly
                 .map(i -> getDescriptor(i, tenant))
                 .collect(Collectors.toSet());
+        final Portfolio portfolio = transactionalPortfolio.getPortfolio();
         final PortfolioOverview overview = portfolio.calculateOverview();
-        Events.fire(new SellingStartedEvent(eligible, overview));
+        transactionalPortfolio.fire(new SellingStartedEvent(eligible, overview));
         final Collection<Investment> investmentsSold = strategy.recommend(eligible, overview)
-                .peek(r -> Events.fire(new SaleRecommendedEvent(r)))
-                .map(r -> processSale(tenant, r, sold))
+                .peek(r -> transactionalPortfolio.fire(new SaleRecommendedEvent(r)))
+                .map(r -> processSale(transactionalPortfolio, r, sold))
                 .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
                 .collect(Collectors.toSet());
-        Events.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
+        transactionalPortfolio.fire(new SellingCompletedEvent(investmentsSold, portfolio.calculateOverview()));
     }
 
     /**
      * Execute the strategy on a given portfolio. Won't do anything if the supplier in
      * {@link #Selling(Supplier)} returns and empty {@link Optional}.
      * @param portfolio Portfolio of investments to choose from.
-     * @param auth Will be used to create remote connections to the Zonky server.
      */
     @Override
-    public void accept(final Portfolio portfolio, final Tenant auth) {
-        strategy.get().ifPresent(s -> sell(portfolio, s, auth));
+    public void accept(final TransactionalPortfolio portfolio) {
+        strategy.get().ifPresent(s -> sell(portfolio, s));
     }
 }

@@ -17,11 +17,9 @@
 package com.github.robozonky.app.portfolio;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,17 +29,15 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.util.BigDecimalCalculator;
 import org.eclipse.collections.api.set.primitive.IntSet;
 import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
@@ -80,8 +76,9 @@ public class Delinquencies {
         return IntHashSet.newSetWith(investments.toArray());
     }
 
-    private static void processNoLongerDelinquent(final Tenant tenant, final int investmentId) {
-        final Optional<Investment> inv = tenant.call(z -> z.getInvestment(investmentId));
+    private static void processNoLongerDelinquent(final TransactionalPortfolio transactionalPortfolio,
+                                                  final int investmentId) {
+        final Optional<Investment> inv = transactionalPortfolio.getTenant().call(z -> z.getInvestment(investmentId));
         if (!inv.isPresent()) {
             LOGGER.warn("Investment not found while it really should have been: #{}.", investmentId);
             return;
@@ -91,78 +88,81 @@ public class Delinquencies {
             LOGGER.warn("Payment status for investment not found while it really should have been: #{}.", investmentId);
             return;
         }
-        final Loan loan = tenant.call(z -> LoanCache.INSTANCE.getLoan(investment.getLoanId(), z));
+        final Loan loan = transactionalPortfolio.getTenant()
+                .call(z -> LoanCache.INSTANCE.getLoan(investment.getLoanId(), z));
         switch (investment.getPaymentStatus().get()) {
             case WRITTEN_OFF: // investment is lost for good
-                Events.fire(new LoanLostEvent(investment, loan));
+                transactionalPortfolio.fire(new LoanLostEvent(investment, loan));
                 return;
             case PAID:
                 LOGGER.debug("Ignoring a repaid investment #{}, will be handled by Repayments.", investmentId);
                 return;
             default:
-                Events.fire(new LoanNoLongerDelinquentEvent(investment, loan));
+                transactionalPortfolio.fire(new LoanNoLongerDelinquentEvent(investment, loan));
                 return;
         }
     }
 
-    private static void processNoLongerDelinquent(final Tenant tenant, final IntSet investmentIds) {
-        investmentIds.forEach(id -> processNoLongerDelinquent(tenant, id));
+    private static void processNoLongerDelinquent(final TransactionalPortfolio transactionalPortfolio,
+                                                  final IntSet investmentIds) {
+        investmentIds.forEach(id -> processNoLongerDelinquent(transactionalPortfolio, id));
     }
 
-    private static void processNewDefaults(final Tenant tenant, final Collection<Investment> investments) {
+    private static void processNewDefaults(final TransactionalPortfolio transactionalPortfolio,
+                                           final Collection<Investment> investments) {
         investments.forEach(i -> {
-            final Loan l = tenant.call(z -> LoanCache.INSTANCE.getLoan(i.getLoanId(), z));
+            final Loan l = transactionalPortfolio.getTenant().call(z -> LoanCache.INSTANCE.getLoan(i.getLoanId(), z));
             final LoanDefaultedEvent evt = new LoanDefaultedEvent(i, l);
-            Events.fire(evt);
+            transactionalPortfolio.fire(evt);
         });
     }
 
-    private static void processNonDefaultDelinquents(final Tenant tenant, final Collection<Investment> investments) {
+    private static void processNonDefaultDelinquents(final TransactionalPortfolio transactionalPortfolio,
+                                                     final Collection<Investment> investments) {
         Stream.of(DelinquencyCategory.values())
-                .forEach(c -> c.update(tenant, investments, i -> tenant.call(z -> LoanCache.INSTANCE.getLoan(i, z)),
-                                       (l, since) -> getDevelopments(tenant, l, since)));
+                .forEach(c -> c.update(transactionalPortfolio, investments));
     }
 
-    static void update(final Tenant tenant, final Collection<Investment> nowDelinquent, final IntSet knownDelinquents,
-                       final IntSet knownDefaulted) {
+    static void update(final TransactionalPortfolio transactionalPortfolio, final Collection<Investment> nowDelinquent,
+                       final IntSet knownDelinquents, final IntSet knownDefaulted) {
         final Collection<Investment> newDefaults = onlyDefaulted(nowDelinquent)
                 .filter(i -> !knownDefaulted.contains(i.getId()))
                 .collect(toList());
-        processNewDefaults(tenant, newDefaults);
+        processNewDefaults(transactionalPortfolio, newDefaults);
         final Collection<Investment> stillDelinquent = nowDelinquent.stream()
                 .filter(i -> !newDefaults.contains(i))
                 .filter(i -> !knownDefaulted.contains(i.getId()))
                 .collect(toList());
-        processNonDefaultDelinquents(tenant, stillDelinquent);
+        processNonDefaultDelinquents(transactionalPortfolio, stillDelinquent);
         final IntSet noLongerDelinquent =
                 knownDelinquents.reject(d -> nowDelinquent.stream().anyMatch(i -> i.getId() == d));
-        processNoLongerDelinquent(tenant, noLongerDelinquent);
+        processNoLongerDelinquent(transactionalPortfolio, noLongerDelinquent);
     }
 
     /**
      * Updates delinquency information based on the information about loans that are either currently delinquent or no
      * longer active. Will fire events on new delinquencies and/or on loans no longer delinquent.
-     * @param tenant The API that will be used to retrieve the loan instances.
+     * @param transactionalPortfolio The API that will be used to retrieve the loan instances.
      */
-    public static void update(final Tenant tenant) {
+    public static void update(final TransactionalPortfolio transactionalPortfolio) {
         LOGGER.debug("Updating delinquent loans.");
+        final Tenant tenant = transactionalPortfolio.getTenant();
         final Collection<Investment> delinquentInvestments =
                 tenant.call(z -> z.getInvestments(new Select()
                                                           .equals("loan.unpaidLastInst", "true")
                                                           .equals("status", "ACTIVE")))
                         .collect(toList());
-        final InstanceState<Delinquencies> state = TenantState.of(tenant.getSessionInfo())
-                .in(Delinquencies.class);
-        final Optional<IntStream> delinquents = state.getValues(DELINQUENT_KEY)
+        final InstanceState<Delinquencies> transactionalState = tenant.getState(Delinquencies.class);
+        final Optional<IntStream> delinquents = transactionalState.getValues(DELINQUENT_KEY)
                 .map(s -> s.mapToInt(Integer::parseInt));
         if (delinquents.isPresent()) { // process updates and notify
-            final IntStream defaulted = state.getValues(DEFAULTED_KEY)
+            final IntStream defaulted = transactionalState.getValues(DEFAULTED_KEY)
                     .map(s -> s.mapToInt(Integer::parseInt))
                     .orElse(IntStream.empty());
-            update(tenant, delinquentInvestments, toIdSet(delinquents.get()), toIdSet(defaulted));
+            update(transactionalPortfolio, delinquentInvestments, toIdSet(delinquents.get()), toIdSet(defaulted));
         }
         // store current state
-        state.update(b -> {
+        transactionalState.update(b -> {
             b.put(DELINQUENT_KEY, toIds(delinquentInvestments.stream()));
             b.put(DEFAULTED_KEY, toIds(onlyDefaulted(delinquentInvestments)));
         });
@@ -186,12 +186,4 @@ public class Delinquencies {
         return Delinquencies.AMOUNTS_AT_RISK.get();
     }
 
-    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
-                                                     final LocalDate delinquentSince) {
-        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
-                .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
-                .collect(toList());
-        Collections.reverse(developments);
-        return developments;
-    }
 }

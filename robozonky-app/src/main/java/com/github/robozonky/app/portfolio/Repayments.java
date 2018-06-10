@@ -27,12 +27,11 @@ import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
-import com.github.robozonky.common.state.TenantState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +40,11 @@ public final class Repayments implements PortfolioDependant {
     private static final Logger LOGGER = LoggerFactory.getLogger(Repayments.class);
 
     @Override
-    public void accept(final Portfolio portfolio, final Tenant tenant) {
-        final InstanceState<Repayments> state = TenantState.of(tenant.getSessionInfo()).in(Repayments.class);
+    public void accept(final TransactionalPortfolio transactionalPortfolio) {
+        final Tenant tenant = transactionalPortfolio.getTenant();
+        final InstanceState<Repayments> state = tenant.getState(Repayments.class);
         if (state.isInitialized()) {
+            final Portfolio portfolio = transactionalPortfolio.getPortfolio();
             final PortfolioOverview portfolioOverview = portfolio.calculateOverview();
             // Zonky payment processing happens at the end of each day, payments are dated to the beginning of that day
             final LocalDate lastZonkyUpdate = portfolio.getStatistics().getTimestamp().toLocalDate();
@@ -70,7 +71,7 @@ public final class Repayments implements PortfolioDependant {
                                 return;
                             }
                             final Event e = new LoanRepaidEvent(actual, l, portfolioOverview);
-                            Events.fire(e);
+                            transactionalPortfolio.fire(e);
                         });
                     });
         }

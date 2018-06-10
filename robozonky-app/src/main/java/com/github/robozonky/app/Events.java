@@ -16,15 +16,12 @@
 
 package com.github.robozonky.app;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -53,8 +50,6 @@ public enum Events {
     private static final Logger LOGGER = LoggerFactory.getLogger(Events.class);
     private static final List<Event> EVENTS_FIRED = new FastList<>(0);
     private static SessionInfo SESSION_INFO = null;
-    private static final AtomicBoolean IS_PAUSED = new AtomicBoolean(false);
-    private static final Queue<Event> QUEUE = new ArrayDeque<>(0);
 
     static class EventSpecific<E extends Event> {
 
@@ -138,38 +133,13 @@ public enum Events {
     @SuppressWarnings("unchecked")
     public synchronized static <E extends Event> void fire(final E event) {
         final Class<E> eventClass = (Class<E>) event.getClass();
-        if (IS_PAUSED.get()) {
-            Events.LOGGER.debug("Queueing {}.", eventClass);
-            QUEUE.add(event);
-        } else {
-            Events.LOGGER.debug("Firing {}.", eventClass);
-            Events.INSTANCE.getListeners(eventClass).parallel().forEach(
-                    l -> Events.fire(event, l, Events.SESSION_INFO));
-            Events.LOGGER.trace("Fired {}.", event);
-            if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
-                Events.EVENTS_FIRED.add(event);
-            }
+        Events.LOGGER.debug("Firing {}.", eventClass);
+        Events.INSTANCE.getListeners(eventClass).parallel().forEach(
+                l -> Events.fire(event, l, Events.SESSION_INFO));
+        Events.LOGGER.trace("Fired {}.", event);
+        if (Settings.INSTANCE.isDebugEventStorageEnabled()) {
+            Events.EVENTS_FIRED.add(event);
         }
-    }
-
-    public synchronized void pause() {
-        LOGGER.debug("Pausing.");
-        IS_PAUSED.set(true);
-    }
-
-    public synchronized void resume() {
-        LOGGER.debug("Resuming operation.");
-        IS_PAUSED.set(false);
-        while (!QUEUE.isEmpty()) {
-            final Event e = QUEUE.poll();
-            Events.fire(e);
-        }
-        LOGGER.debug("Operation resumed.");
-    }
-
-    public synchronized void clear() {
-        LOGGER.debug("Clearing event queue.");
-        QUEUE.clear();
     }
 
     /**

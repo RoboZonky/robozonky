@@ -44,7 +44,11 @@ import com.github.robozonky.internal.api.Settings;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
@@ -117,6 +121,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
         when(zonky.getRestrictions()).thenReturn(new Restrictions());
         when(zonky.getBlockedAmounts()).thenAnswer(i -> Stream.empty());
         when(zonky.getStatistics()).thenReturn(Statistics.empty());
+        when(zonky.getDevelopments(any())).thenAnswer(i -> Stream.empty());
         return zonky;
     }
 

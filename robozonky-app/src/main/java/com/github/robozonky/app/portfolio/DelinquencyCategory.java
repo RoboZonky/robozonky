@@ -20,8 +20,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -35,12 +35,15 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.internal.api.Defaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Keeps active delinquencies over a given threshold. When a new delinquency over a particular threshold arrives, an
@@ -121,18 +124,16 @@ enum DelinquencyCategory {
 
     /**
      * Update internal state trackers and send events if necessary.
-     * @param tenant Session identifier.
+     * @param transactionalPortfolio Portfolio to update.
      * @param active Active delinquencies - ie. payments that are, right now, overdue.
-     * @param loanSupplier Retrieves the loan instance for a particular loan ID.
      * @return IDs of loans that are being tracked in this category.
      */
-    public int[] update(final Tenant tenant, final Collection<Investment> active,
-                        final Function<Integer, Loan> loanSupplier,
-                        final BiFunction<Loan, LocalDate, Collection<Development>> collectionsSupplier) {
+    public int[] update(final TransactionalPortfolio transactionalPortfolio, final Collection<Investment> active) {
         LOGGER.trace("Updating {}.", this);
-        final InstanceState<DelinquencyCategory> state = tenant.getState(DelinquencyCategory.class);
+        final Tenant tenant = transactionalPortfolio.getTenant();
+        final InstanceState<DelinquencyCategory> transactionalState = tenant.getState(DelinquencyCategory.class);
         final String fieldName = getFieldName(thresholdInDays);
-        final int[] keepThese = state.getValues(fieldName)
+        final int[] keepThese = transactionalState.getValues(fieldName)
                 .map(DelinquencyCategory::fromIdString)
                 .orElse(IntStream.empty())
                 .filter(id -> active.stream().anyMatch(d -> isRelated(d, id)))
@@ -143,16 +144,25 @@ enum DelinquencyCategory {
                 .filter(d -> IntStream.of(keepThese).noneMatch(id -> isRelated(d, id)))
                 .peek(d -> {
                     final int loanId = d.getLoanId();
-                    final Loan l = loanSupplier.apply(loanId);
+                    final Loan l = tenant.call(z -> LoanCache.INSTANCE.getLoan(loanId, z));
                     final LocalDate since = getPaymentMissedDate(d);
-                    final Event e = getEvent(since, d, l, thresholdInDays, collectionsSupplier.apply(l, since));
-                    Events.fire(e);
+                    final Event e = getEvent(since, d, l, thresholdInDays, getDevelopments(tenant, l, since));
+                    transactionalPortfolio.fire(e);
                 })
                 .mapToInt(Investment::getLoanId);
         final int[] storeThese = IntStream.concat(IntStream.of(keepThese), addThese).distinct().sorted().toArray();
-        state.update(b -> b.put(fieldName, toIdString(storeThese)));
+        transactionalState.update(b -> b.put(fieldName, toIdString(storeThese)));
         LOGGER.trace("Update over, stored {}.", storeThese);
         return storeThese;
+    }
+
+    private static List<Development> getDevelopments(final Tenant auth, final Loan loan,
+                                                     final LocalDate delinquentSince) {
+        final List<Development> developments = auth.call(z -> z.getDevelopments(loan))
+                .filter(d -> d.getDateFrom().toLocalDate().isAfter(delinquentSince.minusDays(1)))
+                .collect(toList());
+        Collections.reverse(developments);
+        return developments;
     }
 
     @FunctionalInterface

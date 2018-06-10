@@ -29,7 +29,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.strategies.SellStrategy;
-import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Delinquencies;
 import com.github.robozonky.app.portfolio.Portfolio;
@@ -70,13 +69,13 @@ class PortfolioUpdater implements Runnable,
         final RemoteBalance balance = RemoteBalance.create(auth);
         final PortfolioUpdater updater = new PortfolioUpdater(shutdownCall, auth, balance);
         // update delinquents automatically with every portfolio update; important to be first as it brings risk data
-        updater.registerDependant((p, a) -> Delinquencies.update(a));
+        updater.registerDependant(Delinquencies::update);
         // attempt to sell participations; a transaction update later may already pick up some sales
         updater.registerDependant(new Selling(sp));
         // update loans repaid
         updater.registerDependant(new Repayments());
         // update portfolio with unprocessed transactions coming from Zonky
-        updater.registerDependant(Portfolio::updateTransactions);
+        updater.registerDependant(p -> p.getPortfolio().updateTransactions(p.getTenant()));
         return updater;
     }
 
@@ -96,25 +95,24 @@ class PortfolioUpdater implements Runnable,
     }
 
     private Portfolio runIt(final Portfolio old) {
-        Events.INSTANCE.pause(); // start queueing events
         final Portfolio result = old == null ? Portfolio.create(tenant, balance) : old.reloadFromZonky(tenant, balance);
-        final CompletableFuture<Portfolio> combined = dependants.stream()
-                .map(d -> (Function<Portfolio, Portfolio>) folio -> {
+        final TransactionalPortfolio transactional = new TransactionalPortfolio(result, tenant);
+        final CompletableFuture<TransactionalPortfolio> combined = dependants.stream()
+                .map(d -> (Function<TransactionalPortfolio, TransactionalPortfolio>) folio -> {
                     LOGGER.trace("Running {}.", d);
-                    d.accept(folio, tenant);
+                    d.accept(folio);
                     LOGGER.trace("Finished {}.", d);
                     return folio;
                 })
-                .reduce(CompletableFuture.completedFuture(result),
+                .reduce(CompletableFuture.completedFuture(transactional),
                         CompletableFuture::thenApply,
                         (s1, s2) -> s1.thenCombine(s2, (p1, p2) -> p2));
         try {
-            return combined.get();
+            final TransactionalPortfolio portfolio = combined.get();
+            portfolio.run(); // persist stored information
+            return portfolio.getPortfolio();
         } catch (final Throwable t) {
-            Events.INSTANCE.clear(); // don't send any events queued during the failed update; prevents double sends
             throw new IllegalStateException("Portfolio update failed.", t);
-        } finally {
-            Events.INSTANCE.resume(); // stop queueing events, send out queued events if any
         }
     }
 
