@@ -46,16 +46,16 @@ public class Wrapper {
 
     public Wrapper(final Participation participation, final Loan loan) {
         this.loan = loan;
-        this.identifier = "Loan #" + loan.getId() + " (participation #" + participation.getId() + ")";
+        this.identifier = "Loan #" + participation.getLoanId() + " (participation #" + participation.getId() + ")";
         this.remainingTermInMonths = participation.getRemainingInstalmentCount();
         this.originalTermInMonths = participation.getOriginalInstalmentCount();
-        this.remainingAmount = null;
-        this.insuranceActive = loan.isInsuranceActive();
+        this.remainingAmount = participation.getRemainingPrincipal();
+        this.insuranceActive = participation.isInsuranceActive();
     }
 
     public Wrapper(final Investment investment, final Loan loan) {
         this.loan = loan;
-        this.identifier = "Loan #" + loan.getId() + " (investment #" + investment.getId() + ")";
+        this.identifier = "Loan #" + investment.getLoanId() + " (investment #" + investment.getId() + ")";
         this.remainingTermInMonths = investment.getRemainingMonths();
         this.originalTermInMonths = investment.getOriginalTerm();
         this.remainingAmount = investment.getRemainingPrincipal();
@@ -103,7 +103,7 @@ public class Wrapper {
     }
 
     public int getOriginalAmount() {
-        return (int) loan.getAmount();
+        return loan.getAmount();
     }
 
     public BigDecimal getRemainingAmount() {

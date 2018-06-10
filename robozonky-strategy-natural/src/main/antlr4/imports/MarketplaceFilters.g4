@@ -209,4 +209,5 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c10=elapsedTermCondition { $result = $c10.result; }
     | c11=elapsedRelativeTermCondition { $result = $c11.result; }
     | c12=insuranceCondition { $result = $c12.result; }
+    | c13=remainingAmountCondition { $result = $c13.result; }
 ;
