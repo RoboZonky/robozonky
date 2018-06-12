@@ -162,6 +162,11 @@ public class Zonky {
         return getInvestments(s).findFirst();
     }
 
+    public Optional<Investment> getInvestment(final Loan loan) {
+        final Select s = new Select().equals("loan.id", loan.getId());
+        return getInvestments(s).findFirst();
+    }
+
     /**
      * Retrieve loans from marketplace via {@link LoanApi}.
      * @param select Rules to filter the selection by.

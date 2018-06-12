@@ -38,9 +38,12 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PortfolioTest extends AbstractZonkyLeveragingTest {
 
@@ -67,10 +70,8 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         when(z.getBlockedAmounts()).thenReturn(Stream.empty());
         Stream.of(l1, l2, l3).forEach(l -> {
             final Investment i = Investment.fresh(l, investmentSize).build();
-            final MyInvestment m = mockInvestment(l.getId(), i.getRemainingPrincipal());
-            l.setMyInvestment(m);
             when(z.getLoan(eq(l.getId()))).thenReturn(l.build());
-            when(z.getInvestment(eq(m.getId()))).thenReturn(Optional.of(i));
+            when(z.getInvestment(eq(l))).thenReturn(Optional.of(i));
         });
         final Tenant t = mockTenant(z);
         final RemoteBalance b = mockBalance(z);

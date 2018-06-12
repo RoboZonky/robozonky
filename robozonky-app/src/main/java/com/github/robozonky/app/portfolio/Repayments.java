@@ -60,7 +60,7 @@ public final class Repayments implements PortfolioDependant {
                     .forEach(t -> {
                         LOGGER.debug("Processing transaction: {}.", t);
                         final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(t.getLoanId(), zonky));
-                        final Optional<Investment> i = Portfolio.lookup(l, tenant);
+                        final Optional<Investment> i = tenant.call(z -> z.getInvestment(l));
                         if (!i.isPresent()) {
                             LOGGER.debug("Investment for loan #{} not found, probably sold since.", l.getId());
                             return;

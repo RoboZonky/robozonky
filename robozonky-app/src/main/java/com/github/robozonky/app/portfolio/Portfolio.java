@@ -19,7 +19,6 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -87,12 +86,8 @@ public class Portfolio {
         return new Portfolio(tenant.call(Zonky::getStatistics), balance);
     }
 
-    static Optional<Investment> lookup(final Loan loan, final Tenant auth) {
-        return loan.getMyInvestment().flatMap(i -> auth.call(zonky -> zonky.getInvestment(i.getId())));
-    }
-
-    static Investment lookupOrFail(final Loan loan, final Tenant auth) {
-        return lookup(loan, auth)
+    private static Investment lookupOrFail(final Loan loan, final Tenant auth) {
+        return auth.call(zonky -> zonky.getInvestment(loan))
                 .orElseThrow(() -> new IllegalStateException("Investment not found for loan " + loan.getId()));
     }
 
