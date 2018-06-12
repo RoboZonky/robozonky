@@ -32,7 +32,7 @@ class AuthenticatedFilter extends RoboZonkyFilter {
     }
 
     @Override
-    public void filter(ClientRequestContext clientRequestContext) {
+    public void filter(final ClientRequestContext clientRequestContext) {
         final ZonkyApiToken supplied = token == null ? null : token.get();
         final char[] t = supplied == null ? AuthenticatedFilter.EMPTY_TOKEN : supplied.getAccessToken();
         this.setRequestHeader("Authorization", "Bearer " + String.valueOf(t));

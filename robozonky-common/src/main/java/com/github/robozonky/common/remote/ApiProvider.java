@@ -17,6 +17,8 @@
 package com.github.robozonky.common.remote;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -48,13 +50,17 @@ import org.slf4j.LoggerFactory;
 public class ApiProvider implements AutoCloseable {
 
     public static final String ZONKY_URL = "https://api.zonky.cz";
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiProvider.class);
     /**
      * Clients are heavyweight objects where both creation and destruction potentially takes a lot of time. They should
      * be reused as much as possible.
      */
     private final ResteasyClient client;
+    /**
+     * Instances of the Zonky API are kept for as long as the token supplier is kept by the GC. This guarantees that,
+     * for the lifetime of the token supplier, the expensive API-retrieving operations wouldn't be executed twice.
+     */
+    private final Map<Supplier<ZonkyApiToken>, Zonky> authenticated = new WeakHashMap<>(0);
 
     public ApiProvider() {
         this(ProxyFactory.newResteasyClient());
@@ -93,7 +99,7 @@ public class ApiProvider implements AutoCloseable {
     }
 
     protected <T> Collection<T> marketplace(final Class<? extends EntityCollectionApi<T>> target, final String url) {
-        final EntityCollectionApi<T> proxy = ProxyFactory.newProxy(client, new RoboZonkyFilter(), target, url);
+        final EntityCollectionApi<T> proxy = ProxyFactory.newProxy(client, target, url);
         final Api<? extends EntityCollectionApi<T>> api = new Api<>(proxy);
         return api.execute(a -> {
             return a.items();
@@ -101,16 +107,19 @@ public class ApiProvider implements AutoCloseable {
     }
 
     /**
-     * Retrieve available loans from Zonky marketplace cache, which requires no authentication.
+     * Retrieve available loans from Zonky marketplace cache, which requires no authentication. Does not support paging.
      * @return Loans existing in the marketplace at the time this method was called.
      */
     public Collection<RawLoan> marketplace() {
         return this.marketplace(LoanApi.class, ApiProvider.ZONKY_URL);
     }
 
-    private Zonky authenticated(final Supplier<ZonkyApiToken> token) {
-        return new Zonky(this.control(token), this.marketplace(token), this.secondaryMarketplace(token),
-                         this.portfolio(token), this.wallet(token), this.transaction(token), this.collections(token));
+    private synchronized Zonky authenticated(final Supplier<ZonkyApiToken> token) {
+        return authenticated.computeIfAbsent(token, key -> {
+            LOGGER.debug("Creating a new authenticated API for {}.", token);
+            return new Zonky(this.control(key), this.marketplace(key), this.secondaryMarketplace(key),
+                             this.portfolio(key), this.wallet(key), this.transaction(key), this.collections(key));
+        });
     }
 
     public void authenticated(final Supplier<ZonkyApiToken> token, final Consumer<Zonky> operation) {

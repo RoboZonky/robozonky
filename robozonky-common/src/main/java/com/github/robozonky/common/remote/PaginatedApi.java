@@ -29,25 +29,31 @@ class PaginatedApi<S, T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaginatedApi.class);
 
-    private final ThreadLocal<AuthenticatedFilter> filter;
     private final Class<T> api;
     private final String url;
     private final ResteasyClient client;
+    private final Supplier<ZonkyApiToken> tokenSupplier;
 
     PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
                  final ResteasyClient client) {
         this.api = api;
         this.url = url;
         this.client = client;
-        /*
-         * filters are updated with different parameters in every request. in order to support data retrieval in a
-         * parallel stream, each thread must use its own filter.
-         */
-        this.filter = ThreadLocal.withInitial(() -> new AuthenticatedFilter(token));
+        this.tokenSupplier = token;
+    }
+
+    /**
+     * Filters are for one-time use only. They need to be thrown away after being used, as they could otherwise be used
+     * to store and transfer stale state, such as request headers etc. For the same reason, they must not be shared
+     * among threads.
+     * @return
+     */
+    private RoboZonkyFilter newFilter() {
+        return new AuthenticatedFilter(tokenSupplier);
     }
 
     public <Q> Q execute(final Function<T, Q> function) {
-        return this.execute(function, new Select(), filter.get());
+        return this.execute(function, new Select(), newFilter());
     }
 
     <Q> Q execute(final Function<T, Q> function, final Select select, final RoboZonkyFilter filter) {
@@ -62,7 +68,7 @@ class PaginatedApi<S, T> {
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
                                       final int pageSize) {
-        return this.execute(function, select, pageNo, pageSize, filter.get());
+        return this.execute(function, select, pageNo, pageSize, newFilter());
     }
 
     PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,
