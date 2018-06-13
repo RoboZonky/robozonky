@@ -40,7 +40,7 @@
     <!-- Default encoding is UTF-8, no matter what platform we're on. -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
-    <!-- Minimal supported JDK version is 1.8; preferred is 9 though. -->
+    <!-- Minimal supported JDK version is 1.8. -->
     <java.version>1.8</java.version>
     <!--
       Default Java 9 automatic module name; modules may override to comply with the module system spec.
@@ -119,6 +119,16 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency> <!-- Java 9 doesn't export this anymore, but API comes from RESTEasy -->
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-impl</artifactId>
+        <version>2.3.0.1</version>
+      </dependency>
+      <dependency> <!-- Java 9 doesn't export this anymore, but API comes from RESTEasy -->
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-core</artifactId>
+        <version>2.3.0.1</version>
+      </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
@@ -165,11 +175,6 @@
         </exclusions>
       </dependency>
       <!-- Java 9 does not open this anymore. -->
-      <dependency>
-        <groupId>org.glassfish.jaxb</groupId>
-        <artifactId>jaxb-runtime</artifactId>
-        <version>2.3.0</version>
-      </dependency>
       <dependency>
         <groupId>javax.activation</groupId>
         <artifactId>activation</artifactId>
