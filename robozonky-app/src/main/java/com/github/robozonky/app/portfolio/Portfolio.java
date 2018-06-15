@@ -107,10 +107,10 @@ public class Portfolio {
 
     public void updateTransactions(final Tenant tenant) {
         final int[] idsOfNewlySoldLoans = transactions.update(statistics, tenant);
+        final PortfolioOverview po = calculateOverview();
         for (final int loanId : idsOfNewlySoldLoans) { // notify of loans that were just detected as sold
             final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
             final Investment i = lookupOrFail(l, tenant);
-            final PortfolioOverview po = calculateOverview();
             Events.fire(new InvestmentSoldEvent(i, l, po));
         }
         loansSold.addAll(idsOfNewlySoldLoans);

@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Random;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.RawInvestment;
@@ -32,6 +33,8 @@ import com.github.robozonky.internal.api.ToStringBuilder;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 final class MutableInvestmentImpl implements InvestmentBuilder {
+
+    private static final Random RANDOM = new Random(0L);
 
     private int loanId, id, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;
@@ -46,6 +49,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
 
     MutableInvestmentImpl() {
+        this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
     }
 
     MutableInvestmentImpl(final RawInvestment investment) {

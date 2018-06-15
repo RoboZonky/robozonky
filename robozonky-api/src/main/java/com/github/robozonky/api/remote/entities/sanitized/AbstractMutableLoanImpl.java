@@ -22,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Random;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
@@ -34,6 +35,8 @@ import com.github.robozonky.internal.api.ToStringBuilder;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> implements MutableMarketplaceLoan<T> {
+
+    private static final Random RANDOM = new Random(0);
 
     private boolean topped, covered, published, questionsAllowed, insuranceActive;
     private int id, termInMonths, investmentsCount, questionsCount, userId, activeLoansCount, amount,
@@ -50,7 +53,7 @@ abstract class AbstractMutableLoanImpl<T extends MutableMarketplaceLoan<T>> impl
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
 
     AbstractMutableLoanImpl() {
-
+        this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
     }
 
     AbstractMutableLoanImpl(final RawLoan original) {

@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 
+import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
@@ -32,7 +33,7 @@ public class Transaction extends BaseEntity {
     private TransactionOrientation orientation;
     private OffsetDateTime transactionDate;
     private String customMessage;
-    private int id, loanId;
+    private int id, loanId, investmentId;
     private String loanName;
     private String nickName;
 
@@ -50,8 +51,29 @@ public class Transaction extends BaseEntity {
         this.transactionDate = OffsetDateTime.now();
         this.customMessage = "";
         this.loanId = loan.getId();
+        loan.getMyInvestment().ifPresent(i -> this.investmentId = i.getId());
         this.loanName = loan.getName();
         this.nickName = loan.getNickName();
+        this.discount = BigDecimal.ZERO;
+    }
+
+    public Transaction(final Investment investment, final BigDecimal amount, final TransactionCategory category,
+                       final TransactionOrientation orientation) {
+        this(0, investment, amount, category, orientation);
+    }
+
+    public Transaction(final int id, final Investment investment, final BigDecimal amount,
+                       final TransactionCategory category, final TransactionOrientation orientation) {
+        this.id = id;
+        this.amount = amount;
+        this.category = category;
+        this.orientation = orientation;
+        this.transactionDate = OffsetDateTime.now();
+        this.customMessage = "";
+        this.loanId = investment.getLoanId();
+        this.investmentId = investment.getId();
+        this.loanName = "";
+        this.nickName = "";
         this.discount = BigDecimal.ZERO;
     }
 
@@ -87,6 +109,11 @@ public class Transaction extends BaseEntity {
     @XmlElement
     public int getLoanId() {
         return loanId;
+    }
+
+    @XmlElement
+    public int getInvestmentId() {
+        return investmentId;
     }
 
     @XmlElement

@@ -34,6 +34,7 @@ import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.eclipse.collections.api.set.primitive.IntSet;
@@ -83,7 +84,7 @@ class TransactionLog {
     }
 
     private static Rating getLoanRating(final Tenant tenant, final int loanId) {
-        return tenant.call(z -> z.getLoan(loanId).getRating());
+        return tenant.call(z -> LoanCache.INSTANCE.getLoan(loanId, z)).getRating();
     }
 
     public Collection<Synthetic> getSynthetics() {

@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -97,43 +98,45 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
             final Transaction t2 = new Transaction(l2, BigDecimal.TEN, TransactionCategory.SMP_SELL,
                                                    TransactionOrientation.IN);
             final Loan l3 = Loan.custom().setId(1).build();
-            final Transaction t3 = new Transaction(l3, BigDecimal.TEN, TransactionCategory.PAYMENT,
+            final Investment i3 = Investment.custom()
+                    .setId(1000)
+                    .setLoanId(l3.getId())
+                    .build();
+            final Transaction t3 = new Transaction(i3, BigDecimal.TEN, TransactionCategory.PAYMENT,
                                                    TransactionOrientation.IN);
-            when(zonky.getLoan(eq(l3.getId()))).thenReturn(l3);
             when(zonky.getTransactions(any())).thenReturn(Stream.of(t1, t2, t3));
-            when(zonky.getInvestment(eq(l3)))
-                    .thenReturn(Optional.of(Investment.custom()
-                                                    .setLoanId(l3.getId())
-                                                    .build()));
+            when(zonky.getInvestment(eq(t3.getInvestmentId())))
+                    .thenReturn(Optional.of(i3));
             r.accept(transactional);
-            verify(zonky, never()).getLoan(eq(l1.getId()));
-            verify(zonky, never()).getLoan(eq(l2.getId()));
-            verify(zonky).getLoan(eq(l3.getId()));
-            verify(zonky, times(1)).getInvestment(any());
+            verify(zonky, never()).getLoan(anyInt());
+            verify(zonky, times(1)).getInvestment(anyInt());
+            verify(zonky, times(1)).getInvestment(eq(i3.getId()));
         }
 
         @Test
         @DisplayName("only fires events on paid investments.")
         void firesEvents() {
             final Loan l3 = Loan.custom().setId(1).build();
-            final Transaction t3 = new Transaction(l3, BigDecimal.TEN, TransactionCategory.PAYMENT,
+            final Investment i3 = Investment.custom()
+                    .setId(1000)
+                    .setLoanId(l3.getId())
+                    .setPaymentStatus(PaymentStatus.OK)
+                    .build();
+            final Transaction t3 = new Transaction(i3, BigDecimal.TEN, TransactionCategory.PAYMENT,
                                                    TransactionOrientation.IN);
             final Loan l4 = Loan.custom().setId(2).build();
-            final Transaction t4 = new Transaction(l4, BigDecimal.TEN, TransactionCategory.PAYMENT,
+            final Investment i4 = Investment.custom()
+                    .setId(i3.getId() + 1) // different ID
+                    .setLoanId(l4.getId())
+                    .setPaymentStatus(PaymentStatus.PAID)
+                    .build();
+            final Transaction t4 = new Transaction(i4, BigDecimal.TEN, TransactionCategory.PAYMENT,
                                                    TransactionOrientation.IN);
             when(zonky.getLoan(eq(l3.getId()))).thenReturn(l3);
             when(zonky.getLoan(eq(l4.getId()))).thenReturn(l4);
             when(zonky.getTransactions(any())).thenReturn(Stream.of(t3, t4));
-            when(zonky.getInvestment(eq(l3)))
-                    .thenReturn(Optional.of(Investment.custom()
-                                                    .setLoanId(l3.getId())
-                                                    .setPaymentStatus(PaymentStatus.OK)
-                                                    .build()));
-            when(zonky.getInvestment(eq(l4)))
-                    .thenReturn(Optional.of(Investment.custom()
-                                                    .setLoanId(l4.getId())
-                                                    .setPaymentStatus(PaymentStatus.PAID)
-                                                    .build()));
+            when(zonky.getInvestment(eq(t3.getInvestmentId()))).thenReturn(Optional.of(i3));
+            when(zonky.getInvestment(eq(t4.getInvestmentId()))).thenReturn(Optional.of(i4));
             // this is the test
             r.accept(transactional);
             final List<Event> events = getNewEvents();

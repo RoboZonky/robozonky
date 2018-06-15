@@ -59,10 +59,10 @@ public final class Repayments implements PortfolioDependant {
                     .filter(t -> t.getOrientation() == TransactionOrientation.IN)
                     .forEach(t -> {
                         LOGGER.debug("Processing transaction: {}.", t);
-                        final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(t.getLoanId(), zonky));
-                        final Optional<Investment> i = tenant.call(z -> z.getInvestment(l));
+                        final Optional<Investment> i = tenant.call(z -> z.getInvestment(t.getInvestmentId()));
+                        final int loanId = t.getLoanId();
                         if (!i.isPresent()) {
-                            LOGGER.debug("Investment for loan #{} not found, probably sold since.", l.getId());
+                            LOGGER.debug("Investment for loan #{} not found, probably sold since.", loanId);
                             return;
                         }
                         final Investment actual = i.get();
@@ -70,6 +70,7 @@ public final class Repayments implements PortfolioDependant {
                             if (s != PaymentStatus.PAID) {
                                 return;
                             }
+                            final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
                             final Event e = new LoanRepaidEvent(actual, l, portfolioOverview);
                             transactionalPortfolio.fire(e);
                         });
