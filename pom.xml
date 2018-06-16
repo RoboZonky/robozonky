@@ -50,7 +50,7 @@
     <!-- Expected Maven version to execute the build against. -->
     <version.org.apache.maven>3.5.2</version.org.apache.maven>
     <!-- Various dependency versions to be used later. -->
-    <surefire.version>2.21.0</surefire.version>
+    <surefire.version>2.22.0</surefire.version>
     <version.org.antlr>4.7.1</version.org.antlr>
     <version.org.codehaus.izpack>5.1.2</version.org.codehaus.izpack>
     <version.org.jboss.resteasy>3.5.1.Final</version.org.jboss.resteasy>
@@ -230,7 +230,7 @@
       <!-- Testing. -->
       <dependency>
         <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
+        <artifactId>junit-jupiter-engine</artifactId>
         <version>${version.org.junit}</version>
         <scope>test</scope>
       </dependency>
@@ -284,14 +284,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <dependencies>
-    <dependency> <!-- to get around bug https://github.com/junit-team/junit5/issues/801 -->
-      <groupId>org.apache.maven.surefire</groupId>
-      <artifactId>surefire-logger-api</artifactId>
-      <version>${surefire.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
   <build>
     <plugins>
       <plugin>
@@ -496,18 +488,6 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.junit.platform</groupId>
-              <artifactId>junit-platform-surefire-provider</artifactId>
-              <version>1.2.0</version>
-            </dependency>
-            <dependency>
-              <groupId>org.junit.jupiter</groupId>
-              <artifactId>junit-jupiter-engine</artifactId>
-              <version>${version.org.junit}</version>
-            </dependency>
-          </dependencies>
           <configuration>
             <reuseForks>false</reuseForks>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
