@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,9 +39,11 @@ import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
 
 class TransactionLogTest extends AbstractZonkyLeveragingTest {
 
@@ -106,7 +109,7 @@ class TransactionLogTest extends AbstractZonkyLeveragingTest {
         final Tenant t = mockTenant(z);
         final TransactionLog tl = new TransactionLog(t, Collections.singleton(preexisting));
         // the test starts here
-        final int[] soldLoans = tl.update(statistics, t);
+        final Set<Integer> soldLoans = tl.update(statistics, t);
         assertThat(soldLoans).containsOnly(sold.getLoanId()); // transaction correctly identified as sold
         assertThat(tl.getAdjustments()).containsOnlyKeys(Rating.B, Rating.C, Rating.D);
         assertThat(tl.getAdjustments().get(Rating.B)).isEqualTo(sold.getAmount().negate()); // adjust for the sale
@@ -133,7 +136,7 @@ class TransactionLogTest extends AbstractZonkyLeveragingTest {
         final Tenant t = mockTenant(z);
         final TransactionLog tl = new TransactionLog(t, Collections.singleton(preexisting));
         // the test starts here
-        final int[] soldLoans = tl.update(statistics, t);
+        final Set<Integer> soldLoans = tl.update(statistics, t);
         assertThat(soldLoans).isEmpty(); // blocked amounts are only concerned with new investments
         assertThat(tl.getAdjustments()).containsOnlyKeys(Rating.C, Rating.D);
         assertThat(tl.getAdjustments().get(Rating.C)).isEqualTo(blocked.getAmount());

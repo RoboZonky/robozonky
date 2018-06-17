@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -40,7 +41,6 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.configuration.daemon.TransactionalPortfolio;
 import com.github.robozonky.common.remote.Zonky;
 import com.github.robozonky.internal.api.Defaults;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,7 +80,7 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         // make sure new delinquencies are reported and stored
         final Tenant t = mockTenant();
         final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
-        Delinquencies.update(p, Collections.singleton(i), IntHashSet.newSetWith(), IntHashSet.newSetWith());
+        Delinquencies.update(p, Collections.singleton(i), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
         assertThat(this.getNewEvents()).hasSize(1);
         assertThat(this.getNewEvents().get(0)).isInstanceOf(LoanNowDelinquentEvent.class);
@@ -156,11 +156,11 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         // register delinquency
         final Tenant t = mockTenant();
         final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
-        Delinquencies.update(p, Collections.emptyList(), IntHashSet.newSetWith(), IntHashSet.newSetWith());
+        Delinquencies.update(p, Collections.emptyList(), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is defaulted
-        Delinquencies.update(p, Collections.singleton(i), IntHashSet.newSetWith(), IntHashSet.newSetWith());
+        Delinquencies.update(p, Collections.singleton(i), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
         assertThat(this.getNewEvents()).hasSize(1).first().isInstanceOf(LoanDefaultedEvent.class);
     }
@@ -181,12 +181,12 @@ class DelinquenciesTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(l.getId()))).thenReturn(l);
         final Tenant t = mockTenant(zonky);
         final TransactionalPortfolio p = new TransactionalPortfolio(null, t);
-        Delinquencies.update(p, Collections.singleton(i), IntHashSet.newSetWith(), IntHashSet.newSetWith());
+        Delinquencies.update(p, Collections.singleton(i), new HashSet<>(), new HashSet<>());
         p.run(); // finish the transaction
         assertThat(Delinquencies.getAmountsAtRisk()).isEmpty();
         this.readPreexistingEvents(); // ignore events just emitted
         // the investment is paid
-        Delinquencies.update(p, Collections.emptyList(), IntHashSet.newSetWith(i.getId()), IntHashSet.newSetWith());
+        Delinquencies.update(p, Collections.emptyList(), Collections.singleton(i.getId()), new HashSet<>());
         p.run(); // finish the transaction
         assertThat(Delinquencies.getAmountsAtRisk()).isEmpty();
         assertThat(this.getNewEvents()).isEmpty();

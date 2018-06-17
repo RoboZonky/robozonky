@@ -18,10 +18,10 @@ package com.github.robozonky.notifications;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Properties;
 
 import com.github.robozonky.internal.api.Defaults;
-import com.google.common.io.Files;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +32,7 @@ class RefreshableConfigStorageTest {
     void loadCorrectly() throws IOException {
         final File props = File.createTempFile("robozonky-", ".properties");
         final Properties p = new Properties();
-        p.store(Files.newWriter(props, Defaults.CHARSET), "");
+        p.store(Files.newBufferedWriter(props.toPath(), Defaults.CHARSET), "");
         final RefreshableConfigStorage s = new RefreshableConfigStorage(props.toURI().toURL());
         assertThat(s.get()).isPresent();
     }

@@ -17,11 +17,11 @@
 package com.github.robozonky.notifications;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 
 import com.github.robozonky.api.SessionInfo;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public abstract class AbstractTargetHandler {
     final ConfigStorage config;
     private final Logger LOGGER = LoggerFactory.getLogger(AbstractTargetHandler.class);
     private final Counter notifications;
-    private final Map<SupportedListener, Counter> specificNotifications = UnifiedMap.newMap(0);
+    private final Map<SupportedListener, Counter> specificNotifications = new HashMap<>(0);
 
     protected AbstractTargetHandler(final ConfigStorage config, final Target target) {
         this.config = config;

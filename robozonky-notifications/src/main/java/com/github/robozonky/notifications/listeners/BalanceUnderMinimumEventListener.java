@@ -16,6 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 
@@ -23,7 +24,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 public class BalanceUnderMinimumEventListener extends AbstractListener<ExecutionStartedEvent> {
 
@@ -47,7 +47,7 @@ public class BalanceUnderMinimumEventListener extends AbstractListener<Execution
 
     @Override
     protected Map<String, Object> getData(final ExecutionStartedEvent event) {
-        return new UnifiedMap<String, Object>(super.getData(event)) {{
+        return new HashMap(super.getData(event)) {{
             put("minimumBalance", minimumBalance);
         }};
     }

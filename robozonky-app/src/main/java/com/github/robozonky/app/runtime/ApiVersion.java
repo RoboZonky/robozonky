@@ -21,12 +21,13 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.robozonky.internal.api.Defaults;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 /**
  * Represents version of the Zonky API as returned by a remote resource. This doesn't use RESTEasy as it's designed to
@@ -48,7 +49,7 @@ class ApiVersion {
         this.commitIdAbbrev = commitIdAbbrev;
         this.buildTime = buildTime;
         this.buildVersion = buildVersion;
-        this.tags = UnifiedSet.newSetWith(tags);
+        this.tags = Stream.of(tags).collect(Collectors.toSet());
     }
 
     public static ApiVersion read(final String json) throws IOException {

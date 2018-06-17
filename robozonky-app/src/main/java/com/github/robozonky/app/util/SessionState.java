@@ -18,15 +18,14 @@ package com.github.robozonky.app.util;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.common.state.InstanceState;
-import org.eclipse.collections.api.set.primitive.IntSet;
-import org.eclipse.collections.api.set.primitive.MutableIntSet;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public final class SessionState<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);
-    private final MutableIntSet items;
+    private final Collection<Integer> items;
     private final ToIntFunction<T> idSupplier;
     private final String key;
     private final InstanceState<SessionState> state;
@@ -72,20 +71,20 @@ public final class SessionState<T> {
         this.key = key;
         this.idSupplier = idSupplier;
         this.items = read();
-        this.items.retainAll(retain.stream().mapToInt(idSupplier).toArray());
+        this.items.retainAll(retain.stream().mapToInt(idSupplier).boxed().collect(Collectors.toSet()));
         SessionState.LOGGER.debug("'{}' contains {}.", key, items);
     }
 
-    private MutableIntSet read() {
+    private Set<Integer> read() {
         final int[] result = state.getValues(key)
                 .map(s -> s.mapToInt(Integer::parseInt).toArray())
                 .orElse(new int[0]);
         SessionState.LOGGER.trace("'{}' read {}.", key, result);
-        return IntHashSet.newSetWith(result);
+        return IntStream.of(result).boxed().collect(Collectors.toSet());
     }
 
-    private void write(final IntSet items) {
-        final Stream<String> result = IntStream.of(items.toArray()).mapToObj(String::valueOf);
+    private void write(final Collection<Integer> items) {
+        final Stream<String> result = items.stream().map(String::valueOf);
         state.update(b -> b.put(key, result));
         SessionState.LOGGER.trace("'{}' wrote '{}'.", key, state.getValue(key).orElse("nothing"));
     }

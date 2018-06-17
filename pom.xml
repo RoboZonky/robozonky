@@ -217,15 +217,15 @@
         <artifactId>ini4j</artifactId>
         <version>0.5.4</version>
       </dependency>
-      <dependency> <!-- Much less memory consumption -->
-        <groupId>org.eclipse.collections</groupId>
-        <artifactId>eclipse-collections</artifactId>
-        <version>9.2.0</version>
-      </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>3.7</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.6</version>
       </dependency>
       <!-- Testing. -->
       <dependency>

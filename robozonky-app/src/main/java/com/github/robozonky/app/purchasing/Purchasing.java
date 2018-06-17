@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.purchasing;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,7 +32,6 @@ import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.app.util.StrategyExecutor;
 import com.github.robozonky.util.NumberUtil;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class Purchasing extends StrategyExecutor<Participation, PurchaseStrategy
                         LOGGER.debug("Ignoring loan #{} as the user had already sold it before.", loanId);
                     }
                     return !wasSoldBefore;
-                }).collect(Collectors.toCollection(FastList::new));
+                }).collect(Collectors.toCollection(ArrayList::new));
         final RestrictedPurchaseStrategy s = new RestrictedPurchaseStrategy(strategy, auth.getRestrictions());
         return Session.purchase(portfolio, auth, participations, s);
     }

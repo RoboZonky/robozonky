@@ -17,6 +17,7 @@
 package com.github.robozonky.notifications;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,7 +28,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.util.Refreshable;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ final class NotificationEventListenerSupplier<T extends Event> implements Refres
 
     @Override
     public void valueSet(final ConfigStorage newValue) {
-        final Map<Target, EventListener<T>> result = UnifiedMap.newMap(0);
+        final Map<Target, EventListener<T>> result = new HashMap<>(0);
         for (final Target target : Target.values()) {
             final AbstractTargetHandler handler = getTargetHandler(newValue, target);
             if (!handler.isEnabled()) {

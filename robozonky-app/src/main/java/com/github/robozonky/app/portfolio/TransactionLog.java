@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -37,9 +39,6 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
-import org.eclipse.collections.api.set.primitive.IntSet;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,9 +69,9 @@ class TransactionLog {
             Arrays.asList(TransactionCategory.INVESTMENT);
 
     private final Map<Rating, BigDecimal> adjustments = new EnumMap<>(Rating.class);
-    private final Collection<BlockedAmount> blockedAmounts = UnifiedSet.newSet(0);
-    private final Collection<Transaction> transactionsIn = UnifiedSet.newSet(0), transactionsOut = UnifiedSet.newSet(0);
-    private final Collection<Synthetic> synthetics = UnifiedSet.newSet(0);
+    private final Collection<BlockedAmount> blockedAmounts = new HashSet<>(0);
+    private final Collection<Transaction> transactionsIn = new HashSet<>(0), transactionsOut = new HashSet<>(0);
+    private final Collection<Synthetic> synthetics = new HashSet<>(0);
 
     public TransactionLog() {
 
@@ -147,14 +146,14 @@ class TransactionLog {
         updateRatingShare(tenant, ba::getLoanId, ba::getAmount);
     }
 
-    public synchronized int[] update(final Statistics statistics, final Tenant tenant) {
+    public synchronized Set<Integer> update(final Statistics statistics, final Tenant tenant) {
         LOGGER.debug("Pre-update adjustments: {}.", adjustments);
         // all new transactions have the date at the beginning of the day when the timestamp was taken
         final LocalDate lastZonkyUpdate = statistics.getTimestamp().toLocalDate();
         // read all transactions that happened after last Zonky refresh
         final Select onlyAfterZonkyUpdate = new Select()
                 .greaterThanOrEquals("transaction.transactionDate", lastZonkyUpdate);
-        final IntSet newlySold = IntHashSet.newSetWith();
+        final Set<Integer> newlySold = new HashSet<>(0);
         tenant.call(zonky -> zonky.getTransactions(onlyAfterZonkyUpdate))
                 .filter(t -> TRANSACTION_CATEGORIES.contains(t.getCategory()))
                 .forEach(t -> {
@@ -162,7 +161,7 @@ class TransactionLog {
                     final boolean wasSold = processTransaction(tenant, t);
                     if (wasSold) {
                         LOGGER.debug("Transaction marked as a newly sold participation.");
-                        ((IntHashSet) newlySold).add(t.getLoanId());
+                        newlySold.add(t.getLoanId());
                     }
                 });
         // read all blocked amounts that are known to us
@@ -173,6 +172,6 @@ class TransactionLog {
                     processBlockedAmount(tenant, ba);
                 });
         LOGGER.debug("Post-update adjustments: {}.", adjustments);
-        return newlySold.toArray();
+        return Collections.unmodifiableSet(newlySold);
     }
 }

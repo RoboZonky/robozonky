@@ -17,16 +17,15 @@
 package com.github.robozonky.common.state;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
-import org.eclipse.collections.impl.list.mutable.FastList;
-
 final class StateModifierImpl<T> implements StateModifier<T>,
                                             Callable<Boolean> {
 
-    private final Collection<BiConsumer<StateStorage, String>> actions = new FastList<>(0);
+    private final Collection<BiConsumer<StateStorage, String>> actions = new ArrayList<>(0);
     private final InstanceStateImpl<T> state;
 
     public StateModifierImpl(final InstanceStateImpl<T> state, final boolean fresh) {

@@ -19,6 +19,7 @@ package com.github.robozonky.installer.scripts;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,7 +28,6 @@ import java.util.stream.Stream;
 import com.github.robozonky.installer.CommandLinePart;
 import com.github.robozonky.internal.api.Defaults;
 import freemarker.template.TemplateException;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
 
@@ -66,7 +66,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
     protected File process(final CommandLinePart commandLine, final String templateName,
                            final Function<String, String> finisher) {
         try {
-            final String result = TemplateProcessor.INSTANCE.process(templateName, new UnifiedMap<String, Object>() {{
+            final String result = TemplateProcessor.INSTANCE.process(templateName, new HashMap() {{
                 this.put("root", distributionDirectory.getAbsolutePath());
                 this.put("options", configFile.getAbsolutePath());
                 this.put("javaOpts", assembleJavaOpts(commandLine));

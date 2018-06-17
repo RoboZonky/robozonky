@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,15 +29,13 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
-
 /**
  * Allows to filter Zonky API requests based on the values of individual fields.
  * @see <a href="https://zonky.docs.apiary.io/#introduction/pagination,-sorting-and-filtering">Zonky API docs.</a>
  */
 public class Select implements Consumer<RoboZonkyFilter> {
 
-    private final Map<String, List<Object>> conditions = UnifiedMap.newMap(0);
+    private final Map<String, List<Object>> conditions = new HashMap<>(0);
 
     public static Select unrestricted() {
         return new Select();

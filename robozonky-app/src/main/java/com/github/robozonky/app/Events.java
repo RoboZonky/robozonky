@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,7 +32,6 @@ import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.ListenerService;
 import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.internal.api.Settings;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public enum Events {
     INSTANCE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Events.class);
-    private static final List<Event> EVENTS_FIRED = new FastList<>(0);
+    private static final List<Event> EVENTS_FIRED = new ArrayList<>(0);
     private static SessionInfo SESSION_INFO = null;
 
     static class EventSpecific<E extends Event> {

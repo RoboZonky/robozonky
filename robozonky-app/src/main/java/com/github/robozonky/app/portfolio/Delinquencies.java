@@ -22,7 +22,9 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -39,8 +41,6 @@ import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.state.InstanceState;
 import com.github.robozonky.util.BigDecimalCalculator;
-import org.eclipse.collections.api.set.primitive.IntSet;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,8 +72,8 @@ public class Delinquencies {
                 .mapToObj(Integer::toString);
     }
 
-    private static IntSet toIdSet(final IntStream investments) {
-        return IntHashSet.newSetWith(investments.toArray());
+    private static Set<Integer> toIdSet(final IntStream investments) {
+        return investments.boxed().collect(Collectors.toSet());
     }
 
     private static void processNoLongerDelinquent(final TransactionalPortfolio transactionalPortfolio,
@@ -104,7 +104,7 @@ public class Delinquencies {
     }
 
     private static void processNoLongerDelinquent(final TransactionalPortfolio transactionalPortfolio,
-                                                  final IntSet investmentIds) {
+                                                  final Set<Integer> investmentIds) {
         investmentIds.forEach(id -> processNoLongerDelinquent(transactionalPortfolio, id));
     }
 
@@ -124,7 +124,7 @@ public class Delinquencies {
     }
 
     static void update(final TransactionalPortfolio transactionalPortfolio, final Collection<Investment> nowDelinquent,
-                       final IntSet knownDelinquents, final IntSet knownDefaulted) {
+                       final Set<Integer> knownDelinquents, final Set<Integer> knownDefaulted) {
         final Collection<Investment> newDefaults = onlyDefaulted(nowDelinquent)
                 .filter(i -> !knownDefaulted.contains(i.getId()))
                 .collect(toList());
@@ -134,8 +134,9 @@ public class Delinquencies {
                 .filter(i -> !knownDefaulted.contains(i.getId()))
                 .collect(toList());
         processNonDefaultDelinquents(transactionalPortfolio, stillDelinquent);
-        final IntSet noLongerDelinquent =
-                knownDelinquents.reject(d -> nowDelinquent.stream().anyMatch(i -> i.getId() == d));
+        final Set<Integer> noLongerDelinquent = knownDelinquents.stream()
+                .filter(d -> nowDelinquent.stream().noneMatch(i -> i.getId() == d))
+                .collect(Collectors.toSet());
         processNoLongerDelinquent(transactionalPortfolio, noLongerDelinquent);
     }
 
@@ -185,5 +186,4 @@ public class Delinquencies {
     static Map<Rating, BigDecimal> getAmountsAtRisk() {
         return Delinquencies.AMOUNTS_AT_RISK.get();
     }
-
 }

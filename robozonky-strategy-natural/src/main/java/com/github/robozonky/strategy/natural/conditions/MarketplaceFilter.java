@@ -16,6 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -25,7 +26,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.eclipse.collections.impl.list.mutable.FastList;
 
 /**
  * Implements a complex marketplace filter. This filter accepts an item from the marketplace and, by returning true,
@@ -65,7 +65,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return true for filter to return true.
      */
     public void when(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        when = new FastList<>(new LinkedHashSet<>(conditions));
+        when = new ArrayList<>(new LinkedHashSet<>(conditions));
     }
 
     /**
@@ -74,7 +74,7 @@ public class MarketplaceFilter extends MarketplaceFilterConditionImpl {
      * @param conditions All must return false for filter to return true.
      */
     public void butNotWhen(final Collection<? extends MarketplaceFilterCondition> conditions) {
-        butNotWhen = new FastList<>(new LinkedHashSet<>(conditions));
+        butNotWhen = new ArrayList<>(new LinkedHashSet<>(conditions));
     }
 
     @Override

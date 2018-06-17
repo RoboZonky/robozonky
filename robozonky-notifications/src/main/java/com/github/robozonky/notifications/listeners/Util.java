@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -39,7 +40,6 @@ import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.api.Defaults;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 class Util {
 
@@ -60,7 +60,7 @@ class Util {
     }
 
     public static Map<String, Object> getLoanData(final Loan loan) {
-        return new UnifiedMap<String, Object>() {{
+        return new HashMap() {{
             put("loanId", loan.getId());
             put("loanAmount", loan.getAmount());
             put("loanRating", loan.getRating().getCode());
@@ -79,7 +79,7 @@ class Util {
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {
-        return Collections.unmodifiableMap(new UnifiedMap<String, Object>() {{
+        return Collections.unmodifiableMap(new HashMap() {{
             put("absoluteShare", perRating(portfolioOverview::getCzkInvested));
             put("relativeShare", perRating(portfolioOverview::getShareOnInvestment));
             put("absoluteRisk", perRating(portfolioOverview::getCzkAtRisk));
@@ -120,7 +120,7 @@ class Util {
         result.put("collections", collections.stream()
                 .sorted(Comparator.comparing(Development::getDateFrom).reversed())
                 .limit(5)
-                .map(action -> new UnifiedMap<String, Object>() {{
+                .map(action -> new HashMap<String, Object>() {{
                     put("code", action.getType().getCode());
                     put("note", action.getPublicNote().orElse("Bez dalšího vysvětlení."));
                     put("startDate", Util.toDate(action.getDateFrom()));

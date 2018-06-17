@@ -18,6 +18,7 @@ package com.github.robozonky.notifications;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -30,7 +31,6 @@ import com.github.robozonky.common.extensions.ListenerServiceLoader;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.Scheduler;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public final class NotificationListenerService implements ListenerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationListenerService.class);
 
-    private final Map<String, RefreshableConfigStorage> CONFIGURATIONS = UnifiedMap.newMap(0);
+    private final Map<String, RefreshableConfigStorage> CONFIGURATIONS = new HashMap<>(0);
 
     Optional<RefreshableConfigStorage> readConfig(final String configLocation) {
         try {

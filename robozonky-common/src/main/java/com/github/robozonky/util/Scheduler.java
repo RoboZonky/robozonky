@@ -18,6 +18,7 @@ package com.github.robozonky.util;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
@@ -25,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.robozonky.internal.api.Settings;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class Scheduler implements AutoCloseable {
             Schedulers.INSTANCE.create(1, new RoboZonkyThreadFactory(newThreadGroup("rzBackground")));
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     private static final Duration REFRESH = Settings.INSTANCE.getRemoteResourceRefreshInterval();
-    private final Collection<Runnable> submitted = new UnifiedSet<>(0);
+    private final Collection<Runnable> submitted = new HashSet<>(0);
     private final AtomicInteger pauseRequests = new AtomicInteger(0);
     private PausableScheduledExecutorService executor;
 

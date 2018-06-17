@@ -19,19 +19,19 @@ package com.github.robozonky.common.state;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.internal.api.Settings;
-import org.eclipse.collections.api.map.MutableMap;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 final class Holder {
 
     private static final File TARGET = Settings.INSTANCE.getStateFile();
-    private static final StateStorage PARENT = new FileBackedStateStorage(TARGET);
-    private static volatile MutableMap<String, TenantState> TENANT_STATE_MAP = UnifiedMap.newMap(0);
+    private static volatile Map<String, TenantState> TENANT_STATE_MAP = new HashMap<>(0);
 
     private Holder() {
         // no instances
@@ -41,26 +41,23 @@ final class Holder {
         return sessionInfo.getUsername();
     }
 
-    public static TenantState of(final SessionInfo session) {
-        return of(session, PARENT);
+    public static synchronized TenantState of(final SessionInfo session) {
+        return TENANT_STATE_MAP.computeIfAbsent(identify(session), TenantState::new);
     }
 
     public static synchronized Collection<String> getKnownTenants() {
-        return Collections.unmodifiableSet(UnifiedSet.newSet(TENANT_STATE_MAP.keySet()));
-    }
-
-    static synchronized TenantState of(final SessionInfo session, final StateStorage underlying) {
-        return TENANT_STATE_MAP.computeIfAbsent(identify(session),
-                                                tenantName -> new TenantState(tenantName));
+        return Collections.unmodifiableSet(new HashSet<>(TENANT_STATE_MAP.keySet()));
     }
 
     static synchronized void destroy(final TenantState tenantState) {
-        TENANT_STATE_MAP = TENANT_STATE_MAP.reject((id, current) -> Objects.equals(current, tenantState));
+        TENANT_STATE_MAP = TENANT_STATE_MAP.entrySet().stream()
+                .filter(e -> !Objects.equals(e.getValue(), tenantState))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static synchronized void destroy() {
         TENANT_STATE_MAP.forEach((id, state) -> state.destroy());
-        TENANT_STATE_MAP = UnifiedMap.newMap(0);
+        TENANT_STATE_MAP = new HashMap<>(0);
         TARGET.delete();
     }
 }

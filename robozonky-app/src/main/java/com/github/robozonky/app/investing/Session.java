@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.investing;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +40,6 @@ import com.github.robozonky.app.Events;
 import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.app.util.SessionState;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ final class Session {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
     private final Collection<LoanDescriptor> loansStillAvailable;
-    private final List<Investment> investmentsMadeNow = new FastList<>(0);
+    private final List<Investment> investmentsMadeNow = new ArrayList<>(0);
     private final Tenant authenticated;
     private final Investor investor;
     private final SessionState<LoanDescriptor> discarded, seen;
@@ -67,7 +67,7 @@ final class Session {
         this.investor = investor;
         this.discarded = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "discardedLoans");
         this.seen = new SessionState<>(tenant, marketplace, d -> d.item().getId(), "seenLoans");
-        this.loansStillAvailable = FastList.newList(marketplace);
+        this.loansStillAvailable = new ArrayList<>(marketplace);
         this.portfolio = portfolio;
         this.portfolioOverview = portfolio.calculateOverview();
     }

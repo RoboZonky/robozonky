@@ -19,13 +19,13 @@ package com.github.robozonky.api.remote.enums;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 /**
  * Retrieved from Zonky developers via e-mail on March 27, 2018.
@@ -108,7 +108,7 @@ public enum DevelopmentType implements BaseEnum {
     DevelopmentType(final CollectionActionSource source, final String code, final String... internalId) {
         this.source = source;
         this.code = code;
-        this.ids = Collections.unmodifiableSet(UnifiedSet.newSetWith(internalId));
+        this.ids = Collections.unmodifiableSet(Stream.of(internalId).collect(Collectors.toSet()));
     }
 
     public CollectionActionSource getSource() {

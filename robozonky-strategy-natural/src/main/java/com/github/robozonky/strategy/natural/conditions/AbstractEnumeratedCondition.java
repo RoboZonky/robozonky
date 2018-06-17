@@ -17,16 +17,16 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.strategy.natural.Wrapper;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
     private final Function<Wrapper, T> fieldRetriever;
-    private final Collection<T> possibleValues = new UnifiedSet<>(0);
+    private final Collection<T> possibleValues = new HashSet<>(0);
 
     protected AbstractEnumeratedCondition(final Function<Wrapper, T> fieldRetriever) {
         this.fieldRetriever = fieldRetriever;

@@ -19,11 +19,11 @@ package com.github.robozonky.installer.scripts;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.function.Function;
 
 import com.github.robozonky.internal.api.Defaults;
 import freemarker.template.TemplateException;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 public enum ServiceGenerator implements Function<File, File> {
 
@@ -42,7 +42,7 @@ public enum ServiceGenerator implements Function<File, File> {
         try {
             final File root = execScript.getParentFile();
             final String result = TemplateProcessor.INSTANCE.process(filename + ".ftl",
-                                                                     new UnifiedMap<String, Object>() {{
+                                                                     new HashMap() {{
                                                                          this.put("uid", ID);
                                                                          this.put("gid", ID);
                                                                          this.put("pwd", root.getAbsolutePath());

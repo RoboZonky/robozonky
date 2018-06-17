@@ -19,6 +19,8 @@ package com.github.robozonky.notifications;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,8 +28,6 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.state.TenantState;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
-import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ final class Counter {
     private final String id;
     private final long maxItems;
     private final TemporalAmount period;
-    private final Map<SessionInfo, Set<OffsetDateTime>> timestamps = new UnifiedMap<>(0);
+    private final Map<SessionInfo, Set<OffsetDateTime>> timestamps = new HashMap<>(0);
 
     public Counter(final String id, final int maxItems) {
         this(id, maxItems, Duration.ofHours(1));
@@ -54,8 +54,8 @@ final class Counter {
                 .map(value -> value
                         .map(String::trim)
                         .map(OffsetDateTime::parse)
-                        .collect(Collectors.toCollection(UnifiedSet::new)))
-                .orElse(new UnifiedSet<>(0));
+                        .collect(Collectors.toCollection(HashSet::new)))
+                .orElse(new HashSet<>(0));
     }
 
     private void store(final SessionInfo sessionInfo, final String id, final Set<OffsetDateTime> timestamps) {

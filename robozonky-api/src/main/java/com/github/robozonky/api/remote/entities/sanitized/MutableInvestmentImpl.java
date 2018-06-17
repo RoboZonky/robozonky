@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities.sanitized;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -30,7 +31,6 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.api.ToStringBuilder;
-import org.eclipse.collections.impl.list.mutable.FastList;
 
 final class MutableInvestmentImpl implements InvestmentBuilder {
 
@@ -277,7 +277,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     @Override
     public InvestmentBuilder setInsuranceHistory(final Collection<InsurancePolicyPeriod> insurancePolicyPeriods) {
         final boolean isEmpty = insurancePolicyPeriods == null || insurancePolicyPeriods.isEmpty();
-        this.insuranceHistory = isEmpty ? Collections.emptyList() : new FastList<>(insurancePolicyPeriods);
+        this.insuranceHistory = isEmpty ? Collections.emptyList() : new ArrayList<>(insurancePolicyPeriods);
         return this;
     }
 

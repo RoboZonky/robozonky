@@ -19,6 +19,7 @@ package com.github.robozonky.common.remote;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,7 +32,6 @@ import javax.ws.rs.core.UriBuilder;
 import com.github.robozonky.internal.api.Defaults;
 import com.github.robozonky.internal.api.Settings;
 import com.github.robozonky.util.InterceptingInputStream;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +46,8 @@ class RoboZonkyFilter implements ClientRequestFilter,
 
     // not static, so that filters extending this one get the proper logger class
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Map<String, Object[]> queryParams = UnifiedMap.newMap(0);
-    private final Map<String, String> requestHeaders = UnifiedMap.newMap(0);
+    private final Map<String, Object[]> queryParams = new HashMap<>(0);
+    private final Map<String, String> requestHeaders = new HashMap<>(0);
     private Map<String, String> responseHeaders = Collections.emptyMap();
 
     public RoboZonkyFilter() {
@@ -119,6 +119,6 @@ class RoboZonkyFilter implements ClientRequestFilter,
         }
         responseHeaders = clientResponseContext.getHeaders().entrySet().stream()
                 .filter(e -> e.getValue().size() > 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0), (a, b) -> a, UnifiedMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0), (a, b) -> a, HashMap::new));
     }
 }

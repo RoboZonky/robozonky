@@ -19,6 +19,10 @@ package com.github.robozonky.app.portfolio;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -30,8 +34,6 @@ import com.github.robozonky.app.authentication.Tenant;
 import com.github.robozonky.app.util.LoanCache;
 import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
-import org.eclipse.collections.api.set.primitive.MutableIntSet;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,7 @@ public class Portfolio {
     private static final Logger LOGGER = LoggerFactory.getLogger(Portfolio.class);
 
     private final Statistics statistics;
-    private final MutableIntSet loansSold;
+    private final Set<Integer> loansSold;
     private final RemoteBalance balance;
     private final TransactionLog transactions;
 
@@ -55,8 +57,8 @@ public class Portfolio {
     Portfolio(final Statistics statistics, final RemoteBalance balance) {
         this.transactions = new TransactionLog();
         this.statistics = statistics;
-        this.loansSold = IntHashSet.newSetWith();
         this.balance = balance;
+        this.loansSold = new HashSet<>(0);
     }
 
     Portfolio(final Tenant tenant, final Collection<Synthetic> synthetics, final int[] idsOfSoldLoans,
@@ -64,8 +66,8 @@ public class Portfolio {
         LOGGER.debug("Sold loans: {}", Arrays.toString(idsOfSoldLoans));
         this.transactions = new TransactionLog(tenant, synthetics);
         this.statistics = tenant.call(Zonky::getStatistics);
-        this.loansSold = IntHashSet.newSetWith(idsOfSoldLoans);
         this.balance = balance;
+        this.loansSold = IntStream.of(idsOfSoldLoans).boxed().collect(Collectors.toSet());
     }
 
     private static int[] getSoldLoans(final Tenant tenant) {
@@ -106,7 +108,7 @@ public class Portfolio {
     }
 
     public void updateTransactions(final Tenant tenant) {
-        final int[] idsOfNewlySoldLoans = transactions.update(statistics, tenant);
+        final Collection<Integer> idsOfNewlySoldLoans = transactions.update(statistics, tenant);
         final PortfolioOverview po = calculateOverview();
         for (final int loanId : idsOfNewlySoldLoans) { // notify of loans that were just detected as sold
             final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
