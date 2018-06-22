@@ -31,6 +31,7 @@ enum Variables {
     IS_JMX_ENABLED("isJmxEnabled"),
     IS_JMX_SECURITY_ENABLED("isJmxSecurityEnabled"),
     IS_ZONKOID_ENABLED("isZonkoidEnabled"),
+    SMTP_AUTH("isSmtpAuthenticationEnabled"),
     SMTP_TO("smtpTo"),
     SMTP_USERNAME("smtpUsername"),
     SMTP_PASSWORD("smtpPassword"),
