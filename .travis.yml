@@ -21,15 +21,11 @@ os:
 jdk:
   - openjdk8
   - openjdk10
-  - openjdk11
   - oraclejdk8
   - oraclejdk10
   - openjdk-ea
-  - oraclejdk-ea
 matrix:
-  include:
   allow_failures:
-  - jdk: oraclejdk-ea
   - jdk: openjdk-ea
 cache:
   directories:
