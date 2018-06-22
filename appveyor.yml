@@ -26,4 +26,4 @@ install:
 build_script: # no tests, parallel build
   - mvn --batch-mode -T1C install -DskipTests -Dgpg.skip
 test_script: # all tests, no assembly
-  - mvn --batch-mode test integration-test -Dassembly.skipAssembly -Dgpg.skip
+  - mvn --batch-mode install -Dassembly.skipAssembly -Dgpg.skip
