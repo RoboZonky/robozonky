@@ -17,7 +17,6 @@ env:
   - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-installer,robozonky-distribution/robozonky-distribution-installer
 os:
   - linux
-  - osx
 jdk:
   - openjdk8
   - openjdk10
