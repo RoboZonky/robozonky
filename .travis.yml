@@ -16,8 +16,10 @@ env:
 os:
   - linux
 jdk:
-  - oraclejdk9
+  - oraclejdk10
+  - openjdk10
   - oraclejdk8
+  - openjdk8
 cache:
   directories:
   - $HOME/.m2
