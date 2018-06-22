@@ -92,14 +92,6 @@
         <param name="pattern" value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+"/>
       </validator>
     </field>
-    <field type="text" variable="smtpUsername">
-      <spec txt="Uživatel SMTP:" id="smtp.username" size="20" set="${zonkyUsername}"/>
-    </field>
-    <field type="password" variable="smtpPassword">
-      <spec>
-        <pwd txt="Heslo k SMTP:" id="smtp.password" size="20" set=""/>
-      </spec>
-    </field>
     <field type="text" variable="smtpHostname" summaryKey="SMTP server pro odesílání notifikací:">
       <spec txt="Adresa SMTP serveru:" id="smtp.hostname" size="20" set=""/>
       <validator class="com.izforge.izpack.panels.userinput.validator.NotEmptyValidator"
@@ -109,6 +101,17 @@
       <spec txt="Port na SMTP serveru:" id="smtp.port" size="20" set=""/>
       <validator class="com.izforge.izpack.panels.userinput.validator.IsPortValidator"
                  txt="Port musí být číslo." />
+    </field>
+    <field type="check" variable="isSmtpAuthenticationEnabled">
+      <spec txt="Vyžaduje autentizaci." set="true"/>
+    </field>
+    <field type="text" variable="smtpUsername" conditionid="enableSmtpAuthenticationFields">
+      <spec txt="Uživatel SMTP:" id="smtp.username" size="20" set="${zonkyUsername}"/>
+    </field>
+    <field type="password" variable="smtpPassword" conditionid="enableSmtpAuthenticationFields">
+      <spec>
+        <pwd txt="Heslo k SMTP:" id="smtp.password" size="20" set=""/>
+      </spec>
     </field>
     <field type="check" variable="smtpIsTls">
       <spec txt="Vyžaduje TLS." set="false"/>

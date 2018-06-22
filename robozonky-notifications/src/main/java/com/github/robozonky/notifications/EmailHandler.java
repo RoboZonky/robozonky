@@ -40,6 +40,10 @@ final class EmailHandler extends AbstractTargetHandler {
         return config.read(target, "to", "");
     }
 
+    private boolean isAuthenticationRequired() { // for backwards compatibility reasons, defaults to true
+        return config.readBoolean(target, "smtp.requiresAuthentication", true);
+    }
+
     private boolean isStartTlsRequired() {
         return config.readBoolean(target, "smtp.requiresStartTLS", false);
     }
@@ -49,7 +53,7 @@ final class EmailHandler extends AbstractTargetHandler {
     }
 
     private String getSmtpUsername() {
-        return config.read(target, "smtp.username", this.getRecipient());
+        return config.read(target, "smtp.username", this.getSender());
     }
 
     private String getSmtpPassword() {
@@ -71,7 +75,13 @@ final class EmailHandler extends AbstractTargetHandler {
         email.setSmtpPort(getSmtpPort());
         email.setStartTLSRequired(isStartTlsRequired());
         email.setSSLOnConnect(isSslOnConnectRequired());
-        email.setAuthentication(getSmtpUsername(), getSmtpPassword());
+        if (isAuthenticationRequired()) {
+            final String username = getSmtpUsername();
+            LOGGER.debug("Will contact SMTP server as '{}'.", username);
+            email.setAuthentication(getSmtpUsername(), getSmtpPassword());
+        } else {
+            LOGGER.debug("Will contact SMTP server anonymously.");
+        }
         final String sessionName = session.getName().map(n -> "RoboZonky '" + n + "'").orElse("RoboZonky");
         email.setFrom(getSender(), sessionName);
         email.addTo(getRecipient());

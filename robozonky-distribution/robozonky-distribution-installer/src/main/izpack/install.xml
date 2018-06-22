@@ -57,6 +57,10 @@
       <name>isEmailEnabled</name>
       <value>true</value>
     </condition>
+    <condition type="variable" id="enableSmtpAuthenticationFields">
+      <name>isSmtpAuthenticationEnabled</name>
+      <value>true</value>
+    </condition>
     <condition type="variable" id="enableJmxPanel">
       <name>isJmxEnabled</name>
       <value>true</value>
