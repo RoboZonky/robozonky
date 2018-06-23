@@ -54,7 +54,7 @@ final class Counter {
                 .map(value -> value
                         .map(String::trim)
                         .map(OffsetDateTime::parse)
-                        .collect(Collectors.toCollection(HashSet::new)))
+                        .collect(Collectors.toSet()))
                 .orElse(new HashSet<>(0));
     }
 

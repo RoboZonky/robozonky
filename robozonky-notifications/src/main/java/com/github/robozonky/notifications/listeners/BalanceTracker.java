@@ -16,18 +16,13 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.common.state.TenantState;
 import com.github.robozonky.notifications.Target;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class BalanceTracker {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BalanceTracker.class);
 
     private final Target target;
 
@@ -36,20 +31,11 @@ class BalanceTracker {
     }
 
     public OptionalInt getLastKnownBalance(final SessionInfo sessionInfo) {
-        final Optional<String> lastKnownBalance = TenantState.of(sessionInfo)
+        return TenantState.of(sessionInfo)
                 .in(BalanceTracker.class)
-                .getValue(target.getId());
-        if (!lastKnownBalance.isPresent()) {
-            BalanceTracker.LOGGER.debug("No last known balance.");
-            return OptionalInt.empty();
-        } else {
-            try {
-                return OptionalInt.of(Integer.parseInt(lastKnownBalance.get()));
-            } catch (final Exception ex) {
-                BalanceTracker.LOGGER.debug("Failed initializing balance.", ex);
-                return OptionalInt.empty();
-            }
-        }
+                .getValue(target.getId())
+                .map(b -> OptionalInt.of(Integer.parseInt(b)))
+                .orElse(OptionalInt.empty());
     }
 
     public void setLastKnownBalance(final SessionInfo sessionInfo, final int newBalance) {

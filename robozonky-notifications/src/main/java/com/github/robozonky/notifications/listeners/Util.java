@@ -47,7 +47,7 @@ class Util {
     private static final Pattern COMPILE = Pattern.compile("\\Q" + AT + "\\E");
 
     private static Date toDate(final LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay(Defaults.ZONE_ID).toInstant());
+        return toDate(localDate.atStartOfDay(Defaults.ZONE_ID).toOffsetDateTime());
     }
 
     private static Date toDate(final OffsetDateTime offsetDateTime) {
@@ -124,8 +124,7 @@ class Util {
                     put("code", action.getType().getCode());
                     put("note", action.getPublicNote().orElse("Bez dalšího vysvětlení."));
                     put("startDate", Util.toDate(action.getDateFrom()));
-                    put("endDate", action.getDateTo().map(
-                            Util::toDate).orElse(null));
+                    put("endDate", action.getDateTo().map(Util::toDate).orElse(null));
                 }}).collect(Collectors.toList()));
         return result;
     }
