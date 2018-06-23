@@ -10,11 +10,12 @@ env:
   - MODULE=robozonky-common
   - MODULE=robozonky-notifications
   - MODULE=robozonky-app
+  - MODULE=robozonky-installer
   # then plugin modules
   - MODULE=robozonky-strategy-natural
   - MODULE=robozonky-integration-zonkoid
   # finally distributions
-  - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-installer,robozonky-distribution/robozonky-distribution-installer
+  - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
 os:
   - linux
 jdk:
