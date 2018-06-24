@@ -32,7 +32,7 @@ matrix:
 cache:
   directories:
   - $HOME/.m2
-install: # no tests, parallel build
+install: # no tests, just build
   - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
 script: # all tests, no assembly
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
