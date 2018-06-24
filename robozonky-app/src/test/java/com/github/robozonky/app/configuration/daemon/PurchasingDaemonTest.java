@@ -27,7 +27,10 @@ import com.github.robozonky.app.portfolio.Portfolio;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
 
@@ -41,5 +44,17 @@ class PurchasingDaemonTest extends AbstractZonkyLeveragingTest {
         }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
         d.run();
         verify(z, times(1)).getAvailableParticipations(any());
+    }
+
+    @Test
+    void noBalance() {
+        final Zonky z = harmlessZonky(0);
+        final Tenant a = mockTenant(z);
+        final Portfolio portfolio = Portfolio.create(a, mockBalance(z));
+        final Supplier<Optional<PurchaseStrategy>> s = Optional::empty;
+        final PurchasingDaemon d = new PurchasingDaemon(t -> {
+        }, a, s, () -> Optional.of(portfolio), Duration.ZERO);
+        d.run();
+        verify(z, never()).getAvailableParticipations(any());
     }
 }
