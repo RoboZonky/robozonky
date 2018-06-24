@@ -4,26 +4,35 @@ env:
     - JAVA_OPTS=-Xmx2g
     - MAVEN_OPTS=$JAVA_OPTS
 env:
-  # execution per-module so that PITest doesn't timeout the build, most difficult modules first
+  # execution per-module so that PITest doesn't timeout the build
+  # mandatory modules first
+  - MODULE=robozonky-api
+  - MODULE=robozonky-common
+  - MODULE=robozonky-notifications
   - MODULE=robozonky-app
   - MODULE=robozonky-installer
-  - MODULE=robozonky-notifications
+  # then plugin modules
   - MODULE=robozonky-strategy-natural
   - MODULE=robozonky-integration-zonkoid
-  - MODULE=robozonky-common
-  - MODULE=robozonky-api
+  # finally distributions
   - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
 os:
   - linux
 jdk:
-  - oraclejdk9
+  - openjdk8
+  - openjdk10
+
   - oraclejdk8
+  - oraclejdk10
+  - openjdk-ea
+matrix:
+  fast_finish: true # fail all if one fails
+  allow_failures:
+  - jdk: openjdk-ea
 cache:
   directories:
   - $HOME/.m2
-install: # build all required modules for the given module, no tests
+install: # no tests, just build
   - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
-script: # test the one module
+script: # all tests, no assembly
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
-matrix: # fail all if one fails
-  fast_finish: true

@@ -111,23 +111,24 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         return portfolioOverview;
     }
 
-    private static AbstractListener<Event> getListener(final SupportedListener s, final AbstractTargetHandler p) {
-        final AbstractListener<Event> e = spy((AbstractListener<Event>) s.getListener(p));
+    private static AbstractListener<? extends Event> getListener(final SupportedListener s,
+                                                                 final AbstractTargetHandler p) {
+        final AbstractListener<? extends Event> e = spy((AbstractListener<? extends Event>) s.getListener(p));
         // always return a listener that WILL send an e-mail, even though this means shouldSendEmail() is not tested
         doReturn(true).when(e).shouldNotify(any(), eq(SESSION_INFO));
         return e;
     }
 
-    private static void testFormal(final AbstractListener<Event> listener, final Event event,
-                                   final SupportedListener listenerType) {
+    private static <T extends Event> void testFormal(final AbstractListener<T> listener, final T event,
+                                                     final SupportedListener listenerType) {
         assertThat(event).isInstanceOf(listenerType.getEventType());
         assertThat(listener.getTemplateFileName())
                 .isNotNull()
                 .isNotEmpty();
     }
 
-    private static void testProcessingWithoutErrors(final AbstractListener<Event> listener,
-                                                    final Event event) throws IOException, TemplateException {
+    private static <T extends Event> void testProcessing(final AbstractListener<T> listener,
+                                                         final T event) throws IOException, TemplateException {
         final String s = TemplateProcessor.INSTANCE.process(listener.getTemplateFileName(),
                                                             listener.getData(event, SESSION_INFO));
         assertThat(s).contains(Defaults.ROBOZONKY_URL);
@@ -150,22 +151,24 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         return getHandler(cs);
     }
 
-    private DynamicContainer forListener(final SupportedListener listener, final Event e) throws IOException {
-        final AbstractTargetHandler p = getHandler();
-        final AbstractListener<Event> l = getListener(listener, p);
-        return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
-                dynamicTest("is formally correct", () -> testFormal(l, e, listener)),
-                dynamicTest("is processed correctly", () -> testProcessingWithoutErrors(l, e)),
-                dynamicTest("triggers the sending code", () -> testTriggered(p, l, e)),
-                dynamicTest("has listener enabled", () -> testListenerEnabled(e))
-        ));
-    }
-
-    private void testTriggered(final AbstractTargetHandler h, final AbstractListener<Event> listener,
-                               final Event event) throws Exception {
+    private static <T extends Event> void testTriggered(final AbstractTargetHandler h,
+                                                        final AbstractListener<T> listener,
+                                                        final T event) throws Exception {
         BalanceTracker.reset(SESSION_INFO);
         listener.handle(event, SESSION_INFO);
         verify(h, times(1)).actuallySend(notNull(), notNull(), notNull());
+    }
+
+    private static <T extends Event> DynamicContainer forListener(final SupportedListener listener,
+                                                                  final T e) throws IOException {
+        final AbstractTargetHandler p = getHandler();
+        final AbstractListener<T> l = (AbstractListener<T>) getListener(listener, p);
+        return DynamicContainer.dynamicContainer(listener.toString(), Stream.of(
+                dynamicTest("is formally correct", () -> testFormal(l, e, listener)),
+                dynamicTest("is processed correctly", () -> testProcessing(l, e)),
+                dynamicTest("triggers the sending code", () -> testTriggered(p, l, e)),
+                dynamicTest("has listener enabled", () -> testListenerEnabled(e))
+        ));
     }
 
     @BeforeEach
@@ -273,8 +276,7 @@ public class AbstractListenerTest extends AbstractRoboZonkyTest {
         }
 
         @Override
-        public void actuallySend(SessionInfo sessionInfo, String subject,
-                                 String message) throws Exception {
+        public void actuallySend(final SessionInfo sessionInfo, final String subject, final String message) {
 
         }
     }

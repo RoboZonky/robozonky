@@ -16,12 +16,13 @@
 
 package com.github.robozonky.notifications;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.github.robozonky.notifications.listeners.RoboZonkyTestingEventListener;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ConfigStorageTest {
 
@@ -41,5 +42,11 @@ class ConfigStorageTest {
                                                                        "notifications-enabled-spamless.cfg"));
         assertThat(cs).isNotEqualTo(cs3);
         assertThat(cs3).isNotEqualTo(cs);
+    }
+
+    @Test
+    void fromFile() throws IOException {
+        final ConfigStorage cs = ConfigStorage.create(File.createTempFile("robozonky-", ".tmp"));
+        assertThat(cs).isNotNull();
     }
 }
