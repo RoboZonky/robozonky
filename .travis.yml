@@ -32,6 +32,6 @@ cache:
   directories:
   - $HOME/.m2
 install: # no tests, parallel build
-  - mvn --batch-mode -pl $MODULE -am -T1C install -DskipTests -Dgpg.skip
+  - mvn --batch-mode -T1C -pl $MODULE -am install -DskipTests -Dgpg.skip
 script: # all tests, no assembly
-  - mvn --batch-mode -pl $MODULE -am -T1C install -Dassembly.skipAssembly -Dgpg.skip
+  - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
