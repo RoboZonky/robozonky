@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.MyInvestment;
@@ -37,16 +38,18 @@ import com.github.robozonky.api.remote.enums.Rating;
  */
 public interface Investment {
 
-    static Investment sanitized(final RawInvestment investment) {
-        return sanitize(investment).build();
+    static Investment sanitized(final RawInvestment investment,
+                                final Function<Investment, OffsetDateTime> investmentDateSupplier) {
+        return sanitize(investment, investmentDateSupplier).build();
     }
 
     static InvestmentBuilder custom() {
         return new MutableInvestmentImpl();
     }
 
-    static InvestmentBuilder sanitize(final RawInvestment investment) {
-        return new MutableInvestmentImpl(investment);
+    static InvestmentBuilder sanitize(final RawInvestment investment,
+                                      final Function<Investment, OffsetDateTime> investmentDateSupplier) {
+        return new MutableInvestmentImpl(investment, investmentDateSupplier);
     }
 
     static InvestmentBuilder fresh(final MarketplaceLoan loan, final int investedAmount) {
@@ -122,7 +125,7 @@ public interface Investment {
      */
     int getRemainingMonths();
 
-    Optional<OffsetDateTime> getInvestmentDate();
+    OffsetDateTime getInvestmentDate();
 
     /**
      * Only available from Zonky when the investment is already funded, processed and not yet sold.

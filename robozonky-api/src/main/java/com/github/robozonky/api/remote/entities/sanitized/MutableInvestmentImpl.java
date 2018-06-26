@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
+import java.util.function.Function;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.RawInvestment;
@@ -52,7 +53,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
     }
 
-    MutableInvestmentImpl(final RawInvestment investment) {
+    MutableInvestmentImpl(final RawInvestment investment,
+                          final Function<Investment, OffsetDateTime> investmentDateSupplier) {
         this.loanId = investment.getLoanId();
         this.id = investment.getId();
         this.currentTerm = investment.getCurrentTerm();
@@ -80,6 +82,9 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInsuranceActive = investment.isInsuranceActive();
         this.areInstalmentsPostponed = investment.isInstalmentPostponement();
         setInsuranceHistory(investment.getInsuranceHistory());
+        this.investmentDate = investment.getInvestmentDate() == null ?
+                investmentDateSupplier.apply(this) :
+                investment.getInvestmentDate();
     }
 
     // TODO should calculate expected interest somehow
@@ -307,8 +312,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public Optional<OffsetDateTime> getInvestmentDate() {
-        return Optional.ofNullable(investmentDate);
+    public OffsetDateTime getInvestmentDate() {
+        return investmentDate;
     }
 
     @Override

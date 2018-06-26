@@ -61,7 +61,7 @@ public class FinancialCalculator {
     }};
 
     private static BigDecimal baseFee(final Investment investment) {
-        final OffsetDateTime investmentDate = investment.getInvestmentDate().orElse(OffsetDateTime.now());
+        final OffsetDateTime investmentDate = investment.getInvestmentDate();
         if (investmentDate.toInstant().isBefore(MIDNIGHT_2017_09_01)) {
             return ONE_PERCENT;
         }

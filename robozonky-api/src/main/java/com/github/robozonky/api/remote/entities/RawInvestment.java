@@ -19,6 +19,7 @@ package com.github.robozonky.api.remote.entities;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.function.Function;
 import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
@@ -29,7 +30,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 /**
  * It is not recommended to use this class directly as Zonky will return various null references for fields at various
  * points in the investment lifecycle. Please use {@link Investment} as a null-safe alternative. Instances may be
- * created with static methods such as {@link Investment#sanitized(RawInvestment)}.
+ * created with static methods such as {@link Investment#sanitized(RawInvestment, Function)} )}.
  */
 public class RawInvestment extends BaseInvestment {
 
@@ -66,7 +67,7 @@ public class RawInvestment extends BaseInvestment {
         this.loanTermInMonth = investment.getOriginalTerm();
         this.remainingMonths = investment.getRemainingMonths();
         this.currentTerm = investment.getCurrentTerm();
-        this.investmentDate = investment.getInvestmentDate().orElse(null);
+        this.investmentDate = investment.getInvestmentDate();
         this.nextPaymentDate = investment.getNextPaymentDate().orElse(null);
         this.interestRate = investment.getInterestRate();
         this.paidInterest = investment.getPaidInterest();

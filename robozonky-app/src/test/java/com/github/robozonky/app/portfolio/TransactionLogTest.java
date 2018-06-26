@@ -100,7 +100,8 @@ class TransactionLogTest extends AbstractZonkyLeveragingTest {
         final Statistics statistics = Statistics.empty();
         final OffsetDateTime timestamp = statistics.getTimestamp();
         final Zonky z = harmlessZonky(10_000);
-        when(z.getTransactions(argThat(select -> { // only retrieve the transactions when the proper filter is used
+        when(z.getTransactions(
+                (Select) argThat(select -> { // only retrieve the transactions when the proper filter is used
             final Select select2 = Select.unrestricted()
                     .greaterThanOrEquals("transaction.transactionDate", timestamp.toLocalDate());
             return Objects.equals(select, select2);

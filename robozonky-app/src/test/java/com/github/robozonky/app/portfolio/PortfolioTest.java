@@ -35,6 +35,7 @@ import com.github.robozonky.api.remote.enums.TransactionOrientation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.authentication.Tenant;
+import com.github.robozonky.common.remote.Select;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
@@ -66,7 +67,7 @@ class PortfolioTest extends AbstractZonkyLeveragingTest {
         final Transaction sold = new Transaction(l2, investmentSize, TransactionCategory.SMP_SELL,
                                                  TransactionOrientation.IN);
         final Zonky z = harmlessZonky(10_000);
-        when(z.getTransactions(any())).thenReturn(Stream.of(sold));
+        when(z.getTransactions((Select) any())).thenReturn(Stream.of(sold));
         when(z.getBlockedAmounts()).thenReturn(Stream.empty());
         Stream.of(l1, l2, l3).forEach(l -> {
             final Investment i = Investment.fresh(l, investmentSize).build();

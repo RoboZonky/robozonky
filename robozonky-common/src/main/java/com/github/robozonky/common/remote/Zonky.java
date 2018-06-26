@@ -16,6 +16,7 @@
 
 package com.github.robozonky.common.remote;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -150,7 +151,17 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Investment> getInvestments(final Select select) {
-        return Zonky.getStream(portfolioApi, PortfolioApi::items, select).map(Investment::sanitized);
+        final Function<Investment, OffsetDateTime> investmentDateSupplier = (i) -> {
+            final OffsetDateTime d = getTransactions(i)
+                    .map(Transaction::getTransactionDate)
+                    .sorted()
+                    .findFirst()
+                    .orElse(OffsetDateTime.now());
+            LOGGER.debug("Date for investment #{} (loan #{}) was determined to be {}.", i.getId(), i.getLoanId(), d);
+            return d;
+        };
+        return Zonky.getStream(portfolioApi, PortfolioApi::items, select)
+                .map(raw -> Investment.sanitized(raw, investmentDateSupplier));
     }
 
     public Loan getLoan(final int id) {
@@ -183,6 +194,16 @@ public class Zonky {
      */
     public Stream<Transaction> getTransactions(final Select select) {
         return Zonky.getStream(transactions, TransactionApi::items, select);
+    }
+
+    /**
+     * Retrieve transactions from the wallet via {@link TransactionApi}.
+     * @param investment Investment to filter the selection by.
+     * @return All items from the remote API, lazy-loaded, filtered for the specific investment.
+     */
+    public Stream<Transaction> getTransactions(final Investment investment) {
+        final Select select = new Select().equals("investment.id", investment.getId());
+        return getTransactions(select);
     }
 
     /**
