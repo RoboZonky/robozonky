@@ -29,9 +29,12 @@ import org.mockserver.socket.PortFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class UpdateMonitorTest {
 
@@ -41,7 +44,7 @@ class UpdateMonitorTest {
     @BeforeAll
     static void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
-        serverUrl = "http://127.0.0.1:" + server.getPort();
+        serverUrl = "http://127.0.0.1:" + server.getLocalPort();
     }
 
     @AfterEach

@@ -31,7 +31,8 @@ import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.socket.PortFactory;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.verify.VerificationTimes.once;
@@ -44,7 +45,7 @@ class ZonkoidConfirmationProviderTest {
     @BeforeEach
     void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
-        serverUrl = "127.0.0.1:" + server.getPort();
+        serverUrl = "127.0.0.1:" + server.getLocalPort();
     }
 
     @AfterEach
