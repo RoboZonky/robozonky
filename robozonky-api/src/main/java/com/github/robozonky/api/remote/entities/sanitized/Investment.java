@@ -38,6 +38,13 @@ import com.github.robozonky.api.remote.enums.Rating;
  */
 public interface Investment {
 
+    /**
+     * Create {@link Investment} based on {@link RawInvestment}, figuring out the investment date in case
+     * {@link RawInvestment#getInvestmentDate()} is null.
+     * @param investment Investment to sanitize.
+     * @param investmentDateSupplier Date to assign in case the original is null.
+     * @return Sanitized investment.
+     */
     static Investment sanitized(final RawInvestment investment,
                                 final Function<Investment, OffsetDateTime> investmentDateSupplier) {
         return sanitize(investment, investmentDateSupplier).build();
@@ -47,6 +54,13 @@ public interface Investment {
         return new MutableInvestmentImpl();
     }
 
+    /**
+     * Create modifiable {@link Investment} based on {@link RawInvestment}, figuring out the investment date in case
+     * {@link RawInvestment#getInvestmentDate()} is null.
+     * @param investment Investment to sanitize.
+     * @param investmentDateSupplier Date to assign in case the original is null.
+     * @return Sanitized modifiable investment.
+     */
     static InvestmentBuilder sanitize(final RawInvestment investment,
                                       final Function<Investment, OffsetDateTime> investmentDateSupplier) {
         return new MutableInvestmentImpl(investment, investmentDateSupplier);
