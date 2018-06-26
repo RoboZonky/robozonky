@@ -20,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.CollectionsApi;
@@ -44,6 +45,7 @@ import com.github.robozonky.api.remote.entities.sanitized.Development;
 import com.github.robozonky.api.remote.entities.sanitized.Investment;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.entities.sanitized.MarketplaceLoan;
+import com.github.robozonky.api.remote.enums.TransactionCategory;
 import com.github.robozonky.internal.api.Settings;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 import org.slf4j.Logger;
@@ -152,11 +154,24 @@ public class Zonky {
      */
     public Stream<Investment> getInvestments(final Select select) {
         final Function<Investment, OffsetDateTime> investmentDateSupplier = (i) -> {
-            final OffsetDateTime d = getTransactions(i)
+            /*
+             * Zonky makes it very difficult to figure out when any particular investment was made. this code attempts
+             * to figure it out.
+             *
+             * we find the first payment from past transactions. if there's no first payment, we use the expected date.
+             * in the very rare situation where both are missing, we just use the present date.
+             *
+             * we subtract a month from that value to find out the approximate date when this loan was created.
+             */
+            final Supplier<OffsetDateTime> expectedPayment =
+                    () -> i.getNextPaymentDate().orElse(OffsetDateTime.now());
+            final OffsetDateTime lastPayment = getTransactions(i)
+                    .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
                     .map(Transaction::getTransactionDate)
                     .sorted()
                     .findFirst()
-                    .orElse(OffsetDateTime.now());
+                    .orElseGet(expectedPayment);
+            final OffsetDateTime d = lastPayment.minusMonths(1);
             LOGGER.debug("Date for investment #{} (loan #{}) was determined to be {}.", i.getId(), i.getLoanId(), d);
             return d;
         };
