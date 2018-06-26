@@ -183,6 +183,35 @@
                     "methodName": "getDelinquentSince",
                     "elementKind": "method",
                     "justification": "Defaults and repayments no longer carry delinquency information."
+                  }, {
+                    "code": "java.method.returnTypeChanged",
+                    "old": "method java.util.Optional<java.time.OffsetDateTime> com.github.robozonky.api.remote.entities.sanitized.Investment::getInvestmentDate()",
+                    "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.sanitized.Investment::getInvestmentDate()",
+                    "oldType": "java.util.Optional<java.time.OffsetDateTime>",
+                    "newType": "java.time.OffsetDateTime",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "getInvestmentDate",
+                    "elementKind": "method",
+                    "justification": "Investment date no longer optional."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder com.github.robozonky.api.remote.entities.sanitized.Investment::sanitize(com.github.robozonky.api.remote.entities.RawInvestment)",
+                    "new": "method com.github.robozonky.api.remote.entities.sanitized.InvestmentBuilder com.github.robozonky.api.remote.entities.sanitized.Investment::sanitize(com.github.robozonky.api.remote.entities.RawInvestment, java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.OffsetDateTime>)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "sanitize",
+                    "elementKind": "method",
+                    "justification": "Investment date no longer optional."
+                  }, {
+                    "code": "java.method.numberOfParametersChanged",
+                    "old": "method com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.remote.entities.sanitized.Investment::sanitized(com.github.robozonky.api.remote.entities.RawInvestment)",
+                    "new": "method com.github.robozonky.api.remote.entities.sanitized.Investment com.github.robozonky.api.remote.entities.sanitized.Investment::sanitized(com.github.robozonky.api.remote.entities.RawInvestment, java.util.function.Function<com.github.robozonky.api.remote.entities.sanitized.Investment, java.time.OffsetDateTime>)",
+                    "package": "com.github.robozonky.api.remote.entities.sanitized",
+                    "classSimpleName": "Investment",
+                    "methodName": "sanitized",
+                    "elementKind": "method",
+                    "justification": "Investment date no longer optional."
                   }
                 ]
               }
