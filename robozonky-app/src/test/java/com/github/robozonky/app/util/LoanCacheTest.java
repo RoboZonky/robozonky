@@ -25,9 +25,12 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.common.remote.Zonky;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class LoanCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -37,7 +40,8 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         final int loanId = 1;
         assertThat(c.getLoan(loanId)).isEmpty(); // nothing returned at first
         final MyInvestment mi = mock(MyInvestment.class);
-        when(mi.getTimeCreated()).thenReturn(OffsetDateTime.now());
+        final OffsetDateTime d = OffsetDateTime.now();
+        when(mi.getTimeCreated()).thenReturn(d);
         final Loan loan = Loan.custom()
                 .setId(loanId)
                 .setMyInvestment(mi)
@@ -49,7 +53,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
                 .setLoanId(loanId)
                 .build();
         assertThat(c.getLoan(i, z)).isEqualTo(loan);
-        assertThat(i.getInvestmentDate()).isNotEmpty();
+        assertThat(i.getInvestmentDate()).isEqualTo(d);
     }
 
     @Test

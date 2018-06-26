@@ -16,18 +16,12 @@
 
 package com.github.robozonky.api.remote.entities.sanitized;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.RawLoan;
 import org.slf4j.Logger;
@@ -64,28 +58,6 @@ class Util {
             return guessUrl(l.getId());
         } else {
             return toUrl(providedUrl);
-        }
-    }
-
-    static void reportNulls(final Object target) {
-        final Collection<Method> nullReturningGetters = Stream.of(target.getClass().getDeclaredMethods())
-                .filter(m -> Modifier.isPublic(m.getModifiers()))
-                .filter(m -> !Modifier.isStatic(m.getModifiers()))
-                .filter(m -> !Modifier.isAbstract(m.getModifiers()))
-                .filter(m -> m.getName().startsWith("get"))
-                .filter(m -> m.getParameterCount() == 0)
-                .filter(m -> !m.getReturnType().isPrimitive())
-                .filter(m -> {
-                    try {
-                        final Object o = m.invoke(target);
-                        return o == null;
-                    } catch (final IllegalAccessException | InvocationTargetException ex) {
-                        LOGGER.trace("Cannot call '{}' on '{}'.", m, target, ex);
-                        return false;
-                    }
-                }).collect(Collectors.toSet());
-        if (!nullReturningGetters.isEmpty()) {
-            LOGGER.debug("The following methods on {} returned null: {}.", target, nullReturningGetters);
         }
     }
 

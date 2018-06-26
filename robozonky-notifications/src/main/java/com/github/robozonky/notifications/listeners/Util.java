@@ -96,9 +96,7 @@ class Util {
     }
 
     private static long getMonthsElapsed(final Investment i) {
-        return i.getInvestmentDate()
-                .map(d -> Period.between(d.toLocalDate(), LocalDate.now()).toTotalMonths())
-                .orElse((long) (i.getOriginalTerm() - i.getCurrentTerm() + 1));
+        return Period.between(i.getInvestmentDate().toLocalDate(), LocalDate.now()).toTotalMonths();
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {

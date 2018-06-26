@@ -61,9 +61,9 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
     void onlyChecksAfterInitialized() {
         final PortfolioDependant r = TransactionalPortfolioDependant.create(new Repayments());
         r.accept(transactional);
-        verify(zonky, never()).getTransactions(any());
+        verify(zonky, never()).getTransactions((Select) any());
         r.accept(transactional);
-        verify(zonky).getTransactions(any());
+        verify(zonky).getTransactions((Select) any());
     }
 
     @Nested
@@ -104,7 +104,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
                     .build();
             final Transaction t3 = new Transaction(i3, BigDecimal.TEN, TransactionCategory.PAYMENT,
                                                    TransactionOrientation.IN);
-            when(zonky.getTransactions(any())).thenReturn(Stream.of(t1, t2, t3));
+            when(zonky.getTransactions((Select) any())).thenReturn(Stream.of(t1, t2, t3));
             when(zonky.getInvestment(eq(t3.getInvestmentId())))
                     .thenReturn(Optional.of(i3));
             r.accept(transactional);
@@ -134,7 +134,7 @@ class RepaymentsTest extends AbstractZonkyLeveragingTest {
                                                    TransactionOrientation.IN);
             when(zonky.getLoan(eq(l3.getId()))).thenReturn(l3);
             when(zonky.getLoan(eq(l4.getId()))).thenReturn(l4);
-            when(zonky.getTransactions(any())).thenReturn(Stream.of(t3, t4));
+            when(zonky.getTransactions((Select) any())).thenReturn(Stream.of(t3, t4));
             when(zonky.getInvestment(eq(t3.getInvestmentId()))).thenReturn(Optional.of(i3));
             when(zonky.getInvestment(eq(t4.getInvestmentId()))).thenReturn(Optional.of(i4));
             // this is the test

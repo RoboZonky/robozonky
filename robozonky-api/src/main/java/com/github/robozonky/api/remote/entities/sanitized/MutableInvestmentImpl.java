@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.entities.InsurancePolicyPeriod;
 import com.github.robozonky.api.remote.entities.RawInvestment;
@@ -38,7 +40,8 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
 
     private int loanId, id, currentTerm, originalTerm, remainingMonths;
     private Integer daysPastDue;
-    private OffsetDateTime nextPaymentDate, investmentDate;
+    private OffsetDateTime nextPaymentDate;
+    private volatile OffsetDateTime investmentDate; // may be updated from various threads
     private boolean canBeOffered, isOnSmp, isInsuranceActive, areInstalmentsPostponed;
     private Boolean isInWithdrawal;
     private BigDecimal originalPrincipal, interestRate, paidPrincipal, duePrincipal, paidInterest, dueInterest,
@@ -47,18 +50,28 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     private InvestmentStatus status;
     private PaymentStatus paymentStatus;
     private Collection<InsurancePolicyPeriod> insuranceHistory = Collections.emptyList();
+    // default value for investment date, in case it is null
+    private Supplier<OffsetDateTime> investmentDateSupplier = OffsetDateTime::now;
 
     MutableInvestmentImpl() {
         this.id = RANDOM.nextInt(); // simplifies tests which do not have to generate random IDs themselves
     }
 
-    MutableInvestmentImpl(final RawInvestment investment) {
+    /**
+     * Create a new instance, basing it on the original {@link RawInvestment}, which will lazy-load investment date
+     * if necessary.
+     * @param investment The original.
+     * @param investmentDateSupplier Will use this to lazy-load if the original is null.
+     */
+    MutableInvestmentImpl(final RawInvestment investment,
+                          final Function<Investment, OffsetDateTime> investmentDateSupplier) {
         this.loanId = investment.getLoanId();
         this.id = investment.getId();
         this.currentTerm = investment.getCurrentTerm();
         this.originalTerm = investment.getLoanTermInMonth();
         this.remainingMonths = investment.getRemainingMonths();
         this.daysPastDue = investment.getLegalDpd();
+        this.investmentDate = investment.getInvestmentDate();
         this.nextPaymentDate = investment.getNextPaymentDate();
         this.canBeOffered = investment.isCanBeOffered();
         this.isOnSmp = investment.isOnSmp();
@@ -80,6 +93,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
         this.isInsuranceActive = investment.isInsuranceActive();
         this.areInstalmentsPostponed = investment.isInstalmentPostponement();
         setInsuranceHistory(investment.getInsuranceHistory());
+        this.investmentDateSupplier = () -> investmentDateSupplier.apply(this);
     }
 
     // TODO should calculate expected interest somehow
@@ -239,7 +253,7 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public InvestmentBuilder setInvestmentDate(final OffsetDateTime investmentDate) {
+    public synchronized InvestmentBuilder setInvestmentDate(final OffsetDateTime investmentDate) {
         this.investmentDate = investmentDate;
         return this;
     }
@@ -307,8 +321,11 @@ final class MutableInvestmentImpl implements InvestmentBuilder {
     }
 
     @Override
-    public Optional<OffsetDateTime> getInvestmentDate() {
-        return Optional.ofNullable(investmentDate);
+    public synchronized OffsetDateTime getInvestmentDate() {
+        if (investmentDate == null) {
+            investmentDate = investmentDateSupplier.get();
+        }
+        return investmentDate;
     }
 
     @Override

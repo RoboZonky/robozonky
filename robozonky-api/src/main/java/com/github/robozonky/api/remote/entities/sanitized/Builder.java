@@ -19,7 +19,6 @@ package com.github.robozonky.api.remote.entities.sanitized;
 interface Builder<T> {
 
     default T build() {
-        Util.reportNulls(this);
         return (T) this;
     }
 }

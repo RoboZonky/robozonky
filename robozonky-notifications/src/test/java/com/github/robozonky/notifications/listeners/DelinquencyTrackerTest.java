@@ -19,6 +19,7 @@ package com.github.robozonky.notifications.listeners;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 
 import com.github.robozonky.api.SessionInfo;
@@ -67,7 +68,9 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .setName("")
             .setUrl(getSomeUrl())
             .build();
-    private static final Investment INVESTMENT = Investment.fresh(LOAN, 200).build();
+    private static final Investment INVESTMENT = Investment.fresh(LOAN, 200)
+            .setInvestmentDate(OffsetDateTime.now())
+            .build();
     private static SessionInfo SESSION = new SessionInfo("someone@robozonky.cz");
 
     @Test
