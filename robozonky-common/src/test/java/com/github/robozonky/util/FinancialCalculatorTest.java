@@ -35,7 +35,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.mockito.Mockito;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -91,6 +91,7 @@ class FinancialCalculatorTest {
                 .setInterestRate(BigDecimal.TEN)
                 .setPaidInterest(BigDecimal.valueOf(500))
                 .setPaidPenalty(BigDecimal.ONE)
+                .setRemainingMonths(40)
                 .setCurrentTerm(50)
                 .setSmpFee(BigDecimal.ONE);
         final BigDecimal before = FinancialCalculator.actualInterestAfterFees(i, getPortfolioOverview(threshold - 1));

@@ -127,8 +127,8 @@ public interface Investment {
     BigDecimal getPaidPenalty();
 
     /**
-     * How many monthly payments were remaining to be made from {@link #getOriginalTerm()}.
-     * May be less than {@link #getRemainingMonths()} in case of early payments.
+     * How many monthly payments were expected to be made. May be less than {@link #getOriginalTerm()} in case of early
+     * payments.
      * @return
      */
     int getCurrentTerm();
