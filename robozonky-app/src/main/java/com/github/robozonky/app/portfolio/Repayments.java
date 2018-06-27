@@ -17,11 +17,10 @@
 package com.github.robozonky.app.portfolio;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.stream.Stream;
 
-import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.LoanRepaidEvent;
-import com.github.robozonky.api.remote.entities.sanitized.Investment;
+import com.github.robozonky.api.remote.entities.Transaction;
 import com.github.robozonky.api.remote.entities.sanitized.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.TransactionCategory;
@@ -57,24 +56,17 @@ public final class Repayments implements PortfolioDependant {
                     .parallel()
                     .filter(t -> t.getCategory() == TransactionCategory.PAYMENT)
                     .filter(t -> t.getOrientation() == TransactionOrientation.IN)
-                    .forEach(t -> {
-                        LOGGER.debug("Processing transaction: {}.", t);
-                        final Optional<Investment> i = tenant.call(z -> z.getInvestment(t.getInvestmentId()));
-                        final int loanId = t.getLoanId();
-                        if (!i.isPresent()) {
-                            LOGGER.debug("Investment for loan #{} not found, probably sold since.", loanId);
-                            return;
-                        }
-                        final Investment actual = i.get();
-                        actual.getPaymentStatus().ifPresent(s -> {
-                            if (s != PaymentStatus.PAID) {
-                                return;
-                            }
-                            final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(loanId, zonky));
-                            final Event e = new LoanRepaidEvent(actual, l, portfolioOverview);
-                            transactionalPortfolio.fire(e);
-                        });
-                    });
+                    .peek(t -> LOGGER.debug("Processing transaction: {}.", t))
+                    .mapToInt(Transaction::getInvestmentId)
+                    .distinct() // multiple transactions on the same investment only to be processed once
+                    .mapToObj(investmentId -> tenant.call(z -> z.getInvestment(investmentId)))
+                    .flatMap(i -> i.map(Stream::of).orElse(Stream.empty()))
+                    .filter(i -> i.getPaymentStatus().map(s -> s == PaymentStatus.PAID).orElse(false))
+                    .map(i -> {
+                        final Loan l = tenant.call(zonky -> LoanCache.INSTANCE.getLoan(i.getLoanId(), zonky));
+                        return new LoanRepaidEvent(i, l, portfolioOverview);
+                    })
+                    .forEach(transactionalPortfolio::fire);
         }
         state.reset(); // initialize state with today's update date
     }

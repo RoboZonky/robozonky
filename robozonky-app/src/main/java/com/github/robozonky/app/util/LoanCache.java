@@ -91,7 +91,7 @@ public class LoanCache {
     }
 
     private void addLoan(final int loanId, final Loan loan) {
-        runLocked(() -> cache.get().put(loanId, new Pair(loan, Instant.now())));
+        runLocked(() -> cache.get().put(loanId, new Pair<>(loan, Instant.now())));
     }
 
     public Loan getLoan(final int loanId, final Zonky api) {
