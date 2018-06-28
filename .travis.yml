@@ -21,10 +21,13 @@ os:
   - linux
 jdk:
   - openjdk8
+  - openjdk10
+  - oraclejdk8
+  - oraclejdk10
+  - openjdk-ea
 stages: # order the stages we'll use during this build
   - precache
-  - test1
-  - test2
+  - test
   - sonar
 matrix:
   include:
@@ -32,13 +35,7 @@ matrix:
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
     env: # empty
-  - stage: test1 # first run on default JDK only
-  - stage: test2 # then run all other JDKs
-    jdk:
-      - openjdk10
-      - oraclejdk8
-      - oraclejdk10
-      - openjdk-ea
+  - stage: test # execution per-module so that PITest doesn't timeout the build
     allow_failures: # early adopters version of Java may fail and we're OK with that
       - jdk: openjdk-ea
   - stage: sonar # independent build stage for Sonar code analysis
