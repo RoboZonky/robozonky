@@ -37,11 +37,6 @@ matrix:
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
     env: # empty
-  - stage: preview # test early adopters JDK as well, but relax requirements
-    env: #empty
-    jdk: openjdk-ea
-    allow_failures: true
-    script: mvn --batch-mode test -Dassembly.skipAssembly -Dgpg.skip
   - stage: sonar # independent build stage for Sonar code analysis
     env: # empty
     addons:
@@ -51,6 +46,11 @@ matrix:
           secure: $SONAR_TOKEN
     script: # use "test" phase instead of "install", so that PITest is not executed, speeding up the build
       - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
+  - stage: preview # test early adopters JDK as well, but relax requirements
+    env: #empty
+    jdk: openjdk-ea
+    allow_failures: true
+    script: mvn --batch-mode test -Dassembly.skipAssembly -Dgpg.skip
 cache:
   directories:
   - $HOME/.m2
