@@ -21,12 +21,22 @@ os:
 jdk:
   - openjdk8
   - openjdk10
-
   - oraclejdk8
   - oraclejdk10
   - openjdk-ea
 matrix:
   fast_finish: true # fail all if one fails
+  include:
+  - jdk: openjdk8
+    env: # no effect, just visual
+      - MODULE=robozonky-distribution
+    addons:
+      sonarcloud:
+        organization: "robozonky"
+        token:
+          secure: $SONAR_TOKEN
+    script: # use "test" here so that PITest is not executed, speeding up the build
+      - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
   allow_failures:
   - jdk: openjdk-ea
 cache:
