@@ -29,7 +29,7 @@ matrix:
   include:
   - jdk: openjdk8
     env: # no effect, just visual
-      - MODULE=all
+      - MODULE=robozonky-distribution
     addons:
       sonarcloud:
         organization: "robozonky"
