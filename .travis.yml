@@ -5,6 +5,18 @@ env:
   global:
     - JAVA_OPTS=-Xmx2g
     - MAVEN_OPTS=$JAVA_OPTS
+  matrix:
+    # mandatory modules first
+    - MODULE=robozonky-api
+    - MODULE=robozonky-common
+    - MODULE=robozonky-notifications
+    - MODULE=robozonky-app
+    - MODULE=robozonky-installer
+    # then plugin modules
+    - MODULE=robozonky-strategy-natural
+    - MODULE=robozonky-integration-zonkoid
+    # finally distributions
+    - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
 os:
   - linux
 jdk:
@@ -23,25 +35,11 @@ matrix:
     jdk: openjdk8
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
+    env: # empty
   - stage: test # execution per-module so that PITest doesn't timeout the build
-    env:
-      # mandatory modules first
-      - MODULE=robozonky-api
-      - MODULE=robozonky-common
-      - MODULE=robozonky-notifications
-      - MODULE=robozonky-app
-      - MODULE=robozonky-installer
-      # then plugin modules
-      - MODULE=robozonky-strategy-natural
-      - MODULE=robozonky-integration-zonkoid
-      # finally distributions
-      - MODULE=robozonky-distribution/robozonky-distribution-full,robozonky-distribution/robozonky-distribution-installer
-    script:
-      - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
-    allow_failures: # early adopters version of Java may fail and we're OK with that
-      - jdk: openjdk-ea
   - stage: sonar # independent build stage for Sonar code analysis
     jdk: openjdk8
+    env: #empty
     addons:
       sonarcloud:
         organization: "robozonky"
@@ -50,8 +48,12 @@ matrix:
     script: # use "test" phase instead of "install" here so that PITest is not executed, speeding up the build
       - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
   fast_finish: true # fail all if one fails
+  allow_failures: # early adopters version of Java may fail and we're OK with that
+    - jdk: openjdk-ea
 cache:
   directories:
   - $HOME/.m2
 install:
   - mvn --batch-mode clean install -DskipTests -Dgpg.skip
+script:
+  - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
