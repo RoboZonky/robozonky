@@ -36,6 +36,7 @@ matrix:
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
     env: # empty
+  - stage: test
   - stage: test2 # execution per-module so that PITest doesn't timeout the build
     env: # empty
     jdk:
