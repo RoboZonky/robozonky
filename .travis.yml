@@ -27,7 +27,7 @@ jdk:
 stages: # order the stages we'll use during this build
   - precache
   - test
-  - testEA
+  - preview
   - sonar
 matrix:
   include:
@@ -35,8 +35,7 @@ matrix:
     script:
       - mvn dependency:go-offline # no need to run through the usual script, this is mostly no-op
     env: # empty
-  - stage: test
-  - stage: testEA # test early adopters JDK as well, but relax requirements
+  - stage: preview # test early adopters JDK as well, but relax requirements
     env: #empty
     jdk: openjdk-ea
     allow_failures: true
@@ -54,6 +53,6 @@ cache:
   directories:
   - $HOME/.m2
 install: # by default, build everything and skip tests
-  - mvn --batch-mode clean install -DskipTests -Dgpg.skip
-script: # by default, run all tests, skipping all assemblies
+  - mvn --batch-mode -pl $MODULE -am install -DskipTests -Dgpg.skip
+script: # by default, run all tests incl. PITest, skipping all assemblies
   - mvn --batch-mode -pl $MODULE install -Dassembly.skipAssembly -Dgpg.skip
