@@ -57,11 +57,11 @@ import static org.mockito.Mockito.when;
 
 class ZonkyTest {
 
-    @SuppressWarnings("unchecked")
     private static <T, S> PaginatedApi<T, S> mockApi() {
         return mockApi(Collections.emptyList());
     }
 
+    @SuppressWarnings("unchecked")
     private static <T, S> PaginatedApi<T, S> mockApi(final List<T> toReturn) {
         final PaginatedApi<T, S> api = mock(PaginatedApi.class);
         final PaginatedResult<T> apiReturn = new PaginatedResult<T>(toReturn, toReturn.size());
